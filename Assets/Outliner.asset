@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: Outliner
   m_EditorClassIdentifier: 
   gapLength: 0
-  product: 0
+  product: 1

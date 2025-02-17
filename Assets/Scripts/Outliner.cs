@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = nameof(Outliner), menuName = nameof(Outliner))]

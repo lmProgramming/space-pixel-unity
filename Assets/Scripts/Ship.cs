@@ -1,10 +1,12 @@
-using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Serialization;
 
 public class Ship : MonoBehaviour
 {
+    [SerializeField]
+    private Sprite shipSprite;
     [SerializeField]
     private SpriteRenderer spriteRenderer;
     [SerializeField]
@@ -14,27 +16,21 @@ public class Ship : MonoBehaviour
     [SerializeField] private Vector2 centerPivot;
     [SerializeField]
     private float tolerance = 0.1f;
+
+    [SerializeField] protected List<IWeapon> Weapons = new();
     
-    [FormerlySerializedAs("rigidbody2D")] [SerializeField]
+    [SerializeField]
     protected Rigidbody2D rb;
     
-    void Start()
+    public void Start()
     {
-        var array = new[,]
-        {
-            { Color.clear, Color.green, Color.clear,  Color.green,  Color.green,  Color.green,  Color.green },
-            { Color.green, Color.red, Color.green,  Color.green,  Color.green,  Color.green,  Color.green },
-            { Color.green, Color.red, Color.green,  Color.green,  Color.green,  Color.green,  Color.green },
-            { Color.clear, Color.green, Color.clear,  Color.green,  Color.green,  Color.green,  Color.green },
-        };
-        var texture = ConvertToTexture(array);
+        spriteRenderer.sprite = shipSprite;
         
-        texture.filterMode = FilterMode.Point;
-
-        var sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero);
-        spriteRenderer.sprite = sprite;
+        var texture = shipSprite.texture;
         
         GenerateColliders(texture);
+
+        Weapons = GetComponentsInChildren<IWeapon>().ToList();
     }
 
     private static Texture2D ConvertToTexture(Color[,] array)
@@ -79,9 +75,16 @@ public class Ship : MonoBehaviour
     private void Update()
     {
         Move();
+        
+        HandleWeapons();
     }
 
     protected virtual void Move()
+    {
+        
+    }
+
+    protected virtual void HandleWeapons()
     {
         
     }
@@ -93,8 +96,8 @@ public class Ship : MonoBehaviour
         
         boundaryTracer.Trace(texture, centerPivot, pixelsPerUnit, outliner.gapLength, outliner.product);
 
-        List<Vector2> path = new List<Vector2>();
-        List<Vector2> points = new List<Vector2>();
+        var path = new List<Vector2>();
+        var points = new List<Vector2>();
         
         Debug.Log(texture.width);   
 
@@ -102,7 +105,7 @@ public class Ship : MonoBehaviour
         if(!polygonCollider2D) polygonCollider2D = gameObject.AddComponent<PolygonCollider2D>();
 
         polygonCollider2D.pathCount = boundaryTracer.pathCount;
-        for (int i = 0; i < polygonCollider2D.pathCount; i++)
+        for (var i = 0; i < polygonCollider2D.pathCount; i++)
         {
             boundaryTracer.GetPath(i, ref path);
             LineUtility.Simplify(path, tolerance, points);

@@ -17,4 +17,13 @@ public class PlayerShip : Ship
         
         rb.AddTorque(turn);
     }
+
+    protected override void HandleWeapons()
+    {
+        if (!Input.GetMouseButtonDown(0)) return;
+        foreach (var weapon in Weapons)
+        {
+            weapon.Shoot();
+        }
+    }
 }

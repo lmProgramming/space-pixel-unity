@@ -67,9 +67,6 @@ public class ContourTracer
     /// <include file='../Documentation.xml' path='docs/ContourTracer/Trace/*'/>
     public void Trace(Texture2D texture, Vector2 pivot, float pixelsPerUnit, uint gapLength, float product)
     {
-        Debug.LogWarning($"Trace method is still missing support for InnerOuter points.");
-        Debug.LogWarning($"Trace method is still missing support for Rect.");
-
         pathCount = 0;
         pointMultiplier = 1 / pixelsPerUnit;
         pivot.x *= texture.width - 1f;
@@ -78,7 +75,7 @@ public class ContourTracer
 
         Code code;
         var point = Vector2Int.zero;
-        Direction direction = Direction.Front;
+        var direction = Direction.Front;
 
         Code lastLineCode;
         float lineLength;
@@ -93,7 +90,7 @@ public class ContourTracer
         #region Methods
         bool IsBorder(int _x, int _y)
         {
-            int pixelIndex = _y * texture.width + _x;
+            var pixelIndex = _y * texture.width + _x;
             return pixels[pixelIndex].a != 0f;
         }
         bool IsBorderSafe(int _x, int _y) => _y >= 0 && _y < texture.height && _x >= 0 && _x < texture.width && IsBorder(_x, _y);
@@ -280,7 +277,7 @@ public class ContourTracer
                     continue;
                 }
 
-                bool isBorder = N0();
+                var isBorder = N0();
                 if(inside)
                 {
                     inside = isBorder;

@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 public class CameraManager : MonoBehaviour
@@ -18,6 +17,10 @@ public class CameraManager : MonoBehaviour
     {
         var mouseScroll = Input.GetAxis("Mouse ScrollWheel") * scrollMultiplier;
         
-        _mainCamera.orthographicSize += mouseScroll;
+        var orthographicSize = _mainCamera.orthographicSize + mouseScroll;
+        
+        orthographicSize = Mathf.Clamp(orthographicSize, minScroll, maxScroll);
+        
+        _mainCamera.orthographicSize = orthographicSize;
     }
 }
