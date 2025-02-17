@@ -119,6 +119,37 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &54834334
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 54834335}
+  m_Layer: 0
+  m_Name: GameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &54834335
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 54834334}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 292801185}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &179442448
 GameObject:
   m_ObjectHideFlags: 0
@@ -347,6 +378,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   shipSprite: {fileID: -6861685568144147557, guid: 19268e8cce0ec814090f00c53a407f66, type: 3}
+  shipTexture: {fileID: 0}
   spriteRenderer: {fileID: 292801183}
   outliner: {fileID: 11400000, guid: e7ddc049aba5b40428f2d03a0730b707, type: 2}
   pixelsPerUnit: 100
@@ -354,7 +386,7 @@ MonoBehaviour:
   tolerance: 0
   rb: {fileID: 292801182}
   speedMultiplier: 100
-  rotationMultiplier: -10
+  rotationMultiplier: -30
 --- !u!4 &292801185
 Transform:
   m_ObjectHideFlags: 0
@@ -370,6 +402,7 @@ Transform:
   m_Children:
   - {fileID: 1076727015}
   - {fileID: 1186953700}
+  - {fileID: 54834335}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1076727014
@@ -659,6 +692,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   shipSprite: {fileID: -6861685568144147557, guid: 19268e8cce0ec814090f00c53a407f66, type: 3}
+  shipTexture: {fileID: 0}
   spriteRenderer: {fileID: 1276085534}
   outliner: {fileID: 11400000, guid: e7ddc049aba5b40428f2d03a0730b707, type: 2}
   pixelsPerUnit: 100

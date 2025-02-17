@@ -6,6 +6,8 @@ public class Ship : MonoBehaviour
 {
     [SerializeField] private Sprite shipSprite;
 
+    [SerializeField] private Texture2D shipTexture;
+
     [SerializeField] private SpriteRenderer spriteRenderer;
 
     [SerializeField] private Outliner outliner;
@@ -20,8 +22,23 @@ public class Ship : MonoBehaviour
 
     [SerializeField] protected List<IWeapon> Weapons = new();
 
+    private float pixelUnitSize => 1 / pixelsPerUnit;
+
+    private float unitWidth => shipTexture.width / pixelsPerUnit;
+
+    private float unitHeight => shipTexture.height / pixelsPerUnit;
+
     private void Start()
     {
+        shipTexture = new Texture2D(shipSprite.texture.width, shipSprite.texture.height)
+        {
+            filterMode = FilterMode.Point
+        };
+        shipTexture.SetPixels(shipSprite.texture.GetPixels());
+        shipTexture.Apply();
+
+        shipSprite = Sprite.Create(shipTexture, new Rect(0, 0, shipTexture.width, shipTexture.height),
+            new Vector2(0.5f, 0.5f));
         spriteRenderer.sprite = shipSprite;
 
         RecalculateColliders();
@@ -86,15 +103,12 @@ public class Ship : MonoBehaviour
 
     private void GenerateColliders(Texture2D texture)
     {
-        Debug.Log(texture.width);
         var boundaryTracer = new ContourTracer();
 
         boundaryTracer.Trace(texture, centerPivot, pixelsPerUnit, outliner.gapLength, outliner.product);
 
         var path = new List<Vector2>();
         var points = new List<Vector2>();
-
-        Debug.Log(texture.width);
 
         var polygonCollider2D = gameObject.GetComponent<PolygonCollider2D>();
         if (!polygonCollider2D) polygonCollider2D = gameObject.AddComponent<PolygonCollider2D>();
@@ -114,5 +128,22 @@ public class Ship : MonoBehaviour
                 polygonCollider2D.SetPath(i, points);
             }
         }
+    }
+
+    public void DamagePixelAt(Vector2 point)
+    {
+        Vector2 position = transform.InverseTransformPoint(point);
+
+        Debug.DrawRay(position, Vector2.up * tolerance, Color.red);
+
+        var arrayPosition = new Vector2Int((int)((position.x + unitWidth / 2) / pixelUnitSize),
+            (int)((position.y + unitHeight / 2) / pixelUnitSize));
+
+        shipSprite.texture.SetPixel(arrayPosition.x, arrayPosition.y, Color.clear);
+        shipSprite.texture.Apply();
+
+        RecalculateColliders();
+
+        Debug.Log(position);
     }
 }

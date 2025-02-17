@@ -16,5 +16,11 @@ public class Bullet : MonoBehaviour
     {
         Debug.Log(other.gameObject.name);
         Debug.Log(other.contacts[0].point);
+
+        var ship = other.gameObject.GetComponent<Ship>();
+
+        if (ship is null) return;
+
+        other.gameObject.GetComponent<Ship>().DamagePixelAt(other.contacts[0].point);
     }
 }
