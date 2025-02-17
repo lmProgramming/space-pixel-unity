@@ -10,10 +10,7 @@ namespace Editor
         {
             var ship = (Ship)target;
             DrawDefaultInspector();
-            if (GUILayout.Button("Generate Pixels"))
-            {
-                ship.Start();
-            }
+            if (GUILayout.Button("Generate Pixels")) ship.RecalculateColliders();
         }
     }
 }

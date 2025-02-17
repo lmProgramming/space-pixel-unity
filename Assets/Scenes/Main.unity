@@ -353,8 +353,8 @@ MonoBehaviour:
   centerPivot: {x: 0.5, y: 0.5}
   tolerance: 0
   rb: {fileID: 292801182}
-  speedMultiplier: 50
-  rotationMultiplier: -1
+  speedMultiplier: 100
+  rotationMultiplier: -10
 --- !u!4 &292801185
 Transform:
   m_ObjectHideFlags: 0
