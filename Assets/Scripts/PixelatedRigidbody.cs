@@ -4,7 +4,7 @@ using System.Linq;
 using ContourTracer;
 using UnityEngine;
 
-public class PixelatedRigidbody : MonoBehaviour, IPixelized
+public class PixelatedRigidbody : MonoBehaviour, IPixelated
 {
     [SerializeField] private Sprite sprite;
 
@@ -43,13 +43,7 @@ public class PixelatedRigidbody : MonoBehaviour, IPixelized
 
     public void Start()
     {
-        SetupRendering();
-
-        CalculatePixels();
-
-        GetPolygonCollider();
-
-        RecalculateColliders();
+        Setup();
     }
 
     private void Update()
@@ -71,10 +65,36 @@ public class PixelatedRigidbody : MonoBehaviour, IPixelized
         ResolveCollision(otherRb, collision);
     }
 
-    public void ResolveCollision(IPixelized other, Collision2D collision)
+    public void ResolveCollision(IPixelated other, Collision2D collision)
     {
         _didCollide = true;
         DamageAt(collision.contacts[0].point, collision);
+    }
+
+    public void SetupFromColors(Color[,] colors)
+    {
+        texture = new Texture2D(colors.GetLength(0), colors.GetLength(1), TextureFormat.ARGB32, false)
+        {
+            filterMode = FilterMode.Point
+        };
+
+        var colorsArray = colors.OfType<Color>().ToArray();
+
+        texture.SetPixels(colorsArray);
+        sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
+
+        Setup();
+    }
+
+    public void Setup()
+    {
+        SetupRendering();
+
+        CalculatePixels();
+
+        GetPolygonCollider();
+
+        RecalculateColliders();
     }
 
     private void CalculatePixels()
@@ -89,7 +109,7 @@ public class PixelatedRigidbody : MonoBehaviour, IPixelized
         }
     }
 
-    public event Action<IPixelized> OnNoPixelsLeft;
+    public event Action<IPixelated> OnNoPixelsLeft;
 
     private void GetPolygonCollider()
     {
@@ -128,12 +148,149 @@ public class PixelatedRigidbody : MonoBehaviour, IPixelized
         if (pixelToDestroyPosition == null) return;
 
         var pos = pixelToDestroyPosition.Value;
-        _internalSprite.texture.SetPixel(pos.x, pos.y, Color.clear);
-        _internalSprite.texture.Apply();
-
-        RecalculateColliders();
+        RemovePixelAt(pos);
 
         Debug.Log(position);
+    }
+
+    private void RemovePixelAt(Vector2Int point)
+    {
+        _internalSprite.texture.SetPixel(point.x, point.y, Color.clear);
+        _internalSprite.texture.Apply();
+
+        var regions = FloodFindCohesiveRegions(point);
+
+        if (regions.Count > 1) HandleDivision(regions);
+
+        RecalculateColliders();
+    }
+
+    private void HandleDivision(List<HashSet<Vector2Int>> regions)
+    {
+        var colors = new List<Color>
+        {
+            Color.red,
+            Color.green,
+            Color.blue,
+            Color.cyan
+        };
+
+        var cInd = 0;
+
+        regions = regions.OrderBy(r => r.Count).ToList();
+
+        for (var index = 0; index < regions.Count - 1; index++)
+        {
+            var region = regions[index];
+            CreateNewJunk(region);
+        }
+    }
+
+    private void CreateNewJunk(HashSet<Vector2Int> points)
+    {
+        var rightTopPoint = new Vector2Int(points.Max(p => p.x), points.Max(p => p.y));
+        var leftBottomPoint = new Vector2Int(points.Min(p => p.x), points.Min(p => p.y));
+
+        var width = rightTopPoint.x - leftBottomPoint.x + 1;
+        var height = rightTopPoint.y - leftBottomPoint.y + 1;
+
+        var newColorsGrid = new Color[width, height];
+
+        foreach (var point in points)
+            newColorsGrid[point.x - leftBottomPoint.x, point.y - leftBottomPoint.y] = GetColor(point);
+
+        var globalPosition = transform.TransformPoint((Vector2)leftBottomPoint);
+
+        JunkSpawner.Instance.SpawnJunk(globalPosition, transform.rotation, newColorsGrid);
+    }
+
+    private List<HashSet<Vector2Int>> FloodFindCohesiveRegions(Vector2Int searchStartPoint)
+    {
+        var visited = new HashSet<Vector2Int>
+        {
+            searchStartPoint
+        };
+
+        var regions = new List<HashSet<Vector2Int>>();
+
+        SetupFlooding(searchStartPoint + new Vector2Int(1, 0));
+        SetupFlooding(searchStartPoint + new Vector2Int(-1, 0));
+        SetupFlooding(searchStartPoint + new Vector2Int(0, 1));
+        SetupFlooding(searchStartPoint + new Vector2Int(0, -1));
+
+        return regions;
+
+        void SetupFlooding(Vector2Int searchStart)
+        {
+            if (!InBounds(searchStart)) return;
+
+            regions.Add(new HashSet<Vector2Int> { searchStart });
+
+            FloodFind(searchStart, regions.Count - 1);
+        }
+
+        void FloodFind(Vector2Int position, int regionIndex)
+        {
+            if (regionIndex == regions.Count) return;
+
+            if (!InBounds(position)) return;
+
+            if (!visited.Add(position))
+            {
+                FindRegionToMerge(position, regionIndex);
+                return;
+            }
+
+            if (!IsPixel(position)) return;
+
+            regions[regionIndex].Add(position);
+
+            FloodFind(position + new Vector2Int(1, 0), regionIndex);
+            FloodFind(position + new Vector2Int(-1, 0), regionIndex);
+            FloodFind(position + new Vector2Int(0, 1), regionIndex);
+            FloodFind(position + new Vector2Int(0, -1), regionIndex);
+        }
+
+        void FindRegionToMerge(Vector2Int position, int regionIndex)
+        {
+            for (var index = 0; index < regions.Count; index++)
+            {
+                var region = regions[index];
+
+                if (!region.Contains(position)) continue;
+
+                if (index == regionIndex) break;
+
+                MergeRegions(index, regionIndex);
+            }
+        }
+
+        void MergeRegions(int indexToMergeWith, int indexMerged)
+        {
+            regions[indexToMergeWith].UnionWith(regions[indexMerged]);
+
+            regions.RemoveAt(indexMerged);
+        }
+    }
+
+    private void SetColor(Vector2Int point, Color color)
+    {
+        texture.SetPixel(point.x, point.y, color);
+    }
+
+    private Color GetColor(Vector2Int point)
+    {
+        return texture.GetPixel(point.x, point.y);
+    }
+
+    private bool IsPixel(Vector2Int point)
+    {
+        return texture.GetPixel(point.x, point.y).a != 0;
+    }
+
+    private bool InBounds(Vector2Int point)
+    {
+        return point.x >= 0 && point.x < texture.width && point.y >= 0 && point.y < texture.height;
     }
 
     private Vector2Int? GetPointAlongPath(Vector2Int startPosition, Vector2 direction, bool getLast)
