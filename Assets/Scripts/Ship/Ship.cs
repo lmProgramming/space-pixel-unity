@@ -2,29 +2,32 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class Ship : MonoBehaviour
+namespace Ship
 {
-    [field: SerializeField] public ShipBody Body { get; private set; }
-
-    [SerializeField] protected List<IWeapon> Weapons = new();
-
-    private void Start()
+    public class Ship : MonoBehaviour
     {
-        Weapons = GetComponentsInChildren<IWeapon>().ToList();
-    }
+        [field: SerializeField] public ShipBody Body { get; private set; }
 
-    private void Update()
-    {
-        Move();
+        [SerializeField] protected List<IWeapon> Weapons = new();
 
-        HandleWeapons();
-    }
+        private void Start()
+        {
+            Weapons = GetComponentsInChildren<IWeapon>().ToList();
+        }
 
-    protected virtual void Move()
-    {
-    }
+        private void Update()
+        {
+            Move();
 
-    protected virtual void HandleWeapons()
-    {
+            HandleWeapons();
+        }
+
+        protected virtual void Move()
+        {
+        }
+
+        protected virtual void HandleWeapons()
+        {
+        }
     }
 }

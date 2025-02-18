@@ -4,28 +4,27 @@ using UnityEngine;
 
 namespace ContourTracer
 {
-    public class ContourTracer
+    public class SimpleContourTracer : IContourTracer
     {
         // Each contour is stored as a stack of pixel positions (in texture space)
         private readonly List<Stack<Vector2Int>> _contours = new();
+        private readonly uint _gapLength;
+        private readonly float _smoothingThreshold;
         private Vector2 _pivotOffset;
 
         // Used to convert pixel coordinates to world coordinates
         private float _pointScale;
 
+        public SimpleContourTracer(uint gapLength, float smoothingThreshold)
+        {
+            _gapLength = gapLength;
+            _smoothingThreshold = smoothingThreshold;
+        }
+
         /// <summary>
         ///     Number of detected contours.
         /// </summary>
-        public int ContourCount { get; private set; }
-
-        /// <summary>
-        ///     Returns the contour at the given index as an array of world-space points.
-        /// </summary>
-        public Vector2[] GetContour(int index)
-        {
-            var pixelPoints = _contours[index].ToArray();
-            return Array.ConvertAll(pixelPoints, pixelPoint => (Vector2)pixelPoint * _pointScale - _pivotOffset);
-        }
+        private int ContourCount { get; set; }
 
         /// <summary>
         ///     Traces the contours (i.e. borders of non-transparent pixels) in the given texture.
@@ -36,14 +35,7 @@ namespace ContourTracer
         ///     (e.g. (0.5, 0.5) is the center of the texture)
         /// </param>
         /// <param name="pixelsPerUnit">Scale to convert pixels to world units.</param>
-        /// <param name="gapLength">
-        ///     A gap-length parameter used in the smoothing logic (determines when new points are added).
-        /// </param>
-        /// <param name="smoothingThreshold">
-        ///     Dot-product threshold used to determine if two segments are almost collinear.
-        /// </param>
-        public void Trace(Texture2D texture, Vector2 pivot, float pixelsPerUnit, uint gapLength,
-            float smoothingThreshold)
+        public Vector2[] GenerateCollider(Texture2D texture, Vector2 pivot, float pixelsPerUnit)
         {
             ContourCount = 0;
             _pointScale = 1f / pixelsPerUnit;
@@ -59,7 +51,7 @@ namespace ContourTracer
             if (texture.width == 1 || texture.height == 1)
             {
                 HandleSmallSprite();
-                return;
+                return null;
             }
 
             // State variables for the tracing algorithm
@@ -184,7 +176,7 @@ namespace ContourTracer
                             }
                         }
 
-                        maxAllowedLineLength = currentLineLength + gapLength;
+                        maxAllowedLineLength = currentLineLength + _gapLength;
                         currentLineLength = 0;
                         break;
 
@@ -297,7 +289,7 @@ namespace ContourTracer
             void SmoothSegment()
             {
                 var segmentDir = (currentPoint - (Vector2)currentContour.Peek()).normalized;
-                if (Vector2.Dot(segmentDir, lastSegmentDirection) > smoothingThreshold)
+                if (Vector2.Dot(segmentDir, lastSegmentDirection) > _smoothingThreshold)
                     currentContour.Pop();
                 lastSegmentDirection = segmentDir;
             }
@@ -421,6 +413,17 @@ namespace ContourTracer
                     insideAlreadyProcessed = true;
                 }
             }
+
+            return null;
+        }
+
+        /// <summary>
+        ///     Returns the contour at the given index as an array of world-space points.
+        /// </summary>
+        public Vector2[] GetContour(int index)
+        {
+            var pixelPoints = _contours[index].ToArray();
+            return Array.ConvertAll(pixelPoints, pixelPoint => (Vector2)pixelPoint * _pointScale - _pivotOffset);
         }
 
         // Enum representing the current facing direction.

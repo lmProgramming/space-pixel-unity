@@ -12,6 +12,15 @@ public static class GridMarcher
         var x = start.x;
         var y = (float)start.y;
 
+        var triesLeft = 3;
+        while (triesLeft > 0 && !(x < dimensions.x && x >= 0 && y < dimensions.y && y >= 0))
+        {
+            triesLeft--;
+
+            x += direction.x > 0 ? 1 : -1;
+            y += m;
+        }
+
         var points = new List<Vector2Int>();
 
         while (x < dimensions.x && x >= 0 && y < dimensions.y && y >= 0)

@@ -1,3 +1,6 @@
-public class ShipBody : PixelatedRigidbody
+namespace Ship
 {
+    public class ShipBody : PixelatedRigidbody
+    {
+    }
 }

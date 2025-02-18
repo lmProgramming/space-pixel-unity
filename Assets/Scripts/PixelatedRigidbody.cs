@@ -137,42 +137,57 @@ public class PixelatedRigidbody : MonoBehaviour, IPixelated
 
     private void RecalculateColliders()
     {
-        var boundaryTracer = new ContourTracer.ContourTracer();
-
-        boundaryTracer.Trace(_internalSprite.texture, centerPivot, pixelsPerUnit, outliner.gapLength, outliner.product);
-
-        var points = new List<Vector2>();
-
-        _polygonCollider2D.pathCount = boundaryTracer.ContourCount;
-
-        var paths = new List<List<Vector2>>();
-        for (var i = 0; i < _polygonCollider2D.pathCount; i++)
-        {
-            var path = boundaryTracer.GetContour(i);
-            LineUtility.Simplify(path.ToList(), lineSimplificationTolerance, points);
-
-            if (points.Count < 3)
-            {
-                _polygonCollider2D.pathCount--;
-                i--;
-                continue;
-            }
-
-            paths.Add(points);
-        }
-
-        if (_polygonCollider2D.pathCount == 0)
+        var gridContourTracer = new GridContourTracer();
+        var polygon = gridContourTracer.GenerateCollider(_texture, centerPivot, pixelsPerUnit);
+        if (polygon is null)
         {
             NoPixelsLeft();
             return;
         }
 
-        for (var i = 0; i < _polygonCollider2D.pathCount; i++)
-        {
-            points = paths[i];
+        var points = new List<Vector2>();
 
-            _polygonCollider2D.SetPath(i, points);
-        }
+        LineUtility.Simplify(polygon.ToList(), lineSimplificationTolerance, points);
+
+        _polygonCollider2D.pathCount = 1;
+        _polygonCollider2D.SetPath(0, points);
+
+        // var boundaryTracer = new ContourTracer.ContourTracer();
+        //
+        // boundaryTracer.Trace(_internalSprite.texture, centerPivot, pixelsPerUnit, outliner.gapLength, outliner.product);
+        //
+        // var points = new List<Vector2>();
+        //
+        // _polygonCollider2D.pathCount = boundaryTracer.ContourCount;
+        //
+        // var paths = new List<List<Vector2>>();
+        // for (var i = 0; i < _polygonCollider2D.pathCount; i++)
+        // {
+        //     var path = boundaryTracer.GetContour(i);
+        //     LineUtility.Simplify(path.ToList(), lineSimplificationTolerance, points);
+        //
+        //     if (points.Count < 3)
+        //     {
+        //         _polygonCollider2D.pathCount--;
+        //         i--;
+        //         continue;
+        //     }
+        //
+        //     paths.Add(points);
+        // }
+        //
+        // if (_polygonCollider2D.pathCount == 0)
+        // {
+        //     NoPixelsLeft();
+        //     return;
+        // }
+        //
+        // for (var i = 0; i < _polygonCollider2D.pathCount; i++)
+        // {
+        //     points = paths[i];
+        //
+        //     _polygonCollider2D.SetPath(i, points);
+        // }
     }
 
     private void DamageAt(Vector2 point, Collision2D collision)

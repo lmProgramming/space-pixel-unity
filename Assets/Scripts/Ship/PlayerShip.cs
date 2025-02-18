@@ -1,25 +1,28 @@
 using UnityEngine;
 
-public class PlayerShip : Ship
+namespace Ship
 {
-    [SerializeField] private float speedMultiplier;
-
-    [SerializeField] private float rotationMultiplier;
-
-    protected override void Move()
+    public class PlayerShip : Ship
     {
-        var acceleration = Input.GetAxis("Vertical") * speedMultiplier;
+        [SerializeField] private float speedMultiplier;
 
-        Body.Rigidbody.AddForce(Body.transform.up * acceleration);
+        [SerializeField] private float rotationMultiplier;
 
-        var turn = Input.GetAxis("Horizontal") * rotationMultiplier;
+        protected override void Move()
+        {
+            var acceleration = Input.GetAxis("Vertical") * speedMultiplier;
 
-        Body.Rigidbody.AddTorque(turn);
-    }
+            Body.Rigidbody.AddForce(Body.transform.up * acceleration);
 
-    protected override void HandleWeapons()
-    {
-        if (!Input.GetMouseButtonDown(0)) return;
-        foreach (var weapon in Weapons) weapon.Shoot();
+            var turn = Input.GetAxis("Horizontal") * rotationMultiplier;
+
+            Body.Rigidbody.AddTorque(turn);
+        }
+
+        protected override void HandleWeapons()
+        {
+            if (!Input.GetMouseButtonDown(0)) return;
+            foreach (var weapon in Weapons) weapon.Shoot();
+        }
     }
 }
