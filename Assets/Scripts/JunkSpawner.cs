@@ -4,6 +4,8 @@ public sealed class JunkSpawner : MonoBehaviour
 {
     [SerializeField] private GameObject junkPrefab;
 
+    [SerializeField] private Transform parent;
+
     public static JunkSpawner Instance { get; private set; }
 
     private void Awake()
@@ -13,7 +15,7 @@ public sealed class JunkSpawner : MonoBehaviour
 
     public void SpawnJunk(Vector2 position, Quaternion rotation, Color[,] colors)
     {
-        var newJunk = Instantiate(junkPrefab, position, rotation, transform);
+        var newJunk = Instantiate(junkPrefab, position, rotation, parent);
 
         newJunk.GetComponent<PixelatedJunk>().SetupFromColors(colors);
     }
