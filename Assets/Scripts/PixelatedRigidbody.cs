@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.Linq;
+using ContourTracer;
 using UnityEngine;
 
 public class PixelatedRigidbody : MonoBehaviour, IPixelized
@@ -143,23 +145,22 @@ public class PixelatedRigidbody : MonoBehaviour, IPixelized
         Debug.Log(position);
     }
 
-
     private void GenerateColliders(Texture2D usedTexture)
     {
-        var boundaryTracer = new ContourTracer();
+        var boundaryTracer = new ContourTracer.ContourTracer();
 
         boundaryTracer.Trace(usedTexture, centerPivot, pixelsPerUnit, outliner.gapLength, outliner.product);
 
-        var path = new List<Vector2>();
+        Vector2[] path;
         var points = new List<Vector2>();
 
-        polygonCollider2D.pathCount = boundaryTracer.pathCount;
+        polygonCollider2D.pathCount = boundaryTracer.ContourCount;
 
         var paths = new List<List<Vector2>>();
         for (var i = 0; i < polygonCollider2D.pathCount; i++)
         {
-            boundaryTracer.GetPath(i, ref path);
-            LineUtility.Simplify(path, tolerance, points);
+            path = boundaryTracer.GetContour(i);
+            LineUtility.Simplify(path.ToList(), tolerance, points);
 
             if (points.Count < 3)
             {

@@ -54,7 +54,7 @@ MonoBehaviour:
   pixelsPerUnit: 100
   centerPivot: {x: 0.5, y: 0.5}
   tolerance: 0
-  polygonCollider2D: {fileID: 0}
+  polygonCollider2D: {fileID: 3404191428214464287}
 --- !u!212 &539668653379362583
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -182,5 +182,9 @@ PolygonCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   m_Points:
-    m_Paths: []
+    m_Paths:
+    - - {x: -0.005, y: 0.015}
+      - {x: -0.005, y: -0.015}
+      - {x: 0.005, y: -0.015}
+      - {x: 0.005, y: 0.015}
   m_UseDelaunayMesh: 0
