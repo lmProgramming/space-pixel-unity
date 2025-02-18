@@ -28,37 +28,6 @@ namespace ContourTracer
         }
 
         /// <summary>
-        ///     Fills the provided list with the world-space points of the contour at the given index.
-        ///     Returns the number of points in the contour.
-        /// </summary>
-        public int GetContour(int index, ref List<Vector2> contour)
-        {
-            var pixelPoints = _contours[index].ToArray();
-            int i;
-
-            Vector2 ConvertPoint(int pointIndex)
-            {
-                return (Vector2)pixelPoints[pointIndex] * _pointScale - _pivotOffset;
-            }
-
-            if (pixelPoints.Length > contour.Count)
-            {
-                for (i = 0; i < contour.Count; ++i)
-                    contour[i] = ConvertPoint(i);
-                for (; i < pixelPoints.Length; ++i)
-                    contour.Add(ConvertPoint(i));
-            }
-            else
-            {
-                for (i = 0; i < pixelPoints.Length; ++i)
-                    contour[i] = ConvertPoint(i);
-                contour.RemoveRange(i, contour.Count - pixelPoints.Length);
-            }
-
-            return i;
-        }
-
-        /// <summary>
         ///     Traces the contours (i.e. borders of non-transparent pixels) in the given texture.
         /// </summary>
         /// <param name="texture">The texture to process.</param>
@@ -78,32 +47,36 @@ namespace ContourTracer
         {
             ContourCount = 0;
             _pointScale = 1f / pixelsPerUnit;
-            // Convert normalized pivot to texture space and then to world units.
-            pivot.x *= texture.width - 1f;
-            pivot.y *= texture.height - 1f;
+
+            // Use effective dimensions to avoid multiplying by zero for small sprites.
+            var effectiveWidth = texture.width > 1 ? texture.width - 1f : texture.width;
+            var effectiveHeight = texture.height > 1 ? texture.height - 1f : texture.height;
+
+            pivot.x *= effectiveWidth;
+            pivot.y *= effectiveHeight;
             _pivotOffset = pivot * _pointScale;
 
             if (texture.width == 1 || texture.height == 1)
             {
-                HandleSmallSprite(texture);
+                HandleSmallSprite();
                 return;
             }
 
             // State variables for the tracing algorithm
             var currentPoint = Vector2Int.zero;
             var currentDirection = Direction.Front;
-            var currentCode = Code.InnerOuter; // starting state
+            Code currentCode; // starting state
 
             // Variables used for handling line segments and smoothing.
-            var lastLineCode = Code.Straight;
-            var currentLineLength = 0f;
-            var maxAllowedLineLength = float.PositiveInfinity;
-            var lastSegmentDirection = Vector2.zero;
+            Code lastLineCode;
+            float currentLineLength;
+            float maxAllowedLineLength;
+            Vector2 lastSegmentDirection;
 
             var pixels = texture.GetPixels();
             // Keep track of pixels that have already been processed.
             HashSet<Vector2Int> processedPixels = new();
-            Stack<Vector2Int> currentContour = null;
+            Stack<Vector2Int> currentContour;
             var insideAlreadyProcessed = false;
 
             #region Helper Methods (Local Functions)
@@ -271,7 +244,7 @@ namespace ContourTracer
                 currentCode = newCode;
             }
 
-            void HandleSmallSprite(Texture2D texture)
+            void HandleSmallSprite()
             {
                 int minX = int.MaxValue, minY = int.MaxValue;
                 int maxX = int.MinValue, maxY = int.MinValue;
@@ -293,17 +266,16 @@ namespace ContourTracer
                 var bottom = minY;
                 var top = maxY + 1;
 
-                var currentContour = new Stack<Vector2Int>();
-                currentContour.Push(new Vector2Int(left, bottom));
-                currentContour.Push(new Vector2Int(right, bottom));
-                currentContour.Push(new Vector2Int(right, top));
-                currentContour.Push(new Vector2Int(left, top));
+                var contour = new Stack<Vector2Int>();
+                contour.Push(new Vector2Int(left, bottom));
+                contour.Push(new Vector2Int(right, bottom));
+                contour.Push(new Vector2Int(right, top));
+                contour.Push(new Vector2Int(left, top));
 
                 // Add the contour to the list.
-                _contours.Add(currentContour);
+                _contours.Add(contour);
                 ContourCount = 1;
             }
-
 
             // Moves the current point by an offset (dx, dy) adjusted by the current direction.
             void MovePoint(int dx, int dy)
@@ -454,10 +426,10 @@ namespace ContourTracer
         // Enum representing the current facing direction.
         private enum Direction
         {
-            Front, // 0
-            Right, // 1
-            Rear, // 2
-            Left // 3
+            Front,
+            Right,
+            Rear,
+            Left
         }
 
         // Enum representing the type of movement or transition during contour tracing.

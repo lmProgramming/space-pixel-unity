@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using ContourTracer;
@@ -17,11 +18,15 @@ public class PixelatedRigidbody : MonoBehaviour, IPixelized
 
     [SerializeField] private Vector2 centerPivot = new(0.5f, 0.5f);
 
-    [SerializeField] private float tolerance;
+    [SerializeField] private float lineSimplificationTolerance;
 
     [SerializeField] private PolygonCollider2D polygonCollider2D;
 
     private bool _didCollide;
+
+    private Sprite _internalSprite;
+
+    private Pixel[,] _pixels;
 
     public Rigidbody2D Rigidbody { get; private set; }
 
@@ -38,9 +43,11 @@ public class PixelatedRigidbody : MonoBehaviour, IPixelized
 
     public void Start()
     {
-        GetPolygonCollider();
-
         SetupRendering();
+
+        CalculatePixels();
+
+        GetPolygonCollider();
 
         RecalculateColliders();
     }
@@ -67,14 +74,26 @@ public class PixelatedRigidbody : MonoBehaviour, IPixelized
     public void ResolveCollision(IPixelized other, Collision2D collision)
     {
         _didCollide = true;
-        DamageAt(collision.contacts[0].point);
+        DamageAt(collision.contacts[0].point, collision);
     }
 
-    public void GetPolygonCollider()
+    private void CalculatePixels()
     {
-        polygonCollider2D = GetComponent<PolygonCollider2D>();
+        _pixels = new Pixel[texture.width, texture.height];
 
-        if (polygonCollider2D == null) polygonCollider2D = gameObject.AddComponent<PolygonCollider2D>();
+        for (var x = 0; x < texture.width; x++)
+        for (var y = 0; y < texture.height; y++)
+        {
+            var color = texture.GetPixel(x, y);
+            _pixels[x, y] = new Pixel(color, 100);
+        }
+    }
+
+    public event Action<IPixelized> OnNoPixelsLeft;
+
+    private void GetPolygonCollider()
+    {
+        polygonCollider2D = GetComponent<PolygonCollider2D>() ?? gameObject.AddComponent<PolygonCollider2D>();
     }
 
     private void SetupRendering()
@@ -86,63 +105,51 @@ public class PixelatedRigidbody : MonoBehaviour, IPixelized
         texture.SetPixels(sprite.texture.GetPixels());
         texture.Apply();
 
-        sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height),
+        _internalSprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height),
             new Vector2(0.5f, 0.5f));
-        spriteRenderer.sprite = sprite;
+        spriteRenderer.sprite = _internalSprite;
     }
 
     private void RecalculateColliders()
     {
-        GenerateColliders(sprite.texture);
+        GenerateColliders(_internalSprite.texture);
     }
 
-    private static Texture2D ConvertToTexture(Color[,] array)
-    {
-        var width = array.GetLength(0);
-        var height = array.GetLength(1);
-
-        int minX = width, maxX = 0, minY = height, maxY = 0;
-        var hasVisiblePixels = false;
-
-        for (var x = 0; x < width; x++)
-        for (var y = 0; y < height; y++)
-        {
-            if (!(array[x, y].a > 0)) continue;
-            hasVisiblePixels = true;
-            if (x < minX) minX = x;
-            if (x > maxX) maxX = x;
-            if (y < minY) minY = y;
-            if (y > maxY) maxY = y;
-        }
-
-        if (!hasVisiblePixels) return null;
-
-        var newWidth = maxX - minX + 1;
-        var newHeight = maxY - minY + 1;
-        var texture = new Texture2D(newWidth, newHeight, TextureFormat.RGBA32, false);
-
-        for (var x = 0; x < newWidth; x++)
-        for (var y = 0; y < newHeight; y++)
-            texture.SetPixel(x, y, array[minX + x, minY + y]);
-
-        texture.Apply();
-        return texture;
-    }
-
-
-    public void DamageAt(Vector2 point)
+    private void DamageAt(Vector2 point, Collision2D collision)
     {
         Vector2 position = transform.InverseTransformPoint(point);
 
-        var arrayPosition = new Vector2Int((int)((position.x + UnitWidth / 2) / PixelUnitSize),
+        var hitPosition = new Vector2Int((int)((position.x + UnitWidth / 2) / PixelUnitSize),
             (int)((position.y + UnitHeight / 2) / PixelUnitSize));
 
-        sprite.texture.SetPixel(arrayPosition.x, arrayPosition.y, Color.clear);
-        sprite.texture.Apply();
+        var pixelToDestroyPosition = GetPointAlongPath(hitPosition, -collision.rigidbody.linearVelocity, true) ??
+                                     GetPointAlongPath(hitPosition, collision.rigidbody.linearVelocity, false);
+
+        if (pixelToDestroyPosition == null) return;
+
+        var pos = pixelToDestroyPosition.Value;
+        _internalSprite.texture.SetPixel(pos.x, pos.y, Color.clear);
+        _internalSprite.texture.Apply();
 
         RecalculateColliders();
 
         Debug.Log(position);
+    }
+
+    private Vector2Int? GetPointAlongPath(Vector2Int startPosition, Vector2 direction, bool getLast)
+    {
+        var pointsTraversed = GridMarcher.March(new Vector2Int(texture.width, texture.height), startPosition,
+            direction);
+
+        if (getLast) pointsTraversed.Reverse();
+
+        foreach (var point in pointsTraversed.Where(point => texture.GetPixel(point.x, point.y).a != 0))
+        {
+            Debug.Log(point);
+            return new Vector2Int(point.x, point.y);
+        }
+
+        return null;
     }
 
     private void GenerateColliders(Texture2D usedTexture)
@@ -151,7 +158,6 @@ public class PixelatedRigidbody : MonoBehaviour, IPixelized
 
         boundaryTracer.Trace(usedTexture, centerPivot, pixelsPerUnit, outliner.gapLength, outliner.product);
 
-        Vector2[] path;
         var points = new List<Vector2>();
 
         polygonCollider2D.pathCount = boundaryTracer.ContourCount;
@@ -159,8 +165,8 @@ public class PixelatedRigidbody : MonoBehaviour, IPixelized
         var paths = new List<List<Vector2>>();
         for (var i = 0; i < polygonCollider2D.pathCount; i++)
         {
-            path = boundaryTracer.GetContour(i);
-            LineUtility.Simplify(path.ToList(), tolerance, points);
+            var path = boundaryTracer.GetContour(i);
+            LineUtility.Simplify(path.ToList(), lineSimplificationTolerance, points);
 
             if (points.Count < 3)
             {
@@ -174,11 +180,8 @@ public class PixelatedRigidbody : MonoBehaviour, IPixelized
 
         if (polygonCollider2D.pathCount == 0)
         {
-            Debug.LogWarning("No path found");
-
-            polygonCollider2D.pathCount = 1;
-
-            paths.Add(FallbackPath());
+            NoPixelsLeft();
+            return;
         }
 
         for (var i = 0; i < polygonCollider2D.pathCount; i++)
@@ -189,19 +192,9 @@ public class PixelatedRigidbody : MonoBehaviour, IPixelized
         }
     }
 
-    private List<Vector2> FallbackPath()
+    protected virtual void NoPixelsLeft()
     {
-        var halfRealWidth = UnitWidth / 2;
-        var halfRealHeight = UnitHeight / 2;
-
-        var points = new List<Vector2>
-        {
-            new(-halfRealWidth, halfRealHeight),
-            new(-halfRealWidth, -halfRealHeight),
-            new(halfRealWidth, -halfRealHeight),
-            new(halfRealWidth, halfRealHeight)
-        };
-
-        return points;
+        OnNoPixelsLeft?.Invoke(this);
+        Destroy(gameObject);
     }
 }
