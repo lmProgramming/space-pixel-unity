@@ -89,6 +89,26 @@ public class PixelatedRigidbody : MonoBehaviour, IPixelated
         Setup();
     }
 
+    public Vector2Int WorldToLocalPoint(Vector2 worldPosition)
+    {
+        Vector2 position = transform.InverseTransformPoint(worldPosition);
+
+        return new Vector2Int((int)((position.x + UnitWidth / 2) / PixelUnitSize),
+            (int)((position.y + UnitHeight / 2) / PixelUnitSize));
+    }
+
+    public void RemovePixelAt(Vector2Int point)
+    {
+        _internalSprite.texture.SetPixel(point.x, point.y, Color.clear);
+        _internalSprite.texture.Apply();
+
+        var regions = FloodFindCohesiveRegions(point);
+
+        if (regions.Count > 1) HandleDivision(regions);
+
+        RecalculateColliders();
+    }
+
     public void Setup()
     {
         GetComponents();
@@ -151,51 +171,11 @@ public class PixelatedRigidbody : MonoBehaviour, IPixelated
 
         _polygonCollider2D.pathCount = 1;
         _polygonCollider2D.SetPath(0, points);
-
-        // var boundaryTracer = new ContourTracer.ContourTracer();
-        //
-        // boundaryTracer.Trace(_internalSprite.texture, centerPivot, pixelsPerUnit, outliner.gapLength, outliner.product);
-        //
-        // var points = new List<Vector2>();
-        //
-        // _polygonCollider2D.pathCount = boundaryTracer.ContourCount;
-        //
-        // var paths = new List<List<Vector2>>();
-        // for (var i = 0; i < _polygonCollider2D.pathCount; i++)
-        // {
-        //     var path = boundaryTracer.GetContour(i);
-        //     LineUtility.Simplify(path.ToList(), lineSimplificationTolerance, points);
-        //
-        //     if (points.Count < 3)
-        //     {
-        //         _polygonCollider2D.pathCount--;
-        //         i--;
-        //         continue;
-        //     }
-        //
-        //     paths.Add(points);
-        // }
-        //
-        // if (_polygonCollider2D.pathCount == 0)
-        // {
-        //     NoPixelsLeft();
-        //     return;
-        // }
-        //
-        // for (var i = 0; i < _polygonCollider2D.pathCount; i++)
-        // {
-        //     points = paths[i];
-        //
-        //     _polygonCollider2D.SetPath(i, points);
-        // }
     }
 
-    private void DamageAt(Vector2 point, Collision2D collision)
+    private void DamageAt(Vector2 position, Collision2D collision)
     {
-        Vector2 position = transform.InverseTransformPoint(point);
-
-        var hitPosition = new Vector2Int((int)((position.x + UnitWidth / 2) / PixelUnitSize),
-            (int)((position.y + UnitHeight / 2) / PixelUnitSize));
+        var hitPosition = WorldToLocalPoint(position);
 
         var pixelToDestroyPosition = GetPointAlongPath(hitPosition, -collision.rigidbody.linearVelocity, true) ??
                                      GetPointAlongPath(hitPosition, collision.rigidbody.linearVelocity, false);
@@ -204,18 +184,6 @@ public class PixelatedRigidbody : MonoBehaviour, IPixelated
 
         var pos = pixelToDestroyPosition.Value;
         RemovePixelAt(pos);
-    }
-
-    private void RemovePixelAt(Vector2Int point)
-    {
-        _internalSprite.texture.SetPixel(point.x, point.y, Color.clear);
-        _internalSprite.texture.Apply();
-
-        var regions = FloodFindCohesiveRegions(point);
-
-        if (regions.Count > 1) HandleDivision(regions);
-
-        RecalculateColliders();
     }
 
     private void HandleDivision(List<HashSet<Vector2Int>> regions)
@@ -237,7 +205,11 @@ public class PixelatedRigidbody : MonoBehaviour, IPixelated
             Debug.Log(region.Count);
 
             foreach (var point in region)
+            {
                 SetColorNoApply(point, colors[index]);
+                Debug.Log(point);
+                Debug.Log(GetColor(point));
+            }
 
             CreateNewJunk(region);
         }
