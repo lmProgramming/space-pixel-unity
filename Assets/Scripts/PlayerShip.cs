@@ -10,11 +10,11 @@ public class PlayerShip : Ship
     {
         var acceleration = Input.GetAxis("Vertical") * speedMultiplier;
 
-        rb.AddForce(transform.up * acceleration);
+        Body.Rigidbody.AddForce(Body.transform.up * acceleration);
 
         var turn = Input.GetAxis("Horizontal") * rotationMultiplier;
 
-        rb.AddTorque(turn);
+        Body.Rigidbody.AddTorque(turn);
     }
 
     protected override void HandleWeapons()

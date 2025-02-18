@@ -3,14 +3,15 @@ using UnityEngine;
 
 namespace Editor
 {
-    [CustomEditor(typeof(Ship), true)]
+    [CustomEditor(typeof(PixelatedRigidbody), true)]
     public class ShipEditor : UnityEditor.Editor
     {
         public override void OnInspectorGUI()
         {
-            var ship = (Ship)target;
+            var pixelatedRigidbody = (PixelatedRigidbody)target;
             DrawDefaultInspector();
-            if (GUILayout.Button("Generate Pixels")) ship.RecalculateColliders();
+            if (!GUILayout.Button("Generate Pixels")) return;
+            pixelatedRigidbody.Start();
         }
     }
 }

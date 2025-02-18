@@ -8,17 +8,14 @@ public class ContourTracer
     private float pointMultiplier;
     private Vector2 pointOffset;
 
-    /// <include file='../Documentation.xml' path='docs/ContourTracer/pathCount/*' />
     public int pathCount { get; private set; }
 
-    /// <include file='../Documentation.xml' path='docs/ContourTracer/GetPath/*' />
     public Vector2[] GetPath(int index)
     {
         var points = pixelPaths[index].ToArray();
         return Array.ConvertAll(points, point => (Vector2)point * pointMultiplier - pointOffset);
     }
 
-    /// <include file='../Documentation.xml' path='docs/ContourTracer/GetPath/*' />
     public int GetPath(int index, ref List<Vector2> path)
     {
         var points = pixelPaths[index].ToArray();
