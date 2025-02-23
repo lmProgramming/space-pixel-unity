@@ -9,6 +9,8 @@ using UnityEngine;
 [RequireComponent(typeof(SpriteRenderer))]
 public class PixelatedRigidbody : MonoBehaviour, IPixelated
 {
+    private const float SpeedLimitForDiscreteCollisionDetectionSquared = 1;
+
     [SerializeField] private Sprite sprite;
 
     [SerializeField] private Outliner outliner;
@@ -35,9 +37,12 @@ public class PixelatedRigidbody : MonoBehaviour, IPixelated
 
     private float PixelUnitSize => 1 / pixelsPerUnit;
 
-    private float UnitWidth => _texture.width / pixelsPerUnit;
+    private float PixelWidth => _texture.width;
+    private float PixelHeight => _texture.height;
 
-    private float UnitHeight => _texture.height / pixelsPerUnit;
+    private float UnitWidth => PixelWidth / pixelsPerUnit;
+
+    private float UnitHeight => PixelHeight / pixelsPerUnit;
 
     private void Awake()
     {
@@ -52,6 +57,11 @@ public class PixelatedRigidbody : MonoBehaviour, IPixelated
     private void Update()
     {
         _didCollide = false;
+
+        Rigidbody.collisionDetectionMode =
+            Rigidbody.linearVelocity.sqrMagnitude > SpeedLimitForDiscreteCollisionDetectionSquared
+                ? CollisionDetectionMode2D.Continuous
+                : CollisionDetectionMode2D.Discrete;
     }
 
 
@@ -175,10 +185,12 @@ public class PixelatedRigidbody : MonoBehaviour, IPixelated
 
     private void DamageAt(Vector2 position, Collision2D collision)
     {
-        var hitPosition = WorldToLocalPoint(position);
+        var localPoint = WorldToLocalPoint(position);
 
-        var pixelToDestroyPosition = GetPointAlongPath(hitPosition, -collision.rigidbody.linearVelocity, true) ??
-                                     GetPointAlongPath(hitPosition, collision.rigidbody.linearVelocity, false);
+        // var pixelToDestroyPosition = GetPointAlongPath(hitPosition, -collision.rigidbody.linearVelocity, true) ??
+        //                              GetPointAlongPath(hitPosition, collision.rigidbody.linearVelocity, false);
+
+        var pixelToDestroyPosition = GetClosestPixelPosition(localPoint);
 
         if (pixelToDestroyPosition == null) return;
 
@@ -334,6 +346,42 @@ public class PixelatedRigidbody : MonoBehaviour, IPixelated
 
         foreach (var point in pointsTraversed.Where(point => _texture.GetPixel(point.x, point.y).a != 0))
             return new Vector2Int(point.x, point.y);
+
+        return null;
+    }
+
+    private Vector2Int? GetClosestPixelPosition(Vector2 localPosition)
+    {
+        var localPositionInt = new Vector2Int(Mathf.RoundToInt(localPosition.x), Mathf.RoundToInt(localPosition.y));
+
+        var radiusChecked = 1;
+
+        var maxRadiusChecked = Mathf.Max(PixelWidth + 1, PixelHeight + 1);
+
+        while (radiusChecked < maxRadiusChecked)
+        {
+            Vector2Int? closestHit = null;
+            var closestDistance = float.MaxValue;
+
+            for (var x = localPositionInt.x - radiusChecked; x < localPositionInt.x + radiusChecked; x++)
+            for (var y = localPositionInt.y - radiusChecked; y < localPositionInt.y + radiusChecked; y++)
+            {
+                var pixelPosition = new Vector2Int(x, y);
+
+                if (!IsPixel(pixelPosition)) continue;
+
+                var distance = (new Vector2(x, y) - localPosition).SqrMagnitude();
+
+                if (!(distance < closestDistance)) continue;
+
+                closestDistance = distance;
+                closestHit = pixelPosition;
+            }
+
+            if (closestHit != null) return closestHit;
+
+            radiusChecked++;
+        }
 
         return null;
     }
