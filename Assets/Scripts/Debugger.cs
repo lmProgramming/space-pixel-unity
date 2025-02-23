@@ -5,7 +5,7 @@ public class Debugger : MonoBehaviour
 {
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Delete))
+        if (Input.GetKey(KeyCode.Delete))
         {
             var gameObjectUnderPointer = GameInput.ObjectUnderPointer;
 

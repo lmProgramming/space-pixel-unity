@@ -195,7 +195,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <Body>k__BackingField: {fileID: 1940184194}
-  speedMultiplier: 800
+  speedMultiplier: 200
   rotationMultiplier: -4000
 --- !u!4 &292801185
 Transform:
@@ -1378,7 +1378,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c4dbe50d5bc653142bf2cbb73c5aa09b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  scrollMultiplier: -1
+  scrollMultiplier: -50
   minScroll: 25
   maxScroll: 400
 --- !u!1 &1143205687
@@ -1472,7 +1472,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   projectilePrefab: {fileID: 5654400622174641897, guid: fbb05823f916f824da20fe66a7de32d4, type: 3}
   projectileParent: {fileID: 1064495926}
-  projectileSpeed: 1000
+  projectileSpeed: 5000
 --- !u!1 &1276085533
 GameObject:
   m_ObjectHideFlags: 0
@@ -2039,7 +2039,7 @@ Rigidbody2D:
   m_UseAutoMass: 0
   m_Mass: 10
   m_LinearDamping: 1
-  m_AngularDamping: 20
+  m_AngularDamping: 1
   m_GravityScale: 0
   m_Material: {fileID: 0}
   m_IncludeLayers:

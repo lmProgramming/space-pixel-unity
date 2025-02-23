@@ -83,7 +83,11 @@ namespace Pixelation
                 filterMode = FilterMode.Point
             };
 
-            var colorsArray = colors.OfType<Color>().ToArray();
+            var colorsArray = new Color[colors.GetLength(0) * colors.GetLength(1)];
+
+            for (var y = 0; y < colors.GetLength(1); y++)
+            for (var x = 0; x < colors.GetLength(0); x++)
+                colorsArray[y * colors.GetLength(0) + x] = colors[x, y];
 
             _texture.SetPixels(colorsArray);
             sprite = Sprite.Create(_texture, new Rect(0, 0, _texture.width, _texture.height), new Vector2(0.5f, 0.5f));
