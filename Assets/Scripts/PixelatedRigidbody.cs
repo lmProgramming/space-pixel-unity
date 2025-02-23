@@ -350,7 +350,7 @@ public class PixelatedRigidbody : MonoBehaviour, IPixelated
         return null;
     }
 
-    private Vector2Int? GetClosestPixelPosition(Vector2 localPosition)
+    private List<Vector2Int> GetClosestPixelPositions(Vector2 localPosition, int positionsMaxCount)
     {
         var localPositionInt = new Vector2Int(Mathf.RoundToInt(localPosition.x), Mathf.RoundToInt(localPosition.y));
 
@@ -358,11 +358,10 @@ public class PixelatedRigidbody : MonoBehaviour, IPixelated
 
         var maxRadiusChecked = Mathf.Max(PixelWidth + 1, PixelHeight + 1);
 
+        var closestPointsAndDistances = new List<(Vector2Int Position, float Distance)>();
+
         while (radiusChecked < maxRadiusChecked)
         {
-            Vector2Int? closestHit = null;
-            var closestDistance = float.MaxValue;
-
             for (var x = localPositionInt.x - radiusChecked; x < localPositionInt.x + radiusChecked; x++)
             for (var y = localPositionInt.y - radiusChecked; y < localPositionInt.y + radiusChecked; y++)
             {
@@ -372,18 +371,34 @@ public class PixelatedRigidbody : MonoBehaviour, IPixelated
 
                 var distance = (new Vector2(x, y) - localPosition).SqrMagnitude();
 
-                if (!(distance < closestDistance)) continue;
-
-                closestDistance = distance;
-                closestHit = pixelPosition;
+                InsertPositionToSortedArray(pixelPosition, distance);
             }
 
-            if (closestHit != null) return closestHit;
+            if (closestPointsAndDistances.Count >= positionsMaxCount) break;
 
             radiusChecked++;
         }
 
         return null;
+
+        void InsertPositionToSortedArray(Vector2Int position, float distance)
+        {
+            for (var index = 0; index < closestPointsAndDistances.Count; index++)
+            {
+                var closestPointAndDistance = closestPointsAndDistances[index];
+
+                if (!(distance < closestPointAndDistance.Distance)) continue;
+                closestPointsAndDistances.Insert(index, (position, radiusChecked));
+                return;
+            }
+
+            closestPointsAndDistances.Add((position, radiusChecked));
+        }
+    }
+
+    private Vector2Int? GetClosestPixelPosition(Vector2 localPosition)
+    {
+        return GetClosestPixelPositions(localPosition, 1).FirstOrDefault();
     }
 
     protected virtual void NoPixelsLeft()
