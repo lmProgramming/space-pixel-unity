@@ -1,3 +1,4 @@
+using Pixelation;
 using UnityEditor;
 using UnityEngine;
 
@@ -11,7 +12,7 @@ namespace Editor
             var pixelatedRigidbody = (PixelatedRigidbody)target;
             DrawDefaultInspector();
             if (!GUILayout.Button("Generate Pixels")) return;
-            pixelatedRigidbody.Start();
+            pixelatedRigidbody.Setup();
         }
     }
 }
