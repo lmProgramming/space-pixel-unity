@@ -17,5 +17,7 @@ public class Debugger : MonoBehaviour
 
             pixelated.RemovePixelAt(pixelPoint);
         }
+
+        if (Input.GetKeyDown(KeyCode.Home)) Debug.Log(GameInput.WorldPointerPosition);
     }
 }

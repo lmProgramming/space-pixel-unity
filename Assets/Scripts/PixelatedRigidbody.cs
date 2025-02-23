@@ -188,53 +188,45 @@ public class PixelatedRigidbody : MonoBehaviour, IPixelated
 
     private void HandleDivision(List<HashSet<Vector2Int>> regions)
     {
-        var colors = new[]
-        {
-            Color.red,
-            Color.green,
-            Color.blue,
-            Color.yellow
-        };
-
         regions = regions.OrderBy(r => r.Count).ToList();
 
         for (var index = 0; index < regions.Count - 1; index++)
         {
             var region = regions[index];
 
-            Debug.Log(region.Count);
+            if (region.Count >= 5) CreateNewJunk(region);
 
-            foreach (var point in region)
-            {
-                SetColorNoApply(point, colors[index]);
-                Debug.Log(point);
-                Debug.Log(GetColor(point));
-            }
-
-            CreateNewJunk(region);
+            RemovePixels(region);
         }
 
         ApplyColors();
         RecalculateColliders();
     }
 
+    private void RemovePixels(HashSet<Vector2Int> points)
+    {
+        foreach (var point in points) SetColorNoApply(point, Color.clear);
+
+        ApplyColors();
+    }
+
     private void CreateNewJunk(HashSet<Vector2Int> points)
     {
         var rightTopPoint = new Vector2Int(points.Max(p => p.x), points.Max(p => p.y));
         var leftBottomPoint = new Vector2Int(points.Min(p => p.x), points.Min(p => p.y));
+        var parentCentrePoint = new Vector2(UnitWidth / 2, UnitHeight / 2);
 
         var width = rightTopPoint.x - leftBottomPoint.x + 1;
         var height = rightTopPoint.y - leftBottomPoint.y + 1;
 
+        var centrePoint = (leftBottomPoint + new Vector2(width, height) / 2) * PixelUnitSize;
+
         var newColorsGrid = new Color[width, height];
 
         foreach (var point in points)
-        {
             newColorsGrid[point.x - leftBottomPoint.x, point.y - leftBottomPoint.y] = GetColor(point);
-            SetColorNoApply(point, Color.clear);
-        }
 
-        var globalPosition = transform.TransformPoint((Vector2)leftBottomPoint);
+        var globalPosition = transform.TransformPoint(centrePoint - parentCentrePoint);
 
         JunkSpawner.Instance.SpawnJunk(globalPosition, transform.rotation, newColorsGrid);
     }
@@ -270,13 +262,13 @@ public class PixelatedRigidbody : MonoBehaviour, IPixelated
 
             if (!InBounds(position)) return;
 
+            if (!IsPixel(position)) return;
+
             if (!visited.Add(position))
             {
                 FindRegionToMerge(position, regionIndex);
                 return;
             }
-
-            if (!IsPixel(position)) return;
 
             regions[regionIndex].Add(position);
 
