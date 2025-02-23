@@ -17,6 +17,6 @@ public sealed class JunkSpawner : MonoBehaviour
     {
         var newJunk = Instantiate(junkPrefab, position, rotation, parent);
 
-        newJunk.GetComponent<PixelatedJunk>().SetupFromColors(colors);
+        newJunk.GetComponent<PixelatedJunk>().Setup(colors);
     }
 }

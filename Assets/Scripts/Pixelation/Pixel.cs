@@ -1,19 +1,22 @@
 using UnityEngine;
 
-public class Pixel
+namespace Pixelation
 {
-    public Pixel(Color color, float maxHealth)
+    public class Pixel
     {
-        Color = color;
-        MaxHealth = maxHealth;
-    }
+        public Pixel(Color color, float maxHealth)
+        {
+            Color = color;
+            MaxHealth = maxHealth;
+        }
 
-    public Color Color { get; private set; }
-    public float Health { get; private set; }
-    public float MaxHealth { get; }
+        public Color Color { get; private set; }
+        public float Health { get; private set; }
+        public float MaxHealth { get; }
 
-    public void RepairToMaxHealth()
-    {
-        Health = MaxHealth;
+        public void RepairToMaxHealth()
+        {
+            Health = MaxHealth;
+        }
     }
 }

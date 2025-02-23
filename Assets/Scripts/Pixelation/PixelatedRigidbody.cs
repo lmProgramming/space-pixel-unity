@@ -15,26 +15,17 @@ namespace Pixelation
 
         [SerializeField] private Sprite sprite;
 
-        [SerializeField] private Outliner outliner;
-
         [SerializeField] private Vector2 centerPivot = new(0.5f, 0.5f);
 
         [SerializeField] private float lineSimplificationTolerance;
 
         private bool _didCollide;
 
-        private Sprite _internalSprite;
-
         private PolygonCollider2D _polygonCollider2D;
 
-        private SpriteRenderer _spriteRenderer;
-
-        private Texture2D _texture;
+        public PixelatedTexture PixelatedTexture { get; private set; }
 
         public Rigidbody2D Rigidbody { get; private set; }
-
-        private float PixelWidth => _texture.width;
-        private float PixelHeight => _texture.height;
 
         private void Awake()
         {
@@ -70,43 +61,14 @@ namespace Pixelation
             ResolveCollision(otherRb, collision);
         }
 
-        public void ResolveCollision(IPixelated other, Collision2D collision)
+        public void SetSpriteFromColors(Color[,] colors)
         {
-            _didCollide = true;
-            DamageAt(collision.contacts[0].point, collision);
-        }
-
-        public void SetupFromColors(Color[,] colors)
-        {
-            _texture = new Texture2D(colors.GetLength(0), colors.GetLength(1), TextureFormat.ARGB32, false)
-            {
-                filterMode = FilterMode.Point
-            };
-
-            var colorsArray = new Color[colors.GetLength(0) * colors.GetLength(1)];
-
-            for (var y = 0; y < colors.GetLength(1); y++)
-            for (var x = 0; x < colors.GetLength(0); x++)
-                colorsArray[y * colors.GetLength(0) + x] = colors[x, y];
-
-            _texture.SetPixels(colorsArray);
-            sprite = Sprite.Create(_texture, new Rect(0, 0, _texture.width, _texture.height), new Vector2(0.5f, 0.5f));
-
-            Setup();
-        }
-
-        public Vector2Int WorldToLocalPoint(Vector2 worldPosition)
-        {
-            Vector2 position = transform.InverseTransformPoint(worldPosition);
-
-            return new Vector2Int((int)(position.x + PixelWidth / 2),
-                (int)(position.y + PixelHeight / 2));
+            Setup(colors);
         }
 
         public void RemovePixelAt(Vector2Int point)
         {
-            _internalSprite.texture.SetPixel(point.x, point.y, Color.clear);
-            _internalSprite.texture.Apply();
+            SetPixel(point, Color.clear);
 
             var regions = FloodFindCohesiveRegions(point);
 
@@ -115,11 +77,72 @@ namespace Pixelation
             RecalculateColliders();
         }
 
-        public void Setup()
+        public void SetPixelNoApply(Vector2Int point, Color color)
         {
-            GetComponents();
+            PixelatedTexture.SetPixelNoApply(point, color);
+        }
 
-            SetupRendering();
+        public void SetPixel(Vector2Int point, Color color)
+        {
+            PixelatedTexture.SetPixel(point, color);
+        }
+
+        public void ApplyChanges()
+        {
+            PixelatedTexture.ApplyChanges();
+        }
+
+        public Color GetColor(Vector2Int point)
+        {
+            return PixelatedTexture.GetColor(point);
+        }
+
+        public bool IsPixel(Vector2Int point)
+        {
+            return InBounds(point) && IsPixelAssumeInBounds(point);
+        }
+
+        public bool IsPixelAssumeInBounds(Vector2Int point)
+        {
+            return PixelatedTexture.IsPixelAssumeInBounds(point);
+        }
+
+        public bool InBounds(Vector2Int point)
+        {
+            return PixelatedTexture.InBounds(point);
+        }
+
+        public void ResolveCollision(IPixelated other, Collision2D collision)
+        {
+            _didCollide = true;
+            DamageAt(collision.contacts[0].point, collision);
+        }
+
+        public Vector2Int WorldToLocalPoint(Vector2 worldPosition)
+        {
+            Vector2 position = transform.InverseTransformPoint(worldPosition);
+
+            return new Vector2Int((int)(position.x + (float)PixelatedTexture.Width / 2),
+                (int)(position.y + (float)PixelatedTexture.Height / 2));
+        }
+
+        public void Setup(Color[,] colors = null)
+        {
+            if (sprite.ToString() == "null" && colors is null) return;
+            
+            PixelatedTexture = new PixelatedTexture(GetComponent<SpriteRenderer>());
+            
+            if (colors is not null)
+            {
+                Debug.Log(colors.Length);
+                PixelatedTexture.SetSpriteFromColors(colors);
+            }
+
+            if (sprite.ToString() != "null") PixelatedTexture.SetSprite(sprite);
+            
+            PixelatedTexture.Setup();
+
+            GetComponents();
 
             // CalculatePixels();
 
@@ -143,29 +166,13 @@ namespace Pixelation
         private void GetComponents()
         {
             _polygonCollider2D = GetComponent<PolygonCollider2D>();
-            _spriteRenderer = GetComponent<SpriteRenderer>();
             Rigidbody = GetComponent<Rigidbody2D>();
-        }
-
-        private void SetupRendering()
-        {
-            _texture = new Texture2D(sprite.texture.width, sprite.texture.height)
-            {
-                filterMode = FilterMode.Point
-            };
-            _texture.SetPixels(sprite.texture.GetPixels());
-            _texture.Apply();
-
-            _internalSprite = Sprite.Create(_texture, new Rect(0, 0, _texture.width, _texture.height),
-                new Vector2(0.5f, 0.5f), 1);
-
-            _spriteRenderer.sprite = _internalSprite;
         }
 
         private void RecalculateColliders()
         {
             var gridContourTracer = new GridContourTracer();
-            var polygon = gridContourTracer.GenerateCollider(_texture, centerPivot, 1);
+            var polygon = gridContourTracer.GenerateCollider(PixelatedTexture.Texture, centerPivot, 1);
             if (polygon is null)
             {
                 NoPixelsLeft();
@@ -208,22 +215,22 @@ namespace Pixelation
                 RemovePixels(region);
             }
 
-            ApplyColors();
+            ApplyChanges();
             RecalculateColliders();
         }
 
         private void RemovePixels(HashSet<Vector2Int> points)
         {
-            foreach (var point in points) SetColorNoApply(point, Color.clear);
+            foreach (var point in points) SetPixelNoApply(point, Color.clear);
 
-            ApplyColors();
+            ApplyChanges();
         }
 
         private void CreateNewJunk(HashSet<Vector2Int> points)
         {
             var rightTopPoint = new Vector2Int(points.Max(p => p.x), points.Max(p => p.y));
             var leftBottomPoint = new Vector2Int(points.Min(p => p.x), points.Min(p => p.y));
-            var parentCentrePoint = new Vector2(PixelWidth / 2, PixelHeight / 2);
+            var parentCenterPoint = PixelatedTexture.Center;
 
             var width = rightTopPoint.x - leftBottomPoint.x + 1;
             var height = rightTopPoint.y - leftBottomPoint.y + 1;
@@ -235,7 +242,7 @@ namespace Pixelation
             foreach (var point in points)
                 newColorsGrid[point.x - leftBottomPoint.x, point.y - leftBottomPoint.y] = GetColor(point);
 
-            var globalPosition = transform.TransformPoint(centrePoint - parentCentrePoint);
+            var globalPosition = transform.TransformPoint(centrePoint - parentCenterPoint);
 
             JunkSpawner.Instance.SpawnJunk(globalPosition, transform.rotation, newColorsGrid);
         }
@@ -309,44 +316,15 @@ namespace Pixelation
             }
         }
 
-        private void SetColorNoApply(Vector2Int point, Color color)
-        {
-            _texture.SetPixel(point.x, point.y, color);
-        }
-
-        private void ApplyColors()
-        {
-            _texture.Apply();
-        }
-
-        private Color GetColor(Vector2Int point)
-        {
-            return _texture.GetPixel(point.x, point.y);
-        }
-
-        private bool IsPixel(Vector2Int point)
-        {
-            return InBounds(point) && IsPixelAssumeInBounds(point);
-        }
-
-        private bool IsPixelAssumeInBounds(Vector2Int point)
-        {
-            return _texture.GetPixel(point.x, point.y).a > 0;
-        }
-
-        private bool InBounds(Vector2Int point)
-        {
-            return point.x >= 0 && point.x < _texture.width && point.y >= 0 && point.y < _texture.height;
-        }
-
         private Vector2Int? GetPointAlongPath(Vector2Int startPosition, Vector2 direction, bool getLast)
         {
-            var pointsTraversed = GridMarcher.March(new Vector2Int(_texture.width, _texture.height), startPosition,
+            var pointsTraversed = GridMarcher.March(new Vector2Int(PixelatedTexture.Width, PixelatedTexture.Height),
+                startPosition,
                 direction);
 
             if (getLast) pointsTraversed.Reverse();
 
-            foreach (var point in pointsTraversed.Where(point => _texture.GetPixel(point.x, point.y).a != 0))
+            foreach (var point in pointsTraversed.Where(IsPixel))
                 return new Vector2Int(point.x, point.y);
 
             return null;
@@ -358,14 +336,14 @@ namespace Pixelation
 
             var radiusChecked = 0;
 
-            var maxRadiusChecked = Mathf.Max(PixelWidth + 2, PixelHeight + 2);
+            var maxRadiusChecked = Mathf.Max(PixelatedTexture.Width, PixelatedTexture.Height);
 
             var closestPointsAndDistances = new List<(Vector2Int Position, float Distance)>();
 
             while (radiusChecked < maxRadiusChecked)
             {
-                for (var x = localPositionInt.x - radiusChecked; x < localPositionInt.x + radiusChecked; x++)
-                for (var y = localPositionInt.y - radiusChecked; y < localPositionInt.y + radiusChecked; y++)
+                for (var x = localPositionInt.x - radiusChecked; x <= localPositionInt.x + radiusChecked; x++)
+                for (var y = localPositionInt.y - radiusChecked; y <= localPositionInt.y + radiusChecked; y++)
                 {
                     var pixelPosition = new Vector2Int(x, y);
 

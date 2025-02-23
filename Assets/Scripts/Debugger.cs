@@ -1,4 +1,5 @@
 using Other;
+using Pixelation;
 using UnityEngine;
 
 public class Debugger : MonoBehaviour
@@ -9,7 +10,7 @@ public class Debugger : MonoBehaviour
         {
             var gameObjectUnderPointer = GameInput.ObjectUnderPointer;
 
-            var pixelated = gameObjectUnderPointer?.GetComponent<IPixelated>();
+            var pixelated = gameObjectUnderPointer?.GetComponent<PixelatedRigidbody>();
 
             if (pixelated is null) return;
 
