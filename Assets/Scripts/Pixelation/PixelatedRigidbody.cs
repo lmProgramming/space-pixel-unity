@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Pixelation
@@ -48,14 +49,12 @@ namespace Pixelation
 
         public void RemovePixelAt(Vector2Int point)
         {
-            SetPixel(point, Color.clear);
-
-            OnPixelDestroyed.Invoke(point);
+            RemovePixels(new[] { point });
         }
 
-        public void ApplyChanges()
+        public void ApplyPixels()
         {
-            PixelGrid.ApplyChanges();
+            PixelGrid.ApplyPixels();
         }
 
         public Color32 GetColor(Vector2Int point)
@@ -78,11 +77,9 @@ namespace Pixelation
             return PixelGrid.InBounds(point);
         }
 
-        public void RemovePixels(HashSet<Vector2Int> points)
+        public Vector2Int Dimensions()
         {
-            foreach (var point in points) SetPixelNoApply(point, Color.clear);
-
-            ApplyChanges();
+            return PixelGrid.Dimensions();
         }
 
         public void SetPixel(Vector2Int point, Color32 color)
@@ -98,6 +95,17 @@ namespace Pixelation
         public void SetPixelNoApply(Vector2Int point, Color32 color)
         {
             PixelGrid.SetPixelNoApply(point, color);
+        }
+
+        public void RemovePixels(IEnumerable<Vector2Int> points)
+        {
+            var pointsArray = points as Vector2Int[] ?? points.ToArray();
+
+            if (!pointsArray.Any()) return;
+
+            PixelGrid.RemovePixels(pointsArray);
+
+            OnPixelsDestroyed?.Invoke(pointsArray.ToList());
         }
 
         public Vector2 WorldToLocalPoint(Vector2 worldPosition)
@@ -156,7 +164,7 @@ namespace Pixelation
         // }
 
         public event Action<IPixelated> OnNoPixelsLeft;
-        public event Action<Vector2Int> OnPixelDestroyed;
+        public event Action<List<Vector2Int>> OnPixelsDestroyed;
 
         private void GetComponents()
         {
