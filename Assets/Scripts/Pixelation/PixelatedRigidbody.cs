@@ -14,6 +14,7 @@ namespace Pixelation
         [SerializeField] private Sprite sprite;
 
         [SerializeField] private float lineSimplificationTolerance;
+        private bool _isSetupped;
 
         private PixelGrid PixelGrid { get; set; }
         public PixelCollisionHandler CollisionHandler { get; private set; }
@@ -116,7 +117,8 @@ namespace Pixelation
 
         public void Setup(Color[,] colors = null)
         {
-            if (sprite.ToString() == "null" && colors is null) return;
+            if (_isSetupped) return;
+            _isSetupped = true;
 
             PixelGrid = new PixelGrid(GetComponent<SpriteRenderer>());
 
