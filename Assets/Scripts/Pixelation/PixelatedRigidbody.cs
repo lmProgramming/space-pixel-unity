@@ -12,6 +12,7 @@ namespace Pixelation
     public class PixelatedRigidbody : MonoBehaviour, IPixelated
     {
         private const float SpeedLimitForDiscreteCollisionDetectionSquared = 1;
+        private const int MinPixelsForJunkCreation = 3;
 
         [SerializeField] private Sprite sprite;
 
@@ -23,7 +24,7 @@ namespace Pixelation
 
         private PolygonCollider2D _polygonCollider2D;
 
-        public PixelatedTexture PixelatedTexture { get; private set; }
+        private PixelatedTexture PixelatedTexture { get; set; }
 
         public Rigidbody2D Rigidbody { get; private set; }
 
@@ -129,9 +130,9 @@ namespace Pixelation
         public void Setup(Color[,] colors = null)
         {
             if (sprite.ToString() == "null" && colors is null) return;
-            
+
             PixelatedTexture = new PixelatedTexture(GetComponent<SpriteRenderer>());
-            
+
             if (colors is not null)
             {
                 Debug.Log(colors.Length);
@@ -139,7 +140,7 @@ namespace Pixelation
             }
 
             if (sprite.ToString() != "null") PixelatedTexture.SetSprite(sprite);
-            
+
             PixelatedTexture.Setup();
 
             GetComponents();
@@ -210,7 +211,7 @@ namespace Pixelation
             {
                 var region = regions[index];
 
-                if (region.Count >= 5) CreateNewJunk(region);
+                if (region.Count >= MinPixelsForJunkCreation) CreateNewJunk(region);
 
                 RemovePixels(region);
             }
@@ -244,7 +245,7 @@ namespace Pixelation
 
             var globalPosition = transform.TransformPoint(centrePoint - parentCenterPoint);
 
-            JunkSpawner.Instance.SpawnJunk(globalPosition, transform.rotation, newColorsGrid);
+            JunkSpawner.Instance.SpawnJunk(globalPosition, transform.rotation, newColorsGrid, this);
         }
 
         private List<HashSet<Vector2Int>> FloodFindCohesiveRegions(Vector2Int searchStartPoint)
@@ -388,6 +389,11 @@ namespace Pixelation
         {
             OnNoPixelsLeft?.Invoke(this);
             Destroy(gameObject);
+        }
+
+        public void CopyVelocity(PixelatedRigidbody parentBody)
+        {
+            Rigidbody.linearVelocity = parentBody.Rigidbody.linearVelocity;
         }
     }
 }

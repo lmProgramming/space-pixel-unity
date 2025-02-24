@@ -1,3 +1,4 @@
+using Pixelation;
 using UnityEngine;
 
 public sealed class JunkSpawner : MonoBehaviour
@@ -13,10 +14,13 @@ public sealed class JunkSpawner : MonoBehaviour
         Instance = this;
     }
 
-    public void SpawnJunk(Vector2 position, Quaternion rotation, Color[,] colors)
+    public void SpawnJunk(Vector2 position, Quaternion rotation, Color[,] colors, PixelatedRigidbody parentBody)
     {
         var newJunk = Instantiate(junkPrefab, position, rotation, parent);
 
-        newJunk.GetComponent<PixelatedJunk>().Setup(colors);
+        var pixelatedJunk = newJunk.GetComponent<PixelatedJunk>();
+
+        pixelatedJunk.Setup(colors);
+        pixelatedJunk.CopyVelocity(parentBody);
     }
 }
