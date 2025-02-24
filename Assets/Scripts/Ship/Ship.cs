@@ -8,11 +8,13 @@ namespace Ship
     {
         [field: SerializeField] public ShipBody Body { get; private set; }
 
-        [SerializeField] protected List<IWeapon> Weapons = new();
+        protected List<IWeapon> Weapons = new();
 
         private void Start()
         {
             Weapons = GetComponentsInChildren<IWeapon>().ToList();
+
+            Body.OnNoPixelsLeft += _ => Destroy(gameObject);
         }
 
         private void Update()

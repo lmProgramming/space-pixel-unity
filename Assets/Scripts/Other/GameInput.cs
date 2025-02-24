@@ -212,13 +212,13 @@ namespace Other
 #if UNITY_EDITOR
         public static float TouchesAndPointersCount => Input.GetMouseButton(0) ? 1 : 0;
 #else
-    public static float TouchesAndPointersCount
-    {
-        get
+        public static float TouchesAndPointersCount
         {
-            return Input.touchCount;
+            get
+            {
+                return Input.touchCount;
+            }
         }
-    }
 #endif
 
         // warning: returns positive infinity for more touches than one or none

@@ -28,12 +28,7 @@ namespace Other
 
                 if (searchStartPoint == null) return regions;
 
-                visited.Add(searchStartPoint.Value);
-
-                SetupFlooding(searchStartPoint.Value + new Vector2Int(1, 0));
-                SetupFlooding(searchStartPoint.Value + new Vector2Int(-1, 0));
-                SetupFlooding(searchStartPoint.Value + new Vector2Int(0, 1));
-                SetupFlooding(searchStartPoint.Value + new Vector2Int(0, -1));
+                SetupFlooding(searchStartPoint.Value);
             }
 
             return regions;
