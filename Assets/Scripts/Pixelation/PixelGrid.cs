@@ -1,15 +1,16 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Pixelation
 {
-    public class PixelatedTexture : IPixelated
+    public class PixelGrid : IPixelated
     {
         private readonly SpriteRenderer _spriteRenderer;
         private Sprite _internalSprite;
         private Texture2D _internalTexture;
 
-        public PixelatedTexture(SpriteRenderer spriteRenderer)
+        public PixelGrid(SpriteRenderer spriteRenderer)
         {
             _spriteRenderer = spriteRenderer;
         }
@@ -71,6 +72,11 @@ namespace Pixelation
         public void RemovePixelAt(Vector2Int point)
         {
             SetPixel(point, Color.clear);
+        }
+
+        public void RemovePixels(HashSet<Vector2Int> points)
+        {
+            foreach (var point in points) SetPixel(point, Color.clear);
         }
 
         private void SetSpriteFromColors(Color[] colors, int width, int height)

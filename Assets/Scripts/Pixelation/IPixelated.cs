@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Pixelation
@@ -5,6 +6,8 @@ namespace Pixelation
     public interface IPixelated
     {
         public void RemovePixelAt(Vector2Int point);
+
+        public void RemovePixels(HashSet<Vector2Int> points);
 
         public void SetSpriteFromColors(Color[,] colors);
 
