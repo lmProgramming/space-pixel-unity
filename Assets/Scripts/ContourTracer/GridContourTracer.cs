@@ -135,8 +135,10 @@ namespace ContourTracer
 
                 if (!foundNext)
                 {
+#if UNITY_EDITOR
                     Debug.LogWarning(
                         "Could not find a connecting edge. The edges might not form a single closed loop.");
+#endif
                     break;
                 }
 

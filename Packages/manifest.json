@@ -4,6 +4,7 @@
     "com.unity.feature.2d": "2.0.1",
     "com.unity.ide.rider": "3.0.34",
     "com.unity.inputsystem": "1.13.1",
+    "com.unity.project-auditor": "1.0.0",
     "com.unity.render-pipelines.universal": "17.0.3",
     "com.unity.timeline": "1.8.8",
     "com.unity.toolchain.win-x86_64-linux-x86_64": "2.0.10",

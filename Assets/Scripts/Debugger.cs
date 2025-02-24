@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Debugger : MonoBehaviour
 {
+#if UNITY_EDITOR
     private void Update()
     {
         if (Input.GetKey(KeyCode.Delete))
@@ -19,6 +20,7 @@ public class Debugger : MonoBehaviour
             pixelated.RemovePixelAt(pixelPoint);
         }
 
-        if (Input.GetKeyDown(KeyCode.Home)) Debug.Log(GameInput.WorldPointerPosition);
+        if (Input.GetKeyDown(KeyCode.Home)) Debug.Log(GameInput.WorldPointerPosition.ToString());
     }
+#endif
 }

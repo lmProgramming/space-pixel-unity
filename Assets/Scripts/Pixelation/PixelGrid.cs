@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Unity.Collections;
 using UnityEngine;
 
 namespace Pixelation
@@ -22,23 +23,12 @@ namespace Pixelation
 
         public Texture2D Texture { get; private set; }
 
-        public void SetSpriteFromColors(Color[,] colors)
-        {
-            var colorsArray = new Color[colors.GetLength(0) * colors.GetLength(1)];
-
-            for (var y = 0; y < colors.GetLength(1); y++)
-            for (var x = 0; x < colors.GetLength(0); x++)
-                colorsArray[y * colors.GetLength(0) + x] = colors[x, y];
-
-            SetSpriteFromColors(colorsArray, colors.GetLength(0), colors.GetLength(1));
-        }
-
-        public void SetPixelNoApply(Vector2Int point, Color color)
+        public void SetPixelNoApply(Vector2Int point, Color32 color)
         {
             Texture.SetPixel(point.x, point.y, color);
         }
 
-        public void SetPixel(Vector2Int point, Color color)
+        public void SetPixel(Vector2Int point, Color32 color)
         {
             Texture.SetPixel(point.x, point.y, color);
             Texture.Apply();
@@ -49,7 +39,7 @@ namespace Pixelation
             Texture.Apply();
         }
 
-        public Color GetColor(Vector2Int point)
+        public Color32 GetColor(Vector2Int point)
         {
             return Texture.GetPixel(point.x, point.y);
         }
@@ -79,14 +69,39 @@ namespace Pixelation
             foreach (var point in points) SetPixel(point, Color.clear);
         }
 
-        private void SetSpriteFromColors(Color[] colors, int width, int height)
+        public void SetSpriteFromColors(Color32[,] colors)
+        {
+            var colorsArray = new Color32[colors.GetLength(0) * colors.GetLength(1)];
+
+            for (var y = 0; y < colors.GetLength(1); y++)
+            for (var x = 0; x < colors.GetLength(0); x++)
+                colorsArray[y * colors.GetLength(0) + x] = colors[x, y];
+
+            SetSpriteFromColors(colorsArray, colors.GetLength(0), colors.GetLength(1));
+        }
+
+        private void SetSpriteFromColors(NativeArray<Color32> colors, int width, int height)
         {
             Texture = new Texture2D(width, height, TextureFormat.ARGB32, false)
             {
                 filterMode = FilterMode.Point
             };
 
-            Texture.SetPixels(colors);
+            Texture.SetPixelData(colors, 0);
+            Texture.Apply();
+
+            _internalSprite = Sprite.Create(Texture, new Rect(0, 0, width, height),
+                new Vector2(0.5f, 0.5f), 1);
+        }
+
+        private void SetSpriteFromColors(Color32[] colors, int width, int height)
+        {
+            Texture = new Texture2D(width, height, TextureFormat.ARGB32, false)
+            {
+                filterMode = FilterMode.Point
+            };
+
+            Texture.SetPixels32(colors);
             Texture.Apply();
 
             _internalSprite = Sprite.Create(Texture, new Rect(0, 0, width, height),
@@ -95,7 +110,8 @@ namespace Pixelation
 
         public void SetSprite(Sprite sprite)
         {
-            SetSpriteFromColors(sprite.texture.GetPixels(), sprite.texture.width, sprite.texture.height);
+            SetSpriteFromColors(sprite.texture.GetPixels32(), sprite.texture.width,
+                sprite.texture.height);
         }
 
         public void Setup()

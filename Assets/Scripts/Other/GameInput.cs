@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -27,6 +26,22 @@ namespace Other
         private static float _simSpeed = 1;
 
         public static int AmountOfHeldUIElements;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        private static void InitializeOnLoad()
+        {
+            Instance = null;
+            _mainCamera = null;
+            PressingTime = 0;
+            _timeSinceLastLeftClick = 0;
+            LeftDoubleClick = false;
+            PressingAfterLeftDoubleClick = false;
+            _deltaTime = 0;
+            _unscaledDeltaTime = 0;
+            SimDeltaTime = 0;
+            _simSpeed = 1;
+            AmountOfHeldUIElements = 0;
+        }
 
         private void Awake()
         {
@@ -94,16 +109,31 @@ namespace Other
 
         private static bool JustStoppedClicking
         {
-            get { return Input.touches.Any(touch => touch.phase == TouchPhase.Ended) || Input.GetMouseButtonUp(0); }
+            get
+            {
+                var any = false;
+                for (var i = 0; i < Input.touchCount; i++)
+                {
+                    var touch = Input.GetTouch(i);
+                    if (touch.phase != TouchPhase.Ended) continue;
+                    any = true;
+                    break;
+                }
+
+                return any || Input.GetMouseButtonUp(0);
+            }
         }
 
         public static bool JustStoppedClickingOutsideUI
         {
             get
             {
-                foreach (var touch in Input.touches)
+                for (var index = 0; index < Input.touchCount; index++)
+                {
+                    var touch = Input.touches[index];
                     if (touch.phase == TouchPhase.Ended && !IsPointerOverUI)
                         return true;
+                }
 
                 return Input.GetMouseButtonUp(0) && !IsPointerOverUI;
             }
@@ -220,7 +250,7 @@ namespace Other
                 if (EventSystem.current.IsPointerOverGameObject()) return true;
 
                 if (Input.touchCount <= 0) return false;
-                var id = Input.touches[0].fingerId;
+                var id = Input.GetTouch(0).fingerId;
                 return EventSystem.current.IsPointerOverGameObject(id);
             }
         }

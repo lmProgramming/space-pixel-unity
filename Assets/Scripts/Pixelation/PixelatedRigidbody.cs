@@ -46,11 +46,6 @@ namespace Pixelation
             CollisionHandler.OnCollision(collision);
         }
 
-        public void SetSpriteFromColors(Color[,] colors)
-        {
-            Setup(colors);
-        }
-
         public void RemovePixelAt(Vector2Int point)
         {
             SetPixel(point, Color.clear);
@@ -58,22 +53,12 @@ namespace Pixelation
             OnPixelDestroyed.Invoke(point);
         }
 
-        public void SetPixelNoApply(Vector2Int point, Color color)
-        {
-            PixelGrid.SetPixelNoApply(point, color);
-        }
-
-        public void SetPixel(Vector2Int point, Color color)
-        {
-            PixelGrid.SetPixel(point, color);
-        }
-
         public void ApplyChanges()
         {
             PixelGrid.ApplyChanges();
         }
 
-        public Color GetColor(Vector2Int point)
+        public Color32 GetColor(Vector2Int point)
         {
             return PixelGrid.GetColor(point);
         }
@@ -100,6 +85,21 @@ namespace Pixelation
             ApplyChanges();
         }
 
+        public void SetPixel(Vector2Int point, Color32 color)
+        {
+            PixelGrid.SetPixel(point, color);
+        }
+
+        public void SetSpriteFromColors(Color32[,] colors)
+        {
+            Setup(colors);
+        }
+
+        public void SetPixelNoApply(Vector2Int point, Color32 color)
+        {
+            PixelGrid.SetPixelNoApply(point, color);
+        }
+
         public Vector2 WorldToLocalPoint(Vector2 worldPosition)
         {
             var position = transform.InverseTransformPoint(worldPosition);
@@ -121,7 +121,7 @@ namespace Pixelation
             return position;
         }
 
-        public void Setup(Color[,] colors = null)
+        public void Setup(Color32[,] colors = null)
         {
             if (_isSetup) return;
             _isSetup = true;

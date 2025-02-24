@@ -30,7 +30,9 @@ namespace Other
         {
             if (list == null || list.Count == 0)
             {
+#if UNITY_EDITOR
                 Debug.LogWarning("The list is empty or null. Returning default value.");
+#endif
                 return default;
             }
 
@@ -50,7 +52,9 @@ namespace Other
         {
             if (array == null || array.Length == 0)
             {
+#if UNITY_EDITOR
                 Debug.LogWarning("The list is empty or null. Returning default value.");
+#endif
                 return default;
             }
 

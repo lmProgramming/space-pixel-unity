@@ -9,15 +9,15 @@ namespace Pixelation
 
         public void RemovePixels(HashSet<Vector2Int> points);
 
-        public void SetSpriteFromColors(Color[,] colors);
+        public void SetSpriteFromColors(Color32[,] colors);
 
-        public void SetPixelNoApply(Vector2Int point, Color color);
+        public void SetPixelNoApply(Vector2Int point, Color32 color);
 
-        public void SetPixel(Vector2Int point, Color color);
+        public void SetPixel(Vector2Int point, Color32 color);
 
         public void ApplyChanges();
 
-        public Color GetColor(Vector2Int point);
+        public Color32 GetColor(Vector2Int point);
 
         public bool IsPixel(Vector2Int point);
 

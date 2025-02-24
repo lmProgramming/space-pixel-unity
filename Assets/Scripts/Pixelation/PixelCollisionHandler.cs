@@ -13,8 +13,8 @@ namespace Pixelation
         private readonly PixelGrid _grid;
         private readonly float _lineSimplificationTolerance;
 
-
         private bool _didCollide;
+        private readonly GridContourTracer _gridContourTracer = new();
 
         public PixelCollisionHandler(PixelGrid grid, PixelatedRigidbody body, PolygonCollider2D collider)
         {
@@ -37,13 +37,12 @@ namespace Pixelation
         public void ResolveCollision(IPixelated other, Collision2D collision)
         {
             _didCollide = true;
-            DamageAt(collision.contacts[0].point, collision);
+            DamageAt(collision.GetContact(0).point, collision);
         }
 
         public void RecalculateColliders()
         {
-            var gridContourTracer = new GridContourTracer();
-            var polygon = gridContourTracer.GenerateCollider(_grid.Texture, new Vector2(.5f, .5f), 1);
+            var polygon = _gridContourTracer.GenerateCollider(_grid.Texture, new Vector2(.5f, .5f), 1);
             if (polygon is null)
             {
                 _body.NoPixelsLeft();
@@ -101,7 +100,7 @@ namespace Pixelation
 
             var centrePoint = leftBottomPoint + new Vector2(width, height) / 2;
 
-            var newColorsGrid = new Color[width, height];
+            var newColorsGrid = new Color32[width, height];
 
             foreach (var point in points)
                 newColorsGrid[point.x - leftBottomPoint.x, point.y - leftBottomPoint.y] = _grid.GetColor(point);

@@ -65,7 +65,7 @@ namespace ContourTracer
             float maxAllowedLineLength;
             Vector2 lastSegmentDirection;
 
-            var pixels = texture.GetPixels();
+            var pixels = texture.GetRawTextureData<Color32>();
             // Keep track of pixels that have already been processed.
             HashSet<Vector2Int> processedPixels = new();
             Stack<Vector2Int> currentContour;
