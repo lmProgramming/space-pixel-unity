@@ -14,7 +14,7 @@ namespace Pixelation
         [SerializeField] private Sprite sprite;
 
         [SerializeField] private float lineSimplificationTolerance;
-        private bool _isSetupped;
+        private bool _isSetup;
 
         private PixelGrid PixelGrid { get; set; }
         public PixelCollisionHandler CollisionHandler { get; private set; }
@@ -100,12 +100,18 @@ namespace Pixelation
             ApplyChanges();
         }
 
-        public Vector2Int WorldToLocalPoint(Vector2 worldPosition)
+        public Vector2 WorldToLocalPoint(Vector2 worldPosition)
         {
-            Vector2 position = transform.InverseTransformPoint(worldPosition);
+            var position = transform.InverseTransformPoint(worldPosition);
 
-            return new Vector2Int((int)(position.x + (float)PixelGrid.Width / 2),
-                (int)(position.y + (float)PixelGrid.Height / 2));
+            return new Vector2(position.x + (float)PixelGrid.Width / 2, position.y + (float)PixelGrid.Height / 2);
+        }
+
+        public Vector2Int WorldToLocalPixel(Vector2 worldPosition)
+        {
+            var position = WorldToLocalPoint(worldPosition);
+
+            return new Vector2Int((int)position.x, (int)position.y);
         }
 
         public Vector2 LocalToWorldPoint(Vector2Int localPosition)
@@ -117,8 +123,8 @@ namespace Pixelation
 
         public void Setup(Color[,] colors = null)
         {
-            if (_isSetupped) return;
-            _isSetupped = true;
+            if (_isSetup) return;
+            _isSetup = true;
 
             PixelGrid = new PixelGrid(GetComponent<SpriteRenderer>());
 

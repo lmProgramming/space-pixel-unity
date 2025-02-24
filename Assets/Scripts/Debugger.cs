@@ -14,7 +14,7 @@ public class Debugger : MonoBehaviour
 
             if (pixelated is null) return;
 
-            var pixelPoint = pixelated.WorldToLocalPoint(GameInput.WorldPointerPosition);
+            var pixelPoint = pixelated.WorldToLocalPixel(GameInput.WorldPointerPosition);
 
             pixelated.RemovePixelAt(pixelPoint);
         }
