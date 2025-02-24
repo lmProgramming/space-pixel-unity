@@ -7,7 +7,7 @@ namespace Pixelation
     {
         public void RemovePixelAt(Vector2Int point);
 
-        public void RemovePixels(HashSet<Vector2Int> points);
+        public void RemovePixels(IEnumerable<Vector2Int> points);
 
         public void SetSpriteFromColors(Color32[,] colors);
 
@@ -15,7 +15,7 @@ namespace Pixelation
 
         public void SetPixel(Vector2Int point, Color32 color);
 
-        public void ApplyChanges();
+        public void ApplyPixels();
 
         public Color32 GetColor(Vector2Int point);
 

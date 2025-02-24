@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using ContourTracer;
+using Pixelation.CollisionResolver;
 using UnityEngine;
 
 namespace Pixelation
@@ -10,11 +11,12 @@ namespace Pixelation
         private const int MinPixelsForJunkCreation = 3;
         private readonly PixelatedRigidbody _body;
         private readonly PolygonCollider2D _collider;
+        private readonly CollisionResolver.CollisionResolver _collisionResolver;
         private readonly PixelGrid _grid;
+        private readonly GridContourTracer _gridContourTracer = new();
         private readonly float _lineSimplificationTolerance;
 
         private bool _didCollide;
-        private readonly GridContourTracer _gridContourTracer = new();
 
         public PixelCollisionHandler(PixelGrid grid, PixelatedRigidbody body, PolygonCollider2D collider)
         {
@@ -22,12 +24,14 @@ namespace Pixelation
             _body = body;
             _collider = collider;
 
-            body.OnPixelDestroyed += PixelDestroyed;
+            _collisionResolver = new PhysicsCollision(this, _body);
+
+            body.OnPixelsDestroyed += PixelsDestroyed;
         }
 
-        private void PixelDestroyed(Vector2Int pixel)
+        private void PixelsDestroyed(List<Vector2Int> pixels)
         {
-            var regions = FloodFindCohesiveRegions(pixel);
+            var regions = FloodFindCohesiveRegions(pixels[0]);
 
             if (regions.Count > 1) HandleDivision(regions);
 
@@ -37,7 +41,7 @@ namespace Pixelation
         public void ResolveCollision(IPixelated other, Collision2D collision)
         {
             _didCollide = true;
-            DamageAt(collision.GetContact(0).point, collision);
+            _collisionResolver.ResolveCollision(other, collision);
         }
 
         public void RecalculateColliders()
@@ -57,21 +61,6 @@ namespace Pixelation
             _collider.SetPath(0, points);
         }
 
-        private void DamageAt(Vector2 position, Collision2D collision)
-        {
-            var localPoint = _body.WorldToLocalPoint(position);
-
-            // var pixelToDestroyPosition = GetPointAlongPath(hitPosition, -collision.rigidbody.linearVelocity, true) ??
-            //                              GetPointAlongPath(hitPosition, collision.rigidbody.linearVelocity, false);
-
-            var pixelToDestroyPosition = GetClosestPixelPosition(localPoint);
-
-            if (pixelToDestroyPosition == null) return;
-
-            var pos = pixelToDestroyPosition.Value;
-            _body.RemovePixelAt(pos);
-        }
-
         private void HandleDivision(List<HashSet<Vector2Int>> regions)
         {
             regions = regions.OrderBy(r => r.Count).ToList();
@@ -82,10 +71,9 @@ namespace Pixelation
 
                 if (region.Count >= MinPixelsForJunkCreation) CreateNewJunk(region);
 
-                _body.RemovePixels(region);
+                _grid.RemovePixels(region);
             }
 
-            _body.ApplyChanges();
             RecalculateColliders();
         }
 
@@ -137,22 +125,26 @@ namespace Pixelation
 
             void FloodFind(Vector2Int position, int regionIndex)
             {
-                if (regionIndex == regions.Count) return;
-
-                if (!_grid.IsPixel(position)) return;
-
-                if (!visited.Add(position))
+                while (true)
                 {
-                    FindRegionToMerge(position, regionIndex);
-                    return;
+                    if (regionIndex == regions.Count) return;
+
+                    if (!_grid.IsPixel(position)) return;
+
+                    if (!visited.Add(position))
+                    {
+                        FindRegionToMerge(position, regionIndex);
+                        return;
+                    }
+
+                    regions[regionIndex].Add(position);
+
+                    FloodFind(position + new Vector2Int(1, 0), regionIndex);
+                    FloodFind(position + new Vector2Int(-1, 0), regionIndex);
+                    FloodFind(position + new Vector2Int(0, 1), regionIndex);
+                    // recursion changed to tail
+                    position += new Vector2Int(0, -1);
                 }
-
-                regions[regionIndex].Add(position);
-
-                FloodFind(position + new Vector2Int(1, 0), regionIndex);
-                FloodFind(position + new Vector2Int(-1, 0), regionIndex);
-                FloodFind(position + new Vector2Int(0, 1), regionIndex);
-                FloodFind(position + new Vector2Int(0, -1), regionIndex);
             }
 
             void FindRegionToMerge(Vector2Int position, int regionIndex)
@@ -191,7 +183,7 @@ namespace Pixelation
             return null;
         }
 
-        private List<Vector2Int> GetClosestPixelPositions(Vector2 localPosition, int positionsMaxCount)
+        public List<Vector2Int> GetClosestPixelPositions(Vector2 localPosition, int positionsMaxCount)
         {
             var localPositionInt = new Vector2Int(Mathf.RoundToInt(localPosition.x), Mathf.RoundToInt(localPosition.y));
 
@@ -203,6 +195,8 @@ namespace Pixelation
 
             while (radiusChecked < maxRadiusChecked)
             {
+                if (closestPointsAndDistances.Count >= positionsMaxCount) break;
+
                 for (var x = localPositionInt.x - radiusChecked; x <= localPositionInt.x + radiusChecked; x++)
                 for (var y = localPositionInt.y - radiusChecked; y <= localPositionInt.y + radiusChecked; y++)
                 {
@@ -214,8 +208,6 @@ namespace Pixelation
 
                     InsertPositionToSortedArray(pixelPosition, distance);
                 }
-
-                if (closestPointsAndDistances.Count >= positionsMaxCount) break;
 
                 radiusChecked++;
             }
@@ -237,7 +229,7 @@ namespace Pixelation
             }
         }
 
-        private Vector2Int? GetClosestPixelPosition(Vector2 localPosition)
+        public Vector2Int? GetClosestPixelPosition(Vector2 localPosition)
         {
             var positions = GetClosestPixelPositions(localPosition, 1);
 

@@ -34,7 +34,7 @@ namespace Pixelation
             Texture.Apply();
         }
 
-        public void ApplyChanges()
+        public void ApplyPixels()
         {
             Texture.Apply();
         }
@@ -64,7 +64,7 @@ namespace Pixelation
             SetPixel(point, Color.clear);
         }
 
-        public void RemovePixels(HashSet<Vector2Int> points)
+        public void RemovePixels(IEnumerable<Vector2Int> points)
         {
             foreach (var point in points) SetPixel(point, Color.clear);
         }
