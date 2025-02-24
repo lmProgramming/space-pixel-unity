@@ -243,7 +243,7 @@ namespace Other
             }
         }
 
-        private static bool IsPointerOverUI
+        public static bool IsPointerOverUI
         {
             get
             {
