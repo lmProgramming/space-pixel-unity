@@ -48,13 +48,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sprite: {fileID: 21300000, guid: 48c3f738877df1e4b96921ca32bddcac, type: 3}
-  texture: {fileID: 0}
-  spriteRenderer: {fileID: 539668653379362583}
-  outliner: {fileID: 11400000, guid: e7ddc049aba5b40428f2d03a0730b707, type: 2}
-  pixelsPerUnit: 100
-  centerPivot: {x: 0.5, y: 0.5}
   lineSimplificationTolerance: 0
-  polygonCollider2D: {fileID: 3404191428214464287}
 --- !u!212 &539668653379362583
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -123,8 +117,8 @@ Rigidbody2D:
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
   m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
+  m_LinearDamping: 1
+  m_AngularDamping: 1
   m_GravityScale: 0
   m_Material: {fileID: 0}
   m_IncludeLayers:
@@ -175,7 +169,7 @@ PolygonCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 0.01, y: 0.03}
+    oldSize: {x: 1, y: 3}
     newSize: {x: 0.01, y: 0.03}
     adaptiveTilingThreshold: 0.5
     drawMode: 0

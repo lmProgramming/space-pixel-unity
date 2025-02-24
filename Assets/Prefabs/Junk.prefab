@@ -48,13 +48,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sprite: {fileID: 0}
-  texture: {fileID: 0}
-  spriteRenderer: {fileID: 3548003927128369362}
-  outliner: {fileID: 11400000, guid: e7ddc049aba5b40428f2d03a0730b707, type: 2}
-  pixelsPerUnit: 100
-  centerPivot: {x: 0.5, y: 0.5}
   lineSimplificationTolerance: 0
-  polygonCollider2D: {fileID: 0}
 --- !u!212 &3548003927128369362
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -124,7 +118,7 @@ Rigidbody2D:
   m_UseAutoMass: 0
   m_Mass: 10
   m_LinearDamping: 1
-  m_AngularDamping: 20
+  m_AngularDamping: 1
   m_GravityScale: 0
   m_Material: {fileID: 0}
   m_IncludeLayers:

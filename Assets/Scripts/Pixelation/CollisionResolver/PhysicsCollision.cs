@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace Pixelation.CollisionResolver
 {
@@ -9,17 +10,19 @@ namespace Pixelation.CollisionResolver
         {
         }
 
-        public override void ResolveCollision(IPixelated other, Collision2D collision)
+        public override IEnumerable<Vector2Int> ResolveCollision(IPixelated other, Collision2D collision)
         {
-            var pixelsToDestroy = collision.relativeVelocity.magnitude * collision.rigidbody.mass / 500;
+            var pixelsToDestroyCount = collision.relativeVelocity.magnitude * collision.rigidbody.mass / 500;
 
-            Debug.Log(pixelsToDestroy);
+            Debug.Log(pixelsToDestroyCount);
 
             var localPoint = PixelatedRigidbody.WorldToLocalPoint(collision.contacts[0].point);
 
-            var pixelToDestroyPosition = CollisionHandler.GetClosestPixelPositions(localPoint, (int)pixelsToDestroy);
+            var pixelsToDestroy = CollisionHandler.GetClosestPixelPositions(localPoint, (int)pixelsToDestroyCount);
 
-            PixelatedRigidbody.RemovePixels(pixelToDestroyPosition);
+            PixelatedRigidbody.RemovePixels(pixelsToDestroy);
+
+            return pixelsToDestroy;
         }
     }
 }

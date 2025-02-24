@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace Pixelation.CollisionResolver
 {
@@ -13,6 +14,6 @@ namespace Pixelation.CollisionResolver
             PixelatedRigidbody = pixelatedRigidbody;
         }
 
-        public abstract void ResolveCollision(IPixelated other, Collision2D collision);
+        public abstract IEnumerable<Vector2Int> ResolveCollision(IPixelated other, Collision2D collision);
     }
 }

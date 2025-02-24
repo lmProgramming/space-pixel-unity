@@ -44,7 +44,11 @@ namespace Pixelation
         public void ResolveCollision(IPixelated other, Collision2D collision)
         {
             _didCollide = true;
-            _collisionResolver.ResolveCollision(other, collision);
+            var pixelsDestroyed = _collisionResolver.ResolveCollision(other, collision);
+
+            var vector2Ints = pixelsDestroyed as Vector2Int[] ?? pixelsDestroyed.ToArray();
+            if (vector2Ints.Count() > 2)
+                EffectsSpawner.Instance.SpawnExplosion(_body.LocalToWorldPoint(MathExt.RandomFrom(vector2Ints)));
         }
 
         public void RecalculateColliders()
