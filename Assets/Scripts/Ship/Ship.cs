@@ -14,6 +14,9 @@ namespace Ship
         {
             Weapons = GetComponentsInChildren<IWeapon>().ToList();
 
+            foreach (var weapon in Weapons)
+                weapon.SetBody(Body);
+
             Body.OnNoPixelsLeft += _ => Destroy(gameObject);
         }
 

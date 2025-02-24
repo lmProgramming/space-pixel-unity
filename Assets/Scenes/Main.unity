@@ -2991,7 +2991,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1064495926}
   m_Layer: 0
-  m_Name: Bullets
+  m_Name: Projectiles
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3251,12 +3251,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   objectToFollow: {fileID: 1940184193}
   forcedToFollowCurrentObject: 1
+  followRotation: 1
   dragSpeed: 1
   keySpeed: 1
-  scrollSpeed: 1
+  scrollSpeed: 80
   mobileScrollSpeed: 1
-  maxZoom: 30
-  minZoom: 400
+  maxZoom: 400
+  minZoom: 30
   updateCamera: 1
 --- !u!1 &1112267843
 GameObject:
@@ -3516,8 +3517,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   projectilePrefab: {fileID: 5654400622174641897, guid: fbb05823f916f824da20fe66a7de32d4, type: 3}
-  projectileParent: {fileID: 1064495926}
-  projectileSpeed: 5000
+  projectilesHolder: {fileID: 1064495926}
+  projectileSpeed: 90
 --- !u!213 &1212046491
 Sprite:
   m_ObjectHideFlags: 0
