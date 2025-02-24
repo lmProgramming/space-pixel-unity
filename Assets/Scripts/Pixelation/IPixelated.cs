@@ -24,5 +24,7 @@ namespace Pixelation
         public bool IsPixelAssumeInBounds(Vector2Int point);
 
         public bool InBounds(Vector2Int point);
+
+        public Vector2Int Dimensions();
     }
 }

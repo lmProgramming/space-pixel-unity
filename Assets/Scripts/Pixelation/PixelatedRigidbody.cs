@@ -77,6 +77,11 @@ namespace Pixelation
             return PixelGrid.InBounds(point);
         }
 
+        public Vector2Int Dimensions()
+        {
+            return PixelGrid.Dimensions();
+        }
+
         public void SetPixel(Vector2Int point, Color32 color)
         {
             PixelGrid.SetPixel(point, color);

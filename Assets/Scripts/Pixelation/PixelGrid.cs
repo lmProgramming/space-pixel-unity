@@ -59,6 +59,11 @@ namespace Pixelation
             return point.x >= 0 && point.x < Texture.width && point.y >= 0 && point.y < Texture.height;
         }
 
+        public Vector2Int Dimensions()
+        {
+            return new Vector2Int(Texture.width, Texture.height);
+        }
+
         public void RemovePixelAt(Vector2Int point)
         {
             SetPixel(point, Color.clear);

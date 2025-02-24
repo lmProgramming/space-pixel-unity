@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using ContourTracer;
+using Other;
 using Pixelation.CollisionResolver;
 using UnityEngine;
 
@@ -31,7 +32,9 @@ namespace Pixelation
 
         private void PixelsDestroyed(List<Vector2Int> pixels)
         {
-            var regions = FloodFindCohesiveRegions(pixels[0]);
+            var regions = pixels.Count == 1
+                ? GridRegionFinder.FloodFindCohesiveRegions(pixels[0], _grid)
+                : GridRegionFinder.FloodFindCohesiveRegions(_grid);
 
             if (regions.Count > 1) HandleDivision(regions);
 
@@ -96,77 +99,6 @@ namespace Pixelation
             var globalPosition = _body.transform.TransformPoint(centrePoint - parentCenterPoint);
 
             JunkSpawner.Instance.SpawnJunk(globalPosition, _body.transform.rotation, newColorsGrid, _body);
-        }
-
-        private List<HashSet<Vector2Int>> FloodFindCohesiveRegions(Vector2Int searchStartPoint)
-        {
-            var visited = new HashSet<Vector2Int>
-            {
-                searchStartPoint
-            };
-
-            var regions = new List<HashSet<Vector2Int>>();
-
-            SetupFlooding(searchStartPoint + new Vector2Int(1, 0));
-            SetupFlooding(searchStartPoint + new Vector2Int(-1, 0));
-            SetupFlooding(searchStartPoint + new Vector2Int(0, 1));
-            SetupFlooding(searchStartPoint + new Vector2Int(0, -1));
-
-            return regions;
-
-            void SetupFlooding(Vector2Int searchStart)
-            {
-                if (!_grid.InBounds(searchStart)) return;
-
-                regions.Add(new HashSet<Vector2Int> { searchStart });
-
-                FloodFind(searchStart, regions.Count - 1);
-            }
-
-            void FloodFind(Vector2Int position, int regionIndex)
-            {
-                while (true)
-                {
-                    if (regionIndex == regions.Count) return;
-
-                    if (!_grid.IsPixel(position)) return;
-
-                    if (!visited.Add(position))
-                    {
-                        FindRegionToMerge(position, regionIndex);
-                        return;
-                    }
-
-                    regions[regionIndex].Add(position);
-
-                    FloodFind(position + new Vector2Int(1, 0), regionIndex);
-                    FloodFind(position + new Vector2Int(-1, 0), regionIndex);
-                    FloodFind(position + new Vector2Int(0, 1), regionIndex);
-                    // recursion changed to tail
-                    position += new Vector2Int(0, -1);
-                }
-            }
-
-            void FindRegionToMerge(Vector2Int position, int regionIndex)
-            {
-                for (var index = 0; index < regions.Count; index++)
-                {
-                    var region = regions[index];
-
-                    if (!region.Contains(position)) continue;
-
-                    if (index == regionIndex) break;
-
-                    MergeRegions(index, regionIndex);
-                }
-            }
-
-            void MergeRegions(int indexToMergeWith, int indexMerged)
-            {
-                regions[indexToMergeWith].UnionWith(regions[indexMerged]);
-
-                regions.RemoveAt(indexMerged);
-            }
         }
 
         private Vector2Int? GetPointAlongPath(Vector2Int startPosition, Vector2 direction, bool getLast)
