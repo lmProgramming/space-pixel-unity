@@ -19,7 +19,11 @@ public class Cannon : MonoBehaviour, IWeapon
 
         var direction = (pointerPosition - (Vector2)transform.position).normalized;
 
-        var newBullet = Instantiate(projectilePrefab, transform.position, transform.rotation, projectilesHolder);
+        var angle = MathExt.AngleBetweenTwoPoints(pointerPosition, transform.position);
+
+        var rotation = Quaternion.Euler(0, 0, angle + 90);
+
+        var newBullet = Instantiate(projectilePrefab, transform.position, rotation, projectilesHolder);
 
         var bulletRigidbody = newBullet.GetComponent<Rigidbody2D>();
         bulletRigidbody.linearVelocity = _parentBody.Rigidbody.linearVelocity;

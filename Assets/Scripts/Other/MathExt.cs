@@ -10,7 +10,6 @@ namespace Other
             return Mathf.Atan2(a.y - b.y, a.x - b.x) * Mathf.Rad2Deg;
         }
 
-        // faster computationally than normal distance
         public static float SquaredDistance(Vector2 a, Vector2 b)
         {
             return Mathf.Pow(a.x - b.x, 2) + Mathf.Pow(a.y - b.y, 2);
