@@ -21,33 +21,122 @@ namespace FastScriptReload.Editor
     public class FastScriptReloadWelcomeScreen : ProductWelcomeScreenBase
     {
         public static string BaseUrl = "https://immersivevrtools.com";
-        public static string GenerateGetUpdatesUrl(string userId, string versionId)
-        {
-            //WARN: the URL can sometimes be adjusted, make sure updated correctly
-            return $"{BaseUrl}/updates/fast-script-reload/{userId}?CurrentVersion={versionId}";
-        }
         public static string VersionId = "1.4";
         private static readonly string ProjectIconName = "ProductIcon64";
         public static readonly string ProjectName = "fast-script-reload";
 
-        private static Vector2 _WindowSizePx = new Vector2(650, 500);
-        private static string _WindowTitle = "Fast Script Reload";
+        private static readonly Vector2 _windowSizePx = new(650, 500);
+        private static readonly string _windowTitle = "Fast Script Reload";
+
+        private static readonly ScrollViewGuiSection MainScrollViewSection = new(
+            "", screen =>
+            {
+                GenerateCommonWelcomeText(FastScriptReloadPreference.ProductName, screen);
+
+                GUILayout.Label("Enabled Features:", screen.LabelStyle);
+                using (LayoutHelper.LabelWidth(350))
+                {
+                    ProductPreferenceBase.RenderGuiAndPersistInput(FastScriptReloadPreference
+                        .EnableAutoReloadForChangedFiles);
+                    RenderSettingsWithCheckLimitationsButton(
+                        FastScriptReloadPreference.EnableExperimentalAddedFieldsSupport, true,
+                        () => ((FastScriptReloadWelcomeScreen)screen).OpenNewFieldsSection());
+                    RenderSettingsWithCheckLimitationsButton(
+                        FastScriptReloadPreference.EnableExperimentalEditorHotReloadSupport, false,
+                        () => ((FastScriptReloadWelcomeScreen)screen).OpenEditorHotReloadSection());
+                }
+            }
+        );
+
+        private static readonly List<GuiSection> LeftSections = CreateLeftSections(new List<ChangeMainViewButton>
+            {
+                new("On-Device\r\nHot-Reload",
+                    screen =>
+                    {
+                        EditorGUILayout.LabelField("Live Script Reload", screen.BoldTextStyle);
+
+                        GUILayout.Space(10);
+                        EditorGUILayout.LabelField(
+                            @"There's an extension to this asset that'll allow you to include Hot-Reload capability in builds (standalone / Android), please click the button below to learn more.",
+                            screen.TextStyle);
+
+                        GUILayout.Space(20);
+                        if (GUILayout.Button("View Live Script Reload on Asset Store"))
+                            Application.OpenURL($"{RedirectBaseUrl}/live-script-reload-extension");
+                    }
+                )
+            },
+            new LaunchSceneButton("Basic Example", s => GetScenePath("ExampleScene"), screen =>
+            {
+                GUILayout.Label(
+                    $@"Asset is very simple to use:
+
+1) Hit play to start.
+2) Go to 'FunctionLibrary.cs' ({@"Assets/FastScriptReload/Examples/Scripts/"})", screen.TextStyle);
+
+                CreateOpenFunctionLibraryOnRippleMethodButton();
+
+
+                GUILayout.Label(
+                    @"3) Change 'Ripple' method (eg change line before return statement to 'p.z = v * 10'
+4) Save file
+5) See change immediately",
+                    screen.TextStyle
+                );
+
+                GUILayout.Space(10);
+                EditorGUILayout.HelpBox(
+                    "There are some limitations to what can be Hot-Reloaded, documentation lists them under 'limitations' section.",
+                    MessageType.Warning);
+            }), MainScrollViewSection);
+
+        private static readonly string RedirectBaseUrl = "https://immersivevrtools.com/redirect/fast-script-reload";
+        private static readonly GuiSection TopSection = CreateTopSectionButtons(RedirectBaseUrl);
+
+        private static readonly GuiSection BottomSection = new(
+            "I want to make this tool better. And I need your help!",
+            "It'd be great if you could share your feedback (good and bad) with me. I'm very keen to make this tool better and that can only happen with your help. Please use:",
+            new List<ClickableElement>
+            {
+                new OpenUrlButton(" Unity Forum", $"{RedirectBaseUrl}/unity-forum"),
+                new OpenUrlButton(" or Write a Short Review", $"{RedirectBaseUrl}/asset-store-review")
+            }
+        );
 
         public static ChangeMainViewButton ExclusionsSection { get; private set; }
         public static ChangeMainViewButton EditorHotReloadSection { get; private set; }
         public static ChangeMainViewButton NewFieldsSection { get; private set; }
         public static ChangeMainViewButton UserScriptRewriteOverrides { get; private set; }
 
+        public override string WindowTitle { get; } = _windowTitle;
+        public override Vector2 WindowSizePx { get; } = _windowSizePx;
+
+        public void OnEnable()
+        {
+            OnEnableCommon(ProjectIconName);
+        }
+
+        public void OnGUI()
+        {
+            RenderGUI(LeftSections, TopSection, BottomSection, MainScrollViewSection);
+        }
+
+        public static string GenerateGetUpdatesUrl(string userId, string versionId)
+        {
+            //WARN: the URL can sometimes be adjusted, make sure updated correctly
+            return $"{BaseUrl}/updates/fast-script-reload/{userId}?CurrentVersion={versionId}";
+        }
+
         public void OpenExclusionsSection()
         {
             ExclusionsSection.OnClick(this);
         }
-        
+
         public void OpenUserScriptRewriteOverridesSection()
         {
             UserScriptRewriteOverrides.OnClick(this);
         }
-        
+
         public void OpenEditorHotReloadSection()
         {
             EditorHotReloadSection.OnClick(this);
@@ -57,116 +146,65 @@ namespace FastScriptReload.Editor
         {
             NewFieldsSection.OnClick(this);
         }
-        
-        private static readonly ScrollViewGuiSection MainScrollViewSection = new ScrollViewGuiSection(
-            "", (screen) =>
-            {
-                GenerateCommonWelcomeText(FastScriptReloadPreference.ProductName, screen);
 
-                GUILayout.Label("Enabled Features:", screen.LabelStyle);
-                using (LayoutHelper.LabelWidth(350))
-                {
-                    ProductPreferenceBase.RenderGuiAndPersistInput(FastScriptReloadPreference.EnableAutoReloadForChangedFiles);
-                    RenderSettingsWithCheckLimitationsButton(FastScriptReloadPreference.EnableExperimentalAddedFieldsSupport, true, () => ((FastScriptReloadWelcomeScreen)screen).OpenNewFieldsSection());
-                    RenderSettingsWithCheckLimitationsButton(FastScriptReloadPreference.EnableExperimentalEditorHotReloadSupport, false,  () => ((FastScriptReloadWelcomeScreen)screen).OpenEditorHotReloadSection());
-                }
-            }
-        );
-
-        private static void RenderSettingsWithCheckLimitationsButton(ToggleProjectEditorPreferenceDefinition preferenceDefinition, bool allowChange, Action onCheckLimitationsClick)
+        private static void RenderSettingsWithCheckLimitationsButton(
+            ToggleProjectEditorPreferenceDefinition preferenceDefinition, bool allowChange,
+            Action onCheckLimitationsClick)
         {
             EditorGUILayout.BeginHorizontal();
             if (!allowChange)
-            {
                 using (LayoutHelper.LabelWidth(313))
                 {
                     EditorGUILayout.LabelField(preferenceDefinition.Label);
                 }
-            }
             else
-            {
                 ProductPreferenceBase.RenderGuiAndPersistInput(preferenceDefinition);
-            }
 
-            if (GUILayout.Button("Check limitations"))
-            {
-                onCheckLimitationsClick();
-            }
+            if (GUILayout.Button("Check limitations")) onCheckLimitationsClick();
 
             EditorGUILayout.EndHorizontal();
         }
 
-        private static readonly List<GuiSection> LeftSections = CreateLeftSections(new List<ChangeMainViewButton>
-            {
-                new ChangeMainViewButton("On-Device\r\nHot-Reload",  
-                    (screen) =>
-                    {
-                        EditorGUILayout.LabelField("Live Script Reload", screen.BoldTextStyle); 
-                        
-                        GUILayout.Space(10);
-                        EditorGUILayout.LabelField(@"There's an extension to this asset that'll allow you to include Hot-Reload capability in builds (standalone / Android), please click the button below to learn more.", screen.TextStyle);
-
-                        GUILayout.Space(20);
-                        if (GUILayout.Button("View Live Script Reload on Asset Store"))
-                        {
-                            Application.OpenURL($"{RedirectBaseUrl}/live-script-reload-extension");
-                        }
-                    }
-                )
-            }, 
-            new LaunchSceneButton("Basic Example", (s) => GetScenePath("ExampleScene"), (screen) =>
-            {
-                GUILayout.Label(
-                    $@"Asset is very simple to use:
-
-1) Hit play to start.
-2) Go to 'FunctionLibrary.cs' ({@"Assets/FastScriptReload/Examples/Scripts/"})", screen.TextStyle);
-                
-                CreateOpenFunctionLibraryOnRippleMethodButton();
-
-                
-                GUILayout.Label(
-                    $@"3) Change 'Ripple' method (eg change line before return statement to 'p.z = v * 10'
-4) Save file
-5) See change immediately",
-                    screen.TextStyle
-                );
-                
-                GUILayout.Space(10);
-                EditorGUILayout.HelpBox("There are some limitations to what can be Hot-Reloaded, documentation lists them under 'limitations' section.", MessageType.Warning);
-            }), MainScrollViewSection);
-
-        protected static List<GuiSection> CreateLeftSections(List<ChangeMainViewButton> additionalSections, LaunchSceneButton launchSceneButton, ScrollViewGuiSection mainScrollViewSection)
+        protected static List<GuiSection> CreateLeftSections(List<ChangeMainViewButton> additionalSections,
+            LaunchSceneButton launchSceneButton, ScrollViewGuiSection mainScrollViewSection)
         {
-            return new List<GuiSection>() {
-                new GuiSection("", new List<ClickableElement>
+            return new List<GuiSection>
+            {
+                new("", new List<ClickableElement>
                 {
-                    new LastUpdateButton("New Update!", (screen) => LastUpdateUpdateScrollViewSection.RenderMainScrollViewSection(screen)),
-                    new ChangeMainViewButton("Welcome", (screen) => mainScrollViewSection.RenderMainScrollViewSection(screen)),
+                    new LastUpdateButton("New Update!",
+                        screen => LastUpdateUpdateScrollViewSection.RenderMainScrollViewSection(screen)),
+                    new ChangeMainViewButton("Welcome",
+                        screen => mainScrollViewSection.RenderMainScrollViewSection(screen))
                 }),
-                new GuiSection("Options", new List<ClickableElement>
+                new("Options", new List<ClickableElement>
                 {
-                    new ChangeMainViewButton("Reload", (screen) =>
+                    new ChangeMainViewButton("Reload", screen =>
                     {
                         const int sectionBreakHeight = 15;
                         GUILayout.Label(
                             @"Asset watches all script files and automatically hot-reloads on change, you can disable that behaviour and reload on demand.",
                             screen.TextStyle
                         );
-                
+
                         using (LayoutHelper.LabelWidth(320))
                         {
-                            ProductPreferenceBase.RenderGuiAndPersistInput(FastScriptReloadPreference.EnableAutoReloadForChangedFiles);
+                            ProductPreferenceBase.RenderGuiAndPersistInput(FastScriptReloadPreference
+                                .EnableAutoReloadForChangedFiles);
                         }
+
                         GUILayout.Space(sectionBreakHeight);
-                
-                        EditorGUILayout.HelpBox("On demand reload :\r\n(only works if you opted in below, this is to avoid unnecessary file watching)\r\nvia Window -> Fast Script Reload -> Force Reload, \r\nor by calling 'FastScriptIterationManager.Instance.TriggerReloadForChangedFiles()'", MessageType.Warning);
-                        
+
+                        EditorGUILayout.HelpBox(
+                            "On demand reload :\r\n(only works if you opted in below, this is to avoid unnecessary file watching)\r\nvia Window -> Fast Script Reload -> Force Reload, \r\nor by calling 'FastScriptIterationManager.Instance.TriggerReloadForChangedFiles()'",
+                            MessageType.Warning);
+
                         using (LayoutHelper.LabelWidth(320))
                         {
-                            ProductPreferenceBase.RenderGuiAndPersistInput(FastScriptReloadPreference.EnableOnDemandReload);
+                            ProductPreferenceBase.RenderGuiAndPersistInput(FastScriptReloadPreference
+                                .EnableOnDemandReload);
                         }
-                        
+
                         GUILayout.Space(sectionBreakHeight);
 
                         GUILayout.Label(
@@ -176,56 +214,64 @@ namespace FastScriptReload.Editor
 
                         using (LayoutHelper.LabelWidth(300))
                         {
-                            ProductPreferenceBase.RenderGuiAndPersistInput(FastScriptReloadPreference.BatchScriptChangesAndReloadEveryNSeconds);
+                            ProductPreferenceBase.RenderGuiAndPersistInput(FastScriptReloadPreference
+                                .BatchScriptChangesAndReloadEveryNSeconds);
                         }
 
                         GUILayout.Space(sectionBreakHeight);
-                    
+
                         using (LayoutHelper.LabelWidth(350))
                         {
-                            ProductPreferenceBase.RenderGuiAndPersistInput(FastScriptReloadPreference.EnableExperimentalThisCallLimitationFix);
+                            ProductPreferenceBase.RenderGuiAndPersistInput(FastScriptReloadPreference
+                                .EnableExperimentalThisCallLimitationFix);
                         }
-                        EditorGUILayout.HelpBox("Method calls utilizing 'this' will trigger compiler exception, if enabled tool will rewrite the calls to have proper type after adjustments." +
-                                                "\r\n\r\nIn case you're seeing compile errors relating to 'this' keyword please let me know via support page. Also turning this setting off will prevent rewrite.", MessageType.Info);
-                        
-                        GUILayout.Space(sectionBreakHeight);
-                        
-                        using (LayoutHelper.LabelWidth(350))
-                        {
-                            ProductPreferenceBase.RenderGuiAndPersistInput(FastScriptReloadPreference.IsForceLockAssembliesViaCode);
-                        }
+
                         EditorGUILayout.HelpBox(
-@"Sometimes Unity continues to reload assemblies on change in playmode even when Auto-Refresh is turned off.
+                            "Method calls utilizing 'this' will trigger compiler exception, if enabled tool will rewrite the calls to have proper type after adjustments." +
+                            "\r\n\r\nIn case you're seeing compile errors relating to 'this' keyword please let me know via support page. Also turning this setting off will prevent rewrite.",
+                            MessageType.Info);
+
+                        GUILayout.Space(sectionBreakHeight);
+
+                        using (LayoutHelper.LabelWidth(350))
+                        {
+                            ProductPreferenceBase.RenderGuiAndPersistInput(FastScriptReloadPreference
+                                .IsForceLockAssembliesViaCode);
+                        }
+
+                        EditorGUILayout.HelpBox(
+                            @"Sometimes Unity continues to reload assemblies on change in playmode even when Auto-Refresh is turned off.
 
 Use this setting to force lock assemblies via code."
-, MessageType.Info);
+                            , MessageType.Info);
                         GUILayout.Space(sectionBreakHeight);
-                        
-                        
+
+
                         using (LayoutHelper.LabelWidth(350))
                         {
-                            ProductPreferenceBase.RenderGuiAndPersistInput(FastScriptReloadPreference.IsDidFieldsOrPropertyCountChangedCheckDisabled);
+                            ProductPreferenceBase.RenderGuiAndPersistInput(FastScriptReloadPreference
+                                .IsDidFieldsOrPropertyCountChangedCheckDisabled);
                         }
-                        EditorGUILayout.HelpBox("By default if you add / remove fields, tool will not redirect method calls for recompiled class." +
-                                                "\r\nYou can also enable added-fields support (experimental)." +
-                                                "\r\n\r\nSome assets however will use IL weaving to adjust your classes (eg Mirror) as a post compile step. In that case it's quite likely hot-reload will still work. " +
-                                                "\r\n\r\nTick this box for tool to try and reload changes when that happens."
-                            
-                            , MessageType.Info);
 
+                        EditorGUILayout.HelpBox(
+                            "By default if you add / remove fields, tool will not redirect method calls for recompiled class." +
+                            "\r\nYou can also enable added-fields support (experimental)." +
+                            "\r\n\r\nSome assets however will use IL weaving to adjust your classes (eg Mirror) as a post compile step. In that case it's quite likely hot-reload will still work. " +
+                            "\r\n\r\nTick this box for tool to try and reload changes when that happens."
+                            , MessageType.Info);
                     }),
-                    (UserScriptRewriteOverrides = new ChangeMainViewButton("User Script\r\nRewrite Overrides", (screen) =>
+                    (UserScriptRewriteOverrides = new ChangeMainViewButton("User Script\r\nRewrite Overrides", screen =>
                     {
                         EditorGUILayout.HelpBox(
-                            $@"For tool to work it'll need to slightly adjust your code to make it compilable. Sometimes due to existing limitations this can fail and you'll see an error.
+                            @"For tool to work it'll need to slightly adjust your code to make it compilable. Sometimes due to existing limitations this can fail and you'll see an error.
 
 You can specify custom script rewrite overrides, those are specified for specific parts of code that fail, eg method. 
 
 It will help overcome limitations in the short run while I work on implementing proper solution."
                             , MessageType.Info);
-                        
+
                         EditorGUILayout.HelpBox(
-                            $@"To add:
+                            @"To add:
 1) right-click in project panel on the file that causes the issue. 
 2) select Fast Script Reload -> Add / Open User Script Rewrite Override
 
@@ -237,38 +283,36 @@ It'll open override file with template already in. You can read top comments tha
                         foreach (var scriptOverride in ScriptGenerationOverridesManager.UserDefinedScriptOverrides)
                         {
                             EditorGUILayout.BeginHorizontal();
-                            
+
                             EditorGUILayout.LabelField(scriptOverride.File.Name);
                             if (GUILayout.Button("Open"))
-                            {
                                 InternalEditorUtility.OpenFileAtLineExternal(scriptOverride.File.FullName, 0);
-                            }
-                            
+
                             if (GUILayout.Button("Delete"))
-                            {
                                 executeAfterIteration = () =>
                                 {
-                                    if (EditorUtility.DisplayDialog("Are you sure", "This will permanently remove override file.", "Delete", "Keep File"))
-                                    {
+                                    if (EditorUtility.DisplayDialog("Are you sure",
+                                            "This will permanently remove override file.", "Delete", "Keep File"))
                                         ScriptGenerationOverridesManager.TryRemoveScriptOverride(scriptOverride);
-                                    }
                                 };
-                            }
-                            
+
                             EditorGUILayout.EndHorizontal();
                         }
+
                         executeAfterIteration?.Invoke();
                     })),
-                    (ExclusionsSection = new ChangeMainViewButton("Exclusions", (screen) => 
+                    (ExclusionsSection = new ChangeMainViewButton("Exclusions", screen =>
                     {
-                        EditorGUILayout.HelpBox("Those are easiest to manage from Project window by right clicking on script file and selecting: " +
-                                                "\r\nFast Script Reload -> Add Hot-Reload Exclusion " +
-                                                "\r\nFast Script Reload -> Remove Hot-Reload Exclusion", MessageType.Info);
+                        EditorGUILayout.HelpBox(
+                            "Those are easiest to manage from Project window by right clicking on script file and selecting: " +
+                            "\r\nFast Script Reload -> Add Hot-Reload Exclusion " +
+                            "\r\nFast Script Reload -> Remove Hot-Reload Exclusion", MessageType.Info);
                         GUILayout.Space(10);
-                
-                        ProductPreferenceBase.RenderGuiAndPersistInput(FastScriptReloadPreference.FilesExcludedFromHotReload);
+
+                        ProductPreferenceBase.RenderGuiAndPersistInput(FastScriptReloadPreference
+                            .FilesExcludedFromHotReload);
                     })),
-                    new ChangeMainViewButton("Debugging", (screen) =>
+                    new ChangeMainViewButton("Debugging", screen =>
                     {
                         EditorGUILayout.HelpBox(
                             @"To debug you'll need to set breakpoints in dynamically-compiled file. 
@@ -276,16 +320,20 @@ It'll open override file with template already in. You can read top comments tha
 BREAKPOINTS IN ORIGINAL FILE WON'T BE HIT!", MessageType.Error);
 
                         EditorGUILayout.HelpBox(
-@"You can do that via:
+                            @"You can do that via:
     - clicking link in console-window after change, eg
       'FSR: Files: FunctionLibrary.cs changed (click here to debug [in bottom details pane]) (...)'
-      (it needs to be clicked in bottom details pane, double click will simply take you to log location)", MessageType.Warning);
+      (it needs to be clicked in bottom details pane, double click will simply take you to log location)",
+                            MessageType.Warning);
                         GUILayout.Space(10);
-                        
-                        EditorGUILayout.HelpBox(@"Tool can also auto-open generated file on every change, to do so select below option", MessageType.Info);
+
+                        EditorGUILayout.HelpBox(
+                            @"Tool can also auto-open generated file on every change, to do so select below option",
+                            MessageType.Info);
                         using (LayoutHelper.LabelWidth(350))
                         {
-                            ProductPreferenceBase.RenderGuiAndPersistInput(FastScriptReloadPreference.IsAutoOpenGeneratedSourceFileOnChangeEnabled);
+                            ProductPreferenceBase.RenderGuiAndPersistInput(FastScriptReloadPreference
+                                .IsAutoOpenGeneratedSourceFileOnChangeEnabled);
                         }
 
                         GUILayout.Space(20);
@@ -293,16 +341,20 @@ BREAKPOINTS IN ORIGINAL FILE WON'T BE HIT!", MessageType.Error);
                         {
                             EditorGUILayout.LabelField("Logging", screen.BoldTextStyle);
                             GUILayout.Space(5);
-                            ProductPreferenceBase.RenderGuiAndPersistInput(FastScriptReloadPreference.EnableDetailedDebugLogging);
-                            ProductPreferenceBase.RenderGuiAndPersistInput(FastScriptReloadPreference.LogHowToFixMessageOnCompilationError);
-                            ProductPreferenceBase.RenderGuiAndPersistInput(FastScriptReloadPreference.StopShowingAutoReloadEnabledDialogBox);
-                            ProductPreferenceBase.RenderGuiAndPersistInput(FastScriptReloadPreference.DebugWriteRewriteReasonAsComment);
+                            ProductPreferenceBase.RenderGuiAndPersistInput(FastScriptReloadPreference
+                                .EnableDetailedDebugLogging);
+                            ProductPreferenceBase.RenderGuiAndPersistInput(FastScriptReloadPreference
+                                .LogHowToFixMessageOnCompilationError);
+                            ProductPreferenceBase.RenderGuiAndPersistInput(FastScriptReloadPreference
+                                .StopShowingAutoReloadEnabledDialogBox);
+                            ProductPreferenceBase.RenderGuiAndPersistInput(FastScriptReloadPreference
+                                .DebugWriteRewriteReasonAsComment);
                         }
                     })
                 }.Concat(additionalSections).ToList()),
-                new GuiSection("Experimental", new List<ClickableElement>
+                new("Experimental", new List<ClickableElement>
                 {
-                    (NewFieldsSection = new ChangeMainViewButton("New Fields", (screen) =>
+                    (NewFieldsSection = new ChangeMainViewButton("New Fields", screen =>
                     {
 #if LiveScriptReload_Enabled
                         EditorGUILayout.HelpBox(
@@ -310,13 +362,14 @@ BREAKPOINTS IN ORIGINAL FILE WON'T BE HIT!", MessageType.Error);
 If you enable - new fields WILL show in editor and work as expected but link with the device will be broken and changes won't be visible there!", MessageType.Error);
                         GUILayout.Space(10);
 #endif
-                        
+
                         EditorGUILayout.HelpBox(
                             @"Adding new fields is still in experimental mode, it will have issues. 
 
-When you encounter them please get in touch (via any support links above) and I'll be sure to sort them out. Thanks!", MessageType.Error);
+When you encounter them please get in touch (via any support links above) and I'll be sure to sort them out. Thanks!",
+                            MessageType.Error);
                         GUILayout.Space(10);
-                        
+
                         EditorGUILayout.HelpBox(
                             @"Adding new fields will affect performance, behind the scenes your code is rewritten to access field via static dictionary.
 
@@ -324,7 +377,7 @@ Once you exit playmode and do a full recompile they'll turn to standard fields a
 
 New fields will also show in editor - you can tweak them as normal variables.", MessageType.Warning);
                         GUILayout.Space(10);
-                        
+
                         EditorGUILayout.HelpBox(
                             @"LIMITATIONS: (full list and more info in docs)
 - outside classes can not call new fields added at runtime
@@ -333,67 +386,79 @@ New fields will also show in editor - you can tweak them as normal variables.", 
 
                         using (LayoutHelper.LabelWidth(300))
                         {
-                            ProductPreferenceBase.RenderGuiAndPersistInput(FastScriptReloadPreference.EnableExperimentalAddedFieldsSupport);
+                            ProductPreferenceBase.RenderGuiAndPersistInput(FastScriptReloadPreference
+                                .EnableExperimentalAddedFieldsSupport);
                         }
+
                         GUILayout.Space(10);
 
                         if (Application.isPlaying)
-                        {
-                            EditorGUILayout.HelpBox(@"You're in playmode, for option to start working you need to restart playmode.", MessageType.Warning);
-                        }
+                            EditorGUILayout.HelpBox(
+                                @"You're in playmode, for option to start working you need to restart playmode.",
+                                MessageType.Warning);
 
                         GUILayout.Space(10);
                     })),
-                    (EditorHotReloadSection = new ChangeMainViewButton("Editor Hot-Reload", (screen) =>
+                    (EditorHotReloadSection = new ChangeMainViewButton("Editor Hot-Reload", screen =>
                     {
-                        EditorGUILayout.HelpBox(@"Currently asset hot-reloads only in play-mode, you can enable experimental editor mode support here.
+                        EditorGUILayout.HelpBox(
+                            @"Currently asset hot-reloads only in play-mode, you can enable experimental editor mode support here.
 
 Please make sure to read limitation section as not all changes can be performed", MessageType.Warning);
-                        
-                        EditorGUILayout.HelpBox(@"As an experimental feature it may be unstable and is not as reliable as play-mode workflow.
+
+                        EditorGUILayout.HelpBox(
+                            @"As an experimental feature it may be unstable and is not as reliable as play-mode workflow.
 
 In some cases it can lock/crash editor.", MessageType.Error);
                         GUILayout.Space(10);
-                        
+
                         using (LayoutHelper.LabelWidth(320))
                         {
-                            var valueBefore = (bool)FastScriptReloadPreference.EnableExperimentalEditorHotReloadSupport.GetEditorPersistedValueOrDefault();
-                            ProductPreferenceBase.RenderGuiAndPersistInput(FastScriptReloadPreference.EnableExperimentalEditorHotReloadSupport);
-                            var valueAfter = (bool)FastScriptReloadPreference.EnableExperimentalEditorHotReloadSupport.GetEditorPersistedValueOrDefault();
+                            var valueBefore = (bool)FastScriptReloadPreference.EnableExperimentalEditorHotReloadSupport
+                                .GetEditorPersistedValueOrDefault();
+                            ProductPreferenceBase.RenderGuiAndPersistInput(FastScriptReloadPreference
+                                .EnableExperimentalEditorHotReloadSupport);
+                            var valueAfter = (bool)FastScriptReloadPreference.EnableExperimentalEditorHotReloadSupport
+                                .GetEditorPersistedValueOrDefault();
                             if (!valueBefore && valueAfter)
                             {
                                 EditorUtility.DisplayDialog("Experimental feature",
                                     "Reloading outside of playmode is still in experimental phase. " +
                                     "\r\n\r\nIt's not as good as in-playmode workflow",
                                     "Ok");
-                                
+
 #if UNITY_2019_3_OR_NEWER
                                 CompilationPipeline.RequestScriptCompilation();
 #elif UNITY_2017_1_OR_NEWER
                                  var editorAssembly = Assembly.GetAssembly(typeof(Editor));
-                                 var editorCompilationInterfaceType = editorAssembly.GetType("UnityEditor.Scripting.ScriptCompilation.EditorCompilationInterface");
-                                 var dirtyAllScriptsMethod = editorCompilationInterfaceType.GetMethod("DirtyAllScripts", BindingFlags.Static | BindingFlags.Public);
+                                 var editorCompilationInterfaceType =
+ editorAssembly.GetType("UnityEditor.Scripting.ScriptCompilation.EditorCompilationInterface");
+                                 var dirtyAllScriptsMethod =
+ editorCompilationInterfaceType.GetMethod("DirtyAllScripts", BindingFlags.Static | BindingFlags.Public);
                                  dirtyAllScriptsMethod.Invoke(editorCompilationInterfaceType, null);
 #endif
                             }
                         }
-                        
+
                         GUILayout.Space(10);
-                        
-                        EditorGUILayout.HelpBox(@"Tool will automatically trigger full domain reload after number of hot-reloads specified below has been reached. 
+
+                        EditorGUILayout.HelpBox(
+                            @"Tool will automatically trigger full domain reload after number of hot-reloads specified below has been reached. 
 This is to ensure dynamically created and loaded assembles are cleared out properly", MessageType.Info);
                         GUILayout.Space(10);
-                        
+
                         using (LayoutHelper.LabelWidth(420))
                         {
-                            ProductPreferenceBase.RenderGuiAndPersistInput(FastScriptReloadPreference.TriggerDomainReloadIfOverNDynamicallyLoadedAssembles);
+                            ProductPreferenceBase.RenderGuiAndPersistInput(FastScriptReloadPreference
+                                .TriggerDomainReloadIfOverNDynamicallyLoadedAssembles);
                         }
+
                         GUILayout.Space(10);
                     }))
                 }),
-                new GuiSection("Advanced", new List<ClickableElement>
+                new("Advanced", new List<ClickableElement>
                 {
-                    new ChangeMainViewButton("File Watchers", (screen) => 
+                    new ChangeMainViewButton("File Watchers", screen =>
                     {
                         EditorGUILayout.HelpBox(
                             $@"Asset watches .cs files for changes. Unfortunately Unity's FileWatcher 
@@ -407,31 +472,33 @@ includeSubdirectories - whether child directories should be watched as well
 
 {FastScriptReloadManager.FileWatcherReplacementTokenForApplicationDataPath} - you can use that token and it'll be replaced with your /Assets folder"
                             , MessageType.Info);
-                        
-                        EditorGUILayout.HelpBox("Recompile after making changes for file watchers to re-load.", MessageType.Warning);
-                        
-                        ProductPreferenceBase.RenderGuiAndPersistInput(FastScriptReloadPreference.FileWatcherSetupEntries);
+
+                        EditorGUILayout.HelpBox("Recompile after making changes for file watchers to re-load.",
+                            MessageType.Warning);
+
+                        ProductPreferenceBase.RenderGuiAndPersistInput(FastScriptReloadPreference
+                            .FileWatcherSetupEntries);
                     }),
-                    new ChangeMainViewButton("Exclude References", (screen) =>
+                    new ChangeMainViewButton("Exclude References", screen =>
                     {
                         EditorGUILayout.HelpBox(
-                            $@"Asset pulls in all the references from changed assembly. If you're encountering some compilation errors relating to those - please use list below to exclude specific ones."
+                            @"Asset pulls in all the references from changed assembly. If you're encountering some compilation errors relating to those - please use list below to exclude specific ones."
                             , MessageType.Info);
-                        
-                        EditorGUILayout.HelpBox($@"By default asset removes ExCSS.Unity as it collides with the Tuple type. If you need that library in changed code - please remove from the list", MessageType.Warning);
-                         
-                        ProductPreferenceBase.RenderGuiAndPersistInput(FastScriptReloadPreference.ReferencesExcludedFromHotReload);
+
+                        EditorGUILayout.HelpBox(
+                            @"By default asset removes ExCSS.Unity as it collides with the Tuple type. If you need that library in changed code - please remove from the list",
+                            MessageType.Warning);
+
+                        ProductPreferenceBase.RenderGuiAndPersistInput(FastScriptReloadPreference
+                            .ReferencesExcludedFromHotReload);
                     })
                 }),
-                new GuiSection("Launch Demo", new List<ClickableElement>
+                new("Launch Demo", new List<ClickableElement>
                 {
                     launchSceneButton
                 })
             };
         }
-
-        private static readonly string RedirectBaseUrl = "https://immersivevrtools.com/redirect/fast-script-reload"; 
-        private static readonly GuiSection TopSection = CreateTopSectionButtons(RedirectBaseUrl);
 
         protected static GuiSection CreateTopSectionButtons(string redirectBaseUrl)
         {
@@ -445,35 +512,23 @@ includeSubdirectories - whether child directories should be watched as well
             );
         }
 
-        private static readonly GuiSection BottomSection = new GuiSection(
-            "I want to make this tool better. And I need your help!",
-            $"It'd be great if you could share your feedback (good and bad) with me. I'm very keen to make this tool better and that can only happen with your help. Please use:",
-            new List<ClickableElement>
-            {
-                new OpenUrlButton(" Unity Forum", $"{RedirectBaseUrl}/unity-forum"),
-                new OpenUrlButton(" or Write a Short Review", $"{RedirectBaseUrl}/asset-store-review"),
-            }
-        );
-
-        public override string WindowTitle { get; } = _WindowTitle;
-        public override Vector2 WindowSizePx { get; } = _WindowSizePx;
-
 #if !LiveScriptReload_Enabled
         [MenuItem("Window/Fast Script Reload/Start Screen", false, 1999)]
 #endif
         public static FastScriptReloadWelcomeScreen Init()
         {
-            return OpenWindow<FastScriptReloadWelcomeScreen>(_WindowTitle, _WindowSizePx);
+            return OpenWindow<FastScriptReloadWelcomeScreen>(_windowTitle, _windowSizePx);
         }
-    
+
 #if !LiveScriptReload_Enabled
         [MenuItem("Window/Fast Script Reload/Force Reload", true, 1999)]
 #endif
         public static bool ForceReloadValidate()
         {
-            return EditorApplication.isPlaying && (bool)FastScriptReloadPreference.EnableOnDemandReload.GetEditorPersistedValueOrDefault();
+            return EditorApplication.isPlaying &&
+                   (bool)FastScriptReloadPreference.EnableOnDemandReload.GetEditorPersistedValueOrDefault();
         }
-    
+
 #if !LiveScriptReload_Enabled
         [MenuItem("Window/Fast Script Reload/Force Reload", false, 1999)]
 #endif
@@ -481,28 +536,20 @@ includeSubdirectories - whether child directories should be watched as well
         {
             if (!(bool)FastScriptReloadPreference.EnableOnDemandReload.GetEditorPersistedValueOrDefault())
             {
-                LoggerScoped.LogWarning("On demand hot reload is disabled, can't perform. You can enable it via 'Window -> Fast Script Reload -> Start Screen -> Reload -> Enable on demand reload'");
+                LoggerScoped.LogWarning(
+                    "On demand hot reload is disabled, can't perform. You can enable it via 'Window -> Fast Script Reload -> Start Screen -> Reload -> Enable on demand reload'");
                 return;
             }
-            
+
             FastScriptReloadManager.Instance.TriggerReloadForChangedFiles();
         }
 
-        public void OnEnable()
-        {
-            OnEnableCommon(ProjectIconName);
-        }
-
-        public void OnGUI()
-        {
-            RenderGUI(LeftSections, TopSection, BottomSection, MainScrollViewSection);
-        }
-        
         protected static void CreateOpenFunctionLibraryOnRippleMethodButton()
         {
             if (GUILayout.Button("Open 'FunctionLibrary.cs'"))
             {
-                var codeComponent = AssetDatabase.LoadAssetAtPath<MonoScript>(AssetDatabase.GUIDToAssetPath(AssetDatabase.FindAssets($"t:Script FunctionLibrary")[0]));
+                var codeComponent = AssetDatabase.LoadAssetAtPath<MonoScript>(
+                    AssetDatabase.GUIDToAssetPath(AssetDatabase.FindAssets("t:Script FunctionLibrary")[0]));
                 CodeEditorManager.GotoScript(codeComponent, "Ripple");
             }
         }
@@ -510,132 +557,129 @@ includeSubdirectories - whether child directories should be watched as well
 
     public class FastScriptReloadPreference : ProductPreferenceBase
     {
-        public const string BuildSymbol_DetailedDebugLogging = "ImmersiveVrTools_DebugEnabled";
-        
-        public const string ProductName = "Fast Script Reload";
-        private static string[] ProductKeywords = new[] { "productivity", "tools" };
+        public const string BuildSymbolDetailedDebugLogging = "ImmersiveVrTools_DebugEnabled";
 
-        public static readonly IntProjectEditorPreferenceDefinition BatchScriptChangesAndReloadEveryNSeconds = new IntProjectEditorPreferenceDefinition(
+        public const string ProductName = "Fast Script Reload";
+        private static readonly string[] _productKeywords = { "productivity", "tools" };
+
+        public static readonly IntProjectEditorPreferenceDefinition BatchScriptChangesAndReloadEveryNSeconds = new(
             "Batch script changes and reload every N seconds", "BatchScriptChangesAndReloadEveryNSeconds", 1);
 
-        public static readonly ToggleProjectEditorPreferenceDefinition EnableAutoReloadForChangedFiles = new ToggleProjectEditorPreferenceDefinition(
+        public static readonly ToggleProjectEditorPreferenceDefinition EnableAutoReloadForChangedFiles = new(
             "Enable auto Hot-Reload for changed files (in play mode)", "EnableAutoReloadForChangedFiles", true);
-        
-        public static readonly ToggleProjectEditorPreferenceDefinition EnableOnDemandReload = new ToggleProjectEditorPreferenceDefinition(
+
+        public static readonly ToggleProjectEditorPreferenceDefinition EnableOnDemandReload = new(
             "Enable on demand hot reload", "EnableOnDemandReload", false);
-        
-        public static readonly ToggleProjectEditorPreferenceDefinition EnableExperimentalThisCallLimitationFix = new ToggleProjectEditorPreferenceDefinition(
-            "(Experimental) Enable method calls with 'this' as argument fix", "EnableExperimentalThisCallLimitationFix", true, (object newValue, object oldValue) =>
+
+        public static readonly ToggleProjectEditorPreferenceDefinition EnableExperimentalThisCallLimitationFix = new(
+            "(Experimental) Enable method calls with 'this' as argument fix", "EnableExperimentalThisCallLimitationFix",
+            true,
+            (newValue, oldValue) =>
             {
                 DynamicCompilationBase.EnableExperimentalThisCallLimitationFix = (bool)newValue;
             },
-            (value) =>
-            {
-                DynamicCompilationBase.EnableExperimentalThisCallLimitationFix = (bool)value;
-            });
-    
-        public static readonly StringListProjectEditorPreferenceDefinition FilesExcludedFromHotReload = new StringListProjectEditorPreferenceDefinition(
-            "Files excluded from Hot-Reload", "FilesExcludedFromHotReload", new List<string> {}, isReadonly: true);
-        
-        public static readonly StringListProjectEditorPreferenceDefinition ReferencesExcludedFromHotReload = new StringListProjectEditorPreferenceDefinition(
+            value => { DynamicCompilationBase.EnableExperimentalThisCallLimitationFix = (bool)value; });
+
+        public static readonly StringListProjectEditorPreferenceDefinition FilesExcludedFromHotReload = new(
+            "Files excluded from Hot-Reload", "FilesExcludedFromHotReload", new List<string>(), isReadonly: true);
+
+        public static readonly StringListProjectEditorPreferenceDefinition ReferencesExcludedFromHotReload = new(
             "References to exclude from Hot-Reload", "ReferencesExcludedFromHotReload", new List<string>
             {
                 "ExCSS.Unity.dll"
-            }, (newValue, oldValue) =>
+            },
+            (newValue, oldValue) =>
             {
                 DynamicCompilationBase.ReferencesExcludedFromHotReload = (List<string>)newValue;
             },
-            (value) =>
-            {
-                DynamicCompilationBase.ReferencesExcludedFromHotReload = (List<string>)value;
-            });
-        
-        public static readonly ToggleProjectEditorPreferenceDefinition LogHowToFixMessageOnCompilationError = new ToggleProjectEditorPreferenceDefinition(
-            "Log how to fix message on compilation error", "LogHowToFixMessageOnCompilationError", true, (object newValue, object oldValue) =>
-            {
-                DynamicCompilationBase.LogHowToFixMessageOnCompilationError = (bool)newValue;
-            },
-            (value) =>
-            {
-                DynamicCompilationBase.LogHowToFixMessageOnCompilationError = (bool)value;
-            }
+            value => { DynamicCompilationBase.ReferencesExcludedFromHotReload = (List<string>)value; });
+
+        public static readonly ToggleProjectEditorPreferenceDefinition LogHowToFixMessageOnCompilationError = new(
+            "Log how to fix message on compilation error", "LogHowToFixMessageOnCompilationError", true,
+            (newValue, oldValue) => { DynamicCompilationBase.LogHowToFixMessageOnCompilationError = (bool)newValue; },
+            value => { DynamicCompilationBase.LogHowToFixMessageOnCompilationError = (bool)value; }
         );
-        
-        public static readonly ToggleProjectEditorPreferenceDefinition DebugWriteRewriteReasonAsComment = new ToggleProjectEditorPreferenceDefinition(
-            "Write rewrite reason as comment in changed file", "DebugWriteRewriteReasonAsComment", false, (object newValue, object oldValue) =>
-            {
-                DynamicCompilationBase.DebugWriteRewriteReasonAsComment = (bool)newValue;
-            },
-            (value) =>
-            {
-                DynamicCompilationBase.DebugWriteRewriteReasonAsComment = (bool)value;
-            });
-        
-        public static readonly ToggleProjectEditorPreferenceDefinition IsAutoOpenGeneratedSourceFileOnChangeEnabled = new ToggleProjectEditorPreferenceDefinition(
-            "Auto-open generated source file for debugging", "IsAutoOpenGeneratedSourceFileOnChangeEnabled", false);
-        
-        public static readonly ToggleProjectEditorPreferenceDefinition StopShowingAutoReloadEnabledDialogBox = new ToggleProjectEditorPreferenceDefinition(
+
+        public static readonly ToggleProjectEditorPreferenceDefinition DebugWriteRewriteReasonAsComment = new(
+            "Write rewrite reason as comment in changed file", "DebugWriteRewriteReasonAsComment", false,
+            (newValue, oldValue) => { DynamicCompilationBase.DebugWriteRewriteReasonAsComment = (bool)newValue; },
+            value => { DynamicCompilationBase.DebugWriteRewriteReasonAsComment = (bool)value; });
+
+        public static readonly ToggleProjectEditorPreferenceDefinition IsAutoOpenGeneratedSourceFileOnChangeEnabled =
+            new(
+                "Auto-open generated source file for debugging", "IsAutoOpenGeneratedSourceFileOnChangeEnabled", false);
+
+        public static readonly ToggleProjectEditorPreferenceDefinition StopShowingAutoReloadEnabledDialogBox = new(
             "Stop showing assets/script auto-reload enabled warning", "StopShowingAutoReloadEnabledDialogBox", false);
-        public static readonly ToggleProjectEditorPreferenceDefinition EnableDetailedDebugLogging = new ToggleProjectEditorPreferenceDefinition(
+
+        public static readonly ToggleProjectEditorPreferenceDefinition EnableDetailedDebugLogging = new(
             "Enable detailed debug logging", "EnableDetailedDebugLogging", false,
-            (object newValue, object oldValue) =>
+            (newValue, oldValue) =>
             {
-                BuildDefineSymbolManager.SetBuildDefineSymbolState(BuildSymbol_DetailedDebugLogging, (bool)newValue);
+                BuildDefineSymbolManager.SetBuildDefineSymbolState(BuildSymbolDetailedDebugLogging, (bool)newValue);
             },
-            (value) =>
+            value =>
             {
-                BuildDefineSymbolManager.SetBuildDefineSymbolState(BuildSymbol_DetailedDebugLogging, (bool)value);
+                BuildDefineSymbolManager.SetBuildDefineSymbolState(BuildSymbolDetailedDebugLogging, (bool)value);
             }
         );
-        
-        public static readonly ToggleProjectEditorPreferenceDefinition IsDidFieldsOrPropertyCountChangedCheckDisabled = new ToggleProjectEditorPreferenceDefinition(
-            "Disable added/removed fields check", "IsDidFieldsOrPropertyCountChangedCheckDisabled", false,
-            (object newValue, object oldValue) =>
-            {
-                FastScriptReloadManager.Instance.AssemblyChangesLoaderEditorOptionsNeededInBuild.IsDidFieldsOrPropertyCountChangedCheckDisabled = (bool)newValue;
-            },
-            (value) =>
-            {
-                FastScriptReloadManager.Instance.AssemblyChangesLoaderEditorOptionsNeededInBuild.IsDidFieldsOrPropertyCountChangedCheckDisabled = (bool)value;
-            }
-        );
-        
-        public static readonly ToggleProjectEditorPreferenceDefinition IsForceLockAssembliesViaCode = new ToggleProjectEditorPreferenceDefinition(
+
+        public static readonly ToggleProjectEditorPreferenceDefinition IsDidFieldsOrPropertyCountChangedCheckDisabled =
+            new(
+                "Disable added/removed fields check", "IsDidFieldsOrPropertyCountChangedCheckDisabled", false,
+                (newValue, oldValue) =>
+                {
+                    FastScriptReloadManager.Instance.AssemblyChangesLoaderEditorOptionsNeededInBuild
+                        .isDidFieldsOrPropertyCountChangedCheckDisabled = (bool)newValue;
+                },
+                value =>
+                {
+                    FastScriptReloadManager.Instance.AssemblyChangesLoaderEditorOptionsNeededInBuild
+                        .isDidFieldsOrPropertyCountChangedCheckDisabled = (bool)value;
+                }
+            );
+
+        public static readonly ToggleProjectEditorPreferenceDefinition IsForceLockAssembliesViaCode = new(
             "Force prevent assembly reload during playmode", "IsForceLockAssembliesViaCode", false);
-        
-        public static readonly JsonObjectListProjectEditorPreferenceDefinition<FileWatcherSetupEntry> FileWatcherSetupEntries = new JsonObjectListProjectEditorPreferenceDefinition<FileWatcherSetupEntry>(
-            "File Watchers Setup", "FileWatcherSetupEntries", new List<string>
-            {
-                JsonUtility.ToJson(new FileWatcherSetupEntry("<Application.dataPath>", "*.cs", true))
-            }, 
-            () => new FileWatcherSetupEntry("<Application.dataPath>", "*.cs", true)
-        );
-        
-        public static readonly ToggleProjectEditorPreferenceDefinition EnableExperimentalAddedFieldsSupport = new ToggleProjectEditorPreferenceDefinition(
+
+        public static readonly JsonObjectListProjectEditorPreferenceDefinition<FileWatcherSetupEntry>
+            FileWatcherSetupEntries = new(
+                "File Watchers Setup", "FileWatcherSetupEntries", new List<string>
+                {
+                    JsonUtility.ToJson(new FileWatcherSetupEntry("<Application.dataPath>", "*.cs", true))
+                },
+                () => new FileWatcherSetupEntry("<Application.dataPath>", "*.cs", true)
+            );
+
+        public static readonly ToggleProjectEditorPreferenceDefinition EnableExperimentalAddedFieldsSupport = new(
             "(Experimental) Enable runtime added field support", "EnableExperimentalAddedFieldsSupport", true,
-            (object newValue, object oldValue) =>
+            (newValue, oldValue) =>
             {
-                FastScriptReloadManager.Instance.AssemblyChangesLoaderEditorOptionsNeededInBuild.EnableExperimentalAddedFieldsSupport = (bool)newValue;
+                FastScriptReloadManager.Instance.AssemblyChangesLoaderEditorOptionsNeededInBuild
+                    .enableExperimentalAddedFieldsSupport = (bool)newValue;
             },
-            (value) =>
+            value =>
             {
-                FastScriptReloadManager.Instance.AssemblyChangesLoaderEditorOptionsNeededInBuild.EnableExperimentalAddedFieldsSupport = (bool)value;
+                FastScriptReloadManager.Instance.AssemblyChangesLoaderEditorOptionsNeededInBuild
+                    .enableExperimentalAddedFieldsSupport = (bool)value;
             });
-        
-        public static readonly ToggleProjectEditorPreferenceDefinition EnableExperimentalEditorHotReloadSupport = new ToggleProjectEditorPreferenceDefinition(
+
+        public static readonly ToggleProjectEditorPreferenceDefinition EnableExperimentalEditorHotReloadSupport = new(
             "(Experimental) Enable Hot-Reload outside of play mode", "EnableExperimentalEditorHotReloadSupport", false);
-        
+
         //TODO: potentially that's just a normal settings (also in playmode) - but in playmode user is unlikely to make this many changes
-        public static readonly IntProjectEditorPreferenceDefinition TriggerDomainReloadIfOverNDynamicallyLoadedAssembles = new IntProjectEditorPreferenceDefinition(
-            "Trigger full domain reload after N hot-reloads (when not in play mode)", "TriggerDomainReloadIfOverNDynamicallyLoadedAssembles", 50);
-        
+        public static readonly IntProjectEditorPreferenceDefinition
+            TriggerDomainReloadIfOverNDynamicallyLoadedAssembles = new(
+                "Trigger full domain reload after N hot-reloads (when not in play mode)",
+                "TriggerDomainReloadIfOverNDynamicallyLoadedAssembles", 50);
+
         public static void SetCommonMaterialsShader(ShadersMode newShaderModeValue)
         {
-            var rootToolFolder = AssetPathResolver.GetAssetFolderPathRelativeToScript(ScriptableObject.CreateInstance(typeof(FastScriptReloadWelcomeScreen)), 1);
+            var rootToolFolder =
+                AssetPathResolver.GetAssetFolderPathRelativeToScript(
+                    ScriptableObject.CreateInstance(typeof(FastScriptReloadWelcomeScreen)), 1);
             if (rootToolFolder.Contains("/Scripts"))
-            {
                 rootToolFolder = rootToolFolder.Replace("/Scripts", ""); //if nested remove that and go higher level
-            }
             var assets = AssetDatabase.FindAssets("t:Material Point", new[] { rootToolFolder });
 
             try
@@ -643,8 +687,8 @@ includeSubdirectories - whether child directories should be watched as well
                 Shader shaderToUse = null;
                 switch (newShaderModeValue)
                 {
-                    case ShadersMode.HDRP: shaderToUse = Shader.Find("Shader Graphs/Point URP"); break;
-                    case ShadersMode.URP: shaderToUse = Shader.Find("Shader Graphs/Point URP"); break;
+                    case ShadersMode.Hdrp: shaderToUse = Shader.Find("Shader Graphs/Point URP"); break;
+                    case ShadersMode.Urp: shaderToUse = Shader.Find("Shader Graphs/Point URP"); break;
                     case ShadersMode.Surface: shaderToUse = Shader.Find("Graph/Point Surface"); break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -653,10 +697,7 @@ includeSubdirectories - whether child directories should be watched as well
                 foreach (var guid in assets)
                 {
                     var material = AssetDatabase.LoadAssetAtPath<Material>(AssetDatabase.GUIDToAssetPath(guid));
-                    if (material.shader.name != shaderToUse.name)
-                    {
-                        material.shader = shaderToUse;
-                    }
+                    if (material.shader.name != shaderToUse.name) material.shader = shaderToUse;
                 }
             }
             catch (Exception ex)
@@ -665,7 +706,7 @@ includeSubdirectories - whether child directories should be watched as well
             }
         }
 
-        public static List<ProjectEditorPreferenceDefinitionBase> PreferenceDefinitions = new List<ProjectEditorPreferenceDefinitionBase>()
+        public static List<ProjectEditorPreferenceDefinitionBase> PreferenceDefinitions = new()
         {
             CreateDefaultShowOptionPreferenceDefinition(),
             BatchScriptChangesAndReloadEveryNSeconds,
@@ -683,27 +724,27 @@ includeSubdirectories - whether child directories should be watched as well
             IsForceLockAssembliesViaCode
         };
 
-        private static bool PrefsLoaded = false;
+        private static bool _prefsLoaded;
 
 
 #if !LiveScriptReload_Enabled
-    #if UNITY_2019_1_OR_NEWER
+#if UNITY_2019_1_OR_NEWER
         [SettingsProvider]
         public static SettingsProvider ImpostorsSettings()
         {
-            return GenerateProvider(ProductName, ProductKeywords, PreferencesGUI);
+            return GenerateProvider(ProductName, _productKeywords, PreferencesGUI);
         }
 
-    #else
+#else
 	[PreferenceItem(ProductName)]
-    #endif
+#endif
 #endif
         public static void PreferencesGUI()
         {
-            if (!PrefsLoaded)
+            if (!_prefsLoaded)
             {
                 LoadDefaults(PreferenceDefinitions);
-                PrefsLoaded = true;
+                _prefsLoaded = true;
             }
 
             RenderGuiCommon(PreferenceDefinitions);
@@ -711,8 +752,8 @@ includeSubdirectories - whether child directories should be watched as well
 
         public enum ShadersMode
         {
-            HDRP,
-            URP,
+            Hdrp,
+            Urp,
             Surface
         }
     }
@@ -725,63 +766,69 @@ includeSubdirectories - whether child directories should be watched as well
 #if !LiveScriptReload_Enabled
         static FastScriptReloadWelcomeScreenInitializer()
         {
-            var userId = ProductPreferenceBase.CreateDefaultUserIdDefinition(FastScriptReloadWelcomeScreen.ProjectName).GetEditorPersistedValueOrDefault().ToString();
+            var userId = ProductPreferenceBase.CreateDefaultUserIdDefinition(FastScriptReloadWelcomeScreen.ProjectName)
+                .GetEditorPersistedValueOrDefault().ToString();
 
             HandleUnityStartup(
                 () => FastScriptReloadWelcomeScreen.Init(),
                 FastScriptReloadWelcomeScreen.GenerateGetUpdatesUrl(userId, FastScriptReloadWelcomeScreen.VersionId),
                 new List<ProjectEditorPreferenceDefinitionBase>(),
-                (isFirstRun) =>
-                {
-                    AutoDetectAndSetShaderMode();
-                }
+                isFirstRun => { AutoDetectAndSetShaderMode(); }
             );
-            
+
             InitCommon();
         }
 #endif
-        
+
         protected static void InitCommon()
         {
             DisplayMessageIfLastDetourPotentiallyCrashedEditor();
             EnsureUserAwareOfAutoRefresh();
 
-            DynamicCompilationBase.LogHowToFixMessageOnCompilationError = (bool)FastScriptReloadPreference.LogHowToFixMessageOnCompilationError.GetEditorPersistedValueOrDefault();
-            DynamicCompilationBase.DebugWriteRewriteReasonAsComment = (bool)FastScriptReloadPreference.DebugWriteRewriteReasonAsComment.GetEditorPersistedValueOrDefault();
-            DynamicCompilationBase.ReferencesExcludedFromHotReload = (List<string>)FastScriptReloadPreference.ReferencesExcludedFromHotReload.GetElements();
+            DynamicCompilationBase.LogHowToFixMessageOnCompilationError = (bool)FastScriptReloadPreference
+                .LogHowToFixMessageOnCompilationError.GetEditorPersistedValueOrDefault();
+            DynamicCompilationBase.DebugWriteRewriteReasonAsComment = (bool)FastScriptReloadPreference
+                .DebugWriteRewriteReasonAsComment.GetEditorPersistedValueOrDefault();
+            DynamicCompilationBase.ReferencesExcludedFromHotReload =
+                (List<string>)FastScriptReloadPreference.ReferencesExcludedFromHotReload.GetElements();
             FastScriptReloadManager.Instance.AssemblyChangesLoaderEditorOptionsNeededInBuild.UpdateValues(
-                (bool)FastScriptReloadPreference.IsDidFieldsOrPropertyCountChangedCheckDisabled.GetEditorPersistedValueOrDefault(),
+                (bool)FastScriptReloadPreference.IsDidFieldsOrPropertyCountChangedCheckDisabled
+                    .GetEditorPersistedValueOrDefault(),
                 (bool)FastScriptReloadPreference.EnableExperimentalAddedFieldsSupport.GetEditorPersistedValueOrDefault()
             );
-            
-            BuildDefineSymbolManager.SetBuildDefineSymbolState(FastScriptReloadPreference.BuildSymbol_DetailedDebugLogging,
+
+            BuildDefineSymbolManager.SetBuildDefineSymbolState(
+                FastScriptReloadPreference.BuildSymbolDetailedDebugLogging,
                 (bool)FastScriptReloadPreference.EnableDetailedDebugLogging.GetEditorPersistedValueOrDefault()
             );
         }
 
         private static void EnsureUserAwareOfAutoRefresh()
         {
-            var autoRefreshMode = (AssetPipelineAutoRefreshMode)EditorPrefs.GetInt("kAutoRefreshMode", EditorPrefs.GetBool("kAutoRefresh") ? 1 : 0);
+            var autoRefreshMode = (AssetPipelineAutoRefreshMode)EditorPrefs.GetInt("kAutoRefreshMode",
+                EditorPrefs.GetBool("kAutoRefresh") ? 1 : 0);
             if (autoRefreshMode != AssetPipelineAutoRefreshMode.Enabled)
                 return;
-            
+
             if ((bool)FastScriptReloadPreference.IsForceLockAssembliesViaCode.GetEditorPersistedValueOrDefault())
                 return;
-            
-            LoggerScoped.LogWarning("Fast Script Reload - asset auto refresh enabled - full reload will be triggered unless editor preference adjusted - see documentation for more details.");
 
-            if ((bool)FastScriptReloadPreference.StopShowingAutoReloadEnabledDialogBox.GetEditorPersistedValueOrDefault())
+            LoggerScoped.LogWarning(
+                "Fast Script Reload - asset auto refresh enabled - full reload will be triggered unless editor preference adjusted - see documentation for more details.");
+
+            if ((bool)FastScriptReloadPreference.StopShowingAutoReloadEnabledDialogBox
+                    .GetEditorPersistedValueOrDefault())
                 return;
 
             var chosenOption = EditorUtility.DisplayDialogComplex("Fast Script Reload - Warning",
                 "Auto reload for assets/scripts is enabled." +
-                $"\n\nThis means any change made in playmode will likely trigger full recompile." +
-                $"\r\n\r\nIt's an editor setting and can be adjusted at any time via Edit -> Preferences -> Asset Pipeline -> Auto Refresh" +
-                $"\r\n\r\nI can also adjust that for you now - that means you'll need to manually load changes (outside of playmode) via Assets -> Refresh (CTRL + R)." +
-                $"\r\n\r\nIn some editor versions you can also set script compilation to happen outside of playmode and don't have to manually refresh. " +
-                $"\r\n\r\nDepending on version you'll find it via: " +
-                $"\r\n1) Edit -> Preferences -> General -> Script Changes While Playing -> Recompile After Finished Playing." +
-                $"\r\n2) Edit -> Preferences -> Asset Pipeline -> Auto Refresh -> Enabled Outside Playmode",
+                "\n\nThis means any change made in playmode will likely trigger full recompile." +
+                "\r\n\r\nIt's an editor setting and can be adjusted at any time via Edit -> Preferences -> Asset Pipeline -> Auto Refresh" +
+                "\r\n\r\nI can also adjust that for you now - that means you'll need to manually load changes (outside of playmode) via Assets -> Refresh (CTRL + R)." +
+                "\r\n\r\nIn some editor versions you can also set script compilation to happen outside of playmode and don't have to manually refresh. " +
+                "\r\n\r\nDepending on version you'll find it via: " +
+                "\r\n1) Edit -> Preferences -> General -> Script Changes While Playing -> Recompile After Finished Playing." +
+                "\r\n2) Edit -> Preferences -> Asset Pipeline -> Auto Refresh -> Enabled Outside Playmode",
                 "Ok, disable asset auto refresh (I'll refresh manually when needed)",
                 "No, don't change (stop showing this message)",
                 "No, don't change"
@@ -810,16 +857,6 @@ includeSubdirectories - whether child directories should be watched as well
                     LoggerScoped.LogError("Unrecognized option.");
                     break;
             }
-                
-            
-        }
-
-        //copied from internal UnityEditor.AssetPipelineAutoRefreshMode
-        internal enum AssetPipelineAutoRefreshMode
-        {
-            Disabled,
-            Enabled,
-            EnabledOutsidePlaymode,
         }
 
         private static void DisplayMessageIfLastDetourPotentiallyCrashedEditor()
@@ -856,19 +893,21 @@ In the meantime, you can exclude any file from Hot-Reload by
             var usedShaderMode = FastScriptReloadPreference.ShadersMode.Surface;
             var renderPipelineAsset = GraphicsSettings.defaultRenderPipeline;
             if (renderPipelineAsset == null)
-            {
                 usedShaderMode = FastScriptReloadPreference.ShadersMode.Surface;
-            }
             else if (renderPipelineAsset.GetType().Name.Contains("HDRenderPipelineAsset"))
-            {
-                usedShaderMode = FastScriptReloadPreference.ShadersMode.HDRP;
-            }
+                usedShaderMode = FastScriptReloadPreference.ShadersMode.Hdrp;
             else if (renderPipelineAsset.GetType().Name.Contains("UniversalRenderPipelineAsset"))
-            {
-                usedShaderMode = FastScriptReloadPreference.ShadersMode.URP;
-            }
-        
+                usedShaderMode = FastScriptReloadPreference.ShadersMode.Urp;
+
             FastScriptReloadPreference.SetCommonMaterialsShader(usedShaderMode);
+        }
+
+        //copied from internal UnityEditor.AssetPipelineAutoRefreshMode
+        internal enum AssetPipelineAutoRefreshMode
+        {
+            Disabled,
+            Enabled,
+            EnabledOutsidePlaymode
         }
     }
 }

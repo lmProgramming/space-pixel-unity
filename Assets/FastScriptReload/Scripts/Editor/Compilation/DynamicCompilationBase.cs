@@ -9,26 +9,19 @@ using FastScriptReload.Editor.Compilation.ScriptGenerationOverrides;
 using FastScriptReload.Runtime;
 using FastScriptReload.Scripts.Runtime;
 using ImmersiveVRTools.Editor.Common.Cache;
-using ImmersiveVRTools.Runtime.Common.Utilities;
 using ImmersiveVrToolsCommon.Runtime.Logging;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 namespace FastScriptReload.Editor.Compilation
 {
     [InitializeOnLoad]
     public class DynamicCompilationBase
     {
-        public static bool DebugWriteRewriteReasonAsComment;
-	    public static bool LogHowToFixMessageOnCompilationError;
-	    public static bool EnableExperimentalThisCallLimitationFix;
-        public static List<string> ReferencesExcludedFromHotReload = new List<string>();
-
-        public const string DebuggingInformationComment = 
+        public const string DebuggingInformationComment =
             @"// DEBUGGING READ-ME " +
 #if !UNITY_2021_1_OR_NEWER
 "WARN: on Unity versions prior to 2021, opening files in that manner can cause static values to be reinitialized"
@@ -52,74 +45,90 @@ namespace FastScriptReload.Editor.Compilation
 
 
 ";
-	    
+
+        public static bool DebugWriteRewriteReasonAsComment;
+        public static bool LogHowToFixMessageOnCompilationError;
+        public static bool EnableExperimentalThisCallLimitationFix;
+        public static List<string> ReferencesExcludedFromHotReload = new();
+
         public static readonly string[] ActiveScriptCompilationDefines;
-        protected static readonly string DynamicallyCreatedAssemblyAttributeSourceCode = $"[assembly: {typeof(DynamicallyCreatedAssemblyAttribute).FullName}()]";
+
+        protected static readonly string DynamicallyCreatedAssemblyAttributeSourceCode =
+            $"[assembly: {typeof(DynamicallyCreatedAssemblyAttribute).FullName}()]";
+
         private static readonly string AssemblyCsharpFullPath;
-        
+
         static DynamicCompilationBase()
         {
             //needs to be set from main thread
             ActiveScriptCompilationDefines = EditorUserBuildSettings.activeScriptCompilationDefines;
             AssemblyCsharpFullPath = SessionStateCache.GetOrCreateString(
-	            $"FSR:AssemblyCsharpFullPath", 
-	            () => AssetDatabase.FindAssets("Microsoft.CSharp")
-					            .Select(g => new System.IO.FileInfo(UnityEngine.Application.dataPath + "/../" + AssetDatabase.GUIDToAssetPath(g)))
-					            .First(fi => fi.Name.ToLower() == "Microsoft.CSharp.dll".ToLower()).FullName
-	        );
-
+                "FSR:AssemblyCsharpFullPath",
+                () => AssetDatabase.FindAssets("Microsoft.CSharp")
+                    .Select(g => new FileInfo(Application.dataPath + "/../" + AssetDatabase.GUIDToAssetPath(g)))
+                    .First(fi => fi.Name.ToLower() == "Microsoft.CSharp.dll".ToLower()).FullName
+            );
         }
-        
-        protected static string CreateSourceCodeCombinedContents(List<string> sourceCodeFiles, List<string> definedPreprocessorSymbols)
+
+        protected static string CreateSourceCodeCombinedContents(List<string> sourceCodeFiles,
+            List<string> definedPreprocessorSymbols)
         {
             var combinedUsingStatements = new List<string>();
-            
+
             var sourceCodeWithAdjustments = sourceCodeFiles.Select(sourceCodeFile =>
             {
                 var fileCode = File.ReadAllText(sourceCodeFile);
-                var tree = CSharpSyntaxTree.ParseText(fileCode, new CSharpParseOptions(preprocessorSymbols: definedPreprocessorSymbols));
+                var tree = CSharpSyntaxTree.ParseText(fileCode,
+                    new CSharpParseOptions(preprocessorSymbols: definedPreprocessorSymbols));
                 var root = tree.GetRoot();
-                
+
                 var typeToNewFieldDeclarations = new Dictionary<string, List<string>>();
-                if (FastScriptReloadManager.Instance.AssemblyChangesLoaderEditorOptionsNeededInBuild.EnableExperimentalAddedFieldsSupport)
+                if (FastScriptReloadManager.Instance.AssemblyChangesLoaderEditorOptionsNeededInBuild
+                    .enableExperimentalAddedFieldsSupport)
                 {
                     //WARN: needs to walk before root class name changes, otherwise it'll resolve wrong name
                     var fieldsWalker = new FieldsWalker();
                     fieldsWalker.Visit(root);
-                    
+
                     var typeToFieldDeclarations = fieldsWalker.GetTypeToFieldDeclarations();
                     typeToNewFieldDeclarations = typeToFieldDeclarations.ToDictionary(
                         t => t.Key,
                         t =>
                         {
-                            if (!ProjectTypeCache.AllTypesInNonDynamicGeneratedAssemblies.TryGetValue(t.Key, out var existingType))
+                            if (!ProjectTypeCache.AllTypesInNonDynamicGeneratedAssemblies.TryGetValue(t.Key,
+                                    out var existingType))
                             {
-                                LoggerScoped.LogDebug($"Unable to find type: {t.Key} in loaded assemblies. If that's the class you've added field to then it may not be properly working. It's possible the class was not yet loaded / used and you can ignore that warning. If it's causing any issues please contact support");
+                                LoggerScoped.LogDebug(
+                                    $"Unable to find type: {t.Key} in loaded assemblies. If that's the class you've added field to then it may not be properly working. It's possible the class was not yet loaded / used and you can ignore that warning. If it's causing any issues please contact support");
                                 return new List<string>();
                             }
 
-                            var existingTypeMembersToReplace = NewFieldsRewriter.GetReplaceableMembers(existingType).Select(m => m.Name).ToList();
-			
-                            var newFields = t.Value.Where(fD => !existingTypeMembersToReplace.Contains(fD.FieldName)).ToList();
-                            
+                            var existingTypeMembersToReplace = NewFieldsRewriter.GetReplaceableMembers(existingType)
+                                .Select(m => m.Name).ToList();
+
+                            var newFields = t.Value.Where(fD => !existingTypeMembersToReplace.Contains(fD.FieldName))
+                                .ToList();
+
                             //TODO: ideally that registration would happen outside of this class
                             //TODO: to work for LSR it needs to be handled in runtime
                             TemporaryNewFieldValues.RegisterNewFields(
-                                existingType, 
+                                existingType,
                                 newFields.ToDictionary(
                                     fD => fD.FieldName,
-                                    fD => new TemporaryNewFieldValues.GetNewFieldInitialValue((Type forNewlyGeneratedType) =>
+                                    fD => new TemporaryNewFieldValues.GetNewFieldInitialValue(forNewlyGeneratedType =>
                                     {
                                         //TODO: PERF: could cache those - they run to init every new value (for every instance when accessed)
-                                        return CreateNewFieldInitMethodRewriter.ResolveNewFieldsToCreateValueFn(forNewlyGeneratedType)[fD.FieldName]();
+                                        return CreateNewFieldInitMethodRewriter.ResolveNewFieldsToCreateValueFn(
+                                            forNewlyGeneratedType)[fD.FieldName]();
                                     })
                                 ),
                                 newFields.ToDictionary(
                                     fD => fD.FieldName,
-                                    fD => new TemporaryNewFieldValues.GetNewFieldType((Type forNewlyGeneratedType) =>
+                                    fD => new TemporaryNewFieldValues.GetNewFieldType(forNewlyGeneratedType =>
                                     {
                                         //TODO: PERF: could cache those - they run to init every new value (for every instance when accessed)
-                                        return (Type)CreateNewFieldInitMethodRewriter.ResolveNewFieldsToTypeFn(forNewlyGeneratedType)[fD.FieldName]();
+                                        return (Type)CreateNewFieldInitMethodRewriter.ResolveNewFieldsToTypeFn(
+                                            forNewlyGeneratedType)[fD.FieldName]();
                                     })
                                 )
                             );
@@ -139,24 +148,28 @@ namespace FastScriptReload.Editor.Compilation
                 //WARN: application order is important, eg ctors need to happen before class names as otherwise ctors will not be recognised as ctors
                 if (FastScriptReloadManager.Instance.EnableExperimentalThisCallLimitationFix)
                 {
-					root = new ThisCallRewriter(DebugWriteRewriteReasonAsComment).Visit(root);
-					root = new ThisAssignmentRewriter(DebugWriteRewriteReasonAsComment).Visit(root);
+                    root = new ThisCallRewriter(DebugWriteRewriteReasonAsComment).Visit(root);
+                    root = new ThisAssignmentRewriter(DebugWriteRewriteReasonAsComment).Visit(root);
                 }
 
-                if (FastScriptReloadManager.Instance.AssemblyChangesLoaderEditorOptionsNeededInBuild.EnableExperimentalAddedFieldsSupport)
+                if (FastScriptReloadManager.Instance.AssemblyChangesLoaderEditorOptionsNeededInBuild
+                    .enableExperimentalAddedFieldsSupport)
                 {
-                    root = new NewFieldsRewriter(typeToNewFieldDeclarations, DebugWriteRewriteReasonAsComment).Visit(root);
-                    root = new CreateNewFieldInitMethodRewriter(typeToNewFieldDeclarations, DebugWriteRewriteReasonAsComment).Visit(root);
+                    root = new NewFieldsRewriter(typeToNewFieldDeclarations, DebugWriteRewriteReasonAsComment)
+                        .Visit(root);
+                    root = new CreateNewFieldInitMethodRewriter(typeToNewFieldDeclarations,
+                        DebugWriteRewriteReasonAsComment).Visit(root);
                 }
-                
-                root = new ConstructorRewriter(adjustCtorOnlyForNonNestedTypes: true, DebugWriteRewriteReasonAsComment).Visit(root);
-                
+
+                root = new ConstructorRewriter(true, DebugWriteRewriteReasonAsComment).Visit(root);
+
                 var hotReloadCompliantRewriter = new HotReloadCompliantRewriter(DebugWriteRewriteReasonAsComment);
                 root = hotReloadCompliantRewriter.Visit(root);
                 combinedUsingStatements.AddRange(hotReloadCompliantRewriter.StrippedUsingDirectives);
 
                 //processed as last step to simply rewrite all changes made before
-                if (TryResolveUserDefinedOverridesRoot(sourceCodeFile, definedPreprocessorSymbols, out var userDefinedOverridesRoot))
+                if (TryResolveUserDefinedOverridesRoot(sourceCodeFile, definedPreprocessorSymbols,
+                        out var userDefinedOverridesRoot))
                 {
                     root = ProcessUserDefinedOverridesReplacements(sourceCodeFile, root, userDefinedOverridesRoot);
                     root = AddUserDefinedOverridenTypes(userDefinedOverridesRoot, root);
@@ -167,17 +180,13 @@ namespace FastScriptReload.Editor.Compilation
 
             var sourceCodeCombinedSb = new StringBuilder();
             sourceCodeCombinedSb.Append(DebuggingInformationComment);
-            
+
             foreach (var usingStatement in combinedUsingStatements.Distinct())
-            {
                 sourceCodeCombinedSb.Append(usingStatement);
-            }
 
             foreach (var sourceCodeWithAdjustment in sourceCodeWithAdjustments)
-            {
                 sourceCodeCombinedSb.AppendLine(sourceCodeWithAdjustment);
-            }
-            
+
             LoggerScoped.LogDebug("Source Code Created:\r\n\r\n" + sourceCodeCombinedSb);
             return sourceCodeCombinedSb.ToString();
         }
@@ -186,21 +195,21 @@ namespace FastScriptReload.Editor.Compilation
         {
             try
             {
-                var userDefinedOverrideTypes = userDefinedOverridesRoot.DescendantNodes().OfType<TypeDeclarationSyntax>()
-                    .ToDictionary(n => RoslynUtils.GetMemberFQDN(n, n.Identifier.ToString()));
+                var userDefinedOverrideTypes = userDefinedOverridesRoot.DescendantNodes()
+                    .OfType<TypeDeclarationSyntax>()
+                    .ToDictionary(n => RoslynUtils.GetMemberFqdn(n, n.Identifier.ToString()));
                 var allDefinedTypesInRecompiledFile = root.DescendantNodes().OfType<TypeDeclarationSyntax>()
-                    .ToDictionary(n => RoslynUtils.GetMemberFQDN(n, n.Identifier.ToString())); //what about nested types?
+                    .ToDictionary(n =>
+                        RoslynUtils.GetMemberFqdn(n, n.Identifier.ToString())); //what about nested types?
 
-                var userDefinedOverrideTypesWithoutMatchnigInRecompiledFile = userDefinedOverrideTypes.Select(overridenType =>
-                    {
-                        if (!allDefinedTypesInRecompiledFile.ContainsKey(overridenType.Key))
+                var userDefinedOverrideTypesWithoutMatchnigInRecompiledFile = userDefinedOverrideTypes.Select(
+                        overridenType =>
                         {
-                            return overridenType;
-                        }
+                            if (!allDefinedTypesInRecompiledFile.ContainsKey(overridenType.Key)) return overridenType;
 
-                        return default(KeyValuePair<string, TypeDeclarationSyntax>);
-                    })
-                    .Where(kv => kv.Key != default(string))
+                            return default;
+                        })
+                    .Where(kv => kv.Key != default)
                     .ToList();
 
                 //types should be added either to root namespace or root of document
@@ -208,7 +217,7 @@ namespace FastScriptReload.Editor.Compilation
                 foreach (var overridenTypeToAdd in userDefinedOverrideTypesWithoutMatchnigInRecompiledFile)
                 {
                     var newMember = FastScriptReloadCodeRewriterBase.AddRewriteCommentIfNeeded(overridenTypeToAdd.Value,
-                        "New type defined in override file", 
+                        "New type defined in override file",
                         true, //always write reason so it's not easy to miss in generated file
                         true);
                     if (rootNamespace != null)
@@ -233,40 +242,45 @@ namespace FastScriptReload.Editor.Compilation
             return root;
         }
 
-        private static bool TryResolveUserDefinedOverridesRoot(string sourceCodeFile, List<string> definedPreprocessorSymbols, out SyntaxNode userDefinedOverridesRoot)
+        private static bool TryResolveUserDefinedOverridesRoot(string sourceCodeFile,
+            List<string> definedPreprocessorSymbols, out SyntaxNode userDefinedOverridesRoot)
         {
-            if (ScriptGenerationOverridesManager.TryGetScriptOverride(new FileInfo(sourceCodeFile), out var userDefinedOverridesFile))
-            {
+            if (ScriptGenerationOverridesManager.TryGetScriptOverride(new FileInfo(sourceCodeFile),
+                    out var userDefinedOverridesFile))
                 try
                 {
-                    userDefinedOverridesRoot = CSharpSyntaxTree.ParseText(File.ReadAllText(userDefinedOverridesFile.FullName), new CSharpParseOptions(preprocessorSymbols: definedPreprocessorSymbols)).GetRoot();
+                    userDefinedOverridesRoot = CSharpSyntaxTree
+                        .ParseText(File.ReadAllText(userDefinedOverridesFile.FullName),
+                            new CSharpParseOptions(preprocessorSymbols: definedPreprocessorSymbols)).GetRoot();
                     return true;
                 }
                 catch (Exception ex)
                 {
-                    Debug.LogError($"Unable to resolve user defined overrides for file: '{userDefinedOverridesFile.FullName}' - please make sure it's compilable. Error: '{ex}'");
+                    Debug.LogError(
+                        $"Unable to resolve user defined overrides for file: '{userDefinedOverridesFile.FullName}' - please make sure it's compilable. Error: '{ex}'");
                 }
-            }
 
             userDefinedOverridesRoot = null;
             return false;
         }
 
-        private static SyntaxNode ProcessUserDefinedOverridesReplacements(string sourceCodeFile, SyntaxNode root, SyntaxNode userDefinedOverridesRoot)
+        private static SyntaxNode ProcessUserDefinedOverridesReplacements(string sourceCodeFile, SyntaxNode root,
+            SyntaxNode userDefinedOverridesRoot)
         {
-            if (ScriptGenerationOverridesManager.TryGetScriptOverride(new FileInfo(sourceCodeFile), out var userDefinedOverridesFile))
-            {
+            if (ScriptGenerationOverridesManager.TryGetScriptOverride(new FileInfo(sourceCodeFile),
+                    out var userDefinedOverridesFile))
                 try
                 {
-                    var userDefinedScriptOverridesRewriter = new ManualUserDefinedScriptOverridesRewriter(userDefinedOverridesRoot, 
+                    var userDefinedScriptOverridesRewriter = new ManualUserDefinedScriptOverridesRewriter(
+                        userDefinedOverridesRoot,
                         true); //always write rewrite reason so it's not easy to miss
                     root = userDefinedScriptOverridesRewriter.Visit(root);
                 }
                 catch (Exception ex)
                 {
-                    Debug.LogError($"Unable to resolve user defined overrides for file: '{userDefinedOverridesFile.FullName}' - please make sure it's compilable. Error: '{ex}'");
+                    Debug.LogError(
+                        $"Unable to resolve user defined overrides for file: '{userDefinedOverridesFile.FullName}' - please make sure it's compilable. Error: '{ex}'");
                 }
-            }
 
             return root;
         }
@@ -277,13 +291,13 @@ namespace FastScriptReload.Editor.Compilation
             foreach (var assembly in AppDomain.CurrentDomain
                          .GetAssemblies() //TODO: PERF: just need to load once and cache? or get assembly based on changed file only?
                          .Where(a => excludeAssyNames.All(assyName => !a.FullName.StartsWith(assyName))
-												&& CustomAttributeExtensions.GetCustomAttribute<DynamicallyCreatedAssemblyAttribute>((Assembly)a) == null))
-            {
+                                     && a.GetCustomAttribute<DynamicallyCreatedAssemblyAttribute>() == null))
                 try
                 {
                     if (string.IsNullOrEmpty(assembly.Location))
                     {
-                        LoggerScoped.LogDebug($"FastScriptReload: Assembly location is null, usually dynamic assembly, harmless.");
+                        LoggerScoped.LogDebug(
+                            "FastScriptReload: Assembly location is null, usually dynamic assembly, harmless.");
                         continue;
                     }
 
@@ -291,26 +305,27 @@ namespace FastScriptReload.Editor.Compilation
                 }
                 catch (Exception)
                 {
-                    LoggerScoped.LogDebug($"Unable to add a reference to assembly as unable to get location or null: {assembly.FullName} when hot-reloading, this is likely dynamic assembly and won't cause issues");
+                    LoggerScoped.LogDebug(
+                        $"Unable to add a reference to assembly as unable to get location or null: {assembly.FullName} when hot-reloading, this is likely dynamic assembly and won't cause issues");
                 }
-            }
-            
-            referencesToAdd = referencesToAdd.Where(r => !ReferencesExcludedFromHotReload.Any(rTe => r.EndsWith(rTe))).ToList();
 
-            if (EnableExperimentalThisCallLimitationFix || FastScriptReloadManager.Instance.AssemblyChangesLoaderEditorOptionsNeededInBuild.EnableExperimentalAddedFieldsSupport)
-            {
-	            IncludeMicrosoftCsharpReferenceToSupportDynamicKeyword(referencesToAdd);
-            }
+            referencesToAdd = referencesToAdd.Where(r => !ReferencesExcludedFromHotReload.Any(rTe => r.EndsWith(rTe)))
+                .ToList();
+
+            if (EnableExperimentalThisCallLimitationFix || FastScriptReloadManager.Instance
+                    .AssemblyChangesLoaderEditorOptionsNeededInBuild
+                    .enableExperimentalAddedFieldsSupport)
+                IncludeMicrosoftCsharpReferenceToSupportDynamicKeyword(referencesToAdd);
 
             return referencesToAdd;
         }
 
         private static void IncludeMicrosoftCsharpReferenceToSupportDynamicKeyword(List<string> referencesToAdd)
         {
-	        //TODO: check .net4.5 backend not breaking?
-	        //ThisRewriters will cast to dynamic - if using .NET Standard 2.1 - reference is required
-	        referencesToAdd.Add(AssemblyCsharpFullPath);
-	        // referencesToAdd.Add(@"C:\Program Files\Unity\Hub\Editor\2021.3.12f1\Editor\Data\UnityReferenceAssemblies\unity-4.8-api\Microsoft.CSharp.dll");
+            //TODO: check .net4.5 backend not breaking?
+            //ThisRewriters will cast to dynamic - if using .NET Standard 2.1 - reference is required
+            referencesToAdd.Add(AssemblyCsharpFullPath);
+            // referencesToAdd.Add(@"C:\Program Files\Unity\Hub\Editor\2021.3.12f1\Editor\Data\UnityReferenceAssemblies\unity-4.8-api\Microsoft.CSharp.dll");
         }
     }
 }
