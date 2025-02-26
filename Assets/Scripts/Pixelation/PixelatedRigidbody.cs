@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
@@ -187,25 +188,34 @@ namespace Pixelation
 
         protected async UniTask FadeOutAndDestroy(float duration)
         {
-            await FadeOut(duration);
-            Destroy(gameObject);
+            // Retrieve the token before awaiting any async operation
+            var token = this.GetCancellationTokenOnDestroy();
+
+            await FadeOut(duration, token);
+
+            // Ensure that the object is not already destroyed before calling Destroy
+            if (!token.IsCancellationRequested) Destroy(gameObject);
         }
 
-        private async UniTask FadeOut(float duration)
+        private async UniTask FadeOut(float duration, CancellationToken token)
         {
             var elapsed = 0f;
+
+            if (SpriteRenderer == null) return;
             var startColor = SpriteRenderer.color;
 
             while (elapsed < duration)
             {
+                if (token.IsCancellationRequested || SpriteRenderer == null) return;
+
                 var alpha = 1f - elapsed / duration;
                 SpriteRenderer.color = new Color(startColor.r, startColor.g, startColor.b, alpha);
 
                 elapsed += Time.deltaTime;
-                await UniTask.Yield();
+                await UniTask.Yield(PlayerLoopTiming.Update, token);
             }
 
-            SpriteRenderer.color = new Color(startColor.r, startColor.g, startColor.b, 0f);
+            if (SpriteRenderer != null) SpriteRenderer.color = new Color(startColor.r, startColor.g, startColor.b, 0f);
         }
     }
 }

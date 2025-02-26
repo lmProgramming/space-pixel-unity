@@ -11,7 +11,7 @@ public class Cannon : MonoBehaviour, IWeapon
 
     [SerializeField] private float projectileSpeed;
 
-    private PixelatedRigidbody parentBody;
+    private PixelatedRigidbody _parentBody;
 
     public void Shoot()
     {
@@ -22,13 +22,13 @@ public class Cannon : MonoBehaviour, IWeapon
         var newBullet = Instantiate(projectilePrefab, transform.position, transform.rotation, projectilesHolder);
 
         var bulletRigidbody = newBullet.GetComponent<Rigidbody2D>();
-        bulletRigidbody.linearVelocity = parentBody.Rigidbody.linearVelocity;
-        bulletRigidbody.AddForce(parentBody.Rigidbody.linearVelocity + direction * projectileSpeed,
+        bulletRigidbody.linearVelocity = _parentBody.Rigidbody.linearVelocity;
+        bulletRigidbody.AddForce(_parentBody.Rigidbody.linearVelocity + direction * projectileSpeed,
             ForceMode2D.Impulse);
     }
 
     public void SetBody(ShipBody body)
     {
-        parentBody = body;
+        _parentBody = body;
     }
 }

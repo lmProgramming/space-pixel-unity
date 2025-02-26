@@ -19,12 +19,17 @@ public class Bullet : PixelatedRigidbody
     {
         try
         {
-            await UniTask.Delay(TimeSpan.FromSeconds(lifeTime));
+            var token = this.GetCancellationTokenOnDestroy();
+
+            await UniTask.Delay(TimeSpan.FromSeconds(lifeTime), cancellationToken: token);
             await FadeOutAndDestroy(fadeOutTime);
         }
-        catch (Exception ex)
+        catch (OperationCanceledException)
         {
-            Debug.LogException(ex);
+        }
+        catch (Exception e)
+        {
+            Debug.LogException(e);
         }
     }
 }
