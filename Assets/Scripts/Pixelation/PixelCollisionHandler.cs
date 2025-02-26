@@ -7,9 +7,10 @@ using UnityEngine;
 
 namespace Pixelation
 {
-    public class PixelCollisionHandler
+    public sealed class PixelCollisionHandler
     {
         private const int MinPixelsForJunkCreation = 3;
+        private const float DefaultExplosionChange = 0.5f;
         private readonly PixelatedRigidbody _body;
         private readonly PolygonCollider2D _collider;
         private readonly CollisionResolver.CollisionResolver _collisionResolver;
@@ -36,17 +37,19 @@ namespace Pixelation
                 ? GridRegionFinder.FloodFindCohesiveRegions(pixels[0], _grid)
                 : GridRegionFinder.FloodFindCohesiveRegions(_grid);
 
+            regions = regions.OrderBy(r => r.Count).ToList();
+
             switch (regions.Count)
             {
                 case 0:
                     _body.NoPixelsLeft();
                     return;
                 case > 1:
-                    HandleDivision(regions);
+                    HandleDivision(regions.SkipLast(1).ToList());
                     break;
             }
 
-            RecalculateMass(regions[0].Count);
+            RecalculateMass(regions[^1].Count);
 
             RecalculateColliders();
         }
@@ -62,8 +65,14 @@ namespace Pixelation
             var pixelsDestroyed = _collisionResolver.ResolveCollision(other, collision);
 
             var vector2Ints = pixelsDestroyed as Vector2Int[] ?? pixelsDestroyed.ToArray();
-            if (vector2Ints.Count() > 2)
-                EffectsSpawner.Instance.SpawnExplosion(_body.LocalToWorldPoint(MathExt.RandomFrom(vector2Ints)));
+            EffectsOnPixelsDestroyed(vector2Ints);
+        }
+
+        private void EffectsOnPixelsDestroyed(Vector2Int[] pixels)
+        {
+            foreach (var pixel in pixels)
+                if (Random.value < DefaultExplosionChange)
+                    EffectsSpawner.Instance.SpawnExplosion(_body.LocalToWorldPoint(pixel));
         }
 
         private void RecalculateColliders()
@@ -85,12 +94,8 @@ namespace Pixelation
 
         private void HandleDivision(List<HashSet<Vector2Int>> regions)
         {
-            regions = regions.OrderBy(r => r.Count).ToList();
-
-            for (var index = 0; index < regions.Count - 1; index++)
+            foreach (var region in regions)
             {
-                var region = regions[index];
-
                 if (region.Count >= MinPixelsForJunkCreation) CreateNewJunk(region);
 
                 _grid.RemovePixels(region);
@@ -118,7 +123,7 @@ namespace Pixelation
             JunkSpawner.Instance.SpawnJunk(globalPosition, _body.transform.rotation, newColorsGrid, _body);
         }
 
-        private Vector2Int? GetPointAlongPath(Vector2Int startPosition, Vector2 direction, bool getLast)
+        public Vector2Int? GetPointAlongPath(Vector2Int startPosition, Vector2 direction, bool getLast)
         {
             var pointsTraversed = GridMarcher.March(new Vector2Int(_grid.Width, _grid.Height),
                 startPosition,
@@ -142,10 +147,9 @@ namespace Pixelation
 
             var closestPointsAndDistances = new List<(Vector2Int Position, float Distance)>();
 
-            while (radiusChecked < maxRadiusChecked)
+            while (radiusChecked < maxRadiusChecked && closestPointsAndDistances.Count < positionsMaxCount)
             {
-                if (closestPointsAndDistances.Count >= positionsMaxCount) break;
-
+                closestPointsAndDistances = new List<(Vector2Int Position, float Distance)>();
                 for (var x = localPositionInt.x - radiusChecked; x <= localPositionInt.x + radiusChecked; x++)
                 for (var y = localPositionInt.y - radiusChecked; y <= localPositionInt.y + radiusChecked; y++)
                 {
@@ -161,7 +165,7 @@ namespace Pixelation
                 radiusChecked++;
             }
 
-            return closestPointsAndDistances.Select(p => p.Position).ToList();
+            return closestPointsAndDistances.Select(p => p.Position).Take(positionsMaxCount).ToList();
 
             void InsertPositionToSortedArray(Vector2Int position, float distance)
             {
