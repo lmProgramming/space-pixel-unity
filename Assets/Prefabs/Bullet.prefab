@@ -49,6 +49,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sprite: {fileID: 21300000, guid: 48c3f738877df1e4b96921ca32bddcac, type: 3}
   lineSimplificationTolerance: 0
+  fadeOutTime: 2
+  lifeTime: 2
 --- !u!212 &539668653379362583
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -117,7 +119,7 @@ Rigidbody2D:
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
   m_Mass: 1
-  m_LinearDamping: 1
+  m_LinearDamping: 0.1
   m_AngularDamping: 1
   m_GravityScale: 0
   m_Material: {fileID: 0}

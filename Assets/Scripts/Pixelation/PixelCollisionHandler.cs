@@ -10,7 +10,7 @@ namespace Pixelation
     public sealed class PixelCollisionHandler
     {
         private const int MinPixelsForJunkCreation = 3;
-        private const float DefaultExplosionChange = 0.5f;
+        private const float DefaultExplosionChange = 0.25f;
         private readonly PixelatedRigidbody _body;
         private readonly PolygonCollider2D _collider;
         private readonly CollisionResolver.CollisionResolver _collisionResolver;
@@ -59,7 +59,7 @@ namespace Pixelation
             _body.Rigidbody.mass = pixelsCount;
         }
 
-        private void ResolveCollision(IPixelated other, Collision2D collision)
+        private void ResolveCollision(PixelatedRigidbody other, Collision2D collision)
         {
             _didCollide = true;
             var pixelsDestroyed = _collisionResolver.ResolveCollision(other, collision);

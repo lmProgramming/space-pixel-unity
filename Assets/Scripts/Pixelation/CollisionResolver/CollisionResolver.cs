@@ -14,6 +14,6 @@ namespace Pixelation.CollisionResolver
             PixelatedRigidbody = pixelatedRigidbody;
         }
 
-        public abstract IEnumerable<Vector2Int> ResolveCollision(IPixelated other, Collision2D collision);
+        public abstract IEnumerable<Vector2Int> ResolveCollision(PixelatedRigidbody other, Collision2D collision);
     }
 }

@@ -12,7 +12,7 @@ namespace Pixelation
     [RequireComponent(typeof(SpriteRenderer))]
     public class PixelatedRigidbody : MonoBehaviour, IPixelated
     {
-        private const float SpeedLimitForDiscreteCollisionDetectionSquared = 1;
+        private const float SpeedLimitForDiscreteCollisionDetectionSquared = 0;
 
         [SerializeField] private Sprite sprite;
 
@@ -40,7 +40,7 @@ namespace Pixelation
             CollisionHandler.SetCollided(false);
 
             Rigidbody.collisionDetectionMode =
-                Rigidbody.linearVelocity.sqrMagnitude > SpeedLimitForDiscreteCollisionDetectionSquared
+                Rigidbody.linearVelocity.sqrMagnitude >= SpeedLimitForDiscreteCollisionDetectionSquared
                     ? CollisionDetectionMode2D.Continuous
                     : CollisionDetectionMode2D.Discrete;
         }

@@ -543,8 +543,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <Body>k__BackingField: {fileID: 1940184194}
-  speedMultiplier: 400
-  rotationMultiplier: -2000
+  speedMultiplier: 4000
+  rotationMultiplier: -20000
 --- !u!4 &292801185
 Transform:
   m_ObjectHideFlags: 0
@@ -3251,7 +3251,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   objectToFollow: {fileID: 1940184193}
   forcedToFollowCurrentObject: 1
-  followRotation: 1
+  followRotation: 0
   dragSpeed: 1
   keySpeed: 1
   scrollSpeed: 80

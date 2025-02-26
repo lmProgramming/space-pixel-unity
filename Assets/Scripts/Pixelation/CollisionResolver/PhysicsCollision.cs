@@ -10,9 +10,9 @@ namespace Pixelation.CollisionResolver
         {
         }
 
-        public override IEnumerable<Vector2Int> ResolveCollision(IPixelated other, Collision2D collision)
+        public override IEnumerable<Vector2Int> ResolveCollision(PixelatedRigidbody other, Collision2D collision)
         {
-            var pixelsToDestroyCount = collision.relativeVelocity.magnitude * collision.rigidbody.mass / 500;
+            var pixelsToDestroyCount = collision.relativeVelocity.magnitude * Mathf.Sqrt(other.Rigidbody.mass) * 0.01f;
 
             Debug.Log(pixelsToDestroyCount);
 
