@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 namespace Pixelation
@@ -21,13 +22,14 @@ namespace Pixelation
         public PixelCollisionHandler CollisionHandler { get; private set; }
 
         public Rigidbody2D Rigidbody { get; private set; }
+        private SpriteRenderer SpriteRenderer { get; set; }
 
         private void Awake()
         {
             Rigidbody = GetComponent<Rigidbody2D>();
         }
 
-        public void Start()
+        public virtual void Start()
         {
             Setup();
         }
@@ -134,7 +136,9 @@ namespace Pixelation
             if (_isSetup) return;
             _isSetup = true;
 
-            PixelGrid = new PixelGrid(GetComponent<SpriteRenderer>());
+            GetComponents();
+
+            PixelGrid = new PixelGrid(SpriteRenderer);
 
             CollisionHandler = new PixelCollisionHandler(PixelGrid, this, GetComponent<PolygonCollider2D>());
 
@@ -143,8 +147,6 @@ namespace Pixelation
             if (sprite.ToString() != "null") PixelGrid.SetSprite(sprite);
 
             PixelGrid.Setup();
-
-            GetComponents();
 
             // CalculatePixels();
 
@@ -169,6 +171,7 @@ namespace Pixelation
         private void GetComponents()
         {
             Rigidbody = GetComponent<Rigidbody2D>();
+            SpriteRenderer = GetComponent<SpriteRenderer>();
         }
 
         public virtual void NoPixelsLeft()
@@ -180,6 +183,29 @@ namespace Pixelation
         public void CopyVelocity(PixelatedRigidbody parentBody)
         {
             Rigidbody.linearVelocity = parentBody.Rigidbody.linearVelocity;
+        }
+
+        protected async UniTask FadeOutAndDestroy(float duration)
+        {
+            await FadeOut(duration);
+            Destroy(gameObject);
+        }
+
+        private async UniTask FadeOut(float duration)
+        {
+            var elapsed = 0f;
+            var startColor = SpriteRenderer.color;
+
+            while (elapsed < duration)
+            {
+                var alpha = 1f - elapsed / duration;
+                SpriteRenderer.color = new Color(startColor.r, startColor.g, startColor.b, alpha);
+
+                elapsed += Time.deltaTime;
+                await UniTask.Yield();
+            }
+
+            SpriteRenderer.color = new Color(startColor.r, startColor.g, startColor.b, 0f);
         }
     }
 }
