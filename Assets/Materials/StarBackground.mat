@@ -1,0 +1,73 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: StarBackground
+  m_Shader: {fileID: 4800000, guid: 93a8241f162bc914d8e443f52eb7a842, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _AlphaTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MaskTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NormalMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _EnableExternalAlpha: 0
+    - _GradientOffset: 0.5
+    - _GradientParallax: 0.3
+    - _GradientScale: 2
+    - _MaxZoom: 100
+    - _MinZoom: 30
+    - _NoiseScale: 0.01
+    - _NoiseSpeed: 0.01
+    - _NoiseStrength: 0.5
+    - _ParallaxStrength: 0.02
+    - _Seed: 42
+    - _StarDensity: 2
+    - _StarSize: 1
+    - _StarSizeMax: 6
+    - _StarSizeMin: 1
+    - _TwinkleSpeed: 1
+    - _TwinkleVariation: 0.7
+    - _ZWrite: 0
+    m_Colors:
+    - _BackgroundColor: {r: 0, g: 0, b: 0, a: 1}
+    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _GradientColor1: {r: 0.5, g: 0, b: 1, a: 1}
+    - _GradientColor2: {r: 0, g: 0.05, b: 0.1, a: 1}
+    - _GradientColor3: {r: 0.02, g: 0.02, b: 0.05, a: 1}
+    - _RendererColor: {r: 1, g: 1, b: 1, a: 1}
+    - _StarColor1: {r: 1, g: 1, b: 1, a: 1}
+    - _StarColor2: {r: 0.7, g: 0.8, b: 1, a: 1}
+    - _StarColor3: {r: 1, g: 0.8, b: 0.6, a: 1}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1
