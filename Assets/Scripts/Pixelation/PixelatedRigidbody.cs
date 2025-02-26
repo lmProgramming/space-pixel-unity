@@ -127,7 +127,8 @@ namespace Pixelation
 
         public Vector2 LocalToWorldPoint(Vector2Int localPosition)
         {
-            Vector2 position = transform.TransformPoint((Vector2)localPosition);
+            Vector2 position = transform.TransformPoint(new Vector2(localPosition.x - (float)PixelGrid.Width / 2,
+                localPosition.y - (float)PixelGrid.Height / 2));
 
             return position;
         }
