@@ -36,12 +36,27 @@ namespace Pixelation
                 ? GridRegionFinder.FloodFindCohesiveRegions(pixels[0], _grid)
                 : GridRegionFinder.FloodFindCohesiveRegions(_grid);
 
-            if (regions.Count > 1) HandleDivision(regions);
+            switch (regions.Count)
+            {
+                case 0:
+                    _body.NoPixelsLeft();
+                    return;
+                case > 1:
+                    HandleDivision(regions);
+                    break;
+            }
+
+            RecalculateMass(regions[0].Count);
 
             RecalculateColliders();
         }
 
-        public void ResolveCollision(IPixelated other, Collision2D collision)
+        private void RecalculateMass(int pixelsCount)
+        {
+            _body.Rigidbody.mass = pixelsCount;
+        }
+
+        private void ResolveCollision(IPixelated other, Collision2D collision)
         {
             _didCollide = true;
             var pixelsDestroyed = _collisionResolver.ResolveCollision(other, collision);
@@ -51,7 +66,7 @@ namespace Pixelation
                 EffectsSpawner.Instance.SpawnExplosion(_body.LocalToWorldPoint(MathExt.RandomFrom(vector2Ints)));
         }
 
-        public void RecalculateColliders()
+        private void RecalculateColliders()
         {
             var polygon = _gridContourTracer.GenerateCollider(_grid.Texture, new Vector2(.5f, .5f), 1);
             if (polygon is null)
@@ -80,8 +95,6 @@ namespace Pixelation
 
                 _grid.RemovePixels(region);
             }
-
-            RecalculateColliders();
         }
 
         private void CreateNewJunk(HashSet<Vector2Int> points)

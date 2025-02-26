@@ -149,9 +149,7 @@ namespace Pixelation
 
             PixelGrid.Setup();
 
-            // CalculatePixels();
-
-            CollisionHandler.RecalculateColliders();
+            OnPixelsDestroyed?.Invoke(new List<Vector2Int>());
         }
 
         // private void CalculatePixels()
@@ -188,12 +186,10 @@ namespace Pixelation
 
         protected async UniTask FadeOutAndDestroy(float duration)
         {
-            // Retrieve the token before awaiting any async operation
             var token = this.GetCancellationTokenOnDestroy();
 
             await FadeOut(duration, token);
 
-            // Ensure that the object is not already destroyed before calling Destroy
             if (!token.IsCancellationRequested) Destroy(gameObject);
         }
 
