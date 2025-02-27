@@ -13,7 +13,7 @@ using ImmersiveVrToolsCommon.Runtime.Logging;
 using UnityEditor;
 using UnityEditorInternal;
 
-namespace FastScriptReload.Editor.Compilation
+namespace FastScriptReload.Scripts.Editor.Compilation
 {
     [InitializeOnLoad]
     public class DotnetExeDynamicCompilation : DynamicCompilationBase

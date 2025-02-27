@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using FastScriptReload.Runtime;
+using FastScriptReload.Scripts.Runtime;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -10,7 +10,7 @@ using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
 
-namespace FastScriptReload.Editor.Compilation.ScriptGenerationOverrides
+namespace FastScriptReload.Scripts.Editor.Compilation.ScriptGenerationOverrides
 {
     [InitializeOnLoad]
     public static class ScriptGenerationOverridesManager

@@ -2,19 +2,19 @@
 using System;
 using System.IO;
 using System.Linq;
-using ImmersiveVrToolsCommon.Runtime.Logging;
+using UnityEditor;
 using UnityEngine;
 
-namespace FastScriptReload.Runtime
+namespace FastScriptReload.Scripts.Runtime
 {
 #if UNITY_EDITOR
-    [UnityEditor.InitializeOnLoad]
+    [InitializeOnLoad]
 #endif
     public class DetourCrashHandler
     {
         //TODO: add device support / android crashes / how to report issues back?
         public static string LastDetourFilePath;
-    
+
         static DetourCrashHandler()
         {
 #if UNITY_EDITOR
@@ -25,14 +25,11 @@ namespace FastScriptReload.Runtime
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
-        static void Init()
+        private static void Init()
         {
 #if UNITY_EDITOR
             LastDetourFilePath = Path.GetTempPath() + Application.productName + "-last-detour.txt";
-            foreach (var c in Path.GetInvalidFileNameChars()) 
-            { 
-                LastDetourFilePath = LastDetourFilePath.Replace(c, '-'); 
-            }
+            foreach (var c in Path.GetInvalidFileNameChars()) LastDetourFilePath = LastDetourFilePath.Replace(c, '-');
 #else
             LoggerScoped.Log($"{nameof(DetourCrashHandler)}: currently only supported in Editor");
 #endif

@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using ContourTracer;
 using Other;
 using Pixelation.CollisionResolver;
 using UnityEngine;
+using Enumerable = System.Linq.Enumerable;
 
 namespace Pixelation
 {
@@ -37,7 +37,7 @@ namespace Pixelation
                 ? GridRegionFinder.FloodFindCohesiveRegions(pixels[0], _grid)
                 : GridRegionFinder.FloodFindCohesiveRegions(_grid);
 
-            regions = regions.OrderBy(r => r.Count).ToList();
+            regions = Enumerable.ToList(Enumerable.OrderBy(regions, r => r.Count));
 
             switch (regions.Count)
             {
@@ -45,7 +45,7 @@ namespace Pixelation
                     _body.NoPixelsLeft();
                     return;
                 case > 1:
-                    HandleDivision(regions.SkipLast(1).ToList());
+                    HandleDivision(Enumerable.ToList(Enumerable.SkipLast(regions, 1)));
                     break;
             }
 
@@ -64,15 +64,15 @@ namespace Pixelation
             _didCollide = true;
             var pixelsDestroyed = _collisionResolver.ResolveCollision(other, collision);
 
-            var vector2Ints = pixelsDestroyed as Vector2Int[] ?? pixelsDestroyed.ToArray();
+            var vector2Ints = pixelsDestroyed as Vector2Int[] ?? Enumerable.ToArray(pixelsDestroyed);
             EffectsOnPixelsDestroyed(vector2Ints);
         }
 
         private void EffectsOnPixelsDestroyed(Vector2Int[] pixels)
         {
-            foreach (var pixel in pixels)
-                if (Random.value < DefaultExplosionChange)
-                    EffectsSpawner.Instance.SpawnExplosion(_body.LocalToWorldPoint(pixel));
+            var explosionsCount = Mathf.Min(pixels.Length - 1, Mathf.Max(1, pixels.Length * DefaultExplosionChange));
+            for (var index = 0; index < explosionsCount; index++)
+                EffectsSpawner.Instance.SpawnExplosion(_body.LocalToWorldPoint(pixels[index]));
         }
 
         private void RecalculateColliders()
@@ -86,7 +86,7 @@ namespace Pixelation
 
             var points = new List<Vector2>();
 
-            LineUtility.Simplify(polygon.ToList(), _lineSimplificationTolerance, points);
+            LineUtility.Simplify(Enumerable.ToList(polygon), _lineSimplificationTolerance, points);
 
             _collider.pathCount = 1;
             _collider.SetPath(0, points);
@@ -104,8 +104,8 @@ namespace Pixelation
 
         private void CreateNewJunk(HashSet<Vector2Int> points)
         {
-            var rightTopPoint = new Vector2Int(points.Max(p => p.x), points.Max(p => p.y));
-            var leftBottomPoint = new Vector2Int(points.Min(p => p.x), points.Min(p => p.y));
+            var rightTopPoint = new Vector2Int(Enumerable.Max(points, p => p.x), Enumerable.Max(points, p => p.y));
+            var leftBottomPoint = new Vector2Int(Enumerable.Min(points, p => p.x), Enumerable.Min(points, p => p.y));
             var parentCenterPoint = _grid.Center;
 
             var width = rightTopPoint.x - leftBottomPoint.x + 1;
@@ -131,7 +131,7 @@ namespace Pixelation
 
             if (getLast) pointsTraversed.Reverse();
 
-            foreach (var point in pointsTraversed.Where(_grid.IsPixel))
+            foreach (var point in Enumerable.Where(pointsTraversed, _grid.IsPixel))
                 return new Vector2Int(point.x, point.y);
 
             return null;
@@ -165,7 +165,8 @@ namespace Pixelation
                 radiusChecked++;
             }
 
-            return closestPointsAndDistances.Select(p => p.Position).Take(positionsMaxCount).ToList();
+            return Enumerable.ToList(Enumerable.Take(Enumerable.Select(closestPointsAndDistances, p => p.Position),
+                positionsMaxCount));
 
             void InsertPositionToSortedArray(Vector2Int position, float distance)
             {

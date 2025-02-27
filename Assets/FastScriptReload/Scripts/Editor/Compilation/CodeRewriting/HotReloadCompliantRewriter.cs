@@ -1,21 +1,21 @@
 ﻿using System.Collections.Generic;
-using FastScriptReload.Runtime;
+using FastScriptReload.Scripts.Runtime;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace FastScriptReload.Editor.Compilation.CodeRewriting
+namespace FastScriptReload.Scripts.Editor.Compilation.CodeRewriting
 {
-    class HotReloadCompliantRewriter : FastScriptReloadCodeRewriterBase
+    internal class HotReloadCompliantRewriter : FastScriptReloadCodeRewriterBase
     {
-        public List<string> StrippedUsingDirectives = new List<string>();
-        
-        public HotReloadCompliantRewriter(bool writeRewriteReasonAsComment, bool visitIntoStructuredTrivia = false) 
+        public List<string> StrippedUsingDirectives = new();
+
+        public HotReloadCompliantRewriter(bool writeRewriteReasonAsComment, bool visitIntoStructuredTrivia = false)
             : base(writeRewriteReasonAsComment, visitIntoStructuredTrivia)
         {
         }
 
-        
+
         public override SyntaxNode VisitClassDeclaration(ClassDeclarationSyntax node)
         {
             return AddPatchedPostfixToTopLevelDeclarations(node, node.Identifier);
@@ -61,7 +61,8 @@ namespace FastScriptReload.Editor.Compilation.CodeRewriting
         private SyntaxNode AddPatchedPostfixToTopLevelDeclarations(CSharpSyntaxNode node, SyntaxToken identifier)
         {
             var newIdentifier = SyntaxFactory.Identifier(identifier + AssemblyChangesLoader.ClassnamePatchedPostfix);
-            newIdentifier = AddRewriteCommentIfNeeded(newIdentifier, $"{nameof(HotReloadCompliantRewriter)}:{nameof(AddPatchedPostfixToTopLevelDeclarations)}");
+            newIdentifier = AddRewriteCommentIfNeeded(newIdentifier,
+                $"{nameof(HotReloadCompliantRewriter)}:{nameof(AddPatchedPostfixToTopLevelDeclarations)}");
             node = node.ReplaceToken(identifier, newIdentifier);
             return node;
         }

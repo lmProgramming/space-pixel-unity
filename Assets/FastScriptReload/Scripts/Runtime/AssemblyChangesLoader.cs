@@ -12,7 +12,7 @@ using ImmersiveVrToolsCommon.Runtime.Logging;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace FastScriptReload.Runtime
+namespace FastScriptReload.Scripts.Runtime
 {
     [PreventHotReload]
 #if UNITY_EDITOR

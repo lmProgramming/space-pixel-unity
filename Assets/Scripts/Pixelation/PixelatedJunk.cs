@@ -1,5 +1,6 @@
-using Pixelation;
-
-public class PixelatedJunk : PixelatedRigidbody
+namespace Pixelation
 {
+    public class PixelatedJunk : PixelatedRigidbody
+    {
+    }
 }

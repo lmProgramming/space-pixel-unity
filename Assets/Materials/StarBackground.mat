@@ -50,12 +50,12 @@ Material:
     - _NoiseScale: 0.01
     - _NoiseSpeed: 0.01
     - _NoiseStrength: 0.5
-    - _ParallaxStrength: 0.02
+    - _ParallaxStrength: 0.025
     - _Seed: 42
     - _StarDensity: 2
     - _StarSize: 1
-    - _StarSizeMax: 6
-    - _StarSizeMin: 1
+    - _StarSizeMax: 7
+    - _StarSizeMin: 0.5
     - _TwinkleSpeed: 1
     - _TwinkleVariation: 0.7
     - _ZWrite: 0

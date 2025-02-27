@@ -189,17 +189,15 @@ Shader "Custom/StarBackgroundWithNoiseGradient"
                 float noise1 = fbm(noiseUV, 3);
                 float noise2 = fbm(noiseUV + float2(7.89, 3.25), 3);
 
-                // Mix colors based on noise values
-                fixed4 backgroundColor = _BackgroundColor;
-
                 // First blend between color1 and color2
                 fixed4 gradColor1 = lerp(_BackgroundColor, _GradientColor1, noise1 * _NoiseStrength);
 
                 // Then blend with color2 using second noise sample
                 fixed4 gradColor2 = lerp(gradColor1, _GradientColor2, noise2 * _NoiseStrength);
 
+                // Mix colors based on noise values
                 // Add a subtle third color variation using combined noise
-                backgroundColor = lerp(gradColor2, _GradientColor3, (noise1 * noise2) * _NoiseStrength * 0.5);
+                fixed4 backgroundColor = lerp(gradColor2, _GradientColor3, (noise1 * noise2) * _NoiseStrength * 0.5);
 
                 // Create star layers with different densities for depth effect
                 // Scale density with zoom for consistent look
@@ -272,11 +270,11 @@ Shader "Custom/StarBackgroundWithNoiseGradient"
 
                 // Choose star colors - truly separate for each star
                 fixed4 col1 = lerp(lerp(_StarColor1, _StarColor2, step(0.33, colorRandom1)), _StarColor3,
-                                                   step(0.66, colorRandom1));
+                                   step(0.66, colorRandom1));
                 fixed4 col2 = lerp(lerp(_StarColor1, _StarColor2, step(0.33, colorRandom2)), _StarColor3,
-                    step(0.66, colorRandom2));
+                   step(0.66, colorRandom2));
                 fixed4 col3 = lerp(lerp(_StarColor1, _StarColor2, step(0.33, colorRandom3)), _StarColor3,
-                    step(0.66, colorRandom3));
+                  step(0.66, colorRandom3));
 
                 // Blend each star layer with the background
                 fixed4 finalColor = backgroundColor;

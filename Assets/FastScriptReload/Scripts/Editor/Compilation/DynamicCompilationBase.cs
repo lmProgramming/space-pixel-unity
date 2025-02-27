@@ -4,9 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using FastScriptReload.Editor.Compilation.CodeRewriting;
-using FastScriptReload.Editor.Compilation.ScriptGenerationOverrides;
-using FastScriptReload.Runtime;
+using FastScriptReload.Scripts.Editor.Compilation.CodeRewriting;
+using FastScriptReload.Scripts.Editor.Compilation.ScriptGenerationOverrides;
 using FastScriptReload.Scripts.Runtime;
 using ImmersiveVRTools.Editor.Common.Cache;
 using ImmersiveVrToolsCommon.Runtime.Logging;
@@ -16,7 +15,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using UnityEditor;
 using UnityEngine;
 
-namespace FastScriptReload.Editor.Compilation
+namespace FastScriptReload.Scripts.Editor.Compilation
 {
     [InitializeOnLoad]
     public class DynamicCompilationBase

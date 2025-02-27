@@ -4,9 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using FastScriptReload.Editor.Compilation;
-using FastScriptReload.Editor.Compilation.ScriptGenerationOverrides;
-using FastScriptReload.Runtime;
+using FastScriptReload.Scripts.Editor.Compilation;
+using FastScriptReload.Scripts.Editor.Compilation.ScriptGenerationOverrides;
+using FastScriptReload.Scripts.Runtime;
 using ImmersiveVRTools.Runtime.Common;
 using ImmersiveVrToolsCommon.Runtime.Logging;
 using UnityEditor;
@@ -14,7 +14,7 @@ using UnityEditor.Compilation;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace FastScriptReload.Editor
+namespace FastScriptReload.Scripts.Editor
 {
     [InitializeOnLoad]
     [PreventHotReload]
@@ -30,17 +30,17 @@ namespace FastScriptReload.Editor
         private static readonly string _dataPath = Application.dataPath;
 
         private static bool _hotReloadDisabledWarningMessageShownAlready;
-        private bool _assemblyChangesLoaderResolverResolutionAlreadyCalled;
-        private IEnumerable<string> _currentFileExclusions;
 
         private readonly List<DynamicFileHotReloadState> _dynamicFileHotReloadStateEntries = new();
         private readonly List<FileSystemWatcher> _fileWatchers = new();
+        private bool _assemblyChangesLoaderResolverResolutionAlreadyCalled;
+        private IEnumerable<string> _currentFileExclusions;
         private int _hotReloadPerformedCount;
         private bool _isEditorModeHotReloadEnabled;
         private bool _isOnDemandHotReloadEnabled;
         private PlayModeStateChange _lastPlayModeStateChange;
 
-        private DateTime _lastTimeChangeBatchRun = default;
+        private DateTime _lastTimeChangeBatchRun;
         private int _triggerDomainReloadIfOverNDynamicallyLoadedAssembles = 100;
 
         private bool _wasLockReloadAssembliesCalled;

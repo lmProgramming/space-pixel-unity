@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
-using FastScriptReload.Editor.Compilation.CodeRewriting;
-using FastScriptReload.Runtime;
+using FastScriptReload.Scripts.Editor.Compilation.CodeRewriting;
 using FastScriptReload.Scripts.Runtime;
 using HarmonyLib;
 using ImmersiveVRTools.Editor.Common.Utilities;
@@ -9,7 +8,7 @@ using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace FastScriptReload.Editor.NewFields
+namespace FastScriptReload.Scripts.Editor.NewFields
 {
     [InitializeOnLoad]
     public class NewFieldsRendererDefaultEditorPatch
