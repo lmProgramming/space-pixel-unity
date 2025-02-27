@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace Other
+namespace LM
 {
     public static class GridMarcher
     {

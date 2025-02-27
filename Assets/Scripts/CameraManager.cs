@@ -1,4 +1,4 @@
-using Other;
+using LM;
 using UnityEngine;
 
 public class CameraManager : MonoBehaviour

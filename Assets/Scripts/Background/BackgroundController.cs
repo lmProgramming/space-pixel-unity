@@ -77,6 +77,7 @@ namespace Background
         private void Start()
         {
             meshRenderer.material = starBackgroundMaterial;
+            meshRenderer.enabled = true;
 
             if (playerTransform == null)
             {

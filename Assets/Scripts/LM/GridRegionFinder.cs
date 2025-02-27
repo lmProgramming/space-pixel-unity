@@ -2,7 +2,7 @@
 using Pixelation;
 using UnityEngine;
 
-namespace Other
+namespace LM
 {
     public static class GridRegionFinder
     {
