@@ -14,7 +14,7 @@ namespace Pixelation.CollisionResolver
         {
             var pixelsToDestroyCount = collision.relativeVelocity.magnitude * Mathf.Sqrt(other.Rigidbody.mass) * 0.01f;
 
-            Debug.Log(pixelsToDestroyCount);
+            //Debug.Log(pixelsToDestroyCount);
 
             var localPoint = PixelatedRigidbody.WorldToLocalPoint(collision.contacts[0].point);
 
