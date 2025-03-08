@@ -136,6 +136,9 @@ namespace Pixelation
         public void Setup(Color32[,] colors = null)
         {
             if (_isSetup) return;
+
+            if (!sprite && colors is null) throw new UnityException("Sprite is null");
+
             _isSetup = true;
 
             GetComponents();

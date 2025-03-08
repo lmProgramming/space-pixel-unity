@@ -50,7 +50,7 @@ Material:
     - _NoiseScale: 0.01
     - _NoiseSpeed: 0.01
     - _NoiseStrength: 0.5
-    - _ParallaxStrength: 0.025
+    - _ParallaxStrength: 0.01
     - _Seed: 42
     - _StarDensity: 2
     - _StarSize: 1
