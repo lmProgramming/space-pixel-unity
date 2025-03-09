@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using LM;
 using Unity.Collections;
 using UnityEngine;
@@ -75,18 +77,19 @@ namespace Pixelation
             foreach (var point in points) SetPixel(point, Color.clear);
         }
 
-        public void SetSpriteFromColors(Color32[,] colors)
+        public void SetTextureFromColors(Color32[,] colors)
         {
-            var colorsArray = new Color32[colors.GetLength(0) * colors.GetLength(1)];
+            var width = colors.GetLength(0);
+            var height = colors.GetLength(1);
+            var colorsArray = new Color32[width * height];
 
-            for (var y = 0; y < colors.GetLength(1); y++)
-            for (var x = 0; x < colors.GetLength(0); x++)
-                colorsArray[y * colors.GetLength(0) + x] = colors[x, y];
+            var lengthOfColor32 = Marshal.SizeOf(typeof(Color32));
+            Buffer.BlockCopy(colors, 0, colorsArray, 0, colorsArray.Length * lengthOfColor32);
 
-            SetSpriteFromColors(colorsArray, colors.GetLength(0), colors.GetLength(1));
+            SetTextureFromColors(colorsArray, colors.GetLength(0), colors.GetLength(1));
         }
 
-        private void SetSpriteFromColors(NativeArray<Color32> colors, int width, int height)
+        public void SetTextureFromColors(NativeArray<Color32> colors, int width, int height)
         {
             Texture = new Texture2D(width, height, TextureFormat.ARGB32, false)
             {
@@ -100,7 +103,7 @@ namespace Pixelation
                 new Vector2(0.5f, 0.5f), 1);
         }
 
-        private void SetSpriteFromColors(Color32[] colors, int width, int height)
+        public void SetTextureFromColors(Color32[] colors, int width, int height)
         {
             Texture = new Texture2D(width, height, TextureFormat.ARGB32, false)
             {
@@ -114,10 +117,9 @@ namespace Pixelation
                 new Vector2(0.5f, 0.5f), 1);
         }
 
-        public void SetSprite(Sprite sprite)
+        public void SetTexture(Texture2D texture)
         {
-            SetSpriteFromColors(sprite.texture.GetPixels32(), sprite.texture.width,
-                sprite.texture.height);
+            SetTextureFromColors(texture.GetPixels32(), texture.width, texture.height);
         }
 
         public void Setup()

@@ -15,9 +15,13 @@ namespace Pixelation
         private const float SpeedLimitForDiscreteCollisionDetectionSquared = 0;
 
         [SerializeField] private Sprite sprite;
+        [SerializeField] private bool flipX;
+        [SerializeField] private bool flipY;
 
         [SerializeField] private float lineSimplificationTolerance;
         private bool _isSetup;
+
+        private bool HasSprite => sprite != null && sprite.ToString() != "null";
 
         private PixelGrid PixelGrid { get; set; }
         public PixelCollisionHandler CollisionHandler { get; private set; }
@@ -90,7 +94,7 @@ namespace Pixelation
             PixelGrid.SetPixel(point, color);
         }
 
-        public void SetSpriteFromColors(Color32[,] colors)
+        public void SetTextureFromColors(Color32[,] colors)
         {
             Setup(colors);
         }
@@ -133,9 +137,9 @@ namespace Pixelation
             return position;
         }
 
-        public void Setup(Color32[,] colors = null)
+        public void Setup(Color32[,] colors = null, bool forceSetup = false)
         {
-            if (_isSetup) return;
+            if (_isSetup && !forceSetup) return;
 
             if (!sprite && colors is null) throw new UnityException("Sprite is null");
 
@@ -147,13 +151,42 @@ namespace Pixelation
 
             CollisionHandler = new PixelCollisionHandler(PixelGrid, this, GetComponent<PolygonCollider2D>());
 
-            if (colors is not null) PixelGrid.SetSpriteFromColors(colors);
+            if (colors is not null) PixelGrid.SetTextureFromColors(colors);
 
-            if (sprite.ToString() != "null") PixelGrid.SetSprite(sprite);
+            if (HasSprite)
+            {
+                var (colorsArray, width, height) = ReorientTexture(sprite.texture, flipX, flipY);
+                PixelGrid.SetTextureFromColors(colorsArray, width, height);
+            }
 
             PixelGrid.Setup();
 
             OnPixelsDestroyed?.Invoke(new List<Vector2Int>());
+        }
+
+        private static (Color32[], int, int) ReorientTexture(Texture2D texture, bool flipX, bool flipY)
+        {
+            var width = texture.width;
+            var height = texture.height;
+
+            if (!flipX && !flipY) return (texture.GetPixels32(), width, height);
+
+            var pixels = texture.GetPixels32();
+
+            if (flipX)
+                for (var x = 0; x < width / 2; x++)
+                for (var y = 0; y < height; y++)
+                    (pixels[x + y * width], pixels[width - 1 - x + y * width]) =
+                        (pixels[width - 1 - x + y * width], pixels[x + y * width]);
+
+            if (!flipY) return (pixels, width, height);
+
+            for (var x = 0; x < width; x++)
+            for (var y = 0; y < height / 2; y++)
+                (pixels[x + y * width], pixels[x + (height - 1 - y) * width]) = (
+                    pixels[x + (height - 1 - y) * width], pixels[x + y * width]);
+
+            return (pixels, width, height);
         }
 
         // private void CalculatePixels()
