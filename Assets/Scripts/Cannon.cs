@@ -1,7 +1,6 @@
 ﻿using Cysharp.Threading.Tasks;
 using LM;
 using Pixelation;
-using Ship;
 using UnityEngine;
 
 public class Cannon : MonoBehaviour, IWeapon
@@ -43,10 +42,5 @@ public class Cannon : MonoBehaviour, IWeapon
             ForceMode2D.Impulse);
 
         _reloadTimer.Wait(reloadTime).Forget();
-    }
-
-    public void SetBody(ShipBody body)
-    {
-        _parentBody = body;
     }
 }

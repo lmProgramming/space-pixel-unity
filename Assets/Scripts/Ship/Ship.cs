@@ -1,12 +1,15 @@
 using System.Collections.Generic;
 using System.Linq;
+using Ship.Modules;
 using UnityEngine;
 
 namespace Ship
 {
     public class Ship : MonoBehaviour
     {
-        [field: SerializeField] public ShipBody Body { get; private set; }
+        [field: SerializeField] public Main MainModule { get; private set; }
+
+        [SerializeField] private ModuleConnectionFactory moduleConnectionFactory;
 
         protected List<IWeapon> Weapons = new();
 
@@ -14,10 +17,9 @@ namespace Ship
         {
             Weapons = GetComponentsInChildren<IWeapon>().ToList();
 
-            foreach (var weapon in Weapons)
-                weapon.SetBody(Body);
+            MainModule.PixelatedRigidbody.OnNoPixelsLeft += _ => Destroy(gameObject);
 
-            Body.OnNoPixelsLeft += _ => Destroy(gameObject);
+            moduleConnectionFactory.ConnectModules(this);
         }
 
         private void Update()

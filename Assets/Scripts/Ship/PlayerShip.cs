@@ -12,11 +12,11 @@ namespace Ship
         {
             var acceleration = Input.GetAxis("Vertical") * speedMultiplier;
 
-            Body.Rigidbody.AddForce(Body.transform.up * acceleration);
+            MainModule.PixelatedRigidbody.Rigidbody.AddForce(MainModule.transform.up * acceleration);
 
             var turn = Input.GetAxis("Horizontal") * rotationMultiplier;
 
-            Body.Rigidbody.AddTorque(turn);
+            MainModule.PixelatedRigidbody.Rigidbody.AddTorque(turn);
         }
 
         protected override void HandleWeapons()

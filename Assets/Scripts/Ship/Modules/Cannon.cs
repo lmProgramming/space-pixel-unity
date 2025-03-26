@@ -45,10 +45,5 @@ namespace Ship.Modules
 
             _reloadTimer.Wait(reloadTime).Forget();
         }
-
-        public void SetBody(ShipBody body)
-        {
-            _parentBody = body;
-        }
     }
 }
