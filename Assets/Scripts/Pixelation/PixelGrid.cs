@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using LM;
 using Unity.Collections;
 using UnityEngine;
@@ -83,8 +81,18 @@ namespace Pixelation
             var height = colors.GetLength(1);
             var colorsArray = new Color32[width * height];
 
-            var lengthOfColor32 = Marshal.SizeOf(typeof(Color32));
-            Buffer.BlockCopy(colors, 0, colorsArray, 0, colorsArray.Length * lengthOfColor32);
+            if (width == 0 || height == 0)
+            {
+                Debug.LogWarning("Pixel grid texture has no colors.");
+                return;
+            }
+
+            for (var y = 0; y < height; y++)
+            for (var x = 0; x < width; x++)
+                colorsArray[y * width + x] = colors[x, y];
+
+            //var lengthOfColor32 = Marshal.SizeOf(typeof(Color32));
+            //Buffer.BlockCopy(colors, 0, colorsArray, 0, colorsArray.Length * lengthOfColor32);
 
             SetTextureFromColors(colorsArray, colors.GetLength(0), colors.GetLength(1));
         }
