@@ -23,7 +23,7 @@ namespace Pixelation
 
         private bool HasSprite => sprite != null && sprite.ToString() != "null";
 
-        private PixelGrid PixelGrid { get; set; }
+        public PixelGrid PixelGrid { get; private set; }
         public PixelCollisionHandler CollisionHandler { get; private set; }
 
         public Rigidbody2D Rigidbody { get; private set; }
@@ -47,6 +47,11 @@ namespace Pixelation
                 Rigidbody.linearVelocity.sqrMagnitude >= SpeedLimitForDiscreteCollisionDetectionSquared
                     ? CollisionDetectionMode2D.Continuous
                     : CollisionDetectionMode2D.Discrete;
+        }
+
+        private void OnDestroy()
+        {
+            _isSetup = false;
         }
 
         private void OnCollisionEnter2D(Collision2D collision)

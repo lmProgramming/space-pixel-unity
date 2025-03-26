@@ -6,10 +6,10 @@ namespace Editor
 {
     public class RenderAllPixelatedRigidbody : EditorWindow
     {
-        [MenuItem("Tools/Render all pixelated rigidbodies")]
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void RenderAllPixelated()
         {
-            var allObjects = FindObjectsByType<PixelatedRigidbody>(FindObjectsSortMode.None);
+            var allObjects = FindObjectsOfType<PixelatedRigidbody>();
 
             foreach (var obj in allObjects)
             {
@@ -17,7 +17,7 @@ namespace Editor
                 obj.Setup(forceSetup: true);
             }
 
-            Debug.Log("Components sorted for all GameObjects.");
+            Debug.Log("Rendered all pixelated rigidbodies.");
         }
     }
 }
