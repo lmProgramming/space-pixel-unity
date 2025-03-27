@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Ship.Modules;
@@ -11,11 +12,15 @@ namespace Ship
 
         [SerializeField] private ModuleConnectionFactory moduleConnectionFactory;
 
-        protected List<IWeapon> Weapons = new();
+        protected readonly Dictionary<Type, List<Module>> Modules = new();
+
+        public List<IWeapon> Weapons => Modules[typeof(IWeapon)].Cast<IWeapon>().ToList();
+        public List<Engine> Engines => Modules[typeof(Engine)].Cast<Engine>().ToList();
 
         private void Start()
         {
-            Weapons = GetComponentsInChildren<IWeapon>().ToList();
+            Modules[typeof(IWeapon)] = GetComponentsInChildren<IWeapon>().Cast<Module>().ToList();
+            Modules[typeof(Engine)] = GetComponentsInChildren<Engine>().Cast<Module>().ToList();
 
             CommandModule ??= GetComponentInChildren<Command>();
 

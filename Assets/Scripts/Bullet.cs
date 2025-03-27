@@ -40,7 +40,7 @@ public class Bullet : PixelatedRigidbody
         while (true)
         {
             var results = new Collider2D[1];
-            var collisionCount = Physics2D.OverlapCircle(transform.position, 0.3f, new ContactFilter2D(), results);
+            var collisionCount = Physics2D.OverlapCircle(transform.position, 1f, new ContactFilter2D(), results);
 
             if (collisionCount == 0)
             {
