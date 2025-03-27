@@ -1,6 +1,5 @@
 using Cysharp.Threading.Tasks;
 using LM;
-using Pixelation;
 using UnityEngine;
 
 namespace Ship.Modules
@@ -14,8 +13,6 @@ namespace Ship.Modules
         [SerializeField] private float projectileSpeed;
 
         [SerializeField] private float reloadTime;
-
-        private PixelatedRigidbody _parentBody;
 
         private SimpleTimer _reloadTimer;
 
@@ -39,8 +36,8 @@ namespace Ship.Modules
             var newBullet = Instantiate(projectilePrefab, transform.position, rotation, projectilesHolder);
 
             var bulletRigidbody = newBullet.GetComponent<Rigidbody2D>();
-            bulletRigidbody.linearVelocity = _parentBody.Rigidbody.linearVelocity;
-            bulletRigidbody.AddForce(_parentBody.Rigidbody.linearVelocity + direction * projectileSpeed,
+            bulletRigidbody.linearVelocity = PixelatedRigidbody.Rigidbody.linearVelocity;
+            bulletRigidbody.AddForce(PixelatedRigidbody.Rigidbody.linearVelocity + direction * projectileSpeed,
                 ForceMode2D.Impulse);
 
             _reloadTimer.Wait(reloadTime).Forget();
