@@ -13,6 +13,7 @@ namespace Ship.Modules
         [SerializeField] private Vector2Int leftBottom;
 
         private readonly Dictionary<Module, List<Vector2Int>> _connectionPoints = new();
+        private readonly Dictionary<Module, FixedJoint2D> _connections = new();
 
         private void Start()
         {
@@ -21,9 +22,6 @@ namespace Ship.Modules
 
         public void SetupConnections(Module otherModule, Vector2Int otherModulePosition)
         {
-            Debug.Log(otherModule.transform.position);
-            Debug.Log(transform.position);
-
             var otherPixelatedRigidbody = otherModule.PixelatedRigidbody;
 
             var overlappingPoints =
@@ -32,6 +30,12 @@ namespace Ship.Modules
             if (overlappingPoints.Count == 0) return;
 
             _connectionPoints[otherModule] = overlappingPoints;
+
+            var joint = gameObject.AddComponent<FixedJoint2D>();
+
+            joint.connectedBody = otherPixelatedRigidbody.Rigidbody;
+
+            _connections[otherModule] = joint;
 
             //for (var i = 0; i < overlappingPoints.Count; i++)
             //    Debug.Log(overlappingPoints[i]);
@@ -42,6 +46,13 @@ namespace Ship.Modules
             foreach (var point in points) RemovePixelFromConnections(point);
         }
 
+        private void DetachConnections(Module otherModule)
+        {
+            Destroy(_connections[otherModule]);
+            _connections.Remove(otherModule);
+            _connectionPoints.Remove(otherModule);
+        }
+
         private void RemovePixelFromConnections(Vector2Int pixel)
         {
             foreach (var connectedModule in _connectionPoints)
@@ -49,7 +60,15 @@ namespace Ship.Modules
                 {
                     var connectionPixels = connectedModule.Value[index];
                     if (pixel != connectionPixels) continue;
+
                     connectedModule.Value.Remove(pixel);
+
+                    if (connectedModule.Value.Count == 0)
+                    {
+                        DetachConnections(connectedModule.Key);
+                        RemovePixelFromConnections(pixel);
+                        return;
+                    }
 
                     // assuming more than 1 module can have the same connection point
                     // but 1 module can not have duplicate connection points
