@@ -25,7 +25,8 @@ namespace Pixelation
         [SerializeField] private bool flipX;
         [SerializeField] private bool flipY;
 
-        [SerializeField] private float lineSimplificationTolerance;
+        [Range(0, 3)] [SerializeField] private int rotation;
+
         private bool _isSetup;
 
         private bool HasSprite => sprite != null && sprite.ToString() != "null";
@@ -167,7 +168,10 @@ namespace Pixelation
 
             if (HasSprite)
             {
-                var (colorsArray, width, height) = ReorientTexture(sprite.texture, flipX, flipY);
+                var (colorsArray, width, height) =
+                    (sprite.texture.GetPixels32(), sprite.texture.width, sprite.texture.height);
+                colorsArray = ReorientTexture(colorsArray, width, height, flipX, flipY);
+                (colorsArray, width, height) = RotateTexture(colorsArray, width, height, rotation);
                 PixelGrid.SetTextureFromColors(colorsArray, width, height);
             }
 
@@ -176,14 +180,10 @@ namespace Pixelation
             OnPixelsLost?.Invoke(new List<Vector2Int>(), PixelLoseReason.Other);
         }
 
-        private static (Color32[], int, int) ReorientTexture(Texture2D texture, bool flipX, bool flipY)
+        private static Color32[] ReorientTexture(Color32[] pixels, int width, int height, bool flipX,
+            bool flipY)
         {
-            var width = texture.width;
-            var height = texture.height;
-
-            if (!flipX && !flipY) return (texture.GetPixels32(), width, height);
-
-            var pixels = texture.GetPixels32();
+            if (!flipX && !flipY) return pixels;
 
             if (flipX)
                 for (var x = 0; x < width / 2; x++)
@@ -191,15 +191,41 @@ namespace Pixelation
                     (pixels[x + y * width], pixels[width - 1 - x + y * width]) =
                         (pixels[width - 1 - x + y * width], pixels[x + y * width]);
 
-            if (!flipY) return (pixels, width, height);
+            if (!flipY) return pixels;
 
             for (var x = 0; x < width; x++)
             for (var y = 0; y < height / 2; y++)
                 (pixels[x + y * width], pixels[x + (height - 1 - y) * width]) = (
                     pixels[x + (height - 1 - y) * width], pixels[x + y * width]);
 
-            return (pixels, width, height);
+            return pixels;
         }
+
+        private static (Color32[], int, int) RotateTexture(Color32[] pixels, int width, int height, int rotation)
+        {
+            rotation = (4 - rotation % 4 + 4) % 4;
+
+            if (rotation == 0) return (pixels, width, height);
+
+            var rotatedPixels = pixels;
+            int newWidth = width, newHeight = height;
+
+            for (var r = 0; r < rotation; r++)
+            {
+                var tempPixels = new Color32[newWidth * newHeight];
+                var index = 0;
+
+                for (var x = 0; x < newWidth; x++)
+                for (var y = newHeight - 1; y >= 0; y--)
+                    tempPixels[index++] = rotatedPixels[y * newWidth + x];
+
+                rotatedPixels = tempPixels;
+                (newWidth, newHeight) = (newHeight, newWidth);
+            }
+
+            return (rotatedPixels, newWidth, newHeight);
+        }
+
 
         // private void CalculatePixels()
         // {
