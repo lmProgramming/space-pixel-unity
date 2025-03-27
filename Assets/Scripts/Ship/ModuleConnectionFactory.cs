@@ -23,11 +23,12 @@ namespace Ship
 
                 for (var j = i + 1; j < modules.Count; j++)
                 {
-                    var otherModuleData = modules[j];
+                    var otherModule = modules[j];
 
-                    module.SetupConnections(otherModuleData,
-                        otherModuleData.PixelatedRigidbody.WorldToLocalPixel(otherModuleData.transform
-                            .position));
+                    FixedJoint2D joint = null;
+                    module.SetupConnections(otherModule, ref joint);
+
+                    otherModule.SetupConnections(module, ref joint);
                 }
             }
         }

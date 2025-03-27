@@ -12,6 +12,13 @@ namespace Pixelation
     [RequireComponent(typeof(SpriteRenderer))]
     public class PixelatedRigidbody : MonoBehaviour, IPixelated
     {
+        public enum PixelLoseReason
+        {
+            Destroyed,
+            Division,
+            Other
+        }
+
         private const float SpeedLimitForDiscreteCollisionDetectionSquared = 0;
 
         [SerializeField] private Sprite sprite;
@@ -117,7 +124,7 @@ namespace Pixelation
 
             PixelGrid.RemovePixels(pointsArray);
 
-            OnPixelsDestroyed?.Invoke(pointsArray.ToList());
+            OnPixelsLost?.Invoke(pointsArray.ToList(), PixelLoseReason.Destroyed);
         }
 
         public Vector2 WorldToLocalPoint(Vector2 worldPosition)
@@ -166,7 +173,7 @@ namespace Pixelation
 
             PixelGrid.Setup();
 
-            OnPixelsDestroyed?.Invoke(new List<Vector2Int>());
+            OnPixelsLost?.Invoke(new List<Vector2Int>(), PixelLoseReason.Other);
         }
 
         private static (Color32[], int, int) ReorientTexture(Texture2D texture, bool flipX, bool flipY)
@@ -207,7 +214,9 @@ namespace Pixelation
         // }
 
         public event Action<IPixelated> OnNoPixelsLeft;
-        public event Action<List<Vector2Int>> OnPixelsDestroyed;
+
+        // pixels lost and cause of 
+        public event Action<List<Vector2Int>, PixelLoseReason> OnPixelsLost;
 
         private void GetComponents()
         {
@@ -254,6 +263,11 @@ namespace Pixelation
             }
 
             if (SpriteRenderer != null) SpriteRenderer.color = new Color(startColor.r, startColor.g, startColor.b, 0f);
+        }
+
+        public void PixelLostByDivision(HashSet<Vector2Int> region)
+        {
+            OnPixelsLost?.Invoke(region.ToList(), PixelLoseReason.Division);
         }
     }
 }

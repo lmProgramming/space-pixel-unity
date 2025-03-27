@@ -15,10 +15,10 @@ namespace Ship.Modules
 
         private void Start()
         {
-            PixelatedRigidbody.OnPixelsDestroyed += CheckCohesion;
+            PixelatedRigidbody.OnPixelsLost += CheckCohesion;
         }
 
-        public void SetupConnections(Module otherModule, Vector2Int otherModulePosition)
+        public void SetupConnections(Module otherModule, ref FixedJoint2D joint)
         {
             var otherPixelatedRigidbody = otherModule.PixelatedRigidbody;
 
@@ -29,23 +29,25 @@ namespace Ship.Modules
 
             _connectionPoints[otherModule] = overlappingPoints;
 
-            var joint = gameObject.AddComponent<FixedJoint2D>();
+            if (!joint)
+            {
+                joint = gameObject.AddComponent<FixedJoint2D>();
 
-            joint.connectedBody = otherPixelatedRigidbody.Rigidbody;
+                joint.connectedBody = otherPixelatedRigidbody.Rigidbody;
+            }
 
             _connections[otherModule] = joint;
-
-            //for (var i = 0; i < overlappingPoints.Count; i++)
-            //    Debug.Log(overlappingPoints[i]);
         }
 
-        private void CheckCohesion(List<Vector2Int> points)
+        private void CheckCohesion(List<Vector2Int> points, PixelatedRigidbody.PixelLoseReason reason)
         {
+            if (points.Count > 1) Debug.Log(points.Count);
             foreach (var point in points) RemovePixelFromConnections(point);
         }
 
         private void DetachConnections(Module otherModule)
         {
+            Debug.Log(_connections[otherModule]);
             Destroy(_connections[otherModule]);
             _connections.Remove(otherModule);
             _connectionPoints.Remove(otherModule);

@@ -28,11 +28,13 @@ namespace Pixelation
 
             _collisionResolver = new PhysicsCollision(this, _body);
 
-            body.OnPixelsDestroyed += PixelsDestroyed;
+            body.OnPixelsLost += PixelsLost;
         }
 
-        private void PixelsDestroyed(List<Vector2Int> pixels)
+        private void PixelsLost(List<Vector2Int> pixels, PixelatedRigidbody.PixelLoseReason reason)
         {
+            if (reason == PixelatedRigidbody.PixelLoseReason.Division) return;
+
             var regions = pixels.Count == 1
                 ? GridRegionFinder.FloodFindCohesiveRegions(pixels[0], _grid)
                 : GridRegionFinder.FloodFindCohesiveRegions(_grid);
@@ -97,6 +99,8 @@ namespace Pixelation
             foreach (var region in regions)
             {
                 if (region.Count >= MinPixelsForJunkCreation) CreateNewJunk(region);
+
+                _body.PixelLostByDivision(region);
 
                 _grid.RemovePixels(region);
             }
