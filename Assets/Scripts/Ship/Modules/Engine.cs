@@ -1,6 +1,6 @@
 namespace Ship.Modules
 {
-    public class Engine
+    public class Engine : Module
     {
     }
 }

@@ -1,6 +1,6 @@
 namespace Ship.Modules
 {
-    public class Main : Module
+    public class Command : Module
     {
     }
 }

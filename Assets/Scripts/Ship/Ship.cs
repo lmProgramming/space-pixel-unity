@@ -7,7 +7,7 @@ namespace Ship
 {
     public class Ship : MonoBehaviour
     {
-        [field: SerializeField] public Main MainModule { get; private set; }
+        [field: SerializeField] public Command CommandModule { get; private set; }
 
         [SerializeField] private ModuleConnectionFactory moduleConnectionFactory;
 
@@ -17,7 +17,9 @@ namespace Ship
         {
             Weapons = GetComponentsInChildren<IWeapon>().ToList();
 
-            MainModule.PixelatedRigidbody.OnNoPixelsLeft += _ => Destroy(gameObject);
+            CommandModule ??= GetComponentInChildren<Command>();
+
+            CommandModule.PixelatedRigidbody.OnNoPixelsLeft += _ => Destroy(gameObject);
 
             moduleConnectionFactory.ConnectModules(this);
         }

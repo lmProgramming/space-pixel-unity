@@ -1,33 +1,32 @@
-using System;
 using System.Collections.Generic;
+using System.Linq;
 using Ship.Modules;
 using UnityEngine;
 
 namespace Ship
 {
-    [Serializable]
-    public class ModuleData
-    {
-        public Module module;
-        public Vector2Int position;
-    }
-
     public class ModuleConnectionFactory : MonoBehaviour
     {
-        [SerializeField] private List<ModuleData> moduleDatas;
+        private List<Module> GetModules(Transform parent)
+        {
+            var modules = GetComponentsInChildren<Module>(parent).ToList();
+            return modules;
+        }
 
         public void ConnectModules(Ship ship)
         {
-            for (var i = 0; i < moduleDatas.Count - 1; i++)
+            var modules = GetModules(ship.transform);
+
+            for (var i = 0; i < modules.Count - 1; i++)
             {
-                var moduleData = moduleDatas[i];
+                var module = modules[i];
 
-                for (var j = i + 1; j < moduleDatas.Count; j++)
+                for (var j = i + 1; j < modules.Count; j++)
                 {
-                    var otherModuleData = moduleDatas[j];
+                    var otherModuleData = modules[j];
 
-                    moduleData.module.SetupConnections(otherModuleData.module,
-                        otherModuleData.module.PixelatedRigidbody.WorldToLocalPixel(otherModuleData.module.transform
+                    module.SetupConnections(otherModuleData,
+                        otherModuleData.PixelatedRigidbody.WorldToLocalPixel(otherModuleData.transform
                             .position));
                 }
             }

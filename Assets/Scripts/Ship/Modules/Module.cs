@@ -10,8 +10,6 @@ namespace Ship.Modules
     {
         [field: SerializeField] public PixelatedRigidbody PixelatedRigidbody { get; private set; }
 
-        [SerializeField] private Vector2Int leftBottom;
-
         private readonly Dictionary<Module, List<Vector2Int>> _connectionPoints = new();
         private readonly Dictionary<Module, FixedJoint2D> _connections = new();
 
