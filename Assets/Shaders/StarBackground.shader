@@ -45,7 +45,7 @@ Shader "Custom/StarBackgroundWithNoiseGradient"
                 float2 uv : TEXCOORD0;
             };
 
-            struct v2f
+            struct v2_f
             {
                 float2 uv : TEXCOORD0;
                 float4 vertex : SV_POSITION;
@@ -156,16 +156,16 @@ Shader "Custom/StarBackgroundWithNoiseGradient"
                 return sum;
             }
 
-            v2f vert(appdata v)
+            v2_f vert(appdata v)
             {
-                v2f o;
+                v2_f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 o.uv = v.uv;
                 o.worldPos = mul(unity_ObjectToWorld, v.vertex);
                 return o;
             }
 
-            fixed4 frag(v2f i) : SV_Target
+            fixed4 frag(v2_f i) : SV_Target
             {
                 // Apply zoom to compensate for camera zoom levels
                 float zoomFactor = clamp(_CurrentZoom, _MinZoom, _MaxZoom);
@@ -272,9 +272,9 @@ Shader "Custom/StarBackgroundWithNoiseGradient"
                 fixed4 col1 = lerp(lerp(_StarColor1, _StarColor2, step(0.33, colorRandom1)), _StarColor3,
                                    step(0.66, colorRandom1));
                 fixed4 col2 = lerp(lerp(_StarColor1, _StarColor2, step(0.33, colorRandom2)), _StarColor3,
-                   step(0.66, colorRandom2));
+                                   step(0.66, colorRandom2));
                 fixed4 col3 = lerp(lerp(_StarColor1, _StarColor2, step(0.33, colorRandom3)), _StarColor3,
-                  step(0.66, colorRandom3));
+                                                   step(0.66, colorRandom3));
 
                 // Blend each star layer with the background
                 fixed4 finalColor = backgroundColor;
