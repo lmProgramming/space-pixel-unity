@@ -4,6 +4,8 @@ using UnityEngine;
 public sealed class EffectsSpawner : MonoBehaviour
 {
     [SerializeField] private GameObject explosionPrefab;
+
+    [SerializeField] private Transform effectsHolder;
     private EasyPool<ParticleSystem> _explosionPool;
 
     public static EffectsSpawner Instance { get; private set; }
@@ -11,7 +13,7 @@ public sealed class EffectsSpawner : MonoBehaviour
     private void Awake()
     {
         Instance = this;
-        _explosionPool = new EasyPool<ParticleSystem>(explosionPrefab);
+        _explosionPool = new EasyPool<ParticleSystem>(explosionPrefab, effectsHolder);
     }
 
     public void SpawnExplosion(Vector2 position)

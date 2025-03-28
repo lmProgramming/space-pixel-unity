@@ -8,8 +8,6 @@ namespace Ship.Modules
     {
         [SerializeField] private GameObject projectilePrefab;
 
-        [SerializeField] private Transform projectilesHolder;
-
         [SerializeField] private float projectileSpeed;
 
         [SerializeField] private float reloadTime;
@@ -33,7 +31,7 @@ namespace Ship.Modules
 
             var rotation = Quaternion.Euler(0, 0, angle + 90);
 
-            var newBullet = Instantiate(projectilePrefab, transform.position, rotation, projectilesHolder);
+            var newBullet = ProjectilesSpawner.Instance.Spawn(projectilePrefab, transform.position, rotation);
 
             var bulletRigidbody = newBullet.GetComponent<Rigidbody2D>();
             bulletRigidbody.linearVelocity = PixelatedRigidbody.Rigidbody.linearVelocity;
