@@ -12,7 +12,7 @@ namespace Editor
             var pixelatedRigidbody = (PixelatedRigidbody)target;
             DrawDefaultInspector();
             if (!GUILayout.Button("Generate Pixels")) return;
-            pixelatedRigidbody.Setup();
+            pixelatedRigidbody.Setup(forceSetup: true);
         }
     }
 }

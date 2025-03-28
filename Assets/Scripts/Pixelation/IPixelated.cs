@@ -9,7 +9,7 @@ namespace Pixelation
 
         public void RemovePixels(IEnumerable<Vector2Int> points);
 
-        public void SetSpriteFromColors(Color32[,] colors);
+        public void SetTextureFromColors(Color32[,] colors);
 
         public void SetPixelNoApply(Vector2Int point, Color32 color);
 

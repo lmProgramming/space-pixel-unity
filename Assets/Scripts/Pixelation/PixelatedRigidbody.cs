@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using LM;
 using UnityEngine;
 
 namespace Pixelation
@@ -12,14 +13,26 @@ namespace Pixelation
     [RequireComponent(typeof(SpriteRenderer))]
     public class PixelatedRigidbody : MonoBehaviour, IPixelated
     {
+        public enum PixelLoseReason
+        {
+            Destroyed,
+            Division,
+            Other
+        }
+
         private const float SpeedLimitForDiscreteCollisionDetectionSquared = 0;
 
         [SerializeField] private Sprite sprite;
+        [SerializeField] private bool flipX;
+        [SerializeField] private bool flipY;
 
-        [SerializeField] private float lineSimplificationTolerance;
+        [Range(0, 3)] [SerializeField] private int rotation;
+
         private bool _isSetup;
 
-        private PixelGrid PixelGrid { get; set; }
+        private bool HasSprite => sprite != null && sprite.ToString() != "null";
+
+        public PixelGrid PixelGrid { get; private set; }
         public PixelCollisionHandler CollisionHandler { get; private set; }
 
         public Rigidbody2D Rigidbody { get; private set; }
@@ -43,6 +56,11 @@ namespace Pixelation
                 Rigidbody.linearVelocity.sqrMagnitude >= SpeedLimitForDiscreteCollisionDetectionSquared
                     ? CollisionDetectionMode2D.Continuous
                     : CollisionDetectionMode2D.Discrete;
+        }
+
+        private void OnDestroy()
+        {
+            _isSetup = false;
         }
 
         private void OnCollisionEnter2D(Collision2D collision)
@@ -90,7 +108,7 @@ namespace Pixelation
             PixelGrid.SetPixel(point, color);
         }
 
-        public void SetSpriteFromColors(Color32[,] colors)
+        public void SetTextureFromColors(Color32[,] colors)
         {
             Setup(colors);
         }
@@ -108,7 +126,7 @@ namespace Pixelation
 
             PixelGrid.RemovePixels(pointsArray);
 
-            OnPixelsDestroyed?.Invoke(pointsArray.ToList());
+            OnPixelsLost?.Invoke(pointsArray.ToList(), PixelLoseReason.Destroyed);
         }
 
         public Vector2 WorldToLocalPoint(Vector2 worldPosition)
@@ -133,9 +151,12 @@ namespace Pixelation
             return position;
         }
 
-        public void Setup(Color32[,] colors = null)
+        public void Setup(Color32[,] colors = null, bool forceSetup = false)
         {
-            if (_isSetup) return;
+            if (_isSetup && !forceSetup) return;
+
+            if (!sprite && colors is null) throw new UnityException("Sprite is null");
+
             _isSetup = true;
 
             GetComponents();
@@ -144,29 +165,25 @@ namespace Pixelation
 
             CollisionHandler = new PixelCollisionHandler(PixelGrid, this, GetComponent<PolygonCollider2D>());
 
-            if (colors is not null) PixelGrid.SetSpriteFromColors(colors);
+            if (colors is not null) PixelGrid.SetTextureFromColors(colors);
 
-            if (sprite.ToString() != "null") PixelGrid.SetSprite(sprite);
+            if (HasSprite)
+            {
+                var (colorsArray, width, height) =
+                    (sprite.texture.GetPixels32(), sprite.texture.width, sprite.texture.height);
+                colorsArray = EasyImage.ReorientTexture(colorsArray, width, height, flipX, flipY);
+                (colorsArray, width, height) = EasyImage.RotateTexture(colorsArray, width, height, rotation);
+                PixelGrid.SetTextureFromColors(colorsArray, width, height);
+            }
 
             PixelGrid.Setup();
 
-            OnPixelsDestroyed?.Invoke(new List<Vector2Int>());
+            OnPixelsLost?.Invoke(new List<Vector2Int>(), PixelLoseReason.Other);
         }
 
-        // private void CalculatePixels()
-        // {
-        //     _pixels = new Pixel[_texture.width, _texture.height];
-        //
-        //     for (var x = 0; x < _texture.width; x++)
-        //     for (var y = 0; y < _texture.height; y++)
-        //     {
-        //         var color = _texture.GetPixel(x, y);
-        //         _pixels[x, y] = new Pixel(color, 100);
-        //     }
-        // }
-
         public event Action<IPixelated> OnNoPixelsLeft;
-        public event Action<List<Vector2Int>> OnPixelsDestroyed;
+
+        public event Action<List<Vector2Int>, PixelLoseReason> OnPixelsLost;
 
         private void GetComponents()
         {
@@ -213,6 +230,11 @@ namespace Pixelation
             }
 
             if (SpriteRenderer != null) SpriteRenderer.color = new Color(startColor.r, startColor.g, startColor.b, 0f);
+        }
+
+        public void PixelLostByDivision(HashSet<Vector2Int> region)
+        {
+            OnPixelsLost?.Invoke(region.ToList(), PixelLoseReason.Division);
         }
     }
 }

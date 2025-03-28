@@ -10,13 +10,15 @@ namespace Ship
 
         protected override void Move()
         {
-            var acceleration = Input.GetAxis("Vertical") * speedMultiplier;
+            var engineCount = Engines.Count + 1;
 
-            Body.Rigidbody.AddForce(Body.transform.up * acceleration);
+            var acceleration = Input.GetAxis("Vertical") * speedMultiplier * engineCount;
 
-            var turn = Input.GetAxis("Horizontal") * rotationMultiplier;
+            CommandModule.PixelatedRigidbody.Rigidbody.AddForce(CommandModule.transform.up * acceleration);
 
-            Body.Rigidbody.AddTorque(turn);
+            var turn = Input.GetAxis("Horizontal") * rotationMultiplier * engineCount;
+
+            CommandModule.PixelatedRigidbody.Rigidbody.AddTorque(turn);
         }
 
         protected override void HandleWeapons()

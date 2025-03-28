@@ -1,0 +1,108 @@
+using System.Collections.Generic;
+using LM;
+using Pixelation;
+using UnityEngine;
+
+namespace Ship.Modules
+{
+    public enum ModuleType
+    {
+        Command,
+        Production,
+        Storage,
+        Weapon,
+        Engine
+    }
+
+    [RequireComponent(typeof(PixelatedRigidbody))]
+    public class Module : MonoBehaviour
+    {
+        [field: SerializeField] public ModuleType Type { get; private set; }
+        private readonly Dictionary<Module, List<Vector2Int>> _connectionPoints = new();
+        private readonly Dictionary<Module, FixedJoint2D> _connections = new();
+
+        public Ship Ship { get; private set; }
+
+        public PixelatedRigidbody PixelatedRigidbody { get; private set; }
+
+        private void Awake()
+        {
+            PixelatedRigidbody = GetComponent<PixelatedRigidbody>();
+        }
+
+        private void Start()
+        {
+            PixelatedRigidbody.OnPixelsLost += CheckCohesion;
+        }
+
+        public void Setup(Ship ship)
+        {
+            Ship = ship;
+        }
+
+        public void SetupConnections(Module otherModule, ref FixedJoint2D joint)
+        {
+            var otherPixelatedRigidbody = otherModule.PixelatedRigidbody;
+
+            var overlappingPoints =
+                OverlapCalculator.CalculateOverlappingPoints(PixelatedRigidbody, otherPixelatedRigidbody);
+
+            if (overlappingPoints.Count == 0) return;
+
+            _connectionPoints[otherModule] = overlappingPoints;
+
+            if (!joint)
+            {
+                joint = gameObject.AddComponent<FixedJoint2D>();
+
+                joint.connectedBody = otherPixelatedRigidbody.Rigidbody;
+            }
+
+            _connections[otherModule] = joint;
+        }
+
+        private void CheckCohesion(List<Vector2Int> points, PixelatedRigidbody.PixelLoseReason reason)
+        {
+            foreach (var point in points) RemovePixelFromConnections(point);
+        }
+
+        private void DetachConnections(Module otherModule)
+        {
+            Debug.Log(_connections[otherModule]);
+            Destroy(_connections[otherModule]);
+            _connections.Remove(otherModule);
+            _connectionPoints.Remove(otherModule);
+
+            Ship.ModuleGraph.RemoveEdge(this, otherModule);
+
+            if (!Ship.ModuleGraph.ContainsNode(this)) transform.SetParent(MapInfo.Instance.mapTransform);
+            if (!Ship.ModuleGraph.ContainsNode(otherModule))
+                otherModule.transform.SetParent(MapInfo.Instance.mapTransform);
+
+            Ship.RecacheModulesDictionary();
+        }
+
+        private void RemovePixelFromConnections(Vector2Int pixel)
+        {
+            foreach (var connectedModule in _connectionPoints)
+                for (var index = 0; index < connectedModule.Value.Count; index++)
+                {
+                    var connectionPixels = connectedModule.Value[index];
+                    if (pixel != connectionPixels) continue;
+
+                    connectedModule.Value.Remove(pixel);
+
+                    if (connectedModule.Value.Count == 0)
+                    {
+                        DetachConnections(connectedModule.Key);
+                        RemovePixelFromConnections(pixel);
+                        return;
+                    }
+
+                    // assuming more than 1 module can have the same connection point
+                    // but 1 module can not have duplicate connection points
+                    break;
+                }
+        }
+    }
+}
