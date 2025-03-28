@@ -20,6 +20,9 @@ namespace Ship.Modules
         [field: SerializeField] public ModuleType Type { get; private set; }
         private readonly Dictionary<Module, List<Vector2Int>> _connectionPoints = new();
         private readonly Dictionary<Module, FixedJoint2D> _connections = new();
+
+        public Ship Ship { get; private set; }
+
         public PixelatedRigidbody PixelatedRigidbody { get; private set; }
 
         private void Awake()
@@ -30,6 +33,11 @@ namespace Ship.Modules
         private void Start()
         {
             PixelatedRigidbody.OnPixelsLost += CheckCohesion;
+        }
+
+        public void Setup(Ship ship)
+        {
+            Ship = ship;
         }
 
         public void SetupConnections(Module otherModule, ref FixedJoint2D joint)
@@ -55,7 +63,6 @@ namespace Ship.Modules
 
         private void CheckCohesion(List<Vector2Int> points, PixelatedRigidbody.PixelLoseReason reason)
         {
-            if (points.Count > 1) Debug.Log(points.Count);
             foreach (var point in points) RemovePixelFromConnections(point);
         }
 
@@ -65,6 +72,11 @@ namespace Ship.Modules
             Destroy(_connections[otherModule]);
             _connections.Remove(otherModule);
             _connectionPoints.Remove(otherModule);
+
+            Ship.ModuleGraph.RemoveEdge(this, otherModule);
+            Ship.ModuleGraph.RemoveEdge(otherModule, this);
+
+            Ship.RecacheModulesDictionary();
         }
 
         private void RemovePixelFromConnections(Vector2Int pixel)

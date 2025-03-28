@@ -17,6 +17,9 @@ namespace Ship
         {
             var modules = GetModules(ship.transform);
 
+            foreach (var module in modules) ship.ModuleGraph.AddNode(module);
+
+            var graph = ship.ModuleGraph;
             for (var i = 0; i < modules.Count - 1; i++)
             {
                 var module = modules[i];
@@ -28,10 +31,16 @@ namespace Ship
                     FixedJoint2D joint = null;
                     module.SetupConnections(otherModule, ref joint);
                     otherModule.SetupConnections(module, ref joint);
+
+                    if (!joint) continue;
+                    graph.AddNode(module);
+                    graph.AddNode(otherModule);
+
+                    graph.AddEdge(module, otherModule);
                 }
             }
 
-            foreach (var module in modules) ship.AddModule(module);
+            foreach (var module in modules) module.Setup(ship);
         }
     }
 }
