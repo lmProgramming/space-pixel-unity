@@ -11,20 +11,22 @@ namespace LM
             var body1Dimensions = body1.Dimensions();
             var body2Dimensions = body2.Dimensions();
 
-            var body1LeftBottom = body1.LocalToWorldPoint(new Vector2Int(0, 0));
-            var body1RightTop = body1.LocalToWorldPoint(new Vector2Int(body1Dimensions.x - 1, body1Dimensions.y - 1));
+            var body1LeftBottom = body1.LocalToWorldPoint(new Vector2Int(0, 0)).ToVec2Int();
+            var body1RightTop = body1.LocalToWorldPoint(new Vector2Int(body1Dimensions.x - 1, body1Dimensions.y - 1))
+                .ToVec2Int();
 
-            var body2LeftBottom = body2.LocalToWorldPoint(new Vector2Int(0, 0)) - Vector2Int.one;
-            var body2RightTop = body2.LocalToWorldPoint(new Vector2Int(body2Dimensions.x, body2Dimensions.y));
+            var body2LeftBottom = body2.LocalToWorldPoint(new Vector2Int(0, 0)).ToVec2Int() - Vector2Int.one;
+            var body2RightTop = body2.LocalToWorldPoint(new Vector2Int(body2Dimensions.x, body2Dimensions.y))
+                .ToVec2Int();
 
             var overlapLeftBottom = new Vector2Int(
-                Mathf.Max(Mathf.RoundToInt(body1LeftBottom.x), Mathf.RoundToInt(body2LeftBottom.x)),
-                Mathf.Max(Mathf.RoundToInt(body1LeftBottom.y), Mathf.RoundToInt(body2LeftBottom.y))
+                Mathf.Max(body1LeftBottom.x, body2LeftBottom.x),
+                Mathf.Max(body1LeftBottom.y, body2LeftBottom.y)
             );
 
             var overlapRightTop = new Vector2Int(
-                Mathf.Min(Mathf.RoundToInt(body1RightTop.x), Mathf.RoundToInt(body2RightTop.x)),
-                Mathf.Min(Mathf.RoundToInt(body1RightTop.y), Mathf.RoundToInt(body2RightTop.y))
+                Mathf.Min(body1RightTop.x, body2RightTop.x),
+                Mathf.Min(body1RightTop.y, body2RightTop.y)
             );
 
             var overlappingPoints = new List<Vector2Int>();

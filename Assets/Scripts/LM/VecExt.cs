@@ -4,6 +4,11 @@ namespace LM
 {
     public static class VecExt
     {
+        public static Vector2Int ToVec2Int(this Vector2 vec)
+        {
+            return new Vector2Int(Mathf.RoundToInt(vec.x), Mathf.RoundToInt(vec.y));
+        }
+
         // Vector2
         public static Vector2 SetX(this Vector2 aVec, float aXValue)
         {
