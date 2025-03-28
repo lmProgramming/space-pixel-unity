@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using LM;
 using UnityEngine;
 
 namespace Pixelation
@@ -170,8 +171,8 @@ namespace Pixelation
             {
                 var (colorsArray, width, height) =
                     (sprite.texture.GetPixels32(), sprite.texture.width, sprite.texture.height);
-                colorsArray = ReorientTexture(colorsArray, width, height, flipX, flipY);
-                (colorsArray, width, height) = RotateTexture(colorsArray, width, height, rotation);
+                colorsArray = EasyImage.ReorientTexture(colorsArray, width, height, flipX, flipY);
+                (colorsArray, width, height) = EasyImage.RotateTexture(colorsArray, width, height, rotation);
                 PixelGrid.SetTextureFromColors(colorsArray, width, height);
             }
 
@@ -180,68 +181,8 @@ namespace Pixelation
             OnPixelsLost?.Invoke(new List<Vector2Int>(), PixelLoseReason.Other);
         }
 
-        private static Color32[] ReorientTexture(Color32[] pixels, int width, int height, bool flipX,
-            bool flipY)
-        {
-            if (!flipX && !flipY) return pixels;
-
-            if (flipX)
-                for (var x = 0; x < width / 2; x++)
-                for (var y = 0; y < height; y++)
-                    (pixels[x + y * width], pixels[width - 1 - x + y * width]) =
-                        (pixels[width - 1 - x + y * width], pixels[x + y * width]);
-
-            if (!flipY) return pixels;
-
-            for (var x = 0; x < width; x++)
-            for (var y = 0; y < height / 2; y++)
-                (pixels[x + y * width], pixels[x + (height - 1 - y) * width]) = (
-                    pixels[x + (height - 1 - y) * width], pixels[x + y * width]);
-
-            return pixels;
-        }
-
-        private static (Color32[], int, int) RotateTexture(Color32[] pixels, int width, int height, int rotation)
-        {
-            rotation = (4 - rotation % 4 + 4) % 4;
-
-            if (rotation == 0) return (pixels, width, height);
-
-            var rotatedPixels = pixels;
-            int newWidth = width, newHeight = height;
-
-            for (var r = 0; r < rotation; r++)
-            {
-                var tempPixels = new Color32[newWidth * newHeight];
-                var index = 0;
-
-                for (var x = 0; x < newWidth; x++)
-                for (var y = newHeight - 1; y >= 0; y--)
-                    tempPixels[index++] = rotatedPixels[y * newWidth + x];
-
-                rotatedPixels = tempPixels;
-                (newWidth, newHeight) = (newHeight, newWidth);
-            }
-
-            return (rotatedPixels, newWidth, newHeight);
-        }
-
-
-        // private void CalculatePixels()
-        // {
-        //     _pixels = new Pixel[_texture.width, _texture.height];
-        //
-        //     for (var x = 0; x < _texture.width; x++)
-        //     for (var y = 0; y < _texture.height; y++)
-        //     {
-        //         var color = _texture.GetPixel(x, y);
-        //         _pixels[x, y] = new Pixel(color, 100);
-        //     }
-        // }
-
         public event Action<IPixelated> OnNoPixelsLeft;
 
-        // pixels lost and cause of 
         public event Action<List<Vector2Int>, PixelLoseReason> OnPixelsLost;
 
         private void GetComponents()
