@@ -26,6 +26,14 @@ namespace Background
         private static readonly int PlayerPosition = Shader.PropertyToID("_PlayerPosition");
         private static readonly int CurrentZoom = Shader.PropertyToID("_CurrentZoom");
 
+        // New pixelation property IDs
+        private static readonly int PixelSize = Shader.PropertyToID("_PixelSize");
+        private static readonly int BackgroundPixelSize = Shader.PropertyToID("_BackgroundPixelSize");
+        private static readonly int StarPixelSize = Shader.PropertyToID("_StarPixelSize");
+        private static readonly int StarSharpness = Shader.PropertyToID("_StarSharpness");
+        private static readonly int DitherStrength = Shader.PropertyToID("_DitherStrength");
+        private static readonly int ColorBanding = Shader.PropertyToID("_ColorBanding");
+
         [SerializeField] private MeshRenderer meshRenderer;
         [SerializeField] private Material starBackgroundMaterial;
         [SerializeField] private Transform playerTransform;
@@ -52,16 +60,16 @@ namespace Background
         public Color secondaryStarColor = new(0.2f, 0.5f, 1f);
         public Color tertiaryStarColor = new(1f, 0.5f, 0.2f);
 
-        [Header("Star Appearance")] [Range(0.001f, 10f)]
+        [Header("Star Appearance")] [Range(0.0001f, 1f)]
         public float minStarSize = 0.005f;
 
-        [Range(0.001f, 10f)] public float maxStarSize = 0.02f;
+        [Range(0.0001f, 1f)] public float maxStarSize = 0.02f;
 
         [Range(0f, 2f)] public float twinkleSpeed = 0.5f;
 
         [Range(0f, 1f)] public float twinkleVariation = 0.7f;
 
-        [Range(0.1f, 10f)] public float starDensity = 2.0f;
+        [Range(0.01f, 10f)] public float starDensity = 2.0f;
 
         [Header("Zoom Settings")] public bool trackCameraZoom = true;
 
@@ -70,6 +78,15 @@ namespace Background
         [Range(0.1f, 100f)] public float maxZoom = 5f;
 
         [Range(0, 1000)] public float randomSeed = 42f;
+
+        [Header("Pixelation Settings")] [Range(1, 64)]
+        public float pixelSize = 8f;
+
+        [Range(1, 128)] public float backgroundPixelSize = 4f;
+        [Range(1, 128)] public float starPixelSize = 4f;
+        [Range(0.1f, 10f)] public float starSharpness = 1f;
+        [Range(0f, 1f)] public float ditherStrength = 0.1f;
+        [Range(1, 128)] public float colorBanding = 8f;
 
         private float _initialCameraSize;
         private Vector3 _initialPlayerPosition;
@@ -119,9 +136,10 @@ namespace Background
 
             if (playerTransform)
             {
-                Vector4 playerPos = playerTransform.position - _initialPlayerPosition;
+                var playerPos = playerTransform.position - _initialPlayerPosition;
                 starBackgroundMaterial.SetVector(PlayerPosition, playerPos);
             }
+
 
             if (mainCamera && trackCameraZoom)
             {
@@ -175,6 +193,14 @@ namespace Background
 
             starBackgroundMaterial.SetFloat(MinZoom, minZoom);
             starBackgroundMaterial.SetFloat(MaxZoom, maxZoom);
+
+            // Set pixelation properties
+            starBackgroundMaterial.SetFloat(PixelSize, pixelSize);
+            starBackgroundMaterial.SetFloat(BackgroundPixelSize, backgroundPixelSize);
+            starBackgroundMaterial.SetFloat(StarPixelSize, starPixelSize);
+            starBackgroundMaterial.SetFloat(StarSharpness, starSharpness);
+            starBackgroundMaterial.SetFloat(DitherStrength, ditherStrength);
+            starBackgroundMaterial.SetFloat(ColorBanding, colorBanding);
         }
     }
 }

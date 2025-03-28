@@ -41,21 +41,27 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _BackgroundPixelSize: 128
+    - _ColorBanding: 128
+    - _DitherStrength: 0.1
     - _EnableExternalAlpha: 0
     - _GradientOffset: 0.5
     - _GradientParallax: 0.3
     - _GradientScale: 2
     - _MaxZoom: 100
     - _MinZoom: 30
-    - _NoiseScale: 0.01
+    - _NoiseScale: 0.0176
     - _NoiseSpeed: 0.01
-    - _NoiseStrength: 0.5
+    - _NoiseStrength: 0.401
     - _ParallaxStrength: 0.01
+    - _PixelSize: 8
     - _Seed: 42
-    - _StarDensity: 0.82
+    - _StarDensity: 0.41
+    - _StarPixelSize: 16
+    - _StarSharpness: 1.41
     - _StarSize: 1
-    - _StarSizeMax: 2.11
-    - _StarSizeMin: 0.82
+    - _StarSizeMax: 0.306
+    - _StarSizeMin: 0.041
     - _TwinkleSpeed: 1
     - _TwinkleVariation: 0.7
     - _ZWrite: 0

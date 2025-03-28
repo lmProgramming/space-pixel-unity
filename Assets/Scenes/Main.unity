@@ -438,21 +438,27 @@ MonoBehaviour:
   gradientColor1: {r: 0.5, g: 0, b: 1, a: 1}
   gradientColor2: {r: 0, g: 0.05, b: 0.1, a: 1}
   gradientColor3: {r: 0.02, g: 0.02, b: 0.05, a: 1}
-  noiseScale: 0.01
-  noiseStrength: 0.5
+  noiseScale: 0.0176
+  noiseStrength: 0.401
   noiseSpeed: 0.01
   primaryStarColor: {r: 1, g: 1, b: 1, a: 1}
   secondaryStarColor: {r: 0.7, g: 0.8, b: 1, a: 1}
   tertiaryStarColor: {r: 1, g: 0.8, b: 0.6, a: 1}
-  minStarSize: 0.82
-  maxStarSize: 2.11
+  minStarSize: 0.041
+  maxStarSize: 0.306
   twinkleSpeed: 1
   twinkleVariation: 0.7
-  starDensity: 0.82
+  starDensity: 0.41
   trackCameraZoom: 1
   minZoom: 30
   maxZoom: 100
   randomSeed: 42
+  pixelSize: 8
+  backgroundPixelSize: 128
+  starPixelSize: 16
+  starSharpness: 1.41
+  ditherStrength: 0.1
+  colorBanding: 128
 --- !u!1 &185009410
 GameObject:
   m_ObjectHideFlags: 0
