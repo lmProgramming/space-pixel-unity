@@ -74,7 +74,6 @@ namespace Ship.Modules
             _connectionPoints.Remove(otherModule);
 
             Ship.ModuleGraph.RemoveEdge(this, otherModule);
-            Ship.ModuleGraph.RemoveEdge(otherModule, this);
 
             Ship.RecacheModulesDictionary();
         }

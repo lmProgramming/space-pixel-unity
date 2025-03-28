@@ -24,7 +24,7 @@ namespace Ship
         {
             CommandModule ??= GetComponentInChildren<Command>();
 
-            ModuleGraph = new Graph<Module>(CommandModule);
+            ModuleGraph = new BiCohesionGraph<Module>(CommandModule);
 
             CommandModule.PixelatedRigidbody.OnNoPixelsLeft += _ => Destroy(gameObject);
 

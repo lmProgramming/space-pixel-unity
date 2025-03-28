@@ -10,7 +10,7 @@ namespace Ship
 
         protected override void Move()
         {
-            var engineCount = Engines.Count;
+            var engineCount = Engines.Count + 1;
 
             var acceleration = Input.GetAxis("Vertical") * speedMultiplier * engineCount;
 
