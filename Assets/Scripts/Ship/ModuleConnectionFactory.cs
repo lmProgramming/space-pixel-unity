@@ -27,10 +27,11 @@ namespace Ship
 
                     FixedJoint2D joint = null;
                     module.SetupConnections(otherModule, ref joint);
-
                     otherModule.SetupConnections(module, ref joint);
                 }
             }
+
+            foreach (var module in modules) ship.AddModule(module);
         }
     }
 }

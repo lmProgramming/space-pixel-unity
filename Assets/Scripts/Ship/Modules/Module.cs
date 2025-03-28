@@ -5,13 +5,27 @@ using UnityEngine;
 
 namespace Ship.Modules
 {
+    public enum ModuleType
+    {
+        Command,
+        Production,
+        Storage,
+        Weapon,
+        Engine
+    }
+
     [RequireComponent(typeof(PixelatedRigidbody))]
     public class Module : MonoBehaviour
     {
-        [field: SerializeField] public PixelatedRigidbody PixelatedRigidbody { get; private set; }
-
+        [field: SerializeField] public ModuleType Type { get; private set; }
         private readonly Dictionary<Module, List<Vector2Int>> _connectionPoints = new();
         private readonly Dictionary<Module, FixedJoint2D> _connections = new();
+        public PixelatedRigidbody PixelatedRigidbody { get; private set; }
+
+        private void Awake()
+        {
+            PixelatedRigidbody = GetComponent<PixelatedRigidbody>();
+        }
 
         private void Start()
         {
