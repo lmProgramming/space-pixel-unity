@@ -37,18 +37,30 @@ public class Bullet : PixelatedRigidbody
 
     private async UniTaskVoid CheckCollisionsAndEnableCollider()
     {
-        while (true)
+        try
         {
-            var results = new Collider2D[1];
-            var collisionCount = Physics2D.OverlapCircle(transform.position, 1f, new ContactFilter2D(), results);
+            var token = this.GetCancellationTokenOnDestroy();
 
-            if (collisionCount == 0)
+            while (true)
             {
-                _collider.enabled = true;
-                break;
-            }
+                var results = new Collider2D[1];
+                var collisionCount = Physics2D.OverlapCircle(transform.position, 1f, new ContactFilter2D(), results);
 
-            await UniTask.DelayFrame(4);
+                if (collisionCount == 0)
+                {
+                    _collider.enabled = true;
+                    break;
+                }
+
+                await UniTask.DelayFrame(4, cancellationToken: token);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        catch (Exception e)
+        {
+            Debug.LogException(e);
         }
     }
 

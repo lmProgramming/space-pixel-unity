@@ -68,7 +68,6 @@ namespace Ship.Modules
 
         private void DetachConnections(Module otherModule)
         {
-            Debug.Log(_connections[otherModule]);
             Destroy(_connections[otherModule]);
             _connections.Remove(otherModule);
             _connectionPoints.Remove(otherModule);
@@ -95,6 +94,7 @@ namespace Ship.Modules
                     if (connectedModule.Value.Count == 0)
                     {
                         DetachConnections(connectedModule.Key);
+                        // start again
                         RemovePixelFromConnections(pixel);
                         return;
                     }
