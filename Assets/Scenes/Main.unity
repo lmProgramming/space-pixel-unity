@@ -411,7 +411,7 @@ Transform:
   m_GameObject: {fileID: 115355037}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 10, y: -9, z: 10}
+  m_LocalPosition: {x: 9, y: -7.7, z: 10}
   m_LocalScale: {x: 2000, y: 1500, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -444,11 +444,11 @@ MonoBehaviour:
   primaryStarColor: {r: 1, g: 1, b: 1, a: 1}
   secondaryStarColor: {r: 0.7, g: 0.8, b: 1, a: 1}
   tertiaryStarColor: {r: 1, g: 0.8, b: 0.6, a: 1}
-  minStarSize: 0.5
-  maxStarSize: 7
+  minStarSize: 0.82
+  maxStarSize: 2.11
   twinkleSpeed: 1
   twinkleVariation: 0.7
-  starDensity: 2
+  starDensity: 0.82
   trackCameraZoom: 1
   minZoom: 30
   maxZoom: 100
