@@ -75,6 +75,10 @@ namespace Ship.Modules
 
             Ship.ModuleGraph.RemoveEdge(this, otherModule);
 
+            if (!Ship.ModuleGraph.ContainsNode(this)) transform.SetParent(MapInfo.Instance.mapTransform);
+            if (!Ship.ModuleGraph.ContainsNode(otherModule))
+                otherModule.transform.SetParent(MapInfo.Instance.mapTransform);
+
             Ship.RecacheModulesDictionary();
         }
 
