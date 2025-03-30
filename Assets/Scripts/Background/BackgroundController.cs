@@ -34,6 +34,8 @@ namespace Background
         private static readonly int DitherStrength = Shader.PropertyToID("_DitherStrength");
         private static readonly int ColorBanding = Shader.PropertyToID("_ColorBanding");
 
+        [SerializeField] private bool testInScene;
+
         [SerializeField] private MeshRenderer meshRenderer;
         [SerializeField] private Material starBackgroundMaterial;
         [SerializeField] private Transform playerTransform;
@@ -82,8 +84,8 @@ namespace Background
         [Header("Pixelation Settings")] [Range(1, 64)]
         public float pixelSize = 8f;
 
-        [Range(1, 128)] public float backgroundPixelSize = 4f;
-        [Range(1, 128)] public float starPixelSize = 4f;
+        [Range(1, 256)] public float backgroundPixelSize = 4f;
+        [Range(1, 256)] public float starPixelSize = 4f;
         [Range(0.1f, 10f)] public float starSharpness = 1f;
         [Range(0f, 1f)] public float ditherStrength = 0.1f;
         [Range(1, 128)] public float colorBanding = 8f;
@@ -163,6 +165,16 @@ namespace Background
 
         private void OnValidate()
         {
+            if (testInScene)
+            {
+                meshRenderer.material = starBackgroundMaterial;
+                meshRenderer.enabled = true;
+            }
+            else
+            {
+                meshRenderer.enabled = false;
+            }
+
             UpdateShaderProperties();
         }
 
