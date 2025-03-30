@@ -1,4 +1,6 @@
-﻿using Cysharp.Threading.Tasks;
+﻿using System;
+using Cysharp.Threading.Tasks;
+using UnityEngine;
 
 public class SimpleTimer
 {
@@ -12,12 +14,18 @@ public class SimpleTimer
 
     public bool IsReady { get; private set; }
 
+    public event Action OnReady;
+    public event Action OnNotReady;
+
     public async UniTask Wait(float? seconds = null)
     {
+        OnNotReady?.Invoke();
         var elapsedSeconds = seconds ?? _interval;
 
         IsReady = false;
         await UniTask.Delay((int)(elapsedSeconds * 1000));
         IsReady = true;
+        OnReady?.Invoke();
+        Debug.Log("On Ready Invoked");
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using Cysharp.Threading.Tasks;
 using LM;
 using UnityEngine;
@@ -17,6 +18,16 @@ namespace Ship.Modules
         private void Start()
         {
             _reloadTimer = new SimpleTimer(reloadTime);
+
+            _reloadTimer.OnReady += HandleReady;
+            _reloadTimer.OnNotReady += HandleNotReady;
+        }
+
+        private void OnDestroy()
+        {
+            if (_reloadTimer == null) return;
+            _reloadTimer.OnReady -= HandleReady;
+            _reloadTimer.OnNotReady -= HandleNotReady;
         }
 
         public void Shoot()
@@ -40,6 +51,24 @@ namespace Ship.Modules
                 ForceMode2D.Impulse);
 
             _reloadTimer.Wait(reloadTime).Forget();
+        }
+
+        public bool IsReady()
+        {
+            return _reloadTimer.IsReady;
+        }
+
+        public event Action OnReady;
+        public event Action OnNotReady;
+
+        private void HandleReady()
+        {
+            OnReady?.Invoke();
+        }
+
+        private void HandleNotReady()
+        {
+            OnNotReady?.Invoke();
         }
     }
 }
