@@ -13,6 +13,8 @@ namespace Ship.Modules
 
         [SerializeField] private float reloadTime;
 
+        [SerializeField] private GameObject icon;
+
         private SimpleTimer _reloadTimer;
 
         private void Start()
@@ -56,6 +58,11 @@ namespace Ship.Modules
         public bool IsReady()
         {
             return _reloadTimer.IsReady;
+        }
+
+        public GameObject GetIcon()
+        {
+            return icon;
         }
 
         public event Action OnReady;

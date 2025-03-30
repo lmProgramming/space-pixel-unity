@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Ship.Modules;
 using UnityEngine;
 
 namespace UI.Main
@@ -115,11 +114,7 @@ namespace UI.Main
         {
             if (weapon == null || iconContainer == null) return null;
 
-            var chosenPrefab = weapon switch
-            {
-                Cannon => smallCannonPrefab,
-                _ => bigCannonPrefab
-            };
+            var chosenPrefab = weapon.GetIcon();
 
             return chosenPrefab == null ? null : Instantiate(chosenPrefab, iconContainer);
         }

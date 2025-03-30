@@ -26,6 +26,5 @@ public class SimpleTimer
         await UniTask.Delay((int)(elapsedSeconds * 1000));
         IsReady = true;
         OnReady?.Invoke();
-        Debug.Log("On Ready Invoked");
     }
 }
