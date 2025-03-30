@@ -40,7 +40,6 @@ namespace Pixelation
             return new Bounds(center, size);
         }
 
-
         public static List<Vector2Int> CalculateOverlappingPoints(PixelatedRigidbody body1, PixelatedRigidbody body2)
         {
             var overlappingPoints = new List<Vector2Int>();

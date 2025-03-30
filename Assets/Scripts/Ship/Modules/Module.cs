@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using LM;
 using Pixelation;
 using UnityEngine;
 
@@ -44,12 +43,15 @@ namespace Ship.Modules
         {
             if (PixelatedRigidbody == null || _connectionPoints == null) return;
 
-            Gizmos.color = Color.cyan;
             var gizmoSize = Vector3.one * 0.8f;
 
             foreach (var (otherModule, points) in _connectionPoints)
             {
                 if (otherModule == null || points == null) continue;
+
+                var hashCode = GetHashCode() + otherModule.GetHashCode();
+                var hue = (Mathf.Abs(hashCode) % 1000 + 50) / 1050f;
+                Gizmos.color = Color.HSVToRGB(hue, 1.0f, 0.95f);
 
                 foreach (var localPixelPos in points)
                 {
@@ -94,7 +96,7 @@ namespace Ship.Modules
                     Debug.LogError($"Connected body Rigidbody2D is null on {otherModule.name}!", otherModule);
                     Destroy(joint);
                     joint = null;
-                    _connectionPoints.Remove(otherModule); // Don't keep connection points if joint fails
+                    _connectionPoints.Remove(otherModule);
                     return;
                 }
             }
@@ -105,15 +107,13 @@ namespace Ship.Modules
 
         private void CheckCohesion(List<Vector2Int> points, PixelatedRigidbody.PixelLoseReason reason)
         {
-            // Make a copy of the keys to iterate over, as DetachConnections modifies the dictionary
             var connectedModulesToCheck = new List<Module>(_connectionPoints.Keys);
-            var modulesToDetach = new List<Module>();
+            var modulesToDetach = new HashSet<Module>();
 
             foreach (var point in points)
-                // Iterate over the modules that were connected *before* this pixel loss event started
             foreach (var connectedModule in connectedModulesToCheck)
             {
-                if (modulesToDetach.Contains(connectedModule)) continue; // Already marked for detachment
+                if (modulesToDetach.Contains(connectedModule)) continue;
 
                 if (!_connectionPoints.TryGetValue(connectedModule, out var connectionPixelList)) continue;
                 var indexToRemove = connectionPixelList.FindIndex(p => p == point);
@@ -122,11 +122,9 @@ namespace Ship.Modules
                 connectionPixelList.RemoveAt(indexToRemove);
 
                 if (connectionPixelList.Count != 0) continue;
-                if (!modulesToDetach.Contains(connectedModule))
-                    modulesToDetach.Add(connectedModule);
+                modulesToDetach.Add(connectedModule);
             }
 
-            // Now, perform the detachments accumulated
             foreach (var moduleToDetach in modulesToDetach.Where(moduleToDetach =>
                          _connectionPoints.ContainsKey(moduleToDetach)))
                 DetachConnections(moduleToDetach);
@@ -147,7 +145,6 @@ namespace Ship.Modules
                 var thisStillInGraph = Ship.ModuleGraph.ContainsNode(this);
                 var otherStillInGraph = Ship.ModuleGraph.ContainsNode(otherModule);
 
-                // Use MapInfo singleton for reparenting detached modules
                 if (MapInfo.Instance && MapInfo.Instance.mapTransform)
                 {
                     if (!thisStillInGraph && transform.parent != MapInfo.Instance.mapTransform)
