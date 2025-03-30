@@ -1,50 +1,86 @@
 ﻿using System.Collections.Generic;
-using Pixelation;
 using UnityEngine;
 
-namespace LM
+namespace Pixelation
 {
     public static class OverlapCalculator
     {
+        private static readonly Vector2Int[] NeighborOffsets =
+        {
+            new(1, 0),
+            new(0, 1),
+            new(-1, 0),
+            new(0, -1)
+        };
+
+        private static Bounds CalculateWorldBounds(PixelatedRigidbody body)
+        {
+            var dimensions = body.Dimensions();
+            if (dimensions.x <= 0 || dimensions.y <= 0) return new Bounds(body.transform.position, Vector3.zero);
+
+            var world00 = body.LocalToWorldPoint(new Vector2Int(0, 0));
+            var worldW0 = body.LocalToWorldPoint(new Vector2Int(dimensions.x - 1, 0));
+            var world0H = body.LocalToWorldPoint(new Vector2Int(0, dimensions.y - 1));
+            var worldWh = body.LocalToWorldPoint(new Vector2Int(dimensions.x - 1, dimensions.y - 1));
+
+            var minX = Mathf.Min(world00.x, worldW0.x, world0H.x, worldWh.x);
+            var minY = Mathf.Min(world00.y, worldW0.y, world0H.y, worldWh.y);
+            var maxX = Mathf.Max(world00.x, worldW0.x, world0H.x, worldWh.x);
+            var maxY = Mathf.Max(world00.y, worldW0.y, world0H.y, worldWh.y);
+
+            const float pixelWorldSizeApprox = 1.0f;
+            minX -= pixelWorldSizeApprox * 0.5f + 1;
+            minY -= pixelWorldSizeApprox * 0.5f + 1;
+            maxX += pixelWorldSizeApprox * 0.5f + 1;
+            maxY += pixelWorldSizeApprox * 0.5f + 1;
+
+            var center = new Vector3((minX + maxX) / 2f, (minY + maxY) / 2f, body.transform.position.z);
+            var size = new Vector3(maxX - minX, maxY - minY, 0.1f);
+
+            return new Bounds(center, size);
+        }
+
+
         public static List<Vector2Int> CalculateOverlappingPoints(PixelatedRigidbody body1, PixelatedRigidbody body2)
         {
-            var body1Dimensions = body1.Dimensions();
-            var body2Dimensions = body2.Dimensions();
-
-            var body1LeftBottom = body1.LocalToWorldPoint(new Vector2Int(0, 0)).ToVec2Int();
-            var body1RightTop = body1.LocalToWorldPoint(new Vector2Int(body1Dimensions.x - 1, body1Dimensions.y - 1))
-                .ToVec2Int();
-
-            var body2LeftBottom = body2.LocalToWorldPoint(new Vector2Int(0, 0)).ToVec2Int() - Vector2Int.one;
-            var body2RightTop = body2.LocalToWorldPoint(new Vector2Int(body2Dimensions.x, body2Dimensions.y))
-                .ToVec2Int();
-
-            var overlapLeftBottom = new Vector2Int(
-                Mathf.Max(body1LeftBottom.x, body2LeftBottom.x),
-                Mathf.Max(body1LeftBottom.y, body2LeftBottom.y)
-            );
-
-            var overlapRightTop = new Vector2Int(
-                Mathf.Min(body1RightTop.x, body2RightTop.x),
-                Mathf.Min(body1RightTop.y, body2RightTop.y)
-            );
-
             var overlappingPoints = new List<Vector2Int>();
 
-            for (var x = overlapLeftBottom.x; x <= overlapRightTop.x; x++)
-            for (var y = overlapLeftBottom.y; y <= overlapRightTop.y; y++)
+            if (body1 == null || body2 == null) return overlappingPoints;
+
+            var bounds1 = CalculateWorldBounds(body1);
+            var bounds2 = CalculateWorldBounds(body2);
+
+            if (!bounds1.Intersects(bounds2)) return overlappingPoints;
+
+            var body1Dimensions = body1.Dimensions();
+
+            for (var x = 0; x < body1Dimensions.x; x++)
+            for (var y = 0; y < body1Dimensions.y; y++)
             {
-                var point = new Vector2Int(x, y);
-                var point1 = body1.WorldToLocalPixel(point);
-                var point2 = body2.WorldToLocalPixel(point);
-                if (body1.IsPixel(point1) && (body2.IsPixel(point2 + new Vector2Int(1, 0)) ||
-                                              body2.IsPixel(point2 + new Vector2Int(0, 1)) ||
-                                              body2.IsPixel(point2 + new Vector2Int(-1, 0)) ||
-                                              body2.IsPixel(point2 + new Vector2Int(0, -1))))
-                    overlappingPoints.Add(point1);
+                var localP1 = new Vector2Int(x, y);
+
+                if (!body1.IsPixelAssumeInBounds(localP1)) continue;
+
+                var worldPosP1 = body1.LocalToWorldPoint(localP1);
+
+                if (!bounds2.Contains(worldPosP1)) continue;
+
+                if (IsAdjacentToBody2(worldPosP1)) overlappingPoints.Add(localP1);
             }
 
             return overlappingPoints;
+
+            bool IsAdjacentToBody2(Vector2 p1WorldPos)
+            {
+                foreach (var offset in NeighborOffsets)
+                {
+                    var worldNeighborPos = p1WorldPos + offset;
+                    var p2NeighborLocal = body2.WorldToLocalPixel(worldNeighborPos);
+                    if (body2.IsPixel(p2NeighborLocal)) return true;
+                }
+
+                return false;
+            }
         }
     }
 }
