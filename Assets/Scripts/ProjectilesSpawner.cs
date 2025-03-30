@@ -17,8 +17,11 @@ public sealed class ProjectilesSpawner : MonoBehaviour
         Instance = null;
     }
 
-    public GameObject Spawn(GameObject projectilePrefab, Vector3 transformPosition, Quaternion rotation)
+    public GameObject Spawn(GameObject projectilePrefab, Vector3 transformPosition, Quaternion rotation,
+        LayerMask layer)
     {
-        return Instantiate(projectilePrefab, transformPosition, rotation, ProjectilesHolder);
+        var bulletObject = Instantiate(projectilePrefab, transformPosition, rotation, ProjectilesHolder);
+        bulletObject.GetComponent<Bullet>().SetLayer(layer);
+        return bulletObject;
     }
 }

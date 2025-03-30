@@ -11,16 +11,9 @@ public class Bullet : PixelatedRigidbody
     [SerializeField] private float fadeOutTime = 2f;
     [SerializeField] private float lifeTime = 2f;
 
-    private Collider2D _collider;
-
     public override void Start()
     {
         base.Start();
-
-        _collider = GetComponent<Collider2D>();
-        _collider.enabled = false;
-
-        CheckCollisionsAndEnableCollider().Forget();
 
         DelayedFadeOutAsync().Forget();
     }
@@ -35,33 +28,9 @@ public class Bullet : PixelatedRigidbody
                 ForceMode2D.Impulse);
     }
 
-    private async UniTaskVoid CheckCollisionsAndEnableCollider()
+    public void SetLayer(LayerMask layer)
     {
-        try
-        {
-            var token = this.GetCancellationTokenOnDestroy();
-
-            while (true)
-            {
-                var results = new Collider2D[1];
-                var collisionCount = Physics2D.OverlapCircle(transform.position, 1f, new ContactFilter2D(), results);
-
-                if (collisionCount == 0)
-                {
-                    _collider.enabled = true;
-                    break;
-                }
-
-                await UniTask.DelayFrame(4, cancellationToken: token);
-            }
-        }
-        catch (OperationCanceledException)
-        {
-        }
-        catch (Exception e)
-        {
-            Debug.LogException(e);
-        }
+        gameObject.layer = layer;
     }
 
     private async UniTaskVoid DelayedFadeOutAsync()
