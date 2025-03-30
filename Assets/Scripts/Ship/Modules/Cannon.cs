@@ -29,7 +29,7 @@ namespace Ship.Modules
 
             var angle = MathExt.AngleBetweenTwoPoints(pointerPosition, transform.position);
 
-            var rotation = Quaternion.Euler(0, 0, angle + 90);
+            var rotation = Quaternion.Euler(0, 0, angle - 90);
 
             var newBullet =
                 ProjectilesSpawner.Instance.Spawn(projectilePrefab, transform.position, rotation, gameObject.layer);

@@ -16,6 +16,8 @@ public class Bullet : PixelatedRigidbody
         base.Start();
 
         DelayedFadeOutAsync().Forget();
+
+        OnPixelsLost += (_, _) => SetLayer(LayerMask.NameToLayer("Default"));
     }
 
     private void OnDestroy()
