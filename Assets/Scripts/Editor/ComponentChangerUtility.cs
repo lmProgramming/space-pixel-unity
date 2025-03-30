@@ -7,31 +7,36 @@ namespace Editor
     public class ComponentChangerUtility
     {
         [MenuItem("CONTEXT/Module/Change to Engine")]
-        private static void ChangeToEngine1(MenuCommand command)
+        private static void ChangeToEngine(MenuCommand command)
         {
-            ChangeComponent<Module, Engine>(command.context as MonoBehaviour);
+            ChangeComponent<Engine>(command.context as MonoBehaviour);
         }
 
         [MenuItem("CONTEXT/Module/Change to Command")]
-        private static void ChangeToCommand1(MenuCommand command)
+        private static void ChangeToCommand(MenuCommand command)
         {
-            ChangeComponent<Module, Command>(command.context as MonoBehaviour);
+            ChangeComponent<Command>(command.context as MonoBehaviour);
         }
 
         [MenuItem("CONTEXT/Module/Change to Cannon")]
-        private static void ChangeToCannon1(MenuCommand command)
+        private static void ChangeToCannon(MenuCommand command)
         {
-            ChangeComponent<Module, Cannon>(command.context as MonoBehaviour);
+            ChangeComponent<Cannon>(command.context as MonoBehaviour);
+        }
+
+        [MenuItem("CONTEXT/Module/Change to Laser Beam")]
+        private static void ChangeToLaserBeam(MenuCommand command)
+        {
+            ChangeComponent<LaserBeam>(command.context as MonoBehaviour);
         }
 
         [MenuItem("CONTEXT/Module/Change to Basic Module")]
-        private static void ChangeToModule1(MenuCommand command)
+        private static void ChangeToModule(MenuCommand command)
         {
-            ChangeComponent<Module, Module>(command.context as MonoBehaviour);
+            ChangeComponent<Module>(command.context as MonoBehaviour);
         }
 
-        private static void ChangeComponent<TBase, TNew>(MonoBehaviour oldComponent)
-            where TBase : MonoBehaviour where TNew : MonoBehaviour
+        private static void ChangeComponent<TNew>(MonoBehaviour oldComponent) where TNew : MonoBehaviour
         {
             if (oldComponent == null) return;
 
