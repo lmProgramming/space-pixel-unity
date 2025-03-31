@@ -2110,13 +2110,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   <Type>k__BackingField: 3
   lineRenderer: {fileID: 521192492}
-  beamRange: 20
-  fireDuration: 1.5
+  beamRange: 200
+  maxFireDuration: 1
   damagePerSecond: 10
   hitLayers:
     serializedVersion: 2
-    m_Bits: 128
-  reloadTime: 2
+    m_Bits: 129
+  icon: {fileID: 1865393218821458671, guid: 8f61f8d23847b2d46b2c194f226b8f84, type: 3}
+  reloadTime: 5
 --- !u!120 &521192492
 LineRenderer:
   serializedVersion: 2
@@ -2125,7 +2126,7 @@ LineRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 521192484}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -2186,7 +2187,7 @@ LineRenderer:
     colorGradient:
       serializedVersion: 2
       key0: {r: 1, g: 0.17337054, b: 0, a: 1}
-      key1: {r: 1, g: 0.6383666, b: 0, a: 1}
+      key1: {r: 1, g: 0.6383666, b: 0, a: 0}
       key2: {r: 0, g: 0, b: 0, a: 0}
       key3: {r: 0, g: 0, b: 0, a: 0}
       key4: {r: 0, g: 0, b: 0, a: 0}
@@ -2210,7 +2211,7 @@ LineRenderer:
       atime6: 0
       atime7: 0
       m_Mode: 0
-      m_ColorSpace: -1
+      m_ColorSpace: 0
       m_NumColorKeys: 2
       m_NumAlphaKeys: 2
     numCornerVertices: 0

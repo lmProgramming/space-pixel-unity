@@ -4,20 +4,23 @@ using Cysharp.Threading.Tasks;
 using LM;
 using Pixelation;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace Ship.Modules
 {
     [RequireComponent(typeof(LineRenderer))]
-    public class LaserBeam : Module, IWeapon // Changed interface if desired
+    public class LaserBeam : Module, IWeapon
     {
         [Header("Laser Settings")] [SerializeField]
         private LineRenderer lineRenderer;
 
         [SerializeField] private float beamRange = 20f;
 
-        [SerializeField] private float maxFireDuration = 1.5f; // No longer fixed duration
-        [SerializeField] private float damagePerSecond = 10f;
+        [SerializeField] private float maxFireDuration = 1.5f;
+        [SerializeField] private float pixelsDestroyedPerSecond = 10f;
         [SerializeField] private LayerMask hitLayers;
+
+        [SerializeField] private GameObject icon;
 
         [Header("Weapon Base Settings")] [SerializeField]
         private float reloadTime = 2.0f;
@@ -27,8 +30,10 @@ namespace Ship.Modules
 
         private SimpleTimer _reloadTimer;
 
-        private void Awake()
+        protected override void Awake()
         {
+            base.Awake();
+
             if (lineRenderer == null) lineRenderer = GetComponent<LineRenderer>();
             if (lineRenderer == null)
             {
@@ -48,13 +53,11 @@ namespace Ship.Modules
 
         private void OnDestroy()
         {
-            StopFiringCleanup(); // Ensure cleanup on destroy
+            StopFiringCleanup();
 
-            if (_reloadTimer != null)
-            {
-                _reloadTimer.OnReady -= HandleReady;
-                _reloadTimer.OnNotReady -= HandleNotReady;
-            }
+            if (_reloadTimer == null) return;
+            _reloadTimer.OnReady -= HandleReady;
+            _reloadTimer.OnNotReady -= HandleNotReady;
         }
 
         public event Action OnReady;
@@ -70,20 +73,18 @@ namespace Ship.Modules
             return !_isFiring && _reloadTimer != null && _reloadTimer.IsReady;
         }
 
-        public GameObject GetIcon() // Keep if IWeapon still needs it
+        public GameObject GetIcon()
         {
-            // return icon; // Return actual icon if you re-add the field
-            return null;
+            return icon;
         }
 
-        // Renamed from Shoot to reflect starting the action
         public void StartShooting()
         {
             if (!IsReady()) return;
 
             _isFiring = true;
             lineRenderer.enabled = true;
-            HandleNotReady(); // Signal busy state
+            HandleNotReady();
 
             _fireCts?.Cancel();
             _fireCts?.Dispose();
@@ -92,22 +93,19 @@ namespace Ship.Modules
             FireBeamUpdateAsync(_fireCts.Token).Forget();
         }
 
-        // New method to stop firing when input is released
-        public void StopShooting()
+        private void StopShooting()
         {
-            if (!_isFiring) return; // Only stop if currently firing
+            _isFiring = false;
 
             StopFiringCleanup();
 
-            // Start reload timer after stopping
-            if (_reloadTimer != null) _reloadTimer.Wait(reloadTime).Forget();
-            // HandleNotReady will be invoked by the timer starting its wait
+            _reloadTimer?.Wait(reloadTime).Forget();
         }
 
         private void StopFiringCleanup()
         {
             _isFiring = false;
-            if (lineRenderer != null) // Check if lineRenderer still exists
+            if (lineRenderer != null)
                 lineRenderer.enabled = false;
             _fireCts?.Cancel();
             _fireCts?.Dispose();
@@ -120,7 +118,6 @@ namespace Ship.Modules
             var timeRemaining = maxFireDuration;
             try
             {
-                // Loop runs as long as _isFiring is true and not cancelled
                 while (_isFiring && !token.IsCancellationRequested && timeRemaining > 0)
                 {
                     timeRemaining -= Time.deltaTime;
@@ -134,15 +131,20 @@ namespace Ship.Modules
 
                     var hit = Physics2D.Raycast(origin, direction, beamRange, hitLayers);
 
-                    if (hit.collider != null)
+                    if (hit.collider)
                     {
                         lineRenderer.SetPosition(1, hit.point);
-                        var pixelatedRigidbody = hit.collider.GetComponent<PixelatedRigidbody>();
 
-                        var closestPixelPosition = pixelatedRigidbody.CollisionHandler.GetClosestPixelPosition(
-                            pixelatedRigidbody.WorldToLocalPoint(endPoint));
+                        if (Random.value < pixelsDestroyedPerSecond * Time.deltaTime)
+                        {
+                            var pixelatedRigidbody = hit.collider.GetComponent<PixelatedRigidbody>();
 
-                        if (closestPixelPosition.HasValue) pixelatedRigidbody.RemovePixelAt(closestPixelPosition.Value);
+                            var closestPixelPosition = pixelatedRigidbody.CollisionHandler.GetClosestPixelPosition(
+                                pixelatedRigidbody.WorldToLocalPoint(hit.point));
+
+                            if (closestPixelPosition.HasValue)
+                                pixelatedRigidbody.RemovePixelAt(closestPixelPosition.Value);
+                        }
                     }
                     else
                     {
@@ -154,13 +156,10 @@ namespace Ship.Modules
             }
             catch (OperationCanceledException)
             {
-                // Expected when firing stops, ignore
             }
             finally
             {
-                // Final cleanup is handled by StopFiringCleanup or OnDestroy
-                if (lineRenderer != null) // Ensure line is off if loop exits unexpectedly
-                    lineRenderer.enabled = false;
+                StopShooting();
             }
         }
 

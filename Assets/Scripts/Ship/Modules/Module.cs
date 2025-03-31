@@ -24,15 +24,13 @@ namespace Ship.Modules
         private Ship Ship { get; set; }
         public PixelatedRigidbody PixelatedRigidbody { get; private set; }
 
-        private void Awake()
+        protected virtual void Awake()
         {
             PixelatedRigidbody = GetComponent<PixelatedRigidbody>();
         }
 
         private void Start()
         {
-            if (PixelatedRigidbody == null) PixelatedRigidbody = GetComponent<PixelatedRigidbody>();
-
             if (PixelatedRigidbody != null)
                 PixelatedRigidbody.OnPixelsLost += CheckCohesion;
             else
