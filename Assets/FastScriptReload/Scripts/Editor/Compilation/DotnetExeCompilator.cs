@@ -5,25 +5,29 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
+using FastScriptReload.Editor.AssemblyPostProcess;
+using HarmonyLib;
 using ImmersiveVRTools.Editor.Common.Cache;
+using ImmersiveVRTools.Editor.Common.Utilities;
 using ImmersiveVRTools.Runtime.Common;
 using ImmersiveVrToolsCommon.Runtime.Logging;
 using UnityEditor;
-using UnityEditorInternal;
 
-namespace FastScriptReload.Scripts.Editor.Compilation
+namespace FastScriptReload.Editor.Compilation
 {
     [InitializeOnLoad]
-    public class DotnetExeDynamicCompilation : DynamicCompilationBase
+    public class DotnetExeDynamicCompilation: DynamicCompilationBase
     {
-        private static readonly string _dotnetExePath;
-        private static readonly string _cscDll;
-        private static readonly string _tempFolder;
+        private static string _dotnetExePath;
+        private static string _cscDll;
+        private static string _tempFolder;
 
-        private static readonly string _applicationContentsPath = EditorApplication.applicationContentsPath;
-        private static readonly List<string> CreatedFilesToCleanUp = new();
+        private static string ApplicationContentsPath = EditorApplication.applicationContentsPath;
+        private static readonly List<string> _createdFilesToCleanUp = new List<string>();
+        private static readonly Dictionary<string, Assembly> _typeNameAssemblyCache = new Dictionary<string, Assembly>(16);
 
         static DotnetExeDynamicCompilation()
         {
@@ -32,19 +36,23 @@ namespace FastScriptReload.Scripts.Editor.Compilation
 #else
             const string dotnetExecutablePath = "dotnet"; //mac and linux, no extension
 #endif
-
+                
             _dotnetExePath = FindFileOrThrow(dotnetExecutablePath);
             _cscDll = FindFileOrThrow("csc.dll"); //even on mac/linux need to find dll and use, not no extension one
             _tempFolder = Path.GetTempPath();
-
+            
             EditorApplication.playModeStateChanged += obj =>
             {
-                if (obj == PlayModeStateChange.ExitingPlayMode && CreatedFilesToCleanUp.Any())
+                if (obj == PlayModeStateChange.ExitingPlayMode && _createdFilesToCleanUp.Any())
                 {
-                    LoggerScoped.LogDebug($"Removing temporary files: [{string.Join(",", CreatedFilesToCleanUp)}]");
-
-                    foreach (var fileToCleanup in CreatedFilesToCleanUp) File.Delete(fileToCleanup);
-                    CreatedFilesToCleanUp.Clear();
+                    LoggerScoped.LogDebug($"Removing temporary files: [{string.Join(",", _createdFilesToCleanUp)}]");
+                    
+                    foreach (var fileToCleanup in _createdFilesToCleanUp)
+                    {
+                        new FileInfo(fileToCleanup).IsReadOnly = false;
+                        File.Delete(fileToCleanup);
+                    }
+                    _createdFilesToCleanUp.Clear();
                 }
             };
         }
@@ -54,59 +62,70 @@ namespace FastScriptReload.Scripts.Editor.Compilation
             return SessionStateCache.GetOrCreateString($"FSR:FilePath_{fileName}", () =>
             {
                 var foundFile = Directory
-                    .GetFiles(_applicationContentsPath, fileName, SearchOption.AllDirectories)
+                    .GetFiles(ApplicationContentsPath, fileName, SearchOption.AllDirectories)
                     .FirstOrDefault();
                 if (foundFile == null)
-                    throw new Exception(
-                        $"Unable to find '{fileName}', make sure Editor version supports it. You can also add preprocessor directive 'FastScriptReload_CompileViaMCS' which will use Mono compiler instead");
+                {
+                    throw new Exception($"Unable to find '{fileName}', make sure Editor version supports it. You can also add preprocessor directive 'FastScriptReload_CompileViaMCS' which will use Mono compiler instead");
+                }
 
                 return foundFile;
             });
         }
 
-        public static CompileResult Compile(List<string> filePathsWithSourceCode,
-            UnityMainThreadDispatcher unityMainThreadDispatcher)
+        public static CompileResult Compile(List<string> filePathsWithSourceCode, UnityMainThreadDispatcher unityMainThreadDispatcher)
         {
+            var sourceCodeCombinedFilePath = string.Empty;
             try
             {
                 var asmName = Guid.NewGuid().ToString().Replace("-", "");
                 var rspFile = _tempFolder + $"{asmName}.rsp";
                 var assemblyAttributeFilePath = _tempFolder + $"{asmName}.DynamicallyCreatedAssemblyAttribute.cs";
-                var sourceCodeCombinedFilePath = _tempFolder + $"{asmName}.SourceCodeCombined.cs";
+                sourceCodeCombinedFilePath = _tempFolder + $"{asmName}.SourceCodeCombined.cs";
                 var outLibraryPath = $"{_tempFolder}{asmName}.dll";
 
-                var sourceCodeCombined =
-                    CreateSourceCodeCombinedContents(filePathsWithSourceCode, ActiveScriptCompilationDefines.ToList());
-                CreateFileAndTrackAsCleanup(sourceCodeCombinedFilePath, sourceCodeCombined, CreatedFilesToCleanUp);
+                var createSourceCodeCombinedResult = CreateSourceCodeCombinedContents(filePathsWithSourceCode, ActiveScriptCompilationDefines.ToList());
+                CreateFileAndTrackAsCleanup(sourceCodeCombinedFilePath, createSourceCodeCombinedResult.SourceCode, _createdFilesToCleanUp);
 #if UNITY_EDITOR
                 unityMainThreadDispatcher.Enqueue(() =>
                 {
-                    if ((bool)FastScriptReloadPreference.IsAutoOpenGeneratedSourceFileOnChangeEnabled
-                            .GetEditorPersistedValueOrDefault())
-                        InternalEditorUtility.OpenFileAtLineExternal(sourceCodeCombinedFilePath, 0);
+                    if ((bool)FastScriptReloadPreference.IsAutoOpenGeneratedSourceFileOnChangeEnabled.GetEditorPersistedValueOrDefault())
+                    {
+                        UnityEditorInternal.InternalEditorUtility.OpenFileAtLineExternal(sourceCodeCombinedFilePath, 0);
+                    }
                 });
 #endif
 
-                var rspFileContent = GenerateCompilerArgsRspFileContents(outLibraryPath, _tempFolder, asmName,
-                    sourceCodeCombinedFilePath, assemblyAttributeFilePath);
-                CreateFileAndTrackAsCleanup(rspFile, rspFileContent, CreatedFilesToCleanUp);
-                CreateFileAndTrackAsCleanup(assemblyAttributeFilePath, DynamicallyCreatedAssemblyAttributeSourceCode,
-                    CreatedFilesToCleanUp);
+                var originalAssemblyPathToAsmWithInternalsVisibleToCompiled = PerfMeasure.Elapsed(
+                    () => CreateAssemblyCopiesWithInternalsVisibleTo(createSourceCodeCombinedResult, asmName),
+                    out var createInternalVisibleToAsmElapsedMilliseconds);
 
-                var exitCode = ExecuteDotnetExeCompilation(_dotnetExePath, _cscDll, rspFile, outLibraryPath,
-                    out var outputMessages);
+                var shouldAddUnsafeFlag = createSourceCodeCombinedResult.SourceCode.Contains("unsafe"); //TODO: not ideal as 'unsafe' can be part of comment, not code. But compiling with that flag in more cases shouldn't cause issues
+                var rspFileContent = GenerateCompilerArgsRspFileContents(outLibraryPath, sourceCodeCombinedFilePath, assemblyAttributeFilePath, 
+                    originalAssemblyPathToAsmWithInternalsVisibleToCompiled, shouldAddUnsafeFlag);
+                CreateFileAndTrackAsCleanup(rspFile, rspFileContent, _createdFilesToCleanUp);
+                CreateFileAndTrackAsCleanup(assemblyAttributeFilePath, DynamicallyCreatedAssemblyAttributeSourceCode, _createdFilesToCleanUp);
+
+                var exitCode = ExecuteDotnetExeCompilation(_dotnetExePath, _cscDll, rspFile, outLibraryPath, out var outputMessages);
 
                 var compiledAssembly = Assembly.LoadFrom(outLibraryPath);
-                return new CompileResult(outLibraryPath, outputMessages, exitCode, compiledAssembly, sourceCodeCombined,
-                    sourceCodeCombinedFilePath);
+                return new CompileResult(outLibraryPath, outputMessages, exitCode, compiledAssembly, createSourceCodeCombinedResult.SourceCode, 
+                    sourceCodeCombinedFilePath, createInternalVisibleToAsmElapsedMilliseconds);
             }
-            catch (Exception)
+            catch (SourceCodeHasErrorsException e)
             {
-                LoggerScoped.LogError("Compilation error: temporary files were not removed so they can be inspected: "
-                                      + string.Join(", ", CreatedFilesToCleanUp
-                                          .Select(f => $"<a href=\"{f}\" line=\"1\">{f}</a>")));
+                // FastScriptReloadManager has a special case for reporting SourceCodeHasErrorsException.
+                // Just pass it through.
+                throw e;
+            }
+            catch (Exception e)
+            {
+                LoggerScoped.LogError($"Compilation error: temporary files were not removed so they can be inspected: " 
+                               + string.Join(", ", _createdFilesToCleanUp
+                                   .Select(f => $"<a href=\"{f}\" line=\"1\">{f}</a>")));
                 if (LogHowToFixMessageOnCompilationError)
-                    LoggerScoped.LogWarning(@"HOW TO FIX - INSTRUCTIONS:
+                {
+                    LoggerScoped.LogWarning($@"HOW TO FIX - INSTRUCTIONS:
 
 1) Open file that caused issue by looking at error log starting with: 'FSR: Compilation error: temporary files were not removed so they can be inspected: '. And click on file path to open.
 2) Look up other error in the console, which will be like 'Error When updating files:' - this one contains exact line that failed to compile (in XXX_SourceCodeGenerated.cs file). Those are same compilation errors as you see in Unity/IDE when developing.
@@ -133,34 +152,91 @@ You can also:
 3) Have a look at compilation error, it shows error line (in the '*.SourceCodeCombined.cs' file, it's going to be something that compiler does not accept, likely easy to spot. To workaround you can change that part of code in original file. It's specific patterns that'll break it.
 
 *If you want to prevent that message from reappearing please go to Window -> Fast Script Reload -> Start Screen -> Logging -> tick off 'Log how to fix message on compilation error'*");
-                throw;
+
+                }
+                
+                throw new HotReloadCompilationException(e.Message, e, sourceCodeCombinedFilePath);
             }
         }
 
-        private static void CreateFileAndTrackAsCleanup(string filePath, string contents,
-            List<string> createdFilesToCleanUp)
+        private static Dictionary<string, string> CreateAssemblyCopiesWithInternalsVisibleTo(CreateSourceCodeCombinedContentsResult createSourceCodeCombinedResult, string asmName)
+        {
+            var originalAssemblyPathToAsmWithInternalsVisibleToCompiled = new Dictionary<string, string>();
+            try
+            {
+                var assembliesForTypesInCombinedFile = createSourceCodeCombinedResult.TypeNamesDefinitions
+                    .Select(GetAssemblyByTypeName)
+                    .Where(t => t != null)
+                    .Distinct();
+
+                foreach (var assemblyForTypesInCombinedFile in assembliesForTypesInCombinedFile)
+                {
+                    var createdAssemblyWithInternalsVisibleToNewlyCompiled = AddInternalsVisibleToForAllUserAssembliesPostProcess.CreateAssemblyWithInternalsContentsVisibleTo(
+                        assemblyForTypesInCombinedFile, asmName
+                    );
+                    originalAssemblyPathToAsmWithInternalsVisibleToCompiled.Add(assemblyForTypesInCombinedFile.Location, createdAssemblyWithInternalsVisibleToNewlyCompiled);
+                }
+            }
+            catch (Exception e)
+            {
+                LoggerScoped.LogWarning($"Unable to create assembly with '{nameof(InternalsVisibleToAttribute)}' for dynamically recompiled code. {e}");
+            }
+
+            return originalAssemblyPathToAsmWithInternalsVisibleToCompiled;
+        }
+
+        private static void CreateFileAndTrackAsCleanup(string filePath, string contents, List<string> createdFilesToCleanUp)
         {
             File.WriteAllText(filePath, contents);
+            new FileInfo(filePath).IsReadOnly = true;
             createdFilesToCleanUp.Add(filePath);
         }
 
-        private static string GenerateCompilerArgsRspFileContents(string outLibraryPath, string tempFolder,
-            string asmName,
-            string sourceCodeCombinedFilePath, string assemblyAttributeFilePath)
+        private static Assembly GetAssemblyByTypeName(string typeName)
+        {
+            // This cache is barely worth it on my machine - it's ~1ms without, ~0ms with.
+            // However, the number of assemblies to search is technically unbounded
+            //  - so this might be more important for somebody else.
+            if (_typeNameAssemblyCache.TryGetValue(typeName, out var assembly)) return assembly;
+
+            // FSR (via Harmony) originally did this search by enumerating assembly.GetTypes().
+            // I can't see anything in the documentation suggesting the assembly.GetType(typeName) version misses any cases.
+            // It's much faster.
+            assembly = AppDomain.CurrentDomain.GetAssemblies().SingleOrDefault(asm => asm.GetType(typeName, false) != null);
+
+            if (assembly != null) _typeNameAssemblyCache.Add(typeName, assembly);
+            return assembly;
+        }
+
+        private static string GenerateCompilerArgsRspFileContents(string outLibraryPath, string sourceCodeCombinedFilePath, string assemblyAttributeFilePath, 
+            Dictionary<string, string> originalAssemblyPathToAsmWithInternalsVisibleToCompiled, bool addUnsafeFlag)
         {
             var rspContents = new StringBuilder();
             rspContents.AppendLine("-target:library");
             rspContents.AppendLine($"-out:\"{outLibraryPath}\"");
-            rspContents.AppendLine($"-refout:\"{tempFolder}{asmName}.ref.dll\""); //TODO: what's that?
-            foreach (var symbol in ActiveScriptCompilationDefines) rspContents.AppendLine($"-define:{symbol}");
+            // rspContents.AppendLine($"-refout:\"{tempFolder}{asmName}.ref.dll\""); //reference assembly for linking, not needed
+            foreach (var symbol in ActiveScriptCompilationDefines)
+            {
+                rspContents.AppendLine($"-define:{symbol}");
+            }
 
             foreach (var referenceToAdd in ResolveReferencesToAdd(new List<string>()))
-                rspContents.AppendLine($"-r:\"{referenceToAdd}\"");
+            {
+                if (originalAssemblyPathToAsmWithInternalsVisibleToCompiled.TryGetValue(referenceToAdd, out var asmWithInternalsVisibleTo))
+                {
+                    //Changed assembly have InternalsVisibleTo added to it to avoid any issues where types are defined internal
+                    rspContents.AppendLine($"-r:\"{asmWithInternalsVisibleTo}\"");
+                }
+                else
+                {
+                    rspContents.AppendLine($"-r:\"{referenceToAdd}\"");
+                }
+            }
 
             rspContents.AppendLine($"\"{sourceCodeCombinedFilePath}\"");
             rspContents.AppendLine($"\"{assemblyAttributeFilePath}\"");
 
-            rspContents.AppendLine("-langversion:latest");
+            rspContents.AppendLine($"-langversion:latest");
 
             rspContents.AppendLine("/deterministic");
             rspContents.AppendLine("/optimize-");
@@ -168,13 +244,18 @@ You can also:
             rspContents.AppendLine("/nologo");
             rspContents.AppendLine("/RuntimeMetadataVersion:v4.0.30319");
 
+            if (addUnsafeFlag)
+            {
+                rspContents.AppendLine("/unsafe");
+            }
+
             rspContents.AppendLine("/nowarn:0169");
             rspContents.AppendLine("/nowarn:0649");
             rspContents.AppendLine("/nowarn:1701");
             rspContents.AppendLine("/nowarn:1702");
             rspContents.AppendLine("/utf8output");
             rspContents.AppendLine("/preferreduilang:en-US");
-
+            
             var rspContentsString = rspContents.ToString();
             return rspContentsString;
         }
@@ -188,8 +269,8 @@ You can also:
 
             var outMessages = new List<string>();
 
-            var stderrCompleted = new ManualResetEvent(false);
-            var stdoutCompleted = new ManualResetEvent(false);
+            var stderr_completed = new ManualResetEvent(false);
+            var stdout_completed = new ManualResetEvent(false);
 
             process.StartInfo.CreateNoWindow = true;
             process.StartInfo.UseShellExecute = false;
@@ -201,7 +282,7 @@ You can also:
                 if (args.Data != null)
                     outMessages.Add(args.Data);
                 else
-                    stderrCompleted.Set();
+                    stderr_completed.Set();
             };
             process.OutputDataReceived += (sender, args) =>
             {
@@ -211,7 +292,7 @@ You can also:
                     return;
                 }
 
-                stdoutCompleted.Set();
+                stdout_completed.Set();
             };
             process.StartInfo.StandardOutputEncoding = process.StartInfo.StandardErrorEncoding = Encoding.UTF8;
 
@@ -230,7 +311,7 @@ You can also:
                 throw;
             }
 
-            var exitCode = -1;
+            int exitCode = -1;
             try
             {
                 process.BeginOutputReadLine();
@@ -241,8 +322,8 @@ You can also:
             }
             finally
             {
-                stderrCompleted.WaitOne(TimeSpan.FromSeconds(30.0));
-                stdoutCompleted.WaitOne(TimeSpan.FromSeconds(30.0));
+                stderr_completed.WaitOne(TimeSpan.FromSeconds(30.0));
+                stdout_completed.WaitOne(TimeSpan.FromSeconds(30.0));
                 process.Close();
             }
 
@@ -253,6 +334,16 @@ You can also:
             outputMessages = new List<string>();
             outputMessages.AddRange(outMessages);
             return exitCode;
+        }
+    }
+
+    public class HotReloadCompilationException : Exception
+    {
+        public string SourceCodeCombinedFileCreated { get; }
+
+        public HotReloadCompilationException(string message, Exception innerException, string sourceCodeCombinedFileCreated) : base(message, innerException)
+        {
+            SourceCodeCombinedFileCreated = sourceCodeCombinedFileCreated;
         }
     }
 }

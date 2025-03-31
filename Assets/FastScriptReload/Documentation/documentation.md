@@ -90,13 +90,47 @@ Due to that there'll be some overhead with:
 
 > All that shouldn't really add too much overhead on dev-machine - you may lose few FPS though.
 
+## EXPERIMENTAL In-editor Hot Reload (outside of playmode)
+Asset has an experimental support for hot reload outside of playmode. However with limitations as they are now - it
+is intended for some specific use cases (like iterating on editor scripts).
+
+> **Feature is not intended as a replacement for Unity compile / reload mechanism**
+
+To enable, please:
+`Window -> Fast Script Reload -> Start Window -> Editor Hot-Reload -> Enable Hot-Reload outside of play mode`.
+
+> As this is an experimental feature please expect it to break more often! It'd be great help if you could report any issues via Discord / email.
+
+## Debugging
+Debugging is fully supported although breakpoints in your original file won't be hit.
+
+Once change is compiled, you'll get an option to open generated file [via clickable link in console window] in which you can set breakpoints.
+
+Tool can also auto-open generated files for you on change for simpler access, you can find option via 'Window -> Fast Script Reload -> Start Screen -> Debugging -> Auto open generated source file for debugging'
+
+> Debugging with Rider for Unity 2019 and 2020 is having some issues, you can only open debuggable files with auto-open feature. Clicking a file in console causes subtle static-variables reload (not full domain reload) that'll break your play-session.
+
+### Adding Function Breakpoint
+If for whatever reason debugger breakpoint is not hit you can try setting Function Breakpoint in your IDE.
+
+For type name you want to include `<OriginalTypeName>__Patched_`, the `__Patched_` postfix is auto-added by asset to prevent name clash.
+Function name remains unchanged.
+
+## Production Build
+For Fast Script Reload asset code will be excluded from any builds.
+
+For Live Script Reload you should exclude it from final production build, do that via:
+- 'Window -> Fast Script Reload -> Welcome Screen -> Build -> Enable Hot Reload For Build' - untick
+ 
+**When building via File -> Build Settings - you'll also see Live Script Reload status under 'Build' button. You can click 'Adjust' button which will take you to build page for asset.**
+```This is designed to make sure you don't accidentally build tool into release althoguh best approach would be to ensure your release process takes care of that.```
 
 ## User Defined Script Overrides
 For asset to hot reload your changes it needs to make some adjustments to code. This could cause some issues as described in limitations section.
 
 I continuously work on mitigating limitations. When they happen you can help yourself quickly by creating user defined script override.
 
-Those are simply overrides on a per-file / method basis - when specified their contents will be used for final source code. Allowing you to simply fix any issues. 
+Those are simply overrides on a per-file / method basis - when specified their contents will be used for final source code. Allowing you to simply fix any issues.
 This is especially helpful with larger files.
 
 ### Replacing methods
@@ -153,7 +187,7 @@ public class MySingleton__Patched_: MonoBehaviour {
 ```
 
 ### Adding types
-When your code is recompiled it lands in new assembly. This can cause some issues, for example if your class is using `internal` 
+When your code is recompiled it lands in new assembly. This can cause some issues, for example if your class is using `internal`
 interface - after recompile it won't be able to access that interface.
 
 Following code will fail to compile when changing MyClass as it won't be able to access IInterface which is `internal`:
@@ -204,40 +238,6 @@ This will take you to tool settings window. You can also access it via:
 1) Clicking `Window -> Fast Script Reload -> Start Screen`
 2) Selecting `User Script Rewrite Overrides` side tab
 
-## EXPERIMENTAL In-editor Hot Reload (outside of playmode)
-Asset has an experimental support for hot reload outside of playmode. However with limitations as they are now - it
-is intended for some specific use cases (like iterating on editor scripts).
-
-> **Feature is not intended as a replacement for Unity compile / reload mechanism**
-
-To enable, please:
-`Window -> Fast Script Reload -> Start Window -> Editor Hot-Reload -> Enable Hot-Reload outside of play mode`.
-
-> As this is an experimental feature please expect it to break more often! It'd be great help if you could report any issues via Discord / email.
-
-## Debugging
-Debugging is fully supported although breakpoints in your original file won't be hit.
-
-Once change is compiled, you'll get an option to open generated file [via clickable link in console window] in which you can set breakpoints.
-
-Tool can also auto-open generated files for you on change for simpler access, you can find option via 'Window -> Fast Script Reload -> Start Screen -> Debugging -> Auto open generated source file for debugging'
-
-> Debugging with Rider for Unity 2019 and 2020 is having some issues, you can only open debuggable files with auto-open feature. Clicking a file in console causes subtle static-variables reload (not full domain reload) that'll break your play-session.
-
-### Adding Function Breakpoint
-If for whatever reason debugger breakpoint is not hit you can try setting Function Breakpoint in your IDE.
-
-For type name you want to include `<OriginalTypeName>__Patched_`, the `__Patched_` postfix is auto-added by asset to prevent name clash.
-Function name remains unchanged.
-
-## Production Build
-For Fast Script Reload asset code will be excluded from any builds.
-
-For Live Script Reload you should exclude it from final production build, do that via:
-- 'Window -> Fast Script Reload -> Welcome Screen -> Build -> Enable Hot Reload For Build' - untick
- 
-**When building via File -> Build Settings - you'll also see Live Script Reload status under 'Build' button. You can click 'Adjust' button which will take you to build page for asset.**
-```This is designed to make sure you don't accidentally build tool into release althoguh best approach would be to ensure your release process takes care of that.```
 
 ## Options
 You can access Welcome Screen / Options via 'Window -> Fast/Live Script Reload -> Start Screen' - it contains useful information as well as options.
@@ -254,6 +254,24 @@ You can also manually manage reload, to do so:
 3) or call `FastScriptReloadManager.TriggerReloadForChangedFiles()` method from code
 
 > You can also use Editor -> Hotkeys to bind Force Reload to specific key.
+
+
+### Watch only specific files or folders
+By default FSR watches all files (as specified in global file watcher) - if you want to limit that behaviour to specific files 
+please tick 'Specify watched folders/files manually' in 'Reload tab'.
+
+Then you can right click on folder/file in project window and select 'Fast Script Reload -> Watch File / Folder'.
+
+> Technically this adds another File Watcher behind the scenes, you can always adjust those on File Watchers tab. 
+
+### Custom file watcher implementation
+In some cases standard file default watcher API can cause issues. You can choose different file watcher implementations via 'Window -> Fast Script Reload -> Start Screen -> File Watchers -> File Watcher implementation'
+
+> DefaultUnity - on some editor versions it could be slow or not trigger at all
+> 
+> DirectWindowsApi - (experimental) uses Windows API directly, faster (symlinks not supported)
+>
+> CustomPolling - (experimental) watches files by manual polling for changes, slowest. Make sure to narrow down watchers scope to script folders
 
 ### [Live-Reload] Hot-Reload over Network
 With on-device build, your code changes will be distributed over the network in real-time.
@@ -454,6 +472,8 @@ public class MySingleton: MonoBehaviour {
 ### Calling internal class members from changed code
 > You can use [User Defined Script Overrides](#user-defined-script-overrides) to overcome this limitation
 
+> fixed in unreleased 1.5 - please get in touch if you need a copy before release
+
 Technically, once your changed code is compiled it'll be in a separate assembly. As a result this changed code won't be able to access internal classes from assembly it originated from.
 
 ### Extensive use of nested classed / structs
@@ -547,6 +567,8 @@ public static ObjectFromExternalAssemblyExtensions
 ### Changing class that implements internal interface can trigger compilation error
 > You can use [User Defined Script Overrides](#user-defined-script-overrides) to overcome this limitation
 
+> fixed in unreleased 1.5 - please get in touch if you need a copy before release
+
 If class is implementing interface that's defined in different file as internal (default for no access modifier) - then changes to that class will fail to compile.
 
 eg.
@@ -569,6 +591,8 @@ class ClassImplementingIInterface: IInterface {
 ### Changing class that accesses `private protected` members
 > You can use [User Defined Script Overrides](#user-defined-script-overrides) to overcome this limitation
 
+> fixed in unreleased 1.5 - please get in touch if you need a copy before release
+
 With C# 7.2 `private protected` access modifier was introduced. It works as `protected` access modifier in a sense that inherited classes can access it but. 
 Addition of `private` also limits it to same assembly. Your changes are technically compiled into separate assembly and at the moment trying to access `private protected` in changed code will produce compiler error.
 
@@ -581,7 +605,17 @@ Once breakpoint has been hit it'll stop asset from hot-reloading in that play-se
 Asset runs based on specific .NET functionality, IL2CPP builds will not be supported. Although as this is development workflow aid you can build your APK with Mono backend (android) and change later.
 
 ### Partial classes
-Partial classes are not yet supported
+Experimental support (on by default). Potentially could have some performance implications as it's file-read heavy in current state. Can be disabled in options if needed.
+
+Your partial class file needs to share name with actual class. eg
+`public class PartialClass`
+
+Needs to be in files
+**PartialClass**XYZ
+
+eg.
+- PartialClass.1.cs
+- PartialClass.2.cs
 
 ## FAQ
 ### How is this asset different than Live Script Reload?
@@ -656,7 +690,18 @@ This is down to reimporting 'Point' prefab. Right now plugin will make sure it's
 
 To fix please go to `FastScripReload\Examples\Point\Point.prefab` and search for 'Point' shader. 
 
+### On Mac hot reload does not trigger when changing files
+It'd seem for some code editors on Mac file changes are not picked up. This seems to be down to editors not updating LastWrite property on save and file watcher can't pick up the change.
+Unfortunately right now only workaround is to use editor that does update it, eg VSCode.
+
+### I removed FSR but my scripts are still not reloading
+FSR initially asks if you want to disable Unity auto-reload. If you select yes, then it'll let you know you should now trigger full reload with CTRL + R.
+That's a Unity setting and it does not change back when removing asset.
+
+> To change go to 'Edit -> Preferences -> Asset Pipeline -> Auto Refresh -> Enabled'
+
 ## Roadmap
+- add Mac silicon support
 - ~~add Mac/Linux support~~ (added with 1.1)
 - ~~add debugger support for hot-reloaded scripts~~ (added with 1.2)
 - ~~allow to add new fields (adjustable in Editor)~~ (added with 1.3)

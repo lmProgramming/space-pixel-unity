@@ -1,21 +1,25 @@
-﻿#if UNITY_EDITOR || LiveScriptReload_Enabled
+﻿using System;
+using System.Linq;
+using System.Reflection;
+using ImmersiveVRTools.Runtime.Common.Utilities;
+using UnityEngine;
 
-namespace FastScriptReload.Scripts.Runtime
+#if UNITY_EDITOR || LiveScriptReload_Enabled
+
+namespace FastScriptReload.Runtime
 {
     public class AssemblyChangesLoaderResolver
     {
         private static AssemblyChangesLoaderResolver _instance;
+        public static AssemblyChangesLoaderResolver Instance => _instance ?? (_instance = new AssemblyChangesLoaderResolver());
 
         private IAssemblyChangesLoader _cachedNetworkLoader;
-
-        public static AssemblyChangesLoaderResolver Instance =>
-            _instance ?? (_instance = new AssemblyChangesLoaderResolver());
-
+        
         public IAssemblyChangesLoader Resolve()
         {
 #if LiveScriptReload_Enabled
             //network loader is in add-on that's not referenced by this lib, use reflection to get instance
-            if (_cachedNetworkLoader == null)
+            if (!(Component) _cachedNetworkLoader) //needs to cast for Unity based null comparison (for that to work with disabled domain reload)
             {
                 _cachedNetworkLoader = (IAssemblyChangesLoader)ReflectionHelper.GetAllTypes()
                     .First(t => t.FullName == "LiveScriptReload.Runtime.NetworkedAssemblyChangesSender")
@@ -32,6 +36,7 @@ namespace FastScriptReload.Scripts.Runtime
 #else
             return AssemblyChangesLoader.Instance;
 #endif
+
         }
     }
 }

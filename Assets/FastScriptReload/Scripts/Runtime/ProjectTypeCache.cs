@@ -5,18 +5,20 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 
-namespace FastScriptReload.Scripts.Runtime
+namespace FastScriptReload.Runtime
 {
     public class ProjectTypeCache
     {
         private static bool _isInitialized;
         private static Dictionary<string, Type> _allTypesInNonDynamicGeneratedAssemblies;
-
         public static Dictionary<string, Type> AllTypesInNonDynamicGeneratedAssemblies
         {
             get
             {
-                if (!_isInitialized) Init();
+                if (!_isInitialized)
+                {
+                    Init();
+                }
 
                 return _allTypesInNonDynamicGeneratedAssemblies;
             }
@@ -30,18 +32,18 @@ namespace FastScriptReload.Scripts.Runtime
                 typeLookupSw.Start();
 
                 _allTypesInNonDynamicGeneratedAssemblies = AppDomain.CurrentDomain.GetAssemblies()
-                    .Where(a => !a.GetCustomAttributes<DynamicallyCreatedAssemblyAttribute>().Any())
+                    .Where(a => !CustomAttributeExtensions.GetCustomAttributes<DynamicallyCreatedAssemblyAttribute>((Assembly)a).Any())
                     .SelectMany(a => a.GetTypes())
                     .GroupBy(t => t.FullName)
-                    .Select(g =>
-                        g.First()) //TODO: quite odd that same type full name can be defined multiple times? eg Microsoft.CodeAnalysis.EmbeddedAttribute throws 'An item with the same key has already been added' 
+                    .Select(g => g.First()) //TODO: quite odd that same type full name can be defined multiple times? eg Microsoft.CodeAnalysis.EmbeddedAttribute throws 'An item with the same key has already been added' 
                     .ToDictionary(t => t.FullName, t => t);
-
+                    
 #if ImmersiveVrTools_DebugEnabled
-                    LoggerScoped.Log($"Initialized type-lookup dictionary, took: {typeLookupSw.ElapsedMilliseconds}ms - cached");
+                ImmersiveVrToolsCommon.Runtime.Logging.LoggerScoped.Log($"Initialized type-lookup dictionary, took: {typeLookupSw.ElapsedMilliseconds}ms - cached");
 #endif
             }
         }
+
     }
 }
 #endif

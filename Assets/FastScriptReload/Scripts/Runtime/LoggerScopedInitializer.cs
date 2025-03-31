@@ -1,11 +1,10 @@
 ﻿using ImmersiveVrToolsCommon.Runtime.Logging;
-using UnityEditor;
 using UnityEngine;
 
-namespace FastScriptReload.Scripts.Runtime
+namespace FastScriptReload.Runtime
 {
 #if UNITY_EDITOR
-    [InitializeOnLoad]
+    [UnityEditor.InitializeOnLoad]
 #endif
     public static class LoggerScopedInitializer
     {
@@ -13,9 +12,9 @@ namespace FastScriptReload.Scripts.Runtime
         {
             Init();
         }
-
+        
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
-        private static void Init()
+        static void Init()
         {
             LoggerScoped.LogPrefix = "FSR: ";
         }
