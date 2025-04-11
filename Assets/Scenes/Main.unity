@@ -184,6 +184,7 @@ MonoBehaviour:
   flipX: 0
   flipY: 0
   rotation: 0
+  collisionEventChannelSO: {fileID: 11400000, guid: 407789f55f1a01548b246d2e77cf6183, type: 2}
 --- !u!50 &25841635
 Rigidbody2D:
   serializedVersion: 5
@@ -524,6 +525,7 @@ MonoBehaviour:
   flipX: 1
   flipY: 0
   rotation: 1
+  collisionEventChannelSO: {fileID: 11400000, guid: 407789f55f1a01548b246d2e77cf6183, type: 2}
 --- !u!50 &116197410
 Rigidbody2D:
   serializedVersion: 5
@@ -746,6 +748,7 @@ MonoBehaviour:
   flipX: 1
   flipY: 0
   rotation: 0
+  collisionEventChannelSO: {fileID: 11400000, guid: 407789f55f1a01548b246d2e77cf6183, type: 2}
 --- !u!50 &185009414
 Rigidbody2D:
   serializedVersion: 5
@@ -1944,6 +1947,7 @@ MonoBehaviour:
   flipX: 1
   flipY: 0
   rotation: 2
+  collisionEventChannelSO: {fileID: 11400000, guid: 407789f55f1a01548b246d2e77cf6183, type: 2}
 --- !u!50 &521192488
 Rigidbody2D:
   serializedVersion: 5
@@ -2829,6 +2833,7 @@ MonoBehaviour:
   flipX: 0
   flipY: 0
   rotation: 2
+  collisionEventChannelSO: {fileID: 11400000, guid: 407789f55f1a01548b246d2e77cf6183, type: 2}
 --- !u!50 &672308254
 Rigidbody2D:
   serializedVersion: 5
@@ -3047,6 +3052,7 @@ MonoBehaviour:
   flipX: 1
   flipY: 0
   rotation: 0
+  collisionEventChannelSO: {fileID: 11400000, guid: 407789f55f1a01548b246d2e77cf6183, type: 2}
 --- !u!50 &696995299
 Rigidbody2D:
   serializedVersion: 5
@@ -4992,6 +4998,7 @@ MonoBehaviour:
   flipX: 0
   flipY: 0
   rotation: 0
+  collisionEventChannelSO: {fileID: 11400000, guid: 407789f55f1a01548b246d2e77cf6183, type: 2}
 --- !u!50 &1384098531
 Rigidbody2D:
   serializedVersion: 5
@@ -5361,6 +5368,7 @@ MonoBehaviour:
   flipX: 0
   flipY: 0
   rotation: 0
+  collisionEventChannelSO: {fileID: 11400000, guid: 407789f55f1a01548b246d2e77cf6183, type: 2}
 --- !u!50 &1492072031
 Rigidbody2D:
   serializedVersion: 5
@@ -5687,6 +5695,7 @@ MonoBehaviour:
   flipX: 1
   flipY: 0
   rotation: 0
+  collisionEventChannelSO: {fileID: 11400000, guid: 407789f55f1a01548b246d2e77cf6183, type: 2}
 --- !u!50 &1619951467
 Rigidbody2D:
   serializedVersion: 5
@@ -6555,6 +6564,7 @@ MonoBehaviour:
   flipX: 1
   flipY: 0
   rotation: 1
+  collisionEventChannelSO: {fileID: 11400000, guid: 407789f55f1a01548b246d2e77cf6183, type: 2}
 --- !u!50 &1884429654
 Rigidbody2D:
   serializedVersion: 5
@@ -7049,7 +7059,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1959479949}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1901650863
@@ -7067,8 +7078,8 @@ MonoBehaviour:
   sounds:
   - name: explosion
     clip: {fileID: 8300000, guid: ec9fc538b634e48429428e09cb77746a, type: 3}
-    volume: 1
-    pitch: 1
+    volume: 0.2
+    pitch: 0.3
     isLoop: 0
     hasCooldown: 0
     source: {fileID: 0}
@@ -7266,6 +7277,7 @@ MonoBehaviour:
   flipX: 0
   flipY: 0
   rotation: 0
+  collisionEventChannelSO: {fileID: 11400000, guid: 407789f55f1a01548b246d2e77cf6183, type: 2}
 --- !u!114 &1940184200
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7536,6 +7548,52 @@ Sprite:
   m_Bones: []
   m_ScriptableObjects: []
   m_SpriteID: 
+--- !u!1 &1959479948
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1959479949}
+  - component: {fileID: 1959479950}
+  m_Layer: 0
+  m_Name: CollisionSoundPlayer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1959479949
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1959479948}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1901650862}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1959479950
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1959479948}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f00060aeda7f446e82b18022deaf95f1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  collisionEventChannel: {fileID: 11400000, guid: 407789f55f1a01548b246d2e77cf6183, type: 2}
+  soundManager: {fileID: 1901650863}
 --- !u!1 &1988705646
 GameObject:
   m_ObjectHideFlags: 0
@@ -7643,6 +7701,7 @@ MonoBehaviour:
   flipX: 0
   flipY: 0
   rotation: 0
+  collisionEventChannelSO: {fileID: 11400000, guid: 407789f55f1a01548b246d2e77cf6183, type: 2}
 --- !u!50 &1988705650
 Rigidbody2D:
   serializedVersion: 5

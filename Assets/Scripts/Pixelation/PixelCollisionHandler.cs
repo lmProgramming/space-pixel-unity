@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using ContourTracer;
+using Events.Collision;
 using LM;
 using Pixelation.CollisionResolver;
 using UnityEngine;
@@ -13,6 +14,8 @@ namespace Pixelation
         private const float DefaultExplosionChange = 0.25f;
         private readonly PixelatedRigidbody _body;
         private readonly PolygonCollider2D _collider;
+
+        private readonly CollisionEventChannelSO _collisionEventChannel;
         private readonly CollisionResolver.CollisionResolver _collisionResolver;
         private readonly PixelGrid _grid;
         private readonly GridContourTracer _gridContourTracer = new();
@@ -20,11 +23,13 @@ namespace Pixelation
 
         private bool _didCollide;
 
-        public PixelCollisionHandler(PixelGrid grid, PixelatedRigidbody body, PolygonCollider2D collider)
+        public PixelCollisionHandler(PixelGrid grid, PixelatedRigidbody body, PolygonCollider2D collider,
+            CollisionEventChannelSO collisionEventChannel)
         {
             _grid = grid;
             _body = body;
             _collider = collider;
+            _collisionEventChannel = collisionEventChannel;
 
             _collisionResolver = new PhysicsCollision(this, _body);
 
@@ -66,16 +71,24 @@ namespace Pixelation
             _didCollide = true;
             var pixelsDestroyed = _collisionResolver.ResolveCollision(other, collision);
 
-            var vector2Ints = pixelsDestroyed as Vector2Int[] ?? Enumerable.ToArray(pixelsDestroyed);
-            EffectsOnPixelsDestroyed(vector2Ints);
+            var pixels = pixelsDestroyed as Vector2Int[] ?? Enumerable.ToArray(pixelsDestroyed);
+
+            SpawnExplosions(pixels);
+
+            if (_collisionEventChannel == null) return;
+            var data = new CollisionData(
+                _body.gameObject,
+                other.gameObject,
+                collision.contacts[0].point
+            );
+            _collisionEventChannel.RaiseEvent(data);
         }
 
-        private void EffectsOnPixelsDestroyed(Vector2Int[] pixels)
+        private void SpawnExplosions(Vector2Int[] pixels)
         {
             var explosionsCount = Mathf.Min(pixels.Length - 1, Mathf.Max(1, pixels.Length * DefaultExplosionChange));
             for (var index = 0; index < explosionsCount; index++)
                 EffectsSpawner.Instance.SpawnExplosion(_body.LocalToWorldPoint(pixels[index]));
-            SoundManager.Play("explosion");
         }
 
         private void RecalculateColliders()

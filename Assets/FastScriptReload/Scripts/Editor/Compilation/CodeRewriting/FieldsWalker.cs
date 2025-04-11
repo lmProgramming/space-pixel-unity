@@ -5,16 +5,16 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace FastScriptReload.Editor.Compilation.CodeRewriting
 {
-    class FieldsWalker : CSharpSyntaxWalker {
-        private readonly Dictionary<string, List<NewFieldDeclaration>> _typeNameToFieldDeclarations = new Dictionary<string, List<NewFieldDeclaration>>();
+    internal class FieldsWalker : CSharpSyntaxWalker
+    {
+        private readonly Dictionary<string, List<NewFieldDeclaration>> _typeNameToFieldDeclarations = new();
 
         public override void VisitClassDeclaration(ClassDeclarationSyntax node)
         {
             var className = node.Identifier;
-            var fullClassName = RoslynUtils.GetMemberFQDN(node, className.ToString());
-            if(!_typeNameToFieldDeclarations.ContainsKey(fullClassName)) {
+            var fullClassName = RoslynUtils.GetMemberFqdn(node, className.ToString());
+            if (!_typeNameToFieldDeclarations.ContainsKey(fullClassName))
                 _typeNameToFieldDeclarations[fullClassName] = new List<NewFieldDeclaration>();
-            }
 
             base.VisitClassDeclaration(node);
         }
@@ -22,21 +22,23 @@ namespace FastScriptReload.Editor.Compilation.CodeRewriting
         public override void VisitFieldDeclaration(FieldDeclarationSyntax node)
         {
             var fieldName = node.Declaration.Variables.First().Identifier.ToString();
-            var fullClassName = RoslynUtils.GetMemberFQDNWithoutMemberName(node);
-            if(!_typeNameToFieldDeclarations.ContainsKey(fullClassName)) {
+            var fullClassName = RoslynUtils.GetMemberFqdnWithoutMemberName(node);
+            if (!_typeNameToFieldDeclarations.ContainsKey(fullClassName))
                 _typeNameToFieldDeclarations[fullClassName] = new List<NewFieldDeclaration>();
-            }
-		
-            _typeNameToFieldDeclarations[fullClassName].Add(new NewFieldDeclaration(fieldName, node.Declaration.Type.ToString(), node));
-		
+
+            _typeNameToFieldDeclarations[fullClassName]
+                .Add(new NewFieldDeclaration(fieldName, node.Declaration.Type.ToString(), node));
+
             base.VisitFieldDeclaration(node);
         }
 
-        public Dictionary<string, List<NewFieldDeclaration>> GetTypeToFieldDeclarations() {
+        public Dictionary<string, List<NewFieldDeclaration>> GetTypeToFieldDeclarations()
+        {
             return _typeNameToFieldDeclarations;
         }
-        
-        public List<string> GetTypeNames() {
+
+        public List<string> GetTypeNames()
+        {
             return _typeNameToFieldDeclarations.Select(kv => kv.Key).ToList();
         }
     }
