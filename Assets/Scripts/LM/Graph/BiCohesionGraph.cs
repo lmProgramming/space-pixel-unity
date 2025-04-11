@@ -25,8 +25,10 @@ namespace Ship.Modules.Graph
             if (AdjacencyList.TryGetValue(from, out var value)) value.Remove(to);
             if (AdjacencyList.TryGetValue(to, out var value1)) value1.Remove(from);
 
-            if (!Equals(from, _centralNode) && AdjacencyList[from].Count == 0) AdjacencyList.Remove(from);
-            if (!Equals(to, _centralNode) && AdjacencyList[to].Count == 0) AdjacencyList.Remove(to);
+            if (!Equals(from, _centralNode) && AdjacencyList.ContainsKey(from) && AdjacencyList[from].Count == 0)
+                AdjacencyList.Remove(from);
+            if (!Equals(to, _centralNode) && AdjacencyList.ContainsKey(to) && AdjacencyList[to].Count == 0)
+                AdjacencyList.Remove(to);
         }
 
         public override void RemoveNode(T node)

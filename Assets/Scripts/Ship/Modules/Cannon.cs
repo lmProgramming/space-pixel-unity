@@ -55,6 +55,10 @@ namespace Ship.Modules
             _reloadTimer.Wait(reloadTime).Forget();
         }
 
+        public void StopShooting()
+        {
+        }
+
         public bool IsReady()
         {
             return _reloadTimer.IsReady;
