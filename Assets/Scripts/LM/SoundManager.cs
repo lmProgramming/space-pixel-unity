@@ -4,23 +4,21 @@ using UnityEngine;
 
 namespace LM
 {
+    public enum SoundIdentifier
+    {
+        Explosion
+    }
+
     public class SoundManager : MonoBehaviour
     {
-        private static Dictionary<string, float> _soundTimerDictionary;
         public Sound[] sounds;
-
-        public static SoundManager Instance { get; private set; }
+        private Dictionary<SoundIdentifier, Sound> _soundsDictionary;
 
         private void Awake()
         {
-            if (Instance != null && Instance != this)
-                Destroy(gameObject);
-            else
-                Instance = this;
-
             DontDestroyOnLoad(gameObject);
 
-            _soundTimerDictionary = new Dictionary<string, float>();
+            _soundsDictionary = new Dictionary<SoundIdentifier, Sound>();
 
             foreach (var sound in sounds)
             {
@@ -31,7 +29,7 @@ namespace LM
                 sound.source.pitch = sound.pitch;
                 sound.source.loop = sound.isLoop;
 
-                _soundTimerDictionary[sound.name] = 0f;
+                _soundsDictionary[sound.identifier] = sound;
             }
         }
 
@@ -40,20 +38,13 @@ namespace LM
             SetVolume(PlayerPrefs.GetFloat("soundVolume", 1f));
         }
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        private static void InitializeOnLoad()
+        public void Play(SoundIdentifier identifier)
         {
-            Instance = null;
-            _soundTimerDictionary = new Dictionary<string, float>();
-        }
-
-        public void Play(string name)
-        {
-            var sound = Array.Find(Instance.sounds, s => s.name == name);
+            var sound = GetSound(identifier);
 
             if (sound == null)
             {
-                Debug.LogError("Sound " + name + " Not Found!");
+                Debug.LogError("Sound " + identifier + " Not Found!");
                 return;
             }
 
@@ -62,61 +53,67 @@ namespace LM
             sound.source.Play();
         }
 
-        public static void Stop(string name)
+        public void Stop(SoundIdentifier identifier)
         {
-            var sound = Array.Find(Instance.sounds, s => s.name == name);
+            var sound = GetSound(identifier);
 
             if (sound == null)
             {
-                Debug.LogError("Sound " + name + " Not Found!");
+                Debug.LogError("Sound " + identifier + " Not Found!");
                 return;
             }
 
             sound.source.Stop();
         }
 
-        public static void Pause(string name)
+        public void Pause(SoundIdentifier identifier)
         {
-            var sound = Array.Find(Instance.sounds, s => s.name == name);
+            var sound = GetSound(identifier);
 
             if (sound == null)
             {
-                Debug.LogError("Sound " + name + " Not Found!");
+                Debug.LogError("Sound " + identifier + " Not Found!");
                 return;
             }
 
             sound.source.Pause();
         }
 
-        public static void UnPause(string name)
+        public void UnPause(SoundIdentifier identifier)
         {
-            var sound = Array.Find(Instance.sounds, s => s.name == name);
+            var sound = GetSound(identifier);
 
             if (sound == null)
             {
-                Debug.LogError("Sound " + name + " Not Found!");
+                Debug.LogError("Sound " + identifier + " Not Found!");
                 return;
             }
 
             sound.source.UnPause();
         }
 
-        public static bool PlayingSound(string name)
+        public bool PlayingSound(SoundIdentifier identifier)
         {
-            var sound = Array.Find(Instance.sounds, s => s.name == name);
+            var sound = GetSound(identifier);
 
             if (sound != null) return sound.source.isPlaying;
 
-            Debug.LogError("Sound " + name + " Not Found!");
+            Debug.LogError("Sound " + identifier + " Not Found!");
             return false;
         }
 
-        private static bool CanPlaySound(Sound sound)
+        private Sound GetSound(SoundIdentifier identifier)
         {
-            return _soundTimerDictionary.TryGetValue(sound.name, out _);
+            var sound = _soundsDictionary[identifier];
+            return sound;
         }
 
-        public void SetVolume(float val)
+        private bool CanPlaySound(Sound sound)
+        {
+            return _soundsDictionary.TryGetValue(sound.identifier, out _);
+        }
+
+        private void SetVolume(float val)
         {
             foreach (var t in sounds) t.source.volume = val * t.volume;
         }
@@ -145,7 +142,7 @@ namespace LM
             Music
         }
 
-        public string name;
+        public SoundIdentifier identifier;
 
         public AudioClip clip;
 
@@ -154,7 +151,6 @@ namespace LM
         [Range(.1f, 3f)] public float pitch = 1f;
 
         public bool isLoop;
-        public bool hasCooldown;
         public AudioSource source;
 
         public Type type;

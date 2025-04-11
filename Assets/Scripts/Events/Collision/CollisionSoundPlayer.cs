@@ -21,7 +21,7 @@ namespace Events.Collision
 
         private void HandleCollision(CollisionData data)
         {
-            soundManager.Play("explosion");
+            soundManager.Play(SoundIdentifier.Explosion);
         }
     }
 }
