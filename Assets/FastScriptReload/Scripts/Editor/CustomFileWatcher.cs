@@ -123,7 +123,7 @@ public class CustomFileWatcher : EditorWindow
             getFilesStopwatch.Start();
 #endif
 
-            string[] files = Directory.GetFiles(directoryPath, searchPattern, includeSubdirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
+            var files = Directory.GetFiles(directoryPath, searchPattern, includeSubdirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
 
 #if ImmersiveVrTools_DebugEnabled
 

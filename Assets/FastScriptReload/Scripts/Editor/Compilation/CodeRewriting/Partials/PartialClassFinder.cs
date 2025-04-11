@@ -12,10 +12,10 @@ public static class PartialClassFinder
         if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath))
             return Enumerable.Empty<string>();
 
-        string directory = Path.GetDirectoryName(filePath);
-        string fileContent = File.ReadAllText(filePath);
+        var directory = Path.GetDirectoryName(filePath);
+        var fileContent = File.ReadAllText(filePath);
 
-        string partialClassName = ExtractPartialClassName(fileContent);
+        var partialClassName = ExtractPartialClassName(fileContent);
         if (string.IsNullOrEmpty(partialClassName))
         {
             Debug.LogWarning($"No partial class/struct found in file: {filePath}");
@@ -60,7 +60,7 @@ public static class PartialClassFinder
     {
         try
         {
-            string content = File.ReadAllText(filePath);
+            var content = File.ReadAllText(filePath);
             return content.Contains($"partial class {className}")
                 || content.Contains($"partial struct {className}");
         }

@@ -594,7 +594,7 @@ namespace FastScriptReload.Editor
                             if (dynamicallyLoadedAssemblyCompilerResult.MessagesFromCompilerProcess.Count > 0)
                             {
                                 var msg = new StringBuilder();
-                                foreach (string message in dynamicallyLoadedAssemblyCompilerResult.MessagesFromCompilerProcess)
+                                foreach (var message in dynamicallyLoadedAssemblyCompilerResult.MessagesFromCompilerProcess)
                                 {
                                     msg.AppendLine($"Error  when compiling, it's best to check code and make sure it's compilable \r\n {message}\n");
                                 }

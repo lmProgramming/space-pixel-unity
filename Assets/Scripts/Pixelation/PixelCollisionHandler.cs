@@ -75,6 +75,7 @@ namespace Pixelation
             var explosionsCount = Mathf.Min(pixels.Length - 1, Mathf.Max(1, pixels.Length * DefaultExplosionChange));
             for (var index = 0; index < explosionsCount; index++)
                 EffectsSpawner.Instance.SpawnExplosion(_body.LocalToWorldPoint(pixels[index]));
+            SoundManager.Play("explosion");
         }
 
         private void RecalculateColliders()

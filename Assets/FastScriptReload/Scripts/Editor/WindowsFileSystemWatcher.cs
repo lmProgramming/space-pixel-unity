@@ -194,8 +194,8 @@ namespace FastScriptReload.Editor
 
                 fixed (byte* bufferPointer = buffer)
                 {
-                    bool ok = false;
-                    int size = 0;
+                    var ok = false;
+                    var size = 0;
 
                     try
                     {
@@ -257,7 +257,7 @@ namespace FastScriptReload.Editor
         private void ProcessBufferOnEventThread(InterruptibleHandle handle, ReadOnlySpan<byte> buffer)
         {
             ReadOnlySpan<char> oldName = default;
-            bool oldMatch = false;
+            var oldMatch = false;
 
             while (true)
             {

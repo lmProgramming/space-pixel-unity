@@ -311,7 +311,7 @@ You can also:
                 throw;
             }
 
-            int exitCode = -1;
+            var exitCode = -1;
             try
             {
                 process.BeginOutputReadLine();
