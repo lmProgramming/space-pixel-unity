@@ -130,7 +130,7 @@ namespace LM
             {
                 for (var index = 0; index < Input.touchCount; index++)
                 {
-                    var touch = Input.touches[index];
+                    var touch = Input.GetTouch(index);
                     if (touch.phase == TouchPhase.Ended && !IsPointerOverUI)
                         return true;
                 }

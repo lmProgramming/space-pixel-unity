@@ -1,4 +1,4 @@
-Shader "Custom/StarBackgroundWithNoiseGradient"
+Shader "Custom/PixelatedStarBackgroundWithNoiseGradient"
 {
     Properties
     {
@@ -22,6 +22,14 @@ Shader "Custom/StarBackgroundWithNoiseGradient"
         _Seed ("Random Seed", Range(0, 1000)) = 42
         _MinZoom ("Min Zoom Level", Range(0.1, 100.0)) = 0.5
         _MaxZoom ("Max Zoom Level", Range(0.1, 100.0)) = 5.0
+
+        // Pixelation properties
+        _PixelSize ("Pixel Size", Range(1, 64)) = 8
+        _BackgroundPixelSize ("Background Pixel Size", Range(1, 32)) = 4
+        _StarPixelSize ("Star Pixel Size", Range(1, 16)) = 4
+        _StarSharpness ("Star Pixel Sharpness", Range(0.1, 10.0)) = 1.0
+        _DitherStrength ("Dither Strength", Range(0.0, 1.0)) = 0.1
+        _ColorBanding ("Color Banding", Range(1, 32)) = 8
     }
 
     SubShader
@@ -50,6 +58,7 @@ Shader "Custom/StarBackgroundWithNoiseGradient"
                 float2 uv : TEXCOORD0;
                 float4 vertex : SV_POSITION;
                 float4 worldPos : TEXCOORD1;
+                float4 screenPos : TEXCOORD2;
             };
 
             sampler2D _MainTex;
@@ -73,52 +82,38 @@ Shader "Custom/StarBackgroundWithNoiseGradient"
             float _MinZoom;
             float _MaxZoom;
 
+            // Pixelation parameters
+            float _PixelSize;
+            float _BackgroundPixelSize;
+            float _StarPixelSize;
+            float _StarSharpness;
+            float _DitherStrength;
+            float _ColorBanding;
+
             // Global variables passed from script
             float4 _PlayerPosition;
             float _CurrentZoom;
 
-            // Hash function for pseudo-random number generation
-            float hash(float2 p)
+            float hash_iq(float2 p)
             {
-                p = frac(p * float2(123.34, 456.21));
-                p += dot(p, p + 45.32);
-                return frac(p.x * p.y + _Seed);
+                // Combine components with large prime numbers
+                float h = dot(p, float2(127.1, 311.7));
+
+                // Use sine function for pseudo-randomness, large multiplier for chaos
+                // Add _Seed for variation based on the property
+                return frac(sin(h + _Seed) * 43758.5453123);
             }
 
-            // Hash function for color determination
-            float hashColor(float2 p)
+            // Version returning float2 (useful if you need two random numbers)
+            float2 hash_iq2(float2 p)
             {
-                p = frac(p * float2(273.31, 781.57));
-                p += dot(p, p + 92.78);
-                return frac(p.x * p.y + _Seed * 1.23);
-            }
-
-            // Hash for star size
-            float hashSize(float2 p)
-            {
-                p = frac(p * float2(187.37, 639.19));
-                p += dot(p, p + 135.33);
-                return frac(p.x * p.y + _Seed * 0.87);
-            }
-
-            // Hash for twinkle phase
-            float hashTwinklePhase(float2 p)
-            {
-                p = frac(p * float2(398.47, 519.29));
-                p += dot(p, p + 217.53);
-                return frac(p.x * p.y + _Seed * 1.87);
-            }
-
-            // Hash for twinkle group
-            float hashTwinkleGroup(float2 p)
-            {
-                p = frac(p * float2(527.63, 291.41));
-                p += dot(p, p + 159.27);
-                return frac(p.x * p.y + _Seed * 0.53);
+                p = float2(dot(p, float2(127.1, 311.7)),
+                           dot(p, float2(269.5, 183.3)));
+                return frac(sin(p + _Seed) * 43758.5453123);
             }
 
             // 2D Perlin noise implementation for background gradient
-            float2 unity_gradientNoise_dir(float2 p)
+            float2 unity_gradient_noise_dir(float2 p)
             {
                 p = p % 289;
                 float x = (34 * p.x + 1) * p.x % 289 + p.y;
@@ -131,10 +126,10 @@ Shader "Custom/StarBackgroundWithNoiseGradient"
             {
                 float2 ip = floor(p);
                 float2 fp = frac(p);
-                float d00 = dot(unity_gradientNoise_dir(ip), fp);
-                float d01 = dot(unity_gradientNoise_dir(ip + float2(0, 1)), fp - float2(0, 1));
-                float d10 = dot(unity_gradientNoise_dir(ip + float2(1, 0)), fp - float2(1, 0));
-                float d11 = dot(unity_gradientNoise_dir(ip + float2(1, 1)), fp - float2(1, 1));
+                float d00 = dot(unity_gradient_noise_dir(ip), fp);
+                float d01 = dot(unity_gradient_noise_dir(ip + float2(0, 1)), fp - float2(0, 1));
+                float d10 = dot(unity_gradient_noise_dir(ip + float2(1, 0)), fp - float2(1, 0));
+                float d11 = dot(unity_gradient_noise_dir(ip + float2(1, 1)), fp - float2(1, 1));
                 fp = fp * fp * fp * (fp * (fp * 6 - 15) + 10);
                 return lerp(lerp(d00, d01, fp.y), lerp(d10, d11, fp.y), fp.x) + 0.5;
             }
@@ -156,12 +151,50 @@ Shader "Custom/StarBackgroundWithNoiseGradient"
                 return sum;
             }
 
+            // Ordered dithering function
+            float dither8x8(float2 position, float brightness)
+            {
+                int x = int(fmod(position.x, 8));
+                int y = int(fmod(position.y, 8));
+
+                // 8x8 Bayer matrix for ordered dithering
+                const float dither[64] = {
+                    0, 32, 8, 40, 2, 34, 10, 42,
+                    48, 16, 56, 24, 50, 18, 58, 26,
+                    12, 44, 4, 36, 14, 46, 6, 38,
+                    60, 28, 52, 20, 62, 30, 54, 22,
+                    3, 35, 11, 43, 1, 33, 9, 41,
+                    51, 19, 59, 27, 49, 17, 57, 25,
+                    15, 47, 7, 39, 13, 45, 5, 37,
+                    63, 31, 55, 23, 61, 29, 53, 21
+                };
+
+                int index = y * 8 + x;
+                float limit = dither[index] / 64.0;
+
+                return step(limit, brightness);
+            }
+
+            // Pixelate the UV coordinates
+            float2 pixelateUV(float2 uv, float pixelSize)
+            {
+                float2 pixelatedUV = floor(uv * pixelSize) / pixelSize;
+                return pixelatedUV;
+            }
+
+            // Quantize colors to create banding effect
+            float4 quantizeColor(float4 color, float levels)
+            {
+                return floor(color * levels) / levels;
+            }
+
             v2_f vert(appdata v)
             {
                 v2_f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 o.uv = v.uv;
                 o.worldPos = mul(unity_ObjectToWorld, v.vertex);
+                o.screenPos = ComputeScreenPos(o.vertex);
                 return o;
             }
 
@@ -176,16 +209,23 @@ Shader "Custom/StarBackgroundWithNoiseGradient"
                 // Calculate parallax offset based on player position
                 float2 parallaxOffset = _PlayerPosition.xy * _ParallaxStrength;
 
+                // Apply pixelation to the world UVs with a smaller pixel size for the background
+                // This makes the background less pixelated while stars remain more pixelated
+                float2 bgPixelatedUV = pixelateUV(worldUV, _BackgroundPixelSize * 0.5);
+
                 // Apply offset to UVs - different layers move at different speeds
                 float2 uv1 = worldUV + parallaxOffset * 0.5; // Far stars (slow)
                 float2 uv2 = worldUV + parallaxOffset * 0.7; // Mid stars
                 float2 uv3 = worldUV + parallaxOffset; // Near stars (fast)
 
-                // Multi-layered noise for background - very slow movement with player position
-                float2 noiseUV = worldUV * _NoiseScale + parallaxOffset * 0.15;
-                noiseUV += _Time.y * _NoiseSpeed; // Additional slow movement over time
+                // Multi-layered noise for background - apply less pixelation to the noise
+                float2 noiseUV = pixelateUV(worldUV * _NoiseScale + parallaxOffset * 0.15, _BackgroundPixelSize * 0.25);
 
-                // Use Fractional Brownian Motion for more complex noise pattern
+                // CHANGED: Use smooth time instead of pixelated time for noise movement
+                float noiseTime = _Time.y * _NoiseSpeed;
+                noiseUV += noiseTime;
+
+                // Use Fractional Brownian Motion with more octaves for smoother noise pattern
                 float noise1 = fbm(noiseUV, 3);
                 float noise2 = fbm(noiseUV + float2(7.89, 3.25), 3);
 
@@ -196,46 +236,58 @@ Shader "Custom/StarBackgroundWithNoiseGradient"
                 fixed4 gradColor2 = lerp(gradColor1, _GradientColor2, noise2 * _NoiseStrength);
 
                 // Mix colors based on noise values
-                // Add a subtle third color variation using combined noise
                 fixed4 backgroundColor = lerp(gradColor2, _GradientColor3, (noise1 * noise2) * _NoiseStrength * 0.5);
 
+                // Apply subtle color quantization to create slight banding in background
+                backgroundColor = quantizeColor(backgroundColor, _ColorBanding * 0.5);
+
                 // Create star layers with different densities for depth effect
-                // Scale density with zoom for consistent look
                 float scaledDensity = _StarDensity * (1.0 / zoomFactor);
 
-                float2 gridUV1 = frac(uv1 * scaledDensity * 8.0);
-                float2 cellID1 = floor(uv1 * scaledDensity * 8.0);
+                // Create pixelated UVs specifically for stars
+                float2 starUV1 = pixelateUV(uv1, _StarPixelSize);
+                float2 starUV2 = pixelateUV(uv2, _StarPixelSize);
+                float2 starUV3 = pixelateUV(uv3, _StarPixelSize);
 
-                float2 gridUV2 = frac(uv2 * scaledDensity * 12.0);
-                float2 cellID2 = floor(uv2 * scaledDensity * 12.0);
+                // Use pixelated UVs for grid cell identification
+                float2 gridUV1 = frac(starUV1 * scaledDensity * 8.0);
+                float2 cellID1 = floor(starUV1 * scaledDensity * 8.0);
 
-                float2 gridUV3 = frac(uv3 * scaledDensity * 16.0);
-                float2 cellID3 = floor(uv3 * scaledDensity * 16.0);
+                float2 gridUV2 = frac(starUV2 * scaledDensity * 12.0);
+                float2 cellID2 = floor(starUV2 * scaledDensity * 12.0);
+
+                float2 gridUV3 = frac(starUV3 * scaledDensity * 16.0);
+                float2 cellID3 = floor(starUV3 * scaledDensity * 16.0);
 
                 // Generate stars based on random hash for each layer
-                float random1 = hash(cellID1);
-                float random2 = hash(cellID2);
-                float random3 = hash(cellID3);
+                float random1 = hash_iq(cellID1);
+                float random2 = hash_iq(cellID2);
+                float random3 = hash_iq(cellID3);
 
                 // Separate hash for color determination to ensure color variety
-                float colorRandom1 = hashColor(cellID1);
-                float colorRandom2 = hashColor(cellID2);
-                float colorRandom3 = hashColor(cellID3);
+                float colorRandom1 = hash_iq(cellID1 + float2(0.1, -0.1));
+                float colorRandom2 = hash_iq(cellID2 + float2(0.1, -0.1));
+                float colorRandom3 = hash_iq(cellID3 + float2(0.1, -0.1));
 
                 // Hash for individual star sizes
-                float sizeRandom1 = hashSize(cellID1);
-                float sizeRandom2 = hashSize(cellID2);
-                float sizeRandom3 = hashSize(cellID3);
+                float sizeRandom1 = hash_iq(cellID1 + float2(-0.1, 0.1));
+                float sizeRandom2 = hash_iq(cellID2 + float2(-0.1, 0.1));
+                float sizeRandom3 = hash_iq(cellID3 + float2(-0.1, 0.1));
 
                 // Determine individual star sizes between min and max
                 float starSize1 = lerp(_StarSizeMin, _StarSizeMax, sizeRandom1) / zoomFactor;
                 float starSize2 = lerp(_StarSizeMin, _StarSizeMax, sizeRandom2) / zoomFactor;
                 float starSize3 = lerp(_StarSizeMin, _StarSizeMax, sizeRandom3) / zoomFactor;
 
-                // Create stars using individual sizes
-                float brightness1 = smoothstep(starSize1, 0.0, length(gridUV1 - 0.5));
-                float brightness2 = smoothstep(starSize2, 0.0, length(gridUV2 - 0.5));
-                float brightness3 = smoothstep(starSize3, 0.0, length(gridUV3 - 0.5));
+                // Create pixelated stars with hard edges
+                float dist1 = length(gridUV1 - 0.5);
+                float dist2 = length(gridUV2 - 0.5);
+                float dist3 = length(gridUV3 - 0.5);
+
+                // Create pixelated stars of different sizes
+                float brightness1 = step(dist1, starSize1 * _StarSharpness);
+                float brightness2 = step(dist2, starSize2 * _StarSharpness);
+                float brightness3 = step(dist3, starSize3 * _StarSharpness);
 
                 // Only show some cells as stars based on the random value
                 brightness1 *= step(0.85, random1); // Only ~15% of cells have stars
@@ -243,44 +295,61 @@ Shader "Custom/StarBackgroundWithNoiseGradient"
                 brightness3 *= step(0.93, random3); // Only ~7% of cells have stars
 
                 // Twinkle group assignment (0-4)
-                float twinkleGroup1 = floor(hashTwinkleGroup(cellID1) * 5);
-                float twinkleGroup2 = floor(hashTwinkleGroup(cellID2) * 5);
-                float twinkleGroup3 = floor(hashTwinkleGroup(cellID3) * 5);
+                float twinkleGroup1 = floor(hash_iq(cellID1 + float2(0.2, 0.2)) * 5.0);
+                float twinkleGroup2 = floor(hash_iq(cellID2 + float2(0.2, 0.2)) * 5.0);
+                float twinkleGroup3 = floor(hash_iq(cellID3 + float2(0.2, 0.2)) * 5.0);
 
                 // Twinkle phase offset per star
-                float phaseOffset1 = hashTwinklePhase(cellID1) * 6.28; // 0 to 2π
-                float phaseOffset2 = hashTwinklePhase(cellID2) * 6.28;
-                float phaseOffset3 = hashTwinklePhase(cellID3) * 6.28;
+                float phaseOffset1 = hash_iq(cellID1 + float2(-0.2, -0.2)) * 6.28318; // 0 to 2pi
+                float phaseOffset2 = hash_iq(cellID2 + float2(-0.2, -0.2)) * 6.28318;
+                float phaseOffset3 = hash_iq(cellID3 + float2(-0.2, -0.2)) * 6.28318;
 
-                // Group-based twinkling
-                // Base time offset for each group - they twinkle independently
-                float groupTime1 = _Time.y * _TwinkleSpeed + twinkleGroup1 * 1.618;
-                float groupTime2 = _Time.y * _TwinkleSpeed + twinkleGroup2 * 1.618;
-                float groupTime3 = _Time.y * _TwinkleSpeed + twinkleGroup3 * 1.618;
+                // Keep pixelated time values for twinkling - 8 frames per second for star twinkling
+                float pixelatedTime = floor(_Time.y * _TwinkleSpeed * 8) / 8;
 
-                // Calculate twinkling - add individualized phase offset to group timing
-                float twinkle1 = sin(groupTime1 + phaseOffset1 * _TwinkleVariation) * 0.5 + 0.5;
-                float twinkle2 = sin(groupTime2 + phaseOffset2 * _TwinkleVariation) * 0.5 + 0.5;
-                float twinkle3 = sin(groupTime3 + phaseOffset3 * _TwinkleVariation) * 0.5 + 0.5;
+                // Group-based twinkling with pixelated time
+                float groupTime1 = pixelatedTime + twinkleGroup1 * 1.618;
+                float groupTime2 = pixelatedTime + twinkleGroup2 * 1.618;
+                float groupTime3 = pixelatedTime + twinkleGroup3 * 1.618;
+
+                // Calculate twinkling with more steps (0, 0.2, 0.4, 0.6, 0.8, 1.0)
+                float twinkle1 = floor(sin(groupTime1 + phaseOffset1 * _TwinkleVariation) * 2.5 + 2.5) / 5;
+                float twinkle2 = floor(sin(groupTime2 + phaseOffset2 * _TwinkleVariation) * 2.5 + 2.5) / 5;
+                float twinkle3 = floor(sin(groupTime3 + phaseOffset3 * _TwinkleVariation) * 2.5 + 2.5) / 5;
 
                 // Apply twinkling to brightness
                 brightness1 *= lerp(0.6, 1.0, twinkle1);
                 brightness2 *= lerp(0.5, 1.0, twinkle2);
                 brightness3 *= lerp(0.4, 1.0, twinkle3);
 
-                // Choose star colors - truly separate for each star
-                fixed4 col1 = lerp(lerp(_StarColor1, _StarColor2, step(0.33, colorRandom1)), _StarColor3,
-                                   step(0.66, colorRandom1));
-                fixed4 col2 = lerp(lerp(_StarColor1, _StarColor2, step(0.33, colorRandom2)), _StarColor3,
-                                   step(0.66, colorRandom2));
-                fixed4 col3 = lerp(lerp(_StarColor1, _StarColor2, step(0.33, colorRandom3)), _StarColor3,
-                                                   step(0.66, colorRandom3));
+                // Choose star colors from a limited palette (pixel art style)
+                fixed4 col1 = quantizeColor(lerp(lerp(_StarColor1, _StarColor2, step(0.33, colorRandom1)), _StarColor3,
+                                                 step(0.66, colorRandom1)), _ColorBanding * 0.5);
+                fixed4 col2 = quantizeColor(lerp(lerp(_StarColor1, _StarColor2, step(0.33, colorRandom2)), _StarColor3,
+                                                step(0.66, colorRandom2)), _ColorBanding * 0.5);
+                fixed4 col3 = quantizeColor(lerp(lerp(_StarColor1, _StarColor2, step(0.33, colorRandom3)), _StarColor3,
+                             step(0.66, colorRandom3)),
+                        _ColorBanding * 0.5);
+
+                // Apply ordered dithering for a retro look
+                float2 screenPos = i.screenPos.xy / i.screenPos.w * _ScreenParams.xy;
+                float dither1 = dither8x8(screenPos, brightness1 * _DitherStrength);
+                float dither2 = dither8x8(screenPos, brightness2 * _DitherStrength);
+                float dither3 = dither8x8(screenPos, brightness3 * _DitherStrength);
+
+                // Blend dithering with brightness for a better pixel art effect
+                brightness1 = lerp(brightness1, dither1, _DitherStrength * 0.5);
+                brightness2 = lerp(brightness2, dither2, _DitherStrength * 0.5);
+                brightness3 = lerp(brightness3, dither3, _DitherStrength * 0.5);
 
                 // Blend each star layer with the background
                 fixed4 finalColor = backgroundColor;
                 finalColor = lerp(finalColor, col1, brightness1);
                 finalColor = lerp(finalColor, col2, brightness2);
                 finalColor = lerp(finalColor, col3, brightness3);
+
+                // Apply subtle quantization to final color for the pixelated effect
+                finalColor = quantizeColor(finalColor, _ColorBanding);
 
                 return finalColor;
             }

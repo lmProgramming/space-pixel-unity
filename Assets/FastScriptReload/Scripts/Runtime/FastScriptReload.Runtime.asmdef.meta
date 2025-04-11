@@ -5,3 +5,10 @@ AssemblyDefinitionImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 239351
+  packageName: Fast Script Reload
+  packageVersion: 1.6.1
+  assetPath: Assets/FastScriptReload/Scripts/Runtime/FastScriptReload.Runtime.asmdef
+  uploadId: 710802

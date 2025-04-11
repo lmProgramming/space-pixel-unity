@@ -1,0 +1,176 @@
+using System;
+using System.Threading;
+using Cysharp.Threading.Tasks;
+using LM;
+using Pixelation;
+using UnityEngine;
+using Random = UnityEngine.Random;
+
+namespace Ship.Modules
+{
+    [RequireComponent(typeof(LineRenderer))]
+    public class LaserBeam : Module, IWeapon
+    {
+        [Header("Laser Settings")] [SerializeField]
+        private LineRenderer lineRenderer;
+
+        [SerializeField] private float beamRange = 20f;
+
+        [SerializeField] private float maxFireDuration = 1.5f;
+        [SerializeField] private float pixelsDestroyedPerSecond = 10f;
+        [SerializeField] private LayerMask hitLayers;
+
+        [SerializeField] private GameObject icon;
+
+        [Header("Weapon Base Settings")] [SerializeField]
+        private float reloadTime = 2.0f;
+
+        private CancellationTokenSource _fireCts;
+        private bool _isFiring;
+
+        private SimpleTimer _reloadTimer;
+
+        protected override void Awake()
+        {
+            base.Awake();
+
+            if (lineRenderer == null) lineRenderer = GetComponent<LineRenderer>();
+            if (lineRenderer == null)
+            {
+                Debug.LogError($"LaserBeam on {gameObject.name} requires a LineRenderer component.", this);
+                enabled = false;
+                return;
+            }
+
+            lineRenderer.positionCount = 2;
+            lineRenderer.useWorldSpace = true;
+            lineRenderer.enabled = false;
+
+            _reloadTimer = new SimpleTimer(reloadTime);
+            _reloadTimer.OnReady += HandleReady;
+            _reloadTimer.OnNotReady += HandleNotReady;
+        }
+
+        private void OnDestroy()
+        {
+            StopFiringCleanup();
+
+            if (_reloadTimer == null) return;
+            _reloadTimer.OnReady -= HandleReady;
+            _reloadTimer.OnNotReady -= HandleNotReady;
+        }
+
+        public event Action OnReady;
+        public event Action OnNotReady;
+
+        public void Shoot()
+        {
+            StartShooting();
+        }
+
+        public bool IsReady()
+        {
+            return !_isFiring && _reloadTimer != null && _reloadTimer.IsReady;
+        }
+
+        public GameObject GetIcon()
+        {
+            return icon;
+        }
+
+        public void StartShooting()
+        {
+            if (!IsReady()) return;
+
+            _isFiring = true;
+            lineRenderer.enabled = true;
+            HandleNotReady();
+
+            _fireCts?.Cancel();
+            _fireCts?.Dispose();
+            _fireCts = new CancellationTokenSource();
+
+            FireBeamUpdateAsync(_fireCts.Token).Forget();
+        }
+
+        private void StopShooting()
+        {
+            _isFiring = false;
+
+            StopFiringCleanup();
+
+            _reloadTimer?.Wait(reloadTime).Forget();
+        }
+
+        private void StopFiringCleanup()
+        {
+            _isFiring = false;
+            if (lineRenderer != null)
+                lineRenderer.enabled = false;
+            _fireCts?.Cancel();
+            _fireCts?.Dispose();
+            _fireCts = null;
+        }
+
+
+        private async UniTask FireBeamUpdateAsync(CancellationToken token)
+        {
+            var timeRemaining = maxFireDuration;
+            try
+            {
+                while (_isFiring && !token.IsCancellationRequested && timeRemaining > 0)
+                {
+                    timeRemaining -= Time.deltaTime;
+
+                    var pointerPosition = GameInput.WorldPointerPosition;
+                    Vector2 origin = transform.position;
+                    var direction = (pointerPosition - origin).normalized;
+                    var endPoint = origin + direction * beamRange;
+
+                    lineRenderer.SetPosition(0, origin);
+
+                    var hit = Physics2D.Raycast(origin, direction, beamRange, hitLayers);
+
+                    if (hit.collider)
+                    {
+                        lineRenderer.SetPosition(1, hit.point);
+
+                        if (Random.value < pixelsDestroyedPerSecond * Time.deltaTime)
+                        {
+                            var pixelatedRigidbody = hit.collider.GetComponent<PixelatedRigidbody>();
+
+                            var closestPixelPosition = pixelatedRigidbody.CollisionHandler.GetClosestPixelPosition(
+                                pixelatedRigidbody.WorldToLocalPoint(hit.point));
+
+                            if (closestPixelPosition.HasValue)
+                                pixelatedRigidbody.RemovePixelAt(closestPixelPosition.Value);
+                        }
+                    }
+                    else
+                    {
+                        lineRenderer.SetPosition(1, endPoint);
+                    }
+
+                    await UniTask.Yield(PlayerLoopTiming.Update, token);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            finally
+            {
+                StopShooting();
+            }
+        }
+
+        private void HandleReady()
+        {
+            if (!_isFiring) OnReady?.Invoke();
+        }
+
+        private void HandleNotReady()
+        {
+            OnNotReady?.Invoke();
+        }
+    }
+}

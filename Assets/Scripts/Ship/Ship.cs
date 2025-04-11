@@ -9,7 +9,7 @@ namespace Ship
 {
     public class Ship : MonoBehaviour
     {
-        [field: SerializeField] public Command CommandModule { get; private set; }
+        public Command CommandModule { get; private set; }
 
         [SerializeField] private ModuleConnectionFactory moduleConnectionFactory;
 

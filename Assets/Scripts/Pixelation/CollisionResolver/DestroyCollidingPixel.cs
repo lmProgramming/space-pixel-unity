@@ -12,7 +12,7 @@ namespace Pixelation.CollisionResolver
 
         public override IEnumerable<Vector2Int> ResolveCollision(PixelatedRigidbody other, Collision2D collision)
         {
-            var localPoint = PixelatedRigidbody.WorldToLocalPoint(collision.contacts[0].point);
+            var localPoint = PixelatedRigidbody.WorldToLocalPoint(collision.GetContact(0).point);
 
             // var pixelToDestroyPosition = GetPointAlongPath(hitPosition, -collision.rigidbody.linearVelocity, true) ??
             //                              GetPointAlongPath(hitPosition, collision.rigidbody.linearVelocity, false);

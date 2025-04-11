@@ -5,7 +5,7 @@
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "8042b29ff87dd5506d7aad72bd6d8d7405985f27"
+      "hash": "06067cd4c83e372310d6f79d1c625f6870ff7a2a"
     },
     "com.unity.2d.animation": {
       "version": "10.1.4",
@@ -151,7 +151,7 @@
       }
     },
     "com.unity.ide.rider": {
-      "version": "3.0.34",
+      "version": "3.0.35",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -190,7 +190,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.project-auditor": {
-      "version": "1.0.0",
+      "version": "1.0.1",
       "depth": 0,
       "source": "registry",
       "dependencies": {

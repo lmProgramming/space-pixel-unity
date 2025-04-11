@@ -10,6 +10,8 @@ public class Debugger : MonoBehaviour
         if (Input.GetKey(KeyCode.Delete)) HandleDelete();
 
         if (Input.GetKeyDown(KeyCode.Home)) Debug.Log(GameInput.WorldPointerPosition.ToString());
+
+        if (Input.GetKeyDown(KeyCode.P)) Debug.Break();
     }
 
     private void HandleDelete()

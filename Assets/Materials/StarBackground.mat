@@ -41,21 +41,27 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _BackgroundPixelSize: 256
+    - _ColorBanding: 128
+    - _DitherStrength: 0.1
     - _EnableExternalAlpha: 0
     - _GradientOffset: 0.5
     - _GradientParallax: 0.3
     - _GradientScale: 2
     - _MaxZoom: 100
     - _MinZoom: 30
-    - _NoiseScale: 0.01
+    - _NoiseScale: 0.0176
     - _NoiseSpeed: 0.01
     - _NoiseStrength: 0.5
     - _ParallaxStrength: 0.01
-    - _Seed: 42
-    - _StarDensity: 0.82
+    - _PixelSize: 12.3
+    - _Seed: 621
+    - _StarDensity: 0.41
+    - _StarPixelSize: 34.8
+    - _StarSharpness: 1.41
     - _StarSize: 1
-    - _StarSizeMax: 2.11
-    - _StarSizeMin: 0.82
+    - _StarSizeMax: 1
+    - _StarSizeMin: 0.041
     - _TwinkleSpeed: 1
     - _TwinkleVariation: 0.7
     - _ZWrite: 0
@@ -63,7 +69,7 @@ Material:
     - _BackgroundColor: {r: 0, g: 0, b: 0, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _GradientColor1: {r: 0.5, g: 0, b: 1, a: 1}
-    - _GradientColor2: {r: 0, g: 0.05, b: 0.1, a: 1}
+    - _GradientColor2: {r: 0.17736198, g: 0, b: 0.18867922, a: 1}
     - _GradientColor3: {r: 0.02, g: 0.02, b: 0.05, a: 1}
     - _RendererColor: {r: 1, g: 1, b: 1, a: 1}
     - _StarColor1: {r: 1, g: 1, b: 1, a: 1}

@@ -74,3 +74,10 @@ PluginImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 239351
+  packageName: Fast Script Reload
+  packageVersion: 1.6.1
+  assetPath: Assets/FastScriptReload/Plugins/ImmersiveVrToolsCommon/ImmersiveVRTools.Common.Editor.dll
+  uploadId: 710802
