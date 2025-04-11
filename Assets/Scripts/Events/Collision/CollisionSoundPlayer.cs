@@ -1,22 +1,22 @@
 ﻿using LM;
 using UnityEngine;
+using Zenject;
 
 namespace Events.Collision
 {
     public class CollisionSoundPlayer : MonoBehaviour
     {
-        [SerializeField] private CollisionEventChannelSO collisionEventChannel;
-
         [SerializeField] private SoundManager soundManager;
+        [Inject] private CollisionEventChannelSO _collisionEventChannel;
 
         private void OnEnable()
         {
-            if (collisionEventChannel != null) collisionEventChannel.RegisterListener(HandleCollision);
+            if (_collisionEventChannel != null) _collisionEventChannel.RegisterListener(HandleCollision);
         }
 
         private void OnDisable()
         {
-            if (collisionEventChannel != null) collisionEventChannel.UnregisterListener(HandleCollision);
+            if (_collisionEventChannel != null) _collisionEventChannel.UnregisterListener(HandleCollision);
         }
 
         private void HandleCollision(CollisionData data)

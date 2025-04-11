@@ -6,6 +6,7 @@ using Cysharp.Threading.Tasks;
 using Events.Collision;
 using LM;
 using UnityEngine;
+using Zenject;
 
 namespace Pixelation
 {
@@ -29,7 +30,7 @@ namespace Pixelation
 
         [Range(0, 3)] [SerializeField] private int rotation;
 
-        [SerializeField] private CollisionEventChannelSO collisionEventChannelSO;
+        [Inject] private CollisionEventChannelSO _collisionEventChannelSO;
 
         private bool _isSetup;
 
@@ -167,7 +168,7 @@ namespace Pixelation
             PixelGrid = new PixelGrid(SpriteRenderer);
 
             CollisionHandler = new PixelCollisionHandler(PixelGrid, this, GetComponent<PolygonCollider2D>(),
-                collisionEventChannelSO);
+                _collisionEventChannelSO);
 
             if (colors is not null) PixelGrid.SetTextureFromColors(colors);
 
