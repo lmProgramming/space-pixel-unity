@@ -6,6 +6,7 @@ namespace EasyPool
     public interface IReturnToPool<T> where T : Component
     {
         void Initialize(IObjectPool<T> pool);
+        void OnConfigured();
         void ResetState();
     }
 }

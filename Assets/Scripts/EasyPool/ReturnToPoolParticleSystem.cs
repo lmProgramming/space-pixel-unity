@@ -23,6 +23,10 @@ namespace EasyPool
             _pool = pool;
         }
 
+        public void OnConfigured()
+        {
+        }
+
         public void ResetState()
         {
         }

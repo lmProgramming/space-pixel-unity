@@ -21,14 +21,10 @@ namespace EasyPool
 
         private void OnEnable()
         {
-            if (!_mainComponent || !_mainComponent || _pool == null) return;
+            if (!_mainComponent || !_mainComponent) return;
             _cts?.Cancel();
             _cts?.Dispose();
             _cts = new CancellationTokenSource();
-
-            var duration = _mainComponent.Duration();
-
-            if (!_mainComponent.loop && duration > 0) ReturnAfterDelayAsync(duration, _cts.Token).Forget();
         }
 
         private void OnDisable()
@@ -41,6 +37,13 @@ namespace EasyPool
         public void Initialize(IObjectPool<AudioSource> pool)
         {
             _pool = pool;
+        }
+
+        public void OnConfigured()
+        {
+            var duration = _mainComponent.Duration();
+
+            if (!_mainComponent.loop && duration > 0) ReturnAfterDelayAsync(duration, _cts.Token).Forget();
         }
 
         public void ResetState()

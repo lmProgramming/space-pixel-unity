@@ -157,6 +157,8 @@ namespace LM
 
             ConfigureAudioSource(audioSource, sound, position);
 
+            if (audioSource.GetComponent<IReturnToPool<AudioSource>>() is { } returner) returner.OnConfigured();
+
             audioSource.Play();
         }
 
