@@ -1,0 +1,20 @@
+fileFormatVersion: 2
+guid: 7af915e488780684b8e42443f8bcbfb9
+timeCreated: 1528535898
+licenseType: Store
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 157735
+  packageName: Extenject Dependency Injection IOC
+  packageVersion: 9.2.0
+  assetPath: Assets/Plugins/Zenject/Source/Factories/Pooling/MonoPoolableMemoryPool.cs
+  uploadId: 370902

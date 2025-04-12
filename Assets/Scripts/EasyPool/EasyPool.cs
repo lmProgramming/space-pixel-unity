@@ -15,6 +15,8 @@ namespace EasyPool
         }
 
         private readonly bool _collectionChecks;
+
+        private readonly Instantiator _instantiator;
         private readonly int _maxPoolSize;
         private readonly Transform _parent;
         private readonly PoolType _poolType;
@@ -22,58 +24,98 @@ namespace EasyPool
 
         private IObjectPool<T> _pool;
 
-        public EasyPool(GameObject prefab, Transform parent, PoolType poolType = PoolType.Stack,
-            bool collectionChecks = true,
-            int maxPoolSize = 100)
+        public EasyPool(GameObject prefab, Transform parent, Instantiator instantiator,
+            PoolType poolType = PoolType.Stack, bool collectionChecks = true, int maxPoolSize = 100)
         {
+            if (prefab == null) throw new ArgumentNullException(nameof(prefab));
+            if (instantiator == null) throw new ArgumentNullException(nameof(instantiator));
+
             _prefab = prefab;
             _parent = parent;
+            _instantiator = instantiator;
             _poolType = poolType;
             _collectionChecks = collectionChecks;
             _maxPoolSize = maxPoolSize;
         }
 
-        public IObjectPool<T> Pool => _pool ??= CreatePool();
+        private IObjectPool<T> Pool => _pool ??= CreatePool();
+        public int CountInactive => Pool.CountInactive;
+
+        public T Get()
+        {
+            return Pool.Get();
+        }
+
+        public void Release(T element)
+        {
+            Pool.Release(element);
+        }
+
+        public void Clear()
+        {
+            Pool.Clear();
+        }
 
         private IObjectPool<T> CreatePool()
         {
             return _poolType switch
             {
-                PoolType.Stack => new ObjectPool<T>(CreatePooledItem, OnTakeFromPool, OnReturnedToPool,
+                PoolType.Stack => new ObjectPool<T>(
+                    CreatePooledItem,
+                    OnTakeFromPool,
+                    OnReturnedToPool,
                     OnDestroyPoolObject,
-                    _collectionChecks, 10, _maxPoolSize),
-                PoolType.LinkedList => new LinkedPool<T>(CreatePooledItem, OnTakeFromPool, OnReturnedToPool,
+                    _collectionChecks,
+                    10,
+                    _maxPoolSize),
+                PoolType.LinkedList => new LinkedPool<T>(
+                    CreatePooledItem,
+                    OnTakeFromPool,
+                    OnReturnedToPool,
                     OnDestroyPoolObject,
-                    _collectionChecks, _maxPoolSize),
-                _ => throw new ArgumentOutOfRangeException()
+                    _collectionChecks,
+                    _maxPoolSize),
+                _ => throw new ArgumentOutOfRangeException(nameof(_poolType), _poolType, null)
             };
         }
 
         private T CreatePooledItem()
         {
-            var go = Object.Instantiate(_prefab, _parent, true);
+            var go = _instantiator.Instantiate(_prefab, _parent, false);
 
-            IReturnToPool<T> returnToPool = null;
+            var mainComponent = go.GetComponent<T>();
+            if (mainComponent == null)
+            {
+                Debug.LogError(
+                    $"Prefab '{_prefab.name}' does not contain the required component '{typeof(T).Name}'. Destroying instance.",
+                    go);
+                Object.Destroy(go);
+                throw new InvalidOperationException($"Prefab missing component {typeof(T).Name}");
+            }
 
-            if (typeof(T) == typeof(ParticleSystem))
-                returnToPool = (IReturnToPool<T>)go.AddComponent<ReturnToPoolParticleSystem>();
+            var returnToPoolComponent = go.GetComponent<IReturnToPool<T>>();
+            if (returnToPoolComponent != null)
+                returnToPoolComponent.Initialize(Pool);
+            else
+                Debug.LogWarning(
+                    $"Prefab '{_prefab.name}' or its component '{typeof(T).Name}' does not implement IReturnToPool<{typeof(T).Name}>. Object will need manual releasing.",
+                    go);
 
-            returnToPool?.Initialize(Pool);
-
-            return go.GetComponent<T>();
+            return mainComponent;
         }
 
-        private static void OnReturnedToPool(T system)
+        private void OnReturnedToPool(T system)
         {
-            system.gameObject.SetActive(false);
+            if (system is IReturnToPool<T> returner) returner.ResetState();
+            if (system != null) system.gameObject.SetActive(false);
         }
 
-        private static void OnTakeFromPool(T system)
+        private void OnTakeFromPool(T system)
         {
-            system.gameObject.SetActive(true);
+            if (system != null) system.gameObject.SetActive(true);
         }
 
-        private static void OnDestroyPoolObject(T system)
+        private void OnDestroyPoolObject(T system)
         {
             if (system != null && system.gameObject != null) Object.Destroy(system.gameObject);
         }

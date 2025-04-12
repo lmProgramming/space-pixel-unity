@@ -70,7 +70,7 @@ namespace Ship.Modules
 
         public bool IsReady()
         {
-            return !_isFiring && _reloadTimer != null && _reloadTimer.IsReady;
+            return !_isFiring && _reloadTimer is { IsReady: true };
         }
 
         public GameObject GetIcon()
@@ -78,7 +78,16 @@ namespace Ship.Modules
             return icon;
         }
 
-        public void StartShooting()
+        public void StopShooting()
+        {
+            _isFiring = false;
+
+            StopFiringCleanup();
+
+            _reloadTimer?.Wait(reloadTime).Forget();
+        }
+
+        private void StartShooting()
         {
             if (!IsReady()) return;
 
@@ -91,15 +100,6 @@ namespace Ship.Modules
             _fireCts = new CancellationTokenSource();
 
             FireBeamUpdateAsync(_fireCts.Token).Forget();
-        }
-
-        private void StopShooting()
-        {
-            _isFiring = false;
-
-            StopFiringCleanup();
-
-            _reloadTimer?.Wait(reloadTime).Forget();
         }
 
         private void StopFiringCleanup()
@@ -143,7 +143,7 @@ namespace Ship.Modules
                                 pixelatedRigidbody.WorldToLocalPoint(hit.point));
 
                             if (closestPixelPosition.HasValue)
-                                pixelatedRigidbody.RemovePixelAt(closestPixelPosition.Value);
+                                pixelatedRigidbody.RemovePixelAt(closestPixelPosition.Value, true);
                         }
                     }
                     else

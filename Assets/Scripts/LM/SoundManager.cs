@@ -1,179 +1,302 @@
 using System;
 using System.Collections.Generic;
+using EasyPool;
 using UnityEngine;
 
 namespace LM
 {
+    public enum SoundIdentifier
+    {
+        Explosion
+    }
+
     public class SoundManager : MonoBehaviour
     {
         public Sound[] sounds;
-        private static Dictionary<string, float> _soundTimerDictionary;
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        private static void InitializeOnLoad()
-        {
-            Instance = null;
-            _soundTimerDictionary = new Dictionary<string, float>();
-        }
+        [Header("Pooling Settings")] [SerializeField]
+        private GameObject audioSourcePrefab;
 
-        public static SoundManager Instance { get; private set; }
+        [SerializeField] private Transform audioSourceParent;
+
+        [SerializeField] private Instantiator unityInstantiator;
+
+        [SerializeField] private int maxPoolSize = 50;
+
+        private EasyPool<AudioSource> _audioSourcePool;
+        private float _effectsVolume = 1f;
+
+        private float _masterVolume = 1f;
+        private float _musicVolume = 1f;
+
+        private Dictionary<SoundIdentifier, Sound> _soundsDictionary;
+
 
         private void Awake()
         {
-            if (Instance != null && Instance != this)
+            // Consider singleton pattern alternatives or DI if needed across scenes
+            // DontDestroyOnLoad(gameObject);
+
+            if (audioSourcePrefab == null)
             {
-                Destroy(gameObject);
-            }
-            else
-            {
-                Instance = this;
+                Debug.LogError("SoundManager: AudioSource Prefab is not assigned!", this);
+                enabled = false;
+                return;
             }
 
-            DontDestroyOnLoad(gameObject);
+            if (unityInstantiator == null)
+            {
+                Debug.LogError("SoundManager: Unity Instantiator is not assigned!", this);
+                enabled = false;
+                return;
+            }
 
-            _soundTimerDictionary = new Dictionary<string, float>();
+            _soundsDictionary = new Dictionary<SoundIdentifier, Sound>();
+
+            try
+            {
+                _audioSourcePool = new EasyPool<AudioSource>(
+                    audioSourcePrefab,
+                    audioSourceParent,
+                    unityInstantiator,
+                    EasyPool<AudioSource>.PoolType.Stack,
+                    true,
+                    maxPoolSize
+                );
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"SoundManager: Failed to initialize AudioSource pool: {e.Message}", this);
+                enabled = false;
+                return;
+            }
 
             foreach (var sound in sounds)
             {
-                sound.source = gameObject.AddComponent<AudioSource>();
-                sound.source.clip = sound.clip;
+                if (sound.clip == null)
+                {
+                    Debug.LogWarning($"Sound '{sound.identifier}' has no AudioClip assigned. Skipping.");
+                    continue;
+                }
 
-                sound.source.volume = sound.volume;
-                sound.source.pitch = sound.pitch;
-                sound.source.loop = sound.isLoop;
+                sound.originalVolume = sound.volume;
 
-                _soundTimerDictionary[sound.name] = 0f;
+                if (!sound.allowOverlap)
+                {
+                    sound.dedicatedSource = gameObject.AddComponent<AudioSource>();
+                    ConfigureAudioSource(sound.dedicatedSource, sound, null);
+                    sound.dedicatedSource.playOnAwake = false;
+                }
+
+                _soundsDictionary[sound.identifier] = sound;
             }
+
+            Debug.Log(
+                $"SoundManager initialized with {_soundsDictionary.Count} sounds and pool for '{audioSourcePrefab.name}'.");
         }
+
 
         private void Start()
         {
-            SetVolume(PlayerPrefs.GetFloat("soundVolume", 1f));
+            _masterVolume = PlayerPrefs.GetFloat("masterVolume", 1f);
+            _musicVolume = PlayerPrefs.GetFloat("musicVolume", 1f);
+            _effectsVolume = PlayerPrefs.GetFloat("effectVolume", 1f);
+
+            ApplyAllVolumes();
         }
 
-        public static void Play(string name)
-        {
-            var sound = Array.Find(Instance.sounds, s => s.name == name);
 
-            if (sound == null)
+        #region Playback Methods
+
+        public void Play(SoundIdentifier identifier, Vector3? position = null)
+        {
+            if (!_soundsDictionary.TryGetValue(identifier, out var sound))
             {
-                Debug.LogError("Sound " + name + " Not Found!");
+                Debug.LogError($"Sound '{identifier}' not found in dictionary!");
                 return;
             }
 
-            if (!CanPlaySound(sound)) return;
-
-            sound.source.Play();
+            if (!sound.allowOverlap)
+                PlayDedicatedSource(sound, position);
+            else
+                PlayPooledSource(sound, position);
         }
 
-        public static void Stop(string name)
+        private void PlayDedicatedSource(Sound sound, Vector3? position)
         {
-            var sound = Array.Find(Instance.sounds, s => s.name == name);
-
-            if (sound == null)
+            if (!sound.dedicatedSource)
             {
-                Debug.LogError("Sound " + name + " Not Found!");
+                Debug.LogError($"Sound '{sound.identifier}' is marked as non-overlapping but has no dedicated source!");
                 return;
             }
 
-            sound.source.Stop();
+            if (sound.dedicatedSource.isPlaying && sound.isLoop) return;
+
+            ConfigureAudioSource(sound.dedicatedSource, sound, position);
+            sound.dedicatedSource.Play();
         }
 
-        public static void Pause(string name)
+        private void PlayPooledSource(Sound sound, Vector3? position)
         {
-            var sound = Array.Find(Instance.sounds, s => s.name == name);
-
-            if (sound == null)
+            AudioSource audioSource;
+            try
             {
-                Debug.LogError("Sound " + name + " Not Found!");
+                audioSource = _audioSourcePool.Get();
+                if (!audioSource || !audioSource)
+                {
+                    Debug.LogError($"Pool returned invalid object for sound '{sound.identifier}'.", audioSource);
+                    if (audioSource) _audioSourcePool.Release(audioSource);
+                    return;
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Failed to get AudioSource from pool for '{sound.identifier}': {e.Message}", this);
                 return;
             }
 
-            sound.source.Pause();
+            ConfigureAudioSource(audioSource, sound, position);
+
+            if (audioSource.GetComponent<IReturnToPool<AudioSource>>() is { } returner) returner.OnConfigured();
+
+            audioSource.Play();
         }
 
-        public static void UnPause(string name)
+        private void ConfigureAudioSource(AudioSource source, Sound sound, Vector3? position)
         {
-            var sound = Array.Find(Instance.sounds, s => s.name == name);
+            if (!source || sound == null || !sound.clip) return;
 
-            if (sound == null)
+            source.clip = sound.clip;
+            source.volume = CalculateActualVolume(sound);
+            source.pitch = sound.pitch;
+            source.loop = sound.isLoop;
+
+            if (position.HasValue)
             {
-                Debug.LogError("Sound " + name + " Not Found!");
-                return;
+                source.transform.position = position.Value;
+                source.spatialBlend = 1.0f;
+            }
+            else
+            {
+                source.transform.position = transform.position;
+                source.spatialBlend = 0f;
+            }
+        }
+
+        // Stop, Pause, UnPause primarily work reliably for non-overlapping sounds.
+
+        public void Stop(SoundIdentifier identifier)
+        {
+            if (_soundsDictionary.TryGetValue(identifier, out var sound) && !sound.allowOverlap &&
+                sound.dedicatedSource != null)
+                sound.dedicatedSource.Stop();
+            else if (sound is { allowOverlap: true })
+                Debug.LogWarning(
+                    $"Stop() called on overlapping sound '{identifier}'. Only stops dedicated source, not pooled instances.");
+        }
+
+        public void Pause(SoundIdentifier identifier)
+        {
+            if (_soundsDictionary.TryGetValue(identifier, out var sound) && !sound.allowOverlap &&
+                sound.dedicatedSource != null)
+                sound.dedicatedSource.Pause();
+            else if (sound is { allowOverlap: true })
+                Debug.LogWarning(
+                    $"Pause() called on overlapping sound '{identifier}'. Not supported for pooled instances.");
+        }
+
+        public void UnPause(SoundIdentifier identifier)
+        {
+            if (_soundsDictionary.TryGetValue(identifier, out var sound) && !sound.allowOverlap &&
+                sound.dedicatedSource != null)
+                sound.dedicatedSource.UnPause();
+            else if (sound is { allowOverlap: true })
+                Debug.LogWarning(
+                    $"UnPause() called on overlapping sound '{identifier}'. Not supported for pooled instances.");
+        }
+
+        public bool IsPlaying(SoundIdentifier identifier)
+        {
+            if (!_soundsDictionary.TryGetValue(identifier, out var sound)) return false;
+
+            switch (sound.allowOverlap)
+            {
+                case false when sound.dedicatedSource != null:
+                    return sound.dedicatedSource.isPlaying;
+                case true:
+                    Debug.LogWarning($"IsPlaying() check for overlapping sound '{identifier}' is simplified.");
+                    return false;
             }
 
-            sound.source.UnPause();
-        }
-
-        public static bool PlayingSound(string name)
-        {
-            var sound = Array.Find(Instance.sounds, s => s.name == name);
-
-            if (sound != null) return sound.source.isPlaying;
-            
-            Debug.LogError("Sound " + name + " Not Found!");
+            Debug.LogError($"Sound '{identifier}' not found for IsPlaying check!");
             return false;
         }
 
-        private static bool CanPlaySound(Sound sound)
+        #endregion
+
+        #region Volume Control
+
+        private float CalculateActualVolume(Sound sound)
         {
-            return _soundTimerDictionary.TryGetValue(sound.name, out _);
+            var typeVolume = sound.type == Sound.Type.Music ? _musicVolume : _effectsVolume;
+            return Mathf.Clamp01(_masterVolume * typeVolume * sound.originalVolume);
         }
 
-        public void SetVolume(float val)
+        private void ApplyAllVolumes()
         {
-            foreach (var t in sounds)
-            {
-                t.source.volume = val * t.volume;
-            }
+            foreach (var sound in _soundsDictionary.Values)
+                if (!sound.allowOverlap && sound.dedicatedSource != null)
+                    sound.dedicatedSource.volume = CalculateActualVolume(sound);
         }
 
-        public void SetVolumeOfSoundEffects(float val)
+        public void SetMasterVolume(float volume)
         {
-            foreach (var t in sounds)
-            {
-                if (t.type == Sound.Type.Effect)
-                {
-                    t.source.volume = val * t.volume;
-                }
-            }
+            _masterVolume = Mathf.Clamp01(volume);
+            PlayerPrefs.SetFloat("masterVolume", _masterVolume);
+            ApplyAllVolumes();
         }
 
-        public void SetVolumeOfMusicTracks(float val)
+        public void SetMusicVolume(float volume)
         {
-            foreach (var t in sounds)
-            {
-                if (t.type == Sound.Type.Music)
-                {
-                    t.source.volume = val * t.volume;
-                }
-            }
+            _musicVolume = Mathf.Clamp01(volume);
+            PlayerPrefs.SetFloat("musicVolume", _musicVolume);
+            ApplyAllVolumes();
         }
+
+        public void SetEffectsVolume(float volume)
+        {
+            _effectsVolume = Mathf.Clamp01(volume);
+            PlayerPrefs.SetFloat("effectVolume", _effectsVolume);
+            ApplyAllVolumes();
+        }
+
+        #endregion
     }
 
     [Serializable]
     public class Sound
     {
-        public string name;
-
-        public AudioClip clip;
-
-        [Range(0f, 1f)]
-        public float volume = 1f;
-
-        [Range(.1f, 3f)]
-        public float pitch = 1f;
-
-        public bool isLoop;
-        public bool hasCooldown;
-        public AudioSource source;
-
         public enum Type
         {
             Effect,
             Music
         }
 
+        public SoundIdentifier identifier;
+        public AudioClip clip;
+
+        [Range(0f, 1f)] public float volume = 1f;
+        [Range(.1f, 3f)] public float pitch = 1f;
+
+        [Tooltip("Should this sound loop indefinitely?")]
+        public bool isLoop;
+
+        [Tooltip("Allow multiple instances of this sound to play at the same time?")]
+        public bool allowOverlap = true;
+
         public Type type;
+
+        [HideInInspector] public AudioSource dedicatedSource;
+        [HideInInspector] public float originalVolume;
     }
 }

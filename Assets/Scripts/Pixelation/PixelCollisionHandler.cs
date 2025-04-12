@@ -1,30 +1,37 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using ContourTracer;
+using Events.Collision;
+using JetBrains.Annotations;
 using LM;
 using Pixelation.CollisionResolver;
 using UnityEngine;
-using Enumerable = System.Linq.Enumerable;
 
 namespace Pixelation
 {
     public sealed class PixelCollisionHandler
     {
         private const int MinPixelsForJunkCreation = 3;
-        private const float DefaultExplosionChange = 0.25f;
         private readonly PixelatedRigidbody _body;
         private readonly PolygonCollider2D _collider;
+
+        private readonly CollisionEventChannelSO _collisionEventChannel;
         private readonly CollisionResolver.CollisionResolver _collisionResolver;
         private readonly PixelGrid _grid;
         private readonly GridContourTracer _gridContourTracer = new();
+        private readonly JunkSpawner _junkSpawner;
         private readonly float _lineSimplificationTolerance;
 
         private bool _didCollide;
 
-        public PixelCollisionHandler(PixelGrid grid, PixelatedRigidbody body, PolygonCollider2D collider)
+        public PixelCollisionHandler(PixelGrid grid, PixelatedRigidbody body, PolygonCollider2D collider,
+            CollisionEventChannelSO collisionEventChannel, JunkSpawner junkSpawner)
         {
             _grid = grid;
             _body = body;
             _collider = collider;
+            _collisionEventChannel = collisionEventChannel;
+            _junkSpawner = junkSpawner;
 
             _collisionResolver = new PhysicsCollision(this, _body);
 
@@ -39,7 +46,7 @@ namespace Pixelation
                 ? GridRegionFinder.FloodFindCohesiveRegions(pixels[0], _grid)
                 : GridRegionFinder.FloodFindCohesiveRegions(_grid);
 
-            regions = Enumerable.ToList(Enumerable.OrderBy(regions, r => r.Count));
+            regions = regions.OrderBy(r => r.Count).ToList();
 
             switch (regions.Count)
             {
@@ -47,7 +54,7 @@ namespace Pixelation
                     _body.NoPixelsLeft();
                     return;
                 case > 1:
-                    HandleDivision(Enumerable.ToList(Enumerable.SkipLast(regions, 1)));
+                    HandleDivision(regions.SkipLast(1).ToList());
                     break;
             }
 
@@ -66,16 +73,24 @@ namespace Pixelation
             _didCollide = true;
             var pixelsDestroyed = _collisionResolver.ResolveCollision(other, collision);
 
-            var vector2Ints = pixelsDestroyed as Vector2Int[] ?? Enumerable.ToArray(pixelsDestroyed);
-            EffectsOnPixelsDestroyed(vector2Ints);
+            var pixels = pixelsDestroyed as Vector2Int[] ?? pixelsDestroyed.ToArray();
+
+            RaiseCollisionEvent(other.gameObject, collision.contacts[0].point, pixels);
         }
 
-        private void EffectsOnPixelsDestroyed(Vector2Int[] pixels)
+        public void RaiseCollisionEvent([CanBeNull] GameObject other, Vector2 contactPoint, Vector2Int[] pixels)
         {
-            var explosionsCount = Mathf.Min(pixels.Length - 1, Mathf.Max(1, pixels.Length * DefaultExplosionChange));
-            for (var index = 0; index < explosionsCount; index++)
-                EffectsSpawner.Instance.SpawnExplosion(_body.LocalToWorldPoint(pixels[index]));
-            SoundManager.Play("explosion");
+            var pixelsGlobalPositions = new Vector2[pixels.Length];
+
+            for (var i = 0; i < pixels.Length; i++) pixelsGlobalPositions[i] = _body.LocalToWorldPoint(pixels[i]);
+
+            var data = new CollisionData(
+                _body.gameObject,
+                other?.gameObject,
+                contactPoint,
+                pixelsGlobalPositions
+            );
+            _collisionEventChannel.RaiseEvent(data);
         }
 
         private void RecalculateColliders()
@@ -89,7 +104,7 @@ namespace Pixelation
 
             var points = new List<Vector2>();
 
-            LineUtility.Simplify(Enumerable.ToList(polygon), _lineSimplificationTolerance, points);
+            LineUtility.Simplify(polygon.ToList(), _lineSimplificationTolerance, points);
 
             _collider.pathCount = 1;
             _collider.SetPath(0, points);
@@ -103,14 +118,14 @@ namespace Pixelation
 
                 _body.PixelLostByDivision(region);
 
-                _grid.RemovePixels(region);
+                _grid.RemovePixels(region, false);
             }
         }
 
         private void CreateNewJunk(HashSet<Vector2Int> points)
         {
-            var rightTopPoint = new Vector2Int(Enumerable.Max(points, p => p.x), Enumerable.Max(points, p => p.y));
-            var leftBottomPoint = new Vector2Int(Enumerable.Min(points, p => p.x), Enumerable.Min(points, p => p.y));
+            var rightTopPoint = new Vector2Int(points.Max(p => p.x), points.Max(p => p.y));
+            var leftBottomPoint = new Vector2Int(points.Min(p => p.x), points.Min(p => p.y));
             var parentCenterPoint = _grid.Center;
 
             var width = rightTopPoint.x - leftBottomPoint.x + 1;
@@ -125,7 +140,7 @@ namespace Pixelation
 
             var globalPosition = _body.transform.TransformPoint(centrePoint - parentCenterPoint);
 
-            JunkSpawner.Instance.SpawnJunk(globalPosition, _body.transform.rotation, newColorsGrid, _body);
+            _junkSpawner.SpawnJunk(globalPosition, _body.transform.rotation, newColorsGrid, _body);
         }
 
         public Vector2Int? GetPointAlongPath(Vector2Int startPosition, Vector2 direction, bool getLast)
@@ -136,7 +151,7 @@ namespace Pixelation
 
             if (getLast) pointsTraversed.Reverse();
 
-            foreach (var point in Enumerable.Where(pointsTraversed, _grid.IsPixel))
+            foreach (var point in pointsTraversed.Where(_grid.IsPixel))
                 return new Vector2Int(point.x, point.y);
 
             return null;
@@ -170,8 +185,7 @@ namespace Pixelation
                 radiusChecked++;
             }
 
-            return Enumerable.ToList(Enumerable.Take(Enumerable.Select(closestPointsAndDistances, p => p.Position),
-                positionsMaxCount));
+            return closestPointsAndDistances.Select(p => p.Position).Take(positionsMaxCount).ToList();
 
             void InsertPositionToSortedArray(Vector2Int position, float distance)
             {

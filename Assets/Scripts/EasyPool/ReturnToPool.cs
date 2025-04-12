@@ -1,9 +1,12 @@
-﻿using UnityEngine.Pool;
+﻿using UnityEngine;
+using UnityEngine.Pool;
 
 namespace EasyPool
 {
-    public interface IReturnToPool<T> where T : class
+    public interface IReturnToPool<T> where T : Component
     {
-        public void Initialize(IObjectPool<T> pool);
+        void Initialize(IObjectPool<T> pool);
+        void OnConfigured();
+        void ResetState();
     }
 }

@@ -6,11 +6,12 @@ namespace Editor
 {
     public class RenderAllPixelatedRigidbody : EditorWindow
     {
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         [MenuItem("Tools/Render all pixelated rigidbodies")]
         private static void RenderAllPixelated()
         {
-            var allObjects = FindObjectsOfType<PixelatedRigidbody>();
+            var allObjects =
+                FindObjectsByType<PixelatedRigidbody>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
 
             foreach (var obj in allObjects)
             {

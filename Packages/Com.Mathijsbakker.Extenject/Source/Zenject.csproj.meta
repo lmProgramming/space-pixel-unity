@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: f55f50c96b05a124a8b67c7de601b3a1
+timeCreated: 1461878212
+licenseType: Store
+DefaultImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 157735
+  packageName: Extenject Dependency Injection IOC
+  packageVersion: 9.2.0
+  assetPath: Assets/Plugins/Zenject/Source/Zenject.csproj
+  uploadId: 370902

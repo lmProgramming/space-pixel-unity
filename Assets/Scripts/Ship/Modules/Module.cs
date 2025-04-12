@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Pixelation;
 using UnityEngine;
+using Zenject;
 
 namespace Ship.Modules
 {
@@ -20,6 +21,8 @@ namespace Ship.Modules
         [field: SerializeField] public ModuleType Type { get; private set; }
         private readonly Dictionary<Module, List<Vector2Int>> _connectionPoints = new();
         private readonly Dictionary<Module, FixedJoint2D> _connections = new();
+
+        [Inject] private MapInfo _mapInfo;
 
         private Ship Ship { get; set; }
         public PixelatedRigidbody PixelatedRigidbody { get; private set; }
@@ -128,7 +131,6 @@ namespace Ship.Modules
                 DetachConnections(moduleToDetach);
         }
 
-
         private void DetachConnections(Module otherModule)
         {
             if (_connections.TryGetValue(otherModule, out var jointToDestroy) && jointToDestroy)
@@ -136,32 +138,25 @@ namespace Ship.Modules
             _connections.Remove(otherModule);
             _connectionPoints.Remove(otherModule);
 
-            if (Ship && Ship.ModuleGraph != null)
+            Ship.ModuleGraph.RemoveEdge(this, otherModule);
+
+            var thisStillInGraph = Ship.ModuleGraph.ContainsNode(this);
+            var otherStillInGraph = Ship.ModuleGraph.ContainsNode(otherModule);
+
+            if (!thisStillInGraph && transform.parent != _mapInfo.mapTransform)
             {
-                Ship.ModuleGraph.RemoveEdge(this, otherModule);
-
-                var thisStillInGraph = Ship.ModuleGraph.ContainsNode(this);
-                var otherStillInGraph = Ship.ModuleGraph.ContainsNode(otherModule);
-
-                if (MapInfo.Instance && MapInfo.Instance.mapTransform)
-                {
-                    if (!thisStillInGraph && transform.parent != MapInfo.Instance.mapTransform)
-                        transform.SetParent(MapInfo.Instance.mapTransform);
-                    if (otherModule && !otherStillInGraph &&
-                        otherModule.transform.parent != MapInfo.Instance.mapTransform)
-                        otherModule.transform.SetParent(MapInfo.Instance.mapTransform);
-                }
-                else
-                {
-                    Debug.LogWarning("MapInfo instance or mapTransform is null, cannot reparent detached modules.");
-                }
-
-                Ship.RecacheModulesDictionary();
+                transform.SetParent(_mapInfo.mapTransform);
+                gameObject.layer = LayerMask.NameToLayer("Default");
             }
-            else
+
+            if (otherModule && !otherStillInGraph &&
+                otherModule.transform.parent != _mapInfo.mapTransform)
             {
-                Debug.LogWarning("Ship or ModuleGraph is null, cannot update graph or recache on detach.", this);
+                otherModule.transform.SetParent(_mapInfo.mapTransform);
+                otherModule.gameObject.layer = LayerMask.NameToLayer("Default");
             }
+
+            Ship.RecacheModulesDictionary();
         }
     }
 }

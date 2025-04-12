@@ -23,8 +23,13 @@ namespace Ship
 
         protected override void HandleWeapons()
         {
-            if (!Input.GetMouseButton(0)) return;
-            foreach (var weapon in Weapons) weapon.Shoot();
+            if (Input.GetMouseButton(0))
+                foreach (var weapon in Weapons)
+                    weapon.Shoot();
+
+            if (Input.GetMouseButtonUp(0))
+                foreach (var weapon in Weapons)
+                    weapon.StopShooting();
         }
     }
 }

@@ -65,12 +65,12 @@ namespace Pixelation
             return new Vector2Int(Texture.width, Texture.height);
         }
 
-        public void RemovePixelAt(Vector2Int point)
+        public void RemovePixelAt(Vector2Int point, bool _)
         {
             SetPixel(point, Color.clear);
         }
 
-        public void RemovePixels(IEnumerable<Vector2Int> points)
+        public void RemovePixels(IEnumerable<Vector2Int> points, bool _)
         {
             foreach (var point in points) SetPixel(point, Color.clear);
         }
