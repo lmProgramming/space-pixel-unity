@@ -21,13 +21,16 @@ namespace EasyPool
         private readonly GameObject _prefab;
 
         private IObjectPool<T> _pool;
+        public Instantiator Instantiator;
 
-        public EasyPool(GameObject prefab, Transform parent, PoolType poolType = PoolType.Stack,
+        public EasyPool(GameObject prefab, Transform parent, Instantiator instantiator,
+            PoolType poolType = PoolType.Stack,
             bool collectionChecks = true,
             int maxPoolSize = 100)
         {
             _prefab = prefab;
             _parent = parent;
+            Instantiator = instantiator;
             _poolType = poolType;
             _collectionChecks = collectionChecks;
             _maxPoolSize = maxPoolSize;
@@ -51,7 +54,7 @@ namespace EasyPool
 
         private T CreatePooledItem()
         {
-            var go = Object.Instantiate(_prefab, _parent, true);
+            var go = Instantiator.Instantiate(_prefab, _parent, true);
 
             IReturnToPool<T> returnToPool = null;
 
