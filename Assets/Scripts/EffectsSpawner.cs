@@ -19,7 +19,7 @@ public sealed class EffectsSpawner : MonoBehaviour
 
     public void SpawnExplosion(Vector2 position)
     {
-        var explosion = _explosionPool.Pool.Get();
+        var explosion = _explosionPool.Get();
         explosion.transform.position = position;
         explosion.Play();
     }
