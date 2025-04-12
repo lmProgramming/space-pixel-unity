@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 7c735e922739fb74cbe9473eef5242fe
+timeCreated: 1463318690
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 157735
+  packageName: Extenject Dependency Injection IOC
+  packageVersion: 9.2.0
+  assetPath: Assets/Plugins/Zenject/Source/Binding/Binders/ConcreteBinders/ConcreteIdBinderGeneric.cs
+  uploadId: 370902

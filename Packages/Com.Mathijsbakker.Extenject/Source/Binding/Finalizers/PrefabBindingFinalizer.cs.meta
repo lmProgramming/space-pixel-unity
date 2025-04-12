@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 5e9a7115192e1b0429e60ccb78be4b57
+timeCreated: 1461708048
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 157735
+  packageName: Extenject Dependency Injection IOC
+  packageVersion: 9.2.0
+  assetPath: Assets/Plugins/Zenject/Source/Binding/Finalizers/PrefabBindingFinalizer.cs
+  uploadId: 370902

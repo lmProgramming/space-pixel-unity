@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 61e8dd77654c2a74089d54fb0b2b670b
+timeCreated: 1461708055
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 157735
+  packageName: Extenject Dependency Injection IOC
+  packageVersion: 9.2.0
+  assetPath: Assets/Plugins/Zenject/Source/Binding/Binders/Factory/FactoryFromBinder/SubContainerBinder/FactorySubContainerBinder3.cs
+  uploadId: 370902

@@ -1,0 +1,20 @@
+fileFormatVersion: 2
+guid: c3b2d4d9ed2a25e4495339a58b9540fd
+timeCreated: 1527961729
+licenseType: Store
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 157735
+  packageName: Extenject Dependency Injection IOC
+  packageVersion: 9.2.0
+  assetPath: Assets/Plugins/Zenject/Source/Editor/EditorWindow/ZenjectEditorWindow.cs
+  uploadId: 370902

@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: e7d0ad8ee8cd727498aa2e18d0371f32
+timeCreated: 1487820669
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 157735
+  packageName: Extenject Dependency Injection IOC
+  packageVersion: 9.2.0
+  assetPath: Assets/Plugins/Zenject/Source/Runtime/AnimatorInterfaces/AnimatorMoveHandlerManager.cs
+  uploadId: 370902

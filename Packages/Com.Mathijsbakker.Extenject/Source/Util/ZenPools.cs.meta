@@ -1,0 +1,20 @@
+fileFormatVersion: 2
+guid: 6a9fe6da05e9cbd4ca1a9e233370e85b
+timeCreated: 1535860932
+licenseType: Store
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 157735
+  packageName: Extenject Dependency Injection IOC
+  packageVersion: 9.2.0
+  assetPath: Assets/Plugins/Zenject/Source/Util/ZenPools.cs
+  uploadId: 370902

@@ -1,0 +1,10 @@
+﻿fileFormatVersion: 2
+guid: 18d741a80cc02734b92d25eea542bca4
+timeCreated: 1494728675
+AssetOrigin:
+  serializedVersion: 1
+  productId: 157735
+  packageName: Extenject Dependency Injection IOC
+  packageVersion: 9.2.0
+  assetPath: Assets/Plugins/Zenject/Source/Editor/Editors/RunnableContextEditor.cs
+  uploadId: 370902
