@@ -33,6 +33,7 @@ namespace Pixelation
         [Inject] private CollisionEventChannelSO _collisionEventChannelSO;
 
         private bool _isSetup;
+        [Inject] private JunkSpawner _junkSpawner;
 
         private bool HasSprite => sprite != null && sprite.ToString() != "null";
 
@@ -174,7 +175,7 @@ namespace Pixelation
             PixelGrid = new PixelGrid(SpriteRenderer);
 
             CollisionHandler = new PixelCollisionHandler(PixelGrid, this, GetComponent<PolygonCollider2D>(),
-                _collisionEventChannelSO);
+                _collisionEventChannelSO, _junkSpawner);
 
             if (colors is not null) PixelGrid.SetTextureFromColors(colors);
 

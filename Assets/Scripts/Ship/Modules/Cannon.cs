@@ -2,6 +2,7 @@ using System;
 using Cysharp.Threading.Tasks;
 using LM;
 using UnityEngine;
+using Zenject;
 
 namespace Ship.Modules
 {
@@ -14,6 +15,8 @@ namespace Ship.Modules
         [SerializeField] private float reloadTime;
 
         [SerializeField] private GameObject icon;
+
+        [Inject] private ProjectilesSpawner _projectilesSpawner;
 
         private SimpleTimer _reloadTimer;
 
@@ -45,7 +48,7 @@ namespace Ship.Modules
             var rotation = Quaternion.Euler(0, 0, angle - 90);
 
             var newBullet =
-                ProjectilesSpawner.Instance.Spawn(projectilePrefab, transform.position, rotation, gameObject.layer);
+                _projectilesSpawner.Spawn(projectilePrefab, transform.position, rotation, gameObject.layer);
 
             var bulletRigidbody = newBullet.GetComponent<Rigidbody2D>();
             bulletRigidbody.linearVelocity = PixelatedRigidbody.Rigidbody.linearVelocity;

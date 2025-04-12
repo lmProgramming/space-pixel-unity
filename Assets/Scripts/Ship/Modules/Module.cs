@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Pixelation;
 using UnityEngine;
+using Zenject;
 
 namespace Ship.Modules
 {
@@ -20,6 +21,8 @@ namespace Ship.Modules
         [field: SerializeField] public ModuleType Type { get; private set; }
         private readonly Dictionary<Module, List<Vector2Int>> _connectionPoints = new();
         private readonly Dictionary<Module, FixedJoint2D> _connections = new();
+
+        [Inject] private MapInfo _mapInfo;
 
         private Ship Ship { get; set; }
         public PixelatedRigidbody PixelatedRigidbody { get; private set; }
@@ -140,16 +143,16 @@ namespace Ship.Modules
             var thisStillInGraph = Ship.ModuleGraph.ContainsNode(this);
             var otherStillInGraph = Ship.ModuleGraph.ContainsNode(otherModule);
 
-            if (!thisStillInGraph && transform.parent != MapInfo.Instance.mapTransform)
+            if (!thisStillInGraph && transform.parent != _mapInfo.mapTransform)
             {
-                transform.SetParent(MapInfo.Instance.mapTransform);
+                transform.SetParent(_mapInfo.mapTransform);
                 gameObject.layer = LayerMask.NameToLayer("Default");
             }
 
             if (otherModule && !otherStillInGraph &&
-                otherModule.transform.parent != MapInfo.Instance.mapTransform)
+                otherModule.transform.parent != _mapInfo.mapTransform)
             {
-                otherModule.transform.SetParent(MapInfo.Instance.mapTransform);
+                otherModule.transform.SetParent(_mapInfo.mapTransform);
                 otherModule.gameObject.layer = LayerMask.NameToLayer("Default");
             }
 

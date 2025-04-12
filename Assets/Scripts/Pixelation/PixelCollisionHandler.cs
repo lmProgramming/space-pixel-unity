@@ -19,17 +19,19 @@ namespace Pixelation
         private readonly CollisionResolver.CollisionResolver _collisionResolver;
         private readonly PixelGrid _grid;
         private readonly GridContourTracer _gridContourTracer = new();
+        private readonly JunkSpawner _junkSpawner;
         private readonly float _lineSimplificationTolerance;
 
         private bool _didCollide;
 
         public PixelCollisionHandler(PixelGrid grid, PixelatedRigidbody body, PolygonCollider2D collider,
-            CollisionEventChannelSO collisionEventChannel)
+            CollisionEventChannelSO collisionEventChannel, JunkSpawner junkSpawner)
         {
             _grid = grid;
             _body = body;
             _collider = collider;
             _collisionEventChannel = collisionEventChannel;
+            _junkSpawner = junkSpawner;
 
             _collisionResolver = new PhysicsCollision(this, _body);
 
@@ -138,7 +140,7 @@ namespace Pixelation
 
             var globalPosition = _body.transform.TransformPoint(centrePoint - parentCenterPoint);
 
-            JunkSpawner.Instance.SpawnJunk(globalPosition, _body.transform.rotation, newColorsGrid, _body);
+            _junkSpawner.SpawnJunk(globalPosition, _body.transform.rotation, newColorsGrid, _body);
         }
 
         public Vector2Int? GetPointAlongPath(Vector2Int startPosition, Vector2 direction, bool getLast)
