@@ -143,7 +143,7 @@ namespace Ship.Modules
                                 pixelatedRigidbody.WorldToLocalPoint(hit.point));
 
                             if (closestPixelPosition.HasValue)
-                                pixelatedRigidbody.RemovePixelAt(closestPixelPosition.Value);
+                                pixelatedRigidbody.RemovePixelAt(closestPixelPosition.Value, true);
                         }
                     }
                     else

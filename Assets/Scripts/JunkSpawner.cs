@@ -10,6 +10,8 @@ public sealed class JunkSpawner : MonoBehaviour
 
     [SerializeField] private Instantiator instantiator;
 
+    [SerializeField] private LayerMask junkLayer;
+
     public static JunkSpawner Instance { get; private set; }
 
     private void Awake()
@@ -25,5 +27,6 @@ public sealed class JunkSpawner : MonoBehaviour
 
         pixelatedJunk.Setup(colors);
         pixelatedJunk.CopyVelocity(parentBody);
+        pixelatedJunk.gameObject.layer = junkLayer;
     }
 }

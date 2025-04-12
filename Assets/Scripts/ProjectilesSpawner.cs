@@ -1,10 +1,13 @@
-﻿using UnityEngine;
+﻿using EasyPool;
+using UnityEngine;
 
 public sealed class ProjectilesSpawner : MonoBehaviour
 {
     public static ProjectilesSpawner Instance;
 
     [field: SerializeField] public Transform ProjectilesHolder { get; private set; }
+
+    [SerializeField] private Instantiator instantiator;
 
     private void Awake()
     {
@@ -20,7 +23,7 @@ public sealed class ProjectilesSpawner : MonoBehaviour
     public GameObject Spawn(GameObject projectilePrefab, Vector3 transformPosition, Quaternion rotation,
         LayerMask layer)
     {
-        var bulletObject = Instantiate(projectilePrefab, transformPosition, rotation, ProjectilesHolder);
+        var bulletObject = instantiator.Instantiate(projectilePrefab, transformPosition, rotation, ProjectilesHolder);
         bulletObject.GetComponent<Bullet>().SetLayer(layer);
         return bulletObject;
     }

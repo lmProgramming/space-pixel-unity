@@ -5,9 +5,9 @@ namespace Pixelation
 {
     public interface IPixelated
     {
-        public void RemovePixelAt(Vector2Int point);
+        public void RemovePixelAt(Vector2Int point, bool simulateCollision);
 
-        public void RemovePixels(IEnumerable<Vector2Int> points);
+        public void RemovePixels(IEnumerable<Vector2Int> points, bool simulateCollision);
 
         public void SetTextureFromColors(Color32[,] colors);
 

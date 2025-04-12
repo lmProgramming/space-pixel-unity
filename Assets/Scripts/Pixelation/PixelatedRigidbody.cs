@@ -36,7 +36,7 @@ namespace Pixelation
 
         private bool HasSprite => sprite != null && sprite.ToString() != "null";
 
-        public PixelGrid PixelGrid { get; private set; }
+        private PixelGrid PixelGrid { get; set; }
         public PixelCollisionHandler CollisionHandler { get; private set; }
 
         public Rigidbody2D Rigidbody { get; private set; }
@@ -70,11 +70,6 @@ namespace Pixelation
         private void OnCollisionEnter2D(Collision2D collision)
         {
             CollisionHandler.OnCollision(collision);
-        }
-
-        public void RemovePixelAt(Vector2Int point)
-        {
-            RemovePixels(new[] { point });
         }
 
         public void ApplyPixels()
@@ -122,15 +117,26 @@ namespace Pixelation
             PixelGrid.SetPixelNoApply(point, color);
         }
 
-        public void RemovePixels(IEnumerable<Vector2Int> points)
+        public void RemovePixels(IEnumerable<Vector2Int> points, bool simulateCollision = false)
         {
             var pointsArray = points as Vector2Int[] ?? points.ToArray();
 
             if (!pointsArray.Any()) return;
 
-            PixelGrid.RemovePixels(pointsArray);
+            PixelGrid.RemovePixels(pointsArray, simulateCollision);
 
             OnPixelsLost?.Invoke(pointsArray.ToList(), PixelLoseReason.Destroyed);
+
+            if (!simulateCollision) return;
+
+            var contactPoint = LocalToWorldPoint(pointsArray.First());
+
+            CollisionHandler.RaiseCollisionEvent(null, contactPoint, pointsArray);
+        }
+
+        public void RemovePixelAt(Vector2Int point, bool simulateCollision = false)
+        {
+            RemovePixels(new[] { point }, simulateCollision);
         }
 
         public Vector2 WorldToLocalPoint(Vector2 worldPosition)

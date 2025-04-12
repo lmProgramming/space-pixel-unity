@@ -4395,6 +4395,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <ProjectilesHolder>k__BackingField: {fileID: 1064495926}
+  instantiator: {fileID: 941581985}
 --- !u!213 &1237006405
 Sprite:
   m_ObjectHideFlags: 0

@@ -128,7 +128,6 @@ namespace Ship.Modules
                 DetachConnections(moduleToDetach);
         }
 
-
         private void DetachConnections(Module otherModule)
         {
             if (_connections.TryGetValue(otherModule, out var jointToDestroy) && jointToDestroy)

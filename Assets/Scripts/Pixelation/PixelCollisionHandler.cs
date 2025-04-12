@@ -2,6 +2,7 @@
 using System.Linq;
 using ContourTracer;
 using Events.Collision;
+using JetBrains.Annotations;
 using LM;
 using Pixelation.CollisionResolver;
 using UnityEngine;
@@ -71,13 +72,20 @@ namespace Pixelation
             var pixelsDestroyed = _collisionResolver.ResolveCollision(other, collision);
 
             var pixels = pixelsDestroyed as Vector2Int[] ?? pixelsDestroyed.ToArray();
-            var pixelsGlobalPositions = pixels.Select(p => _body.LocalToWorldPoint(p)).ToArray();
 
-            if (_collisionEventChannel == null) return;
+            RaiseCollisionEvent(other.gameObject, collision.contacts[0].point, pixels);
+        }
+
+        public void RaiseCollisionEvent([CanBeNull] GameObject other, Vector2 contactPoint, Vector2Int[] pixels)
+        {
+            var pixelsGlobalPositions = new Vector2[pixels.Length];
+
+            for (var i = 0; i < pixels.Length; i++) pixelsGlobalPositions[i] = _body.LocalToWorldPoint(pixels[i]);
+
             var data = new CollisionData(
                 _body.gameObject,
-                other.gameObject,
-                collision.contacts[0].point,
+                other?.gameObject,
+                contactPoint,
                 pixelsGlobalPositions
             );
             _collisionEventChannel.RaiseEvent(data);
@@ -108,7 +116,7 @@ namespace Pixelation
 
                 _body.PixelLostByDivision(region);
 
-                _grid.RemovePixels(region);
+                _grid.RemovePixels(region, false);
             }
         }
 
