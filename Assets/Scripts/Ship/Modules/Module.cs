@@ -135,32 +135,25 @@ namespace Ship.Modules
             _connections.Remove(otherModule);
             _connectionPoints.Remove(otherModule);
 
-            if (Ship && Ship.ModuleGraph != null)
+            Ship.ModuleGraph.RemoveEdge(this, otherModule);
+
+            var thisStillInGraph = Ship.ModuleGraph.ContainsNode(this);
+            var otherStillInGraph = Ship.ModuleGraph.ContainsNode(otherModule);
+
+            if (!thisStillInGraph && transform.parent != MapInfo.Instance.mapTransform)
             {
-                Ship.ModuleGraph.RemoveEdge(this, otherModule);
-
-                var thisStillInGraph = Ship.ModuleGraph.ContainsNode(this);
-                var otherStillInGraph = Ship.ModuleGraph.ContainsNode(otherModule);
-
-                if (MapInfo.Instance && MapInfo.Instance.mapTransform)
-                {
-                    if (!thisStillInGraph && transform.parent != MapInfo.Instance.mapTransform)
-                        transform.SetParent(MapInfo.Instance.mapTransform);
-                    if (otherModule && !otherStillInGraph &&
-                        otherModule.transform.parent != MapInfo.Instance.mapTransform)
-                        otherModule.transform.SetParent(MapInfo.Instance.mapTransform);
-                }
-                else
-                {
-                    Debug.LogWarning("MapInfo instance or mapTransform is null, cannot reparent detached modules.");
-                }
-
-                Ship.RecacheModulesDictionary();
+                transform.SetParent(MapInfo.Instance.mapTransform);
+                gameObject.layer = LayerMask.NameToLayer("Default");
             }
-            else
+
+            if (otherModule && !otherStillInGraph &&
+                otherModule.transform.parent != MapInfo.Instance.mapTransform)
             {
-                Debug.LogWarning("Ship or ModuleGraph is null, cannot update graph or recache on detach.", this);
+                otherModule.transform.SetParent(MapInfo.Instance.mapTransform);
+                otherModule.gameObject.layer = LayerMask.NameToLayer("Default");
             }
+
+            Ship.RecacheModulesDictionary();
         }
     }
 }

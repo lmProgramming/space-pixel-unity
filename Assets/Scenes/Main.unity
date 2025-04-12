@@ -1668,6 +1668,9 @@ MonoBehaviour:
   junkPrefab: {fileID: 6238972865151883739, guid: 85019486d9b34774eaf91485f4c4ce1e, type: 3}
   parent: {fileID: 1419483029}
   instantiator: {fileID: 941581985}
+  junkLayer:
+    serializedVersion: 2
+    m_Bits: 1
 --- !u!4 &443114474
 Transform:
   m_ObjectHideFlags: 0
