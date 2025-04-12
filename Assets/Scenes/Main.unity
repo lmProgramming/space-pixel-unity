@@ -351,7 +351,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 115355037}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -424,7 +424,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 87935a2252034332a86a97b43cd2d647, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  testInScene: 1
+  testInScene: 0
   meshRenderer: {fileID: 115355039}
   starBackgroundMaterial: {fileID: 2100000, guid: 00532ff5d5cd1034a9b271e25a528b19, type: 2}
   playerTransform: {fileID: 1940184196}
@@ -7575,7 +7575,7 @@ MonoBehaviour:
   - identifier: 0
     clip: {fileID: 8300000, guid: ec9fc538b634e48429428e09cb77746a, type: 3}
     volume: 0.2
-    pitch: 0.3
+    pitch: 0.8
     isLoop: 0
     allowOverlap: 1
     type: 0
@@ -7584,7 +7584,7 @@ MonoBehaviour:
   audioSourcePrefab: {fileID: 4036958230040339655, guid: 5c53d6b9aa7fb2d488199060b79a25da, type: 3}
   audioSourceParent: {fileID: 1882781145}
   unityInstantiator: {fileID: 712621836}
-  maxPoolSize: 50
+  maxPoolSize: 200
 --- !u!1 &1940184193
 GameObject:
   m_ObjectHideFlags: 0

@@ -10,7 +10,8 @@ namespace Editor
         [MenuItem("Tools/Render all pixelated rigidbodies")]
         private static void RenderAllPixelated()
         {
-            var allObjects = FindObjectsOfType<PixelatedRigidbody>();
+            var allObjects =
+                FindObjectsByType<PixelatedRigidbody>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
 
             foreach (var obj in allObjects)
             {
