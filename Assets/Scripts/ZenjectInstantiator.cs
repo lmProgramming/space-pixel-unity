@@ -10,4 +10,14 @@ public class ZenjectInstantiator : Instantiator
     {
         return _container.InstantiatePrefab(prefab, parent);
     }
+
+    public override GameObject Instantiate(GameObject prefab, Vector3 position, Quaternion rotation)
+    {
+        return Instantiate(prefab, position, rotation, null);
+    }
+
+    public override GameObject Instantiate(GameObject prefab, Vector3 position, Quaternion rotation, Transform parent)
+    {
+        return _container.InstantiatePrefab(prefab, position, rotation, parent);
+    }
 }
