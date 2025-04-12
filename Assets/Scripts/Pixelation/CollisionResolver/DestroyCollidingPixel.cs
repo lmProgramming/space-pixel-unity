@@ -14,9 +14,6 @@ namespace Pixelation.CollisionResolver
         {
             var localPoint = PixelatedRigidbody.WorldToLocalPoint(collision.GetContact(0).point);
 
-            // var pixelToDestroyPosition = GetPointAlongPath(hitPosition, -collision.rigidbody.linearVelocity, true) ??
-            //                              GetPointAlongPath(hitPosition, collision.rigidbody.linearVelocity, false);
-
             var pixelToDestroyPosition = CollisionHandler.GetClosestPixelPosition(localPoint);
 
             if (pixelToDestroyPosition == null) return new List<Vector2Int>();
