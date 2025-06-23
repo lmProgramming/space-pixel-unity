@@ -7295,7 +7295,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sounds:
   - identifier: 0
-    clip: {fileID: 8300000, guid: ec9fc538b634e48429428e09cb77746a, type: 3}
+    clips:
+    - {fileID: 8300000, guid: ec9fc538b634e48429428e09cb77746a, type: 3}
+    volume: 0.2
+    pitch: 0.8
+    isLoop: 0
+    allowOverlap: 1
+    type: 0
+    dedicatedSource: {fileID: 0}
+    originalVolume: 0
+  - identifier: 1
+    clips:
+    - {fileID: 8300000, guid: 56d4ee60da388de4caf4b0f69ca76634, type: 3}
+    - {fileID: 8300000, guid: 514ebfefd3268394686c95533205865f, type: 3}
+    - {fileID: 8300000, guid: b2c5b1115ff62e94692f5eaedfe414c9, type: 3}
+    - {fileID: 8300000, guid: fe4062661a364f545a687d016ebd9a56, type: 3}
     volume: 0.2
     pitch: 0.8
     isLoop: 0
@@ -7558,6 +7572,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   soundManager: {fileID: 1901650863}
+  minMagnitudeForClunk: 0
 --- !u!1 &1988705646
 GameObject:
   m_ObjectHideFlags: 0

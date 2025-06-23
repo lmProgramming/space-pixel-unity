@@ -7,15 +7,16 @@ namespace LM
 {
     public enum SoundIdentifier
     {
-        Explosion
+        Explosion,
+        Collision
     }
 
     public class SoundManager : MonoBehaviour
     {
-        public Sound[] sounds;
+        public Sound[] sounds = new Sound[1];
 
-        [Header("Pooling Settings")] [SerializeField]
-        private GameObject audioSourcePrefab;
+        [Header("Pooling Settings")]
+        [SerializeField] private GameObject audioSourcePrefab;
 
         [SerializeField] private Transform audioSourceParent;
 
@@ -73,7 +74,7 @@ namespace LM
 
             foreach (var sound in sounds)
             {
-                if (sound.clip == null)
+                if (sound.clips == null)
                 {
                     Debug.LogWarning($"Sound '{sound.identifier}' has no AudioClip assigned. Skipping.");
                     continue;
@@ -164,9 +165,9 @@ namespace LM
 
         private void ConfigureAudioSource(AudioSource source, Sound sound, Vector3? position)
         {
-            if (!source || sound == null || !sound.clip) return;
+            if (!source || sound == null || sound.clips.Length == 0) return;
 
-            source.clip = sound.clip;
+            source.clip = MathExt.RandomFrom(sound.clips);
             source.volume = CalculateActualVolume(sound);
             source.pitch = sound.pitch;
             source.loop = sound.isLoop;
@@ -283,7 +284,7 @@ namespace LM
         }
 
         public SoundIdentifier identifier;
-        public AudioClip clip;
+        public AudioClip[] clips;
 
         [Range(0f, 1f)] public float volume = 1f;
         [Range(.1f, 3f)] public float pitch = 1f;
