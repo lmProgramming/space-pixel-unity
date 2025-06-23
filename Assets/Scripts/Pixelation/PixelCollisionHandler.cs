@@ -65,7 +65,7 @@ namespace Pixelation
 
         private void RecalculateMass(int pixelsCount)
         {
-            _body.Rigidbody.mass = pixelsCount;
+            _body.Rigidbody.mass = pixelsCount * _body.MassMultiplier;
         }
 
         private void ResolveCollision(PixelatedRigidbody other, Collision2D collision)

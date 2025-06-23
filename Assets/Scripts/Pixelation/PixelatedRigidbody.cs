@@ -30,6 +30,9 @@ namespace Pixelation
 
         [Range(0, 3)] [SerializeField] private int rotation;
 
+        [field: SerializeField]
+        public float MassMultiplier { get; private set; } = 1;
+
         [Inject] private CollisionEventChannelSO _collisionEventChannelSO;
 
         private bool _isSetup;
