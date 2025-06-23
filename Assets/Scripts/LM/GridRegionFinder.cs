@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using LM.Grid;
 using Pixelation;
+using Unity.Collections;
+using Unity.Jobs;
 using UnityEngine;
 
 namespace LM
@@ -29,6 +32,52 @@ namespace LM
 
             var analyzer = new FastGridAnalyzer(pixelData, dimensions);
             return analyzer.FindRegionsFromNeighbors(lostPixel);
+        }
+
+        public static List<HashSet<Vector2Int>> FloodFindCohesiveRegionsWithJobs(PixelGrid grid)
+        {
+            var texture = grid.Texture;
+            if (texture == null) return new List<HashSet<Vector2Int>>();
+
+            var width = texture.width;
+            var height = texture.height;
+            var pixelCount = width * height;
+
+            var pixelData = texture.GetPixels32();
+            var nativePixels = new NativeArray<Color32>(pixelData, Allocator.TempJob);
+            var nativeVisited = new NativeArray<bool>(pixelCount, Allocator.TempJob);
+
+            var nativeRegionPixels = new NativeList<Vector2Int>(pixelCount, Allocator.TempJob);
+            var nativeRegionMetadata = new NativeList<RegionMetadata>(16, Allocator.TempJob);
+
+            var job = new FindAllRegionsJob
+            {
+                Width = width,
+                Height = height,
+                Pixels = nativePixels,
+                Visited = nativeVisited,
+                AllRegionPixels = nativeRegionPixels,
+                Regions = nativeRegionMetadata
+            };
+
+            var handle = job.Schedule();
+
+            handle.Complete();
+
+            var finalRegions = new List<HashSet<Vector2Int>>();
+            foreach (var metadata in nativeRegionMetadata)
+            {
+                var region = new HashSet<Vector2Int>(metadata.PixelCount);
+                for (var j = 0; j < metadata.PixelCount; j++) region.Add(nativeRegionPixels[metadata.StartIndex + j]);
+                finalRegions.Add(region);
+            }
+
+            nativePixels.Dispose();
+            nativeVisited.Dispose();
+            nativeRegionPixels.Dispose();
+            nativeRegionMetadata.Dispose();
+
+            return finalRegions;
         }
 
         private class FastGridAnalyzer
