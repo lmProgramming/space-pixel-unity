@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace UI.Main
 {
-    public class UIReloadManager : MonoBehaviour
+    public class UIReloadVisualizer : MonoBehaviour
     {
         [SerializeField] private GameObject smallCannonPrefab;
         [SerializeField] private GameObject bigCannonPrefab;

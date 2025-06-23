@@ -1,7 +1,7 @@
 using EasyPool;
 using UnityEngine;
 
-public sealed class EffectsSpawner : MonoBehaviour
+public class EffectsSpawner : MonoBehaviour
 {
     [SerializeField] private GameObject explosionPrefab;
 
@@ -9,11 +9,8 @@ public sealed class EffectsSpawner : MonoBehaviour
     [SerializeField] private Instantiator instantiator;
     private EasyPool<ParticleSystem> _explosionPool;
 
-    public static EffectsSpawner Instance { get; private set; }
-
     private void Awake()
     {
-        Instance = this;
         _explosionPool = new EasyPool<ParticleSystem>(explosionPrefab, effectsHolder, instantiator);
     }
 
