@@ -17,7 +17,8 @@ public class EffectsSpawner : MonoBehaviour
     public void SpawnExplosion(Vector2 position)
     {
         var explosion = _explosionPool.Get();
-        explosion.transform.position = position;
+        var position3 = new Vector3(position.x, position.y, explosion.transform.position.z);
+        explosion.transform.position = position3;
         explosion.Play();
     }
 }
