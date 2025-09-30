@@ -7,6 +7,8 @@ namespace Ships
     {
         private StateMachine _stateMachine;
 
+        public float SightRange => 200f;
+
         protected override void Start()
         {
             base.Start();
@@ -17,8 +19,14 @@ namespace Ships
 
         private void InitializeStateMachine()
         {
-            _stateMachine.RegisterState(new IdleState());
+            _stateMachine.RegisterState(new LookoutState());
+            _stateMachine.RegisterState(new AttackState());
             _stateMachine.StartStateMachine();
+        }
+
+        public Ship GetClosestEnemyInSight()
+        {
+            return FindFirstObjectByType<PlayerShip>();
         }
     }
 }

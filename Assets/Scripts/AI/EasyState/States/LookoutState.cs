@@ -2,7 +2,7 @@ using Random = UnityEngine.Random;
 
 namespace AI.EasyState.States
 {
-    public class IdleState : BaseState
+    public class LookoutState : BaseState
     {
         private const float StateChangeInterval = 3f;
         private const float StateChangeVariance = 2f;
@@ -10,7 +10,7 @@ namespace AI.EasyState.States
 
         private float _statePotentialChangeTime;
 
-        public override string StateName => "Idle";
+        public override string StateName => "Lookout";
 
         public override void Enter(StateMachine stateMachine)
         {
@@ -21,6 +21,15 @@ namespace AI.EasyState.States
         public override void Update(StateMachine stateMachine, float deltaTime)
         {
             base.Update(stateMachine, deltaTime);
+
+            var enemyShip = stateMachine.ShipController.GetClosestEnemyInSight();
+
+            if (enemyShip)
+            {
+                var attackData = new AttackStateData(enemyShip, stateMachine.ShipController.SightRange, 0.5f);
+                stateMachine.TransitionToState("Attack", attackData);
+                return;
+            }
 
             if (TimeInState < _statePotentialChangeTime) return;
 

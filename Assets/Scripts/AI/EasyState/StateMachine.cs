@@ -14,18 +14,18 @@ namespace AI.EasyState
 
         private readonly Dictionary<string, float> _weightedStates = new()
         {
-            { "Idle", 1f }
+            { "Lookout", 1f }
         };
 
         private IState CurrentState { get; set; }
 
-        public Ship ShipController { get; private set; }
+        public AIShip ShipController { get; private set; }
 
-        private static string DefaultState => "Idle";
+        private static string DefaultState => "Lookout";
 
         private void Awake()
         {
-            ShipController = GetComponent<Ship>();
+            ShipController = GetComponent<AIShip>();
         }
 
         private void Update()
@@ -50,7 +50,7 @@ namespace AI.EasyState
             _weightedStates.Remove(stateName);
         }
 
-        private void TransitionToState(string stateName)
+        public void TransitionToState(string stateName, [CanBeNull] IStateData data = null)
         {
             if (!_states.TryGetValue(stateName, out var newState))
             {
@@ -66,10 +66,14 @@ namespace AI.EasyState
 
             CurrentState?.Exit(this);
             CurrentState = newState;
-            CurrentState.Enter(this);
+
+            if (data != null)
+                CurrentState.Enter(this, data);
+            else
+                CurrentState.Enter(this);
         }
 
-        public void ForceTransitionToState(string stateName)
+        public void ForceTransitionToState(string stateName, IStateData data = null)
         {
             if (!_states.TryGetValue(stateName, out var newState))
             {
@@ -81,7 +85,11 @@ namespace AI.EasyState
 
             CurrentState?.Exit(this);
             CurrentState = newState;
-            CurrentState.Enter(this);
+
+            if (data != null)
+                CurrentState.Enter(this, data);
+            else
+                CurrentState.Enter(this);
         }
 
         public void StartStateMachine([CanBeNull] string initialStateName = null)

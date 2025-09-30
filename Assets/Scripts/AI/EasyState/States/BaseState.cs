@@ -17,6 +17,11 @@ namespace AI.EasyState.States
             Debug.Log($"Entering state: {StateName}");
         }
 
+        public virtual void Enter(StateMachine stateMachine, IStateData data)
+        {
+            Enter(stateMachine);
+        }
+
         public virtual void Update(StateMachine stateMachine, float deltaTime)
         {
             TimeInState += deltaTime;
