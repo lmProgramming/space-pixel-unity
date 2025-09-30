@@ -37,7 +37,7 @@ namespace AI.EasyState.States
             base.Update(stateMachine, deltaTime);
 
             // If no target, transition back to lookout
-            if (_targetEnemy == null || !_targetEnemy.gameObject.activeInHierarchy)
+            if (!_targetEnemy || !_targetEnemy.gameObject.activeInHierarchy)
             {
                 stateMachine.TransitionToState("Lookout");
                 return;
@@ -63,10 +63,8 @@ namespace AI.EasyState.States
         private void PerformAttack(StateMachine stateMachine)
         {
             Debug.Log($"Attacking {_targetEnemy.name}!");
-            // Add actual attack logic here (shooting, damage dealing, etc.)
-
-            // Example: Basic attack implementation
-            // You can add projectile spawning, damage dealing, etc. here
+            stateMachine.ShipController.SetAttackTarget(_targetEnemy.CommandModule.transform.position);
+            stateMachine.ShipController.Shoot();
         }
 
         public override void Exit(StateMachine stateMachine)

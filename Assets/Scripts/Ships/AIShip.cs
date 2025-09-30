@@ -1,5 +1,6 @@
 using AI.EasyState;
 using AI.EasyState.States;
+using UnityEngine;
 
 namespace Ships
 {
@@ -22,6 +23,11 @@ namespace Ships
             _stateMachine.RegisterState(new LookoutState());
             _stateMachine.RegisterState(new AttackState());
             _stateMachine.StartStateMachine();
+        }
+
+        public void SetAttackTarget(Vector2 targetPosition)
+        {
+            AttackTargetPosition = targetPosition;
         }
 
         public Ship GetClosestEnemyInSight()

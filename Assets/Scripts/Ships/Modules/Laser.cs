@@ -122,9 +122,9 @@ namespace Ships.Modules
                 {
                     timeRemaining -= Time.deltaTime;
 
-                    var pointerPosition = GameInput.WorldPointerPosition;
+                    var attackPosition = GameInput.WorldPointerPosition;
                     Vector2 origin = transform.position;
-                    var direction = (pointerPosition - origin).normalized;
+                    var direction = (attackPosition - origin).normalized;
                     var endPoint = origin + direction * beamRange;
 
                     lineRenderer.SetPosition(0, origin);

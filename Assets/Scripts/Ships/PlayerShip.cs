@@ -1,3 +1,4 @@
+using LM;
 using UnityEngine;
 
 namespace Ships
@@ -23,13 +24,11 @@ namespace Ships
 
         protected override void HandleWeapons()
         {
-            if (Input.GetMouseButton(0))
-                foreach (var weapon in Weapons)
-                    weapon.Shoot();
+            AttackTargetPosition = GameInput.WorldPointerPosition;
 
-            if (Input.GetMouseButtonUp(0))
-                foreach (var weapon in Weapons)
-                    weapon.StopShooting();
+            if (Input.GetMouseButton(0)) Shoot();
+
+            if (Input.GetMouseButtonUp(0)) StopShooting();
         }
     }
 }

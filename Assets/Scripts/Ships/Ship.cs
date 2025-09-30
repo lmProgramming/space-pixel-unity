@@ -17,6 +17,8 @@ namespace Ships
 
         public Graph<Module> ModuleGraph { get; private set; }
 
+        public Vector2 AttackTargetPosition { get; protected set; }
+
         public List<IWeapon> Weapons => _modules[ModuleType.Weapon].Cast<IWeapon>().ToList();
         public List<Engine> Engines => _modules[ModuleType.Engine].Cast<Engine>().ToList();
 
@@ -53,6 +55,18 @@ namespace Ships
 
         protected virtual void HandleWeapons()
         {
+        }
+
+        public void Shoot()
+        {
+            foreach (var weapon in Weapons)
+                weapon.Shoot();
+        }
+
+        public void StopShooting()
+        {
+            foreach (var weapon in Weapons)
+                weapon.StopShooting();
         }
     }
 }

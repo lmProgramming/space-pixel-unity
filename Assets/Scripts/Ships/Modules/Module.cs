@@ -24,7 +24,7 @@ namespace Ships.Modules
 
         [Inject] private MapInfo _mapInfo;
 
-        private Ship Ship { get; set; }
+        protected Ship Ship { get; private set; }
         public PixelatedRigidbody PixelatedRigidbody { get; private set; }
 
         protected virtual void Awake()
