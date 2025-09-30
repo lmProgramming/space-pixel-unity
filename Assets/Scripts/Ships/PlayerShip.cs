@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Ship
+namespace Ships
 {
     public class PlayerShip : Ship
     {

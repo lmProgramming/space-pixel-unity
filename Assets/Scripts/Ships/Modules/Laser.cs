@@ -6,7 +6,7 @@ using Pixelation;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-namespace Ship.Modules
+namespace Ships.Modules
 {
     [RequireComponent(typeof(LineRenderer))]
     public class LaserBeam : Module, IWeapon

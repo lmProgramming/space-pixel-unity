@@ -2,10 +2,10 @@ using System.Collections.Generic;
 using System.Linq;
 using LM;
 using LM.Graph;
-using Ship.Modules;
+using Ships.Modules;
 using UnityEngine;
 
-namespace Ship
+namespace Ships
 {
     public class Ship : MonoBehaviour
     {
@@ -20,7 +20,7 @@ namespace Ship
         public List<IWeapon> Weapons => _modules[ModuleType.Weapon].Cast<IWeapon>().ToList();
         public List<Engine> Engines => _modules[ModuleType.Engine].Cast<Engine>().ToList();
 
-        private void Start()
+        protected virtual void Start()
         {
             CommandModule ??= GetComponentInChildren<Command>();
 

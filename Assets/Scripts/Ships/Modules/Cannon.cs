@@ -4,7 +4,7 @@ using LM;
 using UnityEngine;
 using Zenject;
 
-namespace Ship.Modules
+namespace Ships.Modules
 {
     public class Cannon : Module, IWeapon
     {

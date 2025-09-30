@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
-using Ship.Modules;
+using Ships.Modules;
 using UnityEngine;
 
-namespace Ship
+namespace Ships
 {
     public class ModuleConnectionFactory : MonoBehaviour
     {

@@ -1,4 +1,4 @@
-﻿using Ship.Modules;
+﻿using Ships.Modules;
 using UnityEditor;
 using UnityEngine;
 

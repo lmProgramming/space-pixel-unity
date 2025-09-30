@@ -4,7 +4,7 @@ using Pixelation;
 using UnityEngine;
 using Zenject;
 
-namespace Ship.Modules
+namespace Ships.Modules
 {
     public enum ModuleType
     {
