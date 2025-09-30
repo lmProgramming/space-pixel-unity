@@ -1,5 +1,5 @@
-using AI.StateMachine;
-using AI.StateMachine.States;
+using AI.EasyState;
+using AI.EasyState.States;
 
 namespace Ships
 {

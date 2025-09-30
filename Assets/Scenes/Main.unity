@@ -6182,7 +6182,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1632795186}
-  - component: {fileID: 1632795188}
+  - component: {fileID: 1632795190}
+  - component: {fileID: 1632795189}
   - component: {fileID: 1632795187}
   m_Layer: 7
   m_Name: Enemy
@@ -6222,7 +6223,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cebb1390bd8548d4c9f27f21510f1fcb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &1632795188
+--- !u!114 &1632795189
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -6231,9 +6232,21 @@ MonoBehaviour:
   m_GameObject: {fileID: 1632795185}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ca2084538397de84187ef625732233bb, type: 3}
+  m_Script: {fileID: 11500000, guid: 3e52a50793d8075f081063f6094377c5, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier: Assembly-CSharp::AI.StateMachine.StateMachine
+--- !u!114 &1632795190
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1632795185}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a1eda6d5f4c1594c86a1d39cfc2d3fa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Ships.AIShip
   moduleConnectionFactory: {fileID: 1632795187}
 --- !u!28 &1633281666
 Texture2D:
