@@ -11,6 +11,9 @@ namespace Ships
     {
         [SerializeField] private ModuleConnectionFactory moduleConnectionFactory;
 
+        [field: SerializeField]
+        public Team Team { get; private set; }
+
         // ReSharper disable once CollectionNeverUpdated.Local
         private readonly DefaultDictionary<ModuleType, List<Module>> _modules = new(() => new List<Module>());
         public Command CommandModule { get; private set; }
@@ -67,6 +70,31 @@ namespace Ships
         {
             foreach (var weapon in Weapons)
                 weapon.StopShooting();
+        }
+
+        protected Ship FindClosestEnemy(float maxRange = float.MaxValue)
+        {
+            var allShips = FindObjectsOfType<Ship>();
+            Ship closestEnemy = null;
+            var closestDistance = maxRange;
+
+            foreach (var ship in allShips)
+            {
+                if (ship == this)
+                    continue;
+
+                if (!Team.IsEnemy(ship.Team))
+                    continue;
+
+                var distance = Vector2.Distance(transform.position, ship.transform.position);
+                if (distance < closestDistance)
+                {
+                    closestDistance = distance;
+                    closestEnemy = ship;
+                }
+            }
+
+            return closestEnemy;
         }
     }
 }

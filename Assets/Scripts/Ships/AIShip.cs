@@ -32,7 +32,7 @@ namespace Ships
 
         public Ship GetClosestEnemyInSight()
         {
-            return FindFirstObjectByType<PlayerShip>();
+            return FindClosestEnemy(SightRange);
         }
     }
 }
