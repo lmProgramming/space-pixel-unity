@@ -112,10 +112,9 @@ namespace Ship.Modules
             var modulesToDetach = new HashSet<Module>();
 
             foreach (var point in points)
-            foreach (var connectedModule in connectedModulesToCheck)
+            foreach (var connectedModule in connectedModulesToCheck.Where(connectedModule =>
+                         !modulesToDetach.Contains(connectedModule)))
             {
-                if (modulesToDetach.Contains(connectedModule)) continue;
-
                 if (!_connectionPoints.TryGetValue(connectedModule, out var connectionPixelList)) continue;
                 var indexToRemove = connectionPixelList.FindIndex(p => p == point);
 

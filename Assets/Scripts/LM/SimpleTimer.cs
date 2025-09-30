@@ -1,29 +1,32 @@
 ﻿using System;
 using Cysharp.Threading.Tasks;
 
-public class SimpleTimer
+namespace LM
 {
-    private readonly float _interval;
-
-    public SimpleTimer(float interval, bool startReady = true)
+    public class SimpleTimer
     {
-        _interval = interval;
-        IsReady = startReady;
-    }
+        private readonly float _interval;
 
-    public bool IsReady { get; private set; }
+        public SimpleTimer(float interval, bool startReady = true)
+        {
+            _interval = interval;
+            IsReady = startReady;
+        }
 
-    public event Action OnReady;
-    public event Action OnNotReady;
+        public bool IsReady { get; private set; }
 
-    public async UniTask Wait(float? seconds = null)
-    {
-        OnNotReady?.Invoke();
-        var elapsedSeconds = seconds ?? _interval;
+        public event Action OnReady;
+        public event Action OnNotReady;
 
-        IsReady = false;
-        await UniTask.Delay((int)(elapsedSeconds * 1000));
-        IsReady = true;
-        OnReady?.Invoke();
+        public async UniTask Wait(float? seconds = null)
+        {
+            OnNotReady?.Invoke();
+            var elapsedSeconds = seconds ?? _interval;
+
+            IsReady = false;
+            await UniTask.Delay((int)(elapsedSeconds * 1000));
+            IsReady = true;
+            OnReady?.Invoke();
+        }
     }
 }
