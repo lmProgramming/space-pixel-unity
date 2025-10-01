@@ -65,7 +65,7 @@ namespace Pixelation
 
         private void RecalculateMass(int pixelsCount)
         {
-            _body.Rigidbody.mass = pixelsCount;
+            _body.Rigidbody.mass = pixelsCount * _body.MassMultiplier;
         }
 
         private void ResolveCollision(PixelatedRigidbody other, Collision2D collision)
@@ -75,20 +75,24 @@ namespace Pixelation
 
             var pixels = pixelsDestroyed as Vector2Int[] ?? pixelsDestroyed.ToArray();
 
-            RaiseCollisionEvent(other.gameObject, collision.contacts[0].point, pixels);
+            RaiseCollisionEvent(other, collision.contacts[0].point, pixels);
         }
 
-        public void RaiseCollisionEvent([CanBeNull] GameObject other, Vector2 contactPoint, Vector2Int[] pixels)
+        public void RaiseCollisionEvent([CanBeNull] PixelatedRigidbody other, Vector2 contactPoint, Vector2Int[] pixels)
         {
             var pixelsGlobalPositions = new Vector2[pixels.Length];
 
             for (var i = 0; i < pixels.Length; i++) pixelsGlobalPositions[i] = _body.LocalToWorldPoint(pixels[i]);
 
+            Vector2? speedDifference = null;
+            if (other) speedDifference = _body.Rigidbody.linearVelocity + other.Rigidbody.linearVelocity;
+
             var data = new CollisionData(
                 _body.gameObject,
                 other?.gameObject,
                 contactPoint,
-                pixelsGlobalPositions
+                pixelsGlobalPositions,
+                speedDifference
             );
             _collisionEventChannel.RaiseEvent(data);
         }

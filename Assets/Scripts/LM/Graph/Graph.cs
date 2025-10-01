@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Ship.Modules.Graph
+namespace LM.Graph
 {
     public class Graph<T>
     {
@@ -32,8 +32,7 @@ namespace Ship.Modules.Graph
 
         public virtual void RemoveNode(T node)
         {
-            if (!AdjacencyList.ContainsKey(node)) return;
-            AdjacencyList.Remove(node);
+            if (!AdjacencyList.Remove(node)) return;
 
             foreach (var value in AdjacencyList) RemoveEdge(value.Key, node);
         }

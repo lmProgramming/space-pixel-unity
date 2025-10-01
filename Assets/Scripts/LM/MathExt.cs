@@ -49,13 +49,7 @@ namespace LM
 
         public static T RandomFrom<T>(T[] array)
         {
-            if (array == null || array.Length == 0)
-            {
-#if UNITY_EDITOR
-                Debug.LogWarning("The list is empty or null. Returning default value.");
-#endif
-                return default;
-            }
+            if (array == null || array.Length == 0) return default;
 
             var randomIndex = Random.Range(0, array.Length);
             return array[randomIndex];

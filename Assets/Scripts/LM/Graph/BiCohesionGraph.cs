@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Ship.Modules.Graph
+namespace LM.Graph
 {
     public class BiCohesionGraph<T> : Graph<T>
     {

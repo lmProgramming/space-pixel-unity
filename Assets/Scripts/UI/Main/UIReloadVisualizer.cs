@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Ships;
 using UnityEngine;
 
 namespace UI.Main
@@ -9,7 +10,7 @@ namespace UI.Main
     {
         [SerializeField] private GameObject smallCannonPrefab;
         [SerializeField] private GameObject bigCannonPrefab;
-        [SerializeField] private Ship.Ship playerShip;
+        [SerializeField] private Ship playerShip;
 
         [SerializeField] private Transform iconContainer;
 

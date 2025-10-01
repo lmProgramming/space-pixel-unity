@@ -6,7 +6,7 @@ using Pixelation;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-namespace Ship.Modules
+namespace Ships.Modules
 {
     [RequireComponent(typeof(LineRenderer))]
     public class LaserBeam : Module, IWeapon
@@ -122,9 +122,9 @@ namespace Ship.Modules
                 {
                     timeRemaining -= Time.deltaTime;
 
-                    var pointerPosition = GameInput.WorldPointerPosition;
+                    var attackPosition = GameInput.WorldPointerPosition;
                     Vector2 origin = transform.position;
-                    var direction = (pointerPosition - origin).normalized;
+                    var direction = (attackPosition - origin).normalized;
                     var endPoint = origin + direction * beamRange;
 
                     lineRenderer.SetPosition(0, origin);

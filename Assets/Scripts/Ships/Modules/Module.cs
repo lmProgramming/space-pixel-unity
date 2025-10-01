@@ -4,7 +4,7 @@ using Pixelation;
 using UnityEngine;
 using Zenject;
 
-namespace Ship.Modules
+namespace Ships.Modules
 {
     public enum ModuleType
     {
@@ -24,7 +24,7 @@ namespace Ship.Modules
 
         [Inject] private MapInfo _mapInfo;
 
-        private Ship Ship { get; set; }
+        protected Ship Ship { get; private set; }
         public PixelatedRigidbody PixelatedRigidbody { get; private set; }
 
         protected virtual void Awake()
@@ -112,10 +112,9 @@ namespace Ship.Modules
             var modulesToDetach = new HashSet<Module>();
 
             foreach (var point in points)
-            foreach (var connectedModule in connectedModulesToCheck)
+            foreach (var connectedModule in connectedModulesToCheck.Where(connectedModule =>
+                         !modulesToDetach.Contains(connectedModule)))
             {
-                if (modulesToDetach.Contains(connectedModule)) continue;
-
                 if (!_connectionPoints.TryGetValue(connectedModule, out var connectionPixelList)) continue;
                 var indexToRemove = connectionPixelList.FindIndex(p => p == point);
 

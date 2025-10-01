@@ -4,7 +4,7 @@ using LM;
 using UnityEngine;
 using Zenject;
 
-namespace Ship.Modules
+namespace Ships.Modules
 {
     public class Cannon : Module, IWeapon
     {
@@ -39,11 +39,11 @@ namespace Ship.Modules
         {
             if (!_reloadTimer.IsReady) return;
 
-            var pointerPosition = GameInput.WorldPointerPosition;
+            var targetPosition = Ship.AttackTargetPosition;
 
-            var direction = (pointerPosition - (Vector2)transform.position).normalized;
+            var direction = (targetPosition - (Vector2)transform.position).normalized;
 
-            var angle = MathExt.AngleBetweenTwoPoints(pointerPosition, transform.position);
+            var angle = MathExt.AngleBetweenTwoPoints(targetPosition, transform.position);
 
             var rotation = Quaternion.Euler(0, 0, angle - 90);
 
