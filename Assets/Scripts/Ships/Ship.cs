@@ -2,8 +2,10 @@ using System.Collections.Generic;
 using System.Linq;
 using LM;
 using LM.Graph;
+using Services;
 using Ships.Modules;
 using UnityEngine;
+using Zenject;
 
 namespace Ships
 {
@@ -16,6 +18,10 @@ namespace Ships
 
         // ReSharper disable once CollectionNeverUpdated.Local
         private readonly DefaultDictionary<ModuleType, List<Module>> _modules = new(() => new List<Module>());
+
+        [Inject]
+        private ShipService _shipService;
+
         public Command CommandModule { get; private set; }
 
         public Graph<Module> ModuleGraph { get; private set; }
@@ -74,7 +80,7 @@ namespace Ships
 
         protected Ship FindClosestEnemy(float maxRange = float.MaxValue)
         {
-            var allShips = FindObjectsOfType<Ship>();
+            var allShips = _shipService.Ships;
             Ship closestEnemy = null;
             var closestDistance = maxRange;
 
@@ -87,11 +93,10 @@ namespace Ships
                     continue;
 
                 var distance = Vector2.Distance(transform.position, ship.transform.position);
-                if (distance < closestDistance)
-                {
-                    closestDistance = distance;
-                    closestEnemy = ship;
-                }
+                if (!(distance < closestDistance)) continue;
+
+                closestDistance = distance;
+                closestEnemy = ship;
             }
 
             return closestEnemy;

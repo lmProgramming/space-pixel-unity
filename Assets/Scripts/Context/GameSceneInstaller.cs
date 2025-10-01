@@ -1,4 +1,5 @@
 using Events.Collision;
+using Services;
 using UnityEngine;
 using Zenject;
 
@@ -12,6 +13,7 @@ namespace Context
         [Header("Services")] [SerializeField] private JunkSpawner junkSpawner;
         [SerializeField] private ProjectilesSpawner projectilesSpawner;
         [SerializeField] private MapInfo mapInfo;
+        [SerializeField] private ShipService shipService;
 
         public override void InstallBindings()
         {
@@ -35,6 +37,10 @@ namespace Context
 
             Container.Bind<MapInfo>()
                 .FromInstance(mapInfo)
+                .AsSingle();
+
+            Container.Bind<ShipService>()
+                .FromInstance(shipService)
                 .AsSingle();
         }
     }
