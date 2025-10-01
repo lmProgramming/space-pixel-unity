@@ -30,7 +30,7 @@ namespace AI.EasyState
 
         private void Update()
         {
-            CurrentState?.Update(this, Time.deltaTime);
+            CurrentState.Update(this, Time.deltaTime);
         }
 
         public void RegisterState(IState state, float? weight = null)
@@ -58,13 +58,13 @@ namespace AI.EasyState
                 return;
             }
 
-            if (CurrentState != null && !CurrentState.CanTransitionTo(stateName))
+            if (!CurrentState.CanTransitionTo(stateName))
             {
                 Debug.LogWarning($"Cannot transition from {CurrentState.StateName} to {stateName}");
                 return;
             }
 
-            CurrentState?.Exit(this);
+            CurrentState.Exit(this);
             CurrentState = newState;
 
             if (data != null)
@@ -83,7 +83,7 @@ namespace AI.EasyState
 
             if (!CurrentState.OverridableByForce) return;
 
-            CurrentState?.Exit(this);
+            CurrentState.Exit(this);
             CurrentState = newState;
 
             if (data != null)

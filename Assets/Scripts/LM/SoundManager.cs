@@ -32,7 +32,6 @@ namespace LM
 
         private Dictionary<SoundIdentifier, Sound> _soundsDictionary;
 
-
         private void Awake()
         {
             // Consider singleton pattern alternatives or DI if needed across scenes
