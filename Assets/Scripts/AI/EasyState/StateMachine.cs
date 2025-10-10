@@ -96,7 +96,12 @@ namespace AI.EasyState
         {
             initialStateName ??= DefaultState;
 
-            TransitionToState(initialStateName);
+            if (!_states.TryGetValue(initialStateName, out var newState))
+                Debug.LogWarning($"State {initialStateName} not found in state machine");
+
+            CurrentState = newState;
+
+            CurrentState!.Enter(this);
         }
 
         public void TransitionToDefaultState()
