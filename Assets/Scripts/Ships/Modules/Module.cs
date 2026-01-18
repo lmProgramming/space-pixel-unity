@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
-using Core;
+using Core.Pixelation;
+using Core.Ship;
 using Pixelation;
 using UnityEngine;
-using Zenject;
 
 namespace Ships.Modules
 {
@@ -14,8 +14,6 @@ namespace Ships.Modules
         private readonly Dictionary<Module, FixedJoint2D> _connections = new();
 
         protected readonly ResourceDraw _resourceDraw;
-
-        [Inject] private IMapInfo _mapInfo;
 
         protected Ship Ship { get; private set; }
 
@@ -62,6 +60,11 @@ namespace Ships.Modules
         public void Setup(Ship ship)
         {
             Ship = ship;
+        }
+
+        public void ClearShipReference()
+        {
+            Ship = null;
         }
 
         public void SetupConnections(Module otherModule, ref FixedJoint2D joint)
@@ -129,30 +132,21 @@ namespace Ships.Modules
 
         private void DetachConnections(Module otherModule)
         {
+            Debug.Log($"[Module] DetachConnections: {name} detaching from {otherModule.name}", this);
+
             if (_connections.TryGetValue(otherModule, out var jointToDestroy) && jointToDestroy)
                 Destroy(jointToDestroy);
             _connections.Remove(otherModule);
             _connectionPoints.Remove(otherModule);
 
+            if (Ship == null)
+            {
+                Debug.Log($"[Module] {name} has no Ship reference, skipping graph update", this);
+                return;
+            }
+
+            Debug.Log($"[Module] Calling RemoveEdge({name}, {otherModule.name})", this);
             Ship.ModuleGraph.RemoveEdge(this, otherModule);
-
-            var thisStillInGraph = Ship.ModuleGraph.ContainsNode(this);
-            var otherStillInGraph = Ship.ModuleGraph.ContainsNode(otherModule);
-
-            if (!thisStillInGraph && transform.parent != _mapInfo.MapTransform)
-            {
-                transform.SetParent(_mapInfo.MapTransform);
-                gameObject.layer = LayerMask.NameToLayer("Default");
-            }
-
-            if (otherModule && !otherStillInGraph &&
-                otherModule.transform.parent != _mapInfo.MapTransform)
-            {
-                otherModule.transform.SetParent(_mapInfo.MapTransform);
-                otherModule.gameObject.layer = LayerMask.NameToLayer("Default");
-            }
-
-            Ship.RecacheModulesDictionary();
         }
     }
 }

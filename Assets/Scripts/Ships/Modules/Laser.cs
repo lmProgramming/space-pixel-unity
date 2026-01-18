@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
-using Core;
+using Core.Gameplay.Combat;
+using Core.Ship;
 using Cysharp.Threading.Tasks;
 using LM;
 using Pixelation;
@@ -12,7 +13,8 @@ namespace Ships.Modules
     [RequireComponent(typeof(LineRenderer))]
     public class LaserBeam : Module, IWeapon
     {
-        [Header("Laser Settings")] [SerializeField]
+        [Header("Laser Settings")]
+        [SerializeField]
         private LineRenderer lineRenderer;
 
         [SerializeField] private float beamRange = 20f;
@@ -23,7 +25,8 @@ namespace Ships.Modules
 
         [SerializeField] private GameObject icon;
 
-        [Header("Weapon Base Settings")] [SerializeField]
+        [Header("Weapon Base Settings")]
+        [SerializeField]
         private float reloadTime = 2.0f;
 
         private CancellationTokenSource _fireCts;
@@ -93,6 +96,7 @@ namespace Ships.Modules
         private void StartShooting()
         {
             if (!IsReady()) return;
+            if (lineRenderer == null) return;
 
             _isFiring = true;
             lineRenderer.enabled = true;

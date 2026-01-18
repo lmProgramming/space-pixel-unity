@@ -2,9 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using Core;
+using Core.Grid;
+using Core.Pixelation;
+using Core.Services;
 using Cysharp.Threading.Tasks;
 using Events.Collision;
+using Grid;
 using LM;
 using UnityEngine;
 using Zenject;
@@ -59,12 +62,12 @@ namespace Pixelation
             CollisionHandler.OnCollision(collision);
         }
 
+        public IPixelGrid PixelGrid { get; set; }
+
         [field: SerializeField]
         public float MassMultiplier { get; private set; } = 1;
 
         public bool HasSprite => sprite != null && sprite.ToString() != "null";
-
-        public PixelGrid PixelGrid { get; set; }
         public IPixelCollisionHandler CollisionHandler { get; private set; }
 
         public Rigidbody2D Rigidbody { get; private set; }

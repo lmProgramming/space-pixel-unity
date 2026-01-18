@@ -1,5 +1,5 @@
 using AI.EasyState;
-using Core;
+using Core.Ship;
 using Ships.AIStates;
 using UnityEngine;
 

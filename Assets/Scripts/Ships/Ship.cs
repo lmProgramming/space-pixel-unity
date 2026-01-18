@@ -1,6 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
-using Core;
+using Core.Gameplay.Combat;
+using Core.Gameplay.EasyTeam;
+using Core.Services;
+using Core.Ship;
+using Gameplay.EasyTeam;
 using LM;
 using LM.Graph;
 using Ships.Modules;
@@ -13,13 +17,21 @@ namespace Ships
     {
         [SerializeField] private ModuleConnectionFactory moduleConnectionFactory;
 
+        [SerializeField]
+        private Team team;
+
         // ReSharper disable once CollectionNeverUpdated.Local
         private readonly DefaultDictionary<ModuleType, List<Module>> _modules = new(() => new List<Module>());
+
+        private BiCohesionGraph<IModule> _biCohesionGraph;
+
+        [Inject]
+        private IMapInfo _mapInfo;
 
         [Inject]
         private IShipService _shipService;
 
-        public Graph<IModule> ModuleGraph { get; private set; }
+        public Graph<IModule> ModuleGraph => _biCohesionGraph;
 
         public Vector2 AttackTargetPosition { get; protected set; }
 
@@ -30,7 +42,8 @@ namespace Ships
         {
             CommandModule ??= GetComponentInChildren<Command>();
 
-            ModuleGraph = new BiCohesionGraph<IModule>(CommandModule);
+            _biCohesionGraph = new BiCohesionGraph<IModule>(CommandModule);
+            _biCohesionGraph.OnNodesRemovedDueToUnreachability += HandleUnreachableModules;
 
             CommandModule.PixelatedRigidbody.OnNoPixelsLeft += _ => Destroy(gameObject);
 
@@ -56,14 +69,41 @@ namespace Ships
             _shipService.UnregisterShip(this);
         }
 
-        public IModule CommandModule { get; private set; }
+        private void OnDestroy()
+        {
+            if (_biCohesionGraph != null)
+                _biCohesionGraph.OnNodesRemovedDueToUnreachability -= HandleUnreachableModules;
+        }
 
-        [field: SerializeField]
-        public Team Team { get; private set; }
+        public ITeam Team
+        {
+            get => team;
+            private set => team = value as Team;
+        }
+
+        public IModule CommandModule { get; private set; }
 
         public Vector2 GetPosition()
         {
             return transform.position;
+        }
+
+        private void HandleUnreachableModules(List<IModule> unreachableModules)
+        {
+            Debug.Log($"[Ship] HandleUnreachableModules called with {unreachableModules.Count} modules: [{string.Join(", ", unreachableModules.Select(m => m?.Transform?.name ?? "null"))}]");
+
+            foreach (var module in unreachableModules.Where(module =>
+                         module?.Transform != null &&
+                         module.Transform.parent != _mapInfo.MapTransform))
+            {
+                Debug.Log($"[Ship] Deparenting unreachable module: {module.Transform.name}", module.Transform);
+                module.Transform.SetParent(_mapInfo.MapTransform);
+                module.Transform.gameObject.layer = LayerMask.NameToLayer("Default");
+
+                if (module is Module concreteModule) concreteModule.ClearShipReference();
+            }
+
+            RecacheModulesDictionary();
         }
 
         public void RecacheModulesDictionary()

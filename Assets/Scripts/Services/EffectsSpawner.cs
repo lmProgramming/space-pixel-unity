@@ -1,6 +1,6 @@
-using Core;
-using Core.Instantiation;
+using Core.Services;
 using EasyPool;
+using Instantiation;
 using UnityEngine;
 
 namespace Services
@@ -11,6 +11,7 @@ namespace Services
 
         [SerializeField] private Transform effectsHolder;
         [SerializeField] private Instantiator instantiator;
+
         private EasyPool<ParticleSystem> _explosionPool;
 
         private void Awake()

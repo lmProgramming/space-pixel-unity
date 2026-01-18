@@ -1,4 +1,4 @@
-﻿using Core;
+﻿using Core.Gameplay.Sound;
 using UnityEngine;
 using Zenject;
 

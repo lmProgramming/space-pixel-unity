@@ -1008,7 +1008,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moduleConnectionFactory: {fileID: 292801186}
-  <Team>k__BackingField: {fileID: 654231193}
+  team: {fileID: 654231193}
   speedMultiplier: 24000
   rotationMultiplier: -800000
 --- !u!4 &292801185
@@ -1681,6 +1681,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   junkPrefab: {fileID: 6238972865151883739, guid: 85019486d9b34774eaf91485f4c4ce1e, type: 3}
   parent: {fileID: 1419483029}
+  instantiator: {fileID: 941581985}
 --- !u!4 &443114474
 Transform:
   m_ObjectHideFlags: 0
@@ -1782,6 +1783,7 @@ MonoBehaviour:
   projectilesSpawner: {fileID: 1203638783}
   shipService: {fileID: 1601371490}
   soundManager: {fileID: 1901650863}
+  effectSpawner: {fileID: 420075600}
 --- !u!114 &499716988
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2940,12 +2942,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 654231191}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 52cf9658973a4bcf8af35abd3602c8f9, type: 3}
+  m_Script: {fileID: 11500000, guid: b87386f5e87c402da0425f97c38c8370, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Ships.Team
+  m_EditorClassIdentifier: Game.Gameplay::Gameplay.EasyTeam.Team
   treatNonAlliedAsEnemy: 1
   allies: []
-  enemies: []
+  enemies:
+  - {fileID: 1056181131}
 --- !u!1 &672308250
 GameObject:
   m_ObjectHideFlags: 0
@@ -4007,12 +4010,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 1056181129}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 52cf9658973a4bcf8af35abd3602c8f9, type: 3}
+  m_Script: {fileID: 11500000, guid: b87386f5e87c402da0425f97c38c8370, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Ships.Team
+  m_EditorClassIdentifier: Game.Gameplay::Gameplay.EasyTeam.Team
   treatNonAlliedAsEnemy: 1
   allies: []
-  enemies: []
+  enemies:
+  - {fileID: 654231193}
 --- !u!1 &1064495925
 GameObject:
   m_ObjectHideFlags: 0
@@ -4595,6 +4599,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <ProjectilesHolder>k__BackingField: {fileID: 1064495926}
+  instantiator: {fileID: 941581985}
 --- !u!213 &1237006405
 Sprite:
   m_ObjectHideFlags: 0
@@ -5632,7 +5637,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1384098529}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -74.06783, y: -17.858976, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -6422,7 +6427,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Ships.AIShip
   moduleConnectionFactory: {fileID: 1632795187}
-  <Team>k__BackingField: {fileID: 1056181131}
+  team: {fileID: 1056181131}
 --- !u!28 &1633281666
 Texture2D:
   m_ObjectHideFlags: 0
@@ -7493,14 +7498,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1901650861}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 74.06783, y: 17.858976, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1959479949}
   - {fileID: 1882781145}
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1920964442}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1901650863
 MonoBehaviour:
@@ -7542,6 +7547,38 @@ MonoBehaviour:
   audioSourceParent: {fileID: 1882781145}
   unityInstantiator: {fileID: 712621836}
   maxPoolSize: 200
+--- !u!1 &1920964441
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1920964442}
+  m_Layer: 0
+  m_Name: Gameplay
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1920964442
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1920964441}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -74.06783, y: -17.858976, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1901650862}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1940184193
 GameObject:
   m_ObjectHideFlags: 0
@@ -8225,6 +8262,7 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 1735107390}
+  - {fileID: 1920964442}
   - {fileID: 499716986}
   - {fileID: 464077494}
   - {fileID: 558805766}
@@ -8236,4 +8274,3 @@ SceneRoots:
   - {fileID: 2081192575}
   - {fileID: 857200673}
   - {fileID: 1384098534}
-  - {fileID: 1901650862}

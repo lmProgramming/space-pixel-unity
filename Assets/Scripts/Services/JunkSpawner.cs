@@ -1,5 +1,6 @@
-using Core;
-using Core.Instantiation;
+using Core.Pixelation;
+using Core.Services;
+using Instantiation;
 using Pixelation;
 using UnityEngine;
 

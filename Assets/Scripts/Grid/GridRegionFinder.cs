@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using Core;
+using Core.Grid;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
@@ -9,7 +9,7 @@ namespace Grid
 {
     public static class GridRegionFinder
     {
-        public static List<HashSet<Vector2Int>> FloodFindCohesiveRegions(PixelGrid grid)
+        public static List<HashSet<Vector2Int>> FloodFindCohesiveRegions(IPixelGrid grid)
         {
             var texture = grid.Texture;
             if (!texture) return new List<HashSet<Vector2Int>>();
@@ -21,7 +21,7 @@ namespace Grid
             return analyzer.FindAllRegions();
         }
 
-        public static List<HashSet<Vector2Int>> FloodFindCohesiveRegions(Vector2Int lostPixel, PixelGrid grid)
+        public static List<HashSet<Vector2Int>> FloodFindCohesiveRegions(Vector2Int lostPixel, IPixelGrid grid)
         {
             var texture = grid.Texture;
             if (!texture) return new List<HashSet<Vector2Int>>();

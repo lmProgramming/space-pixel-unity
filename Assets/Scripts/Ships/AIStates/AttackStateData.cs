@@ -1,5 +1,5 @@
 using AI.EasyState.States;
-using Core;
+using Core.Ship;
 
 namespace Ships.AIStates
 {

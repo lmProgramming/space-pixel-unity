@@ -1,6 +1,6 @@
 using AI.EasyState;
 using AI.EasyState.States;
-using Core;
+using Core.Ship;
 using UnityEngine;
 
 namespace Ships.AIStates

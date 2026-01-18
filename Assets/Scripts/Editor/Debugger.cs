@@ -16,7 +16,7 @@ namespace Editor
             if (Input.GetKeyDown(KeyCode.P)) Debug.Break();
         }
 
-        private void HandleDelete()
+        private static void HandleDelete()
         {
             var gameObjectUnderPointer = GameInput.ObjectUnderPointer;
 

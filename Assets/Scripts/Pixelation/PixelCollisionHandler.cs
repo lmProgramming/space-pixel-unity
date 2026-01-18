@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using ContourTracer;
-using Core;
+using Core.Grid;
+using Core.Pixelation;
+using Core.Services;
 using Events.Collision;
 using Grid;
 using LM;
@@ -18,14 +20,14 @@ namespace Pixelation
 
         private readonly CollisionEventChannelSO _collisionEventChannel;
         private readonly CollisionResolver.CollisionResolver _collisionResolver;
-        private readonly PixelGrid _grid;
+        private readonly IPixelGrid _grid;
         private readonly GridContourTracer _gridContourTracer = new();
         private readonly IJunkSpawner _junkSpawner;
         private readonly float _lineSimplificationTolerance;
 
         private bool _didCollide;
 
-        public PixelCollisionHandler(PixelGrid grid, PixelatedRigidbody body, PolygonCollider2D collider,
+        public PixelCollisionHandler(IPixelGrid grid, PixelatedRigidbody body, PolygonCollider2D collider,
             CollisionEventChannelSO collisionEventChannel, IJunkSpawner junkSpawner)
         {
             _grid = grid;

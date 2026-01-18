@@ -32,9 +32,11 @@ namespace LM.Graph
 
         public virtual void RemoveNode(T node)
         {
-            if (!AdjacencyList.Remove(node)) return;
+            if (!AdjacencyList.TryGetValue(node, out _)) return;
 
-            foreach (var value in AdjacencyList) RemoveEdge(value.Key, node);
+            foreach (var kvp in AdjacencyList) kvp.Value.Remove(node);
+
+            AdjacencyList.Remove(node);
         }
 
         public bool ContainsNode(T node)

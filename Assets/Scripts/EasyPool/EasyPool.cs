@@ -17,7 +17,7 @@ namespace EasyPool
 
         private readonly bool _collectionChecks;
 
-        private readonly Instantiator _instantiator;
+        private readonly IInstantiator _instantiator;
         private readonly int _maxPoolSize;
         private readonly Transform _parent;
         private readonly PoolType _poolType;
@@ -25,15 +25,14 @@ namespace EasyPool
 
         private IObjectPool<T> _pool;
 
-        public EasyPool(GameObject prefab, Transform parent, Instantiator instantiator,
+        public EasyPool(GameObject prefab, Transform parent, IInstantiator instantiator,
             PoolType poolType = PoolType.Stack, bool collectionChecks = true, int maxPoolSize = 100)
         {
             if (prefab == null) throw new ArgumentNullException(nameof(prefab));
-            if (instantiator == null) throw new ArgumentNullException(nameof(instantiator));
 
             _prefab = prefab;
             _parent = parent;
-            _instantiator = instantiator;
+            _instantiator = instantiator ?? throw new ArgumentNullException(nameof(instantiator));
             _poolType = poolType;
             _collectionChecks = collectionChecks;
             _maxPoolSize = maxPoolSize;

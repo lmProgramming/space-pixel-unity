@@ -1,0 +1,17 @@
+{
+    "name": "Game.Instantiation",
+    "rootNamespace": "",
+    "references": [
+        "GUID:24173525d8afb24ad9153261c706727e",
+        "GUID:34bdced8957d5654aa357c6c421984d1"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
