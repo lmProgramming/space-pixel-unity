@@ -1,16 +1,17 @@
 ﻿using System.Collections.Generic;
+using Core;
 using UnityEngine;
 
 namespace Pixelation.CollisionResolver
 {
     public class DestroyCollidingPixel : CollisionResolver
     {
-        public DestroyCollidingPixel(PixelCollisionHandler collisionHandler, PixelatedRigidbody pixelatedRigidbody) :
+        public DestroyCollidingPixel(PixelCollisionHandler collisionHandler, IPixelatedRigidbody pixelatedRigidbody) :
             base(collisionHandler, pixelatedRigidbody)
         {
         }
 
-        public override IEnumerable<Vector2Int> ResolveCollision(PixelatedRigidbody other, Collision2D collision)
+        public override IEnumerable<Vector2Int> ResolveCollision(IPixelatedRigidbody other, Collision2D collision)
         {
             var localPoint = PixelatedRigidbody.WorldToLocalPoint(collision.GetContact(0).point);
 

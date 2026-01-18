@@ -15,7 +15,7 @@ namespace Ships
 
             var acceleration = Input.GetAxis("Vertical") * speedMultiplier * engineCount;
 
-            CommandModule.PixelatedRigidbody.Rigidbody.AddForce(CommandModule.transform.up * acceleration);
+            CommandModule.PixelatedRigidbody.Rigidbody.AddForce(CommandModule.Transform.up * acceleration);
 
             var turn = Input.GetAxis("Horizontal") * rotationMultiplier * engineCount;
 

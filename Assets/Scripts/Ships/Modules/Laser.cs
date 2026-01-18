@@ -1,5 +1,6 @@
 using System;
 using System.Threading;
+using Core;
 using Cysharp.Threading.Tasks;
 using LM;
 using Pixelation;
@@ -33,6 +34,8 @@ namespace Ships.Modules
         protected override void Awake()
         {
             base.Awake();
+
+            Type = ModuleType.Weapon;
 
             if (lineRenderer == null) lineRenderer = GetComponent<LineRenderer>();
             if (lineRenderer == null)

@@ -1,16 +1,17 @@
 ﻿using System.Collections.Generic;
+using Core;
 using UnityEngine;
 
 namespace Pixelation.CollisionResolver
 {
     public class PhysicsCollision : CollisionResolver
     {
-        public PhysicsCollision(PixelCollisionHandler collisionHandler, PixelatedRigidbody pixelatedRigidbody) : base(
+        public PhysicsCollision(PixelCollisionHandler collisionHandler, IPixelatedRigidbody pixelatedRigidbody) : base(
             collisionHandler, pixelatedRigidbody)
         {
         }
 
-        public override IEnumerable<Vector2Int> ResolveCollision(PixelatedRigidbody other, Collision2D collision)
+        public override IEnumerable<Vector2Int> ResolveCollision(IPixelatedRigidbody other, Collision2D collision)
         {
             var pixelsToDestroyCount = collision.relativeVelocity.magnitude * Mathf.Sqrt(other.Rigidbody.mass) * 0.01f;
 

@@ -1,4 +1,5 @@
 using System;
+using Core;
 using Cysharp.Threading.Tasks;
 using LM;
 using UnityEngine;
@@ -16,9 +17,15 @@ namespace Ships.Modules
 
         [SerializeField] private GameObject icon;
 
-        [Inject] private ProjectilesSpawner _projectilesSpawner;
+        [Inject] private IProjectilesSpawner _projectilesSpawner;
 
         private SimpleTimer _reloadTimer;
+
+        protected override void Awake()
+        {
+            base.Awake();
+            Type = ModuleType.Weapon;
+        }
 
         private void Start()
         {

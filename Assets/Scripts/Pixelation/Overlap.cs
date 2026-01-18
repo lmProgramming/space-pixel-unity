@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Core;
 using UnityEngine;
 
 namespace Pixelation
@@ -13,10 +14,10 @@ namespace Pixelation
             new(0, -1)
         };
 
-        private static Bounds CalculateWorldBounds(PixelatedRigidbody body)
+        private static Bounds CalculateWorldBounds(IPixelatedRigidbody body)
         {
             var dimensions = body.Dimensions();
-            if (dimensions.x <= 0 || dimensions.y <= 0) return new Bounds(body.transform.position, Vector3.zero);
+            if (dimensions.x <= 0 || dimensions.y <= 0) return new Bounds(body.Transform.position, Vector3.zero);
 
             var world00 = body.LocalToWorldPoint(new Vector2Int(0, 0));
             var worldW0 = body.LocalToWorldPoint(new Vector2Int(dimensions.x - 1, 0));
@@ -34,13 +35,13 @@ namespace Pixelation
             maxX += pixelWorldSizeApprox * 0.5f + 1;
             maxY += pixelWorldSizeApprox * 0.5f + 1;
 
-            var center = new Vector3((minX + maxX) / 2f, (minY + maxY) / 2f, body.transform.position.z);
+            var center = new Vector3((minX + maxX) / 2f, (minY + maxY) / 2f, body.Transform.position.z);
             var size = new Vector3(maxX - minX, maxY - minY, 0.1f);
 
             return new Bounds(center, size);
         }
 
-        public static List<Vector2Int> CalculateOverlappingPoints(PixelatedRigidbody body1, PixelatedRigidbody body2)
+        public static List<Vector2Int> CalculateOverlappingPoints(IPixelatedRigidbody body1, IPixelatedRigidbody body2)
         {
             var overlappingPoints = new List<Vector2Int>();
 

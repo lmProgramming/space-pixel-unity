@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Core;
 using UnityEngine;
 
 namespace Pixelation.CollisionResolver
@@ -6,14 +7,14 @@ namespace Pixelation.CollisionResolver
     public abstract class CollisionResolver
     {
         protected readonly PixelCollisionHandler CollisionHandler;
-        protected readonly PixelatedRigidbody PixelatedRigidbody;
+        protected readonly IPixelatedRigidbody PixelatedRigidbody;
 
-        protected CollisionResolver(PixelCollisionHandler collisionHandler, PixelatedRigidbody pixelatedRigidbody)
+        protected CollisionResolver(PixelCollisionHandler collisionHandler, IPixelatedRigidbody pixelatedRigidbody)
         {
             CollisionHandler = collisionHandler;
             PixelatedRigidbody = pixelatedRigidbody;
         }
 
-        public abstract IEnumerable<Vector2Int> ResolveCollision(PixelatedRigidbody other, Collision2D collision);
+        public abstract IEnumerable<Vector2Int> ResolveCollision(IPixelatedRigidbody other, Collision2D collision);
     }
 }

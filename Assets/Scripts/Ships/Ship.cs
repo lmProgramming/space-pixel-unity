@@ -1,30 +1,25 @@
 using System.Collections.Generic;
 using System.Linq;
+using Core;
 using LM;
 using LM.Graph;
-using Services;
 using Ships.Modules;
 using UnityEngine;
 using Zenject;
 
 namespace Ships
 {
-    public class Ship : MonoBehaviour
+    public class Ship : MonoBehaviour, IShip
     {
         [SerializeField] private ModuleConnectionFactory moduleConnectionFactory;
-
-        [field: SerializeField]
-        public Team Team { get; private set; }
 
         // ReSharper disable once CollectionNeverUpdated.Local
         private readonly DefaultDictionary<ModuleType, List<Module>> _modules = new(() => new List<Module>());
 
         [Inject]
-        private ShipService _shipService;
+        private IShipService _shipService;
 
-        public Command CommandModule { get; private set; }
-
-        public Graph<Module> ModuleGraph { get; private set; }
+        public Graph<IModule> ModuleGraph { get; private set; }
 
         public Vector2 AttackTargetPosition { get; protected set; }
 
@@ -35,7 +30,7 @@ namespace Ships
         {
             CommandModule ??= GetComponentInChildren<Command>();
 
-            ModuleGraph = new BiCohesionGraph<Module>(CommandModule);
+            ModuleGraph = new BiCohesionGraph<IModule>(CommandModule);
 
             CommandModule.PixelatedRigidbody.OnNoPixelsLeft += _ => Destroy(gameObject);
 
@@ -51,11 +46,31 @@ namespace Ships
             HandleWeapons();
         }
 
+        private void OnEnable()
+        {
+            _shipService.RegisterShip(this);
+        }
+
+        private void OnDisable()
+        {
+            _shipService.UnregisterShip(this);
+        }
+
+        public IModule CommandModule { get; private set; }
+
+        [field: SerializeField]
+        public Team Team { get; private set; }
+
+        public Vector2 GetPosition()
+        {
+            return transform.position;
+        }
+
         public void RecacheModulesDictionary()
         {
             _modules.Clear();
 
-            foreach (var module in ModuleGraph.GetAllNodes()) _modules[module.Type].Add(module);
+            foreach (var module in ModuleGraph.GetAllNodes()) _modules[module.Type].Add(module as Module);
         }
 
         protected virtual void Move()
@@ -78,21 +93,15 @@ namespace Ships
                 weapon.StopShooting();
         }
 
-        protected Ship FindClosestEnemy(float maxRange = float.MaxValue)
+        protected IShip FindClosestEnemy(float maxRange = float.MaxValue)
         {
-            var allShips = _shipService.Ships;
-            Ship closestEnemy = null;
+            var allShips = _shipService.GetEnemyShipsOf(Team);
+            IShip closestEnemy = null;
             var closestDistance = maxRange;
 
             foreach (var ship in allShips)
             {
-                if (ship == this)
-                    continue;
-
-                if (!Team.IsEnemy(ship.Team))
-                    continue;
-
-                var distance = Vector2.Distance(transform.position, ship.transform.position);
+                var distance = Vector2.Distance(transform.position, ship.GetPosition());
                 if (!(distance < closestDistance)) continue;
 
                 closestDistance = distance;

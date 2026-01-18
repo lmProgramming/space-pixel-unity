@@ -1,10 +1,11 @@
 using AI.EasyState;
-using AI.EasyState.States;
+using Core;
+using Ships.AIStates;
 using UnityEngine;
 
 namespace Ships
 {
-    public class AIShip : Ship
+    public class AIShip : Ship, IAgent
     {
         private StateMachine _stateMachine;
 
@@ -18,6 +19,8 @@ namespace Ships
             InitializeStateMachine();
         }
 
+        public Transform Transform => transform;
+
         private void InitializeStateMachine()
         {
             _stateMachine.RegisterState(new LookoutState());
@@ -30,7 +33,7 @@ namespace Ships
             AttackTargetPosition = targetPosition;
         }
 
-        public Ship GetClosestEnemyInSight()
+        public IShip GetClosestEnemyInSight()
         {
             return FindClosestEnemy(SightRange);
         }

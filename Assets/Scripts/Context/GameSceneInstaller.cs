@@ -1,5 +1,7 @@
+using Core;
 using Events.Collision;
 using Services;
+using Services.Sound;
 using UnityEngine;
 using Zenject;
 
@@ -10,10 +12,12 @@ namespace Context
         [Header("Event Channels")] [SerializeField]
         private CollisionEventChannelSO physicsCollisionChannelAsset;
 
-        [Header("Services")] [SerializeField] private JunkSpawner junkSpawner;
-        [SerializeField] private ProjectilesSpawner projectilesSpawner;
+        [SerializeField] private JunkSpawner junkSpawner;
         [SerializeField] private MapInfo mapInfo;
+        [SerializeField] private ProjectilesSpawner projectilesSpawner;
         [SerializeField] private ShipService shipService;
+        [SerializeField] private SoundManager soundManager;
+        [SerializeField] private EffectsSpawner effectSpawner;
 
         public override void InstallBindings()
         {
@@ -27,20 +31,28 @@ namespace Context
                 .FromInstance(physicsCollisionChannelAsset)
                 .AsSingle();
 
-            Container.Bind<JunkSpawner>()
+            Container.Bind<IJunkSpawner>()
                 .FromInstance(junkSpawner)
                 .AsSingle();
 
-            Container.Bind<ProjectilesSpawner>()
+            Container.Bind<IProjectilesSpawner>()
                 .FromInstance(projectilesSpawner)
                 .AsSingle();
 
-            Container.Bind<MapInfo>()
+            Container.Bind<IMapInfo>()
                 .FromInstance(mapInfo)
                 .AsSingle();
 
-            Container.Bind<ShipService>()
+            Container.Bind<IShipService>()
                 .FromInstance(shipService)
+                .AsSingle();
+
+            Container.Bind<ISoundManager>()
+                .FromInstance(soundManager)
+                .AsSingle();
+
+            Container.Bind<IEffectsSpawner>()
+                .FromInstance(effectSpawner)
                 .AsSingle();
         }
     }

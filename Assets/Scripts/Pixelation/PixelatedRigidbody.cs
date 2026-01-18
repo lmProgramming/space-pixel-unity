@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using Core;
 using Cysharp.Threading.Tasks;
 using Events.Collision;
 using LM;
@@ -13,15 +14,8 @@ namespace Pixelation
     [RequireComponent(typeof(PolygonCollider2D))]
     [RequireComponent(typeof(Rigidbody2D))]
     [RequireComponent(typeof(SpriteRenderer))]
-    public class PixelatedRigidbody : MonoBehaviour, IPixelated
+    public class PixelatedRigidbody : MonoBehaviour, IPixelatedRigidbody
     {
-        public enum PixelLoseReason
-        {
-            Destroyed,
-            Division,
-            Other
-        }
-
         private const float SpeedLimitForDiscreteCollisionDetectionSquared = 0;
 
         [SerializeField] private Sprite sprite;
@@ -30,21 +24,10 @@ namespace Pixelation
 
         [Range(0, 3)] [SerializeField] private int rotation;
 
-        [field: SerializeField]
-        public float MassMultiplier { get; private set; } = 1;
-
         [Inject] private CollisionEventChannelSO _collisionEventChannelSO;
 
         private bool _isSetup;
-        [Inject] private JunkSpawner _junkSpawner;
-
-        private bool HasSprite => sprite != null && sprite.ToString() != "null";
-
-        private PixelGrid PixelGrid { get; set; }
-        public PixelCollisionHandler CollisionHandler { get; private set; }
-
-        public Rigidbody2D Rigidbody { get; private set; }
-        private SpriteRenderer SpriteRenderer { get; set; }
+        [Inject] private IJunkSpawner _junkSpawner;
 
         private void Awake()
         {
@@ -75,6 +58,17 @@ namespace Pixelation
         {
             CollisionHandler.OnCollision(collision);
         }
+
+        [field: SerializeField]
+        public float MassMultiplier { get; private set; } = 1;
+
+        public bool HasSprite => sprite != null && sprite.ToString() != "null";
+
+        public PixelGrid PixelGrid { get; set; }
+        public IPixelCollisionHandler CollisionHandler { get; private set; }
+
+        public Rigidbody2D Rigidbody { get; private set; }
+        public SpriteRenderer SpriteRenderer { get; set; }
 
         public void ApplyPixels()
         {
@@ -143,6 +137,9 @@ namespace Pixelation
             RemovePixels(new[] { point }, simulateCollision);
         }
 
+        public Transform Transform => transform;
+        public GameObject GameObject => gameObject;
+
         public Vector2 WorldToLocalPoint(Vector2 worldPosition)
         {
             var position = transform.InverseTransformPoint(worldPosition);
@@ -164,6 +161,10 @@ namespace Pixelation
 
             return position;
         }
+
+        public event Action<IPixelated> OnNoPixelsLeft;
+
+        public event Action<List<Vector2Int>, PixelLoseReason> OnPixelsLost;
 
         public void Setup(Color32[,] colors = null, bool forceSetup = false)
         {
@@ -196,10 +197,6 @@ namespace Pixelation
             OnPixelsLost?.Invoke(new List<Vector2Int>(), PixelLoseReason.Other);
         }
 
-        public event Action<IPixelated> OnNoPixelsLeft;
-
-        public event Action<List<Vector2Int>, PixelLoseReason> OnPixelsLost;
-
         private void GetComponents()
         {
             Rigidbody = GetComponent<Rigidbody2D>();
@@ -212,7 +209,7 @@ namespace Pixelation
             Destroy(gameObject);
         }
 
-        public void CopyVelocity(PixelatedRigidbody parentBody)
+        public void CopyVelocity(IPixelatedRigidbody parentBody)
         {
             Rigidbody.linearVelocity = parentBody.Rigidbody.linearVelocity;
         }

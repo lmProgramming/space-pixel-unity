@@ -1,15 +1,16 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using ContourTracer;
+using Core;
 using Events.Collision;
-using JetBrains.Annotations;
+using Grid;
 using LM;
 using Pixelation.CollisionResolver;
 using UnityEngine;
 
 namespace Pixelation
 {
-    public sealed class PixelCollisionHandler
+    public sealed class PixelCollisionHandler : IPixelCollisionHandler
     {
         private const int MinPixelsForJunkCreation = 3;
         private readonly PixelatedRigidbody _body;
@@ -19,13 +20,13 @@ namespace Pixelation
         private readonly CollisionResolver.CollisionResolver _collisionResolver;
         private readonly PixelGrid _grid;
         private readonly GridContourTracer _gridContourTracer = new();
-        private readonly JunkSpawner _junkSpawner;
+        private readonly IJunkSpawner _junkSpawner;
         private readonly float _lineSimplificationTolerance;
 
         private bool _didCollide;
 
         public PixelCollisionHandler(PixelGrid grid, PixelatedRigidbody body, PolygonCollider2D collider,
-            CollisionEventChannelSO collisionEventChannel, JunkSpawner junkSpawner)
+            CollisionEventChannelSO collisionEventChannel, IJunkSpawner junkSpawner)
         {
             _grid = grid;
             _body = body;
@@ -36,115 +37,6 @@ namespace Pixelation
             _collisionResolver = new PhysicsCollision(this, _body);
 
             body.OnPixelsLost += PixelsLost;
-        }
-
-        private void PixelsLost(List<Vector2Int> pixels, PixelatedRigidbody.PixelLoseReason reason)
-        {
-            if (reason == PixelatedRigidbody.PixelLoseReason.Division) return;
-
-            var regions = pixels.Count == 1
-                ? GridRegionFinder.FloodFindCohesiveRegions(pixels[0], _grid)
-                : GridRegionFinder.FloodFindCohesiveRegions(_grid);
-
-            regions = regions.OrderBy(r => r.Count).ToList();
-
-            switch (regions.Count)
-            {
-                case 0:
-                    _body.NoPixelsLeft();
-                    return;
-                case > 1:
-                    HandleDivision(regions.SkipLast(1).ToList());
-                    break;
-            }
-
-            RecalculateMass(regions[^1].Count);
-
-            RecalculateColliders();
-        }
-
-        private void RecalculateMass(int pixelsCount)
-        {
-            _body.Rigidbody.mass = pixelsCount * _body.MassMultiplier;
-        }
-
-        private void ResolveCollision(PixelatedRigidbody other, Collision2D collision)
-        {
-            _didCollide = true;
-            var pixelsDestroyed = _collisionResolver.ResolveCollision(other, collision);
-
-            var pixels = pixelsDestroyed as Vector2Int[] ?? pixelsDestroyed.ToArray();
-
-            RaiseCollisionEvent(other, collision.contacts[0].point, pixels);
-        }
-
-        public void RaiseCollisionEvent([CanBeNull] PixelatedRigidbody other, Vector2 contactPoint, Vector2Int[] pixels)
-        {
-            var pixelsGlobalPositions = new Vector2[pixels.Length];
-
-            for (var i = 0; i < pixels.Length; i++) pixelsGlobalPositions[i] = _body.LocalToWorldPoint(pixels[i]);
-
-            Vector2? speedDifference = null;
-            if (other) speedDifference = _body.Rigidbody.linearVelocity + other.Rigidbody.linearVelocity;
-
-            var data = new CollisionData(
-                _body.gameObject,
-                other?.gameObject,
-                contactPoint,
-                pixelsGlobalPositions,
-                speedDifference
-            );
-            _collisionEventChannel.RaiseEvent(data);
-        }
-
-        private void RecalculateColliders()
-        {
-            var polygon = _gridContourTracer.GenerateCollider(_grid.Texture, new Vector2(.5f, .5f), 1);
-            if (polygon is null)
-            {
-                _body.NoPixelsLeft();
-                return;
-            }
-
-            var points = new List<Vector2>();
-
-            LineUtility.Simplify(polygon.ToList(), _lineSimplificationTolerance, points);
-
-            _collider.pathCount = 1;
-            _collider.SetPath(0, points);
-        }
-
-        private void HandleDivision(List<HashSet<Vector2Int>> regions)
-        {
-            foreach (var region in regions)
-            {
-                if (region.Count >= MinPixelsForJunkCreation) CreateNewJunk(region);
-
-                _body.PixelLostByDivision(region);
-
-                _grid.RemovePixels(region, false);
-            }
-        }
-
-        private void CreateNewJunk(HashSet<Vector2Int> points)
-        {
-            var rightTopPoint = new Vector2Int(points.Max(p => p.x), points.Max(p => p.y));
-            var leftBottomPoint = new Vector2Int(points.Min(p => p.x), points.Min(p => p.y));
-            var parentCenterPoint = _grid.Center;
-
-            var width = rightTopPoint.x - leftBottomPoint.x + 1;
-            var height = rightTopPoint.y - leftBottomPoint.y + 1;
-
-            var centrePoint = leftBottomPoint + new Vector2(width, height) / 2;
-
-            var newColorsGrid = new Color32[width, height];
-
-            foreach (var point in points)
-                newColorsGrid[point.x - leftBottomPoint.x, point.y - leftBottomPoint.y] = _grid.GetColor(point);
-
-            var globalPosition = _body.transform.TransformPoint(centrePoint - parentCenterPoint);
-
-            _junkSpawner.SpawnJunk(globalPosition, _body.transform.rotation, newColorsGrid, _body);
         }
 
         public Vector2Int? GetPointAlongPath(Vector2Int startPosition, Vector2 direction, bool getLast)
@@ -230,6 +122,116 @@ namespace Pixelation
             otherRb.CollisionHandler.ResolveCollision(_body, collision);
 
             ResolveCollision(otherRb, collision);
+        }
+
+        public void ResolveCollision(IPixelatedRigidbody other, Collision2D collision)
+        {
+            _didCollide = true;
+            var pixelsDestroyed = _collisionResolver.ResolveCollision(other, collision);
+
+            var pixels = pixelsDestroyed as Vector2Int[] ?? pixelsDestroyed.ToArray();
+
+            RaiseCollisionEvent(other, collision.contacts[0].point, pixels);
+        }
+
+        public void RaiseCollisionEvent(IPixelatedRigidbody other, Vector2 contactPoint,
+            Vector2Int[] pixels)
+        {
+            var pixelsGlobalPositions = new Vector2[pixels.Length];
+
+            for (var i = 0; i < pixels.Length; i++) pixelsGlobalPositions[i] = _body.LocalToWorldPoint(pixels[i]);
+
+            Vector2? speedDifference = null;
+            if (other != null) speedDifference = _body.Rigidbody.linearVelocity + other.Rigidbody.linearVelocity;
+
+            var data = new CollisionData(
+                _body.gameObject,
+                other?.GameObject,
+                contactPoint,
+                pixelsGlobalPositions,
+                speedDifference
+            );
+            _collisionEventChannel.RaiseEvent(data);
+        }
+
+        private void PixelsLost(List<Vector2Int> pixels, PixelLoseReason reason)
+        {
+            if (reason == PixelLoseReason.Division) return;
+
+            var regions = pixels.Count == 1
+                ? GridRegionFinder.FloodFindCohesiveRegions(pixels[0], _grid)
+                : GridRegionFinder.FloodFindCohesiveRegions(_grid);
+
+            regions = regions.OrderBy(r => r.Count).ToList();
+
+            switch (regions.Count)
+            {
+                case 0:
+                    _body.NoPixelsLeft();
+                    return;
+                case > 1:
+                    HandleDivision(regions.SkipLast(1).ToList());
+                    break;
+            }
+
+            RecalculateMass(regions[^1].Count);
+
+            RecalculateColliders();
+        }
+
+        private void RecalculateMass(int pixelsCount)
+        {
+            _body.Rigidbody.mass = pixelsCount * _body.MassMultiplier;
+        }
+
+        private void RecalculateColliders()
+        {
+            var polygon = _gridContourTracer.GenerateCollider(_grid.Texture, new Vector2(.5f, .5f), 1);
+            if (polygon is null)
+            {
+                _body.NoPixelsLeft();
+                return;
+            }
+
+            var points = new List<Vector2>();
+
+            LineUtility.Simplify(polygon.ToList(), _lineSimplificationTolerance, points);
+
+            _collider.pathCount = 1;
+            _collider.SetPath(0, points);
+        }
+
+        private void HandleDivision(List<HashSet<Vector2Int>> regions)
+        {
+            foreach (var region in regions)
+            {
+                if (region.Count >= MinPixelsForJunkCreation) CreateNewJunk(region);
+
+                _body.PixelLostByDivision(region);
+
+                _grid.RemovePixels(region, false);
+            }
+        }
+
+        private void CreateNewJunk(HashSet<Vector2Int> points)
+        {
+            var rightTopPoint = new Vector2Int(points.Max(p => p.x), points.Max(p => p.y));
+            var leftBottomPoint = new Vector2Int(points.Min(p => p.x), points.Min(p => p.y));
+            var parentCenterPoint = _grid.Center;
+
+            var width = rightTopPoint.x - leftBottomPoint.x + 1;
+            var height = rightTopPoint.y - leftBottomPoint.y + 1;
+
+            var centrePoint = leftBottomPoint + new Vector2(width, height) / 2;
+
+            var newColorsGrid = new Color32[width, height];
+
+            foreach (var point in points)
+                newColorsGrid[point.x - leftBottomPoint.x, point.y - leftBottomPoint.y] = _grid.GetColor(point);
+
+            var globalPosition = _body.transform.TransformPoint(centrePoint - parentCenterPoint);
+
+            _junkSpawner.SpawnJunk(globalPosition, _body.transform.rotation, newColorsGrid, _body);
         }
     }
 }

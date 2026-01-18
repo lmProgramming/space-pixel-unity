@@ -1,31 +1,23 @@
 using System.Collections.Generic;
 using System.Linq;
+using Core;
 using Pixelation;
 using UnityEngine;
 using Zenject;
 
 namespace Ships.Modules
 {
-    public enum ModuleType
-    {
-        Command,
-        Production,
-        Storage,
-        Weapon,
-        Engine
-    }
-
     [RequireComponent(typeof(PixelatedRigidbody))]
-    public class Module : MonoBehaviour
+    public class Module : MonoBehaviour, IModule
     {
-        [field: SerializeField] public ModuleType Type { get; private set; }
         private readonly Dictionary<Module, List<Vector2Int>> _connectionPoints = new();
         private readonly Dictionary<Module, FixedJoint2D> _connections = new();
 
-        [Inject] private MapInfo _mapInfo;
+        protected readonly ResourceDraw _resourceDraw;
+
+        [Inject] private IMapInfo _mapInfo;
 
         protected Ship Ship { get; private set; }
-        public PixelatedRigidbody PixelatedRigidbody { get; private set; }
 
         protected virtual void Awake()
         {
@@ -61,6 +53,11 @@ namespace Ships.Modules
                 }
             }
         }
+
+        public IPixelatedRigidbody PixelatedRigidbody { get; private set; }
+
+        public Transform Transform => transform;
+        public ModuleType Type { get; protected set; }
 
         public void Setup(Ship ship)
         {
@@ -106,7 +103,7 @@ namespace Ships.Modules
             _connections[otherModule] = joint;
         }
 
-        private void CheckCohesion(List<Vector2Int> points, PixelatedRigidbody.PixelLoseReason reason)
+        private void CheckCohesion(List<Vector2Int> points, PixelLoseReason reason)
         {
             var connectedModulesToCheck = new List<Module>(_connectionPoints.Keys);
             var modulesToDetach = new HashSet<Module>();
@@ -142,16 +139,16 @@ namespace Ships.Modules
             var thisStillInGraph = Ship.ModuleGraph.ContainsNode(this);
             var otherStillInGraph = Ship.ModuleGraph.ContainsNode(otherModule);
 
-            if (!thisStillInGraph && transform.parent != _mapInfo.mapTransform)
+            if (!thisStillInGraph && transform.parent != _mapInfo.MapTransform)
             {
-                transform.SetParent(_mapInfo.mapTransform);
+                transform.SetParent(_mapInfo.MapTransform);
                 gameObject.layer = LayerMask.NameToLayer("Default");
             }
 
             if (otherModule && !otherStillInGraph &&
-                otherModule.transform.parent != _mapInfo.mapTransform)
+                otherModule.transform.parent != _mapInfo.MapTransform)
             {
-                otherModule.transform.SetParent(_mapInfo.mapTransform);
+                otherModule.transform.SetParent(_mapInfo.MapTransform);
                 otherModule.gameObject.layer = LayerMask.NameToLayer("Default");
             }
 
