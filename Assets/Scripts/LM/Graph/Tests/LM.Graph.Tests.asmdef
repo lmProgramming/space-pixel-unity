@@ -1,10 +1,10 @@
 {
   "name": "LM.Graph.Tests",
-  "rootNamespace": "LM.Graph.Tests",
+  "rootNamespace": "",
   "references": [
-    "UnityEngine.TestRunner",
-    "UnityEditor.TestRunner",
-    "LMPro"
+    "GUID:27619889b8ba8c24980f49ee34dbb44a",
+    "GUID:0acc523941302664db1f4e527237feb3",
+    "GUID:b588e3e7a964822d3a9d587848dfd885"
   ],
   "includePlatforms": [
     "Editor"

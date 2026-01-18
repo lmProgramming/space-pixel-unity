@@ -1,17 +1,17 @@
 using NUnit.Framework;
 
-namespace LM.Graph.Tests
+namespace LM.Graph.Tests.LM.Graph.Tests
 {
     [TestFixture]
     public class GraphTests
     {
-        private Graph<string> _graph;
-
         [SetUp]
         public void SetUp()
         {
             _graph = new Graph<string>();
         }
+
+        private Graph<string> _graph;
 
         [Test]
         public void AddNode_AddsNodeToGraph()

@@ -90,7 +90,7 @@ namespace Ships.Modules
 
             StopFiringCleanup();
 
-            _reloadTimer?.Wait(reloadTime).Forget();
+            _reloadTimer?.Wait(reloadTime / Ship.GeneralEfficiency).Forget();
         }
 
         private void StartShooting()
@@ -122,7 +122,7 @@ namespace Ships.Modules
 
         private async UniTask FireBeamUpdateAsync(CancellationToken token)
         {
-            var timeRemaining = maxFireDuration;
+            var timeRemaining = maxFireDuration * Ship.GeneralEfficiency;
             try
             {
                 while (_isFiring && !token.IsCancellationRequested && timeRemaining > 0)

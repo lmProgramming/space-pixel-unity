@@ -1,21 +1,19 @@
 using System.Collections.Generic;
 using NUnit.Framework;
 
-namespace LM.Graph.Tests
+namespace LM.Graph.Tests.LM.Graph.Tests
 {
     [TestFixture]
     public class BiCohesionGraphTests
     {
-        private BiCohesionGraph<string> _graph;
-        private const string CentralNode = "Command";
-
         [SetUp]
         public void SetUp()
         {
             _graph = new BiCohesionGraph<string>(CentralNode);
         }
 
-        #region Basic Graph Operations
+        private BiCohesionGraph<string> _graph;
+        private const string CentralNode = "Command";
 
         [Test]
         public void AddNode_AddsNodeToGraph()
@@ -45,10 +43,6 @@ namespace LM.Graph.Tests
 
             Assert.IsFalse(_graph.GetConnectedNodes(CentralNode).Contains("ModuleA"));
         }
-
-        #endregion
-
-        #region Reachability Tests - Core Bug Fix
 
         [Test]
         public void RemoveEdge_RemovesUnreachableNode_WhenDisconnectedFromCentral()
@@ -168,10 +162,6 @@ namespace LM.Graph.Tests
             Assert.IsFalse(_graph.ContainsNode("E"));
         }
 
-        #endregion
-
-        #region Event Tests
-
         [Test]
         public void RemoveEdge_FiresEventWithUnreachableNodes()
         {
@@ -201,7 +191,7 @@ namespace LM.Graph.Tests
             _graph.AddEdge(CentralNode, "B");
             _graph.AddEdge("A", "B");
 
-            bool eventFired = false;
+            var eventFired = false;
             _graph.OnNodesRemovedDueToUnreachability += _ => eventFired = true;
 
             // Act: Remove edge but B is still reachable via Command
@@ -237,10 +227,6 @@ namespace LM.Graph.Tests
             Assert.Contains("D", removedNodes);
             Assert.IsFalse(removedNodes.Contains("A")); // A is still connected
         }
-
-        #endregion
-
-        #region Edge Cases
 
         [Test]
         public void RemoveEdge_NonExistentEdge_DoesNotThrow()
@@ -284,7 +270,5 @@ namespace LM.Graph.Tests
             // B should also be removed as it's no longer reachable
             Assert.IsFalse(_graph.ContainsNode("B"));
         }
-
-        #endregion
     }
 }

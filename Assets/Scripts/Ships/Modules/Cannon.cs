@@ -72,7 +72,7 @@ namespace Ships.Modules
             bulletRigidbody.AddForce(PixelatedRigidbody.Rigidbody.linearVelocity + direction * projectileSpeed,
                 ForceMode2D.Impulse);
 
-            _reloadTimer.Wait(reloadTime, _cts.Token).Forget();
+            _reloadTimer.Wait(reloadTime / Ship.GeneralEfficiency, _cts.Token).Forget();
         }
 
         public void StopShooting()

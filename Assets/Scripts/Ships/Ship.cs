@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Core.Gameplay.Combat;
@@ -7,6 +8,7 @@ using Core.Ship;
 using Gameplay.EasyTeam;
 using LM;
 using LM.Graph;
+using Ships.Internal;
 using Ships.Modules;
 using UnityEngine;
 using Zenject;
@@ -28,8 +30,12 @@ namespace Ships
         [Inject]
         private IMapInfo _mapInfo;
 
+        private ResourceManager _resourceManager;
+
         [Inject]
         private IShipService _shipService;
+
+        public float GeneralEfficiency => Math.Max(0.01f, _resourceManager.EnergyEfficiency);
 
         public Graph<IModule> ModuleGraph => _biCohesionGraph;
 
@@ -41,6 +47,7 @@ namespace Ships
         protected virtual void Start()
         {
             CommandModule ??= GetComponentInChildren<Command>();
+            _resourceManager ??= GetComponentInChildren<ResourceManager>();
 
             _biCohesionGraph = new BiCohesionGraph<IModule>(CommandModule);
             _biCohesionGraph.OnNodesRemovedDueToUnreachability += HandleUnreachableModules;
@@ -57,6 +64,7 @@ namespace Ships
             Move();
 
             HandleWeapons();
+            _resourceManager.UpdateEnergy();
         }
 
         private void OnEnable()
@@ -90,7 +98,8 @@ namespace Ships
 
         private void HandleUnreachableModules(List<IModule> unreachableModules)
         {
-            Debug.Log($"[Ship] HandleUnreachableModules called with {unreachableModules.Count} modules: [{string.Join(", ", unreachableModules.Select(m => m?.Transform?.name ?? "null"))}]");
+            Debug.Log(
+                $"[Ship] HandleUnreachableModules called with {unreachableModules.Count} modules: [{string.Join(", ", unreachableModules.Select(m => m?.Transform?.name ?? "null"))}]");
 
             foreach (var module in unreachableModules.Where(module =>
                          module?.Transform != null &&

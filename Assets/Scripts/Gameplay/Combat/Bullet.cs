@@ -10,8 +10,8 @@ namespace Gameplay.Combat
         private const float PushAwayRadius = 10f;
         private const float PushAwayStrength = 10f;
 
-        private readonly float fadeOutTime = 2f;
-        private readonly float lifeTime = 2f;
+        private const float FadeOutTime = 2f;
+        private const float LifeTime = 2f;
 
         public override void Start()
         {
@@ -43,8 +43,8 @@ namespace Gameplay.Combat
             {
                 var token = this.GetCancellationTokenOnDestroy();
 
-                await UniTask.Delay(TimeSpan.FromSeconds(lifeTime), cancellationToken: token);
-                await FadeOutAndDestroy(fadeOutTime);
+                await UniTask.Delay(TimeSpan.FromSeconds(LifeTime), cancellationToken: token);
+                await FadeOutAndDestroy(FadeOutTime);
             }
             catch (OperationCanceledException)
             {

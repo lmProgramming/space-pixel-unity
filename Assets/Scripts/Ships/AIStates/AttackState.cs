@@ -54,12 +54,12 @@ namespace Ships.AIStates
             // Attack if cooldown is ready
             if (Time.time - _lastAttackTime >= _attackCooldown)
             {
-                PerformAttack(stateMachine);
+                PerformAttack();
                 _lastAttackTime = Time.time;
             }
         }
 
-        private void PerformAttack(StateMachine stateMachine)
+        private void PerformAttack()
         {
             Ship.SetAttackTarget(_targetEnemy.CommandModule.Transform.position);
             Ship.Shoot();
