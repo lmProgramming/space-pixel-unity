@@ -18,7 +18,7 @@ namespace Ships
 {
     public class Ship : MonoBehaviour, IShip
     {
-        private const float UpdateResourcesTimer = 1f;
+        private const float UpdateResourcesTimer = 0.1f;
         [SerializeField] private ModuleConnectionFactory moduleConnectionFactory;
 
         [SerializeField]
@@ -48,6 +48,8 @@ namespace Ships
 
         public List<IWeapon> Weapons => _modulesDictionary[ModuleType.Weapon].Cast<IWeapon>().ToList();
         public List<Engine> Engines => _modulesDictionary[ModuleType.Engine].Cast<Engine>().ToList();
+
+        public ResourceManager ResourceManager => _resourceManager;
 
         protected virtual void Start()
         {

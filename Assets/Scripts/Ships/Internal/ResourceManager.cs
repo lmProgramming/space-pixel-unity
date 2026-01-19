@@ -15,7 +15,14 @@ namespace Ships.Internal
 
         [SerializeField] private int crewCapacity;
         [SerializeField] private int crew;
+
         public float EnergyEfficiency => energyEfficiency;
+        public float Energy => energy;
+        public float EnergyCapacity => energyCapacity;
+        public float EnergyDraw => energyDraw;
+        public float EnergyProduction => energyProduction;
+        public int Crew => crew;
+        public int CrewCapacity => crewCapacity;
 
         public void Recalculate(List<Module> modules)
         {
