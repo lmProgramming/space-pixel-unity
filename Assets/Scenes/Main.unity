@@ -759,6 +759,8 @@ MonoBehaviour:
     energyProduction: 0
     crew: 2
     crewCapacity: 0
+  thrust: 0
+  maxThrust: 1
 --- !u!114 &185009413
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3279,6 +3281,8 @@ MonoBehaviour:
     energyProduction: 0
     crew: 2
     crewCapacity: 0
+  thrust: 0
+  maxThrust: 0
 --- !u!114 &696995298
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5904,6 +5908,8 @@ MonoBehaviour:
     energyProduction: 0
     crew: 2
     crewCapacity: 0
+  thrust: 0
+  maxThrust: 0
 --- !u!114 &1492072030
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8290,6 +8296,8 @@ MonoBehaviour:
     energyProduction: 0
     crew: 2
     crewCapacity: 0
+  thrust: 0
+  maxThrust: 1
 --- !u!1 &1998466618
 GameObject:
   m_ObjectHideFlags: 0

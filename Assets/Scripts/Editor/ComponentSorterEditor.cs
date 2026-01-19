@@ -1,64 +1,97 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using Pixelation;
+using Ships.Modules;
 using UnityEditor;
+using UnityEditorInternal;
 using UnityEngine;
 
 namespace Editor
 {
     public class ComponentSorterEditor : EditorWindow
     {
+        private static readonly Type[] PriorityOrder =
+        {
+            typeof(Transform),
+            typeof(Module),
+            typeof(PixelatedRigidbody),
+            typeof(Rigidbody),
+            typeof(Rigidbody2D),
+            typeof(Collider),
+            typeof(Collider2D),
+            typeof(Renderer),
+            typeof(Camera),
+            typeof(Light),
+            typeof(AudioSource),
+            typeof(Animator),
+            typeof(MonoBehaviour)
+        };
+
         [MenuItem("Tools/Sort Components in All GameObjects")]
         private static void SortAllComponents()
         {
             var allObjects = FindObjectsByType<GameObject>(FindObjectsSortMode.None);
+            int sortedCount = 0;
 
             foreach (var obj in allObjects)
             {
                 if (PrefabUtility.IsPartOfAnyPrefab(obj)) continue;
-                SortComponents(obj);
+                if (SortComponents(obj)) sortedCount++;
             }
 
-            Debug.Log("Components sorted for all GameObjects.");
+            Debug.Log($"Components sorted for {sortedCount} GameObjects.");
         }
 
-        private static void SortComponents(GameObject obj)
+        private static bool SortComponents(GameObject obj)
         {
-            var components = obj.GetComponents<Component>();
+            var components = obj.GetComponents<Component>()
+                .Where(c => c != null)
+                .ToList();
 
-            if (components.Length <= 1) return;
+            if (components.Count <= 1) return false;
 
-            Type[] priorityOrder =
-            {
-                typeof(MonoBehaviour),
-                typeof(Transform),
-                typeof(Rigidbody),
-                typeof(Collider),
-                typeof(Renderer),
-                typeof(Camera),
-                typeof(Light),
-                typeof(AudioSource),
-                typeof(Animator)
-            };
-
-            var sortedComponents = components
-                .Where(c => c is not Transform)
-                .OrderBy(c => GetComponentPriority(c, priorityOrder))
+            var desiredOrder = components
+                .OrderBy(c => GetComponentPriority(c))
                 .ThenBy(c => c.GetType().Name)
-                .ToArray();
+                .ToList();
 
-            foreach (var c in sortedComponents) DestroyImmediate(c);
+            bool changed = false;
 
-            foreach (var c in sortedComponents) obj.AddComponent(c.GetType());
+            for (int targetIndex = 0; targetIndex < desiredOrder.Count; targetIndex++)
+            {
+                var component = desiredOrder[targetIndex];
 
-            Debug.Log($"Sorted components on {obj.name}");
+                var currentComponents = obj.GetComponents<Component>().Where(c => c != null).ToList();
+                int currentIndex = currentComponents.IndexOf(component);
+
+                while (currentIndex > targetIndex)
+                {
+                    ComponentUtility.MoveComponentUp(component);
+                    currentIndex--;
+                    changed = true;
+                }
+            }
+
+            if (changed)
+            {
+                Debug.Log($"Sorted components on {obj.name}");
+            }
+
+            return changed;
         }
 
-        private static int GetComponentPriority(Component component, Type[] priorityOrder)
+        private static int GetComponentPriority(Component component)
         {
-            for (var i = 0; i < priorityOrder.Length; i++)
-                if (priorityOrder[i].IsAssignableFrom(component.GetType()))
+            var componentType = component.GetType();
+
+            for (var i = 0; i < PriorityOrder.Length; i++)
+            {
+                if (PriorityOrder[i].IsAssignableFrom(componentType))
                     return i;
-            return priorityOrder.Length;
+            }
+
+            return PriorityOrder.Length;
         }
     }
 }
