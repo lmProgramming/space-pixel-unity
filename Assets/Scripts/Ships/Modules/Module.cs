@@ -4,6 +4,7 @@ using Core.Pixelation;
 using Core.Ship;
 using Pixelation;
 using UnityEngine;
+using Resources = Core.Ship.Resources;
 
 namespace Ships.Modules
 {
@@ -13,13 +14,11 @@ namespace Ships.Modules
         private readonly Dictionary<Module, List<Vector2Int>> _connectionPoints = new();
         private readonly Dictionary<Module, FixedJoint2D> _connections = new();
 
-        protected readonly ResourceDraw _resourceDraw;
-
         protected Ship Ship { get; private set; }
 
         /// <summary>
-        /// Gets a read-only view of connection points to other modules.
-        /// Used for serialization and testing.
+        ///     Gets a read-only view of connection points to other modules.
+        ///     Used for serialization and testing.
         /// </summary>
         public IReadOnlyDictionary<Module, List<Vector2Int>> ConnectionPoints => _connectionPoints;
 
@@ -50,18 +49,44 @@ namespace Ships.Modules
                 var hue = (Mathf.Abs(hashCode) % 1000 + 50) / 1050f;
                 Gizmos.color = Color.HSVToRGB(hue, 1.0f, 0.95f);
 
-                foreach (var localPixelPos in points)
-                {
-                    var worldPos = PixelatedRigidbody.LocalToWorldPoint(localPixelPos);
-                    Gizmos.DrawCube(worldPos, gizmoSize);
-                }
+                foreach (var worldPos in points.Select(localPixelPos =>
+                             PixelatedRigidbody.LocalToWorldPoint(localPixelPos))) Gizmos.DrawCube(worldPos, gizmoSize);
             }
         }
+
+        [field: SerializeField]
+        public Resources Resources { get; private set; }
 
         public IPixelatedRigidbody PixelatedRigidbody { get; private set; }
 
         public Transform Transform => transform;
         public ModuleType Type { get; protected set; }
+
+
+        public virtual int GetCrewCount()
+        {
+            return Resources.crew;
+        }
+
+        public virtual int GetCrewCapacity()
+        {
+            return Resources.crewCapacity;
+        }
+
+        public virtual float GetEnergyCapacity()
+        {
+            return Resources.energyCapacity;
+        }
+
+        public virtual float GetEnergyDraw()
+        {
+            return Resources.energyDraw;
+        }
+
+        public virtual float GetEnergyProduction()
+        {
+            return Resources.energyProduction;
+        }
 
         public void Setup(Ship ship)
         {
@@ -118,18 +143,18 @@ namespace Ships.Modules
             var modulesToDetach = new HashSet<Module>();
 
             foreach (var point in points)
-                foreach (var connectedModule in connectedModulesToCheck.Where(connectedModule =>
-                             !modulesToDetach.Contains(connectedModule)))
-                {
-                    if (!_connectionPoints.TryGetValue(connectedModule, out var connectionPixelList)) continue;
-                    var indexToRemove = connectionPixelList.FindIndex(p => p == point);
+            foreach (var connectedModule in connectedModulesToCheck.Where(connectedModule =>
+                         !modulesToDetach.Contains(connectedModule)))
+            {
+                if (!_connectionPoints.TryGetValue(connectedModule, out var connectionPixelList)) continue;
+                var indexToRemove = connectionPixelList.FindIndex(p => p == point);
 
-                    if (indexToRemove == -1) continue;
-                    connectionPixelList.RemoveAt(indexToRemove);
+                if (indexToRemove == -1) continue;
+                connectionPixelList.RemoveAt(indexToRemove);
 
-                    if (connectionPixelList.Count != 0) continue;
-                    modulesToDetach.Add(connectedModule);
-                }
+                if (connectionPixelList.Count != 0) continue;
+                modulesToDetach.Add(connectedModule);
+            }
 
             foreach (var moduleToDetach in modulesToDetach.Where(moduleToDetach =>
                          _connectionPoints.ContainsKey(moduleToDetach)))
@@ -138,6 +163,7 @@ namespace Ships.Modules
 
         private void DetachConnections(Module otherModule)
         {
+            if (!otherModule) return;
             Debug.Log($"[Module] DetachConnections: {name} detaching from {otherModule.name}", this);
 
             if (_connections.TryGetValue(otherModule, out var jointToDestroy) && jointToDestroy)

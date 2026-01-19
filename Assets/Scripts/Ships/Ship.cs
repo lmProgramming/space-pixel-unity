@@ -5,6 +5,7 @@ using Core.Gameplay.Combat;
 using Core.Gameplay.EasyTeam;
 using Core.Services;
 using Core.Ship;
+using Cysharp.Threading.Tasks;
 using Gameplay.EasyTeam;
 using LM;
 using LM.Graph;
@@ -17,13 +18,14 @@ namespace Ships
 {
     public class Ship : MonoBehaviour, IShip
     {
+        private const float UpdateResourcesTimer = 1f;
         [SerializeField] private ModuleConnectionFactory moduleConnectionFactory;
 
         [SerializeField]
         private Team team;
 
         // ReSharper disable once CollectionNeverUpdated.Local
-        private readonly DefaultDictionary<ModuleType, List<Module>> _modules = new(() => new List<Module>());
+        private readonly DefaultDictionary<ModuleType, List<Module>> _modulesDictionary = new(() => new List<Module>());
 
         private BiCohesionGraph<IModule> _biCohesionGraph;
 
@@ -35,14 +37,17 @@ namespace Ships
         [Inject]
         private IShipService _shipService;
 
+        private List<Module> AllModules =>
+            ModuleGraph.GetAllNodes().OfType<Module>().ToList();
+
         public float GeneralEfficiency => Math.Max(0.01f, _resourceManager.EnergyEfficiency);
 
         public Graph<IModule> ModuleGraph => _biCohesionGraph;
 
         public Vector2 AttackTargetPosition { get; protected set; }
 
-        public List<IWeapon> Weapons => _modules[ModuleType.Weapon].Cast<IWeapon>().ToList();
-        public List<Engine> Engines => _modules[ModuleType.Engine].Cast<Engine>().ToList();
+        public List<IWeapon> Weapons => _modulesDictionary[ModuleType.Weapon].Cast<IWeapon>().ToList();
+        public List<Engine> Engines => _modulesDictionary[ModuleType.Engine].Cast<Engine>().ToList();
 
         protected virtual void Start()
         {
@@ -57,6 +62,8 @@ namespace Ships
             moduleConnectionFactory.ConnectModules(this);
 
             RecacheModulesDictionary();
+
+            UpdateResourcesLoop().Forget();
         }
 
         private void Update()
@@ -96,6 +103,19 @@ namespace Ships
             return transform.position;
         }
 
+        private async UniTaskVoid UpdateResourcesLoop()
+        {
+            var updateResourcesTimer = new SimpleTimer(UpdateResourcesTimer);
+
+            var token = this.GetCancellationTokenOnDestroy();
+
+            while (!token.IsCancellationRequested)
+            {
+                await updateResourcesTimer.Wait(cancellationToken: token);
+                _resourceManager.Recalculate(AllModules);
+            }
+        }
+
         private void HandleUnreachableModules(List<IModule> unreachableModules)
         {
             Debug.Log(
@@ -115,11 +135,13 @@ namespace Ships
             RecacheModulesDictionary();
         }
 
-        public void RecacheModulesDictionary()
+        private void RecacheModulesDictionary()
         {
-            _modules.Clear();
+            _modulesDictionary.Clear();
 
-            foreach (var module in ModuleGraph.GetAllNodes()) _modules[module.Type].Add(module as Module);
+            foreach (var module in ModuleGraph.GetAllNodes()) _modulesDictionary[module.Type].Add(module as Module);
+
+            _resourceManager.Recalculate(AllModules);
         }
 
         protected virtual void Move()

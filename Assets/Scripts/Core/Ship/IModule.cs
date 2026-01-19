@@ -17,5 +17,6 @@ namespace Core.Ship
         ModuleType Type { get; }
         IPixelatedRigidbody PixelatedRigidbody { get; }
         Transform Transform { get; }
+        Resources Resources { get; }
     }
 }

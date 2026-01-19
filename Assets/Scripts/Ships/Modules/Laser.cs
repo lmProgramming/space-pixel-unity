@@ -93,6 +93,11 @@ namespace Ships.Modules
             _reloadTimer?.Wait(reloadTime / Ship.GeneralEfficiency).Forget();
         }
 
+        public override float GetEnergyDraw()
+        {
+            return IsReady() ? 0 : Resources.energyDraw;
+        }
+
         private void StartShooting()
         {
             if (!IsReady()) return;
@@ -118,7 +123,6 @@ namespace Ships.Modules
             _fireCts?.Dispose();
             _fireCts = null;
         }
-
 
         private async UniTask FireBeamUpdateAsync(CancellationToken token)
         {
