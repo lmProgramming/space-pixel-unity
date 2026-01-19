@@ -988,6 +988,7 @@ GameObject:
   - component: {fileID: 292801185}
   - component: {fileID: 292801184}
   - component: {fileID: 292801186}
+  - component: {fileID: 292801187}
   m_Layer: 6
   m_Name: Player
   m_TagString: Untagged
@@ -1044,6 +1045,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cebb1390bd8548d4c9f27f21510f1fcb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &292801187
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 292801180}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: efcbf06310ee42ce943304c435de0378, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Ships::Ships.Internal.ResourceManager
+  energyEfficiency: 0
+  crew: 2
+  crewCapacity: 3
+  energy: 100
+  energyCapacity: 100
+  energyDraw: 5
+  energyProduction: 6
 --- !u!213 &300171671
 Sprite:
   m_ObjectHideFlags: 0
@@ -6364,6 +6384,7 @@ GameObject:
   - component: {fileID: 1632795190}
   - component: {fileID: 1632795189}
   - component: {fileID: 1632795187}
+  - component: {fileID: 1632795191}
   m_Layer: 7
   m_Name: Enemy
   m_TagString: Untagged
@@ -6428,6 +6449,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Ships.AIShip
   moduleConnectionFactory: {fileID: 1632795187}
   team: {fileID: 1056181131}
+--- !u!114 &1632795191
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1632795185}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: efcbf06310ee42ce943304c435de0378, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Ships::Ships.Internal.ResourceManager
+  energyEfficiency: 0
+  crew: 2
+  crewCapacity: 3
+  energy: 0
+  energyCapacity: 100
+  energyDraw: 30
+  energyProduction: 6
 --- !u!28 &1633281666
 Texture2D:
   m_ObjectHideFlags: 0

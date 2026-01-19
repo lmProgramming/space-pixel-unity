@@ -17,6 +17,12 @@ namespace Ships.Modules
 
         protected Ship Ship { get; private set; }
 
+        /// <summary>
+        /// Gets a read-only view of connection points to other modules.
+        /// Used for serialization and testing.
+        /// </summary>
+        public IReadOnlyDictionary<Module, List<Vector2Int>> ConnectionPoints => _connectionPoints;
+
         protected virtual void Awake()
         {
             PixelatedRigidbody = GetComponent<PixelatedRigidbody>();
@@ -112,18 +118,18 @@ namespace Ships.Modules
             var modulesToDetach = new HashSet<Module>();
 
             foreach (var point in points)
-            foreach (var connectedModule in connectedModulesToCheck.Where(connectedModule =>
-                         !modulesToDetach.Contains(connectedModule)))
-            {
-                if (!_connectionPoints.TryGetValue(connectedModule, out var connectionPixelList)) continue;
-                var indexToRemove = connectionPixelList.FindIndex(p => p == point);
+                foreach (var connectedModule in connectedModulesToCheck.Where(connectedModule =>
+                             !modulesToDetach.Contains(connectedModule)))
+                {
+                    if (!_connectionPoints.TryGetValue(connectedModule, out var connectionPixelList)) continue;
+                    var indexToRemove = connectionPixelList.FindIndex(p => p == point);
 
-                if (indexToRemove == -1) continue;
-                connectionPixelList.RemoveAt(indexToRemove);
+                    if (indexToRemove == -1) continue;
+                    connectionPixelList.RemoveAt(indexToRemove);
 
-                if (connectionPixelList.Count != 0) continue;
-                modulesToDetach.Add(connectedModule);
-            }
+                    if (connectionPixelList.Count != 0) continue;
+                    modulesToDetach.Add(connectedModule);
+                }
 
             foreach (var moduleToDetach in modulesToDetach.Where(moduleToDetach =>
                          _connectionPoints.ContainsKey(moduleToDetach)))
