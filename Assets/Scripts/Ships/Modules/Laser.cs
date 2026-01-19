@@ -13,6 +13,8 @@ namespace Ships.Modules
     [RequireComponent(typeof(LineRenderer))]
     public class LaserBeam : Module, IWeapon
     {
+        private const float ReloadEnergyMultiplier = 0.5f;
+
         [Header("Laser Settings")]
         [SerializeField]
         private LineRenderer lineRenderer;
@@ -95,7 +97,9 @@ namespace Ships.Modules
 
         public override float GetEnergyDraw()
         {
-            return IsReady() ? 0 : Resources.energyDraw;
+            return IsReady() ? 0
+                : _isFiring ? Resources.energyDraw
+                : Resources.energyDraw * ReloadEnergyMultiplier;
         }
 
         private void StartShooting()

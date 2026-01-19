@@ -29,13 +29,13 @@ namespace Ships.Modules
         {
             base.Awake();
             Type = ModuleType.Weapon;
+
+            _reloadTimer = new SimpleTimer(reloadTime);
+            _cts = new CancellationTokenSource();
         }
 
         private void Start()
         {
-            _reloadTimer = new SimpleTimer(reloadTime);
-            _cts = new CancellationTokenSource();
-
             _reloadTimer.OnReady += HandleReady;
             _reloadTimer.OnNotReady += HandleNotReady;
         }
@@ -91,6 +91,13 @@ namespace Ships.Modules
 
         public event Action OnReady;
         public event Action OnNotReady;
+
+        public override float GetEnergyDraw()
+        {
+            return IsReady()
+                ? 0
+                : Resources.energyDraw;
+        }
 
         private void HandleReady()
         {

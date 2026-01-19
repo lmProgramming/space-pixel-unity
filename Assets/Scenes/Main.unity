@@ -128,11 +128,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 25841632}
-  - component: {fileID: 25841637}
-  - component: {fileID: 25841636}
-  - component: {fileID: 25841635}
-  - component: {fileID: 25841634}
   - component: {fileID: 25841633}
+  - component: {fileID: 25841634}
+  - component: {fileID: 25841635}
+  - component: {fileID: 25841636}
+  - component: {fileID: 25841637}
   m_Layer: 7
   m_Name: MainPart
   m_TagString: Untagged
@@ -167,6 +167,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 843c6bfa00a27d14184145d28d98f33c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  <Resources>k__BackingField:
+    energyCapacity: 2000
+    energyDraw: 30
+    energyProduction: 150
+    crew: 7
+    crewCapacity: 20
 --- !u!114 &25841634
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -338,9 +344,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 115355041}
-  - component: {fileID: 115355040}
   - component: {fileID: 115355039}
   - component: {fileID: 115355042}
+  - component: {fileID: 115355040}
   m_Layer: 0
   m_Name: Background
   m_TagString: Untagged
@@ -472,11 +478,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 116197407}
-  - component: {fileID: 116197412}
-  - component: {fileID: 116197411}
-  - component: {fileID: 116197410}
-  - component: {fileID: 116197409}
   - component: {fileID: 116197408}
+  - component: {fileID: 116197409}
+  - component: {fileID: 116197410}
+  - component: {fileID: 116197411}
+  - component: {fileID: 116197412}
   m_Layer: 6
   m_Name: Cannon (3)
   m_TagString: Untagged
@@ -511,6 +517,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a06280dcf2610f340b3409d0824e526a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  <Resources>k__BackingField:
+    energyCapacity: 200
+    energyDraw: 50
+    energyProduction: 0
+    crew: 4
+    crewCapacity: 0
   projectilePrefab: {fileID: 5654400622174641897, guid: 31131311ffb51fc42a911f89d07e56a6, type: 3}
   projectileSpeed: 1500
   reloadTime: 1
@@ -702,11 +714,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 185009411}
-  - component: {fileID: 185009416}
-  - component: {fileID: 185009415}
-  - component: {fileID: 185009414}
-  - component: {fileID: 185009413}
   - component: {fileID: 185009412}
+  - component: {fileID: 185009413}
+  - component: {fileID: 185009414}
+  - component: {fileID: 185009415}
+  - component: {fileID: 185009416}
   m_Layer: 6
   m_Name: Engine (1)
   m_TagString: Untagged
@@ -741,6 +753,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e58cee17deb728a4da8fdde864b3d57c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  <Resources>k__BackingField:
+    energyCapacity: 100
+    energyDraw: 30
+    energyProduction: 0
+    crew: 2
+    crewCapacity: 0
 --- !u!114 &185009413
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -986,8 +1004,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 292801185}
-  - component: {fileID: 292801184}
   - component: {fileID: 292801186}
+  - component: {fileID: 292801184}
   - component: {fileID: 292801187}
   m_Layer: 6
   m_Name: Player
@@ -1058,12 +1076,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Game.Ships::Ships.Internal.ResourceManager
   energyEfficiency: 0
-  crew: 2
-  crewCapacity: 3
   energy: 100
   energyCapacity: 100
   energyDraw: 5
   energyProduction: 6
+  crewCapacity: 3
+  crew: 2
 --- !u!213 &300171671
 Sprite:
   m_ObjectHideFlags: 0
@@ -1759,8 +1777,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 499716986}
-  - component: {fileID: 499716988}
   - component: {fileID: 499716987}
+  - component: {fileID: 499716988}
   m_Layer: 0
   m_Name: Context
   m_TagString: Untagged
@@ -2055,12 +2073,12 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 521192485}
-  - component: {fileID: 521192490}
-  - component: {fileID: 521192489}
-  - component: {fileID: 521192488}
-  - component: {fileID: 521192487}
-  - component: {fileID: 521192492}
   - component: {fileID: 521192491}
+  - component: {fileID: 521192487}
+  - component: {fileID: 521192488}
+  - component: {fileID: 521192489}
+  - component: {fileID: 521192492}
+  - component: {fileID: 521192490}
   m_Layer: 6
   m_Name: Laser
   m_TagString: Untagged
@@ -2269,6 +2287,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 21aa0218bee341148b64f7ab86433ad1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  <Resources>k__BackingField:
+    energyCapacity: 200
+    energyDraw: 150
+    energyProduction: 0
+    crew: 5
+    crewCapacity: 0
   lineRenderer: {fileID: 521192492}
   beamRange: 200
   maxFireDuration: 2
@@ -2697,8 +2721,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 583050424}
-  - component: {fileID: 583050426}
   - component: {fileID: 583050425}
+  - component: {fileID: 583050426}
   m_Layer: 5
   m_Name: TopLeft
   m_TagString: Untagged
@@ -2775,8 +2799,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 632147082}
-  - component: {fileID: 632147084}
   - component: {fileID: 632147083}
+  - component: {fileID: 632147084}
   m_Layer: 5
   m_Name: Image
   m_TagString: Untagged
@@ -2978,11 +3002,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 672308251}
-  - component: {fileID: 672308256}
-  - component: {fileID: 672308255}
-  - component: {fileID: 672308254}
-  - component: {fileID: 672308253}
   - component: {fileID: 672308252}
+  - component: {fileID: 672308253}
+  - component: {fileID: 672308254}
+  - component: {fileID: 672308255}
+  - component: {fileID: 672308256}
   m_Layer: 6
   m_Name: Cannon (2)
   m_TagString: Untagged
@@ -3017,6 +3041,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a06280dcf2610f340b3409d0824e526a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  <Resources>k__BackingField:
+    energyCapacity: 200
+    energyDraw: 50
+    energyProduction: 0
+    crew: 4
+    crewCapacity: 0
   projectilePrefab: {fileID: 5654400622174641897, guid: fbb05823f916f824da20fe66a7de32d4, type: 3}
   projectileSpeed: 200
   reloadTime: 0.2
@@ -3204,11 +3234,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 696995296}
-  - component: {fileID: 696995301}
-  - component: {fileID: 696995300}
-  - component: {fileID: 696995299}
-  - component: {fileID: 696995298}
   - component: {fileID: 696995297}
+  - component: {fileID: 696995298}
+  - component: {fileID: 696995299}
+  - component: {fileID: 696995300}
+  - component: {fileID: 696995301}
   m_Layer: 7
   m_Name: Engine (1)
   m_TagString: Untagged
@@ -3243,6 +3273,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e58cee17deb728a4da8fdde864b3d57c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  <Resources>k__BackingField:
+    energyCapacity: 100
+    energyDraw: 30
+    energyProduction: 0
+    crew: 2
+    crewCapacity: 0
 --- !u!114 &696995298
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3868,6 +3904,78 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &938120420
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 938120423}
+  - component: {fileID: 938120421}
+  - component: {fileID: 938120422}
+  m_Layer: 0
+  m_Name: UIToolkit
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &938120421
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 938120420}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d4db864dd9a8864048571eb660fac608, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.UI::UI.Main.ShipStatusPanelController
+  playerShip: {fileID: 292801184}
+  uiDocument: {fileID: 938120422}
+  barAnimationSpeed: 5
+  criticalEnergyThreshold: 0.2
+--- !u!114 &938120422
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 938120420}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.dll::UnityEngine.UIElements.UIDocument
+  m_PanelSettings: {fileID: 11400000, guid: bdbe1f2b7f606d8bca72704a6c95444a, type: 2}
+  m_ParentUI: {fileID: 0}
+  sourceAsset: {fileID: 9197481963319205126, guid: fd08b1580adfd3f3d817a6c3f49cc2d8, type: 3}
+  m_SortingOrder: 0
+  m_Position: 0
+  m_WorldSpaceSizeMode: 1
+  m_WorldSpaceWidth: 1920
+  m_WorldSpaceHeight: 1080
+  m_PivotReferenceSize: 0
+  m_Pivot: 0
+  m_WorldSpaceCollider: {fileID: 0}
+--- !u!4 &938120423
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 938120420}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 62.27538, y: -10.22257, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &941581983
 GameObject:
   m_ObjectHideFlags: 0
@@ -4078,9 +4186,9 @@ GameObject:
   m_Component:
   - component: {fileID: 1076727015}
   - component: {fileID: 1076727018}
-  - component: {fileID: 1076727017}
-  - component: {fileID: 1076727016}
   - component: {fileID: 1076727019}
+  - component: {fileID: 1076727016}
+  - component: {fileID: 1076727017}
   m_Layer: 0
   m_Name: MainCamera
   m_TagString: MainCamera
@@ -5112,8 +5220,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1375166404}
-  - component: {fileID: 1375166406}
   - component: {fileID: 1375166405}
+  - component: {fileID: 1375166406}
   m_Layer: 5
   m_Name: ReloadingText
   m_TagString: Untagged
@@ -5297,8 +5405,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1379767995}
-  - component: {fileID: 1379767997}
   - component: {fileID: 1379767996}
+  - component: {fileID: 1379767997}
   m_Layer: 5
   m_Name: Bottom
   m_TagString: Untagged
@@ -5406,10 +5514,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1384098534}
-  - component: {fileID: 1384098533}
-  - component: {fileID: 1384098532}
-  - component: {fileID: 1384098531}
   - component: {fileID: 1384098530}
+  - component: {fileID: 1384098531}
+  - component: {fileID: 1384098532}
+  - component: {fileID: 1384098533}
   m_Layer: 0
   m_Name: asteroid
   m_TagString: Untagged
@@ -5751,11 +5859,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1492072028}
-  - component: {fileID: 1492072033}
-  - component: {fileID: 1492072032}
-  - component: {fileID: 1492072031}
-  - component: {fileID: 1492072030}
   - component: {fileID: 1492072029}
+  - component: {fileID: 1492072030}
+  - component: {fileID: 1492072031}
+  - component: {fileID: 1492072032}
+  - component: {fileID: 1492072033}
   m_Layer: 7
   m_Name: Engine
   m_TagString: Untagged
@@ -5790,6 +5898,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e58cee17deb728a4da8fdde864b3d57c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  <Resources>k__BackingField:
+    energyCapacity: 100
+    energyDraw: 30
+    energyProduction: 0
+    crew: 2
+    crewCapacity: 0
 --- !u!114 &1492072030
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6382,9 +6496,9 @@ GameObject:
   m_Component:
   - component: {fileID: 1632795186}
   - component: {fileID: 1632795190}
-  - component: {fileID: 1632795189}
   - component: {fileID: 1632795187}
   - component: {fileID: 1632795191}
+  - component: {fileID: 1632795189}
   m_Layer: 7
   m_Name: Enemy
   m_TagString: Untagged
@@ -6462,12 +6576,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Game.Ships::Ships.Internal.ResourceManager
   energyEfficiency: 0
-  crew: 2
-  crewCapacity: 3
   energy: 0
   energyCapacity: 100
   energyDraw: 30
   energyProduction: 6
+  crewCapacity: 3
+  crew: 2
 --- !u!28 &1633281666
 Texture2D:
   m_ObjectHideFlags: 0
@@ -6817,8 +6931,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1782625163}
-  - component: {fileID: 1782625165}
   - component: {fileID: 1782625164}
+  - component: {fileID: 1782625165}
   m_Layer: 5
   m_Name: Speed
   m_TagString: Untagged
@@ -6985,11 +7099,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1884429651}
-  - component: {fileID: 1884429656}
-  - component: {fileID: 1884429655}
-  - component: {fileID: 1884429654}
-  - component: {fileID: 1884429653}
   - component: {fileID: 1884429652}
+  - component: {fileID: 1884429653}
+  - component: {fileID: 1884429654}
+  - component: {fileID: 1884429655}
+  - component: {fileID: 1884429656}
   m_Layer: 7
   m_Name: Cannon
   m_TagString: Untagged
@@ -7024,6 +7138,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a06280dcf2610f340b3409d0824e526a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  <Resources>k__BackingField:
+    energyCapacity: 200
+    energyDraw: 20
+    energyProduction: 0
+    crew: 4
+    crewCapacity: 0
   projectilePrefab: {fileID: 5654400622174641897, guid: fbb05823f916f824da20fe66a7de32d4, type: 3}
   projectileSpeed: 200
   reloadTime: 0.2
@@ -7211,9 +7331,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1894711975}
-  - component: {fileID: 1894711974}
   - component: {fileID: 1894711973}
   - component: {fileID: 1894711972}
+  - component: {fileID: 1894711974}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -7628,11 +7748,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1940184196}
-  - component: {fileID: 1940184195}
-  - component: {fileID: 1940184197}
-  - component: {fileID: 1940184198}
-  - component: {fileID: 1940184199}
   - component: {fileID: 1940184200}
+  - component: {fileID: 1940184199}
+  - component: {fileID: 1940184198}
+  - component: {fileID: 1940184197}
+  - component: {fileID: 1940184195}
   m_Layer: 6
   m_Name: MainPart
   m_TagString: Untagged
@@ -7829,6 +7949,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 843c6bfa00a27d14184145d28d98f33c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  <Resources>k__BackingField:
+    energyCapacity: 2000
+    energyDraw: 30
+    energyProduction: 200
+    crew: 7
+    crewCapacity: 20
 --- !u!1 &1959479948
 GameObject:
   m_ObjectHideFlags: 0
@@ -7883,11 +8009,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1988705648}
-  - component: {fileID: 1988705647}
-  - component: {fileID: 1988705651}
-  - component: {fileID: 1988705650}
-  - component: {fileID: 1988705649}
   - component: {fileID: 1988705652}
+  - component: {fileID: 1988705649}
+  - component: {fileID: 1988705650}
+  - component: {fileID: 1988705651}
+  - component: {fileID: 1988705647}
   m_Layer: 6
   m_Name: Engine
   m_TagString: Untagged
@@ -8158,6 +8284,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e58cee17deb728a4da8fdde864b3d57c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  <Resources>k__BackingField:
+    energyCapacity: 100
+    energyDraw: 30
+    energyProduction: 0
+    crew: 2
+    crewCapacity: 0
 --- !u!1 &1998466618
 GameObject:
   m_ObjectHideFlags: 0
@@ -8203,9 +8335,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2081192575}
-  - component: {fileID: 2081192574}
   - component: {fileID: 2081192573}
   - component: {fileID: 2081192572}
+  - component: {fileID: 2081192574}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -8314,3 +8446,4 @@ SceneRoots:
   - {fileID: 2081192575}
   - {fileID: 857200673}
   - {fileID: 1384098534}
+  - {fileID: 938120423}

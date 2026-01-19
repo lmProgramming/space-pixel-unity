@@ -32,15 +32,13 @@ namespace Ships
         [Inject]
         private IMapInfo _mapInfo;
 
-        private ResourceManager _resourceManager;
-
         [Inject]
         private IShipService _shipService;
 
         private List<Module> AllModules =>
             ModuleGraph.GetAllNodes().OfType<Module>().ToList();
 
-        public float GeneralEfficiency => Math.Max(0.01f, _resourceManager.EnergyEfficiency);
+        public float GeneralEfficiency => Math.Max(0.01f, ResourceManager.EnergyEfficiency);
 
         public Graph<IModule> ModuleGraph => _biCohesionGraph;
 
@@ -49,12 +47,12 @@ namespace Ships
         public List<IWeapon> Weapons => _modulesDictionary[ModuleType.Weapon].Cast<IWeapon>().ToList();
         public List<Engine> Engines => _modulesDictionary[ModuleType.Engine].Cast<Engine>().ToList();
 
-        public ResourceManager ResourceManager => _resourceManager;
+        public ResourceManager ResourceManager { get; private set; }
 
         protected virtual void Start()
         {
             CommandModule ??= GetComponentInChildren<Command>();
-            _resourceManager ??= GetComponentInChildren<ResourceManager>();
+            ResourceManager ??= GetComponentInChildren<ResourceManager>();
 
             _biCohesionGraph = new BiCohesionGraph<IModule>(CommandModule);
             _biCohesionGraph.OnNodesRemovedDueToUnreachability += HandleUnreachableModules;
@@ -73,7 +71,7 @@ namespace Ships
             Move();
 
             HandleWeapons();
-            _resourceManager.UpdateEnergy();
+            ResourceManager.UpdateEnergy();
         }
 
         private void OnEnable()
@@ -114,7 +112,7 @@ namespace Ships
             while (!token.IsCancellationRequested)
             {
                 await updateResourcesTimer.Wait(cancellationToken: token);
-                _resourceManager.Recalculate(AllModules);
+                ResourceManager.Recalculate(AllModules);
             }
         }
 
@@ -143,7 +141,7 @@ namespace Ships
 
             foreach (var module in ModuleGraph.GetAllNodes()) _modulesDictionary[module.Type].Add(module as Module);
 
-            _resourceManager.Recalculate(AllModules);
+            ResourceManager.Recalculate(AllModules);
         }
 
         protected virtual void Move()
@@ -164,6 +162,12 @@ namespace Ships
         {
             foreach (var weapon in Weapons)
                 weapon.StopShooting();
+        }
+
+        protected void MarkEnginesActivity(bool active)
+        {
+            foreach (var engine in Engines)
+                engine.SetActive(active);
         }
 
         protected IShip FindClosestEnemy(float maxRange = float.MaxValue)

@@ -46,7 +46,7 @@ namespace Ships.Internal
 
         public void UpdateEnergy()
         {
-            var netEnergy = energyProduction - energyDraw;
+            var netEnergy = (energyProduction - energyDraw) * Time.deltaTime;
 
             energy = Math.Clamp(energy + netEnergy, 0, energyCapacity);
 

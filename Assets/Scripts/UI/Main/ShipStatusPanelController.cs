@@ -5,37 +5,49 @@ using UnityEngine.UIElements;
 
 namespace UI.Main
 {
-    /// <summary>
-    /// Minimal UI controller for ship energy and crew status.
-    /// Shows a vertical energy bar with flow indicator and crew count.
-    /// </summary>
     public class ShipStatusPanelController : MonoBehaviour
     {
         [Header("References")]
         [SerializeField] private Ship playerShip;
+
         [SerializeField] private UIDocument uiDocument;
 
         [Header("Animation Settings")]
         [SerializeField] private float barAnimationSpeed = 8f;
-        [SerializeField] private float criticalEnergyThreshold = 0.2f;
 
-        // UI Element References
-        private VisualElement _root;
-        private VisualElement _shipStatusPanel;
+        [SerializeField] private float criticalEnergyThreshold = 0.2f;
+        private Label _crewCountLabel;
+
+        private float _currentEnergyBarHeight;
         private VisualElement _energyBarFill;
         private VisualElement _energyBarGlow;
         private Label _energyFlowLabel;
-        private Label _crewCountLabel;
-
-        // Animation state
-        private float _currentEnergyBarHeight;
-        private float _targetEnergyBarHeight;
         private float _lastNetEnergy;
+
+        private VisualElement _root;
+        private VisualElement _shipStatusPanel;
+        private float _targetEnergyBarHeight;
 
         private void Awake()
         {
             if (uiDocument == null)
                 uiDocument = GetComponent<UIDocument>();
+        }
+
+        private void Update()
+        {
+            if (!playerShip || !playerShip.ResourceManager)
+            {
+                SetPanelVisible(false);
+                return;
+            }
+
+            SetPanelVisible(true);
+
+            var resourceManager = playerShip.ResourceManager;
+            UpdateEnergyDisplay(resourceManager);
+            UpdateCrewDisplay(resourceManager);
+            AnimateBars();
         }
 
         private void OnEnable()
@@ -56,22 +68,6 @@ namespace UI.Main
             _crewCountLabel = _root.Q<Label>("crew-count-label");
         }
 
-        private void Update()
-        {
-            if (playerShip == null || playerShip.ResourceManager == null)
-            {
-                SetPanelVisible(false);
-                return;
-            }
-
-            SetPanelVisible(true);
-            
-            var resourceManager = playerShip.ResourceManager;
-            UpdateEnergyDisplay(resourceManager);
-            UpdateCrewDisplay(resourceManager);
-            AnimateBars();
-        }
-
         private void SetPanelVisible(bool visible)
         {
             if (_shipStatusPanel != null)
@@ -84,13 +80,10 @@ namespace UI.Main
             var energyCapacity = resourceManager.EnergyCapacity;
             var netEnergy = resourceManager.EnergyProduction - resourceManager.EnergyDraw;
 
-            // Calculate target bar height (percentage)
-            _targetEnergyBarHeight = energyCapacity > 0 ? (energy / energyCapacity) * 100f : 0f;
+            _targetEnergyBarHeight = energyCapacity > 0 ? energy / energyCapacity * 100f : 0f;
 
-            // Update flow indicator
             UpdateFlowIndicator(netEnergy);
 
-            // Update visual states
             UpdateEnergyStates(energy, energyCapacity, netEnergy);
         }
 
@@ -101,19 +94,19 @@ namespace UI.Main
             _energyFlowLabel.RemoveFromClassList("negative");
             _energyFlowLabel.RemoveFromClassList("neutral");
 
-            if (netEnergy > 0.1f)
+            switch (netEnergy)
             {
-                _energyFlowLabel.text = "+";
-            }
-            else if (netEnergy < -0.1f)
-            {
-                _energyFlowLabel.text = "−";
-                _energyFlowLabel.AddToClassList("negative");
-            }
-            else
-            {
-                _energyFlowLabel.text = "=";
-                _energyFlowLabel.AddToClassList("neutral");
+                case > 0.1f:
+                    _energyFlowLabel.text = "+";
+                    break;
+                case < -0.1f:
+                    _energyFlowLabel.text = "−";
+                    _energyFlowLabel.AddToClassList("negative");
+                    break;
+                default:
+                    _energyFlowLabel.text = "=";
+                    _energyFlowLabel.AddToClassList("neutral");
+                    break;
             }
         }
 
@@ -121,9 +114,8 @@ namespace UI.Main
         {
             if (_shipStatusPanel == null) return;
 
-            // Critical state
-            var isCritical = energyCapacity > 0 && (energy / energyCapacity) < criticalEnergyThreshold;
-            
+            var isCritical = energyCapacity > 0 && energy / energyCapacity < criticalEnergyThreshold;
+
             _shipStatusPanel.EnableInClassList("energy-critical", isCritical);
             _shipStatusPanel.EnableInClassList("energy-gaining", !isCritical && netEnergy > 0.1f);
             _shipStatusPanel.EnableInClassList("energy-draining", !isCritical && netEnergy < -0.1f);
@@ -138,20 +130,17 @@ namespace UI.Main
         private void AnimateBars()
         {
             var deltaTime = Time.deltaTime;
-            
-            // Smooth energy bar animation
-            _currentEnergyBarHeight = Mathf.Lerp(_currentEnergyBarHeight, _targetEnergyBarHeight, deltaTime * barAnimationSpeed);
-            
+
+            _currentEnergyBarHeight = Mathf.Lerp(_currentEnergyBarHeight, _targetEnergyBarHeight,
+                deltaTime * barAnimationSpeed);
+
             if (_energyBarFill != null)
                 _energyBarFill.style.height = Length.Percent(_currentEnergyBarHeight);
-            
+
             if (_energyBarGlow != null)
                 _energyBarGlow.style.height = Length.Percent(_currentEnergyBarHeight);
         }
 
-        /// <summary>
-        /// Sets the player ship reference at runtime.
-        /// </summary>
         public void SetPlayerShip(Ship ship)
         {
             playerShip = ship;
