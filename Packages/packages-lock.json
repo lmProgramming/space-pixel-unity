@@ -7,13 +7,6 @@
       "dependencies": {},
       "hash": "06067cd4c83e372310d6f79d1c625f6870ff7a2a"
     },
-    "com.handzlikchris.fastscriptreload": {
-      "version": "https://github.com/handzlikchris/FastScriptReload.git?path=Assets",
-      "depth": 0,
-      "source": "git",
-      "dependencies": {},
-      "hash": "2e1e1a5d2996410a92c2dd1809edbba47c7347ec"
-    },
     "com.mathijsbakker.extenject": {
       "version": "file:Com.Mathijsbakker.Extenject",
       "depth": 0,
