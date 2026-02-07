@@ -4,7 +4,7 @@ using Cysharp.Threading.Tasks;
 
 namespace LM
 {
-    public class SimpleTimer
+    public class SimpleTimer : ITimer
     {
         private readonly float _interval;
 

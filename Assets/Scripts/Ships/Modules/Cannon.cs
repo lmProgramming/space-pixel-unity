@@ -3,7 +3,6 @@ using System.Threading;
 using Core.Gameplay.Combat;
 using Core.Services;
 using Core.Ship;
-using Cysharp.Threading.Tasks;
 using LM;
 using UnityEngine;
 using Zenject;
@@ -23,14 +22,14 @@ namespace Ships.Modules
 
         [Inject] private IProjectilesSpawner _projectilesSpawner;
 
-        private SimpleTimer _reloadTimer;
+        private ManualTimer _reloadTimer;
 
         protected override void Awake()
         {
             base.Awake();
             Type = ModuleType.Weapon;
 
-            _reloadTimer = new SimpleTimer(reloadTime);
+            _reloadTimer = new ManualTimer(reloadTime);
             _cts = new CancellationTokenSource();
         }
 
@@ -38,6 +37,11 @@ namespace Ships.Modules
         {
             _reloadTimer.OnReady += HandleReady;
             _reloadTimer.OnNotReady += HandleNotReady;
+        }
+
+        public void Update()
+        {
+            _reloadTimer.Progress(Time.deltaTime * Ship.GeneralEfficiency);
         }
 
         private void OnDestroy()
@@ -72,7 +76,7 @@ namespace Ships.Modules
             bulletRigidbody.AddForce(PixelatedRigidbody.Rigidbody.linearVelocity + direction * projectileSpeed,
                 ForceMode2D.Impulse);
 
-            _reloadTimer.Wait(reloadTime / Ship.GeneralEfficiency, _cts.Token).Forget();
+            _reloadTimer.Reset();
         }
 
         public void StopShooting()

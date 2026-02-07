@@ -34,7 +34,7 @@ namespace Ships.Modules
         private CancellationTokenSource _fireCts;
         private bool _isFiring;
 
-        private SimpleTimer _reloadTimer;
+        private ManualTimer _reloadTimer;
 
         protected override void Awake()
         {
@@ -54,9 +54,14 @@ namespace Ships.Modules
             lineRenderer.useWorldSpace = true;
             lineRenderer.enabled = false;
 
-            _reloadTimer = new SimpleTimer(reloadTime);
+            _reloadTimer = new ManualTimer(reloadTime);
             _reloadTimer.OnReady += HandleReady;
             _reloadTimer.OnNotReady += HandleNotReady;
+        }
+
+        private void Update()
+        {
+            _reloadTimer.Progress(Time.deltaTime * Ship.GeneralEfficiency);
         }
 
         private void OnDestroy()
@@ -92,7 +97,7 @@ namespace Ships.Modules
 
             StopFiringCleanup();
 
-            _reloadTimer?.Wait(reloadTime / Ship.GeneralEfficiency).Forget();
+            _reloadTimer?.Reset();
         }
 
         public override float GetEnergyDraw()
@@ -105,7 +110,7 @@ namespace Ships.Modules
         private void StartShooting()
         {
             if (!IsReady()) return;
-            if (lineRenderer == null) return;
+            if (!lineRenderer) return;
 
             _isFiring = true;
             lineRenderer.enabled = true;
@@ -121,8 +126,10 @@ namespace Ships.Modules
         private void StopFiringCleanup()
         {
             _isFiring = false;
-            if (lineRenderer != null)
+
+            if (lineRenderer)
                 lineRenderer.enabled = false;
+
             _fireCts?.Cancel();
             _fireCts?.Dispose();
             _fireCts = null;
