@@ -3,6 +3,7 @@ using System.Linq;
 using Core.Gameplay.EasyTeam;
 using Core.Services;
 using Core.Ship;
+using UnityEngine;
 
 namespace Ships.Tests.TestHelpers
 {
@@ -23,6 +24,11 @@ namespace Ships.Tests.TestHelpers
         public IEnumerable<IShip> GetEnemyShipsOf(ITeam team)
         {
             return _ships.Where(s => s.Team != team);
+        }
+
+        public IShip GetClosestEnemyShipOf(ITeam team, Vector2 position)
+        {
+            return GetEnemyShipsOf(team).FirstOrDefault();
         }
 
         public IEnumerable<IShip> GetAlliedShipsOf(ITeam team)

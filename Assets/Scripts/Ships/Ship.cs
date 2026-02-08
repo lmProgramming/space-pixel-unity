@@ -33,7 +33,7 @@ namespace Ships
         private IMapInfo _mapInfo;
 
         [Inject]
-        private IShipService _shipService;
+        protected IShipService ShipService;
 
         private List<Module> AllModules =>
             ModuleGraph.GetAllNodes().OfType<Module>().ToList();
@@ -76,12 +76,12 @@ namespace Ships
 
         private void OnEnable()
         {
-            _shipService.RegisterShip(this);
+            ShipService.RegisterShip(this);
         }
 
         private void OnDisable()
         {
-            _shipService.UnregisterShip(this);
+            ShipService.UnregisterShip(this);
         }
 
         private void OnDestroy()
@@ -172,7 +172,7 @@ namespace Ships
 
         protected IShip FindClosestEnemy(float maxRange = float.MaxValue)
         {
-            var allShips = _shipService.GetEnemyShipsOf(Team);
+            var allShips = ShipService.GetEnemyShipsOf(Team);
             IShip closestEnemy = null;
             var closestDistance = maxRange;
 
