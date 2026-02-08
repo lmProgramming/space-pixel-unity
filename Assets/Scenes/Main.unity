@@ -3282,7 +3282,7 @@ MonoBehaviour:
     crew: 2
     crewCapacity: 0
   thrust: 0
-  maxThrust: 0
+  maxThrust: 1
 --- !u!114 &696995298
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5909,7 +5909,7 @@ MonoBehaviour:
     crew: 2
     crewCapacity: 0
   thrust: 0
-  maxThrust: 0
+  maxThrust: 1
 --- !u!114 &1492072030
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6504,7 +6504,9 @@ GameObject:
   - component: {fileID: 1632795190}
   - component: {fileID: 1632795187}
   - component: {fileID: 1632795191}
-  - component: {fileID: 1632795189}
+  - component: {fileID: 1632795192}
+  - component: {fileID: 1632795194}
+  - component: {fileID: 1632795193}
   m_Layer: 7
   m_Name: Enemy
   m_TagString: Untagged
@@ -6521,7 +6523,7 @@ Transform:
   m_GameObject: {fileID: 1632795185}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 119.2, y: 0, z: 0}
+  m_LocalPosition: {x: 119.2, y: -300, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children:
@@ -6543,18 +6545,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cebb1390bd8548d4c9f27f21510f1fcb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &1632795189
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1632795185}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3e52a50793d8075f081063f6094377c5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AI.StateMachine.StateMachine
 --- !u!114 &1632795190
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6569,6 +6559,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Ships.AIShip
   moduleConnectionFactory: {fileID: 1632795187}
   team: {fileID: 1056181131}
+  speedMultiplier: 24000
+  rotationMultiplier: -800000
+  stopDistance: 1.5
+  minThrustAlignment: 0.1
+  avoidanceWeight: 1.2
 --- !u!114 &1632795191
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6588,6 +6583,62 @@ MonoBehaviour:
   energyProduction: 6
   crewCapacity: 3
   crew: 2
+--- !u!114 &1632795192
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1632795185}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8306ff83506c4050b5621d460b1a7dfb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Ships::Ships.ShipSensing
+  obstacleMask:
+    serializedVersion: 2
+    m_Bits: 768
+  losBlockersMask:
+    serializedVersion: 2
+    m_Bits: 0
+  shipMask:
+    serializedVersion: 2
+    m_Bits: 192
+  useDefaultMasks: 1
+  forwardSenseRange: 18
+  forwardSenseAngles:
+  - 0
+  - 15
+  - -15
+  - 30
+  - -30
+  useCircleCast: 0
+  circleCastRadius: 0.6
+  losMaxDistance: 200
+--- !u!114 &1632795193
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1632795185}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 191a1ab4b8be47529871fc79b543e9b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Ships::Ships.ShipNavigationStateMachine
+--- !u!114 &1632795194
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1632795185}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bc27b73aee54799bad9239b6a29c5c4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Ships::Ships.StateMachines.Behaviour.BehaviourStateMachine
 --- !u!28 &1633281666
 Texture2D:
   m_ObjectHideFlags: 0
