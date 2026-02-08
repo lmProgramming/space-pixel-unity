@@ -1,10 +1,9 @@
-using AI.EasyState;
 using AI.EasyState.States;
 using Random = UnityEngine.Random;
 
-namespace Ships.AIStates
+namespace Ships.StateMachines.Behaviour
 {
-    public class LookoutState : AIShipState
+    public class MovingState : BehaviourState
     {
         private const float StateChangeInterval = 3f;
         private const float StateChangeVariance = 2f;
@@ -12,26 +11,17 @@ namespace Ships.AIStates
 
         private float _statePotentialChangeTime;
 
-        public override string StateName => "Lookout";
+        public override string StateName => "Moving";
 
-        public override void Enter(StateMachine stateMachine, IStateData data)
+        public override void Enter(BehaviourStateMachine stateMachine, IStateData data)
         {
             base.Enter(stateMachine, data);
             _statePotentialChangeTime = GetStatePotentialChangeTime();
         }
 
-        public override void Update(StateMachine stateMachine, float deltaTime)
+        public override void Update(BehaviourStateMachine stateMachine, float deltaTime)
         {
             base.Update(stateMachine, deltaTime);
-
-            var enemyShip = Ship.GetClosestEnemyInSight();
-
-            if (enemyShip != null)
-            {
-                var attackData = new AttackStateData(enemyShip, Ship.SightRange, 0.5f);
-                stateMachine.TransitionToState("Attack", attackData);
-                return;
-            }
 
             if (TimeInState < _statePotentialChangeTime) return;
 

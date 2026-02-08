@@ -1,11 +1,11 @@
-using AI.EasyState;
+using System;
 using AI.EasyState.States;
 using Core.Ship;
 using UnityEngine;
 
-namespace Ships.AIStates
+namespace Ships.StateMachines.Behaviour
 {
-    public class AttackState : AIShipState
+    public class AttackState : BehaviourState
     {
         private float _attackCooldown;
         private float _attackRange;
@@ -14,7 +14,7 @@ namespace Ships.AIStates
 
         public override string StateName => "Attack";
 
-        public override void Enter(StateMachine stateMachine, IStateData data)
+        public override void Enter(BehaviourStateMachine stateMachine, IStateData data)
         {
             base.Enter(stateMachine, data);
 
@@ -27,11 +27,11 @@ namespace Ships.AIStates
             }
             else
             {
-                Debug.LogWarning("AttackState entered without proper AttackStateData");
+                throw new ArgumentException("AttackState requires AttackStateData");
             }
         }
 
-        public override void Update(StateMachine stateMachine, float deltaTime)
+        public override void Update(BehaviourStateMachine stateMachine, float deltaTime)
         {
             base.Update(stateMachine, deltaTime);
 
@@ -65,7 +65,7 @@ namespace Ships.AIStates
             Ship.Shoot();
         }
 
-        public override void Exit(StateMachine stateMachine)
+        public override void Exit(BehaviourStateMachine stateMachine)
         {
             base.Exit(stateMachine);
             _targetEnemy = null;
