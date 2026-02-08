@@ -100,7 +100,7 @@ namespace Ships
 
         public Vector2 GetPosition()
         {
-            return transform.position;
+            return CommandModule.Transform.position;
         }
 
         private async UniTaskVoid UpdateResourcesLoop()
@@ -114,6 +114,16 @@ namespace Ships
                 await updateResourcesTimer.Wait(cancellationToken: token);
                 ResourceManager.Recalculate(AllModules);
             }
+        }
+        
+        public void OnModuleDestroyed(IModule module)
+        {
+            if (module == null) return;
+
+            Debug.Log($"[Ship] Module destroyed: {module.Transform.name}", module.Transform);
+
+            _biCohesionGraph.RemoveNode(module);
+            RecacheModulesDictionary();
         }
 
         private void HandleUnreachableModules(List<IModule> unreachableModules)

@@ -35,6 +35,11 @@ namespace Ships.Modules
                 Debug.LogError("PixelatedRigidbody not found on Module!", this);
         }
 
+        private void OnDestroy()
+        {
+            Ship.OnModuleDestroyed(this);
+        }
+
         private void OnDrawGizmosSelected()
         {
             if (PixelatedRigidbody == null || _connectionPoints == null) return;
