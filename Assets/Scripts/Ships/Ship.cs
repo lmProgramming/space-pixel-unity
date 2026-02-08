@@ -129,7 +129,7 @@ namespace Ships
                 module.Transform.SetParent(_mapInfo.MapTransform);
                 module.Transform.gameObject.layer = LayerMask.NameToLayer("Default");
 
-                if (module is Module concreteModule) concreteModule.ClearShipReference();
+                if (module is Module concreteModule) concreteModule.OnShipConnectionLost();
             }
 
             RecacheModulesDictionary();

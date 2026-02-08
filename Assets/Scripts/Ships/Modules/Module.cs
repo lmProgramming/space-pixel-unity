@@ -93,9 +93,10 @@ namespace Ships.Modules
             Ship = ship;
         }
 
-        public void ClearShipReference()
+        public void OnShipConnectionLost()
         {
             Ship = null;
+            Destroy(this);
         }
 
         public void SetupConnections(Module otherModule, ref FixedJoint2D joint)
