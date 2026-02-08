@@ -14,27 +14,27 @@ namespace Pixelation
 {
     public sealed class PixelCollisionHandler : IPixelCollisionHandler
     {
-        private const int MinPixelsForJunkCreation = 3;
+        private const int MinPixelsForDebrisCreation = 3;
         private readonly PixelatedRigidbody _body;
         private readonly PolygonCollider2D _collider;
 
         private readonly CollisionEventChannelSO _collisionEventChannel;
         private readonly CollisionResolver.CollisionResolver _collisionResolver;
+        private readonly IDebrisSpawner _debrisSpawner;
         private readonly IPixelGrid _grid;
         private readonly GridContourTracer _gridContourTracer = new();
-        private readonly IJunkSpawner _junkSpawner;
         private readonly float _lineSimplificationTolerance;
 
         private bool _didCollide;
 
         public PixelCollisionHandler(IPixelGrid grid, PixelatedRigidbody body, PolygonCollider2D collider,
-            CollisionEventChannelSO collisionEventChannel, IJunkSpawner junkSpawner)
+            CollisionEventChannelSO collisionEventChannel, IDebrisSpawner debrisSpawner)
         {
             _grid = grid;
             _body = body;
             _collider = collider;
             _collisionEventChannel = collisionEventChannel;
-            _junkSpawner = junkSpawner;
+            _debrisSpawner = debrisSpawner;
 
             _collisionResolver = new PhysicsCollision(this, _body);
 
@@ -207,7 +207,7 @@ namespace Pixelation
         {
             foreach (var region in regions)
             {
-                if (region.Count >= MinPixelsForJunkCreation) CreateNewJunk(region);
+                if (region.Count >= MinPixelsForDebrisCreation) CreateNewDebris(region);
 
                 _body.PixelLostByDivision(region);
 
@@ -215,7 +215,7 @@ namespace Pixelation
             }
         }
 
-        private void CreateNewJunk(HashSet<Vector2Int> points)
+        private void CreateNewDebris(HashSet<Vector2Int> points)
         {
             var rightTopPoint = new Vector2Int(points.Max(p => p.x), points.Max(p => p.y));
             var leftBottomPoint = new Vector2Int(points.Min(p => p.x), points.Min(p => p.y));
@@ -233,7 +233,7 @@ namespace Pixelation
 
             var globalPosition = _body.transform.TransformPoint(centrePoint - parentCenterPoint);
 
-            _junkSpawner.SpawnJunk(globalPosition, _body.transform.rotation, newColorsGrid, _body);
+            _debrisSpawner.SpawnDebris(globalPosition, _body.transform.rotation, newColorsGrid, _body);
         }
     }
 }

@@ -5,33 +5,34 @@ using UnityEngine;
 
 namespace Ships.Tests.TestHelpers
 {
-    public class TestJunkSpawner : IJunkSpawner
+    public class TestDebrisSpawner : IDebrisSpawner
     {
-        private List<JunkSpawnRecord> SpawnedJunk { get; } = new();
+        private List<DebrisSpawnRecord> SpawnedDebris { get; } = new();
 
-        public void SpawnJunk(Vector2 position, Quaternion rotation, Color32[,] colors, IPixelatedRigidbody parentBody)
+        public void SpawnDebris(Vector2 position, Quaternion rotation, Color32[,] colors,
+            IPixelatedRigidbody parentBody)
         {
-            SpawnedJunk.Add(new JunkSpawnRecord(position, rotation, colors, parentBody));
+            SpawnedDebris.Add(new DebrisSpawnRecord(position, rotation, colors, parentBody));
         }
 
         public void Clear()
         {
-            SpawnedJunk.Clear();
+            SpawnedDebris.Clear();
         }
 
-        public List<JunkSpawnRecord> GetJunk()
+        public List<DebrisSpawnRecord> GetDebris()
         {
-            return SpawnedJunk;
+            return SpawnedDebris;
         }
 
-        public readonly struct JunkSpawnRecord
+        public readonly struct DebrisSpawnRecord
         {
             public readonly Vector2 Position;
             public readonly Quaternion Rotation;
             public readonly Color32[,] Colors;
             public readonly IPixelatedRigidbody ParentBody;
 
-            public JunkSpawnRecord(Vector2 position, Quaternion rotation, Color32[,] colors,
+            public DebrisSpawnRecord(Vector2 position, Quaternion rotation, Color32[,] colors,
                 IPixelatedRigidbody parentBody)
             {
                 Position = position;

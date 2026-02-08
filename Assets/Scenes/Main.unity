@@ -1719,7 +1719,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a99212ca2d0d1e54891caeb4c2a7d5ba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  junkPrefab: {fileID: 6238972865151883739, guid: 85019486d9b34774eaf91485f4c4ce1e, type: 3}
+  debrisPrefab: {fileID: 6238972865151883739, guid: 85019486d9b34774eaf91485f4c4ce1e, type: 3}
   parent: {fileID: 1419483029}
   instantiator: {fileID: 941581985}
 --- !u!4 &443114474
@@ -1818,7 +1818,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   physicsCollisionChannelAsset: {fileID: 11400000, guid: 407789f55f1a01548b246d2e77cf6183, type: 2}
-  junkSpawner: {fileID: 443114473}
+  debrisSpawner: {fileID: 443114473}
   mapInfo: {fileID: 758022928}
   projectilesSpawner: {fileID: 1203638783}
   shipService: {fileID: 1601371490}

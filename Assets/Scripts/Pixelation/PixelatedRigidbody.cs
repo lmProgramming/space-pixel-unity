@@ -28,9 +28,9 @@ namespace Pixelation
         [Range(0, 3)] [SerializeField] private int rotation;
 
         [Inject] private CollisionEventChannelSO _collisionEventChannelSO;
+        [Inject] private IDebrisSpawner _debrisSpawner;
 
         private bool _isSetup;
-        [Inject] private IJunkSpawner _junkSpawner;
 
         private void Awake()
         {
@@ -182,7 +182,7 @@ namespace Pixelation
             PixelGrid = new PixelGrid(SpriteRenderer);
 
             CollisionHandler = new PixelCollisionHandler(PixelGrid, this, GetComponent<PolygonCollider2D>(),
-                _collisionEventChannelSO, _junkSpawner);
+                _collisionEventChannelSO, _debrisSpawner);
 
             if (colors is not null) PixelGrid.SetTextureFromColors(colors);
 

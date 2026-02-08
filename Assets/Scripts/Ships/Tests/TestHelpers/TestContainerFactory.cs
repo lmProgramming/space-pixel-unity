@@ -14,8 +14,8 @@ namespace Ships.Tests.TestHelpers
             var collisionEventChannel = ScriptableObject.CreateInstance<CollisionEventChannelSO>();
             container.Bind<CollisionEventChannelSO>().FromInstance(collisionEventChannel).AsSingle();
 
-            var junkSpawner = new TestJunkSpawner();
-            container.Bind<IJunkSpawner>().FromInstance(junkSpawner).AsSingle();
+            var testDebrisSpawner = new TestDebrisSpawner();
+            container.Bind<IDebrisSpawner>().FromInstance(testDebrisSpawner).AsSingle();
 
             var mapInfo = new TestMapInfo(mapTransform);
             container.Bind<IMapInfo>().FromInstance(mapInfo).AsSingle();
