@@ -25,7 +25,7 @@ namespace Gameplay.Combat
         private void OnDestroy()
         {
             var results = new Collider2D[5];
-            Physics2D.OverlapCircle(transform.position, PushAwayRadius, new ContactFilter2D(), results);
+            Physics2D.OverlapCircle(transform.position, PushAwayRadius, ContactFilter2D.noFilter, results);
 
             foreach (var result in results)
                 result?.attachedRigidbody.AddForce((result.transform.position - transform.position) * PushAwayStrength,

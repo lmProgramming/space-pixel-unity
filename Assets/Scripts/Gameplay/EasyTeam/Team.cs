@@ -13,7 +13,7 @@ namespace Gameplay.EasyTeam
 
         public bool IsAllied(ITeam shipTeam)
         {
-            return (Team)shipTeam == this || allies.Contains(shipTeam as Team);
+            return (Team)shipTeam == this || allies.Contains((Team)shipTeam);
         }
 
         public bool IsEnemy(ITeam shipTeam)

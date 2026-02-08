@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using Pixelation;
 using Ships.Modules;
@@ -32,7 +31,7 @@ namespace Editor
         private static void SortAllComponents()
         {
             var allObjects = FindObjectsByType<GameObject>(FindObjectsSortMode.None);
-            int sortedCount = 0;
+            var sortedCount = 0;
 
             foreach (var obj in allObjects)
             {
@@ -56,14 +55,14 @@ namespace Editor
                 .ThenBy(c => c.GetType().Name)
                 .ToList();
 
-            bool changed = false;
+            var changed = false;
 
-            for (int targetIndex = 0; targetIndex < desiredOrder.Count; targetIndex++)
+            for (var targetIndex = 0; targetIndex < desiredOrder.Count; targetIndex++)
             {
                 var component = desiredOrder[targetIndex];
 
                 var currentComponents = obj.GetComponents<Component>().Where(c => c != null).ToList();
-                int currentIndex = currentComponents.IndexOf(component);
+                var currentIndex = currentComponents.IndexOf(component);
 
                 while (currentIndex > targetIndex)
                 {
@@ -73,10 +72,7 @@ namespace Editor
                 }
             }
 
-            if (changed)
-            {
-                Debug.Log($"Sorted components on {obj.name}");
-            }
+            if (changed) Debug.Log($"Sorted components on {obj.name}");
 
             return changed;
         }
@@ -86,10 +82,8 @@ namespace Editor
             var componentType = component.GetType();
 
             for (var i = 0; i < PriorityOrder.Length; i++)
-            {
                 if (PriorityOrder[i].IsAssignableFrom(componentType))
                     return i;
-            }
 
             return PriorityOrder.Length;
         }
