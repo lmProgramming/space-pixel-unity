@@ -211,7 +211,7 @@ namespace Pixelation
 
                 _body.PixelLostByDivision(region);
 
-                _grid.RemovePixels(region, false);
+                _grid.RemovePixels(region);
             }
         }
 

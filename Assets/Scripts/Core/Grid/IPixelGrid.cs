@@ -23,8 +23,8 @@ namespace Core.Grid
         bool IsPixelAssumeInBounds(Vector2Int point);
         bool InBounds(Vector2Int point);
         Vector2Int Dimensions();
-        void RemovePixelAt(Vector2Int point, bool _);
-        void RemovePixels(IEnumerable<Vector2Int> points, bool _);
+        void RemovePixelAt(Vector2Int point);
+        void RemovePixels(IEnumerable<Vector2Int> points);
         void SetTextureFromColors(Color32[,] colors);
     }
 }

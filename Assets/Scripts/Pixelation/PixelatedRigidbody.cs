@@ -124,7 +124,7 @@ namespace Pixelation
 
             if (!pointsArray.Any()) return;
 
-            PixelGrid.RemovePixels(pointsArray, simulateCollision);
+            PixelGrid.RemovePixels(pointsArray);
 
             OnPixelsLost?.Invoke(pointsArray.ToList(), PixelLoseReason.Destroyed);
 

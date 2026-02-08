@@ -1,14 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Core.Grid;
-using Core.Pixelation;
 using LM;
 using Unity.Collections;
 using UnityEngine;
 
 namespace Grid
 {
-    public class PixelGrid : IPixelated, IPixelGrid
+    public class PixelGrid : IPixelGrid
     {
         private readonly SpriteRenderer _spriteRenderer;
         private Sprite _internalSprite;
@@ -18,13 +17,6 @@ namespace Grid
         {
             _spriteRenderer = spriteRenderer;
         }
-
-        public int Width => Texture.width;
-        public int Height => Texture.height;
-
-        public Vector2 Center => new((float)Width / 2, (float)Height / 2);
-
-        public Texture2D Texture { get; private set; }
 
         public void SetPixelNoApply(Vector2Int point, Color32 color)
         {
@@ -67,16 +59,6 @@ namespace Grid
             return new Vector2Int(Texture.width, Texture.height);
         }
 
-        public void RemovePixelAt(Vector2Int point, bool _)
-        {
-            SetPixel(point, Color.clear);
-        }
-
-        public void RemovePixels(IEnumerable<Vector2Int> points, bool _)
-        {
-            foreach (var point in points) SetPixel(point, Color.clear);
-        }
-
         public void SetTextureFromColors(Color32[,] colors)
         {
             var width = colors.GetLength(0);
@@ -98,6 +80,13 @@ namespace Grid
 
             SetTextureFromColors(colorsArray, colors.GetLength(0), colors.GetLength(1));
         }
+
+        public int Width => Texture.width;
+        public int Height => Texture.height;
+
+        public Vector2 Center => new((float)Width / 2, (float)Height / 2);
+
+        public Texture2D Texture { get; private set; }
 
         public void SetTextureFromColors(NativeArray<Color32> colors, int width, int height)
         {
@@ -148,6 +137,17 @@ namespace Grid
                 return new Vector2Int(point.x, point.y);
 
             return null;
+        }
+
+        public void RemovePixelAt(Vector2Int point)
+        {
+            SetPixel(point, Color.clear);
+        }
+
+        public void RemovePixels(IEnumerable<Vector2Int> points)
+        {
+            foreach (var point in points) SetPixelNoApply(point, Color.clear);
+            ApplyPixels();
         }
     }
 }
