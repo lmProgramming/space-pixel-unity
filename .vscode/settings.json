@@ -1,3 +1,4 @@
 {
-  "dotnet.preferCSharpExtension": true
+  "dotnet.preferCSharpExtension": true,
+  "conventionalCommits.scopes": ["ships", "ui", "editor"]
 }

@@ -1,5 +1,8 @@
 using System;
-using Cysharp.Threading.Tasks;
+using System.Threading;
+using Core.Gameplay.Combat;
+using Core.Services;
+using Core.Ship;
 using LM;
 using UnityEngine;
 using Zenject;
@@ -15,21 +18,37 @@ namespace Ships.Modules
         [SerializeField] private float reloadTime;
 
         [SerializeField] private GameObject icon;
+        private CancellationTokenSource _cts;
 
-        [Inject] private ProjectilesSpawner _projectilesSpawner;
+        [Inject] private IProjectilesSpawner _projectilesSpawner;
 
-        private SimpleTimer _reloadTimer;
+        private ManualTimer _reloadTimer;
+
+        protected override void Awake()
+        {
+            base.Awake();
+            Type = ModuleType.Weapon;
+
+            _reloadTimer = new ManualTimer(reloadTime);
+            _cts = new CancellationTokenSource();
+        }
 
         private void Start()
         {
-            _reloadTimer = new SimpleTimer(reloadTime);
-
             _reloadTimer.OnReady += HandleReady;
             _reloadTimer.OnNotReady += HandleNotReady;
         }
 
+        public void Update()
+        {
+            _reloadTimer.Progress(Time.deltaTime * Ship.GeneralEfficiency);
+        }
+
         private void OnDestroy()
         {
+            _cts?.Cancel();
+            _cts?.Dispose();
+
             if (_reloadTimer == null) return;
             _reloadTimer.OnReady -= HandleReady;
             _reloadTimer.OnNotReady -= HandleNotReady;
@@ -38,9 +57,11 @@ namespace Ships.Modules
         public void Shoot()
         {
             if (!_reloadTimer.IsReady) return;
+            if (!Ship) return;
 
             var targetPosition = Ship.AttackTargetPosition;
 
+            if (!transform) return;
             var direction = (targetPosition - (Vector2)transform.position).normalized;
 
             var angle = MathExt.AngleBetweenTwoPoints(targetPosition, transform.position);
@@ -55,7 +76,7 @@ namespace Ships.Modules
             bulletRigidbody.AddForce(PixelatedRigidbody.Rigidbody.linearVelocity + direction * projectileSpeed,
                 ForceMode2D.Impulse);
 
-            _reloadTimer.Wait(reloadTime).Forget();
+            _reloadTimer.Reset();
         }
 
         public void StopShooting()
@@ -74,6 +95,13 @@ namespace Ships.Modules
 
         public event Action OnReady;
         public event Action OnNotReady;
+
+        public override float GetEnergyDraw()
+        {
+            return IsReady()
+                ? 0
+                : Resources.energyDraw;
+        }
 
         private void HandleReady()
         {

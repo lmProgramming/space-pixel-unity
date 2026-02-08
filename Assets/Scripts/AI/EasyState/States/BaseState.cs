@@ -11,15 +11,10 @@ namespace AI.EasyState.States
         public abstract string StateName { get; }
         public bool OverridableByForce { get; private set; } = true;
 
-        public virtual void Enter(StateMachine stateMachine)
+        public virtual void Enter(StateMachine stateMachine, IStateData data)
         {
             TimeInState = 0f;
             Debug.Log($"Entering state: {StateName}");
-        }
-
-        public virtual void Enter(StateMachine stateMachine, IStateData data)
-        {
-            Enter(stateMachine);
         }
 
         public virtual void Update(StateMachine stateMachine, float deltaTime)

@@ -1,47 +1,69 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using Core.Gameplay.Combat;
+using Core.Gameplay.EasyTeam;
+using Core.Services;
+using Core.Ship;
+using Cysharp.Threading.Tasks;
+using Gameplay.EasyTeam;
 using LM;
 using LM.Graph;
-using Services;
+using Ships.Internal;
 using Ships.Modules;
 using UnityEngine;
 using Zenject;
 
 namespace Ships
 {
-    public class Ship : MonoBehaviour
+    public class Ship : MonoBehaviour, IShip
     {
+        private const float UpdateResourcesTimer = 0.1f;
         [SerializeField] private ModuleConnectionFactory moduleConnectionFactory;
 
-        [field: SerializeField]
-        public Team Team { get; private set; }
+        [SerializeField]
+        private Team team;
 
         // ReSharper disable once CollectionNeverUpdated.Local
-        private readonly DefaultDictionary<ModuleType, List<Module>> _modules = new(() => new List<Module>());
+        private readonly DefaultDictionary<ModuleType, List<Module>> _modulesDictionary = new(() => new List<Module>());
+
+        private BiCohesionGraph<IModule> _biCohesionGraph;
 
         [Inject]
-        private ShipService _shipService;
+        private IMapInfo _mapInfo;
 
-        public Command CommandModule { get; private set; }
+        [Inject]
+        private IShipService _shipService;
 
-        public Graph<Module> ModuleGraph { get; private set; }
+        private List<Module> AllModules =>
+            ModuleGraph.GetAllNodes().OfType<Module>().ToList();
+
+        public float GeneralEfficiency => Math.Max(0.01f, ResourceManager.EnergyEfficiency);
+
+        public Graph<IModule> ModuleGraph => _biCohesionGraph;
 
         public Vector2 AttackTargetPosition { get; protected set; }
 
-        public List<IWeapon> Weapons => _modules[ModuleType.Weapon].Cast<IWeapon>().ToList();
-        public List<Engine> Engines => _modules[ModuleType.Engine].Cast<Engine>().ToList();
+        public List<IWeapon> Weapons => _modulesDictionary[ModuleType.Weapon].Cast<IWeapon>().ToList();
+        public List<Engine> Engines => _modulesDictionary[ModuleType.Engine].Cast<Engine>().ToList();
+
+        public ResourceManager ResourceManager { get; private set; }
 
         protected virtual void Start()
         {
             CommandModule ??= GetComponentInChildren<Command>();
+            ResourceManager ??= GetComponentInChildren<ResourceManager>();
 
-            ModuleGraph = new BiCohesionGraph<Module>(CommandModule);
+            _biCohesionGraph = new BiCohesionGraph<IModule>(CommandModule);
+            _biCohesionGraph.OnNodesRemovedDueToUnreachability += HandleUnreachableModules;
 
             CommandModule.PixelatedRigidbody.OnNoPixelsLeft += _ => Destroy(gameObject);
 
             moduleConnectionFactory.ConnectModules(this);
 
             RecacheModulesDictionary();
+
+            UpdateResourcesLoop().Forget();
         }
 
         private void Update()
@@ -49,13 +71,77 @@ namespace Ships
             Move();
 
             HandleWeapons();
+            ResourceManager.UpdateEnergy();
         }
 
-        public void RecacheModulesDictionary()
+        private void OnEnable()
         {
-            _modules.Clear();
+            _shipService.RegisterShip(this);
+        }
 
-            foreach (var module in ModuleGraph.GetAllNodes()) _modules[module.Type].Add(module);
+        private void OnDisable()
+        {
+            _shipService.UnregisterShip(this);
+        }
+
+        private void OnDestroy()
+        {
+            if (_biCohesionGraph != null)
+                _biCohesionGraph.OnNodesRemovedDueToUnreachability -= HandleUnreachableModules;
+        }
+
+        public ITeam Team
+        {
+            get => team;
+            private set => team = value as Team;
+        }
+
+        public IModule CommandModule { get; private set; }
+
+        public Vector2 GetPosition()
+        {
+            return transform.position;
+        }
+
+        private async UniTaskVoid UpdateResourcesLoop()
+        {
+            var updateResourcesTimer = new SimpleTimer(UpdateResourcesTimer);
+
+            var token = this.GetCancellationTokenOnDestroy();
+
+            while (!token.IsCancellationRequested)
+            {
+                await updateResourcesTimer.Wait(cancellationToken: token);
+                ResourceManager.Recalculate(AllModules);
+            }
+        }
+
+        private void HandleUnreachableModules(List<IModule> unreachableModules)
+        {
+            Debug.Log(
+                $"[Ship] HandleUnreachableModules called with {unreachableModules.Count} modules: [{string.Join(", ", unreachableModules.Select(m => m?.Transform?.name ?? "null"))}]");
+
+            foreach (var module in unreachableModules.Where(module =>
+                         module?.Transform != null &&
+                         module.Transform.parent != _mapInfo.MapTransform))
+            {
+                Debug.Log($"[Ship] Deparenting unreachable module: {module.Transform.name}", module.Transform);
+                module.Transform.SetParent(_mapInfo.MapTransform);
+                module.Transform.gameObject.layer = LayerMask.NameToLayer("Default");
+
+                if (module is Module concreteModule) concreteModule.OnShipConnectionLost();
+            }
+
+            RecacheModulesDictionary();
+        }
+
+        private void RecacheModulesDictionary()
+        {
+            _modulesDictionary.Clear();
+
+            foreach (var module in ModuleGraph.GetAllNodes()) _modulesDictionary[module.Type].Add(module as Module);
+
+            ResourceManager.Recalculate(AllModules);
         }
 
         protected virtual void Move()
@@ -78,21 +164,21 @@ namespace Ships
                 weapon.StopShooting();
         }
 
-        protected Ship FindClosestEnemy(float maxRange = float.MaxValue)
+        protected void MarkEnginesActivity(bool active)
         {
-            var allShips = _shipService.Ships;
-            Ship closestEnemy = null;
+            foreach (var engine in Engines)
+                engine.SetActive(active);
+        }
+
+        protected IShip FindClosestEnemy(float maxRange = float.MaxValue)
+        {
+            var allShips = _shipService.GetEnemyShipsOf(Team);
+            IShip closestEnemy = null;
             var closestDistance = maxRange;
 
             foreach (var ship in allShips)
             {
-                if (ship == this)
-                    continue;
-
-                if (!Team.IsEnemy(ship.Team))
-                    continue;
-
-                var distance = Vector2.Distance(transform.position, ship.transform.position);
+                var distance = Vector2.Distance(transform.position, ship.GetPosition());
                 if (!(distance < closestDistance)) continue;
 
                 closestDistance = distance;

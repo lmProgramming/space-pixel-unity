@@ -1,31 +1,26 @@
 using System.Collections.Generic;
 using System.Linq;
+using Core.Pixelation;
+using Core.Ship;
 using Pixelation;
 using UnityEngine;
-using Zenject;
+using Resources = Core.Ship.Resources;
 
 namespace Ships.Modules
 {
-    public enum ModuleType
-    {
-        Command,
-        Production,
-        Storage,
-        Weapon,
-        Engine
-    }
-
     [RequireComponent(typeof(PixelatedRigidbody))]
-    public class Module : MonoBehaviour
+    public class Module : MonoBehaviour, IModule
     {
-        [field: SerializeField] public ModuleType Type { get; private set; }
         private readonly Dictionary<Module, List<Vector2Int>> _connectionPoints = new();
         private readonly Dictionary<Module, FixedJoint2D> _connections = new();
 
-        [Inject] private MapInfo _mapInfo;
-
         protected Ship Ship { get; private set; }
-        public PixelatedRigidbody PixelatedRigidbody { get; private set; }
+
+        /// <summary>
+        ///     Gets a read-only view of connection points to other modules.
+        ///     Used for serialization and testing.
+        /// </summary>
+        public IReadOnlyDictionary<Module, List<Vector2Int>> ConnectionPoints => _connectionPoints;
 
         protected virtual void Awake()
         {
@@ -54,17 +49,54 @@ namespace Ships.Modules
                 var hue = (Mathf.Abs(hashCode) % 1000 + 50) / 1050f;
                 Gizmos.color = Color.HSVToRGB(hue, 1.0f, 0.95f);
 
-                foreach (var localPixelPos in points)
-                {
-                    var worldPos = PixelatedRigidbody.LocalToWorldPoint(localPixelPos);
-                    Gizmos.DrawCube(worldPos, gizmoSize);
-                }
+                foreach (var worldPos in points.Select(localPixelPos =>
+                             PixelatedRigidbody.LocalToWorldPoint(localPixelPos))) Gizmos.DrawCube(worldPos, gizmoSize);
             }
+        }
+
+        [field: SerializeField]
+        public Resources Resources { get; private set; }
+
+        public IPixelatedRigidbody PixelatedRigidbody { get; private set; }
+
+        public Transform Transform => transform;
+        public ModuleType Type { get; protected set; }
+
+
+        public virtual int GetCrewCount()
+        {
+            return Resources.crew;
+        }
+
+        public virtual int GetCrewCapacity()
+        {
+            return Resources.crewCapacity;
+        }
+
+        public virtual float GetEnergyCapacity()
+        {
+            return Resources.energyCapacity;
+        }
+
+        public virtual float GetEnergyDraw()
+        {
+            return Resources.energyDraw;
+        }
+
+        public virtual float GetEnergyProduction()
+        {
+            return Resources.energyProduction;
         }
 
         public void Setup(Ship ship)
         {
             Ship = ship;
+        }
+
+        public void OnShipConnectionLost()
+        {
+            Ship = null;
+            Destroy(this);
         }
 
         public void SetupConnections(Module otherModule, ref FixedJoint2D joint)
@@ -106,7 +138,7 @@ namespace Ships.Modules
             _connections[otherModule] = joint;
         }
 
-        private void CheckCohesion(List<Vector2Int> points, PixelatedRigidbody.PixelLoseReason reason)
+        private void CheckCohesion(List<Vector2Int> points, PixelLoseReason reason)
         {
             var connectedModulesToCheck = new List<Module>(_connectionPoints.Keys);
             var modulesToDetach = new HashSet<Module>();
@@ -132,30 +164,22 @@ namespace Ships.Modules
 
         private void DetachConnections(Module otherModule)
         {
+            if (!otherModule) return;
+            Debug.Log($"[Module] DetachConnections: {name} detaching from {otherModule.name}", this);
+
             if (_connections.TryGetValue(otherModule, out var jointToDestroy) && jointToDestroy)
                 Destroy(jointToDestroy);
             _connections.Remove(otherModule);
             _connectionPoints.Remove(otherModule);
 
+            if (Ship == null)
+            {
+                Debug.Log($"[Module] {name} has no Ship reference, skipping graph update", this);
+                return;
+            }
+
+            Debug.Log($"[Module] Calling RemoveEdge({name}, {otherModule.name})", this);
             Ship.ModuleGraph.RemoveEdge(this, otherModule);
-
-            var thisStillInGraph = Ship.ModuleGraph.ContainsNode(this);
-            var otherStillInGraph = Ship.ModuleGraph.ContainsNode(otherModule);
-
-            if (!thisStillInGraph && transform.parent != _mapInfo.mapTransform)
-            {
-                transform.SetParent(_mapInfo.mapTransform);
-                gameObject.layer = LayerMask.NameToLayer("Default");
-            }
-
-            if (otherModule && !otherStillInGraph &&
-                otherModule.transform.parent != _mapInfo.mapTransform)
-            {
-                otherModule.transform.SetParent(_mapInfo.mapTransform);
-                otherModule.gameObject.layer = LayerMask.NameToLayer("Default");
-            }
-
-            Ship.RecacheModulesDictionary();
         }
     }
 }

@@ -1,5 +1,7 @@
 using System;
 using System.Threading;
+using Core.Gameplay.Combat;
+using Core.Ship;
 using Cysharp.Threading.Tasks;
 using LM;
 using Pixelation;
@@ -11,7 +13,10 @@ namespace Ships.Modules
     [RequireComponent(typeof(LineRenderer))]
     public class LaserBeam : Module, IWeapon
     {
-        [Header("Laser Settings")] [SerializeField]
+        private const float ReloadEnergyMultiplier = 0.5f;
+
+        [Header("Laser Settings")]
+        [SerializeField]
         private LineRenderer lineRenderer;
 
         [SerializeField] private float beamRange = 20f;
@@ -22,17 +27,20 @@ namespace Ships.Modules
 
         [SerializeField] private GameObject icon;
 
-        [Header("Weapon Base Settings")] [SerializeField]
+        [Header("Weapon Base Settings")]
+        [SerializeField]
         private float reloadTime = 2.0f;
 
         private CancellationTokenSource _fireCts;
         private bool _isFiring;
 
-        private SimpleTimer _reloadTimer;
+        private ManualTimer _reloadTimer;
 
         protected override void Awake()
         {
             base.Awake();
+
+            Type = ModuleType.Weapon;
 
             if (lineRenderer == null) lineRenderer = GetComponent<LineRenderer>();
             if (lineRenderer == null)
@@ -46,9 +54,14 @@ namespace Ships.Modules
             lineRenderer.useWorldSpace = true;
             lineRenderer.enabled = false;
 
-            _reloadTimer = new SimpleTimer(reloadTime);
+            _reloadTimer = new ManualTimer(reloadTime);
             _reloadTimer.OnReady += HandleReady;
             _reloadTimer.OnNotReady += HandleNotReady;
+        }
+
+        private void Update()
+        {
+            _reloadTimer.Progress(Time.deltaTime * Ship.GeneralEfficiency);
         }
 
         private void OnDestroy()
@@ -84,12 +97,20 @@ namespace Ships.Modules
 
             StopFiringCleanup();
 
-            _reloadTimer?.Wait(reloadTime).Forget();
+            _reloadTimer?.Reset();
+        }
+
+        public override float GetEnergyDraw()
+        {
+            return IsReady() ? 0
+                : _isFiring ? Resources.energyDraw
+                : Resources.energyDraw * ReloadEnergyMultiplier;
         }
 
         private void StartShooting()
         {
             if (!IsReady()) return;
+            if (!lineRenderer) return;
 
             _isFiring = true;
             lineRenderer.enabled = true;
@@ -105,17 +126,18 @@ namespace Ships.Modules
         private void StopFiringCleanup()
         {
             _isFiring = false;
-            if (lineRenderer != null)
+
+            if (lineRenderer)
                 lineRenderer.enabled = false;
+
             _fireCts?.Cancel();
             _fireCts?.Dispose();
             _fireCts = null;
         }
 
-
         private async UniTask FireBeamUpdateAsync(CancellationToken token)
         {
-            var timeRemaining = maxFireDuration;
+            var timeRemaining = maxFireDuration * Ship.GeneralEfficiency;
             try
             {
                 while (_isFiring && !token.IsCancellationRequested && timeRemaining > 0)

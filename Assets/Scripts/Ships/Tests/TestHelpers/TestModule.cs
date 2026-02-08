@@ -1,0 +1,13 @@
+using Core.Ship;
+using Ships.Modules;
+
+namespace Ships.Tests.TestHelpers
+{
+    public class TestModule : Module
+    {
+        public void SetModuleType(ModuleType type)
+        {
+            Type = type;
+        }
+    }
+}

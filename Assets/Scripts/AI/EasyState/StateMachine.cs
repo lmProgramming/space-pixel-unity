@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Linq;
 using AI.EasyState.States;
 using JetBrains.Annotations;
-using Ships;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -19,13 +18,13 @@ namespace AI.EasyState
 
         private IState CurrentState { get; set; }
 
-        public AIShip ShipController { get; private set; }
+        public IAgent Controller { get; private set; }
 
         private static string DefaultState => "Lookout";
 
         private void Awake()
         {
-            ShipController = GetComponent<AIShip>();
+            Controller = GetComponent<IAgent>();
         }
 
         private void Update()
@@ -67,10 +66,7 @@ namespace AI.EasyState
             CurrentState.Exit(this);
             CurrentState = newState;
 
-            if (data != null)
-                CurrentState.Enter(this, data);
-            else
-                CurrentState.Enter(this);
+            CurrentState.Enter(this, data);
         }
 
         public void ForceTransitionToState(string stateName, IStateData data = null)
@@ -86,10 +82,7 @@ namespace AI.EasyState
             CurrentState.Exit(this);
             CurrentState = newState;
 
-            if (data != null)
-                CurrentState.Enter(this, data);
-            else
-                CurrentState.Enter(this);
+            CurrentState.Enter(this, data);
         }
 
         public void StartStateMachine([CanBeNull] string initialStateName = null)
@@ -101,7 +94,7 @@ namespace AI.EasyState
 
             CurrentState = newState;
 
-            CurrentState!.Enter(this);
+            CurrentState!.Enter(this, null);
         }
 
         public void TransitionToDefaultState()

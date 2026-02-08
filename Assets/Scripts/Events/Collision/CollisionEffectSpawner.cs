@@ -1,3 +1,4 @@
+using Core.Services;
 using UnityEngine;
 using Zenject;
 
@@ -6,8 +7,8 @@ namespace Events.Collision
     public class CollisionEffectSpawner : MonoBehaviour
     {
         private const float DefaultExplosionChance = 0.25f;
-        [SerializeField] private EffectsSpawner effectsSpawner;
         [Inject] private CollisionEventChannelSO _collisionEventChannel;
+        [Inject] private IEffectsSpawner _effectsSpawner;
 
         private void OnEnable()
         {
@@ -25,7 +26,7 @@ namespace Events.Collision
                 data.pixelsDestroyed.Length);
 
             for (var i = 0; i < count; i++)
-                effectsSpawner.SpawnExplosion(data.pixelsDestroyed[i]);
+                _effectsSpawner.SpawnExplosion(data.pixelsDestroyed[i]);
         }
     }
 }

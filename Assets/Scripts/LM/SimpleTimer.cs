@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 
 namespace LM
 {
-    public class SimpleTimer
+    public class SimpleTimer : ITimer
     {
         private readonly float _interval;
 
@@ -18,15 +19,22 @@ namespace LM
         public event Action OnReady;
         public event Action OnNotReady;
 
-        public async UniTask Wait(float? seconds = null)
+        public async UniTask Wait(float? seconds = null, CancellationToken cancellationToken = default)
         {
             OnNotReady?.Invoke();
             var elapsedSeconds = seconds ?? _interval;
 
             IsReady = false;
-            await UniTask.Delay((int)(elapsedSeconds * 1000));
-            IsReady = true;
-            OnReady?.Invoke();
+
+            try
+            {
+                await UniTask.Delay((int)(elapsedSeconds * 1000), cancellationToken: cancellationToken);
+                IsReady = true;
+                OnReady?.Invoke();
+            }
+            catch (OperationCanceledException)
+            {
+            }
         }
     }
 }
