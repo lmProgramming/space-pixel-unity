@@ -62,7 +62,7 @@ namespace Ships
             }
 
             var desired = distance > Mathf.Epsilon ? toTarget / distance : Vector2.zero;
-            var forward = -(Vector2)CommandModule.Transform.up;
+            var forward = (Vector2)CommandModule.Transform.up;
 
             if (Sensing)
             {
@@ -93,7 +93,7 @@ namespace Ships
 
             if (desiredDirection.sqrMagnitude > 0f)
             {
-                var turn = Vector2.SignedAngle(forward, desiredDirection);
+                var turn = -Vector2.SignedAngle(forward, desiredDirection);
                 var torque = rotationMultiplier * availableThrust * Mathf.Sign(turn) * Mathf.Abs(turn) / 180f;
                 selfRigidbody.AddTorque(torque);
             }
