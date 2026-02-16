@@ -21,6 +21,7 @@ namespace Context
         [SerializeField] private ShipService shipService;
         [SerializeField] private SoundManager soundManager;
         [SerializeField] private EffectsSpawner effectSpawner;
+        [SerializeField] private SectorService sectorService;
 
         public override void InstallBindings()
         {
@@ -56,6 +57,10 @@ namespace Context
 
             Container.Bind<IEffectsSpawner>()
                 .FromInstance(effectSpawner)
+                .AsSingle();
+
+            Container.Bind<ISectorService>()
+                .FromInstance(sectorService)
                 .AsSingle();
         }
     }
