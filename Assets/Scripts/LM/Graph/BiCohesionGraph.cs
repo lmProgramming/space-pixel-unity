@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
+using ZLinq;
 
 namespace LM.Graph
 {
@@ -53,7 +53,7 @@ namespace LM.Graph
                 if (!AdjacencyList.TryGetValue(current, out var neighbors))
                     continue;
 
-                foreach (var neighbor in neighbors.Where(neighbor => !reachable.Contains(neighbor)))
+                foreach (var neighbor in neighbors.AsValueEnumerable().Where(neighbor => !reachable.Contains(neighbor)))
                 {
                     reachable.Add(neighbor);
                     queue.Enqueue(neighbor);
@@ -72,13 +72,13 @@ namespace LM.Graph
                       $"Reachable: [{string.Join(", ", reachableNodes)}], " +
                       $"All nodes: [{string.Join(", ", allNodes)}]");
 
-            var unreachableNodes = allNodes.Where(node => !reachableNodes.Contains(node) && !Equals(node, _centralNode))
+            var unreachableNodes = allNodes.AsValueEnumerable()
+                .Where(node => !reachableNodes.Contains(node) && !Equals(node, _centralNode))
                 .ToList();
 
             if (unreachableNodes.Count > 0)
-            {
-                Debug.Log($"[BiCohesionGraph] Removing {unreachableNodes.Count} unreachable node(s): [{string.Join(", ", unreachableNodes)}]");
-            }
+                Debug.Log(
+                    $"[BiCohesionGraph] Removing {unreachableNodes.Count} unreachable node(s): [{string.Join(", ", unreachableNodes)}]");
 
             foreach (var node in unreachableNodes) RemoveNodeWithoutReachabilityCheck(node);
 

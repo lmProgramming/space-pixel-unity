@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Linq;
 using Pixelation;
 using Ships.Modules;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
+using ZLinq;
 
 namespace Editor
 {
@@ -44,14 +44,14 @@ namespace Editor
 
         private static bool SortComponents(GameObject obj)
         {
-            var components = obj.GetComponents<Component>()
+            var components = obj.GetComponents<Component>().AsValueEnumerable()
                 .Where(c => c != null)
                 .ToList();
 
             if (components.Count <= 1) return false;
 
-            var desiredOrder = components
-                .OrderBy(c => GetComponentPriority(c))
+            var desiredOrder = components.AsValueEnumerable()
+                .OrderBy(GetComponentPriority)
                 .ThenBy(c => c.GetType().Name)
                 .ToList();
 
@@ -61,7 +61,8 @@ namespace Editor
             {
                 var component = desiredOrder[targetIndex];
 
-                var currentComponents = obj.GetComponents<Component>().Where(c => c != null).ToList();
+                var currentComponents =
+                    obj.GetComponents<Component>().AsValueEnumerable().Where(c => c != null).ToList();
                 var currentIndex = currentComponents.IndexOf(component);
 
                 while (currentIndex > targetIndex)

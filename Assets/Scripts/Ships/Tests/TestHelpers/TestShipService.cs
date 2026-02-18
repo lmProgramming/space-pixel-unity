@@ -11,7 +11,7 @@ namespace Ships.Tests.TestHelpers
     {
         private readonly List<IShip> _ships = new();
 
-        public IEnumerable<IShip> GetShips()
+        public IReadOnlyCollection<IShip> GetShips()
         {
             return _ships;
         }

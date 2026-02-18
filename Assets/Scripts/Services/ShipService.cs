@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using Core.Gameplay.EasyTeam;
 using Core.Services;
 using Core.Ship;
@@ -11,7 +10,7 @@ namespace Services
     {
         private readonly HashSet<IShip> _ships = new();
 
-        public IEnumerable<IShip> GetShips()
+        public IReadOnlyCollection<IShip> GetShips()
         {
             return _ships;
         }
@@ -28,24 +27,43 @@ namespace Services
 
         public IEnumerable<IShip> GetShipsOfTeam(ITeam team)
         {
-            return _ships.Where(ship => ship.Team == team);
+            foreach (var ship in _ships)
+                if (ship.Team == team)
+                    yield return ship;
         }
 
         public IEnumerable<IShip> GetEnemyShipsOf(ITeam team)
         {
-            return _ships.Where(ship => team.IsEnemy(ship.Team));
+            foreach (var ship in _ships)
+                if (team.IsEnemy(ship.Team))
+                    yield return ship;
         }
 
         public IEnumerable<IShip> GetAlliedShipsOf(ITeam team)
         {
-            return _ships.Where(ship => team.IsAllied(ship.Team));
+            foreach (var ship in _ships)
+                if (team.IsAllied(ship.Team))
+                    yield return ship;
         }
+
 
         public IShip GetClosestEnemyShipOf(ITeam team, Vector2 position)
         {
-            return GetEnemyShipsOf(team)
-                .OrderBy(ship => (ship.GetPosition() - position).sqrMagnitude)
-                .FirstOrDefault();
+            IShip closest = null;
+            var bestDist = float.MaxValue;
+
+            foreach (var ship in _ships)
+            {
+                if (!team.IsEnemy(ship.Team))
+                    continue;
+
+                var d = (ship.GetPosition() - position).sqrMagnitude;
+                if (!(d < bestDist)) continue;
+                bestDist = d;
+                closest = ship;
+            }
+
+            return closest;
         }
     }
 }

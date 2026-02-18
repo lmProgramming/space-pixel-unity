@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Core.Gameplay.Combat;
 using Core.Gameplay.EasyTeam;
 using Core.Services;
@@ -13,6 +12,7 @@ using Ships.Internal;
 using Ships.Modules;
 using UnityEngine;
 using Zenject;
+using ZLinq;
 
 namespace Ships
 {
@@ -36,7 +36,7 @@ namespace Ships
         protected IShipService ShipService;
 
         private List<Module> AllModules =>
-            ModuleGraph.GetAllNodes().OfType<Module>().ToList();
+            ModuleGraph.GetAllNodes().AsValueEnumerable().OfType<Module>().ToList();
 
         public float GeneralEfficiency => Math.Max(0.01f, ResourceManager.EnergyEfficiency);
 
@@ -44,8 +44,11 @@ namespace Ships
 
         public Vector2 AttackTargetPosition { get; protected set; }
 
-        public List<IWeapon> Weapons => _modulesDictionary[ModuleType.Weapon].Cast<IWeapon>().ToList();
-        public List<Engine> Engines => _modulesDictionary[ModuleType.Engine].Cast<Engine>().ToList();
+        public List<IWeapon> Weapons =>
+            _modulesDictionary[ModuleType.Weapon].AsValueEnumerable().Cast<IWeapon>().ToList();
+
+        public List<Engine> Engines =>
+            _modulesDictionary[ModuleType.Engine].AsValueEnumerable().Cast<Engine>().ToList();
 
         public ResourceManager ResourceManager { get; private set; }
 
@@ -115,7 +118,7 @@ namespace Ships
                 ResourceManager.Recalculate(AllModules);
             }
         }
-        
+
         public void OnModuleDestroyed(IModule module)
         {
             if (module == null) return;
@@ -129,9 +132,9 @@ namespace Ships
         private void HandleUnreachableModules(List<IModule> unreachableModules)
         {
             Debug.Log(
-                $"[Ship] HandleUnreachableModules called with {unreachableModules.Count} modules: [{string.Join(", ", unreachableModules.Select(m => m?.Transform?.name ?? "null"))}]");
+                $"[Ship] HandleUnreachableModules called with {unreachableModules.Count} modules: [{string.Join(", ", unreachableModules.AsValueEnumerable().Select(m => m?.Transform?.name ?? "null"))}]");
 
-            foreach (var module in unreachableModules.Where(module =>
+            foreach (var module in unreachableModules.AsValueEnumerable().Where(module =>
                          module?.Transform != null &&
                          module.Transform.parent != _mapInfo.MapTransform))
             {

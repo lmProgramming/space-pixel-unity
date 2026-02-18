@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using System.Linq;
 using Ships.Modules;
 using UnityEngine;
+using ZLinq;
 
 namespace Ships
 {
@@ -9,7 +9,7 @@ namespace Ships
     {
         private List<Module> GetModules(Transform parent)
         {
-            var modules = GetComponentsInChildren<Module>(parent).ToList();
+            var modules = GetComponentsInChildren<Module>(parent).AsValueEnumerable().ToList();
             return modules;
         }
 

@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using System.Linq;
 using AI.EasyState.States;
 using JetBrains.Annotations;
 using UnityEngine;
+using ZLinq;
 using Random = UnityEngine.Random;
 
 namespace AI.EasyState
@@ -124,8 +124,8 @@ namespace AI.EasyState
         private float GetTotalStateWeight([CanBeNull] string skippedState = null)
         {
             return skippedState == null
-                ? _weightedStates.Values.Sum()
-                : _weightedStates.Where(kv => kv.Key != skippedState).Sum(kv => kv.Value);
+                ? _weightedStates.Values.AsValueEnumerable().Sum()
+                : _weightedStates.AsValueEnumerable().Where(kv => kv.Key != skippedState).Sum(kv => kv.Value);
         }
 
         private string CalculateNextState([CanBeNull] string skippedState = null)
@@ -133,16 +133,17 @@ namespace AI.EasyState
             var val = Random.value * GetTotalStateWeight(skippedState);
             var possibleStates = skippedState == null
                 ? _weightedStates
-                : _weightedStates.Where(kv => kv.Key != skippedState).ToDictionary(kv => kv.Key, kv => kv.Value);
+                : _weightedStates.AsValueEnumerable().Where(kv => kv.Key != skippedState)
+                    .ToDictionary(kv => kv.Key, kv => kv.Value);
 
             var cumulative = 0f;
-            foreach (var stateWeight in possibleStates.SkipLast(1))
+            foreach (var stateWeight in possibleStates.AsValueEnumerable().SkipLast(1))
             {
                 cumulative += stateWeight.Value;
                 if (val <= cumulative) return stateWeight.Key;
             }
 
-            return possibleStates.Keys.Last();
+            return possibleStates.Keys.AsValueEnumerable().Last();
         }
 
         public T GetState<T>(string stateName) where T : BaseState<TSelf, TStateBase>

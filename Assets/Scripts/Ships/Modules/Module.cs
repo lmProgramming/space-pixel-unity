@@ -1,9 +1,9 @@
 using System.Collections.Generic;
-using System.Linq;
 using Core.Pixelation;
 using Core.Ship;
 using Pixelation;
 using UnityEngine;
+using ZLinq;
 using Resources = Core.Ship.Resources;
 
 namespace Ships.Modules
@@ -37,7 +37,7 @@ namespace Ships.Modules
 
         private void OnDestroy()
         {
-            Ship.OnModuleDestroyed(this);
+            Ship?.OnModuleDestroyed(this);
         }
 
         private void OnDrawGizmosSelected()
@@ -54,7 +54,7 @@ namespace Ships.Modules
                 var hue = (Mathf.Abs(hashCode) % 1000 + 50) / 1050f;
                 Gizmos.color = Color.HSVToRGB(hue, 1.0f, 0.95f);
 
-                foreach (var worldPos in points.Select(localPixelPos =>
+                foreach (var worldPos in points.AsValueEnumerable().Select(localPixelPos =>
                              PixelatedRigidbody.LocalToWorldPoint(localPixelPos))) Gizmos.DrawCube(worldPos, gizmoSize);
             }
         }
@@ -149,7 +149,7 @@ namespace Ships.Modules
             var modulesToDetach = new HashSet<Module>();
 
             foreach (var point in points)
-            foreach (var connectedModule in connectedModulesToCheck.Where(connectedModule =>
+            foreach (var connectedModule in connectedModulesToCheck.AsValueEnumerable().Where(connectedModule =>
                          !modulesToDetach.Contains(connectedModule)))
             {
                 if (!_connectionPoints.TryGetValue(connectedModule, out var connectionPixelList)) continue;
@@ -162,7 +162,7 @@ namespace Ships.Modules
                 modulesToDetach.Add(connectedModule);
             }
 
-            foreach (var moduleToDetach in modulesToDetach.Where(moduleToDetach =>
+            foreach (var moduleToDetach in modulesToDetach.AsValueEnumerable().Where(moduleToDetach =>
                          _connectionPoints.ContainsKey(moduleToDetach)))
                 DetachConnections(moduleToDetach);
         }

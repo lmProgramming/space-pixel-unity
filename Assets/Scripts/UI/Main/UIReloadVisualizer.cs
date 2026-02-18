@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Core.Gameplay.Combat;
 using Ships;
 using UnityEngine;
+using ZLinq;
 
 namespace UI.Main
 {
@@ -84,7 +84,8 @@ namespace UI.Main
                 var readyCount = 0;
                 foreach (Transform child in iconContainer)
                 {
-                    var weaponKvp = _weaponIconDictionary.FirstOrDefault(kvp => kvp.Value == child.gameObject);
+                    var weaponKvp = _weaponIconDictionary.AsValueEnumerable()
+                        .FirstOrDefault(kvp => kvp.Value == child.gameObject);
                     if (weaponKvp.Key != null && weaponKvp.Key.IsReady() &&
                         child.gameObject != icon)
                         readyCount++;
@@ -102,7 +103,7 @@ namespace UI.Main
         {
             if (iconContainer == null || _weaponIconDictionary == null) return;
 
-            var orderedWeapons = _weaponIconDictionary.Keys
+            var orderedWeapons = _weaponIconDictionary.Keys.AsValueEnumerable()
                 .OrderByDescending(w => w.IsReady())
                 .ToList();
 

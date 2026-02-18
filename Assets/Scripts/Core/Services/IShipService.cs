@@ -8,7 +8,7 @@ namespace Core.Services
 {
     public interface IShipService
     {
-        IEnumerable<IShip> GetShips();
+        IReadOnlyCollection<IShip> GetShips();
         IEnumerable<IShip> GetShipsOfTeam(ITeam team);
         IEnumerable<IShip> GetEnemyShipsOf(ITeam team);
         [CanBeNull] IShip GetClosestEnemyShipOf(ITeam team, Vector2 position);

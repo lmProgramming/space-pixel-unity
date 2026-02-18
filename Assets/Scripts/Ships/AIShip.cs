@@ -1,9 +1,9 @@
-using System.Linq;
 using AI.EasyState;
 using Core.Ship;
 using Ships.StateMachines.Behaviour;
 using Ships.StateMachines.Navigation;
 using UnityEngine;
+using ZLinq;
 
 namespace Ships
 {
@@ -81,7 +81,7 @@ namespace Ships
 
         private void ApplyMovement(Rigidbody2D selfRigidbody, Vector2 forward, Vector2 desiredDirection)
         {
-            var availableThrust = Engines.Sum(e => e.maxThrust);
+            var availableThrust = Engines.AsValueEnumerable().Sum(e => e.maxThrust);
             if (availableThrust <= 0f) return;
 
             var alignment = Mathf.Clamp01(Vector2.Dot(forward, desiredDirection));
