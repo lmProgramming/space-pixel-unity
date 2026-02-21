@@ -379,10 +379,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec0c2ce0f23d40fe9ee070fd086aa524, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game.Services::Services.SectorVisualizer
-  onlyShowInCameraView: 1
+  onlyShowInCameraView: 0
   showGrid: 1
   gizmoZ: 0
   sectorService: {fileID: 2088262905}
+  showSectorOverlay: 0
 --- !u!1 &115355037
 GameObject:
   m_ObjectHideFlags: 0
@@ -3151,7 +3152,7 @@ MonoBehaviour:
   pixelsDestroyedPerSecond: 5
   hitLayers:
     serializedVersion: 2
-    m_Bits: 129
+    m_Bits: 897
   icon: {fileID: 1865393218821458671, guid: 8f61f8d23847b2d46b2c194f226b8f84, type: 3}
   reloadTime: 5
 --- !u!120 &521192492

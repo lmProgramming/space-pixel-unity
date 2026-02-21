@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using Core.Services;
 using Services;
 using UnityEngine;
 
@@ -10,6 +12,15 @@ namespace Editor
         [SerializeField] private float gizmoZ;
         [SerializeField] private SectorService sectorService;
 
+        [HideInInspector] public bool showSectorOverlay;
+
+        private Camera _camera;
+
+        private void Start()
+        {
+            _camera = Camera.main;
+        }
+
         private void OnDrawGizmos()
         {
             var sectorSize = sectorService.SectorSize;
@@ -17,34 +28,27 @@ namespace Editor
 
             var cache = sectorService.Cache;
             var cacheDuration = sectorService.CacheDuration;
+
+            if (showGrid) DrawGrid(cache, sectorSize, cacheDuration);
+        }
+
+        private void DrawGrid(IReadOnlyDictionary<Vector2, SectorResult> cache, float sectorSize, float cacheDuration)
+        {
+            if (cache == null) return;
             var currentTime = Application.isPlaying ? Time.time : 0;
 
-            var cam = Camera.main;
-            var hasCam = cam != null;
+            var height = 2f * _camera.orthographicSize;
+            var width = height * _camera.aspect;
+            var camPos = _camera.transform.position;
 
-            float minX = 0, maxX = 0, minY = 0, maxY = 0;
-            if (hasCam)
+            var minX = camPos.x - width / 2f;
+            var maxX = camPos.x + width / 2f;
+            var minY = camPos.y - height / 2f;
+            var maxY = camPos.y + height / 2f;
+
+            foreach (var (center, result) in cache)
             {
-                var height = 2f * cam.orthographicSize;
-                var width = height * cam.aspect;
-                var camPos = cam.transform.position;
-
-                minX = camPos.x - width / 2f;
-                maxX = camPos.x + width / 2f;
-                minY = camPos.y - height / 2f;
-                maxY = camPos.y + height / 2f;
-            }
-
-            if (showGrid && hasCam) DrawVisibleGrid(minX, maxX, minY, maxY, sectorSize);
-
-            if (cache == null) return;
-
-            foreach (var kvp in cache)
-            {
-                var center = kvp.Key;
-                var result = kvp.Value;
-
-                if (onlyShowInCameraView && hasCam)
+                if (onlyShowInCameraView)
                 {
                     var halfSize = sectorSize / 2f;
                     if (center.x + halfSize < minX || center.x - halfSize > maxX ||
@@ -53,40 +57,48 @@ namespace Editor
                 }
 
                 var age = currentTime - result.GenerationTime;
-                var ratio = Mathf.Clamp01(age / cacheDuration);
 
-                var baseColor = result.Empty ? Color.green : Color.red;
-                // Darken as it approaches expiration. If expired, it stays very dark.
-                var darkness = age > cacheDuration ? 0.85f : ratio * 0.7f;
-                var color = Color.Lerp(baseColor, Color.black, darkness);
-                color.a = 0.5f;
-
-                Gizmos.color = color;
+                Gizmos.color = GetSectorColor(result.Empty, age, cacheDuration);
                 var gizmoCenter = new Vector3(center.x, center.y, gizmoZ);
                 Gizmos.DrawCube(gizmoCenter, new Vector3(sectorSize * 0.95f, sectorSize * 0.95f, 0.01f));
 
-                if (age > cacheDuration)
-                {
-                    Gizmos.color = new Color(0.2f, 0.2f, 0.2f, 0.5f);
-                    Gizmos.DrawWireCube(gizmoCenter, new Vector3(sectorSize, sectorSize, 0.01f));
-                }
+                if (!(age > cacheDuration)) continue;
+
+                Gizmos.color = new Color(0.2f, 0.2f, 0.2f, 0.5f);
+                Gizmos.DrawWireCube(gizmoCenter, new Vector3(sectorSize, sectorSize, 0.01f));
             }
         }
 
-        private void DrawVisibleGrid(float minX, float maxX, float minY, float maxY, float sectorSize)
+        private static Color GetSectorColor(bool empty, float age, float cacheDuration)
         {
-            Gizmos.color = new Color(1, 1, 1, 0.05f);
+            var baseColor = empty ? Color.green : Color.red;
+            // Darken as it approaches expiration. If expired, it stays very dark.
+            var darkness = age > cacheDuration ? 0.85f : Mathf.Clamp01(age / cacheDuration) * 0.7f;
+            var color = Color.Lerp(baseColor, Color.black, darkness);
+            color.a = 0.5f;
+            return color;
+        }
 
-            // Align grid to the sector centers
-            var startX = Mathf.Round(minX / sectorSize) * sectorSize;
-            var startY = Mathf.Round(minY / sectorSize) * sectorSize;
+        public void RecalculateSectorGrid()
+        {
+            var sectorSize = sectorService.SectorSize;
+            var camPos = _camera.transform.position;
 
-            for (var x = startX - sectorSize; x <= maxX + sectorSize; x += sectorSize)
-                Gizmos.DrawLine(new Vector3(x - sectorSize / 2f, minY, gizmoZ),
-                    new Vector3(x - sectorSize / 2f, maxY, gizmoZ));
-            for (var y = startY - sectorSize; y <= maxY + sectorSize; y += sectorSize)
-                Gizmos.DrawLine(new Vector3(minX, y - sectorSize / 2f, gizmoZ),
-                    new Vector3(maxX, y - sectorSize / 2f, gizmoZ));
+            var originX = Mathf.Floor(camPos.x / sectorSize) * sectorSize;
+            var originY = Mathf.Floor(camPos.y / sectorSize) * sectorSize;
+
+            const int halfCount = 5;
+            var keys = new List<Vector2>(100);
+            for (var col = -halfCount; col < halfCount; col++)
+            for (var row = -halfCount; row < halfCount; row++)
+                keys.Add(new Vector2(originX + col * sectorSize, originY + row * sectorSize));
+
+            sectorService.ClearCacheEntries(keys);
+
+            foreach (var key in keys)
+                sectorService.GetSectorResult(new Vector3(key.x + sectorSize * 0.5f, key.y + sectorSize * 0.5f));
+
+            showSectorOverlay = true;
         }
     }
 }
