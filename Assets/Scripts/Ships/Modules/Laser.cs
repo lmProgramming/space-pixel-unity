@@ -61,7 +61,7 @@ namespace Ships.Modules
 
         private void Update()
         {
-            _reloadTimer.Progress(Time.deltaTime * Ship.GeneralEfficiency);
+            _reloadTimer.Progress(Time.deltaTime * ShipModuleEfficiency);
         }
 
         private void OnDestroy()
@@ -102,9 +102,9 @@ namespace Ships.Modules
 
         public override float GetEnergyDraw()
         {
-            return IsReady() ? 0
-                : _isFiring ? Resources.energyDraw
-                : Resources.energyDraw * ReloadEnergyMultiplier;
+            var baseEnergyDraw = base.GetEnergyDraw();
+            var multiplier = _isFiring ? 1f : ReloadEnergyMultiplier;
+            return baseEnergyDraw * multiplier;
         }
 
         private void StartShooting()
@@ -137,7 +137,7 @@ namespace Ships.Modules
 
         private async UniTask FireBeamUpdateAsync(CancellationToken token)
         {
-            var timeRemaining = maxFireDuration * Ship.GeneralEfficiency;
+            var timeRemaining = maxFireDuration * ShipModuleEfficiency;
             try
             {
                 while (_isFiring && !token.IsCancellationRequested && timeRemaining > 0)

@@ -1,13 +1,16 @@
 using Core.Ship;
+using UnityEngine;
 
 namespace Ships.Modules
 {
     public class Engine : Module
     {
         public float thrust;
-        public float maxThrust;
+        [SerializeField] private float maxThrust;
         private bool _active;
 
+        public float MaxThrust => maxThrust * ShipModuleEfficiency;
+a
         protected override void Awake()
         {
             base.Awake();
@@ -16,7 +19,7 @@ namespace Ships.Modules
 
         public override float GetEnergyDraw()
         {
-            return _active ? Resources.energyDraw : 0;
+            return _active ? base.GetEnergyDraw() : 0;
         }
 
         public void SetActive(bool active)

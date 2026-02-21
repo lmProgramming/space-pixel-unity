@@ -22,6 +22,12 @@ namespace Ships.Modules
         /// </summary>
         public IReadOnlyDictionary<Module, List<Vector2Int>> ConnectionPoints => _connectionPoints;
 
+        protected float Efficiency => Mathf.Pow(
+            (float)PixelatedRigidbody.CurrentPixelCount / PixelatedRigidbody.StartPixelCount,
+            2);
+
+        protected float ShipModuleEfficiency => Ship.GeneralEfficiency * Efficiency;
+
         protected virtual void Awake()
         {
             PixelatedRigidbody = GetComponent<PixelatedRigidbody>();
@@ -72,27 +78,27 @@ namespace Ships.Modules
 
         public virtual int GetCrewCount()
         {
-            return Resources.crew;
+            return Mathf.FloorToInt(Resources.crew * Efficiency);
         }
 
         public virtual int GetCrewCapacity()
         {
-            return Resources.crewCapacity;
+            return Mathf.FloorToInt(Resources.crewCapacity * Efficiency);
         }
 
         public virtual float GetEnergyCapacity()
         {
-            return Resources.energyCapacity;
+            return Resources.energyCapacity * Efficiency;
         }
 
         public virtual float GetEnergyDraw()
         {
-            return Resources.energyDraw;
+            return Resources.energyDraw * Efficiency;
         }
 
         public virtual float GetEnergyProduction()
         {
-            return Resources.energyProduction;
+            return Resources.energyProduction * Efficiency;
         }
 
         public void Setup(Ship ship)
