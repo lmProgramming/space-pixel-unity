@@ -16,7 +16,7 @@ namespace Editor
 
         private Camera _camera;
 
-        private void Start()
+        private void Awake()
         {
             _camera = Camera.main;
         }
@@ -29,7 +29,7 @@ namespace Editor
             var cache = sectorService.Cache;
             var cacheDuration = sectorService.CacheDuration;
 
-            if (showGrid) DrawGrid(cache, sectorSize, cacheDuration);
+            if (showGrid && _camera) DrawGrid(cache, sectorSize, cacheDuration);
         }
 
         private void DrawGrid(IReadOnlyDictionary<Vector2, SectorResult> cache, float sectorSize, float cacheDuration)

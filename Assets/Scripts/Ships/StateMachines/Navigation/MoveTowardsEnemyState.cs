@@ -9,12 +9,14 @@ namespace Ships.StateMachines.Navigation
     public class MoveTowardsEnemyState : ShipNavigationState
     {
         private const float PathUpdateInterval = 10.0f;
-        private const float WaypointThreshold = 20.0f;
-        private int _currentWaypointIndex;
+        private const float WaypointThreshold = 40.0f;
         private float _lastPathUpdateTime;
         private List<Vector3> _path;
         private float _targetDistanceThreshold;
         private IShip _targetEnemyShip;
+
+        public IReadOnlyList<Vector3> Path => _path;
+        public int CurrentWaypointIndex { get; private set; }
 
         public override string StateName => "MoveTowardsEnemy";
 
@@ -27,7 +29,7 @@ namespace Ships.StateMachines.Navigation
                 _targetEnemyShip = attackData.TargetEnemy;
                 _targetDistanceThreshold = attackData.DistanceThreshold;
                 _path = null;
-                _currentWaypointIndex = 0;
+                CurrentWaypointIndex = 0;
             }
             else
             {
@@ -73,26 +75,26 @@ namespace Ships.StateMachines.Navigation
 
             _path = stateMachine.SectorService.CalculatePath(Ship.GetPosition(), targetPosition,
                 stateMachine.Controller.NavigationSize);
-            _currentWaypointIndex = 0;
+            CurrentWaypointIndex = 0;
         }
 
         private void FollowPath(ShipNavigationStateMachine stateMachine)
         {
             if (_path == null || _path.Count == 0) return;
 
-            if (_currentWaypointIndex >= _path.Count)
+            if (CurrentWaypointIndex >= _path.Count)
             {
                 stateMachine.SetMovementTarget(_targetEnemyShip.GetPosition());
                 return;
             }
 
-            var waypoint = _path[_currentWaypointIndex];
+            var waypoint = _path[CurrentWaypointIndex];
             var distanceToWaypoint = Vector2.Distance(Ship.GetPosition(), waypoint);
 
             if (distanceToWaypoint < WaypointThreshold)
             {
-                _currentWaypointIndex++;
-                if (_currentWaypointIndex < _path.Count) waypoint = _path[_currentWaypointIndex];
+                CurrentWaypointIndex++;
+                if (CurrentWaypointIndex < _path.Count) waypoint = _path[CurrentWaypointIndex];
             }
 
             stateMachine.SetMovementTarget(waypoint);
