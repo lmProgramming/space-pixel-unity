@@ -14,6 +14,7 @@ namespace Ships.Modules
     public class LaserBeam : Module, IWeapon
     {
         private const float ReloadEnergyMultiplier = 0.5f;
+        private const float FiringEnergyMultiplier = 2f;
 
         [Header("Laser Settings")]
         [SerializeField]
@@ -102,8 +103,10 @@ namespace Ships.Modules
 
         public override float GetEnergyDraw()
         {
+            if (IsReady()) return 0;
+
             var baseEnergyDraw = base.GetEnergyDraw();
-            var multiplier = _isFiring ? 1f : ReloadEnergyMultiplier;
+            var multiplier = _isFiring ? FiringEnergyMultiplier : ReloadEnergyMultiplier;
             return baseEnergyDraw * multiplier;
         }
 

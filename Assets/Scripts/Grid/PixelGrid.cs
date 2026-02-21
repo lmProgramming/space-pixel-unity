@@ -148,6 +148,10 @@ namespace Grid
         {
             SetPixel(point, Color.clear);
             PixelCount--;
+
+#if UNITY_EDITOR
+            if (PixelCount < 0) Debug.LogError("Pixel count went below zero. This should not happen.");
+#endif
         }
 
         public void RemovePixels(IEnumerable<Vector2Int> points)
@@ -156,6 +160,10 @@ namespace Grid
             foreach (var point in pointsList) SetPixelNoApply(point, Color.clear);
             ApplyPixels();
             PixelCount -= pointsList.Count;
+
+#if UNITY_EDITOR
+            if (PixelCount < 0) Debug.LogError("Pixel count went below zero. This should not happen.");
+#endif
         }
     }
 }
