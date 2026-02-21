@@ -1,8 +1,10 @@
 using Core.Gameplay.Sound;
 using Core.Services;
+using Core.Ship;
 using Events.Collision;
 using Services;
 using Services.Sound;
+using Ships;
 using UnityEngine;
 using Zenject;
 
@@ -22,6 +24,8 @@ namespace Context
         [SerializeField] private SoundManager soundManager;
         [SerializeField] private EffectsSpawner effectSpawner;
         [SerializeField] private SectorService sectorService;
+        [SerializeField] private MissionService missionService;
+        [SerializeField] private PlayerShip playerShip;
 
         public override void InstallBindings()
         {
@@ -61,6 +65,15 @@ namespace Context
 
             Container.Bind<ISectorService>()
                 .FromInstance(sectorService)
+                .AsSingle();
+
+            Container.Bind<IMissionService>()
+                .FromInstance(missionService)
+                .AsSingle();
+
+            Container.Bind<IShip>()
+                .WithId(MissionService.PlayerShipId)
+                .FromInstance(playerShip)
                 .AsSingle();
         }
     }

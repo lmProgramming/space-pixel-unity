@@ -1,0 +1,34 @@
+.mission-result-overlay {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.6);
+    transition-property: opacity;
+    transition-duration: 0.4s;
+    transition-timing-function: ease-in;
+}
+
+.mission-result-overlay.hidden {
+    display: none;
+}
+
+.result-label {
+    font-size: 72px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    color: rgb(255, 255, 255);
+    letter-spacing: 12px;
+}
+
+.result-label.victory {
+    color: rgb(80, 255, 120);
+}
+
+.result-label.defeat {
+    color: rgb(255, 80, 80);
+}
+
