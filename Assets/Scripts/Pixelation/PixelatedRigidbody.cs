@@ -67,6 +67,9 @@ namespace Pixelation
         [field: SerializeField]
         public float MassMultiplier { get; private set; } = 1;
 
+        public int CurrentPixelCount => PixelGrid.PixelCount;
+        public int StartPixelCount { get; private set; }
+
         public bool HasSprite => sprite != null && sprite.ToString() != "null";
         public IPixelCollisionHandler CollisionHandler { get; private set; }
 
@@ -196,6 +199,8 @@ namespace Pixelation
             }
 
             PixelGrid.Setup();
+
+            StartPixelCount = PixelGrid.PixelCount;
 
             OnPixelsLost?.Invoke(new List<Vector2Int>(), PixelLoseReason.Other);
         }

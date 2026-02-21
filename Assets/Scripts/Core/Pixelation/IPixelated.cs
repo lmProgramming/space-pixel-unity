@@ -5,6 +5,9 @@ namespace Core.Pixelation
 {
     public interface IPixelated
     {
+        int CurrentPixelCount { get; }
+        int StartPixelCount { get; }
+
         public void RemovePixelAt(Vector2Int point, bool simulateCollision = false);
 
         public void RemovePixels(IEnumerable<Vector2Int> points, bool simulateCollision = false);

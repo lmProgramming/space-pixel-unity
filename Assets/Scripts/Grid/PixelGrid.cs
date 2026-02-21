@@ -83,6 +83,7 @@ namespace Grid
 
         public int Width => Texture.width;
         public int Height => Texture.height;
+        public int PixelCount { get; private set; }
 
         public Vector2 Center => new((float)Width / 2, (float)Height / 2);
 
@@ -100,6 +101,8 @@ namespace Grid
 
             _internalSprite = Sprite.Create(Texture, new Rect(0, 0, width, height),
                 new Vector2(0.5f, 0.5f), 1);
+
+            PixelCount = colors.Count(c => c.a > 0);
         }
 
         public void SetTextureFromColors(Color32[] colors, int width, int height)
@@ -114,6 +117,8 @@ namespace Grid
 
             _internalSprite = Sprite.Create(Texture, new Rect(0, 0, width, height),
                 new Vector2(0.5f, 0.5f), 1);
+
+            PixelCount = colors.Count(c => c.a > 0);
         }
 
         public void SetTexture(Texture2D texture)
@@ -142,12 +147,15 @@ namespace Grid
         public void RemovePixelAt(Vector2Int point)
         {
             SetPixel(point, Color.clear);
+            PixelCount--;
         }
 
         public void RemovePixels(IEnumerable<Vector2Int> points)
         {
-            foreach (var point in points) SetPixelNoApply(point, Color.clear);
+            var pointsList = points.ToList();
+            foreach (var point in pointsList) SetPixelNoApply(point, Color.clear);
             ApplyPixels();
+            PixelCount -= pointsList.Count;
         }
     }
 }

@@ -9,6 +9,7 @@ namespace Core.Grid
         Vector2 Center { get; }
         int Width { get; }
         int Height { get; }
+        int PixelCount { get; }
         Texture2D Texture { get; }
         void SetTextureFromColors(NativeArray<Color32> colors, int width, int height);
         void SetTextureFromColors(Color32[] colors, int width, int height);
