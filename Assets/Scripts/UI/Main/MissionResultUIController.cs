@@ -33,7 +33,6 @@ namespace UI.Main
 
         private void OnEnable()
         {
-            if (_missionService == null) return;
             _missionService.OnVictory += ShowVictory;
             _missionService.OnDefeat += ShowDefeat;
         }

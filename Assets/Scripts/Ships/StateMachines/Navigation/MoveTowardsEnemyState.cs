@@ -113,8 +113,7 @@ namespace Ships.StateMachines.Navigation
             if (distanceToNextWaypoint < WaypointThreshold)
             {
                 _currentWaypointIndex += 2;
-                if (_currentWaypointIndex < _path.Count)
-                    return _path[_currentWaypointIndex];
+                return _currentWaypointIndex < _path.Count ? _path[_currentWaypointIndex] : nextWaypoint;
             }
 
             var t = Mathf.Clamp01(WaypointThreshold / distanceToWaypoint);

@@ -24,7 +24,6 @@ namespace External
                     {
                         atlasPopulationMode: AtlasPopulationMode.Dynamic
                     } fontAsset)
-                    //Debug.Log("Clearing font asset data at " + path);
                     fontAsset.ClearFontAssetData(true);
 
             return paths;
