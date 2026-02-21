@@ -290,11 +290,11 @@ namespace Ships.Tests
 
             yield return null; // Wait for events to process
 
-            // Assert: Other module should be disconnected (deparented from ship to map root)
+            // Assert: Other module should be destroyed and disconnected
             Assert.IsFalse(ship.ModuleGraph.ContainsNode(otherModule),
                 "Disconnected module should be removed from graph");
-            Assert.AreEqual(_mapTransform, otherModule.transform.parent,
-                "Disconnected module should be deparented to map transform");
+            Assert.IsFalse(otherModule,
+                "Disconnected module should be destroyed (null reference)");
         }
 
         [UnityTest]
@@ -461,11 +461,11 @@ namespace Ships.Tests
 
             yield return null; // Wait for cohesion check and events
 
-            // Assert: Module A should be disconnected (its connection points were in the removed region)
+            // Assert: Module A should be destroyed and disconnected
             Assert.IsFalse(ship.ModuleGraph.ContainsNode(moduleA),
                 "Module A should be disconnected after slicing near top of B");
-            Assert.AreEqual(_mapTransform, moduleA.transform.parent,
-                "Module A should be deparented to map transform");
+            Assert.IsFalse(moduleA,
+                "Disconnected module should be destroyed (null reference)");
 
             // Module C should still be connected (bottom portion of B remains with its connection points)
             Assert.IsTrue(ship.ModuleGraph.ContainsNode(moduleC),
@@ -502,11 +502,11 @@ namespace Ships.Tests
 
             yield return null; // Wait for cohesion check and events
 
-            // Assert: Module C should be disconnected (its connection points were in the removed region)
+            // Assert: Module C should be destroyed and disconnected
             Assert.IsFalse(ship.ModuleGraph.ContainsNode(moduleC),
                 "Module C should be disconnected after slicing near bottom of B");
-            Assert.AreEqual(_mapTransform, moduleC.transform.parent,
-                "Module C should be deparented to map transform");
+            Assert.IsFalse(moduleC,
+                "Disconnected module should be destroyed (null reference)");
 
             // Module A should still be connected (top portion of B remains with its connection points)
             Assert.IsTrue(ship.ModuleGraph.ContainsNode(moduleA),

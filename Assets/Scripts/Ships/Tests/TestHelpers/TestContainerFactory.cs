@@ -1,5 +1,6 @@
 using Core.Services;
 using Events.Collision;
+using Services;
 using UnityEngine;
 using Zenject;
 
@@ -20,7 +21,7 @@ namespace Ships.Tests.TestHelpers
             var mapInfo = new TestMapInfo(mapTransform);
             container.Bind<IMapInfo>().FromInstance(mapInfo).AsSingle();
 
-            var shipService = new TestShipService();
+            var shipService = new GameObject("ShipService").AddComponent<ShipService>();
             container.Bind<IShipService>().FromInstance(shipService).AsSingle();
 
             return container;
