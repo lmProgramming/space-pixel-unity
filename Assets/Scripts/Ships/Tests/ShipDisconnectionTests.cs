@@ -62,12 +62,12 @@ namespace Ships.Tests
 
             // Create command module (left side)
             var commandModule = CreateModule("Command", shipGo.transform,
-                new Vector3(0, 0, 0), moduleWidth, moduleHeight, true);
+                new Vector2(0, 0), moduleWidth, moduleHeight, true);
 
             // Create second module (right side, adjacent to command)
             // Position it so the left edge of module2 touches the right edge of command
             var module2 = CreateModule("Module2", shipGo.transform,
-                new Vector3(moduleWidth, 0, 0), moduleWidth, moduleHeight, false);
+                new Vector2(moduleWidth, 0), moduleWidth, moduleHeight, false);
 
             // Add required ship infrastructure
             var connectionFactory = shipGo.AddComponent<ModuleConnectionFactory>();
@@ -91,13 +91,13 @@ namespace Ships.Tests
             var shipGo = CreateGameObject("TestShip");
 
             var commandModule = CreateModule("Command", shipGo.transform,
-                new Vector3(0, 0, 0), moduleWidth, moduleHeight, true);
+                new Vector2(0, 0), moduleWidth, moduleHeight, true);
 
             var module2 = CreateModule("Module2", shipGo.transform,
-                new Vector3(moduleWidth, 0, 0), moduleWidth, moduleHeight, false);
+                new Vector2(moduleWidth, 0), moduleWidth, moduleHeight, false);
 
             var module3 = CreateModule("Module3", shipGo.transform,
-                new Vector3(moduleWidth * 2, 0, 0), moduleWidth, moduleHeight, false);
+                new Vector2(moduleWidth * 2, 0), moduleWidth, moduleHeight, false);
 
             var connectionFactory = shipGo.AddComponent<ModuleConnectionFactory>();
             shipGo.AddComponent<ResourceManager>();
@@ -122,19 +122,19 @@ namespace Ships.Tests
 
             // Command module at origin
             var commandModule = CreateModule("Command", shipGo.transform,
-                new Vector3(0, 0, 0), moduleSize, moduleSize, true);
+                new Vector2(0, 0), moduleSize, moduleSize, true);
 
             // Module A to the right of command
             var moduleA = CreateModule("ModuleA", shipGo.transform,
-                new Vector3(moduleSize, 0, 0), moduleSize, moduleSize, false);
+                new Vector2(moduleSize, 0), moduleSize, moduleSize, false);
 
             // Module B above command (and also adjacent to A via diagonal positioning)
             var moduleB = CreateModule("ModuleB", shipGo.transform,
-                new Vector3(0, moduleSize, 0), moduleSize, moduleSize, false);
+                new Vector2(0, moduleSize), moduleSize, moduleSize, false);
 
             // Module C that connects A and B (creates alternate path)
             var moduleC = CreateModule("ModuleC", shipGo.transform,
-                new Vector3(moduleSize, moduleSize, 0), moduleSize, moduleSize, false);
+                new Vector2(moduleSize, moduleSize), moduleSize, moduleSize, false);
 
             var connectionFactory = shipGo.AddComponent<ModuleConnectionFactory>();
             shipGo.AddComponent<ResourceManager>();
@@ -159,15 +159,15 @@ namespace Ships.Tests
 
             // Module B (command) in the center
             var commandModule = CreateModule("CommandB", shipGo.transform,
-                new Vector3(0, 0, 0), moduleWidth, moduleHeight, true);
+                new Vector2(0, 0), moduleWidth, moduleHeight, true);
 
             // Module A above B (touching B's top edge)
             var moduleA = CreateModule("ModuleA", shipGo.transform,
-                new Vector3(0, moduleHeight, 0), moduleWidth, moduleHeight, false);
+                new Vector2(0, moduleHeight), moduleWidth, moduleHeight, false);
 
             // Module C below B (touching B's bottom edge)
             var moduleC = CreateModule("ModuleC", shipGo.transform,
-                new Vector3(0, -moduleHeight, 0), moduleWidth, moduleHeight, false);
+                new Vector2(0, -moduleHeight), moduleWidth, moduleHeight, false);
 
             var connectionFactory = shipGo.AddComponent<ModuleConnectionFactory>();
             shipGo.AddComponent<ResourceManager>();
@@ -182,7 +182,7 @@ namespace Ships.Tests
             return new TestShipComponents(ship, commandModule, new List<Module> { moduleA, moduleC });
         }
 
-        private Module CreateModule(string name, Transform parent, Vector3 localPosition,
+        private Module CreateModule(string name, Transform parent, Vector2 localPosition,
             int width, int height, bool isCommand)
         {
             var moduleGo = CreateGameObject(name);
