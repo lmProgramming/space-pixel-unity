@@ -10,7 +10,7 @@ namespace Ships.Modules
         private bool _active;
 
         public float MaxThrust => maxThrust * ShipModuleEfficiency;
-a
+
         protected override void Awake()
         {
             base.Awake();

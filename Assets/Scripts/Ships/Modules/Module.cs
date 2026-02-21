@@ -1,10 +1,13 @@
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Core.Pixelation;
 using Core.Ship;
 using Pixelation;
 using UnityEngine;
 using ZLinq;
 using Resources = Core.Ship.Resources;
+
+[assembly: InternalsVisibleTo("Game.Editor")]
 
 namespace Ships.Modules
 {
@@ -27,6 +30,10 @@ namespace Ships.Modules
             2);
 
         protected float ShipModuleEfficiency => Ship.GeneralEfficiency * Efficiency;
+
+#if UNITY_EDITOR
+        internal float InternalEfficiency => Efficiency;
+#endif
 
         protected virtual void Awake()
         {
