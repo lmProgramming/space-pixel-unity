@@ -14,6 +14,7 @@ namespace Ships.Modules
     public class LaserBeam : Module, IWeapon
     {
         private const float ReloadEnergyMultiplier = 0.5f;
+        private const float FiringEnergyMultiplier = 2f;
 
         [Header("Laser Settings")]
         [SerializeField]
@@ -61,7 +62,7 @@ namespace Ships.Modules
 
         private void Update()
         {
-            _reloadTimer.Progress(Time.deltaTime * Ship.GeneralEfficiency);
+            _reloadTimer.Progress(Time.deltaTime * ShipModuleEfficiency);
         }
 
         private void OnDestroy()
@@ -102,9 +103,11 @@ namespace Ships.Modules
 
         public override float GetEnergyDraw()
         {
-            return IsReady() ? 0
-                : _isFiring ? Resources.energyDraw
-                : Resources.energyDraw * ReloadEnergyMultiplier;
+            if (IsReady()) return 0;
+
+            var baseEnergyDraw = base.GetEnergyDraw();
+            var multiplier = _isFiring ? FiringEnergyMultiplier : ReloadEnergyMultiplier;
+            return baseEnergyDraw * multiplier;
         }
 
         private void StartShooting()
@@ -137,7 +140,7 @@ namespace Ships.Modules
 
         private async UniTask FireBeamUpdateAsync(CancellationToken token)
         {
-            var timeRemaining = maxFireDuration * Ship.GeneralEfficiency;
+            var timeRemaining = maxFireDuration * ShipModuleEfficiency;
             try
             {
                 while (_isFiring && !token.IsCancellationRequested && timeRemaining > 0)

@@ -3,7 +3,7 @@ using Core.Services;
 using Services;
 using UnityEngine;
 
-namespace Editor
+namespace Editor.Standalone
 {
     public class SectorVisualizer : MonoBehaviour
     {
@@ -23,11 +23,11 @@ namespace Editor
 
         private void OnDrawGizmos()
         {
-            var sectorSize = sectorService.SectorSize;
+            var sectorSize = sectorService.InternalSectorSize;
             if (sectorSize <= 0) return;
 
-            var cache = sectorService.Cache;
-            var cacheDuration = sectorService.CacheDuration;
+            var cache = sectorService.InternalCache;
+            var cacheDuration = sectorService.InternalCacheDuration;
 
             if (showGrid && _camera) DrawGrid(cache, sectorSize, cacheDuration);
         }
@@ -81,7 +81,7 @@ namespace Editor
 
         public void RecalculateSectorGrid()
         {
-            var sectorSize = sectorService.SectorSize;
+            var sectorSize = sectorService.InternalSectorSize;
             var camPos = _camera.transform.position;
 
             var originX = Mathf.Floor(camPos.x / sectorSize) * sectorSize;

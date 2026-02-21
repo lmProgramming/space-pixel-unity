@@ -41,7 +41,7 @@ namespace Ships.Modules
 
         public void Update()
         {
-            _reloadTimer.Progress(Time.deltaTime * Ship.GeneralEfficiency);
+            _reloadTimer.Progress(Time.deltaTime * ShipModuleEfficiency);
         }
 
         private void OnDestroy()
@@ -100,7 +100,7 @@ namespace Ships.Modules
         {
             return IsReady()
                 ? 0
-                : Resources.energyDraw;
+                : base.GetEnergyDraw();
         }
 
         private void HandleReady()

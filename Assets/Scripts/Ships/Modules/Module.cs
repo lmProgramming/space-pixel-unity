@@ -1,10 +1,13 @@
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Core.Pixelation;
 using Core.Ship;
 using Pixelation;
 using UnityEngine;
 using ZLinq;
 using Resources = Core.Ship.Resources;
+
+[assembly: InternalsVisibleTo("Game.Editor")]
 
 namespace Ships.Modules
 {
@@ -21,6 +24,16 @@ namespace Ships.Modules
         ///     Used for serialization and testing.
         /// </summary>
         public IReadOnlyDictionary<Module, List<Vector2Int>> ConnectionPoints => _connectionPoints;
+
+        protected float Efficiency => Mathf.Pow(
+            (float)PixelatedRigidbody.CurrentPixelCount / PixelatedRigidbody.StartPixelCount,
+            2);
+
+        protected float ShipModuleEfficiency => Ship.GeneralEfficiency * Efficiency;
+
+#if UNITY_EDITOR
+        internal float InternalEfficiency => Efficiency;
+#endif
 
         protected virtual void Awake()
         {
@@ -72,27 +85,27 @@ namespace Ships.Modules
 
         public virtual int GetCrewCount()
         {
-            return Resources.crew;
+            return Mathf.FloorToInt(Resources.crew * Efficiency);
         }
 
         public virtual int GetCrewCapacity()
         {
-            return Resources.crewCapacity;
+            return Mathf.FloorToInt(Resources.crewCapacity * Efficiency);
         }
 
         public virtual float GetEnergyCapacity()
         {
-            return Resources.energyCapacity;
+            return Resources.energyCapacity * Efficiency;
         }
 
         public virtual float GetEnergyDraw()
         {
-            return Resources.energyDraw;
+            return Resources.energyDraw * Efficiency;
         }
 
         public virtual float GetEnergyProduction()
         {
-            return Resources.energyProduction;
+            return Resources.energyProduction * Efficiency;
         }
 
         public void Setup(Ship ship)

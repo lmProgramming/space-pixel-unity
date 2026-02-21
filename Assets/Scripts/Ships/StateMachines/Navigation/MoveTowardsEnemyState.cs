@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using AI.EasyState.States;
 using Core.Ship;
 using UnityEngine;
+
+[assembly: InternalsVisibleTo("Game.Editor")]
 
 namespace Ships.StateMachines.Navigation
 {
@@ -11,12 +14,8 @@ namespace Ships.StateMachines.Navigation
         private const float PathUpdateInterval = 10.0f;
         private const float WaypointThreshold = 40.0f;
         private float _lastPathUpdateTime;
-        private List<Vector3> _path;
         private float _targetDistanceThreshold;
         private IShip _targetEnemyShip;
-
-        public IReadOnlyList<Vector3> Path => _path;
-        public int CurrentWaypointIndex { get; private set; }
 
         public override string StateName => "MoveTowardsEnemy";
 
@@ -28,8 +27,8 @@ namespace Ships.StateMachines.Navigation
             {
                 _targetEnemyShip = attackData.TargetEnemy;
                 _targetDistanceThreshold = attackData.DistanceThreshold;
-                _path = null;
-                CurrentWaypointIndex = 0;
+                InternalPath = null;
+                InternalCurrentWaypointIndex = 0;
             }
             else
             {
@@ -73,28 +72,29 @@ namespace Ships.StateMachines.Navigation
             // AIShip has CommandModule which has PixelatedRigidbody, but let's assume a default size if not easily accessible.
             // Actually, SectorService.CalculatePath takes int shipSize.
 
-            _path = stateMachine.SectorService.CalculatePath(Ship.GetPosition(), targetPosition,
+            InternalPath = stateMachine.SectorService.CalculatePath(Ship.GetPosition(), targetPosition,
                 stateMachine.Controller.NavigationSize);
-            CurrentWaypointIndex = 0;
+            InternalCurrentWaypointIndex = 0;
         }
 
         private void FollowPath(ShipNavigationStateMachine stateMachine)
         {
-            if (_path == null || _path.Count == 0) return;
+            if (InternalPath == null || InternalPath.Count == 0) return;
 
-            if (CurrentWaypointIndex >= _path.Count)
+            if (InternalCurrentWaypointIndex >= InternalPath.Count)
             {
                 stateMachine.SetMovementTarget(_targetEnemyShip.GetPosition());
                 return;
             }
 
-            var waypoint = _path[CurrentWaypointIndex];
+            var waypoint = InternalPath[InternalCurrentWaypointIndex];
             var distanceToWaypoint = Vector2.Distance(Ship.GetPosition(), waypoint);
 
             if (distanceToWaypoint < WaypointThreshold)
             {
-                CurrentWaypointIndex++;
-                if (CurrentWaypointIndex < _path.Count) waypoint = _path[CurrentWaypointIndex];
+                InternalCurrentWaypointIndex++;
+                if (InternalCurrentWaypointIndex < InternalPath.Count)
+                    waypoint = InternalPath[InternalCurrentWaypointIndex];
             }
 
             stateMachine.SetMovementTarget(waypoint);
@@ -102,7 +102,7 @@ namespace Ships.StateMachines.Navigation
 
         public override void Exit(ShipNavigationStateMachine stateMachine)
         {
-            _path = null;
+            InternalPath = null;
             base.Exit(stateMachine);
             stateMachine.ClearMovementTarget();
             _targetEnemyShip = null;
@@ -112,5 +112,11 @@ namespace Ships.StateMachines.Navigation
         {
             return true;
         }
+
+#if UNITY_EDITOR
+        internal IReadOnlyList<Vector3> InternalPath { get; private set; }
+
+        internal int InternalCurrentWaypointIndex { get; private set; }
+#endif
     }
 }

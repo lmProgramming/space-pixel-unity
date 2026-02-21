@@ -1,8 +1,11 @@
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Core.Services;
 using External.FyiurAmron;
 using UnityEngine;
 using ZLinq;
+
+[assembly: InternalsVisibleTo("Game.Editor")]
 
 namespace Services
 {
@@ -15,11 +18,6 @@ namespace Services
 
         private readonly Dictionary<Vector2, SectorResult> _sectorCache = new();
         private ContactFilter2D _filter;
-
-        public float SectorSize => sectorSize;
-        public float CacheDuration => cacheDuration;
-        public IReadOnlyDictionary<Vector2, SectorResult> Cache => _sectorCache;
-
         private Vector2 Sector => new(sectorSize, sectorSize);
 
         private void Awake()
@@ -168,5 +166,11 @@ namespace Services
                 Mathf.Floor(position.x / sectorSize) * sectorSize,
                 Mathf.Floor(position.y / sectorSize) * sectorSize);
         }
+
+#if UNITY_EDITOR
+        internal float InternalSectorSize => sectorSize;
+        internal float InternalCacheDuration => cacheDuration;
+        internal IReadOnlyDictionary<Vector2, SectorResult> InternalCache => _sectorCache;
+#endif
     }
 }

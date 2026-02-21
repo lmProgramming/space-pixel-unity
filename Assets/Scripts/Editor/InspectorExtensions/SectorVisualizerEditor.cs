@@ -1,7 +1,8 @@
+using Editor.Standalone;
 using UnityEditor;
 using UnityEngine;
 
-namespace Editor
+namespace Editor.InspectorExtensions
 {
     [CustomEditor(typeof(SectorVisualizer))]
     public class SectorVisualizerEditor : UnityEditor.Editor

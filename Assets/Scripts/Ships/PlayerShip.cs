@@ -12,7 +12,7 @@ namespace Ships
 
         protected override void Move()
         {
-            var availableThrust = Engines.AsValueEnumerable().Sum(e => e.maxThrust);
+            var availableThrust = Engines.AsValueEnumerable().Sum(e => e.MaxThrust);
 
             var acceleration = Input.GetAxis("Vertical") * speedMultiplier * availableThrust;
 

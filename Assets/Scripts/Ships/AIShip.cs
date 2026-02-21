@@ -89,7 +89,7 @@ namespace Ships
 
         private void ApplyMovement(Rigidbody2D selfRigidbody, Vector2 forward, Vector2 desiredDirection)
         {
-            var availableThrust = Engines.AsValueEnumerable().Sum(e => e.maxThrust);
+            var availableThrust = Engines.AsValueEnumerable().Sum(e => e.MaxThrust);
             if (availableThrust <= 0f) return;
 
             var alignment = Mathf.Clamp01(Vector2.Dot(forward, desiredDirection));

@@ -2,7 +2,7 @@ using LM;
 using Pixelation;
 using UnityEngine;
 
-namespace Editor
+namespace Editor.Standalone
 {
     public class Debugger : MonoBehaviour
     {
