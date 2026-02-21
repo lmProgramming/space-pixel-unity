@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using ContourTracer;
 using Core.Grid;
 using Core.Pixelation;
@@ -9,32 +8,33 @@ using Grid;
 using LM;
 using Pixelation.CollisionResolver;
 using UnityEngine;
+using ZLinq;
 
 namespace Pixelation
 {
     public sealed class PixelCollisionHandler : IPixelCollisionHandler
     {
-        private const int MinPixelsForJunkCreation = 3;
+        private const int MinPixelsForDebrisCreation = 3;
         private readonly PixelatedRigidbody _body;
         private readonly PolygonCollider2D _collider;
 
         private readonly CollisionEventChannelSO _collisionEventChannel;
         private readonly CollisionResolver.CollisionResolver _collisionResolver;
+        private readonly IDebrisSpawner _debrisSpawner;
         private readonly IPixelGrid _grid;
         private readonly GridContourTracer _gridContourTracer = new();
-        private readonly IJunkSpawner _junkSpawner;
         private readonly float _lineSimplificationTolerance;
 
         private bool _didCollide;
 
         public PixelCollisionHandler(IPixelGrid grid, PixelatedRigidbody body, PolygonCollider2D collider,
-            CollisionEventChannelSO collisionEventChannel, IJunkSpawner junkSpawner)
+            CollisionEventChannelSO collisionEventChannel, IDebrisSpawner debrisSpawner)
         {
             _grid = grid;
             _body = body;
             _collider = collider;
             _collisionEventChannel = collisionEventChannel;
-            _junkSpawner = junkSpawner;
+            _debrisSpawner = debrisSpawner;
 
             _collisionResolver = new PhysicsCollision(this, _body);
 
@@ -49,7 +49,7 @@ namespace Pixelation
 
             if (getLast) pointsTraversed.Reverse();
 
-            foreach (var point in pointsTraversed.Where(_grid.IsPixel))
+            foreach (var point in pointsTraversed.AsValueEnumerable().Where(_grid.IsPixel))
                 return new Vector2Int(point.x, point.y);
 
             return null;
@@ -83,7 +83,8 @@ namespace Pixelation
                 radiusChecked++;
             }
 
-            return closestPointsAndDistances.Select(p => p.Position).Take(positionsMaxCount).ToList();
+            return closestPointsAndDistances.AsValueEnumerable().Select(p => p.Position).Take(positionsMaxCount)
+                .ToList();
 
             void InsertPositionToSortedArray(Vector2Int position, float distance)
             {
@@ -131,7 +132,7 @@ namespace Pixelation
             _didCollide = true;
             var pixelsDestroyed = _collisionResolver.ResolveCollision(other, collision);
 
-            var pixels = pixelsDestroyed as Vector2Int[] ?? pixelsDestroyed.ToArray();
+            var pixels = pixelsDestroyed as Vector2Int[] ?? pixelsDestroyed.AsValueEnumerable().ToArray();
 
             RaiseCollisionEvent(other, collision.contacts[0].point, pixels);
         }
@@ -164,7 +165,7 @@ namespace Pixelation
                 ? GridRegionFinder.FloodFindCohesiveRegions(pixels[0], _grid)
                 : GridRegionFinder.FloodFindCohesiveRegions(_grid);
 
-            regions = regions.OrderBy(r => r.Count).ToList();
+            regions = regions.AsValueEnumerable().OrderBy(r => r.Count).ToList();
 
             switch (regions.Count)
             {
@@ -172,7 +173,7 @@ namespace Pixelation
                     _body.NoPixelsLeft();
                     return;
                 case > 1:
-                    HandleDivision(regions.SkipLast(1).ToList());
+                    HandleDivision(regions.AsValueEnumerable().SkipLast(1).ToList());
                     break;
             }
 
@@ -197,7 +198,7 @@ namespace Pixelation
 
             var points = new List<Vector2>();
 
-            LineUtility.Simplify(polygon.ToList(), _lineSimplificationTolerance, points);
+            LineUtility.Simplify(polygon.AsValueEnumerable().ToList(), _lineSimplificationTolerance, points);
 
             _collider.pathCount = 1;
             _collider.SetPath(0, points);
@@ -207,7 +208,7 @@ namespace Pixelation
         {
             foreach (var region in regions)
             {
-                if (region.Count >= MinPixelsForJunkCreation) CreateNewJunk(region);
+                if (region.Count >= MinPixelsForDebrisCreation) CreateNewDebris(region);
 
                 _body.PixelLostByDivision(region);
 
@@ -215,10 +216,12 @@ namespace Pixelation
             }
         }
 
-        private void CreateNewJunk(HashSet<Vector2Int> points)
+        private void CreateNewDebris(HashSet<Vector2Int> points)
         {
-            var rightTopPoint = new Vector2Int(points.Max(p => p.x), points.Max(p => p.y));
-            var leftBottomPoint = new Vector2Int(points.Min(p => p.x), points.Min(p => p.y));
+            var rightTopPoint = new Vector2Int(points.AsValueEnumerable().Max(p => p.x),
+                points.AsValueEnumerable().Max(p => p.y));
+            var leftBottomPoint = new Vector2Int(points.AsValueEnumerable().Min(p => p.x),
+                points.AsValueEnumerable().Min(p => p.y));
             var parentCenterPoint = _grid.Center;
 
             var width = rightTopPoint.x - leftBottomPoint.x + 1;
@@ -233,7 +236,7 @@ namespace Pixelation
 
             var globalPosition = _body.transform.TransformPoint(centrePoint - parentCenterPoint);
 
-            _junkSpawner.SpawnJunk(globalPosition, _body.transform.rotation, newColorsGrid, _body);
+            _debrisSpawner.SpawnDebris(globalPosition, _body.transform.rotation, newColorsGrid, _body);
         }
     }
 }

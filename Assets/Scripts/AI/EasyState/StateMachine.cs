@@ -1,38 +1,46 @@
 using System.Collections.Generic;
-using System.Linq;
 using AI.EasyState.States;
 using JetBrains.Annotations;
 using UnityEngine;
+using ZLinq;
 using Random = UnityEngine.Random;
 
 namespace AI.EasyState
 {
-    public class StateMachine : MonoBehaviour
+    public abstract class StateMachine<TSelf, TStateBase> : MonoBehaviour
+        where TSelf : StateMachine<TSelf, TStateBase>
+        where TStateBase : BaseState<TSelf, TStateBase>
     {
-        private readonly Dictionary<string, IState> _states = new();
+        private readonly Dictionary<string, BaseState<TSelf, TStateBase>> _states = new();
 
-        private readonly Dictionary<string, float> _weightedStates = new()
-        {
-            { "Lookout", 1f }
-        };
+        private Dictionary<string, float> _weightedStates;
 
-        private IState CurrentState { get; set; }
+        protected abstract string DefaultState { get; }
 
+        private BaseState<TSelf, TStateBase> CurrentState { get; set; }
         public IAgent Controller { get; private set; }
-
-        private static string DefaultState => "Lookout";
+        public bool UseManualUpdate { get; set; }
+        private TSelf Self => (TSelf)this;
 
         private void Awake()
         {
+            _weightedStates = CreateWeightedStates();
+
             Controller = GetComponent<IAgent>();
         }
 
         private void Update()
         {
-            CurrentState.Update(this, Time.deltaTime);
+            if (UseManualUpdate) return;
+            Tick(Time.deltaTime);
         }
 
-        public void RegisterState(IState state, float? weight = null)
+        protected virtual Dictionary<string, float> CreateWeightedStates()
+        {
+            return new Dictionary<string, float>();
+        }
+
+        public void RegisterState(BaseState<TSelf, TStateBase> state, float? weight = null)
         {
             if (weight.HasValue) AddWeightedState(state.StateName, weight.Value);
 
@@ -63,10 +71,10 @@ namespace AI.EasyState
                 return;
             }
 
-            CurrentState.Exit(this);
+            CurrentState.Exit(Self);
             CurrentState = newState;
 
-            CurrentState.Enter(this, data);
+            CurrentState.Enter(Self, data);
         }
 
         public void ForceTransitionToState(string stateName, IStateData data = null)
@@ -79,13 +87,18 @@ namespace AI.EasyState
 
             if (!CurrentState.OverridableByForce) return;
 
-            CurrentState.Exit(this);
+            CurrentState.Exit(Self);
             CurrentState = newState;
 
-            CurrentState.Enter(this, data);
+            CurrentState.Enter(Self, data);
         }
 
-        public void StartStateMachine([CanBeNull] string initialStateName = null)
+        public void Tick(float deltaTime)
+        {
+            CurrentState.Update(Self, deltaTime);
+        }
+
+        public void StartStateMachine([CanBeNull] string initialStateName = null, IStateData data = null)
         {
             initialStateName ??= DefaultState;
 
@@ -94,7 +107,7 @@ namespace AI.EasyState
 
             CurrentState = newState;
 
-            CurrentState!.Enter(this, null);
+            CurrentState!.Enter(Self, data);
         }
 
         public void TransitionToDefaultState()
@@ -111,8 +124,8 @@ namespace AI.EasyState
         private float GetTotalStateWeight([CanBeNull] string skippedState = null)
         {
             return skippedState == null
-                ? _weightedStates.Values.Sum()
-                : _weightedStates.Where(kv => kv.Key != skippedState).Sum(kv => kv.Value);
+                ? _weightedStates.Values.AsValueEnumerable().Sum()
+                : _weightedStates.AsValueEnumerable().Where(kv => kv.Key != skippedState).Sum(kv => kv.Value);
         }
 
         private string CalculateNextState([CanBeNull] string skippedState = null)
@@ -120,20 +133,20 @@ namespace AI.EasyState
             var val = Random.value * GetTotalStateWeight(skippedState);
             var possibleStates = skippedState == null
                 ? _weightedStates
-                : _weightedStates.Where(kv => kv.Key != skippedState).ToDictionary(kv => kv.Key, kv => kv.Value);
+                : _weightedStates.AsValueEnumerable().Where(kv => kv.Key != skippedState)
+                    .ToDictionary(kv => kv.Key, kv => kv.Value);
 
             var cumulative = 0f;
-            foreach (var stateWeight in possibleStates.SkipLast(1))
+            foreach (var stateWeight in possibleStates.AsValueEnumerable().SkipLast(1))
             {
                 cumulative += stateWeight.Value;
                 if (val <= cumulative) return stateWeight.Key;
             }
 
-            return possibleStates.Keys.Last();
+            return possibleStates.Keys.AsValueEnumerable().Last();
         }
 
-
-        public T GetState<T>(string stateName) where T : class, IState
+        public T GetState<T>(string stateName) where T : BaseState<TSelf, TStateBase>
         {
             return _states.TryGetValue(stateName, out var state) ? state as T : null;
         }

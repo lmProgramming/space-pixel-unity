@@ -13,12 +13,15 @@ namespace Context
         [Header("Event Channels")] [SerializeField]
         private CollisionEventChannelSO physicsCollisionChannelAsset;
 
-        [SerializeField] private JunkSpawner junkSpawner;
+        [SerializeField]
+        private DebrisSpawner debrisSpawner;
+
         [SerializeField] private MapInfo mapInfo;
         [SerializeField] private ProjectilesSpawner projectilesSpawner;
         [SerializeField] private ShipService shipService;
         [SerializeField] private SoundManager soundManager;
         [SerializeField] private EffectsSpawner effectSpawner;
+        [SerializeField] private SectorService sectorService;
 
         public override void InstallBindings()
         {
@@ -32,8 +35,8 @@ namespace Context
                 .FromInstance(physicsCollisionChannelAsset)
                 .AsSingle();
 
-            Container.Bind<IJunkSpawner>()
-                .FromInstance(junkSpawner)
+            Container.Bind<IDebrisSpawner>()
+                .FromInstance(debrisSpawner)
                 .AsSingle();
 
             Container.Bind<IProjectilesSpawner>()
@@ -54,6 +57,10 @@ namespace Context
 
             Container.Bind<IEffectsSpawner>()
                 .FromInstance(effectSpawner)
+                .AsSingle();
+
+            Container.Bind<ISectorService>()
+                .FromInstance(sectorService)
                 .AsSingle();
         }
     }

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using Core.Grid;
 using Core.Pixelation;
@@ -11,6 +10,7 @@ using Grid;
 using LM;
 using UnityEngine;
 using Zenject;
+using ZLinq;
 
 namespace Pixelation
 {
@@ -28,9 +28,9 @@ namespace Pixelation
         [Range(0, 3)] [SerializeField] private int rotation;
 
         [Inject] private CollisionEventChannelSO _collisionEventChannelSO;
+        [Inject] private IDebrisSpawner _debrisSpawner;
 
         private bool _isSetup;
-        [Inject] private IJunkSpawner _junkSpawner;
 
         private void Awake()
         {
@@ -120,17 +120,17 @@ namespace Pixelation
 
         public void RemovePixels(IEnumerable<Vector2Int> points, bool simulateCollision = false)
         {
-            var pointsArray = points as Vector2Int[] ?? points.ToArray();
+            var pointsArray = points as Vector2Int[] ?? points.AsValueEnumerable().ToArray();
 
-            if (!pointsArray.Any()) return;
+            if (!pointsArray.AsValueEnumerable().Any()) return;
 
             PixelGrid.RemovePixels(pointsArray);
 
-            OnPixelsLost?.Invoke(pointsArray.ToList(), PixelLoseReason.Destroyed);
+            OnPixelsLost?.Invoke(pointsArray.AsValueEnumerable().ToList(), PixelLoseReason.Destroyed);
 
             if (!simulateCollision) return;
 
-            var contactPoint = LocalToWorldPoint(pointsArray.First());
+            var contactPoint = LocalToWorldPoint(pointsArray.AsValueEnumerable().First());
 
             CollisionHandler.RaiseCollisionEvent(null, contactPoint, pointsArray);
         }
@@ -182,7 +182,7 @@ namespace Pixelation
             PixelGrid = new PixelGrid(SpriteRenderer);
 
             CollisionHandler = new PixelCollisionHandler(PixelGrid, this, GetComponent<PolygonCollider2D>(),
-                _collisionEventChannelSO, _junkSpawner);
+                _collisionEventChannelSO, _debrisSpawner);
 
             if (colors is not null) PixelGrid.SetTextureFromColors(colors);
 
@@ -249,7 +249,7 @@ namespace Pixelation
 
         public void PixelLostByDivision(HashSet<Vector2Int> region)
         {
-            OnPixelsLost?.Invoke(region.ToList(), PixelLoseReason.Division);
+            OnPixelsLost?.Invoke(region.AsValueEnumerable().ToList(), PixelLoseReason.Division);
         }
     }
 }

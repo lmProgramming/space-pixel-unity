@@ -5,5 +5,6 @@ namespace AI.EasyState
     public interface IAgent
     {
         Transform Transform { get; }
+        int NavigationSize { get; }
     }
 }

@@ -290,11 +290,11 @@ namespace Ships.Tests
 
             yield return null; // Wait for events to process
 
-            // Assert: Other module should be disconnected (deparented from ship to map root)
+            // Assert: Other module should be destroyed and disconnected
             Assert.IsFalse(ship.ModuleGraph.ContainsNode(otherModule),
                 "Disconnected module should be removed from graph");
-            Assert.AreEqual(_mapTransform, otherModule.transform.parent,
-                "Disconnected module should be deparented to map transform");
+            Assert.IsFalse(otherModule,
+                "Disconnected module should be destroyed (null reference)");
         }
 
         [UnityTest]
@@ -446,9 +446,9 @@ namespace Ships.Tests
             // This tests the DIVISION flow:
             // 1. RemovePixels creates a horizontal gap in B
             // 2. GridRegionFinder.FloodFindCohesiveRegions detects B split into 2 regions
-            // 3. HandleDivision removes the smaller region (top portion) as junk
-            // 4. PixelLostByDivision fires OnPixelsLost with the junk pixels
-            // 5. Module.CheckCohesion sees B's connection points to A were in the junk
+            // 3. HandleDivision removes the smaller region (top portion) as debris
+            // 4. PixelLostByDivision fires OnPixelsLost with the debris pixels
+            // 5. Module.CheckCohesion sees B's connection points to A were in the debris
             // 6. DetachConnections removes the A-B edge
             // 7. A becomes unreachable from command and gets deparented
             var dimensions = commandModule.PixelatedRigidbody.Dimensions();
@@ -461,11 +461,11 @@ namespace Ships.Tests
 
             yield return null; // Wait for cohesion check and events
 
-            // Assert: Module A should be disconnected (its connection points were in the removed region)
+            // Assert: Module A should be destroyed and disconnected
             Assert.IsFalse(ship.ModuleGraph.ContainsNode(moduleA),
                 "Module A should be disconnected after slicing near top of B");
-            Assert.AreEqual(_mapTransform, moduleA.transform.parent,
-                "Module A should be deparented to map transform");
+            Assert.IsFalse(moduleA,
+                "Disconnected module should be destroyed (null reference)");
 
             // Module C should still be connected (bottom portion of B remains with its connection points)
             Assert.IsTrue(ship.ModuleGraph.ContainsNode(moduleC),
@@ -490,7 +490,7 @@ namespace Ships.Tests
 
             // Act: Slice a horizontal line near the BOTTOM of B (closer to C)
             // This tests the DIVISION flow (same as SliceCentralModuleNearTop but opposite end):
-            // The bottom portion becomes junk, taking B's connection points to C with it
+            // The bottom portion becomes debris, taking B's connection points to C with it
             // C then becomes unreachable and gets deparented
             var dimensions = commandModule.PixelatedRigidbody.Dimensions();
             var sliceY = 1; // Near bottom (1 pixel from bottom edge)
@@ -502,11 +502,11 @@ namespace Ships.Tests
 
             yield return null; // Wait for cohesion check and events
 
-            // Assert: Module C should be disconnected (its connection points were in the removed region)
+            // Assert: Module C should be destroyed and disconnected
             Assert.IsFalse(ship.ModuleGraph.ContainsNode(moduleC),
                 "Module C should be disconnected after slicing near bottom of B");
-            Assert.AreEqual(_mapTransform, moduleC.transform.parent,
-                "Module C should be deparented to map transform");
+            Assert.IsFalse(moduleC,
+                "Disconnected module should be destroyed (null reference)");
 
             // Module A should still be connected (top portion of B remains with its connection points)
             Assert.IsTrue(ship.ModuleGraph.ContainsNode(moduleA),
@@ -531,7 +531,7 @@ namespace Ships.Tests
 
             // Act: Slice a horizontal line in the MIDDLE of B
             // When halves are equal size, GridRegionFinder keeps the LAST region (arbitrary)
-            // One half becomes junk, its connected module disconnects
+            // One half becomes debris, its connected module disconnects
             var dimensions = commandModule.PixelatedRigidbody.Dimensions();
             var sliceY = dimensions.y / 2; // Middle
             var horizontalLine = new List<Vector2Int>();
@@ -543,7 +543,7 @@ namespace Ships.Tests
             yield return null; // Wait for cohesion check and events
 
             // Assert: At least one module should be disconnected
-            // When sliced in the middle, one half becomes junk and its connected module disconnects
+            // When sliced in the middle, one half becomes debris and its connected module disconnects
             var aConnected = ship.ModuleGraph.ContainsNode(moduleA);
             var cConnected = ship.ModuleGraph.ContainsNode(moduleC);
 
