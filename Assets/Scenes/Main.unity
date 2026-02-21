@@ -1401,7 +1401,7 @@ GameObject:
   - component: {fileID: 323945047}
   - component: {fileID: 323945046}
   - component: {fileID: 323945045}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: asteroid (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1911,6 +1911,273 @@ Texture2D:
     offset: 0
     size: 0
     path: 
+--- !u!1 &351339372
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 351339377}
+  - component: {fileID: 351339376}
+  - component: {fileID: 351339375}
+  - component: {fileID: 351339374}
+  - component: {fileID: 351339373}
+  m_Layer: 9
+  m_Name: asteroid (5)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!212 &351339373
+SpriteRenderer:
+  serializedVersion: 2
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 351339372}
+  m_Enabled: 1
+  m_CastShadows: 0
+  m_ReceiveShadows: 0
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 0
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_MaskInteraction: 0
+  m_Sprite: {fileID: 1165100214}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_FlipX: 0
+  m_FlipY: 0
+  m_DrawMode: 0
+  m_Size: {x: 32, y: 32}
+  m_AdaptiveModeThreshold: 0.5
+  m_SpriteTileMode: 0
+  m_WasSpriteAssigned: 1
+  m_SpriteSortPoint: 0
+--- !u!60 &351339374
+PolygonCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 351339372}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.5, y: 0.5}
+    oldSize: {x: 32, y: 32}
+    newSize: {x: 32, y: 32}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Points:
+    m_Paths:
+    - - {x: -15, y: -7}
+      - {x: -15, y: 2}
+      - {x: -14, y: 2}
+      - {x: -14, y: 5}
+      - {x: -13, y: 5}
+      - {x: -13, y: 7}
+      - {x: -12, y: 7}
+      - {x: -12, y: 9}
+      - {x: -11, y: 9}
+      - {x: -11, y: 10}
+      - {x: -10, y: 10}
+      - {x: -10, y: 11}
+      - {x: -7, y: 11}
+      - {x: -7, y: 12}
+      - {x: -6, y: 12}
+      - {x: -6, y: 13}
+      - {x: -5, y: 13}
+      - {x: -5, y: 14}
+      - {x: -2, y: 14}
+      - {x: -2, y: 15}
+      - {x: 1, y: 15}
+      - {x: 1, y: 14}
+      - {x: 2, y: 14}
+      - {x: 2, y: 13}
+      - {x: 3, y: 13}
+      - {x: 3, y: 12}
+      - {x: 5, y: 12}
+      - {x: 5, y: 11}
+      - {x: 6, y: 11}
+      - {x: 6, y: 10}
+      - {x: 7, y: 10}
+      - {x: 7, y: 9}
+      - {x: 8, y: 9}
+      - {x: 8, y: 8}
+      - {x: 9, y: 8}
+      - {x: 9, y: 7}
+      - {x: 10, y: 7}
+      - {x: 10, y: 6}
+      - {x: 11, y: 6}
+      - {x: 11, y: 5}
+      - {x: 12, y: 5}
+      - {x: 12, y: 4}
+      - {x: 13, y: 4}
+      - {x: 13, y: 2}
+      - {x: 14, y: 2}
+      - {x: 14, y: 0}
+      - {x: 13, y: 0}
+      - {x: 13, y: -2}
+      - {x: 12, y: -2}
+      - {x: 12, y: -7}
+      - {x: 11, y: -7}
+      - {x: 11, y: -8}
+      - {x: 10, y: -8}
+      - {x: 10, y: -9}
+      - {x: 8, y: -9}
+      - {x: 8, y: -10}
+      - {x: 7, y: -10}
+      - {x: 7, y: -11}
+      - {x: 6, y: -11}
+      - {x: 6, y: -12}
+      - {x: 5, y: -12}
+      - {x: 5, y: -13}
+      - {x: 1, y: -13}
+      - {x: 1, y: -14}
+      - {x: 0, y: -14}
+      - {x: 0, y: -15}
+      - {x: -5, y: -15}
+      - {x: -5, y: -14}
+      - {x: -6, y: -14}
+      - {x: -6, y: -13}
+      - {x: -7, y: -13}
+      - {x: -7, y: -12}
+      - {x: -8, y: -12}
+      - {x: -8, y: -11}
+      - {x: -10, y: -11}
+      - {x: -10, y: -10}
+      - {x: -12, y: -10}
+      - {x: -12, y: -9}
+      - {x: -13, y: -9}
+      - {x: -13, y: -8}
+      - {x: -14, y: -8}
+      - {x: -14, y: -7}
+  m_UseDelaunayMesh: 0
+--- !u!50 &351339375
+Rigidbody2D:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 351339372}
+  m_BodyType: 0
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 605
+  m_LinearDamping: 1
+  m_AngularDamping: 20
+  m_GravityScale: 0
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0
+--- !u!114 &351339376
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 351339372}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 724bf49aa054f824eb06409071dd291c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sprite: {fileID: 21300000, guid: 321311b487b27304ab795f9e0d6f9043, type: 3}
+  flipX: 0
+  flipY: 0
+  rotation: 0
+  <MassMultiplier>k__BackingField: 1
+--- !u!4 &351339377
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 351339372}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 151.7, y: -350.2, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!28 &368560840
 Texture2D:
   m_ObjectHideFlags: 0
@@ -2098,7 +2365,7 @@ GameObject:
   - component: {fileID: 496593022}
   - component: {fileID: 496593021}
   - component: {fileID: 496593020}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: asteroid (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4415,7 +4682,7 @@ GameObject:
   - component: {fileID: 825322234}
   - component: {fileID: 825322233}
   - component: {fileID: 825322232}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: asteroid (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6373,7 +6640,7 @@ GameObject:
   - component: {fileID: 1384098531}
   - component: {fileID: 1384098532}
   - component: {fileID: 1384098533}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: asteroid
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7266,7 +7533,7 @@ GameObject:
   - component: {fileID: 1579913507}
   - component: {fileID: 1579913506}
   - component: {fileID: 1579913505}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: asteroid (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7682,6 +7949,7 @@ MonoBehaviour:
   stopDistance: 1.5
   minThrustAlignment: 0.1
   avoidanceWeight: 1.2
+  navigationSize: 1
 --- !u!114 &1632795191
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9674,4 +9942,5 @@ SceneRoots:
   - {fileID: 1579913509}
   - {fileID: 496593024}
   - {fileID: 825322236}
+  - {fileID: 351339377}
   - {fileID: 938120423}

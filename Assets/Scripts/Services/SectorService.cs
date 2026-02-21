@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Core.Services;
 using External.FyiurAmron;
 using UnityEngine;
+using ZLinq;
 
 namespace Services
 {
@@ -26,7 +27,7 @@ namespace Services
             _filter = new ContactFilter2D
             {
                 useLayerMask = true,
-                layerMask = LayerMask.GetMask("Enemy"),
+                layerMask = ~LayerMask.GetMask("Enemy", "Friendly"),
                 useTriggers = false
             };
         }
@@ -59,6 +60,8 @@ namespace Services
             var startSector = NormalizePositionToSector(start);
             var endSector = NormalizePositionToSector(end);
 
+            if (startSector == endSector) return new List<Vector3> { GetSectorCenter(endSector) };
+
             var footprintRadius = Mathf.CeilToInt(shipSize / sectorSize / 2f);
 
             var openSet = new PriorityQueue<Vector2, float>();
@@ -70,21 +73,25 @@ namespace Services
 
             openSet.Enqueue(startSector, Heuristic(startSector, endSector));
 
-            while (openSet.Count > 0)
-            {
-                var current = openSet.Dequeue();
+            var iterations = 0;
+            const int maxIterations = 1000;
 
-                if (current == endSector)
-                    return ReconstructPath(cameFrom, current);
+            while (openSet.Count > 0 && iterations < maxIterations)
+            {
+                iterations++;
+                var current = openSet.Dequeue();
 
                 foreach (var neighbor in GetNeighbors(current))
                 {
-                    if (!IsSectorWalkable(neighbor, footprintRadius))
+                    if (Vector2.Distance(neighbor, endSector) < 0.1f)
+                        return ReconstructPath(cameFrom, current);
+
+                    if (!IsSectorNavigable(neighbor, footprintRadius))
                         continue;
 
                     var tentativeG = gScore[current] + sectorSize;
 
-                    if (gScore.TryGetValue(neighbor, out var existingG) && tentativeG >= existingG)
+                    if (gScore.TryGetValue(neighbor, out var existingG) && tentativeG >= existingG - 0.001f)
                         continue;
 
                     cameFrom[neighbor] = current;
@@ -98,22 +105,29 @@ namespace Services
             return null;
         }
 
+        public void ClearCacheEntries(IEnumerable<Vector2> keys)
+        {
+            foreach (var key in keys)
+                _sectorCache.Remove(key);
+        }
+
         private IEnumerable<Vector2> GetNeighbors(Vector2 sector)
         {
             var s = sectorSize;
 
-            yield return sector + new Vector2(s, 0);
-            yield return sector + new Vector2(-s, 0);
-            yield return sector + new Vector2(0, s);
-            yield return sector + new Vector2(0, -s);
+            yield return new Vector2(sector.x + s, sector.y);
+            yield return new Vector2(sector.x - s, sector.y);
+            yield return new Vector2(sector.x, sector.y + s);
+            yield return new Vector2(sector.x, sector.y - s);
         }
 
-        private bool IsSectorWalkable(Vector2 centerSector, int radius)
+        private bool IsSectorNavigable(Vector2 centerSector, int radius)
         {
-            for (var x = -radius; x <= radius; x++)
-            for (var y = -radius; y <= radius; y++)
+            var radiusNormalized = radius - 1;
+            for (var x = -radiusNormalized; x <= radiusNormalized; x++)
+            for (var y = -radiusNormalized; y <= radiusNormalized; y++)
             {
-                var checkSector = centerSector + new Vector2(x * sectorSize, y * sectorSize);
+                var checkSector = new Vector2(centerSector.x + x * sectorSize, centerSector.y + y * sectorSize);
                 if (!GetSectorResult(checkSector).Empty)
                     return false;
             }
@@ -121,30 +135,38 @@ namespace Services
             return true;
         }
 
-        private float Heuristic(Vector2 a, Vector2 b)
+        private static float Heuristic(Vector2 a, Vector2 b)
         {
-            return Mathf.Abs(a.x - b.x) + Mathf.Abs(a.y - b.y);
+            return Vector2.Distance(a, b);
         }
 
         private List<Vector3> ReconstructPath(
             Dictionary<Vector2, Vector2> cameFrom,
             Vector2 current)
         {
-            var path = new List<Vector3> { current };
+            var path = new List<Vector3> { GetSectorCenter(current) };
 
             while (cameFrom.TryGetValue(current, out var prev))
             {
+                if (prev == current) break; // Safety
                 current = prev;
-                path.Add(current);
+                path.Add(GetSectorCenter(current));
             }
 
             path.Reverse();
-            return path;
+            return path.AsValueEnumerable().Skip(1).ToList();
+        }
+
+        private Vector2 GetSectorCenter(Vector2 sector)
+        {
+            return sector + new Vector2(sectorSize * 0.5f, sectorSize * 0.5f);
         }
 
         private Vector2 NormalizePositionToSector(Vector3 position)
         {
-            return new Vector2(position.x - position.x % sectorSize, position.y - position.y % sectorSize);
+            return new Vector2(
+                Mathf.Floor(position.x / sectorSize) * sectorSize,
+                Mathf.Floor(position.y / sectorSize) * sectorSize);
         }
     }
 }

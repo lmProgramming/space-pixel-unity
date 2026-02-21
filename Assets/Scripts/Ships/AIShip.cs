@@ -18,6 +18,7 @@ namespace Ships
         [SerializeField] private float stopDistance = 1.5f;
         [SerializeField] private float minThrustAlignment = 0.1f;
         [SerializeField] private float avoidanceWeight = 1.2f;
+        [SerializeField] private int navigationSize = 1;
 
         private BehaviourStateMachine _behaviourStateMachine;
         private ShipNavigationStateMachine _navigationStateMachine;
@@ -37,7 +38,14 @@ namespace Ships
             InitializeStateMachines();
         }
 
+        public int NavigationSize => navigationSize;
+
         public Transform Transform => transform;
+
+        public void SetNavigationSize(int size)
+        {
+            navigationSize = size;
+        }
 
         protected override void Move()
         {
@@ -109,6 +117,7 @@ namespace Ships
 
             _navigationStateMachine.RegisterState(new MoveTowardsEnemyState());
             _navigationStateMachine.RegisterState(new StopState());
+
             _navigationStateMachine.StartStateMachine("MoveTowardsEnemy",
                 new EnemyTargetStateData(ShipService.GetClosestEnemyShipOf(Team, GetPosition())));
         }

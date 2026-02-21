@@ -1,10 +1,13 @@
 using AI.EasyState;
+using Core.Services;
 using UnityEngine;
+using Zenject;
 
 namespace Ships.StateMachines.Navigation
 {
     public sealed class ShipNavigationStateMachine : StateMachine<ShipNavigationStateMachine, ShipNavigationState>
     {
+        [Inject] public ISectorService SectorService { get; private set; }
         public bool ShouldMove { get; private set; }
         public Vector2 Target { get; private set; }
 
