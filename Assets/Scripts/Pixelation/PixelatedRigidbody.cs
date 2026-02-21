@@ -62,6 +62,8 @@ namespace Pixelation
             CollisionHandler.OnCollision(collision);
         }
 
+        public Vector2 WeightedCenter { get; private set; }
+
         public IPixelGrid PixelGrid { get; set; }
 
         [field: SerializeField]
@@ -127,7 +129,9 @@ namespace Pixelation
 
             if (!pointsArray.AsValueEnumerable().Any()) return;
 
+            var countBefore = PixelGrid.PixelCount;
             PixelGrid.RemovePixels(pointsArray);
+            NudgeWeightedCenter(pointsArray, countBefore);
 
             OnPixelsLost?.Invoke(pointsArray.AsValueEnumerable().ToList(), PixelLoseReason.Destroyed);
 
@@ -161,6 +165,14 @@ namespace Pixelation
         }
 
         public Vector2 LocalToWorldPoint(Vector2Int localPosition)
+        {
+            Vector2 position = transform.TransformPoint(new Vector2(localPosition.x - (float)PixelGrid.Width / 2,
+                localPosition.y - (float)PixelGrid.Height / 2));
+
+            return position;
+        }
+
+        public Vector2 LocalToWorldPoint(Vector2 localPosition)
         {
             Vector2 position = transform.TransformPoint(new Vector2(localPosition.x - (float)PixelGrid.Width / 2,
                 localPosition.y - (float)PixelGrid.Height / 2));
@@ -202,7 +214,36 @@ namespace Pixelation
 
             StartPixelCount = PixelGrid.PixelCount;
 
+            WeightedCenter = CalculateWeightedCenter();
+
             OnPixelsLost?.Invoke(new List<Vector2Int>(), PixelLoseReason.Other);
+        }
+
+        private Vector2 CalculateWeightedCenter()
+        {
+            var sum = Vector2.zero;
+            var dims = PixelGrid.Dimensions();
+
+            for (var x = 0; x < dims.x; x++)
+            for (var y = 0; y < dims.y; y++)
+                if (PixelGrid.IsPixelAssumeInBounds(new Vector2Int(x, y)))
+                    sum += new Vector2(x, y);
+
+            return PixelGrid.PixelCount > 0 ? sum / PixelGrid.PixelCount : PixelGrid.Center;
+        }
+
+        private void NudgeWeightedCenter(IEnumerable<Vector2Int> removedPixels, int countBefore)
+        {
+            if (PixelGrid.PixelCount <= 0)
+            {
+                WeightedCenter = PixelGrid.Center;
+                return;
+            }
+
+            var removedSum = removedPixels.AsValueEnumerable()
+                .Aggregate(Vector2.zero, (current, p) => current + new Vector2(p.x, p.y));
+
+            WeightedCenter = (WeightedCenter * countBefore - removedSum) / PixelGrid.PixelCount;
         }
 
         private void GetComponents()
@@ -254,6 +295,8 @@ namespace Pixelation
 
         public void PixelLostByDivision(HashSet<Vector2Int> region)
         {
+            var countBefore = PixelGrid.PixelCount + region.Count;
+            NudgeWeightedCenter(region, countBefore);
             OnPixelsLost?.Invoke(region.AsValueEnumerable().ToList(), PixelLoseReason.Division);
         }
     }

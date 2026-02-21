@@ -106,7 +106,8 @@ namespace Ships
 
         public Vector2 GetPosition()
         {
-            return CommandModule.Transform.position;
+            var rb = CommandModule.PixelatedRigidbody;
+            return rb.LocalToWorldPoint(rb.WeightedCenter);
         }
 
         private async UniTaskVoid UpdateResourcesLoop()
