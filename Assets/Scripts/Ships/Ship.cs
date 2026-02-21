@@ -191,7 +191,7 @@ namespace Ships
 
             foreach (var ship in allShips)
             {
-                var distance = Vector2.Distance(transform.position, ship.GetPosition());
+                var distance = Vector2.Distance(GetPosition(), ship.GetPosition());
                 if (!(distance < closestDistance)) continue;
 
                 closestDistance = distance;

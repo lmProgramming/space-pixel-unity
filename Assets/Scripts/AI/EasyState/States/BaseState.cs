@@ -1,6 +1,5 @@
 using System;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 namespace AI.EasyState.States
 {
@@ -30,17 +29,6 @@ namespace AI.EasyState.States
         public virtual void Exit(TStateMachine stateMachine)
         {
             Debug.Log($"Exiting state: {StateName}");
-        }
-
-        private static Vector2 GetRandomDirection()
-        {
-            return Random.insideUnitCircle.normalized;
-        }
-
-        protected static Vector2 GetRandomDirectionBiased(Vector2 currentDirection, float bias)
-        {
-            var random = GetRandomDirection();
-            return Vector2.Lerp(random, currentDirection, bias).normalized;
         }
     }
 }

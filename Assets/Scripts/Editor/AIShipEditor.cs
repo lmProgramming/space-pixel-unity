@@ -1,4 +1,5 @@
 using Ships;
+using Ships.Modules;
 using Ships.StateMachines.Navigation;
 using UnityEditor;
 using UnityEngine;
@@ -14,7 +15,7 @@ namespace Editor
         private void OnSceneGUI()
         {
             var aiShip = (AIShip)target;
-            if (!aiShip) return;
+            if (!aiShip || !(Module)aiShip.CommandModule) return;
 
             _navStateMachine = aiShip.GetComponent<ShipNavigationStateMachine>();
 

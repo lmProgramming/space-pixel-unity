@@ -1079,8 +1079,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moduleConnectionFactory: {fileID: 292801186}
   team: {fileID: 654231193}
-  speedMultiplier: 24000
-  rotationMultiplier: -800000
+  speedMultiplier: 48000
+  rotationMultiplier: -3200000
 --- !u!4 &292801185
 Transform:
   m_ObjectHideFlags: 0
@@ -2173,7 +2173,7 @@ Transform:
   m_GameObject: {fileID: 351339372}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 151.7, y: -350.2, z: 0}
+  m_LocalPosition: {x: 253.9, y: -253.2, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -7945,8 +7945,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Ships.AIShip
   moduleConnectionFactory: {fileID: 1632795187}
   team: {fileID: 1056181131}
-  speedMultiplier: 24000
-  rotationMultiplier: -800000
+  speedMultiplier: 48000
+  rotationMultiplier: -3200000
   stopDistance: 1.5
   minThrustAlignment: 0.1
   avoidanceWeight: 1.2

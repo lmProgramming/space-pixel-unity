@@ -37,6 +37,8 @@ namespace Ships.Modules
 
         private void OnDestroy()
         {
+            if (PixelatedRigidbody != null) PixelatedRigidbody.OnPixelsLost -= CheckCohesion;
+
             Ship?.OnModuleDestroyed(this);
         }
 
@@ -169,7 +171,7 @@ namespace Ships.Modules
 
         private void DetachConnections(Module otherModule)
         {
-            if (!otherModule) return;
+            if (!this || !otherModule) return;
             Debug.Log($"[Module] DetachConnections: {name} detaching from {otherModule.name}", this);
 
             if (_connections.TryGetValue(otherModule, out var jointToDestroy) && jointToDestroy)
