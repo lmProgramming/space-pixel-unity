@@ -6,7 +6,7 @@ using UnityEditorInternal;
 using UnityEngine;
 using ZLinq;
 
-namespace Editor
+namespace Editor.ToolsExtensions
 {
     public class ComponentSorterEditor : EditorWindow
     {

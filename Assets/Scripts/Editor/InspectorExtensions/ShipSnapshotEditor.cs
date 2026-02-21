@@ -7,7 +7,7 @@ using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace Editor
+namespace Editor.InspectorExtensions
 {
     [CustomEditor(typeof(Ship), true)]
     public class ShipSnapshotEditor : UnityEditor.Editor

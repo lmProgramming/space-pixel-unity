@@ -2,7 +2,7 @@ using Ships.Modules;
 using UnityEditor;
 using UnityEngine;
 
-namespace Editor
+namespace Editor.InspectorExtensions
 {
     [CustomEditor(typeof(Module), true)]
     public class ModuleEditor : UnityEditor.Editor

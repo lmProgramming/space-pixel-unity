@@ -2,10 +2,10 @@ using Pixelation;
 using UnityEditor;
 using UnityEngine;
 
-namespace Editor
+namespace Editor.InspectorExtensions
 {
     [CustomEditor(typeof(PixelatedRigidbody), true)]
-    public class ShipEditor : UnityEditor.Editor
+    public class PixelatedRigidbodyEditor : UnityEditor.Editor
     {
         public override void OnInspectorGUI()
         {

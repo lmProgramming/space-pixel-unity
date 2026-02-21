@@ -4,7 +4,7 @@ using Ships.StateMachines.Navigation;
 using UnityEditor;
 using UnityEngine;
 
-namespace Editor
+namespace Editor.InspectorExtensions
 {
     [CustomEditor(typeof(AIShip))]
     public class AIShipEditor : UnityEditor.Editor
@@ -53,10 +53,10 @@ namespace Editor
             if (!_navStateMachine) return;
 
             var moveTowardsState = _navStateMachine.GetState<MoveTowardsEnemyState>("MoveTowardsEnemy");
-            if (moveTowardsState?.Path == null || moveTowardsState.Path.Count == 0) return;
+            if (moveTowardsState?.InternalPath == null || moveTowardsState.InternalPath.Count == 0) return;
 
-            var path = moveTowardsState.Path;
-            var currentWaypointIndex = moveTowardsState.CurrentWaypointIndex;
+            var path = moveTowardsState.InternalPath;
+            var currentWaypointIndex = moveTowardsState.InternalCurrentWaypointIndex;
 
             for (var i = 0; i < path.Count; i++)
             {

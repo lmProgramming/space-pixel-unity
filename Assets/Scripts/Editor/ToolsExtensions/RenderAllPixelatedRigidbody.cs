@@ -2,7 +2,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace Editor
+namespace Editor.ToolsExtensions
 {
     public class RenderAllPixelatedRigidbody : EditorWindow
     {
