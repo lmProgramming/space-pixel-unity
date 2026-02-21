@@ -98,12 +98,12 @@ namespace Ships.StateMachines.Navigation
             var hasMoreWaypoints = _currentWaypointIndex + 1 < _path.Count;
             var interpolatedWaypoint = waypoint;
             if (hasMoreWaypoints)
-                interpolatedWaypoint = ProcessNextWaypoint(stateMachine, waypoint, distanceToWaypoint);
+                interpolatedWaypoint = ProcessNextWaypoint(waypoint, distanceToWaypoint);
 
             stateMachine.SetMovementTarget(interpolatedWaypoint);
         }
 
-        private Vector2 ProcessNextWaypoint(ShipNavigationStateMachine stateMachine, Vector2 waypoint,
+        private Vector2 ProcessNextWaypoint(Vector2 waypoint,
             float distanceToWaypoint)
         {
             var nextWaypoint = _path[_currentWaypointIndex + 1];

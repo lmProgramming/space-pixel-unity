@@ -52,11 +52,14 @@ namespace Ships
 
         public ResourceManager ResourceManager { get; private set; }
 
-        protected virtual void Start()
+        private void Awake()
         {
             CommandModule ??= GetComponentInChildren<Command>();
             ResourceManager ??= GetComponentInChildren<ResourceManager>();
+        }
 
+        protected virtual void Start()
+        {
             _biCohesionGraph = new BiCohesionGraph<IModule>(CommandModule);
             _biCohesionGraph.OnNodesRemovedDueToUnreachability += HandleUnreachableModules;
 

@@ -865,7 +865,7 @@ namespace External.FyiurAmron
         {
             if (typeof(TPriority).IsValueType)
             {
-                if (comparer == Comparer<TPriority>.Default)
+                if (Equals(comparer, Comparer<TPriority>.Default))
                     // if the user manually specifies the default comparer,
                     // revert to using the optimized path.
                     return null;
