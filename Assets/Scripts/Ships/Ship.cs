@@ -52,11 +52,14 @@ namespace Ships
 
         public ResourceManager ResourceManager { get; private set; }
 
-        protected virtual void Start()
+        private void Awake()
         {
             CommandModule ??= GetComponentInChildren<Command>();
             ResourceManager ??= GetComponentInChildren<ResourceManager>();
+        }
 
+        protected virtual void Start()
+        {
             _biCohesionGraph = new BiCohesionGraph<IModule>(CommandModule);
             _biCohesionGraph.OnNodesRemovedDueToUnreachability += HandleUnreachableModules;
 
@@ -103,7 +106,8 @@ namespace Ships
 
         public Vector2 GetPosition()
         {
-            return CommandModule.Transform.position;
+            var rb = CommandModule.PixelatedRigidbody;
+            return rb.LocalToWorldPoint(rb.WeightedCenter);
         }
 
         private async UniTaskVoid UpdateResourcesLoop()

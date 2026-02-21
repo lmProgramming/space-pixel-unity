@@ -7,6 +7,8 @@ namespace Ships.StateMachines.Behaviour
 {
     public class AttackState : BehaviourState
     {
+        private const float AttackStopBufferRangeMultiplier = 1.5f;
+
         private float _attackCooldown;
         private float _attackRange;
         private float _lastAttackTime;
@@ -42,21 +44,18 @@ namespace Ships.StateMachines.Behaviour
                 return;
             }
 
-            var distanceToTarget = Vector2.Distance(stateMachine.transform.position, _targetEnemy.GetPosition());
+            var distanceToTarget = Vector2.Distance(Ship.GetPosition(), _targetEnemy.GetPosition());
 
-            // If target is out of range, transition to moving state or lookout
-            if (distanceToTarget > _attackRange * 1.5f) // Add some buffer
+            if (distanceToTarget > _attackRange * AttackStopBufferRangeMultiplier)
             {
                 stateMachine.TransitionToState("Lookout");
                 return;
             }
 
-            // Attack if cooldown is ready
-            if (Time.time - _lastAttackTime >= _attackCooldown)
-            {
-                PerformAttack();
-                _lastAttackTime = Time.time;
-            }
+            if (Time.time - _lastAttackTime < _attackCooldown) return;
+
+            PerformAttack();
+            _lastAttackTime = Time.time;
         }
 
         private void PerformAttack()

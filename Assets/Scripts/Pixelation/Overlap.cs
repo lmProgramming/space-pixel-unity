@@ -17,7 +17,7 @@ namespace Pixelation
         private static Bounds CalculateWorldBounds(IPixelatedRigidbody body)
         {
             var dimensions = body.Dimensions();
-            if (dimensions.x <= 0 || dimensions.y <= 0) return new Bounds(body.Transform.position, Vector3.zero);
+            if (dimensions.x <= 0 || dimensions.y <= 0) return new Bounds(body.Transform.position, Vector2.zero);
 
             var world00 = body.LocalToWorldPoint(new Vector2Int(0, 0));
             var worldW0 = body.LocalToWorldPoint(new Vector2Int(dimensions.x - 1, 0));
@@ -35,8 +35,8 @@ namespace Pixelation
             maxX += pixelWorldSizeApprox * 0.5f + 1;
             maxY += pixelWorldSizeApprox * 0.5f + 1;
 
-            var center = new Vector3((minX + maxX) / 2f, (minY + maxY) / 2f, body.Transform.position.z);
-            var size = new Vector3(maxX - minX, maxY - minY, 0.1f);
+            var center = new Vector2((minX + maxX) / 2f, (minY + maxY) / 2f);
+            var size = new Vector2(maxX - minX, maxY - minY);
 
             return new Bounds(center, size);
         }

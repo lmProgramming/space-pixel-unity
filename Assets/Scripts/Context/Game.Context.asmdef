@@ -1,19 +1,20 @@
 {
-    "name": "Context",
-    "rootNamespace": "",
-    "references": [
-        "GUID:4369e8c3ba826540aa585f492422e269",
-        "GUID:34bdced8957d5654aa357c6c421984d1",
-        "GUID:24173525d8afb24ad9153261c706727e",
-        "GUID:06792acb7c5af21edb53be64c5595512"
-    ],
-    "includePlatforms": [],
-    "excludePlatforms": [],
-    "allowUnsafeCode": false,
-    "overrideReferences": false,
-    "precompiledReferences": [],
-    "autoReferenced": true,
-    "defineConstraints": [],
-    "versionDefines": [],
-    "noEngineReferences": false
+  "name": "Context",
+  "rootNamespace": "",
+  "references": [
+    "GUID:4369e8c3ba826540aa585f492422e269",
+    "GUID:34bdced8957d5654aa357c6c421984d1",
+    "GUID:24173525d8afb24ad9153261c706727e",
+    "GUID:06792acb7c5af21edb53be64c5595512",
+    "GUID:29d64bc27fa1be0118de1c30cf841f13"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
 }

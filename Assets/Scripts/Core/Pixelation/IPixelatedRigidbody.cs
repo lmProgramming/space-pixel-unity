@@ -9,6 +9,7 @@ namespace Core.Pixelation
     {
         float MassMultiplier { get; }
         bool HasSprite { get; }
+        Vector2 WeightedCenter { get; }
         IPixelGrid PixelGrid { get; set; }
         IPixelCollisionHandler CollisionHandler { get; }
         Rigidbody2D Rigidbody { get; }
@@ -18,6 +19,7 @@ namespace Core.Pixelation
         Vector2 WorldToLocalPoint(Vector2 worldPosition);
         Vector2Int WorldToLocalPixel(Vector2 worldPosition);
         Vector2 LocalToWorldPoint(Vector2Int localPosition);
+        Vector2 LocalToWorldPoint(Vector2 localPosition);
         event Action<IPixelated> OnNoPixelsLeft;
         event Action<List<Vector2Int>, PixelLoseReason> OnPixelsLost;
     }
