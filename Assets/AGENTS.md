@@ -27,7 +27,7 @@ Assemblies:
 
 - AI: just the basic state machine, don't touch
 - Background: just the background, don't touch
-- Context: when creating new services etc., make sure to add them to GameSceneInstaller (Zenject) and use it's dependency injection
+- Context: when creating new services etc., make sure to add them to GameSceneInstaller (Zenject) and use its dependency injection
 - ContourTracer: calculating physical outlines of PixelatedRigidbodies, don't touch
 - Core: mostly basic interfaces/enums
 - EasyPool: just the pool, don't touch
@@ -39,9 +39,9 @@ Assemblies:
 - Instantiation: used for ZenjectInstantiator when you need to instantiate something with Zenject, don't touch
 - LM: my personal utility scripts, feel free to use these utils (GameInput, SimpleTimer, Timer, VecExt, MathExt, DefaultDictionary)
 - Pixelation: PixelatedRigidbody! And CollisionResolver and PixelCollisionHandler
-- Services: many different services, like spawners, or to access ships, sectors etc. Don't forget to add new services to GameSceneInstaller (Zenject) and use it's dependency injection
+- Services: many different services, like spawners, or to access ships, sectors etc. Don't forget to add new services to GameSceneInstaller (Zenject) and use its dependency injection
 - Ships: all ship related code, like Ship, PlayerShip, AIShip, and very importantly - Module (ships are made of modules, which have PixelatedRigidbody, and they are what make up the ship, they can be destroyed)
-  - Current modules inheritors: CommandModule (it's position is the ship's position - don't use ship transform.position!). Cannon, Laser, Engine  
+  - Current modules inheritors: CommandModule (its position is the ship's position - don't use ship transform.position!). Cannon, Laser, Engine  
   - Modules use efficiency based on how many pixels they have left.
   - Modules have crew and power needs, and they can produce both
 - UI: UI (use UIToolkit)
@@ -49,4 +49,4 @@ Assemblies:
 ## Testing
 
 I will run tests after you are done. Make sure to test critical functionality in PlayMode tests.
-Tests are in AssemblyFolder/Tests in it's own assembly.
+Tests are in AssemblyFolder/Tests in its own assembly.

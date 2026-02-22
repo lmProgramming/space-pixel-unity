@@ -28,6 +28,14 @@
 |------|--------------|------|
 | Game.Ships.Tests | Game.Ships.Tests.asmdef | `2e6b3daac871ce600a624bfc8b07b038` |
 | LM.Graph.Tests | LM.Graph.Tests.asmdef | `78c0c23bef7676195a5ee0c989b2dd25` |
+| Game.Ships.Tests | Game.Ships.Tests.asmdef | `2e6b3daac871ce600a624bfc8b07b038` |
+| Game.Services.Tests | Game.Services.Tests.asmdef | `bfccd2559ffe7797b8cf1ddce40a01ff` |
+| Game.Gameplay.Tests | Game.Gameplay.Tests.asmdef | `3d75db2bacaab486d915e22ec7905a55` |
+| Game.UI.Tests | Game.UI.Tests.asmdef | `2081011ff67437d85baa21f04498371b` |
+| Game.Events.Tests | Game.Events.Tests.asmdef | `e6fa68db2a71ae99f93266cf39cebbf1` |
+| Game.Context.Tests | Game.Context.Tests.asmdef | `f90e40e86ba67a993a04a84259226f16` |
+| Game.Core.Tests | Game.Core.Tests.asmdef | `2511d1df5e46a3fe0a30985715a771ca` |
+| Game.Pixelation.Tests | Game.Pixelation.Tests.asmdef | `934da0e225cbf17af8cc9de19b6fdf24` |
 
 ## Useful Package Assemblies
 

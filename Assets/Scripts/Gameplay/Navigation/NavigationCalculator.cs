@@ -103,7 +103,6 @@ namespace Gameplay.Navigation
             return true;
         }
 
-        // Update your Heuristic signature
         private static float Heuristic(Vector2 current, Vector2 end, Vector2 start)
         {
             var manhattan = Mathf.Abs(current.x - end.x) + Mathf.Abs(current.y - end.y);
