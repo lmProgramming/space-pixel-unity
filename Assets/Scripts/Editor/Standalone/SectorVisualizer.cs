@@ -10,9 +10,11 @@ namespace Editor.Standalone
         [SerializeField] private bool onlyShowInCameraView = true;
         [SerializeField] private bool showGrid = true;
         [SerializeField] private float gizmoZ;
-        [SerializeField] private SectorService sectorService;
 
         [HideInInspector] public bool showSectorOverlay;
+
+        [SerializeField]
+        private NavigationService navigationService;
 
         private Camera _camera;
 
@@ -23,11 +25,11 @@ namespace Editor.Standalone
 
         private void OnDrawGizmos()
         {
-            var sectorSize = sectorService.InternalSectorSize;
+            var sectorSize = navigationService.InternalSectorSize;
             if (sectorSize <= 0) return;
 
-            var cache = sectorService.InternalCache;
-            var cacheDuration = sectorService.InternalCacheDuration;
+            var cache = navigationService.InternalCache;
+            var cacheDuration = navigationService.InternalCacheDuration;
 
             if (showGrid && _camera) DrawGrid(cache, sectorSize, cacheDuration);
         }
@@ -81,7 +83,7 @@ namespace Editor.Standalone
 
         public void RecalculateSectorGrid()
         {
-            var sectorSize = sectorService.InternalSectorSize;
+            var sectorSize = navigationService.InternalSectorSize;
             var camPos = _camera.transform.position;
 
             var originX = Mathf.Floor(camPos.x / sectorSize) * sectorSize;
@@ -93,10 +95,10 @@ namespace Editor.Standalone
             for (var row = -halfCount; row < halfCount; row++)
                 keys.Add(new Vector2(originX + col * sectorSize, originY + row * sectorSize));
 
-            sectorService.ClearCacheEntries(keys);
+            navigationService.ClearCacheEntries(keys);
 
             foreach (var key in keys)
-                sectorService.GetSectorResult(new Vector3(key.x + sectorSize * 0.5f, key.y + sectorSize * 0.5f));
+                navigationService.GetSectorResult(new Vector3(key.x + sectorSize * 0.5f, key.y + sectorSize * 0.5f));
 
             showSectorOverlay = true;
         }
