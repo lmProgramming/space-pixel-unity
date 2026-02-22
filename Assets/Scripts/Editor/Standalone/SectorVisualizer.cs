@@ -60,7 +60,7 @@ namespace Editor.Standalone
 
                 var age = currentTime - result.GenerationTime;
 
-                Gizmos.color = GetSectorColor(result.Empty, age, cacheDuration);
+                Gizmos.color = GetSectorColor(result.IsEmpty, age, cacheDuration);
                 var gizmoCenter = new Vector3(center.x, center.y, gizmoZ);
                 Gizmos.DrawCube(gizmoCenter, new Vector3(sectorSize * 0.95f, sectorSize * 0.95f, 0.01f));
 

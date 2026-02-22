@@ -1,5 +1,5 @@
 {
-  "name": "Game.Editor",
+  "name": "Game.Editor.Standalone",
   "rootNamespace": "",
   "references": [
     "GUID:29d64bc27fa1be0118de1c30cf841f13",
