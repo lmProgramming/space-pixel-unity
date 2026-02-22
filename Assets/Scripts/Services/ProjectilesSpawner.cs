@@ -12,12 +12,25 @@ namespace Services
         [SerializeField] private Instantiator instantiator;
 
         public GameObject Spawn(GameObject projectilePrefab, Vector3 transformPosition, Quaternion rotation,
-            LayerMask layer)
+            Collider2D[] collidersToIgnore)
         {
             var bulletObject =
                 instantiator.Instantiate(projectilePrefab, transformPosition, rotation, ProjectilesHolder);
-            bulletObject.GetComponent<Bullet>().SetLayer(layer);
+
+            bulletObject.GetComponent<Bullet>().SetLayer(LayerMask.NameToLayer("Bullets"));
+
+            IgnoreCollisionsBetweenBulletAndShooter(bulletObject, collidersToIgnore);
+
             return bulletObject;
+        }
+
+        private static void IgnoreCollisionsBetweenBulletAndShooter(GameObject bulletObject,
+            Collider2D[] shooterColliders)
+        {
+            var bulletColliders = bulletObject.GetComponentsInChildren<Collider2D>();
+            foreach (var bulletCollider in bulletColliders)
+            foreach (var shooterCollider in shooterColliders)
+                Physics2D.IgnoreCollision(bulletCollider, shooterCollider, true);
         }
     }
 }
