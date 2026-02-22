@@ -382,8 +382,8 @@ MonoBehaviour:
   onlyShowInCameraView: 0
   showGrid: 1
   gizmoZ: 0
-  sectorService: {fileID: 2088262905}
   showSectorOverlay: 0
+  navigationService: {fileID: 2088262905}
 --- !u!1 &115355037
 GameObject:
   m_ObjectHideFlags: 0
@@ -3727,7 +3727,7 @@ MonoBehaviour:
   shipService: {fileID: 1601371490}
   soundManager: {fileID: 1901650863}
   effectSpawner: {fileID: 420075600}
-  sectorService: {fileID: 2088262905}
+  navigationService: {fileID: 2088262905}
   missionService: {fileID: 1040490547}
   playerShip: {fileID: 292801184}
 --- !u!114 &499716988

@@ -23,7 +23,7 @@ namespace Context
         [SerializeField] private ShipService shipService;
         [SerializeField] private SoundManager soundManager;
         [SerializeField] private EffectsSpawner effectSpawner;
-        [SerializeField] private SectorService sectorService;
+        [SerializeField] private NavigationService navigationService;
         [SerializeField] private MissionService missionService;
         [SerializeField] private PlayerShip playerShip;
 
@@ -63,8 +63,8 @@ namespace Context
                 .FromInstance(effectSpawner)
                 .AsSingle();
 
-            Container.Bind<ISectorService>()
-                .FromInstance(sectorService)
+            Container.Bind<INavigationService>()
+                .FromInstance(navigationService)
                 .AsSingle();
 
             Container.Bind<IMissionService>()

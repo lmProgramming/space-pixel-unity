@@ -70,7 +70,7 @@ namespace Ships.StateMachines.Navigation
 
             _lastPathUpdateTime = Time.time;
 
-            _path = stateMachine.SectorService.CalculatePath(Ship.GetPosition(), targetPosition,
+            _path = stateMachine.NavigationService.CalculatePath(Ship.GetPosition(), targetPosition,
                 stateMachine.Controller.NavigationSize);
             _currentWaypointIndex = 0;
         }
