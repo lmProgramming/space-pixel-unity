@@ -14,11 +14,12 @@ namespace Gameplay.Tests.Navigation
         private static NavigationCalculator BuildCalculator(HashSet<Vector2> blockedSectors = null)
         {
             blockedSectors ??= new HashSet<Vector2>();
-            return new NavigationCalculator(SectorSize, sector =>
+            return new NavigationCalculator(SectorSize, Query, (sector, _, _) => Query(sector));
+
+            SectorResult Query(Vector2 sector)
             {
-                var empty = !blockedSectors.Contains(sector);
-                return new SectorResult(empty, 0f);
-            });
+                return new SectorResult(blockedSectors.Contains(sector), false, 0f);
+            }
         }
 
         [Test]

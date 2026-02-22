@@ -11,7 +11,7 @@ namespace Ships.StateMachines.Navigation
 {
     public class MoveTowardsEnemyState : ShipNavigationState
     {
-        private const float PathUpdateInterval = 5.0f;
+        private const float PathUpdateInterval = 1.0f;
         private const float WaypointThreshold = 70.0f;
         private int _currentWaypointIndex;
         private float _lastPathUpdateTime;
@@ -71,7 +71,7 @@ namespace Ships.StateMachines.Navigation
             _lastPathUpdateTime = Time.time;
 
             _path = stateMachine.NavigationService.CalculatePath(Ship.GetPosition(), targetPosition,
-                stateMachine.Controller.NavigationSize);
+                stateMachine.Controller.NavigationSize, Ship, _targetEnemyShip);
             _currentWaypointIndex = 0;
         }
 

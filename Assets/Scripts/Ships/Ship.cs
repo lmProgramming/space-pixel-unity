@@ -104,6 +104,8 @@ namespace Ships
 
         public IModule CommandModule { get; private set; }
 
+        public Collider2D[] OwnColliders { get; private set; } = Array.Empty<Collider2D>();
+
         public Vector2 GetPosition()
         {
             var rb = CommandModule.PixelatedRigidbody;
@@ -157,6 +159,8 @@ namespace Ships
             _modulesDictionary.Clear();
 
             foreach (var module in ModuleGraph.GetAllNodes()) _modulesDictionary[module.Type].Add(module as Module);
+
+            OwnColliders = GetComponentsInChildren<Collider2D>();
 
             ResourceManager.Recalculate(AllModules);
         }
