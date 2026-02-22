@@ -104,6 +104,22 @@ namespace Services.Tests
         }
 
         [Test]
+        public void GetAlliedShipsOf_ReturnsSelf_AndAlliesTeams()
+        {
+            var shipA = new FakeShip(_teamA, Vector2.zero);
+            var shipB = new FakeShip(_teamB, Vector2.zero);
+            _shipService.RegisterShip(shipA);
+            _shipService.RegisterShip(shipB);
+
+            _teamA.AddAlly(_teamB);
+
+            var allies = _shipService.GetAlliedShipsOf(_teamA).ToList();
+
+            Assert.AreEqual(2, allies.Count);
+            Assert.Contains(shipA, allies);
+        }
+
+        [Test]
         public void GetClosestEnemyShipOf_ReturnsClosestEnemy()
         {
             var nearEnemy = new FakeShip(_teamB, new Vector2(5f, 0f));
