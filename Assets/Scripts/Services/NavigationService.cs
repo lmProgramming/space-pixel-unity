@@ -1,12 +1,10 @@
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using Core.Services;
 using Core.Ship;
 using Gameplay.Navigation;
 using UnityEngine;
 using Zenject;
-using ZLinq;
 
 [assembly: InternalsVisibleTo("Game.Editor.Standalone")]
 
@@ -132,12 +130,9 @@ namespace Services
             return new SectorResult(hasObstacles, hasDebris, Time.time);
         }
 
-        private IShip FindShipForCollider(Collider2D potentialShipCollider)
+        private static IShip FindShipForCollider(Collider2D potentialShipCollider)
         {
-            return (from ship in _shipService.GetShips()
-                let ownColliders = ship.OwnColliders
-                where ownColliders.AsValueEnumerable().Any(t => t == potentialShipCollider)
-                select ship).FirstOrDefault();
+            return !potentialShipCollider ? null : potentialShipCollider.GetComponentInParent<IShip>();
         }
 
 #if UNITY_EDITOR

@@ -7,6 +7,7 @@ namespace Editor.Standalone
 {
     public class SectorVisualizer : MonoBehaviour
     {
+#if UNITY_EDITOR
         [SerializeField] private bool onlyShowInCameraView = true;
         [SerializeField] private bool showGrid = true;
         [SerializeField] private float gizmoZ;
@@ -102,5 +103,6 @@ namespace Editor.Standalone
 
             showSectorOverlay = true;
         }
+#endif
     }
 }
