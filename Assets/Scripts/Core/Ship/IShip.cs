@@ -7,6 +7,7 @@ namespace Core.Ship
     {
         ITeam Team { get; }
         IModule CommandModule { get; }
+        Collider2D[] OwnColliders { get; }
         Vector2 GetPosition();
     }
 }

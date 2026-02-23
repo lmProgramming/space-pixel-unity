@@ -68,8 +68,9 @@ namespace Ships.Modules
 
             var rotation = Quaternion.Euler(0, 0, angle - 90);
 
+            var shooterColliders = Ship.OwnColliders;
             var newBullet =
-                _projectilesSpawner.Spawn(projectilePrefab, transform.position, rotation, gameObject.layer);
+                _projectilesSpawner.Spawn(projectilePrefab, transform.position, rotation, shooterColliders);
 
             var bulletRigidbody = newBullet.GetComponent<Rigidbody2D>();
             bulletRigidbody.linearVelocity = PixelatedRigidbody.Rigidbody.linearVelocity;

@@ -1,9 +1,11 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Core.Gameplay.EasyTeam;
 using Core.Ship;
 using NUnit.Framework;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Services.Tests
 {
@@ -166,6 +168,7 @@ namespace Services.Tests
 
             public ITeam Team { get; }
             public IModule CommandModule => null;
+            public Collider2D[] OwnColliders => Array.Empty<Collider2D>();
 
             public Vector2 GetPosition()
             {

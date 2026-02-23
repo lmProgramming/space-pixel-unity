@@ -1,10 +1,12 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Core.Services;
+using Core.Ship;
 using Gameplay.Navigation;
 using UnityEngine;
+using Zenject;
 
-[assembly: InternalsVisibleTo("Game.Editor")]
+[assembly: InternalsVisibleTo("Game.Editor.Standalone")]
 
 namespace Services
 {
@@ -15,22 +17,31 @@ namespace Services
 
         private readonly Collider2D[] _results = new Collider2D[32];
         private readonly Dictionary<Vector2, SectorResult> _sectorCache = new();
+        private ContactFilter2D _allBlockersFilter;
         private NavigationCalculator _calculator;
+        private ContactFilter2D _obstaclesFilter;
 
-        private ContactFilter2D _filter;
+        [Inject] private IShipService _shipService;
 
         private Vector2 Sector => new(sectorSize, sectorSize);
 
         private void Awake()
         {
-            _filter = new ContactFilter2D
+            _obstaclesFilter = new ContactFilter2D
             {
                 useLayerMask = true,
-                layerMask = ~LayerMask.GetMask("Enemy", "Friendly"),
+                layerMask = LayerMask.GetMask("Obstacles", "Debris"),
                 useTriggers = false
             };
 
-            _calculator = new NavigationCalculator(sectorSize, QuerySectorByPosition);
+            _allBlockersFilter = new ContactFilter2D
+            {
+                useLayerMask = true,
+                layerMask = LayerMask.GetMask("Obstacles", "Debris", "Friendly", "Enemy"),
+                useTriggers = false
+            };
+
+            _calculator = new NavigationCalculator(sectorSize, QuerySectorByPosition, QuerySectorByPositionForShips);
         }
 
         public SectorResult GetSectorResult(Vector3 position)
@@ -41,16 +52,20 @@ namespace Services
                 cachedResult.GenerationTime > Time.time - cacheDuration)
                 return cachedResult;
 
-            var count = Physics2D.OverlapBox(normalizedPosition, Sector, 0, _filter, _results);
-            var result = new SectorResult(count == 0, Time.time);
+            var result = BuildSectorResult(normalizedPosition);
             _sectorCache[normalizedPosition] = result;
-
             return result;
         }
 
         public List<Vector3> CalculatePath(Vector3 start, Vector3 end, int shipSize)
         {
             return _calculator.CalculatePath(start, end, shipSize);
+        }
+
+        public List<Vector3> CalculatePath(Vector3 start, Vector3 end, int shipSize, IShip callerShip,
+            IShip targetShip)
+        {
+            return _calculator.CalculatePath(start, end, shipSize, callerShip, targetShip);
         }
 
         public void ClearCacheEntries(IEnumerable<Vector2> keys)
@@ -62,6 +77,62 @@ namespace Services
         private SectorResult QuerySectorByPosition(Vector2 sectorPosition)
         {
             return GetSectorResult(new Vector3(sectorPosition.x, sectorPosition.y));
+        }
+
+        private SectorResult QuerySectorByPositionForShips(Vector2 sectorPosition, IShip callerShip,
+            IShip targetShip)
+        {
+            var count = Physics2D.OverlapBox(sectorPosition, Sector, 0, _allBlockersFilter, _results);
+            if (count == 0) return SectorResult.Empty;
+
+            var shipsFound = new List<IShip>();
+            var hasObstacles = false;
+            var hasDebris = false;
+
+            for (var i = 0; i < count; i++)
+            {
+                var layer = _results[i].gameObject.layer;
+                if (layer == LayerMask.NameToLayer("Obstacles"))
+                {
+                    hasObstacles = true;
+                    continue;
+                }
+
+                if (layer == LayerMask.NameToLayer("Debris"))
+                {
+                    hasDebris = true;
+                    continue;
+                }
+
+                var ship = FindShipForCollider(_results[i]);
+                if (ship != null)
+                    shipsFound.Add(ship);
+            }
+
+            return new SectorResult(hasObstacles, hasDebris, Time.time, shipsFound);
+        }
+
+        private SectorResult BuildSectorResult(Vector2 sectorPosition)
+        {
+            var count = Physics2D.OverlapBox(sectorPosition, Sector, 0, _obstaclesFilter, _results);
+            var hasObstacles = false;
+            var hasDebris = false;
+
+            for (var i = 0; i < count; i++)
+            {
+                var layer = _results[i].gameObject.layer;
+                if (layer == LayerMask.NameToLayer("Obstacles"))
+                    hasObstacles = true;
+                else if (layer == LayerMask.NameToLayer("Debris"))
+                    hasDebris = true;
+            }
+
+            return new SectorResult(hasObstacles, hasDebris, Time.time);
+        }
+
+        private static IShip FindShipForCollider(Collider2D potentialShipCollider)
+        {
+            return !potentialShipCollider ? null : potentialShipCollider.GetComponentInParent<IShip>();
         }
 
 #if UNITY_EDITOR

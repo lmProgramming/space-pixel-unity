@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Core.Services;
+using Core.Ship;
 using External.FyiurAmron;
 using UnityEngine;
 using ZLinq;
@@ -10,15 +11,30 @@ namespace Gameplay.Navigation
     public class NavigationCalculator
     {
         private readonly Func<Vector2, SectorResult> _getSectorResult;
+        private readonly Func<Vector2, IShip, IShip, SectorResult> _getSectorResultForShips;
         private readonly float _sectorSize;
 
-        public NavigationCalculator(float sectorSize, Func<Vector2, SectorResult> getSectorResult)
+        public NavigationCalculator(float sectorSize, Func<Vector2, SectorResult> getSectorResult,
+            Func<Vector2, IShip, IShip, SectorResult> getSectorResultForShips)
         {
             _sectorSize = sectorSize;
             _getSectorResult = getSectorResult;
+            _getSectorResultForShips = getSectorResultForShips;
         }
 
         public List<Vector3> CalculatePath(Vector3 start, Vector3 end, int shipSize)
+        {
+            return CalculatePathInternal(start, end, shipSize, null, null);
+        }
+
+        public List<Vector3> CalculatePath(Vector3 start, Vector3 end, int shipSize, IShip callerShip,
+            IShip targetShip)
+        {
+            return CalculatePathInternal(start, end, shipSize, callerShip, targetShip);
+        }
+
+        private List<Vector3> CalculatePathInternal(Vector3 start, Vector3 end, int shipSize, IShip callerShip,
+            IShip targetShip)
         {
             var startSector = NormalizePositionToSector(start);
             var endSector = NormalizePositionToSector(end);
@@ -49,7 +65,7 @@ namespace Gameplay.Navigation
                     if (Vector2.Distance(neighbor, endSector) < 0.1f)
                         return ReconstructPath(cameFrom, current);
 
-                    if (!IsSectorNavigable(neighbor, footprintRadius))
+                    if (!IsSectorNavigable(neighbor, footprintRadius, callerShip, targetShip))
                         continue;
 
                     var distanceToNeighbor = Vector2.Distance(current, neighbor);
@@ -89,32 +105,43 @@ namespace Gameplay.Navigation
             yield return new Vector2(sector.x, sector.y - _sectorSize);
         }
 
-        private bool IsSectorNavigable(Vector2 centerSector, int radius)
+        private bool IsSectorNavigable(Vector2 centerSector, int radius, IShip callerShip, IShip targetShip)
         {
             var radiusNormalized = radius - 1;
             for (var x = -radiusNormalized; x <= radiusNormalized; x++)
             for (var y = -radiusNormalized; y <= radiusNormalized; y++)
             {
                 var checkSector = new Vector2(centerSector.x + x * _sectorSize, centerSector.y + y * _sectorSize);
-                if (!_getSectorResult(checkSector).Empty)
+
+                var result = callerShip != null
+                    ? _getSectorResultForShips(checkSector, callerShip, targetShip)
+                    : _getSectorResult(checkSector);
+
+                if (!IsSectorResultPassable(result, callerShip, targetShip))
                     return false;
             }
 
             return true;
         }
 
+        private static bool IsSectorResultPassable(SectorResult result, IShip callerShip, IShip targetShip)
+        {
+            if (result.HasObstacles || result.HasDebris) return false;
+            return callerShip == null
+                ? result.IsEmpty
+                : result.ShipsInSector.AsValueEnumerable().All(ship => ship == callerShip || ship == targetShip);
+        }
+
         private static float Heuristic(Vector2 current, Vector2 end, Vector2 start)
         {
             var manhattan = Mathf.Abs(current.x - end.x) + Mathf.Abs(current.y - end.y);
 
-            // Cross-product tie breaker
             var dx1 = current.x - end.x;
             var dy1 = current.y - end.y;
             var dx2 = start.x - end.x;
             var dy2 = start.y - end.y;
             var crossProduct = Mathf.Abs(dx1 * dy2 - dx2 * dy1);
 
-            // Add a tiny penalty for veering off the straight line
             return manhattan + crossProduct * 0.001f;
         }
 
