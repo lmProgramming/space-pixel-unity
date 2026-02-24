@@ -30,7 +30,6 @@ namespace Ships.Serialization
         public ModuleType moduleType;
         public Vector3 localPosition;
         public Quaternion localRotation;
-        public Vector3 localScale;
         public PixelGridSnapshot pixelGrid;
 
         public ModuleSnapshot()

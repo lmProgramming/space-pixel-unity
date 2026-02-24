@@ -50,3 +50,4 @@ Assemblies:
 
 I will run tests after you are done. Make sure to test critical functionality in PlayMode tests.
 Tests are in AssemblyFolder/Tests in its own assembly.
+To allow tests to see private methods/fields, add [assembly: InternalsVisibleTo("AssemblyName.Tests")]. Then create new fields `internal InternalXYZ => XYZ`

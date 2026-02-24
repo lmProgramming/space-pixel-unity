@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Core.Ship;
 using Ships.Modules;
 using UnityEngine;
 
@@ -27,15 +26,45 @@ namespace Ships.Serialization
                 var moduleSnapshot = CaptureModuleSnapshot(module);
                 snapshot.modules.Add(moduleSnapshot);
 
-                if (ship.CommandModule != null && module == (Module)ship.CommandModule) snapshot.commandModuleIndex = i;
+                if (ship.CommandModule != null && module == (Module)ship.CommandModule)
+                    snapshot.commandModuleIndex = i;
             }
 
-            CaptureConnections(ship, snapshot, modules, moduleToIndex);
+            ModuleConnectionDetector.DetectAndCaptureConnections(snapshot, modules, moduleToIndex);
 
             Debug.Log(
                 $"[ShipSnapshotService] Captured snapshot of '{ship.name}' with {snapshot.modules.Count} modules and {snapshot.connections.Count} connections");
 
             return snapshot;
+        }
+
+        public void ApplySnapshot(Ship ship, ShipSnapshot snapshot)
+        {
+            if (!ship)
+            {
+                Debug.LogError("[ShipSnapshotService] Cannot apply snapshot: ship is null");
+                return;
+            }
+
+            if (snapshot == null)
+            {
+                Debug.LogError("[ShipSnapshotService] Cannot apply snapshot: snapshot is null");
+                return;
+            }
+
+            var modules = ship.GetComponentsInChildren<Module>();
+
+            if (modules.Length != snapshot.modules.Count)
+                Debug.LogWarning(
+                    $"[ShipSnapshotService] Module count mismatch: ship has {modules.Length}, snapshot has {snapshot.modules.Count}. Applying by index.");
+
+            var count = Mathf.Min(modules.Length, snapshot.modules.Count);
+
+            for (var i = 0; i < count; i++)
+                ApplyModuleSnapshot(modules[i], snapshot.modules[i]);
+
+            Debug.Log(
+                $"[ShipSnapshotService] Applied snapshot '{snapshot.shipName}' to '{ship.name}' ({count} modules)");
         }
 
         public string ToJson(ShipSnapshot snapshot, bool prettyPrint = true)
@@ -48,13 +77,12 @@ namespace Ships.Serialization
             return JsonUtility.FromJson<ShipSnapshot>(json);
         }
 
-        private ModuleSnapshot CaptureModuleSnapshot(Module module)
+        private static ModuleSnapshot CaptureModuleSnapshot(Module module)
         {
             var moduleSnapshot = new ModuleSnapshot(module.name, module.Type)
             {
                 localPosition = module.transform.localPosition,
-                localRotation = module.transform.localRotation,
-                localScale = module.transform.localScale
+                localRotation = module.transform.localRotation
             };
 
             var pixelatedRb = module.PixelatedRigidbody;
@@ -75,46 +103,24 @@ namespace Ships.Serialization
             return moduleSnapshot;
         }
 
-        private static void CaptureConnections(
-            Ship ship,
-            ShipSnapshot snapshot,
-            Module[] modules,
-            Dictionary<Module, int> moduleToIndex)
+        private static void ApplyModuleSnapshot(Module module, ModuleSnapshot moduleSnapshot)
         {
-            var graph = ship.ModuleGraph;
-            var processedPairs = new HashSet<(int, int)>();
+            module.transform.localPosition = moduleSnapshot.localPosition;
+            module.transform.localRotation = moduleSnapshot.localRotation;
 
-            foreach (var moduleA in modules)
-            {
-                if (!moduleToIndex.TryGetValue(moduleA, out var indexA))
-                    continue;
+            if (moduleSnapshot.pixelGrid == null) return;
 
-                IModule iModuleA = moduleA;
-                var connectedNodes = graph.GetConnectedNodes(iModuleA);
+            var pixelatedRb = module.PixelatedRigidbody;
+            if (pixelatedRb == null) return;
 
-                foreach (var connectedNode in connectedNodes)
-                {
-                    if (connectedNode is not Module moduleB)
-                        continue;
+            var pg = moduleSnapshot.pixelGrid;
+            var colors = new Color32[pg.width, pg.height];
 
-                    if (!moduleToIndex.TryGetValue(moduleB, out var indexB))
-                        continue;
+            for (var y = 0; y < pg.height; y++)
+            for (var x = 0; x < pg.width; x++)
+                colors[x, y] = pg.GetPixel(x, y);
 
-                    var pairKey = indexA < indexB ? (indexA, indexB) : (indexB, indexA);
-                    if (!processedPairs.Add(pairKey))
-                        continue;
-
-                    var connection = new ModuleConnection(indexA, indexB);
-
-                    if (moduleA.ConnectionPoints.TryGetValue(moduleB, out var pointsA))
-                        connection.connectionPointsA.AddRange(pointsA);
-
-                    if (moduleB.ConnectionPoints.TryGetValue(moduleA, out var pointsB))
-                        connection.connectionPointsB.AddRange(pointsB);
-
-                    snapshot.connections.Add(connection);
-                }
-            }
+            pixelatedRb.SetTextureFromColors(colors);
         }
     }
 }

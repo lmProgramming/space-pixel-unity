@@ -29,23 +29,15 @@ namespace Editor.InspectorExtensions
 
             var ship = (Ship)target;
 
-            using (new EditorGUI.DisabledScope(!Application.isPlaying))
-            {
-                if (GUILayout.Button("Capture Snapshot to JSON")) CaptureAndSaveSnapshot(ship);
-            }
-
-            if (!Application.isPlaying)
-                EditorGUILayout.HelpBox(
-                    "Snapshot capture is only available in Play Mode (connections are calculated at runtime).",
-                    MessageType.Info);
+            if (GUILayout.Button("Capture Snapshot to JSON")) CaptureAndSaveSnapshot(ship);
+            if (GUILayout.Button("Load Snapshot from JSON")) LoadSnapshotOntoShip(ship);
 
             EditorGUILayout.Space(5);
 
-            if (GUILayout.Button("Open Snapshots Folder"))
-            {
-                EnsureSnapshotFolderExists();
-                EditorUtility.RevealInFinder(DefaultSaveFolder);
-            }
+            if (!GUILayout.Button("Open Snapshots Folder")) return;
+
+            EnsureSnapshotFolderExists();
+            EditorUtility.RevealInFinder(DefaultSaveFolder);
         }
 
         private void CaptureAndSaveSnapshot(Ship ship)
@@ -71,6 +63,24 @@ namespace Editor.InspectorExtensions
 
             Debug.Log($"[ShipSnapshotEditor] Snapshot saved to: {fullPath}");
             EditorGUIUtility.PingObject(AssetDatabase.LoadAssetAtPath<Object>(fullPath));
+        }
+
+        private void LoadSnapshotOntoShip(Ship ship)
+        {
+            var path = EditorUtility.OpenFilePanel("Load Ship Snapshot", DefaultSaveFolder, "json");
+
+            if (string.IsNullOrEmpty(path)) return;
+
+            var json = File.ReadAllText(path);
+            var snapshot = _snapshotService.FromJson(json);
+
+            if (snapshot == null)
+            {
+                Debug.LogError("[ShipSnapshotEditor] Failed to parse snapshot JSON");
+                return;
+            }
+
+            _snapshotService.ApplySnapshot(ship, snapshot);
         }
 
         private static void EnsureSnapshotFolderExists()

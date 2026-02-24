@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Core.Gameplay.Combat;
 using Core.Gameplay.EasyTeam;
 using Core.Services;
@@ -13,6 +14,8 @@ using Ships.Modules;
 using UnityEngine;
 using Zenject;
 using ZLinq;
+
+[assembly: InternalsVisibleTo("Game.Ships.Tests")]
 
 namespace Ships
 {
@@ -34,6 +37,11 @@ namespace Ships
 
         [Inject]
         protected IShipService ShipService;
+
+        internal ModuleConnectionFactory ModuleConnectionFactoryForTesting
+        {
+            set => moduleConnectionFactory = value;
+        }
 
         private List<Module> AllModules =>
             ModuleGraph.GetAllNodes().AsValueEnumerable().OfType<Module>().ToList();
