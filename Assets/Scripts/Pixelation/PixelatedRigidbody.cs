@@ -115,7 +115,7 @@ namespace Pixelation
 
         public void SetTextureFromColors(Color32[,] colors)
         {
-            Setup(colors);
+            Setup(colors, true);
         }
 
         public void SetPixelNoApply(Vector2Int point, Color32 color)
@@ -189,6 +189,8 @@ namespace Pixelation
             if (_isSetup && !forceSetup) return;
 
             if (!sprite && colors is null) throw new UnityException("Sprite is null");
+
+            CollisionHandler?.Unsubscribe();
 
             _isSetup = true;
 
