@@ -9,7 +9,7 @@ namespace Ships.Modules
         [SerializeField] private float maxThrust;
         private bool _active;
 
-        public float MaxThrust => maxThrust * ShipModuleEfficiency;
+        public float MaxThrust => maxThrust * ShipModuleEfficiency * (1f + GetCrewBonus(CrewSkillType.Navigation));
 
         protected override void Awake()
         {

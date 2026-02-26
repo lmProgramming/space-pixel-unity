@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Core.Pixelation;
@@ -14,8 +15,12 @@ namespace Ships.Modules
     [RequireComponent(typeof(PixelatedRigidbody))]
     public class Module : MonoBehaviour, IModule
     {
+        private const float CrewSkillBonusPerLevel = 0.02f;
+        private const float CaptainBonusPerLevel = 0.05f;
+
         private readonly Dictionary<Module, List<Vector2Int>> _connectionPoints = new();
         private readonly Dictionary<Module, FixedJoint2D> _connections = new();
+        private readonly List<CrewMember> _assignedCrew = new();
 
         protected Ship Ship { get; private set; }
 
@@ -27,7 +32,7 @@ namespace Ships.Modules
 
         protected float Efficiency => Mathf.Pow(
             (float)PixelatedRigidbody.CurrentPixelCount / PixelatedRigidbody.StartPixelCount,
-            2);
+            2) * (1f + GetCrewBonus(CrewSkillType.Mechanics));
 
         protected float ShipModuleEfficiency => Ship.GeneralEfficiency * Efficiency;
 
@@ -47,6 +52,8 @@ namespace Ships.Modules
         private void OnDestroy()
         {
             if (PixelatedRigidbody != null) PixelatedRigidbody.OnPixelsLost -= CheckCohesion;
+
+            KillAllCrew();
 
             Ship?.OnModuleDestroyed(this);
         }
@@ -101,7 +108,7 @@ namespace Ships.Modules
 
         public virtual float GetEnergyProduction()
         {
-            return Resources.energyProduction * Efficiency;
+            return Resources.energyProduction * Efficiency * (1f + GetCrewBonus(CrewSkillType.PowerEngineering));
         }
 
         public void Setup(Ship ship)
@@ -196,6 +203,58 @@ namespace Ships.Modules
 
             Debug.Log($"[Module] Calling RemoveEdge({name}, {otherModule.name})", this);
             Ship.ModuleGraph.RemoveEdge(this, otherModule);
+        }
+
+        public IReadOnlyList<CrewMember> AssignedCrew => _assignedCrew;
+
+        /// <summary>
+        ///     Assigns a crew member to this module if capacity allows.
+        /// </summary>
+        /// <returns>True if successfully assigned; false if over capacity or already assigned.</returns>
+        public bool AssignCrew(CrewMember member)
+        {
+            if (member == null) throw new ArgumentNullException(nameof(member));
+            if (_assignedCrew.Contains(member)) return false;
+            if (_assignedCrew.Count >= Resources.crewCapacity) return false;
+
+            _assignedCrew.Add(member);
+            return true;
+        }
+
+        /// <summary>
+        ///     Removes a crew member from this module.
+        /// </summary>
+        public bool RemoveCrew(CrewMember member)
+        {
+            return _assignedCrew.Remove(member);
+        }
+
+        /// <summary>
+        ///     Returns the effective skill total for the given skill type,
+        ///     with captain-level crew boosting all other skills.
+        /// </summary>
+        public float GetCrewBonus(CrewSkillType skillType)
+        {
+            if (_assignedCrew.Count == 0) return 0f;
+
+            var captainTotal = 0;
+            foreach (var crew in _assignedCrew)
+                captainTotal += crew.GetSkillLevel(CrewSkillType.Captain);
+
+            var captainMultiplier = 1f + captainTotal * CaptainBonusPerLevel;
+
+            var skillTotal = 0;
+            foreach (var crew in _assignedCrew)
+                skillTotal += crew.GetSkillLevel(skillType);
+
+            return skillTotal * captainMultiplier * CrewSkillBonusPerLevel;
+        }
+
+        private void KillAllCrew()
+        {
+            foreach (var crew in _assignedCrew)
+                crew.Kill();
+            _assignedCrew.Clear();
         }
 
         public void SetResources(Resources newResources)
