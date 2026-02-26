@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using Core.Ship;
 using NUnit.Framework;
 using Pixelation;
@@ -77,7 +76,7 @@ namespace Ships.Tests
             shipGo.SetActive(false);
             var ship = shipGo.AddComponent<Ship>();
             _container.Inject(ship);
-            SetPrivateField(ship, "moduleConnectionFactory", connectionFactory);
+            ship.ModuleConnectionFactoryForTesting = connectionFactory;
             shipGo.SetActive(true);
 
             return new TestShipComponents(ship, commandModule, new List<Module> { module2 });
@@ -106,7 +105,7 @@ namespace Ships.Tests
             shipGo.SetActive(false);
             var ship = shipGo.AddComponent<Ship>();
             _container.Inject(ship);
-            SetPrivateField(ship, "moduleConnectionFactory", connectionFactory);
+            ship.ModuleConnectionFactoryForTesting = connectionFactory;
             shipGo.SetActive(true);
 
             return new TestShipComponents(ship, commandModule, new List<Module> { module2, module3 });
@@ -143,7 +142,7 @@ namespace Ships.Tests
             shipGo.SetActive(false);
             var ship = shipGo.AddComponent<Ship>();
             _container.Inject(ship);
-            SetPrivateField(ship, "moduleConnectionFactory", connectionFactory);
+            ship.ModuleConnectionFactoryForTesting = connectionFactory;
             shipGo.SetActive(true);
 
             return new TestShipComponents(ship, commandModule, new List<Module> { moduleA, moduleB, moduleC });
@@ -176,7 +175,7 @@ namespace Ships.Tests
             shipGo.SetActive(false);
             var ship = shipGo.AddComponent<Ship>();
             _container.Inject(ship);
-            SetPrivateField(ship, "moduleConnectionFactory", connectionFactory);
+            ship.ModuleConnectionFactoryForTesting = connectionFactory;
             shipGo.SetActive(true);
 
             return new TestShipComponents(ship, commandModule, new List<Module> { moduleA, moduleC });
@@ -240,12 +239,6 @@ namespace Ships.Tests
             return go;
         }
 
-        private static void SetPrivateField(object obj, string fieldName, object value)
-        {
-            var field = obj.GetType().GetField(fieldName,
-                BindingFlags.NonPublic | BindingFlags.Instance);
-            field?.SetValue(obj, value);
-        }
 
         /// <summary>
         ///     Gets the connection points between two modules.

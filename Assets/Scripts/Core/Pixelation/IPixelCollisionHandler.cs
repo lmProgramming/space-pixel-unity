@@ -13,5 +13,6 @@ namespace Core.Pixelation
         void SetCollided(bool isCollided);
         void OnCollision(Collision2D collision);
         void ResolveCollision(IPixelatedRigidbody other, Collision2D collision);
+        void Unsubscribe();
     }
 }

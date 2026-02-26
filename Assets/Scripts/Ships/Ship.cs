@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Core.Gameplay.Combat;
 using Core.Gameplay.EasyTeam;
+using Core.Pixelation;
 using Core.Services;
 using Core.Ship;
 using Cysharp.Threading.Tasks;
@@ -13,6 +15,8 @@ using Ships.Modules;
 using UnityEngine;
 using Zenject;
 using ZLinq;
+
+[assembly: InternalsVisibleTo("Game.Ships.Tests")]
 
 namespace Ships
 {
@@ -28,12 +32,18 @@ namespace Ships
         private readonly DefaultDictionary<ModuleType, List<Module>> _modulesDictionary = new(() => new List<Module>());
 
         private BiCohesionGraph<IModule> _biCohesionGraph;
+        private Action<IPixelated> _onCommandModuleNoPixelsLeft;
 
         [Inject]
         private IMapInfo _mapInfo;
 
         [Inject]
         protected IShipService ShipService;
+
+        internal ModuleConnectionFactory ModuleConnectionFactoryForTesting
+        {
+            set => moduleConnectionFactory = value;
+        }
 
         private List<Module> AllModules =>
             ModuleGraph.GetAllNodes().AsValueEnumerable().OfType<Module>().ToList();
@@ -63,7 +73,8 @@ namespace Ships
             _biCohesionGraph = new BiCohesionGraph<IModule>(CommandModule);
             _biCohesionGraph.OnNodesRemovedDueToUnreachability += HandleUnreachableModules;
 
-            CommandModule.PixelatedRigidbody.OnNoPixelsLeft += _ => Destroy(gameObject);
+            _onCommandModuleNoPixelsLeft = _ => Destroy(gameObject);
+            CommandModule.PixelatedRigidbody.OnNoPixelsLeft += _onCommandModuleNoPixelsLeft;
 
             moduleConnectionFactory.ConnectModules(this);
 
@@ -94,6 +105,9 @@ namespace Ships
         {
             if (_biCohesionGraph != null)
                 _biCohesionGraph.OnNodesRemovedDueToUnreachability -= HandleUnreachableModules;
+
+            if (CommandModule != null && _onCommandModuleNoPixelsLeft != null)
+                CommandModule.PixelatedRigidbody.OnNoPixelsLeft -= _onCommandModuleNoPixelsLeft;
         }
 
         public ITeam Team
@@ -102,7 +116,7 @@ namespace Ships
             private set => team = value as Team;
         }
 
-        public IModule CommandModule { get; private set; }
+        public IModule CommandModule { get; internal set; }
 
         public Collider2D[] OwnColliders { get; private set; } = Array.Empty<Collider2D>();
 
@@ -163,6 +177,29 @@ namespace Ships
             OwnColliders = GetComponentsInChildren<Collider2D>();
 
             ResourceManager.Recalculate(AllModules);
+        }
+
+        internal void ReinitializeModules()
+        {
+            if (CommandModule != null && _onCommandModuleNoPixelsLeft != null)
+                CommandModule.PixelatedRigidbody.OnNoPixelsLeft -= _onCommandModuleNoPixelsLeft;
+
+            CommandModule = GetComponentInChildren<Command>();
+            if (CommandModule == null)
+                throw new UnityException("[Ship] ReinitializeModules: No Command module found on ship!");
+
+            if (_biCohesionGraph != null)
+                _biCohesionGraph.OnNodesRemovedDueToUnreachability -= HandleUnreachableModules;
+
+            _biCohesionGraph = new BiCohesionGraph<IModule>(CommandModule);
+            _biCohesionGraph.OnNodesRemovedDueToUnreachability += HandleUnreachableModules;
+
+            _onCommandModuleNoPixelsLeft = _ => Destroy(gameObject);
+            CommandModule.PixelatedRigidbody.OnNoPixelsLeft += _onCommandModuleNoPixelsLeft;
+
+            moduleConnectionFactory.ConnectModules(this);
+
+            RecacheModulesDictionary();
         }
 
         protected virtual void Move()
