@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Core.Gameplay.Combat;
 using Core.Gameplay.EasyTeam;
+using Core.Pixelation;
 using Core.Services;
 using Core.Ship;
 using Cysharp.Threading.Tasks;
@@ -31,6 +32,7 @@ namespace Ships
         private readonly DefaultDictionary<ModuleType, List<Module>> _modulesDictionary = new(() => new List<Module>());
 
         private BiCohesionGraph<IModule> _biCohesionGraph;
+        private Action<IPixelated> _onCommandModuleNoPixelsLeft;
 
         [Inject]
         private IMapInfo _mapInfo;
@@ -71,7 +73,8 @@ namespace Ships
             _biCohesionGraph = new BiCohesionGraph<IModule>(CommandModule);
             _biCohesionGraph.OnNodesRemovedDueToUnreachability += HandleUnreachableModules;
 
-            CommandModule.PixelatedRigidbody.OnNoPixelsLeft += _ => Destroy(gameObject);
+            _onCommandModuleNoPixelsLeft = _ => Destroy(gameObject);
+            CommandModule.PixelatedRigidbody.OnNoPixelsLeft += _onCommandModuleNoPixelsLeft;
 
             moduleConnectionFactory.ConnectModules(this);
 
@@ -102,6 +105,9 @@ namespace Ships
         {
             if (_biCohesionGraph != null)
                 _biCohesionGraph.OnNodesRemovedDueToUnreachability -= HandleUnreachableModules;
+
+            if (CommandModule != null && _onCommandModuleNoPixelsLeft != null)
+                CommandModule.PixelatedRigidbody.OnNoPixelsLeft -= _onCommandModuleNoPixelsLeft;
         }
 
         public ITeam Team
@@ -175,6 +181,9 @@ namespace Ships
 
         internal void ReinitializeModules()
         {
+            if (CommandModule != null && _onCommandModuleNoPixelsLeft != null)
+                CommandModule.PixelatedRigidbody.OnNoPixelsLeft -= _onCommandModuleNoPixelsLeft;
+
             CommandModule = GetComponentInChildren<Command>();
             if (CommandModule == null)
                 throw new UnityException("[Ship] ReinitializeModules: No Command module found on ship!");
@@ -185,7 +194,8 @@ namespace Ships
             _biCohesionGraph = new BiCohesionGraph<IModule>(CommandModule);
             _biCohesionGraph.OnNodesRemovedDueToUnreachability += HandleUnreachableModules;
 
-            CommandModule.PixelatedRigidbody.OnNoPixelsLeft += _ => Destroy(gameObject);
+            _onCommandModuleNoPixelsLeft = _ => Destroy(gameObject);
+            CommandModule.PixelatedRigidbody.OnNoPixelsLeft += _onCommandModuleNoPixelsLeft;
 
             moduleConnectionFactory.ConnectModules(this);
 
