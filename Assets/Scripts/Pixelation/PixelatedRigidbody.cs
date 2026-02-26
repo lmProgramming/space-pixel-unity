@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using Core.Grid;
 using Core.Pixelation;
@@ -11,6 +12,9 @@ using LM;
 using UnityEngine;
 using Zenject;
 using ZLinq;
+
+[assembly: InternalsVisibleTo("Game.Ships.Tests")]
+[assembly: InternalsVisibleTo("Game.Pixelation.Tests")]
 
 namespace Pixelation
 {
@@ -44,6 +48,8 @@ namespace Pixelation
 
         private void Update()
         {
+            if (CollisionHandler == null) return;
+
             CollisionHandler.SetCollided(false);
 
             Rigidbody.collisionDetectionMode =
@@ -59,7 +65,7 @@ namespace Pixelation
 
         private void OnCollisionEnter2D(Collision2D collision)
         {
-            CollisionHandler.OnCollision(collision);
+            CollisionHandler?.OnCollision(collision);
         }
 
         public Vector2 WeightedCenter { get; private set; }
@@ -184,11 +190,23 @@ namespace Pixelation
 
         public event Action<List<Vector2Int>, PixelLoseReason> OnPixelsLost;
 
+#if UNITY_INCLUDE_TESTS
+        internal void SetSpriteForTesting(Sprite testSprite)
+        {
+            sprite = testSprite;
+        }
+#endif
+
         public void Setup(Color32[,] colors = null, bool forceSetup = false)
         {
             if (_isSetup && !forceSetup) return;
 
-            if (!sprite && colors is null) throw new UnityException("Sprite is null");
+            if (!sprite && colors is null)
+            {
+                Debug.LogWarning($"[PixelatedRigidbody] Setup skipped on '{name}': no sprite and no colors provided. " +
+                                 "Expecting SetTextureFromColors to be called later.");
+                return;
+            }
 
             CollisionHandler?.Unsubscribe();
 
@@ -198,12 +216,15 @@ namespace Pixelation
 
             PixelGrid = new PixelGrid(SpriteRenderer);
 
-            CollisionHandler = new PixelCollisionHandler(PixelGrid, this, GetComponent<PolygonCollider2D>(),
-                _collisionEventChannelSO, _debrisSpawner);
+            if (_collisionEventChannelSO != null && _debrisSpawner != null)
+                CollisionHandler = new PixelCollisionHandler(PixelGrid, this, GetComponent<PolygonCollider2D>(),
+                    _collisionEventChannelSO, _debrisSpawner);
 
-            if (colors is not null) PixelGrid.SetTextureFromColors(colors);
-
-            if (HasSprite)
+            if (colors is not null)
+            {
+                PixelGrid.SetTextureFromColors(colors);
+            }
+            else if (HasSprite)
             {
                 var (colorsArray, width, height) =
                     (sprite.texture.GetPixels32(), sprite.texture.width, sprite.texture.height);

@@ -110,7 +110,7 @@ namespace Ships
             private set => team = value as Team;
         }
 
-        public IModule CommandModule { get; private set; }
+        public IModule CommandModule { get; internal set; }
 
         public Collider2D[] OwnColliders { get; private set; } = Array.Empty<Collider2D>();
 
@@ -171,6 +171,25 @@ namespace Ships
             OwnColliders = GetComponentsInChildren<Collider2D>();
 
             ResourceManager.Recalculate(AllModules);
+        }
+
+        internal void ReinitializeModules()
+        {
+            CommandModule = GetComponentInChildren<Command>();
+            if (CommandModule == null)
+                throw new UnityException("[Ship] ReinitializeModules: No Command module found on ship!");
+
+            if (_biCohesionGraph != null)
+                _biCohesionGraph.OnNodesRemovedDueToUnreachability -= HandleUnreachableModules;
+
+            _biCohesionGraph = new BiCohesionGraph<IModule>(CommandModule);
+            _biCohesionGraph.OnNodesRemovedDueToUnreachability += HandleUnreachableModules;
+
+            CommandModule.PixelatedRigidbody.OnNoPixelsLeft += _ => Destroy(gameObject);
+
+            moduleConnectionFactory.ConnectModules(this);
+
+            RecacheModulesDictionary();
         }
 
         protected virtual void Move()

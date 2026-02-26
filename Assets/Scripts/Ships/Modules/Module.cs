@@ -31,10 +31,6 @@ namespace Ships.Modules
 
         protected float ShipModuleEfficiency => Ship.GeneralEfficiency * Efficiency;
 
-#if UNITY_EDITOR
-        internal float InternalEfficiency => Efficiency;
-#endif
-
         protected virtual void Awake()
         {
             PixelatedRigidbody = GetComponent<PixelatedRigidbody>();
@@ -201,5 +197,16 @@ namespace Ships.Modules
             Debug.Log($"[Module] Calling RemoveEdge({name}, {otherModule.name})", this);
             Ship.ModuleGraph.RemoveEdge(this, otherModule);
         }
+
+        public void SetResources(Resources newResources)
+        {
+            Resources = newResources;
+        }
+
+#if UNITY_EDITOR
+        internal float InternalEfficiency => Efficiency;
+
+        internal Resources InternalResources => Resources;
+#endif
     }
 }
