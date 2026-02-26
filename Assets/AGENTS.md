@@ -15,6 +15,19 @@ This project uses assemblies, so if you want to use code from other assembly, do
 
 Do a quick code review before handing off as "done", thanks!
 
+## Gotchas
+
+- Ship position: use `ship.GetPosition()` (which uses `CommandModule.Transform.position`), NEVER `ship.transform.position`
+- Resources naming conflict: `Core.Ship.Resources` (crew/power) collides with `UnityEngine.Resources`. Always alias it: `using Resources = Core.Ship.Resources;`
+
+## Third-Party Libraries
+
+Prefer these over their standard-library equivalents:
+
+- **ZLinq** (`using ZLinq;`): use `.AsValueEnumerable()` instead of `System.Linq` for collection queries
+- **UniTask** (`using Cysharp.Threading.Tasks;`): use `async UniTask` / `async UniTaskVoid` instead of `async Task` / `async void`
+- **Zenject** (`using Zenject;`): dependency injection — use `[Inject]` on private fields, register new services in `GameSceneInstaller`
+
 ## Architecture
 
 All of the physically destructible objects are/inherit from PixelatedRigidbody.
@@ -23,7 +36,7 @@ Ship is the base class for ship, with PlayerShip and AIShip inheriting from it. 
 
 UI = UIToolkit
 
-Assemblies:
+### Assemblies
 
 - AI: just the basic state machine, don't touch
 - Background: just the background, don't touch
@@ -41,13 +54,16 @@ Assemblies:
 - Pixelation: PixelatedRigidbody! And CollisionResolver and PixelCollisionHandler
 - Services: many different services, like spawners, or to access ships, sectors etc. Don't forget to add new services to GameSceneInstaller (Zenject) and use its dependency injection
 - Ships: all ship related code, like Ship, PlayerShip, AIShip, and very importantly - Module (ships are made of modules, which have PixelatedRigidbody, and they are what make up the ship, they can be destroyed)
-  - Current modules inheritors: CommandModule (its position is the ship's position - don't use ship transform.position!). Cannon, Laser, Engine  
-  - Modules use efficiency based on how many pixels they have left.
+  - Current modules inheritors: CommandModule (its position is the ship's position - don't use ship transform.position!). Cannon, Laser, Engine
+  - Modules use efficiency based on how many pixels they have left
   - Modules have crew and power needs, and they can produce both
 - UI: UI (use UIToolkit)
 
+Check `ASSEMBLY_GUIDS.md` for exact GUIDS for these and external assemblies
+
 ## Testing
 
-I will run tests after you are done. Make sure to test critical functionality in PlayMode tests.
-Tests are in AssemblyFolder/Tests in its own assembly.
-To allow tests to see private methods/fields, add [assembly: InternalsVisibleTo("AssemblyName.Tests")]. Then create new fields `internal InternalXYZ => XYZ`
+I will run tests after you are done. Make sure to test critical functionality in PlayMode tests
+Tests are in AssemblyFolder/Tests in its own assembly
+To allow tests to see private methods/fields, add [assembly: InternalsVisibleTo("AssemblyName.Tests")]. Then create new properties `internal InternalXYZ => XYZ` or methods like XYZForTesting
+A similar pattern can be done to get access to private fields in Editor inspector extensions
