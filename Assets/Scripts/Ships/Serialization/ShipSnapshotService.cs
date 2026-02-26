@@ -10,14 +10,7 @@ namespace Ships.Serialization
 {
     public class ShipSnapshotService : IShipSnapshotService
     {
-        private static readonly Dictionary<string, Type> ModuleTypeMap = new()
-        {
-            { nameof(Command), typeof(Command) },
-            { nameof(Engine), typeof(Engine) },
-            { nameof(Cannon), typeof(Cannon) },
-            { nameof(LaserBeam), typeof(LaserBeam) },
-            { nameof(Module), typeof(Module) }
-        };
+        private static readonly Dictionary<string, Type> ModuleTypeMap = BuildModuleTypeMap();
 
         private readonly DiContainer _container;
 
@@ -94,6 +87,21 @@ namespace Ships.Serialization
         public ShipSnapshot FromJson(string json)
         {
             return JsonUtility.FromJson<ShipSnapshot>(json);
+        }
+
+        private static Dictionary<string, Type> BuildModuleTypeMap()
+        {
+            var baseType = typeof(Module);
+            var assembly = baseType.Assembly;
+            var map = new Dictionary<string, Type>();
+            foreach (var type in assembly.GetTypes())
+            {
+                if (!baseType.IsAssignableFrom(type))
+                    continue;
+                map[type.Name] = type;
+            }
+
+            return map;
         }
 
         private static ModuleSnapshot CaptureModuleSnapshot(Module module)
