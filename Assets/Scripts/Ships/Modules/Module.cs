@@ -13,26 +13,22 @@ using Resources = Core.Ship.Resources;
 namespace Ships.Modules
 {
     [RequireComponent(typeof(PixelatedRigidbody))]
-    public class Module : MonoBehaviour, IModule
+    public abstract class Module : MonoBehaviour, IModule
     {
         private const float CrewSkillBonusPerLevel = 0.02f;
         private const float CaptainBonusPerLevel = 0.05f;
 
+        [SerializeField] private CrewSkillType mainSkillType;
+
+        [SerializeField]
+        private List<CrewMember> assignedCrew = new();
+
         private readonly Dictionary<Module, List<Vector2Int>> _connectionPoints = new();
         private readonly Dictionary<Module, FixedJoint2D> _connections = new();
-        private readonly List<CrewMember> _assignedCrew = new();
 
         protected Ship Ship { get; private set; }
 
-        /// <summary>
-        ///     Gets a read-only view of connection points to other modules.
-        ///     Used for serialization and testing.
-        /// </summary>
-        public IReadOnlyDictionary<Module, List<Vector2Int>> ConnectionPoints => _connectionPoints;
-
-        protected float Efficiency => Mathf.Pow(
-            (float)PixelatedRigidbody.CurrentPixelCount / PixelatedRigidbody.StartPixelCount,
-            2) * (1f + GetCrewBonus(CrewSkillType.Mechanics));
+        internal IReadOnlyDictionary<Module, List<Vector2Int>> ConnectionPoints => _connectionPoints;
 
         protected float ShipModuleEfficiency => Ship.GeneralEfficiency * Efficiency;
 
@@ -77,6 +73,13 @@ namespace Ships.Modules
             }
         }
 
+        public float Efficiency => Mathf.Pow(
+            (float)PixelatedRigidbody.CurrentPixelCount / PixelatedRigidbody.StartPixelCount,
+            2) * (1f + GetCrewBonus());
+
+        public IReadOnlyList<CrewMember> AssignedCrew => assignedCrew;
+        public int CrewMissingCount => GetCrewNeededCount() - GetCrewCount();
+
         [field: SerializeField]
         public Resources Resources { get; private set; }
 
@@ -88,12 +91,40 @@ namespace Ships.Modules
 
         public virtual int GetCrewCount()
         {
-            return Mathf.FloorToInt(Resources.crew * Efficiency);
+            return assignedCrew.Count;
         }
 
-        public virtual int GetCrewCapacity()
+        public virtual int GetCrewNeededCount()
         {
-            return Mathf.FloorToInt(Resources.crewCapacity * Efficiency);
+            return Mathf.CeilToInt(Resources.crewNeeded);
+        }
+
+        public void FillCrewBySkill(List<CrewMember> crew, out List<CrewMember> remainingCrew)
+        {
+            if (crew == null) throw new ArgumentNullException(nameof(crew));
+
+            var membersOrderBySkill = crew.AsValueEnumerable().OrderByDescending(c => c.GetSkillLevel(mainSkillType));
+
+            var crewToAssign = membersOrderBySkill.Take(CrewMissingCount).ToList();
+
+            foreach (var crewMember in crewToAssign)
+                AssignCrew(crewMember);
+
+            remainingCrew = membersOrderBySkill.Skip(crewToAssign.Count).ToList();
+        }
+
+        public bool AssignCrew(CrewMember member)
+        {
+            if (member == null) throw new ArgumentNullException(nameof(member));
+            if (assignedCrew.Contains(member)) return false;
+
+            assignedCrew.Add(member);
+            return true;
+        }
+
+        public bool RemoveCrew(CrewMember member)
+        {
+            return assignedCrew.Remove(member);
         }
 
         public virtual float GetEnergyCapacity()
@@ -108,7 +139,7 @@ namespace Ships.Modules
 
         public virtual float GetEnergyProduction()
         {
-            return Resources.energyProduction * Efficiency * (1f + GetCrewBonus(CrewSkillType.PowerEngineering));
+            return Resources.energyProduction * Efficiency * (1f + GetCrewBonus());
         }
 
         public void Setup(Ship ship)
@@ -205,56 +236,24 @@ namespace Ships.Modules
             Ship.ModuleGraph.RemoveEdge(this, otherModule);
         }
 
-        public IReadOnlyList<CrewMember> AssignedCrew => _assignedCrew;
-
-        /// <summary>
-        ///     Assigns a crew member to this module if capacity allows.
-        /// </summary>
-        /// <returns>True if successfully assigned; false if over capacity or already assigned.</returns>
-        public bool AssignCrew(CrewMember member)
+        public virtual float GetCrewBonus()
         {
-            if (member == null) throw new ArgumentNullException(nameof(member));
-            if (_assignedCrew.Contains(member)) return false;
-            if (_assignedCrew.Count >= Resources.crewCapacity) return false;
+            if (assignedCrew.Count == 0) return 0f;
 
-            _assignedCrew.Add(member);
-            return true;
-        }
-
-        /// <summary>
-        ///     Removes a crew member from this module.
-        /// </summary>
-        public bool RemoveCrew(CrewMember member)
-        {
-            return _assignedCrew.Remove(member);
-        }
-
-        /// <summary>
-        ///     Returns the effective skill total for the given skill type,
-        ///     with captain-level crew boosting all other skills.
-        /// </summary>
-        public float GetCrewBonus(CrewSkillType skillType)
-        {
-            if (_assignedCrew.Count == 0) return 0f;
-
-            var captainTotal = 0;
-            foreach (var crew in _assignedCrew)
-                captainTotal += crew.GetSkillLevel(CrewSkillType.Captain);
+            var captainTotal = assignedCrew.AsValueEnumerable().Sum(crew => crew.GetSkillLevel(CrewSkillType.Captain));
 
             var captainMultiplier = 1f + captainTotal * CaptainBonusPerLevel;
 
-            var skillTotal = 0;
-            foreach (var crew in _assignedCrew)
-                skillTotal += crew.GetSkillLevel(skillType);
+            var skillTotal = assignedCrew.AsValueEnumerable().Sum(crew => crew.GetSkillLevel(mainSkillType));
 
             return skillTotal * captainMultiplier * CrewSkillBonusPerLevel;
         }
 
         private void KillAllCrew()
         {
-            foreach (var crew in _assignedCrew)
+            foreach (var crew in assignedCrew)
                 crew.Kill();
-            _assignedCrew.Clear();
+            assignedCrew.Clear();
         }
 
         public void SetResources(Resources newResources)

@@ -8,6 +8,7 @@ using Ships.Tests.TestHelpers;
 using UnityEngine;
 using UnityEngine.TestTools;
 using Zenject;
+using Resources = Core.Ship.Resources;
 
 namespace Ships.Tests
 {
@@ -60,7 +61,7 @@ namespace Ships.Tests
 
             var module = go.AddComponent<TestModule>();
             module.SetModuleType(ModuleType.Production);
-            module.SetResources(new Core.Ship.Resources(0, 0, 0, 0, crewCapacity));
+            module.SetResources(new Resources(0, 0, 0, 0, crewCapacity));
             return module;
         }
 
@@ -73,7 +74,7 @@ namespace Ships.Tests
         [Test]
         public void AssignCrew_UnderCapacity_ReturnsTrue()
         {
-            var module = CreateStandaloneModule(crewCapacity: 3);
+            var module = CreateStandaloneModule();
             var crew = MakeCrew();
 
             var result = module.AssignCrew(crew);
@@ -85,7 +86,7 @@ namespace Ships.Tests
         [Test]
         public void AssignCrew_AtCapacity_ReturnsFalse()
         {
-            var module = CreateStandaloneModule(crewCapacity: 2);
+            var module = CreateStandaloneModule(2);
             module.AssignCrew(MakeCrew("A", "A", 20));
             module.AssignCrew(MakeCrew("B", "B", 21));
 
@@ -99,7 +100,7 @@ namespace Ships.Tests
         [Test]
         public void AssignCrew_SameMemberTwice_ReturnsFalse()
         {
-            var module = CreateStandaloneModule(crewCapacity: 3);
+            var module = CreateStandaloneModule();
             var crew = MakeCrew();
 
             module.AssignCrew(crew);
@@ -138,7 +139,7 @@ namespace Ships.Tests
         {
             var module = CreateStandaloneModule();
             var crew1 = MakeCrew("Alice", "A", 25);
-            var crew2 = MakeCrew("Bob", "B", 30);
+            var crew2 = MakeCrew("Bob", "B");
             module.AssignCrew(crew1);
             module.AssignCrew(crew2);
 
@@ -157,7 +158,7 @@ namespace Ships.Tests
         {
             var module = CreateStandaloneModule();
 
-            Assert.AreEqual(0f, module.GetCrewBonus(CrewSkillType.Navigation));
+            Assert.AreEqual(0f, module.GetCrewBonus());
         }
 
         [Test]
@@ -167,7 +168,7 @@ namespace Ships.Tests
             var skills = new Dictionary<CrewSkillType, int> { { CrewSkillType.Navigation, 5 } };
             module.AssignCrew(MakeCrew("Nav", "Expert", 35, skills));
 
-            var bonus = module.GetCrewBonus(CrewSkillType.Navigation);
+            var bonus = module.GetCrewBonus();
 
             Assert.Greater(bonus, 0f);
         }
@@ -175,7 +176,7 @@ namespace Ships.Tests
         [Test]
         public void GetCrewBonus_CaptainSkillAmplifies_OtherSkills()
         {
-            var module = CreateStandaloneModule(crewCapacity: 5);
+            var module = CreateStandaloneModule(5);
 
             var plainSkills = new Dictionary<CrewSkillType, int> { { CrewSkillType.Navigation, 4 } };
             var captainSkills = new Dictionary<CrewSkillType, int>
@@ -186,10 +187,10 @@ namespace Ships.Tests
 
             var moduleNoCaptain = CreateStandaloneModule();
             moduleNoCaptain.AssignCrew(MakeCrew("Nav", "Plain", 30, plainSkills));
-            var bonusNoCaptain = moduleNoCaptain.GetCrewBonus(CrewSkillType.Navigation);
+            var bonusNoCaptain = moduleNoCaptain.GetCrewBonus();
 
             module.AssignCrew(MakeCrew("Nav", "Cap", 30, captainSkills));
-            var bonusWithCaptain = module.GetCrewBonus(CrewSkillType.Navigation);
+            var bonusWithCaptain = module.GetCrewBonus();
 
             Assert.Greater(bonusWithCaptain, bonusNoCaptain);
         }

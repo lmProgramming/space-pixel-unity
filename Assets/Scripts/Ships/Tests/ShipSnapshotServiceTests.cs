@@ -420,8 +420,8 @@ namespace Ships.Tests
             Assert.AreEqual(100f, restored.resources.energyCapacity, 0.001f);
             Assert.AreEqual(10f, restored.resources.energyDraw, 0.001f);
             Assert.AreEqual(50f, restored.resources.energyProduction, 0.001f);
-            Assert.AreEqual(5, restored.resources.crew);
-            Assert.AreEqual(10, restored.resources.crewCapacity);
+            Assert.AreEqual(5, restored.resources.crewNeeded);
+            Assert.AreEqual(10, restored.resources.crewQuarters);
             Assert.AreEqual(new Color32(255, 0, 0, 255), restored.pixelGrid.GetPixel(0, 0));
             Assert.AreEqual(new Color32(0, 255, 0, 255), restored.pixelGrid.GetPixel(1, 0));
             Assert.IsFalse(restored.pixelGrid.IsPixel(1, 1));
@@ -617,7 +617,7 @@ namespace Ships.Tests
             Assert.AreEqual(ModuleType.Command, bridge.moduleType);
             Assert.AreEqual(100f, bridge.resources.energyCapacity, 0.001f);
             Assert.AreEqual(20f, bridge.resources.energyProduction, 0.001f);
-            Assert.AreEqual(3, bridge.resources.crew);
+            Assert.AreEqual(3, bridge.resources.crewNeeded);
             Assert.AreEqual(new Color32(80, 80, 80, 255), bridge.pixelGrid.GetPixel(0, 0));
 
             // Thruster
@@ -1024,8 +1024,8 @@ namespace Ships.Tests
             Assert.AreEqual(200f, cmdSnap.resources.energyCapacity, 0.001f);
             Assert.AreEqual(50f, cmdSnap.resources.energyDraw, 0.001f);
             Assert.AreEqual(75f, cmdSnap.resources.energyProduction, 0.001f);
-            Assert.AreEqual(8, cmdSnap.resources.crew);
-            Assert.AreEqual(12, cmdSnap.resources.crewCapacity);
+            Assert.AreEqual(8, cmdSnap.resources.crewNeeded);
+            Assert.AreEqual(12, cmdSnap.resources.crewQuarters);
         }
     }
 }

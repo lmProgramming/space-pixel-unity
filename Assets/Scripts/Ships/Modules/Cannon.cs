@@ -41,7 +41,7 @@ namespace Ships.Modules
 
         public void Update()
         {
-            _reloadTimer.Progress(Time.deltaTime * ShipModuleEfficiency * (1f + GetCrewBonus(CrewSkillType.WeaponHandling)));
+            _reloadTimer.Progress(Time.deltaTime * ShipModuleEfficiency * (1f + GetCrewBonus()));
         }
 
         private void OnDestroy()

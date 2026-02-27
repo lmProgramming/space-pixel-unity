@@ -1,11 +1,24 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Core.Ship
 {
     [Serializable]
     public class CrewMember
     {
+        [field: SerializeField]
+        public bool IsAlive { get; private set; }
+
+        [field: SerializeField]
+        public string FirstName { get; private set; }
+
+        [field: SerializeField]
+        public string LastName { get; private set; }
+
+        [field: SerializeField]
+        public int Age { get; private set; }
+
         private readonly Dictionary<CrewSkillType, int> _skills;
 
         public CrewMember(string firstName, string lastName, int age,
@@ -18,16 +31,11 @@ namespace Core.Ship
             IsAlive = true;
         }
 
-        public string FirstName { get; }
-        public string LastName { get; }
-        public int Age { get; }
-        public bool IsAlive { get; private set; }
-
         public event Action<CrewMember> OnDied;
 
         public int GetSkillLevel(CrewSkillType skillType)
         {
-            return _skills.TryGetValue(skillType, out var level) ? level : 0;
+            return _skills.GetValueOrDefault(skillType, 0);
         }
 
         public void Kill()

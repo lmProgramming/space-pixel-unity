@@ -6,13 +6,10 @@ This game aims to be a bit similar to Highfleet, but expands on it by making ind
 ## Contributing
 
 Code quality is important. You can write comments, but 99% of comments should be deleted and code extracted to methods before presenting your work as done. Long method names are totally okay, as long as they are descriptive
-
 If a component/anything is necessary for the script, don't silently fail, fail hard with an error!
-
 Periodically check for errors - it sometimes takes a bit of time to auto compile .cs files after you write them
-
 This project uses assemblies, so if you want to use code from other assembly, double check if you should. If you should, write the code as if you used the assembly and after compiling and seeing errors, just please let me know in the chat. I will link them manually in my IDE
-
+Never generate .meta files - I will generate them in Unity
 Do a quick code review before handing off as "done", thanks!
 
 ## Gotchas
@@ -57,7 +54,7 @@ UI = UIToolkit
   - Current modules inheritors: CommandModule (its position is the ship's position - don't use ship transform.position!). Cannon, Laser, Engine
   - Modules use efficiency based on how many pixels they have left
   - Modules have crew and power needs, and they can produce both
-- UI: UI (use UIToolkit)
+- UI: use UIToolkit
 
 Check `ASSEMBLY_GUIDS.md` for exact GUIDS for these and external assemblies
 

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using Core.Gameplay.Combat;
 using Core.Gameplay.EasyTeam;
@@ -32,10 +33,11 @@ namespace Ships
         private readonly DefaultDictionary<ModuleType, List<Module>> _modulesDictionary = new(() => new List<Module>());
 
         private BiCohesionGraph<IModule> _biCohesionGraph;
-        private Action<IPixelated> _onCommandModuleNoPixelsLeft;
 
         [Inject]
         private IMapInfo _mapInfo;
+
+        private Action<IPixelated> _onCommandModuleNoPixelsLeft;
 
         [Inject]
         protected IShipService ShipService;
@@ -61,6 +63,9 @@ namespace Ships
             _modulesDictionary[ModuleType.Engine].AsValueEnumerable().Cast<Engine>().ToList();
 
         public ResourceManager ResourceManager { get; private set; }
+
+        public int CrewMissingCount =>
+            ModuleGraph.GetAllNodes().AsValueEnumerable().Sum(module => module.CrewMissingCount);
 
         private void Awake()
         {
@@ -116,7 +121,7 @@ namespace Ships
             private set => team = value as Team;
         }
 
-        public IModule CommandModule { get; internal set; }
+        public IModule CommandModule { get; private set; }
 
         public Collider2D[] OwnColliders { get; private set; } = Array.Empty<Collider2D>();
 
@@ -220,6 +225,17 @@ namespace Ships
         {
             foreach (var weapon in Weapons)
                 weapon.StopShooting();
+        }
+
+        public void AssignCrewRandomly(IEnumerable<CrewMember> crew)
+        {
+            var crewList = crew.ToList();
+
+            foreach (var module in ModuleGraph.GetAllNodes())
+            {
+                module.FillCrewBySkill(crewList, out var remainingCrew);
+                crewList = remainingCrew.ToList();
+            }
         }
 
         protected void MarkEnginesActivity(bool active)

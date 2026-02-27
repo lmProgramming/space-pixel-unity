@@ -377,12 +377,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 843c6bfa00a27d14184145d28d98f33c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainSkillType: 0
+  assignedCrew: []
   <Resources>k__BackingField:
     energyCapacity: 2000
     energyDraw: 30
     energyProduction: 150
-    crew: 7
-    crewCapacity: 20
+    crewNeeded: 7
+    crewQuarters: 20
 --- !u!114 &25841634
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -829,12 +831,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e58cee17deb728a4da8fdde864b3d57c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainSkillType: 0
+  assignedCrew: []
   <Resources>k__BackingField:
     energyCapacity: 100
     energyDraw: 30
     energyProduction: 0
-    crew: 2
-    crewCapacity: 0
+    crewNeeded: 2
+    crewQuarters: 0
   thrust: 0
   maxThrust: 1
 --- !u!1 &92040606
@@ -1050,7 +1054,7 @@ Transform:
   m_GameObject: {fileID: 116197406}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 4, y: 24, z: 0}
+  m_LocalPosition: {x: 4, y: 25, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1068,12 +1072,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a06280dcf2610f340b3409d0824e526a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainSkillType: 0
+  assignedCrew: []
   <Resources>k__BackingField:
     energyCapacity: 200
     energyDraw: 50
     energyProduction: 0
-    crew: 4
-    crewCapacity: 0
+    crewNeeded: 3
+    crewQuarters: 0
   projectilePrefab: {fileID: 5654400622174641897, guid: 31131311ffb51fc42a911f89d07e56a6, type: 3}
   projectileSpeed: 1500
   reloadTime: 1
@@ -1722,12 +1728,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 843c6bfa00a27d14184145d28d98f33c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainSkillType: 0
+  assignedCrew: []
   <Resources>k__BackingField:
     energyCapacity: 2000
     energyDraw: 30
     energyProduction: 150
-    crew: 7
-    crewCapacity: 20
+    crewNeeded: 7
+    crewQuarters: 20
 --- !u!1 &185009410
 GameObject:
   m_ObjectHideFlags: 0
@@ -1758,7 +1766,7 @@ Transform:
   m_GameObject: {fileID: 185009410}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 19, y: -39, z: 0}
+  m_LocalPosition: {x: 20, y: -39, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1776,12 +1784,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e58cee17deb728a4da8fdde864b3d57c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainSkillType: 0
+  assignedCrew: []
   <Resources>k__BackingField:
     energyCapacity: 100
     energyDraw: 30
     energyProduction: 0
-    crew: 2
-    crewCapacity: 0
+    crewNeeded: 2
+    crewQuarters: 0
   thrust: 0
   maxThrust: 1
 --- !u!114 &185009413
@@ -2213,6 +2223,7 @@ GameObject:
   - component: {fileID: 292801186}
   - component: {fileID: 292801184}
   - component: {fileID: 292801187}
+  - component: {fileID: 292801188}
   m_Layer: 6
   m_Name: Player
   m_TagString: Untagged
@@ -2288,6 +2299,20 @@ MonoBehaviour:
   energyProduction: 6
   crewCapacity: 3
   crew: 2
+--- !u!114 &292801188
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 292801180}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 51beb7d3839b46ae91fd236d4f53e511, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Ships::Ships.ShipCrewAssigner
+  crewMembers: []
+  generateMissingCrewMembers: 1
 --- !u!1 &323945044
 GameObject:
   m_ObjectHideFlags: 0
@@ -2839,12 +2864,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e58cee17deb728a4da8fdde864b3d57c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainSkillType: 0
+  assignedCrew: []
   <Resources>k__BackingField:
     energyCapacity: 100
     energyDraw: 30
     energyProduction: 0
-    crew: 2
-    crewCapacity: 0
+    crewNeeded: 2
+    crewQuarters: 0
   thrust: 0
   maxThrust: 1
 --- !u!28 &341220837
@@ -3566,12 +3593,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 843c6bfa00a27d14184145d28d98f33c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainSkillType: 0
+  assignedCrew: []
   <Resources>k__BackingField:
     energyCapacity: 2000
     energyDraw: 30
     energyProduction: 150
-    crew: 7
-    crewCapacity: 20
+    crewNeeded: 7
+    crewQuarters: 20
 --- !u!1 &443114472
 GameObject:
   m_ObjectHideFlags: 0
@@ -4697,12 +4726,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 21aa0218bee341148b64f7ab86433ad1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainSkillType: 0
+  assignedCrew: []
   <Resources>k__BackingField:
     energyCapacity: 200
     energyDraw: 150
     energyProduction: 0
-    crew: 5
-    crewCapacity: 0
+    crewNeeded: 2
+    crewQuarters: 0
   lineRenderer: {fileID: 521192492}
   beamRange: 200
   maxFireDuration: 2
@@ -5106,12 +5137,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e58cee17deb728a4da8fdde864b3d57c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainSkillType: 0
+  assignedCrew: []
   <Resources>k__BackingField:
     energyCapacity: 100
     energyDraw: 30
     energyProduction: 0
-    crew: 2
-    crewCapacity: 0
+    crewNeeded: 2
+    crewQuarters: 0
   thrust: 0
   maxThrust: 1
 --- !u!1 &558805765
@@ -5509,12 +5542,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a06280dcf2610f340b3409d0824e526a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainSkillType: 0
+  assignedCrew: []
   <Resources>k__BackingField:
     energyCapacity: 200
     energyDraw: 50
     energyProduction: 0
-    crew: 4
-    crewCapacity: 0
+    crewNeeded: 4
+    crewQuarters: 0
   projectilePrefab: {fileID: 5654400622174641897, guid: 31131311ffb51fc42a911f89d07e56a6, type: 3}
   projectileSpeed: 1500
   reloadTime: 1
@@ -5770,12 +5805,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a06280dcf2610f340b3409d0824e526a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainSkillType: 0
+  assignedCrew: []
   <Resources>k__BackingField:
     energyCapacity: 200
     energyDraw: 50
     energyProduction: 0
-    crew: 4
-    crewCapacity: 0
+    crewNeeded: 2
+    crewQuarters: 0
   projectilePrefab: {fileID: 5654400622174641897, guid: fbb05823f916f824da20fe66a7de32d4, type: 3}
   projectileSpeed: 200
   reloadTime: 0.2
@@ -6002,12 +6039,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e58cee17deb728a4da8fdde864b3d57c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainSkillType: 0
+  assignedCrew: []
   <Resources>k__BackingField:
     energyCapacity: 100
     energyDraw: 30
     energyProduction: 0
-    crew: 2
-    crewCapacity: 0
+    crewNeeded: 2
+    crewQuarters: 0
   thrust: 0
   maxThrust: 1
 --- !u!114 &696995298
@@ -7271,12 +7310,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e58cee17deb728a4da8fdde864b3d57c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainSkillType: 0
+  assignedCrew: []
   <Resources>k__BackingField:
     energyCapacity: 100
     energyDraw: 30
     energyProduction: 0
-    crew: 2
-    crewCapacity: 0
+    crewNeeded: 2
+    crewQuarters: 0
   thrust: 0
   maxThrust: 1
 --- !u!1 &938120420
@@ -7679,12 +7720,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e58cee17deb728a4da8fdde864b3d57c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainSkillType: 0
+  assignedCrew: []
   <Resources>k__BackingField:
     energyCapacity: 100
     energyDraw: 30
     energyProduction: 0
-    crew: 2
-    crewCapacity: 0
+    crewNeeded: 2
+    crewQuarters: 0
   thrust: 0
   maxThrust: 1
 --- !u!1 &968734700
@@ -8224,12 +8267,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a06280dcf2610f340b3409d0824e526a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainSkillType: 0
+  assignedCrew: []
   <Resources>k__BackingField:
     energyCapacity: 200
     energyDraw: 20
     energyProduction: 0
-    crew: 4
-    crewCapacity: 0
+    crewNeeded: 4
+    crewQuarters: 0
   projectilePrefab: {fileID: 5654400622174641897, guid: fbb05823f916f824da20fe66a7de32d4, type: 3}
   projectileSpeed: 200
   reloadTime: 0.2
@@ -8910,12 +8955,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a06280dcf2610f340b3409d0824e526a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainSkillType: 0
+  assignedCrew: []
   <Resources>k__BackingField:
     energyCapacity: 200
     energyDraw: 20
     energyProduction: 0
-    crew: 4
-    crewCapacity: 0
+    crewNeeded: 4
+    crewQuarters: 0
   projectilePrefab: {fileID: 5654400622174641897, guid: fbb05823f916f824da20fe66a7de32d4, type: 3}
   projectileSpeed: 200
   reloadTime: 0.2
@@ -9142,12 +9189,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a06280dcf2610f340b3409d0824e526a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainSkillType: 0
+  assignedCrew: []
   <Resources>k__BackingField:
     energyCapacity: 200
     energyDraw: 20
     energyProduction: 0
-    crew: 4
-    crewCapacity: 0
+    crewNeeded: 4
+    crewQuarters: 0
   projectilePrefab: {fileID: 5654400622174641897, guid: fbb05823f916f824da20fe66a7de32d4, type: 3}
   projectileSpeed: 200
   reloadTime: 0.2
@@ -9584,12 +9633,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a06280dcf2610f340b3409d0824e526a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainSkillType: 0
+  assignedCrew: []
   <Resources>k__BackingField:
     energyCapacity: 200
     energyDraw: 50
     energyProduction: 0
-    crew: 4
-    crewCapacity: 0
+    crewNeeded: 4
+    crewQuarters: 0
   projectilePrefab: {fileID: 5654400622174641897, guid: fbb05823f916f824da20fe66a7de32d4, type: 3}
   projectileSpeed: 200
   reloadTime: 0.2
@@ -10141,12 +10192,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e58cee17deb728a4da8fdde864b3d57c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainSkillType: 0
+  assignedCrew: []
   <Resources>k__BackingField:
     energyCapacity: 100
     energyDraw: 30
     energyProduction: 0
-    crew: 2
-    crewCapacity: 0
+    crewNeeded: 2
+    crewQuarters: 0
   thrust: 0
   maxThrust: 1
 --- !u!1 &1383913807
@@ -10945,12 +10998,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 843c6bfa00a27d14184145d28d98f33c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainSkillType: 0
+  assignedCrew: []
   <Resources>k__BackingField:
     energyCapacity: 2000
     energyDraw: 30
     energyProduction: 200
-    crew: 7
-    crewCapacity: 20
+    crewNeeded: 7
+    crewQuarters: 20
 --- !u!1 &1492072027
 GameObject:
   m_ObjectHideFlags: 0
@@ -10999,12 +11054,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e58cee17deb728a4da8fdde864b3d57c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainSkillType: 0
+  assignedCrew: []
   <Resources>k__BackingField:
     energyCapacity: 100
     energyDraw: 30
     energyProduction: 0
-    crew: 2
-    crewCapacity: 0
+    crewNeeded: 2
+    crewQuarters: 0
   thrust: 0
   maxThrust: 1
 --- !u!114 &1492072030
@@ -12695,12 +12752,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 21aa0218bee341148b64f7ab86433ad1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainSkillType: 0
+  assignedCrew: []
   <Resources>k__BackingField:
     energyCapacity: 200
     energyDraw: 150
     energyProduction: 0
-    crew: 5
-    crewCapacity: 0
+    crewNeeded: 5
+    crewQuarters: 0
   lineRenderer: {fileID: 1689674626}
   beamRange: 200
   maxFireDuration: 2
@@ -13307,12 +13366,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 843c6bfa00a27d14184145d28d98f33c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainSkillType: 0
+  assignedCrew: []
   <Resources>k__BackingField:
     energyCapacity: 2000
     energyDraw: 30
     energyProduction: 150
-    crew: 7
-    crewCapacity: 20
+    crewNeeded: 7
+    crewQuarters: 20
 --- !u!1 &1882781144
 GameObject:
   m_ObjectHideFlags: 0
@@ -13392,12 +13453,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a06280dcf2610f340b3409d0824e526a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainSkillType: 0
+  assignedCrew: []
   <Resources>k__BackingField:
     energyCapacity: 200
     energyDraw: 20
     energyProduction: 0
-    crew: 4
-    crewCapacity: 0
+    crewNeeded: 4
+    crewQuarters: 0
   projectilePrefab: {fileID: 5654400622174641897, guid: fbb05823f916f824da20fe66a7de32d4, type: 3}
   projectileSpeed: 200
   reloadTime: 0.2
@@ -14035,12 +14098,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e58cee17deb728a4da8fdde864b3d57c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainSkillType: 0
+  assignedCrew: []
   <Resources>k__BackingField:
     energyCapacity: 100
     energyDraw: 30
     energyProduction: 0
-    crew: 2
-    crewCapacity: 0
+    crewNeeded: 2
+    crewQuarters: 0
   thrust: 0
   maxThrust: 1
 --- !u!1 &1920964441
@@ -14285,12 +14350,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 843c6bfa00a27d14184145d28d98f33c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainSkillType: 0
+  assignedCrew: []
   <Resources>k__BackingField:
     energyCapacity: 2000
     energyDraw: 30
     energyProduction: 200
-    crew: 7
-    crewCapacity: 20
+    crewNeeded: 3
+    crewQuarters: 20
 --- !u!1 &1959479948
 GameObject:
   m_ObjectHideFlags: 0
@@ -14425,7 +14492,7 @@ Transform:
   m_GameObject: {fileID: 1988705646}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -12.8, y: -39, z: 0}
+  m_LocalPosition: {x: -13, y: -39, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -14620,12 +14687,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e58cee17deb728a4da8fdde864b3d57c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainSkillType: 0
+  assignedCrew: []
   <Resources>k__BackingField:
     energyCapacity: 100
     energyDraw: 30
     energyProduction: 0
-    crew: 2
-    crewCapacity: 0
+    crewNeeded: 2
+    crewQuarters: 0
   thrust: 0
   maxThrust: 1
 --- !u!1 &1998466618
@@ -14998,12 +15067,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e58cee17deb728a4da8fdde864b3d57c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainSkillType: 0
+  assignedCrew: []
   <Resources>k__BackingField:
     energyCapacity: 100
     energyDraw: 30
     energyProduction: 0
-    crew: 2
-    crewCapacity: 0
+    crewNeeded: 2
+    crewQuarters: 0
   thrust: 0
   maxThrust: 1
 --- !u!28 &2049620436
