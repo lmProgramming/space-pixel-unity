@@ -13,7 +13,7 @@ namespace Core.Ship
         float Efficiency { get; }
         IReadOnlyList<CrewMember> AssignedCrew { get; }
         int CrewMissingCount { get; }
-        int GetCrewCount();
+        int GetAliveCrewCount();
         int GetCrewNeededCount();
         void FillCrewBySkill(List<CrewMember> crew, out List<CrewMember> remainingCrew);
         bool AssignCrew(CrewMember member);

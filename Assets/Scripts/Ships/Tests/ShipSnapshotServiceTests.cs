@@ -137,6 +137,7 @@ namespace Ships.Tests
             var testSprite = Sprite.Create(spriteTexture, new Rect(0, 0, 3, 3), new Vector2(0.5f, 0.5f), 1);
 
             pixelatedRb.SetSpriteForTesting(testSprite);
+            pixelatedRb.Setup(null, true);
 
             var testModule = moduleGo.AddComponent<TestModule>();
             testModule.SetModuleType(ModuleType.Production);
@@ -238,6 +239,7 @@ namespace Ships.Tests
             spriteTexture.Apply();
             var testSprite = Sprite.Create(spriteTexture, new Rect(0, 0, 4, 4), new Vector2(0.5f, 0.5f), 1);
             pixelatedRb.SetSpriteForTesting(testSprite);
+            pixelatedRb.Setup(null, true);
 
             var testModule = moduleGo.AddComponent<TestModule>();
             testModule.SetModuleType(ModuleType.Production);
@@ -514,8 +516,8 @@ namespace Ships.Tests
                             ""energyCapacity"": 0.0,
                             ""energyDraw"": 0.0,
                             ""energyProduction"": 0.0,
-                            ""crew"": 0,
-                            ""crewCapacity"": 0
+                            ""crewNeeded"": 0,
+                            ""crewQuarters"": 0
                         },
                         ""moduleComponentJson"": """"
                     }
@@ -565,8 +567,8 @@ namespace Ships.Tests
                             ""energyCapacity"": 100.0,
                             ""energyDraw"": 0.0,
                             ""energyProduction"": 20.0,
-                            ""crew"": 3,
-                            ""crewCapacity"": 5
+                            ""crewNeeded"": 3,
+                            ""crewQuarters"": 5
                         },
                         ""moduleComponentJson"": """"
                     },
@@ -588,8 +590,8 @@ namespace Ships.Tests
                             ""energyCapacity"": 0.0,
                             ""energyDraw"": 15.0,
                             ""energyProduction"": 0.0,
-                            ""crew"": 1,
-                            ""crewCapacity"": 2
+                            ""crewNeeded"": 1,
+                            ""crewQuarters"": 2
                         },
                         ""moduleComponentJson"": """"
                     }
@@ -869,8 +871,8 @@ namespace Ships.Tests
                             ""energyCapacity"": 0.0,
                             ""energyDraw"": 0.0,
                             ""energyProduction"": 0.0,
-                            ""crew"": 0,
-                            ""crewCapacity"": 0
+                            ""crewNeeded"": 0,
+                            ""crewQuarters"": 0
                         },
                         ""moduleComponentJson"": """"
                     }

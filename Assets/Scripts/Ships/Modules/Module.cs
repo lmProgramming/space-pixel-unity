@@ -9,11 +9,12 @@ using ZLinq;
 using Resources = Core.Ship.Resources;
 
 [assembly: InternalsVisibleTo("Game.Editor.InspectorExtensions")]
+[assembly: InternalsVisibleTo("Game.Ships.Tests")]
 
 namespace Ships.Modules
 {
     [RequireComponent(typeof(PixelatedRigidbody))]
-    public abstract class Module : MonoBehaviour, IModule
+    public class Module : MonoBehaviour, IModule
     {
         private const float CrewSkillBonusPerLevel = 0.02f;
         private const float CaptainBonusPerLevel = 0.05f;
@@ -25,6 +26,13 @@ namespace Ships.Modules
 
         private readonly Dictionary<Module, List<Vector2Int>> _connectionPoints = new();
         private readonly Dictionary<Module, FixedJoint2D> _connections = new();
+
+        public IReadOnlyList<CrewMember> AliveCrew => assignedCrew.AsValueEnumerable().Where(c => c.IsAlive).ToList();
+
+        internal CrewSkillType MainSkillTypeForTesting
+        {
+            set => mainSkillType = value;
+        }
 
         protected Ship Ship { get; private set; }
 
@@ -75,10 +83,10 @@ namespace Ships.Modules
 
         public float Efficiency => Mathf.Pow(
             (float)PixelatedRigidbody.CurrentPixelCount / PixelatedRigidbody.StartPixelCount,
-            2) * (1f + GetCrewBonus());
+            2) * GetCrewMultiplier();
 
         public IReadOnlyList<CrewMember> AssignedCrew => assignedCrew;
-        public int CrewMissingCount => GetCrewNeededCount() - GetCrewCount();
+        public int CrewMissingCount => GetCrewNeededCount() - GetAliveCrewCount();
 
         [field: SerializeField]
         public Resources Resources { get; private set; }
@@ -89,9 +97,9 @@ namespace Ships.Modules
         public ModuleType Type { get; protected set; }
 
 
-        public virtual int GetCrewCount()
+        public virtual int GetAliveCrewCount()
         {
-            return assignedCrew.Count;
+            return AliveCrew.Count;
         }
 
         public virtual int GetCrewNeededCount()
@@ -139,7 +147,7 @@ namespace Ships.Modules
 
         public virtual float GetEnergyProduction()
         {
-            return Resources.energyProduction * Efficiency * (1f + GetCrewBonus());
+            return Resources.energyProduction * Efficiency * (1f + GetCrewMultiplier());
         }
 
         public void Setup(Ship ship)
@@ -158,6 +166,13 @@ namespace Ships.Modules
             if (PixelatedRigidbody == null || otherModule == null || otherModule.PixelatedRigidbody == null)
             {
                 Debug.LogError("Cannot SetupConnections: Missing PixelatedRigidbody on self or other module.", this);
+                return;
+            }
+
+            if (PixelatedRigidbody.PixelGrid == null || otherModule.PixelatedRigidbody.PixelGrid == null)
+            {
+                Debug.LogError(
+                    $"Cannot SetupConnections: PixelGrid not initialized on '{name}' or '{otherModule.name}'!", this);
                 return;
             }
 
@@ -236,17 +251,19 @@ namespace Ships.Modules
             Ship.ModuleGraph.RemoveEdge(this, otherModule);
         }
 
-        public virtual float GetCrewBonus()
+        public virtual float GetCrewMultiplier()
         {
             if (assignedCrew.Count == 0) return 0f;
 
-            var captainTotal = assignedCrew.AsValueEnumerable().Sum(crew => crew.GetSkillLevel(CrewSkillType.Captain));
+            var captainTotal = AliveCrew.AsValueEnumerable()
+                .Sum(crew => crew.GetSkillLevel(CrewSkillType.Captain));
 
             var captainMultiplier = 1f + captainTotal * CaptainBonusPerLevel;
 
             var skillTotal = assignedCrew.AsValueEnumerable().Sum(crew => crew.GetSkillLevel(mainSkillType));
 
-            return skillTotal * captainMultiplier * CrewSkillBonusPerLevel;
+            return (1 - (float)CrewMissingCount / GetCrewNeededCount()) *
+                   (1 + skillTotal * captainMultiplier * CrewSkillBonusPerLevel);
         }
 
         private void KillAllCrew()

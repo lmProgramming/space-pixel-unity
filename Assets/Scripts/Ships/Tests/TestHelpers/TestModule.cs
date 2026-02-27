@@ -9,5 +9,10 @@ namespace Ships.Tests.TestHelpers
         {
             Type = type;
         }
+
+        public void SetMainSkillType(CrewSkillType skillType)
+        {
+            MainSkillTypeForTesting = skillType;
+        }
     }
 }
