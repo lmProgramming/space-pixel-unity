@@ -6,6 +6,7 @@ using Cysharp.Threading.Tasks;
 using LM;
 using Pixelation;
 using UnityEngine;
+using ZLinq;
 using Random = UnityEngine.Random;
 
 namespace Ships.Modules
@@ -140,6 +141,27 @@ namespace Ships.Modules
             _fireCts = null;
         }
 
+        private RaycastHit2D RaycastIgnoringOwnColliders(Vector2 origin, Vector2 direction)
+        {
+            var hits = new RaycastHit2D[100];
+            var size = Physics2D.RaycastNonAlloc(origin, direction, hits, beamRange, hitLayers);
+            var ownColliders = Ship?.OwnColliders;
+
+            for (var index = 0; index < Mathf.Min(size, hits.Length); index++)
+            {
+                var hit = hits[index];
+                if (ownColliders == null || !IsOwnCollider(hit.collider, ownColliders))
+                    return hit;
+            }
+
+            return default;
+        }
+
+        private static bool IsOwnCollider(Collider2D collider, Collider2D[] ownColliders)
+        {
+            return ownColliders.AsValueEnumerable().Any(own => own == collider);
+        }
+
         private async UniTask FireBeamUpdateAsync(CancellationToken token)
         {
             var timeRemaining = maxFireDuration * ShipModuleEfficiency;
@@ -156,7 +178,7 @@ namespace Ships.Modules
 
                     lineRenderer.SetPosition(0, origin);
 
-                    var hit = Physics2D.Raycast(origin, direction, beamRange, hitLayers);
+                    var hit = RaycastIgnoringOwnColliders(origin, direction);
 
                     if (hit.collider)
                     {
