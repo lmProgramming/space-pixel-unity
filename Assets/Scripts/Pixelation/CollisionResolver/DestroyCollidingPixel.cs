@@ -20,9 +20,9 @@ namespace Pixelation.CollisionResolver
             if (pixelToDestroyPosition == null) return new List<Vector2Int>();
 
             var pos = pixelToDestroyPosition.Value;
-            PixelatedRigidbody.RemovePixelAt(pos);
+            var destroyed = PixelatedRigidbody.DamagePixelAt(pos, 1f);
 
-            return new[] { new Vector2Int(pos.x, pos.y) };
+            return destroyed ? new[] { pos } : new List<Vector2Int>();
         }
     }
 }

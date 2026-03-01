@@ -33,8 +33,9 @@ namespace Ships.Modules
             _cts = new CancellationTokenSource();
         }
 
-        private void Start()
+        protected override void Start()
         {
+            base.Start();
             _reloadTimer.OnReady += HandleReady;
             _reloadTimer.OnNotReady += HandleNotReady;
         }

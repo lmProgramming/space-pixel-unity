@@ -31,10 +31,23 @@ namespace Pixelation
 
         [Range(0, 3)] [SerializeField] private int rotation;
 
+        [SerializeField] private float defaultPixelHealth = 1f;
+
+        [Header("Armor Map (optional)")]
+        [Tooltip("Grayscale sprite where brightness = armor strength. " +
+                 "White (255) = maxArmorHealth, black (0) = defaultPixelHealth. Must match the color sprite dimensions.")]
+        [SerializeField] private Sprite armorMap;
+
+        [Tooltip("Health value that a fully white (255) pixel in the armor map represents.")]
+        [SerializeField] private float maxArmorHealth = 10f;
+
         [Inject] private CollisionEventChannelSO _collisionEventChannelSO;
         [Inject] private IDebrisSpawner _debrisSpawner;
 
         private bool _isSetup;
+        private PixelHealthGrid HealthGrid { get; set; }
+
+        private bool HasArmorMap => armorMap != null && armorMap.ToString() != "null";
 
         private void Awake()
         {
@@ -135,6 +148,8 @@ namespace Pixelation
 
             if (!pointsArray.AsValueEnumerable().Any()) return;
 
+            HealthGrid?.RemovePixels(pointsArray);
+
             var countBefore = PixelGrid.PixelCount;
             PixelGrid.RemovePixels(pointsArray);
             NudgeWeightedCenter(pointsArray, countBefore);
@@ -151,6 +166,29 @@ namespace Pixelation
         public void RemovePixelAt(Vector2Int point, bool simulateCollision = false)
         {
             RemovePixels(new[] { point }, simulateCollision);
+        }
+
+        public bool DamagePixelAt(Vector2Int point, float damage, bool simulateCollision = false)
+        {
+            if (!IsPixel(point)) return false;
+
+            var killed = HealthGrid.DamagePixel(point, damage);
+
+            if (!killed) return false;
+
+            RemovePixelAt(point, simulateCollision);
+            return true;
+        }
+
+        public List<Vector2Int> DamagePixels(IEnumerable<Vector2Int> points, float damagePerPixel,
+            bool simulateCollision = false)
+        {
+            var destroyed = HealthGrid.DamagePixels(points, damagePerPixel);
+
+            if (destroyed.Count > 0)
+                RemovePixels(destroyed, simulateCollision);
+
+            return destroyed;
         }
 
         public Transform Transform => transform;
@@ -235,11 +273,38 @@ namespace Pixelation
 
             PixelGrid.Setup();
 
+            HealthGrid = new PixelHealthGrid(PixelGrid.Width, PixelGrid.Height, defaultPixelHealth);
+            HealthGrid.InitializeFromGrid(PixelGrid);
+
+            if (HasArmorMap)
+                ApplyArmorMap();
+
             StartPixelCount = PixelGrid.PixelCount;
 
             WeightedCenter = CalculateWeightedCenter();
 
             OnPixelsLost?.Invoke(new List<Vector2Int>(), PixelLoseReason.Other);
+        }
+
+        private void ApplyArmorMap()
+        {
+            var armorPixels = armorMap.texture.GetPixels32();
+            var armorWidth = armorMap.texture.width;
+            var armorHeight = armorMap.texture.height;
+
+            armorPixels = EasyImage.ReorientTexture(armorPixels, armorWidth, armorHeight, flipX, flipY);
+            (armorPixels, armorWidth, armorHeight) =
+                EasyImage.RotateTexture(armorPixels, armorWidth, armorHeight, rotation);
+
+            if (armorWidth != PixelGrid.Width || armorHeight != PixelGrid.Height)
+            {
+                Debug.LogError(
+                    $"[PixelatedRigidbody] Armor map size ({armorWidth}x{armorHeight}) doesn't match " +
+                    $"sprite size ({PixelGrid.Width}x{PixelGrid.Height}) on '{name}'. Armor map ignored.");
+                return;
+            }
+
+            HealthGrid.ApplyArmorMap(armorPixels, armorWidth, armorHeight, maxArmorHealth);
         }
 
         private Vector2 CalculateWeightedCenter()
@@ -318,6 +383,8 @@ namespace Pixelation
 
         public void PixelLostByDivision(HashSet<Vector2Int> region)
         {
+            HealthGrid?.RemovePixels(region);
+
             var countBefore = PixelGrid.PixelCount + region.Count;
             NudgeWeightedCenter(region, countBefore);
             OnPixelsLost?.Invoke(region.AsValueEnumerable().ToList(), PixelLoseReason.Division);

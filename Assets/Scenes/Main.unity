@@ -401,6 +401,9 @@ MonoBehaviour:
   flipX: 0
   flipY: 0
   rotation: 0
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!50 &25841635
 Rigidbody2D:
@@ -818,6 +821,9 @@ MonoBehaviour:
   flipX: 1
   flipY: 0
   rotation: 0
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!114 &39741442
 MonoBehaviour:
@@ -1072,7 +1078,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a06280dcf2610f340b3409d0824e526a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mainSkillType: 0
+  mainSkillType: 1
   assignedCrew: []
   <Resources>k__BackingField:
     energyCapacity: 200
@@ -1081,7 +1087,7 @@ MonoBehaviour:
     crewNeeded: 3
     crewQuarters: 0
   projectilePrefab: {fileID: 5654400622174641897, guid: 31131311ffb51fc42a911f89d07e56a6, type: 3}
-  projectileSpeed: 1500
+  projectileSpeed: 2500
   reloadTime: 1
   icon: {fileID: 1865393218821458671, guid: 58a346b199dceed4d81eff4d7a8b6025, type: 3}
 --- !u!114 &116197409
@@ -1100,6 +1106,9 @@ MonoBehaviour:
   flipX: 1
   flipY: 0
   rotation: 1
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!50 &116197410
 Rigidbody2D:
@@ -1715,6 +1724,9 @@ MonoBehaviour:
   flipX: 0
   flipY: 0
   rotation: 0
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!114 &180244043
 MonoBehaviour:
@@ -1784,7 +1796,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e58cee17deb728a4da8fdde864b3d57c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mainSkillType: 0
+  mainSkillType: 2
   assignedCrew: []
   <Resources>k__BackingField:
     energyCapacity: 100
@@ -1810,6 +1822,9 @@ MonoBehaviour:
   flipX: 1
   flipY: 0
   rotation: 0
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!50 &185009414
 Rigidbody2D:
@@ -2564,6 +2579,9 @@ MonoBehaviour:
   flipX: 0
   flipY: 0
   rotation: 0
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!4 &323945049
 Transform:
@@ -2851,6 +2869,9 @@ MonoBehaviour:
   flipX: 1
   flipY: 0
   rotation: 0
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!114 &337337096
 MonoBehaviour:
@@ -3171,6 +3192,9 @@ MonoBehaviour:
   flipX: 0
   flipY: 0
   rotation: 0
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!4 &351339377
 Transform:
@@ -3580,6 +3604,9 @@ MonoBehaviour:
   flipX: 0
   flipY: 0
   rotation: 0
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!114 &441256664
 MonoBehaviour:
@@ -4142,6 +4169,9 @@ MonoBehaviour:
   flipX: 0
   flipY: 0
   rotation: 0
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!4 &496593024
 Transform:
@@ -4557,6 +4587,9 @@ MonoBehaviour:
   flipX: 1
   flipY: 0
   rotation: 2
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!50 &521192488
 Rigidbody2D:
@@ -4727,7 +4760,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 21aa0218bee341148b64f7ab86433ad1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mainSkillType: 0
+  mainSkillType: 1
   assignedCrew: []
   <Resources>k__BackingField:
     energyCapacity: 200
@@ -4736,9 +4769,9 @@ MonoBehaviour:
     crewNeeded: 2
     crewQuarters: 0
   lineRenderer: {fileID: 521192492}
-  beamRange: 200
+  beamRange: 500
   maxFireDuration: 2
-  pixelsDestroyedPerSecond: 5
+  damagePerSecond: 10
   hitLayers:
     serializedVersion: 2
     m_Bits: 961
@@ -5126,6 +5159,9 @@ MonoBehaviour:
   flipX: 1
   flipY: 0
   rotation: 0
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!114 &539151470
 MonoBehaviour:
@@ -5531,6 +5567,9 @@ MonoBehaviour:
   flipX: 1
   flipY: 0
   rotation: 1
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!114 &591781730
 MonoBehaviour:
@@ -5807,7 +5846,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a06280dcf2610f340b3409d0824e526a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mainSkillType: 0
+  mainSkillType: 1
   assignedCrew: []
   <Resources>k__BackingField:
     energyCapacity: 200
@@ -5816,7 +5855,7 @@ MonoBehaviour:
     crewNeeded: 2
     crewQuarters: 0
   projectilePrefab: {fileID: 5654400622174641897, guid: fbb05823f916f824da20fe66a7de32d4, type: 3}
-  projectileSpeed: 200
+  projectileSpeed: 250
   reloadTime: 0.2
   icon: {fileID: 1865393218821458671, guid: c388e61b26f07a841805d089806cdf1d, type: 3}
 --- !u!114 &672308253
@@ -5835,6 +5874,9 @@ MonoBehaviour:
   flipX: 0
   flipY: 0
   rotation: 2
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!50 &672308254
 Rigidbody2D:
@@ -6067,6 +6109,9 @@ MonoBehaviour:
   flipX: 1
   flipY: 0
   rotation: 0
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!50 &696995299
 Rigidbody2D:
@@ -6968,6 +7013,9 @@ MonoBehaviour:
   flipX: 0
   flipY: 0
   rotation: 0
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!4 &825322236
 Transform:
@@ -7299,6 +7347,9 @@ MonoBehaviour:
   flipX: 0
   flipY: 0
   rotation: 0
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!114 &902546474
 MonoBehaviour:
@@ -7709,6 +7760,9 @@ MonoBehaviour:
   flipX: 1
   flipY: 0
   rotation: 0
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!114 &950832980
 MonoBehaviour:
@@ -8287,6 +8341,9 @@ MonoBehaviour:
   flipX: 1
   flipY: 0
   rotation: 1
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!114 &1093244953
 MonoBehaviour:
@@ -8975,6 +9032,9 @@ MonoBehaviour:
   flipX: 1
   flipY: 0
   rotation: 1
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!114 &1260637138
 MonoBehaviour:
@@ -9209,6 +9269,9 @@ MonoBehaviour:
   flipX: 1
   flipY: 0
   rotation: 1
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!114 &1262830485
 MonoBehaviour:
@@ -9653,6 +9716,9 @@ MonoBehaviour:
   flipX: 0
   flipY: 0
   rotation: 2
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!114 &1356672410
 MonoBehaviour:
@@ -10212,6 +10278,9 @@ MonoBehaviour:
   flipX: 0
   flipY: 0
   rotation: 0
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!114 &1380669738
 MonoBehaviour:
@@ -10302,6 +10371,9 @@ MonoBehaviour:
   flipX: 0
   flipY: 0
   rotation: 0
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!50 &1384098531
 Rigidbody2D:
@@ -11018,6 +11090,9 @@ MonoBehaviour:
   flipX: 0
   flipY: 0
   rotation: 0
+  defaultPixelHealth: 1
+  armorMap: {fileID: 21300000, guid: ba1479cb2cd57352581a9fbb7a7b4a52, type: 3}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!114 &1477886125
 MonoBehaviour:
@@ -11113,6 +11188,9 @@ MonoBehaviour:
   flipX: 0
   flipY: 0
   rotation: 0
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!50 &1492072031
 Rigidbody2D:
@@ -12050,6 +12128,9 @@ MonoBehaviour:
   flipX: 0
   flipY: 0
   rotation: 0
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!4 &1579913509
 Transform:
@@ -12486,7 +12567,8 @@ Transform:
   m_LocalPosition: {x: 19, y: 1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1699799067}
   m_Father: {fileID: 820889511}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &1689674625
@@ -12772,6 +12854,9 @@ MonoBehaviour:
   flipX: 1
   flipY: 0
   rotation: 2
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!114 &1689674630
 MonoBehaviour:
@@ -12796,13 +12881,44 @@ MonoBehaviour:
   lineRenderer: {fileID: 1689674626}
   beamRange: 200
   maxFireDuration: 2
-  pixelsDestroyedPerSecond: 5
+  damagePerSecond: 5
   hitLayers:
     serializedVersion: 2
     m_Bits: 897
   icon: {fileID: 1865393218821458671, guid: 8f61f8d23847b2d46b2c194f226b8f84, type: 3}
-  originPoint: {fileID: 0}
+  originPoint: {fileID: 1699799067}
   reloadTime: 5
+--- !u!1 &1699799066
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1699799067}
+  m_Layer: 6
+  m_Name: originPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1699799067
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1699799066}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1689674624}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1735107389
 GameObject:
   m_ObjectHideFlags: 0
@@ -13387,6 +13503,9 @@ MonoBehaviour:
   flipX: 0
   flipY: 0
   rotation: 0
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!114 &1855745759
 MonoBehaviour:
@@ -13515,6 +13634,9 @@ MonoBehaviour:
   flipX: 1
   flipY: 0
   rotation: 1
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!50 &1884429654
 Rigidbody2D:
@@ -14119,6 +14241,9 @@ MonoBehaviour:
   flipX: 0
   flipY: 0
   rotation: 0
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!114 &1905540168
 MonoBehaviour:
@@ -14371,6 +14496,9 @@ MonoBehaviour:
   flipX: 0
   flipY: 0
   rotation: 0
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!114 &1940184200
 MonoBehaviour:
@@ -14548,6 +14676,9 @@ MonoBehaviour:
   flipX: 0
   flipY: 0
   rotation: 0
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!50 &1988705650
 Rigidbody2D:
@@ -14721,7 +14852,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e58cee17deb728a4da8fdde864b3d57c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mainSkillType: 0
+  mainSkillType: 2
   assignedCrew: []
   <Resources>k__BackingField:
     energyCapacity: 100
@@ -15088,6 +15219,9 @@ MonoBehaviour:
   flipX: 0
   flipY: 0
   rotation: 0
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!114 &2015378337
 MonoBehaviour:

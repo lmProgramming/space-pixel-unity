@@ -52,7 +52,7 @@ namespace Ships.Modules
             OnCrewChange();
         }
 
-        private void Start()
+        protected virtual void Start()
         {
             if (PixelatedRigidbody != null)
                 PixelatedRigidbody.OnPixelsLost += CheckCohesion;
