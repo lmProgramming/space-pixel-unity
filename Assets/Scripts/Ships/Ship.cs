@@ -51,12 +51,6 @@ namespace Ships
 
         private IReadOnlyList<Module> AllModules => _allModulesCache;
 
-        public float GeneralEfficiency => Math.Max(0.01f, ResourceManager.EnergyEfficiency);
-
-        public Graph<IModule> ModuleGraph => _biCohesionGraph;
-
-        public Vector2 AttackTargetPosition { get; protected set; }
-
         public List<IWeapon> Weapons =>
             _modulesDictionary[ModuleType.Weapon].AsValueEnumerable().Cast<IWeapon>().ToList();
 
@@ -67,8 +61,6 @@ namespace Ships
 
         public int CrewMissingCount =>
             ModuleGraph.GetAllNodes().AsValueEnumerable().Sum(module => module.CrewMissingCount);
-
-        public float CaptainMultiplier => CommandModule.GetCrewEfficiency();
 
         private void Awake()
         {
@@ -118,6 +110,14 @@ namespace Ships
                 CommandModule.PixelatedRigidbody.OnNoPixelsLeft -= _onCommandModuleNoPixelsLeft;
         }
 
+        public float GeneralEfficiency => Math.Max(0.01f, ResourceManager.EnergyEfficiency);
+
+        public Graph<IModule> ModuleGraph => _biCohesionGraph;
+
+        public Vector2 AttackTargetPosition { get; protected set; }
+
+        public float CaptainMultiplier => CommandModule.GetCrewEfficiency();
+
         public ITeam Team
         {
             get => team;
@@ -126,12 +126,22 @@ namespace Ships
 
         public IModule CommandModule { get; private set; }
 
-        public Collider2D[] OwnColliders { get; } = Array.Empty<Collider2D>();
+        public Collider2D[] OwnColliders { get; set; } = Array.Empty<Collider2D>();
 
         public Vector2 GetPosition()
         {
             var rb = CommandModule.PixelatedRigidbody;
             return rb.LocalToWorldPoint(rb.WeightedCenter);
+        }
+
+        public void OnModuleDestroyed(IModule module)
+        {
+            if (module == null) return;
+
+            Debug.Log($"[Ship] Module destroyed: {module.Transform.name}", module.Transform);
+
+            _biCohesionGraph.RemoveNode(module);
+            RecacheModulesDictionary();
         }
 
         private async UniTaskVoid UpdateResourcesLoop()
@@ -145,16 +155,6 @@ namespace Ships
                 await updateResourcesTimer.Wait(cancellationToken: token);
                 ResourceManager.Recalculate(AllModules);
             }
-        }
-
-        public void OnModuleDestroyed(IModule module)
-        {
-            if (module == null) return;
-
-            Debug.Log($"[Ship] Module destroyed: {module.Transform.name}", module.Transform);
-
-            _biCohesionGraph.RemoveNode(module);
-            RecacheModulesDictionary();
         }
 
         private void HandleUnreachableModules(List<IModule> unreachableModules)
@@ -187,6 +187,8 @@ namespace Ships
                 _modulesDictionary[module.Type].Add(mod);
                 _allModulesCache.Add(mod);
             }
+
+            OwnColliders = GetComponentsInChildren<Collider2D>();
 
             ResourceManager.Recalculate(_allModulesCache);
         }

@@ -64,3 +64,4 @@ I will run tests after you are done. Make sure to test critical functionality in
 Tests are in AssemblyFolder/Tests in its own assembly
 To allow tests to see private methods/fields, add [assembly: InternalsVisibleTo("AssemblyName.Tests")]. Then create new properties `internal InternalXYZ => XYZ` or methods like XYZForTesting
 A similar pattern can be done to get access to private fields in Editor inspector extensions
+Use NSubstitute for mocking dependencies

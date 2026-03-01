@@ -14,5 +14,10 @@ namespace Ships.Tests.TestHelpers
         {
             MainSkillTypeForTesting = skillType;
         }
+
+        public void SetShip(IShip ship)
+        {
+            Ship = ship;
+        }
     }
 }

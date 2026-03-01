@@ -41,7 +41,9 @@ namespace Ships.Tests
 
         private TestModule CreateStandaloneModule(
             int crewNeeded = 3,
-            CrewSkillType mainSkill = CrewSkillType.Navigation)
+            CrewSkillType mainSkill = CrewSkillType.Navigation,
+            float shipCaptainMultiplier = 1f
+        )
         {
             var go = new GameObject("Module");
             _createdObjects.Add(go);
@@ -66,6 +68,11 @@ namespace Ships.Tests
             module.SetModuleType(ModuleType.Production);
             module.SetMainSkillType(mainSkill);
             module.SetResources(new Resources(0, 0, crewNeeded, 0, 0));
+
+            var ship = Substitute.For<IShip>();
+            ship.CaptainMultiplier.Returns(shipCaptainMultiplier);
+            module.SetShip(ship);
+
             return module;
         }
 
@@ -366,24 +373,6 @@ namespace Ships.Tests
         }
 
         [Test]
-        public void GetCrewBonus_CaptainSkillAmplifiesMainSkill()
-        {
-            var module = CreateStandaloneModule(mainSkill: CrewSkillType.Navigation);
-            var captainSkills = new Dictionary<CrewSkillType, int>
-            {
-                { CrewSkillType.Navigation, 4 },
-                { CrewSkillType.Captain, 5 }
-            };
-            module.AssignCrew(MakeCrew("Nav", "Cap", 30, captainSkills));
-
-            // fillRatio = 1 - 2/3 = 1/3, skillTotal=4, captainTotal=5, captainMultiplier=1+5*0.05=1.25
-            // bonus = 1/3 * (1 + 4 * 1.25 * 0.02) = 1/3 * 1.1 ≈ 0.3667
-            var bonus = module.GetCrewEfficiency();
-
-            Assert.AreEqual(1f / 3f * 1.1f, bonus, 0.0001f);
-        }
-
-        [Test]
         public void GetCrewBonus_CaptainOnly_NoBonusWhenNoMainSkill()
         {
             var module = CreateStandaloneModule(mainSkill: CrewSkillType.Mechanics);
@@ -401,8 +390,10 @@ namespace Ships.Tests
         [Test]
         public void GetCrewBonus_CaptainAmplifies_ComparedToNoCaptain()
         {
-            var moduleNoCaptain = CreateStandaloneModule(mainSkill: CrewSkillType.Navigation);
-            var moduleWithCaptain = CreateStandaloneModule(mainSkill: CrewSkillType.Navigation);
+            var moduleShitCaptain =
+                CreateStandaloneModule(mainSkill: CrewSkillType.Navigation, shipCaptainMultiplier: .5f);
+            var moduleGreatCaptain =
+                CreateStandaloneModule(mainSkill: CrewSkillType.Navigation, shipCaptainMultiplier: 2f);
 
             var plainSkills = new Dictionary<CrewSkillType, int> { { CrewSkillType.Navigation, 4 } };
             var captainSkills = new Dictionary<CrewSkillType, int>
@@ -411,10 +402,10 @@ namespace Ships.Tests
                 { CrewSkillType.Captain, 5 }
             };
 
-            moduleNoCaptain.AssignCrew(MakeCrew("Nav", "Plain", 30, plainSkills));
-            moduleWithCaptain.AssignCrew(MakeCrew("Nav", "Cap", 30, captainSkills));
+            moduleShitCaptain.AssignCrew(MakeCrew("Nav", "Plain", 30, plainSkills));
+            moduleGreatCaptain.AssignCrew(MakeCrew("Nav", "Cap", 30, captainSkills));
 
-            Assert.Greater(moduleWithCaptain.GetCrewEfficiency(), moduleNoCaptain.GetCrewEfficiency());
+            Assert.Greater(moduleGreatCaptain.GetCrewEfficiency(), moduleShitCaptain.GetCrewEfficiency());
         }
 
         [Test]

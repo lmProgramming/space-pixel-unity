@@ -36,7 +36,7 @@ namespace Ships.Modules
             set => mainSkillType = value;
         }
 
-        protected IShip Ship { get; private set; }
+        protected IShip Ship { get; set; }
 
         internal IReadOnlyDictionary<Module, List<Vector2Int>> ConnectionPoints => _connectionPoints;
 

@@ -28,6 +28,8 @@ namespace Ships.Modules
 
         [SerializeField] private GameObject icon;
 
+        [SerializeField] private Transform originPoint;
+
         [Header("Weapon Base Settings")]
         [SerializeField]
         private float reloadTime = 2.0f;
@@ -148,7 +150,7 @@ namespace Ships.Modules
                     timeRemaining -= Time.deltaTime;
 
                     var attackPosition = GameInput.WorldPointerPosition;
-                    Vector2 origin = transform.position;
+                    Vector2 origin = originPoint.position;
                     var direction = (attackPosition - origin).normalized;
                     var endPoint = origin + direction * beamRange;
 
