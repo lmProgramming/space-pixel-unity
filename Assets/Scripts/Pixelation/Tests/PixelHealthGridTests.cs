@@ -304,5 +304,52 @@ namespace Pixelation.Tests
             // pixel (0,0) went from 1 to 10, pixel (1,0) stayed at 1
             Assert.AreEqual(11f, grid.TotalHealth, 0.001);
         }
+
+        [Test]
+        public void RemovePixels_ClearsAllHealthValues()
+        {
+            var grid = CreateGrid(4, 4, 5f);
+            var a = new Vector2Int(0, 0);
+            var b = new Vector2Int(1, 1);
+            grid.SetHealth(a, 5f);
+            grid.SetHealth(b, 8f);
+
+            grid.RemovePixels(new HashSet<Vector2Int> { a, b });
+
+            Assert.AreEqual(0f, grid.GetHealth(a));
+            Assert.AreEqual(0f, grid.GetHealth(b));
+        }
+
+        [Test]
+        public void RemovePixels_UpdatesTotalHealth()
+        {
+            var grid = CreateGrid(4, 4, 0f);
+            grid.SetHealth(new Vector2Int(0, 0), 5f);
+            grid.SetHealth(new Vector2Int(1, 0), 3f);
+            grid.SetHealth(new Vector2Int(2, 0), 7f);
+
+            grid.RemovePixels(new List<Vector2Int>
+            {
+                new(0, 0),
+                new(1, 0)
+            });
+
+            Assert.AreEqual(7f, grid.TotalHealth, 0.001);
+        }
+
+        [Test]
+        public void RemovePixels_DoesNotAffectOtherPixels()
+        {
+            var grid = CreateGrid(4, 4, 0f);
+            var removed = new Vector2Int(0, 0);
+            var kept = new Vector2Int(1, 0);
+            grid.SetHealth(removed, 5f);
+            grid.SetHealth(kept, 3f);
+
+            grid.RemovePixels(new[] { removed });
+
+            Assert.AreEqual(3f, grid.GetHealth(kept), 0.001);
+            Assert.That(grid.IsAlive(kept), Is.True);
+        }
     }
 }

@@ -7,7 +7,6 @@ using LM;
 using Pixelation;
 using UnityEngine;
 using ZLinq;
-using Random = UnityEngine.Random;
 
 namespace Ships.Modules
 {
@@ -24,8 +23,10 @@ namespace Ships.Modules
         [SerializeField] private float beamRange = 20f;
 
         [SerializeField] private float maxFireDuration = 1.5f;
-        [SerializeField] private float pixelsDestroyedPerSecond = 10f;
-        [SerializeField] private float laserDamagePerHit = 1f;
+
+        [SerializeField]
+        private float damagePerSecond = 10f;
+
         [SerializeField] private LayerMask hitLayers;
 
         [SerializeField] private GameObject icon;
@@ -186,16 +187,14 @@ namespace Ships.Modules
                     {
                         lineRenderer.SetPosition(1, hit.point);
 
-                        if (Random.value < pixelsDestroyedPerSecond * Time.deltaTime)
-                        {
-                            var pixelatedRigidbody = hit.collider.GetComponent<PixelatedRigidbody>();
+                        var pixelatedRigidbody = hit.collider.GetComponent<PixelatedRigidbody>();
 
-                            var closestPixelPosition = pixelatedRigidbody.CollisionHandler.GetClosestPixelPosition(
-                                pixelatedRigidbody.WorldToLocalPoint(hit.point));
+                        var closestPixelPosition = pixelatedRigidbody.CollisionHandler.GetClosestPixelPosition(
+                            pixelatedRigidbody.WorldToLocalPoint(hit.point));
 
-                            if (closestPixelPosition.HasValue)
-                                pixelatedRigidbody.DamagePixelAt(closestPixelPosition.Value, laserDamagePerHit, true);
-                        }
+                        if (closestPixelPosition.HasValue)
+                            pixelatedRigidbody.DamagePixelAt(closestPixelPosition.Value,
+                                damagePerSecond * Time.deltaTime, true);
                     }
                     else
                     {

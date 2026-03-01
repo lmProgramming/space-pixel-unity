@@ -148,8 +148,7 @@ namespace Pixelation
 
             if (!pointsArray.AsValueEnumerable().Any()) return;
 
-            foreach (var point in pointsArray)
-                HealthGrid?.RemovePixel(point);
+            HealthGrid?.RemovePixels(pointsArray);
 
             var countBefore = PixelGrid.PixelCount;
             PixelGrid.RemovePixels(pointsArray);
@@ -386,6 +385,8 @@ namespace Pixelation
 
         public void PixelLostByDivision(HashSet<Vector2Int> region)
         {
+            HealthGrid?.RemovePixels(region);
+
             var countBefore = PixelGrid.PixelCount + region.Count;
             NudgeWeightedCenter(region, countBefore);
             OnPixelsLost?.Invoke(region.AsValueEnumerable().ToList(), PixelLoseReason.Division);

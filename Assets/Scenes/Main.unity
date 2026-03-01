@@ -1087,7 +1087,7 @@ MonoBehaviour:
     crewNeeded: 3
     crewQuarters: 0
   projectilePrefab: {fileID: 5654400622174641897, guid: 31131311ffb51fc42a911f89d07e56a6, type: 3}
-  projectileSpeed: 15000
+  projectileSpeed: 2500
   reloadTime: 1
   icon: {fileID: 1865393218821458671, guid: 58a346b199dceed4d81eff4d7a8b6025, type: 3}
 --- !u!114 &116197409
@@ -4769,10 +4769,9 @@ MonoBehaviour:
     crewNeeded: 2
     crewQuarters: 0
   lineRenderer: {fileID: 521192492}
-  beamRange: 200
+  beamRange: 500
   maxFireDuration: 2
-  pixelsDestroyedPerSecond: 5
-  laserDamagePerHit: 1
+  damagePerSecond: 10
   hitLayers:
     serializedVersion: 2
     m_Bits: 961
@@ -5856,7 +5855,7 @@ MonoBehaviour:
     crewNeeded: 2
     crewQuarters: 0
   projectilePrefab: {fileID: 5654400622174641897, guid: fbb05823f916f824da20fe66a7de32d4, type: 3}
-  projectileSpeed: 200
+  projectileSpeed: 250
   reloadTime: 0.2
   icon: {fileID: 1865393218821458671, guid: c388e61b26f07a841805d089806cdf1d, type: 3}
 --- !u!114 &672308253
@@ -12568,7 +12567,8 @@ Transform:
   m_LocalPosition: {x: 19, y: 1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1699799067}
   m_Father: {fileID: 820889511}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &1689674625
@@ -12881,14 +12881,44 @@ MonoBehaviour:
   lineRenderer: {fileID: 1689674626}
   beamRange: 200
   maxFireDuration: 2
-  pixelsDestroyedPerSecond: 5
-  laserDamagePerHit: 1
+  damagePerSecond: 5
   hitLayers:
     serializedVersion: 2
     m_Bits: 897
   icon: {fileID: 1865393218821458671, guid: 8f61f8d23847b2d46b2c194f226b8f84, type: 3}
-  originPoint: {fileID: 0}
+  originPoint: {fileID: 1699799067}
   reloadTime: 5
+--- !u!1 &1699799066
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1699799067}
+  m_Layer: 6
+  m_Name: originPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1699799067
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1699799066}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1689674624}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1735107389
 GameObject:
   m_ObjectHideFlags: 0

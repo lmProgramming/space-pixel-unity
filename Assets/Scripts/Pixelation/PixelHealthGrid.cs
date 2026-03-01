@@ -74,6 +74,11 @@ namespace Pixelation
             _health[index] = 0f;
         }
 
+        public void RemovePixels(IEnumerable<Vector2Int> points)
+        {
+            foreach (var point in points) RemovePixel(point);
+        }
+
         public bool IsAlive(Vector2Int point)
         {
             return _health[point.y * _width + point.x] > 0f;
