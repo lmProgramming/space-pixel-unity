@@ -27,7 +27,9 @@ namespace Ships.Modules
         private readonly Dictionary<Module, List<Vector2Int>> _connectionPoints = new();
         private readonly Dictionary<Module, FixedJoint2D> _connections = new();
 
-        public IReadOnlyList<CrewMember> AliveCrew => assignedCrew.AsValueEnumerable().Where(c => c.IsAlive).ToList();
+        private float _crewAppropriateSkillSum;
+
+        private IReadOnlyList<CrewMember> AliveCrew { get; set; }
 
         internal CrewSkillType MainSkillTypeForTesting
         {
@@ -40,9 +42,13 @@ namespace Ships.Modules
 
         protected float ShipModuleEfficiency => Ship.GeneralEfficiency * Efficiency;
 
+        private float PixelEfficiency =>
+            Mathf.Pow((float)PixelatedRigidbody.CurrentPixelCount / PixelatedRigidbody.StartPixelCount, 2);
+
         protected virtual void Awake()
         {
             PixelatedRigidbody = GetComponent<PixelatedRigidbody>();
+            OnCrewChange();
         }
 
         private void Start()
@@ -81,9 +87,7 @@ namespace Ships.Modules
             }
         }
 
-        public float Efficiency => Mathf.Pow(
-            (float)PixelatedRigidbody.CurrentPixelCount / PixelatedRigidbody.StartPixelCount,
-            2) * GetCrewMultiplier();
+        public float Efficiency => PixelEfficiency * GetCrewEfficiency();
 
         public IReadOnlyList<CrewMember> AssignedCrew => assignedCrew;
         public int CrewMissingCount => GetCrewNeededCount() - GetAliveCrewCount();
@@ -97,7 +101,7 @@ namespace Ships.Modules
         public ModuleType Type { get; protected set; }
 
 
-        public virtual int GetAliveCrewCount()
+        public int GetAliveCrewCount()
         {
             return AliveCrew.Count;
         }
@@ -127,12 +131,15 @@ namespace Ships.Modules
             if (assignedCrew.Contains(member)) return false;
 
             assignedCrew.Add(member);
+            OnCrewChange();
             return true;
         }
 
         public bool RemoveCrew(CrewMember member)
         {
-            return assignedCrew.Remove(member);
+            var crewRemoved = assignedCrew.Remove(member);
+            OnCrewChange();
+            return crewRemoved;
         }
 
         public virtual float GetEnergyCapacity()
@@ -147,7 +154,7 @@ namespace Ships.Modules
 
         public virtual float GetEnergyProduction()
         {
-            return Resources.energyProduction * Efficiency * (1f + GetCrewMultiplier());
+            return Resources.energyProduction * Efficiency;
         }
 
         public void Setup(Ship ship)
@@ -251,19 +258,23 @@ namespace Ships.Modules
             Ship.ModuleGraph.RemoveEdge(this, otherModule);
         }
 
-        public virtual float GetCrewMultiplier()
+        public virtual float GetCrewEfficiency()
         {
-            if (assignedCrew.Count == 0) return 0f;
+            if (assignedCrew.Count == 0) return GetCrewNeededCount() == 0 ? 1f : 0f;
 
             var captainTotal = AliveCrew.AsValueEnumerable()
                 .Sum(crew => crew.GetSkillLevel(CrewSkillType.Captain));
 
             var captainMultiplier = 1f + captainTotal * CaptainBonusPerLevel;
 
-            var skillTotal = assignedCrew.AsValueEnumerable().Sum(crew => crew.GetSkillLevel(mainSkillType));
-
             return (1 - (float)CrewMissingCount / GetCrewNeededCount()) *
-                   (1 + skillTotal * captainMultiplier * CrewSkillBonusPerLevel);
+                   (1 + _crewAppropriateSkillSum * captainMultiplier * CrewSkillBonusPerLevel);
+        }
+
+        private void OnCrewChange()
+        {
+            AliveCrew = assignedCrew.AsValueEnumerable().Where(crew => crew.IsAlive).ToList();
+            _crewAppropriateSkillSum = assignedCrew.AsValueEnumerable().Sum(crew => crew.GetSkillLevel(mainSkillType));
         }
 
         private void KillAllCrew()
@@ -271,6 +282,8 @@ namespace Ships.Modules
             foreach (var crew in assignedCrew)
                 crew.Kill();
             assignedCrew.Clear();
+
+            OnCrewChange();
         }
 
         public void SetResources(Resources newResources)

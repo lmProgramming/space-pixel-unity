@@ -136,7 +136,7 @@ namespace Ships.Tests
             for (var i = 0; i < 4; i++)
                 crew.Add(MakeCrew($"Crew{i}", "Member", 25 + i));
 
-            ship.AssignCrewRandomly(crew);
+            ship.AssignCrewBySkill(crew);
 
             var totalAssigned = ship.ModuleGraph.GetAllNodes().AsValueEnumerable()
                 .Sum(m => m.GetAliveCrewCount());
@@ -150,7 +150,7 @@ namespace Ships.Tests
                 (crewNeeded: 3, mainSkill: CrewSkillType.Navigation));
             yield return WaitForStart();
 
-            ship.AssignCrewRandomly(new List<CrewMember>());
+            ship.AssignCrewBySkill(new List<CrewMember>());
 
             var totalAssigned = ship.ModuleGraph.GetAllNodes().AsValueEnumerable()
                 .Sum(m => m.GetAliveCrewCount());
@@ -169,7 +169,7 @@ namespace Ships.Tests
             for (var i = 0; i < 10; i++)
                 crew.Add(MakeCrew($"Crew{i}", "Member", 20 + i));
 
-            ship.AssignCrewRandomly(crew);
+            ship.AssignCrewBySkill(crew);
 
             var totalNeeded = ship.ModuleGraph.GetAllNodes().AsValueEnumerable()
                 .Sum(m => m.GetCrewNeededCount());
@@ -190,7 +190,7 @@ namespace Ships.Tests
             var mechExpert = MakeCrew("Mech", "Expert", 30,
                 new Dictionary<CrewSkillType, int> { { CrewSkillType.Mechanics, 10 } });
 
-            ship.AssignCrewRandomly(new List<CrewMember> { mechExpert, navExpert });
+            ship.AssignCrewBySkill(new List<CrewMember> { mechExpert, navExpert });
 
             var navModule = ship.ModuleGraph.GetAllNodes().AsValueEnumerable()
                 .First(m => m.Type == ModuleType.Production);
@@ -222,7 +222,7 @@ namespace Ships.Tests
             for (var i = 0; i < 3; i++)
                 crew.Add(MakeCrew($"Crew{i}", "Member", 25 + i));
 
-            ship.AssignCrewRandomly(crew);
+            ship.AssignCrewBySkill(crew);
 
             // 5 needed total, 3 assigned → 2 missing
             Assert.AreEqual(2, ship.CrewMissingCount);
@@ -240,7 +240,7 @@ namespace Ships.Tests
             for (var i = 0; i < 3; i++)
                 crew.Add(MakeCrew($"Crew{i}", "Member", 25 + i));
 
-            ship.AssignCrewRandomly(crew);
+            ship.AssignCrewBySkill(crew);
 
             Assert.AreEqual(0, ship.CrewMissingCount);
         }
@@ -255,7 +255,7 @@ namespace Ships.Tests
 
             var crew = new List<CrewMember> { MakeCrew("Only", "One", 25) };
 
-            ship.AssignCrewRandomly(crew);
+            ship.AssignCrewBySkill(crew);
 
             var totalAssigned = ship.ModuleGraph.GetAllNodes().AsValueEnumerable()
                 .Sum(m => m.GetAliveCrewCount());

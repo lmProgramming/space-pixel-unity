@@ -11,7 +11,7 @@ namespace Ships
 {
     public class ShipCrewAssigner : MonoBehaviour
     {
-        [SerializeField] private List<CrewMember> crewMembers;
+        [SerializeField] private List<CrewMember> crewMembers = new();
 
         [SerializeField]
         private bool generateMissingCrewMembers = true;
@@ -40,7 +40,7 @@ namespace Ships
         private void Start()
         {
             if (generateMissingCrewMembers) GenerateMissingCrewMembers();
-            _ship.AssignCrewRandomly(crewMembers);
+            _ship.AssignCrewBySkill(crewMembers);
         }
 
         private void GenerateMissingCrewMembers()

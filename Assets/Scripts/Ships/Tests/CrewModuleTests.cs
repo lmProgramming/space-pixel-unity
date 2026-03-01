@@ -304,7 +304,7 @@ namespace Ships.Tests
         {
             var module = CreateStandaloneModule();
 
-            Assert.AreEqual(0f, module.GetCrewMultiplier());
+            Assert.AreEqual(0f, module.GetCrewEfficiency());
         }
 
         [Test]
@@ -320,7 +320,7 @@ namespace Ships.Tests
 
             // fillRatio = 1 - 2/3 = 1/3, skillTotal(Mechanics) = 0
             // result = 1/3 * (1 + 0) = 1/3
-            Assert.AreEqual(1f / 3f, module.GetCrewMultiplier(), 0.0001f);
+            Assert.AreEqual(1f / 3f, module.GetCrewEfficiency(), 0.0001f);
         }
 
         [Test]
@@ -330,7 +330,7 @@ namespace Ships.Tests
             var skills = new Dictionary<CrewSkillType, int> { { CrewSkillType.Navigation, 5 } };
             module.AssignCrew(MakeCrew("Nav", "Expert", 35, skills));
 
-            var bonus = module.GetCrewMultiplier();
+            var bonus = module.GetCrewEfficiency();
 
             Assert.Greater(bonus, 0f);
         }
@@ -344,7 +344,7 @@ namespace Ships.Tests
 
             // fillRatio = 1 - 2/3 = 1/3, skillTotal=5, captainMultiplier=1.0
             // bonus = 1/3 * (1 + 5 * 1.0 * 0.02) = 1/3 * 1.1 ≈ 0.3667
-            var bonus = module.GetCrewMultiplier();
+            var bonus = module.GetCrewEfficiency();
 
             Assert.AreEqual(1f / 3f * 1.1f, bonus, 0.0001f);
         }
@@ -360,7 +360,7 @@ namespace Ships.Tests
 
             // fillRatio = 1 - 1/3 = 2/3, skillTotal=10, captainMultiplier=1.0
             // bonus = 2/3 * (1 + 10 * 1.0 * 0.02) = 2/3 * 1.2 = 0.8
-            var bonus = module.GetCrewMultiplier();
+            var bonus = module.GetCrewEfficiency();
 
             Assert.AreEqual(2f / 3f * 1.2f, bonus, 0.0001f);
         }
@@ -378,7 +378,7 @@ namespace Ships.Tests
 
             // fillRatio = 1 - 2/3 = 1/3, skillTotal=4, captainTotal=5, captainMultiplier=1+5*0.05=1.25
             // bonus = 1/3 * (1 + 4 * 1.25 * 0.02) = 1/3 * 1.1 ≈ 0.3667
-            var bonus = module.GetCrewMultiplier();
+            var bonus = module.GetCrewEfficiency();
 
             Assert.AreEqual(1f / 3f * 1.1f, bonus, 0.0001f);
         }
@@ -395,7 +395,7 @@ namespace Ships.Tests
 
             // fillRatio = 1/3, skillTotal(Mechanics)=0, captainMultiplier=1+10*0.05=1.5
             // result = 1/3 * (1 + 0) = 1/3
-            Assert.AreEqual(1f / 3f, module.GetCrewMultiplier(), 0.0001f);
+            Assert.AreEqual(1f / 3f, module.GetCrewEfficiency(), 0.0001f);
         }
 
         [Test]
@@ -414,17 +414,26 @@ namespace Ships.Tests
             moduleNoCaptain.AssignCrew(MakeCrew("Nav", "Plain", 30, plainSkills));
             moduleWithCaptain.AssignCrew(MakeCrew("Nav", "Cap", 30, captainSkills));
 
-            Assert.Greater(moduleWithCaptain.GetCrewMultiplier(), moduleNoCaptain.GetCrewMultiplier());
+            Assert.Greater(moduleWithCaptain.GetCrewEfficiency(), moduleNoCaptain.GetCrewEfficiency());
         }
 
         [Test]
-        public void Efficiency_FullPixels_NoCrew_EqualsZero()
+        public void Efficiency_FullPixels_NoCrewExpected_EqualsOne()
         {
             var module = CreateStandaloneModule(0);
 
-            // Full pixels → (25/25)^2 = 1, no crew → GetCrewMultiplier()=0, efficiency = 1 * 0 = 0
+            Assert.AreEqual(1f, module.Efficiency, 0.0001f);
+        }
+
+
+        [Test]
+        public void Efficiency_FullPixels_CrewExpected_EqualsZero()
+        {
+            var module = CreateStandaloneModule(1);
+
             Assert.AreEqual(0f, module.Efficiency, 0.0001f);
         }
+
 
         [Test]
         public void Efficiency_FullPixels_WithCrew_IncludesCrewBonus()

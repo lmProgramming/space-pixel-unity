@@ -227,7 +227,7 @@ namespace Ships
                 weapon.StopShooting();
         }
 
-        public void AssignCrewRandomly(IEnumerable<CrewMember> crew)
+        public void AssignCrewBySkill(IEnumerable<CrewMember> crew)
         {
             var crewList = crew.ToList();
 
