@@ -1,9 +1,8 @@
-using System;
 using System.Collections.Generic;
-using Core.Gameplay.EasyTeam;
 using Core.Services;
 using Core.Ship;
 using Gameplay.Navigation;
+using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -39,18 +38,6 @@ namespace Gameplay.Tests.Navigation
             {
                 var ships = shipsPerSector.GetValueOrDefault(sector);
                 return new SectorResult(false, false, 0f, ships);
-            }
-        }
-
-        private class FakeShip : IShip
-        {
-            public ITeam Team => null;
-            public IModule CommandModule => null;
-            public Collider2D[] OwnColliders => Array.Empty<Collider2D>();
-
-            public Vector2 GetPosition()
-            {
-                return Vector2.zero;
             }
         }
 
@@ -113,7 +100,7 @@ namespace Gameplay.Tests.Navigation
         }
 
         [Test]
-        public void CalculatePath_AllNeighboursBlocked_ReturnsNull()
+        public void CalculatePath_AllNeighborsBlocked_ReturnsNull()
         {
             var blocked = new HashSet<Vector2>
             {
@@ -130,7 +117,7 @@ namespace Gameplay.Tests.Navigation
         }
 
         [Test]
-        public void CalculatePath_AllNeighboursBlockedIfShipBig_ReturnsNull()
+        public void CalculatePath_AllNeighborsBlockedIfShipBig_ReturnsNull()
         {
             const float twoSectorsAway = SectorSize * 2;
             var blocked = new HashSet<Vector2>
@@ -196,11 +183,11 @@ namespace Gameplay.Tests.Navigation
         public void CalculatePath_LargeShip_OnlyOneCorridor_StillFindsPath()
         {
             // Ship size = 2 * SectorSize → footprintRadius = 2, so navigability checks a 3×3 block of sectors.
-            // Block three of the four cardinal neighbours by placing an obstacle inside each of their 3×3 footprints
+            // Block three of the four cardinal neighbors by placing an obstacle inside each of their 3×3 footprints
             // without touching the right-hand corridor (neighbor at (+SectorSize, 0)).
-            //   Left  neighbour footprint contains (-2S, 0) → block it
-            //   Up    neighbour footprint contains (0, +2S)  → block it
-            //   Down  neighbour footprint contains (0, -2S)  → block it
+            //   Left neighbor footprint contains (-2S, 0) → block it
+            //   Up neighbor footprint contains (0, +2S)  → block it
+            //   Down neighbor footprint contains (0, -2S)  → block it
             var blocked = new HashSet<Vector2>
             {
                 new(-2 * SectorSize, 0f),
@@ -240,12 +227,12 @@ namespace Gameplay.Tests.Navigation
         [Test]
         public void CalculatePath_ShipAware_ThirdShipWithDebrisBlocksPath()
         {
-            var callerShip = new FakeShip();
-            var targetShip = new FakeShip();
-            var thirdShip = new FakeShip();
+            var callerShip = Substitute.For<IShip>();
+            var targetShip = Substitute.For<IShip>();
+            var thirdShip = Substitute.For<IShip>();
 
             // Sectors contain a third ship AND debris — both conditions independently block, together they definitely block
-            var allNeighbours = new Dictionary<Vector2, SectorResult>
+            var allNeighbors = new Dictionary<Vector2, SectorResult>
             {
                 { new Vector2(SectorSize, 0f), new SectorResult(false, true, 0f, new[] { thirdShip }) },
                 { new Vector2(-SectorSize, 0f), new SectorResult(false, true, 0f, new[] { thirdShip }) },
@@ -255,50 +242,50 @@ namespace Gameplay.Tests.Navigation
 
             var calculator = new NavigationCalculator(SectorSize,
                 _ => SectorResult.Empty,
-                (sector, _, _) => allNeighbours.TryGetValue(sector, out var r) ? r : SectorResult.Empty);
+                (sector, _, _) => allNeighbors.TryGetValue(sector, out var r) ? r : SectorResult.Empty);
 
             var path = calculator.CalculatePath(
                 new Vector3(5f, 5f), new Vector3(50f, 50f), 5, callerShip, targetShip);
 
-            Assert.IsNull(path, "Expected no path when all neighbouring sectors have both a third ship and debris");
+            Assert.IsNull(path, "Expected no path when all neighboring sectors have both a third ship and debris");
         }
 
         [Test]
         public void CalculatePath_ShipAware_ThirdShipInSectorBlocksPath()
         {
-            var callerShip = new FakeShip();
-            var targetShip = new FakeShip();
-            var thirdShip = new FakeShip();
+            var callerShip = Substitute.For<IShip>();
+            var targetShip = Substitute.For<IShip>();
+            var thirdShip = Substitute.For<IShip>();
 
             // Place the third ship in the only direct route sector (0, SectorSize)
             // With only one neighbor available and it is blocked by a third ship,
             // surround start sector so every escape route contains the third ship
-            var allNeighbours = new Dictionary<Vector2, IReadOnlyCollection<IShip>>
+            var allNeighbors = new Dictionary<Vector2, IReadOnlyCollection<IShip>>
             {
                 { new Vector2(SectorSize, 0f), new[] { thirdShip } },
                 { new Vector2(-SectorSize, 0f), new[] { thirdShip } },
                 { new Vector2(0f, SectorSize), new[] { thirdShip } },
                 { new Vector2(0f, -SectorSize), new[] { thirdShip } }
             };
-            var blockedCalculator = BuildCalculatorWithShipAwareness(allNeighbours);
+            var blockedCalculator = BuildCalculatorWithShipAwareness(allNeighbors);
 
             var path = blockedCalculator.CalculatePath(
                 new Vector3(5f, 5f), new Vector3(50f, 50f), 5, callerShip, targetShip);
 
-            Assert.IsNull(path, "Expected no path when all neighbouring sectors contain a third ship");
+            Assert.IsNull(path, "Expected no path when all neighboring sectors contain a third ship");
         }
 
         [Test]
         public void CalculatePath_ShipAware_CallerAndTargetShipsDoNotBlockPath()
         {
-            var callerShip = new FakeShip();
-            var targetShip = new FakeShip();
+            var callerShip = Substitute.For<IShip>();
+            var targetShip = Substitute.For<IShip>();
 
             // The only route forward (0, SectorSize) contains just the caller and target ships — must be passable
             var directRouteSector = new Vector2(0f, SectorSize);
             var shipsPerSector = new Dictionary<Vector2, IReadOnlyCollection<IShip>>
             {
-                { directRouteSector, new IShip[] { callerShip, targetShip } }
+                { directRouteSector, new[] { callerShip, targetShip } }
             };
             var calculator = BuildCalculatorWithShipAwareness(shipsPerSector);
 

@@ -24,7 +24,7 @@ namespace Ships.Internal
         public int Crew => crew;
         public int CrewCapacity => crewCapacity;
 
-        public void Recalculate(List<Module> modules)
+        public void Recalculate(IReadOnlyList<Module> modules)
         {
             energyCapacity = 0;
             energyDraw = 0;
@@ -35,12 +35,12 @@ namespace Ships.Internal
 
             foreach (var module in modules)
             {
-                energyCapacity += module.GetEnergyCapacity();
+                energyCapacity += module.EnergyCapacity;
                 energyDraw += module.GetEnergyDraw();
                 energyProduction += module.GetEnergyProduction();
 
-                crewCapacity += module.GetCrewCapacity();
-                crew += module.GetCrewCount();
+                crewCapacity += module.CrewNeededCount;
+                crew += module.AliveCrewCount;
             }
         }
 

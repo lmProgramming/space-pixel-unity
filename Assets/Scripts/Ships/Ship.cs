@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using Core.Gameplay.Combat;
 using Core.Gameplay.EasyTeam;
@@ -28,14 +29,17 @@ namespace Ships
         [SerializeField]
         private Team team;
 
+        private readonly List<Module> _allModulesCache = new();
+
         // ReSharper disable once CollectionNeverUpdated.Local
         private readonly DefaultDictionary<ModuleType, List<Module>> _modulesDictionary = new(() => new List<Module>());
 
         private BiCohesionGraph<IModule> _biCohesionGraph;
-        private Action<IPixelated> _onCommandModuleNoPixelsLeft;
 
         [Inject]
         private IMapInfo _mapInfo;
+
+        private Action<IPixelated> _onCommandModuleNoPixelsLeft;
 
         [Inject]
         protected IShipService ShipService;
@@ -45,14 +49,7 @@ namespace Ships
             set => moduleConnectionFactory = value;
         }
 
-        private List<Module> AllModules =>
-            ModuleGraph.GetAllNodes().AsValueEnumerable().OfType<Module>().ToList();
-
-        public float GeneralEfficiency => Math.Max(0.01f, ResourceManager.EnergyEfficiency);
-
-        public Graph<IModule> ModuleGraph => _biCohesionGraph;
-
-        public Vector2 AttackTargetPosition { get; protected set; }
+        private IReadOnlyList<Module> AllModules => _allModulesCache;
 
         public List<IWeapon> Weapons =>
             _modulesDictionary[ModuleType.Weapon].AsValueEnumerable().Cast<IWeapon>().ToList();
@@ -61,6 +58,9 @@ namespace Ships
             _modulesDictionary[ModuleType.Engine].AsValueEnumerable().Cast<Engine>().ToList();
 
         public ResourceManager ResourceManager { get; private set; }
+
+        public int CrewMissingCount =>
+            ModuleGraph.GetAllNodes().AsValueEnumerable().Sum(module => module.CrewMissingCount);
 
         private void Awake()
         {
@@ -110,20 +110,38 @@ namespace Ships
                 CommandModule.PixelatedRigidbody.OnNoPixelsLeft -= _onCommandModuleNoPixelsLeft;
         }
 
+        public float GeneralEfficiency => Math.Max(0.01f, ResourceManager.EnergyEfficiency);
+
+        public Graph<IModule> ModuleGraph => _biCohesionGraph;
+
+        public Vector2 AttackTargetPosition { get; protected set; }
+
+        public float CaptainMultiplier => CommandModule.GetCrewEfficiency();
+
         public ITeam Team
         {
             get => team;
             private set => team = value as Team;
         }
 
-        public IModule CommandModule { get; internal set; }
+        public IModule CommandModule { get; private set; }
 
-        public Collider2D[] OwnColliders { get; private set; } = Array.Empty<Collider2D>();
+        public Collider2D[] OwnColliders { get; set; } = Array.Empty<Collider2D>();
 
         public Vector2 GetPosition()
         {
             var rb = CommandModule.PixelatedRigidbody;
             return rb.LocalToWorldPoint(rb.WeightedCenter);
+        }
+
+        public void OnModuleDestroyed(IModule module)
+        {
+            if (module == null) return;
+
+            Debug.Log($"[Ship] Module destroyed: {module.Transform.name}", module.Transform);
+
+            _biCohesionGraph.RemoveNode(module);
+            RecacheModulesDictionary();
         }
 
         private async UniTaskVoid UpdateResourcesLoop()
@@ -137,16 +155,6 @@ namespace Ships
                 await updateResourcesTimer.Wait(cancellationToken: token);
                 ResourceManager.Recalculate(AllModules);
             }
-        }
-
-        public void OnModuleDestroyed(IModule module)
-        {
-            if (module == null) return;
-
-            Debug.Log($"[Ship] Module destroyed: {module.Transform.name}", module.Transform);
-
-            _biCohesionGraph.RemoveNode(module);
-            RecacheModulesDictionary();
         }
 
         private void HandleUnreachableModules(List<IModule> unreachableModules)
@@ -171,12 +179,18 @@ namespace Ships
         private void RecacheModulesDictionary()
         {
             _modulesDictionary.Clear();
+            _allModulesCache.Clear();
 
-            foreach (var module in ModuleGraph.GetAllNodes()) _modulesDictionary[module.Type].Add(module as Module);
+            foreach (var module in ModuleGraph.GetAllNodes())
+            {
+                var mod = module as Module;
+                _modulesDictionary[module.Type].Add(mod);
+                _allModulesCache.Add(mod);
+            }
 
             OwnColliders = GetComponentsInChildren<Collider2D>();
 
-            ResourceManager.Recalculate(AllModules);
+            ResourceManager.Recalculate(_allModulesCache);
         }
 
         internal void ReinitializeModules()
@@ -220,6 +234,17 @@ namespace Ships
         {
             foreach (var weapon in Weapons)
                 weapon.StopShooting();
+        }
+
+        public void AssignCrewBySkill(IEnumerable<CrewMember> crew)
+        {
+            var crewList = crew.ToList();
+
+            foreach (var module in ModuleGraph.GetAllNodes())
+            {
+                module.FillCrewBySkill(crewList, out var remainingCrew);
+                crewList = remainingCrew.ToList();
+            }
         }
 
         protected void MarkEnginesActivity(bool active)
