@@ -1,7 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using Core.Ship;
+using NSubstitute;
 using NUnit.Framework;
 using Pixelation;
 using Ships.Tests.TestHelpers;
@@ -80,6 +82,12 @@ namespace Ships.Tests
             Dictionary<CrewSkillType, int> skills = null)
         {
             return new CrewMember(first, last, age, skills);
+        }
+
+        private static Delegate GetOnDiedDelegate(CrewMember crew)
+        {
+            var field = typeof(CrewMember).GetField("OnDied", BindingFlags.Instance | BindingFlags.NonPublic);
+            return field?.GetValue(crew) as Delegate;
         }
 
         [Test]
@@ -187,16 +195,16 @@ namespace Ships.Tests
             module.AssignCrew(MakeCrew("B", "B"));
             module.AssignCrew(MakeCrew("C", "C"));
 
-            Assert.AreEqual(-2, module.CrewMissingCount);
+            Assert.AreEqual(0, module.CrewMissingCount);
         }
 
         [Test]
-        public void CrewMissingCount_ZeroCrewNeeded_ReturnsNegativeWhenCrewAssigned()
+        public void CrewMissingCount_ZeroCrewNeeded_ReturnsZeroWhenCrewAssigned()
         {
             var module = CreateStandaloneModule(0);
             module.AssignCrew(MakeCrew());
 
-            Assert.AreEqual(-1, module.CrewMissingCount);
+            Assert.AreEqual(0, module.CrewMissingCount);
         }
 
         [Test]
@@ -506,6 +514,136 @@ namespace Ships.Tests
             var module = CreateStandaloneModule(0);
 
             Assert.AreEqual(0, module.CrewNeededCount);
+        }
+
+        [Test]
+        public void EfficiencyGoesDown_AsCrewDies()
+        {
+            const int crewCount = 10;
+
+            var module = CreateStandaloneModule(crewCount);
+
+            var crew = new List<CrewMember>();
+            for (var i = 0; i < crewCount; i++)
+            {
+                var crewMember = MakeCrew($"Crew{i}", "Member", 20 + i,
+                    new Dictionary<CrewSkillType, int> { { CrewSkillType.Navigation, i } });
+                crew.Add(crewMember);
+                module.AssignCrew(crewMember);
+            }
+
+            var previousEfficiency = module.Efficiency;
+            for (var i = 0; i < crewCount / 2; i++)
+            {
+                crew[i].Kill();
+                var currentEfficiency = module.Efficiency;
+                Assert.Less(currentEfficiency, previousEfficiency,
+                    $"Efficiency should decrease after crew member {crew[i].FirstName} dies");
+                previousEfficiency = currentEfficiency;
+            }
+
+            for (var i = crewCount / 2; i < crewCount; i++)
+            {
+                module.KillRandomCrew(1);
+                var currentEfficiency = module.Efficiency;
+                Assert.Less(currentEfficiency, previousEfficiency,
+                    $"Efficiency should decrease after crew member {crew[i].FirstName} dies");
+                previousEfficiency = currentEfficiency;
+            }
+
+            Assert.AreEqual(previousEfficiency, 0f, 0.0001f,
+                "Efficiency should be zero after all crew members are dead");
+        }
+
+        [Test]
+        public void KillAllCrew_KillsAllAssignedCrew()
+        {
+            var module = CreateStandaloneModule();
+            var crew1 = MakeCrew("Alice", "A", 25);
+            var crew2 = MakeCrew("Bob", "B");
+            var crew3 = MakeCrew("Charlie", "C", 35);
+            module.AssignCrew(crew1);
+            module.AssignCrew(crew2);
+            module.AssignCrew(crew3);
+
+            module.KillAllCrew();
+
+            Assert.IsFalse(crew1.IsAlive);
+            Assert.IsFalse(crew2.IsAlive);
+            Assert.IsFalse(crew3.IsAlive);
+            Assert.AreEqual(0, module.AliveCrewCount);
+        }
+
+        [Test]
+        public void KillAllCrew_DoesNotLeakOnDiedSubscription()
+        {
+            var module = CreateStandaloneModule();
+            var crew = MakeCrew("Alice", "A", 25);
+            module.AssignCrew(crew);
+
+            module.KillAllCrew();
+
+            Assert.IsNull(GetOnDiedDelegate(crew),
+                "Module should have unsubscribed from OnDied after KillAllCrew");
+        }
+
+        [Test]
+        public void KillRandomCrew_KillsSpecifiedCount()
+        {
+            var module = CreateStandaloneModule(5);
+            for (var i = 0; i < 5; i++)
+                module.AssignCrew(MakeCrew($"Crew{i}", "M", 20 + i));
+
+            module.KillRandomCrew(2);
+
+            Assert.AreEqual(3, module.AliveCrewCount);
+        }
+
+        [Test]
+        public void KillRandomCrew_MoreThanAvailable_KillsAll()
+        {
+            var module = CreateStandaloneModule();
+            var crew1 = MakeCrew("A", "A", 20);
+            var crew2 = MakeCrew("B", "B", 25);
+            module.AssignCrew(crew1);
+            module.AssignCrew(crew2);
+
+            module.KillRandomCrew(10);
+
+            Assert.IsFalse(crew1.IsAlive);
+            Assert.IsFalse(crew2.IsAlive);
+            Assert.AreEqual(0, module.AliveCrewCount);
+        }
+
+        [Test]
+        public void RemoveCrew_DoesNotLeakOnDiedSubscription()
+        {
+            var module = CreateStandaloneModule();
+            var crew = MakeCrew("Alice", "A", 25);
+            module.AssignCrew(crew);
+
+            module.RemoveCrew(crew);
+
+            Assert.IsNull(GetOnDiedDelegate(crew),
+                "Module should have unsubscribed from OnDied after RemoveCrew");
+        }
+
+        [Test]
+        public void KillRandomCrew_DoesNotLeakOnDiedSubscription()
+        {
+            var module = CreateStandaloneModule();
+            var crew1 = MakeCrew("A", "A", 20);
+            var crew2 = MakeCrew("B", "B", 25);
+            var crew3 = MakeCrew("C", "C");
+            module.AssignCrew(crew1);
+            module.AssignCrew(crew2);
+            module.AssignCrew(crew3);
+
+            module.KillRandomCrew(3);
+
+            Assert.IsNull(GetOnDiedDelegate(crew1), "crew1 OnDied should have no subscribers");
+            Assert.IsNull(GetOnDiedDelegate(crew2), "crew2 OnDied should have no subscribers");
+            Assert.IsNull(GetOnDiedDelegate(crew3), "crew3 OnDied should have no subscribers");
         }
     }
 }

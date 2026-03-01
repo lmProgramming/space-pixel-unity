@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Core.Pixelation;
 using Core.Ship;
+using LM;
 using Pixelation;
 using UnityEngine;
 using ZLinq;
@@ -29,7 +30,7 @@ namespace Ships.Modules
 
         private float _crewAppropriateSkillSum;
 
-        protected IReadOnlyList<CrewMember> AliveCrew { get; private set; }
+        protected List<CrewMember> AliveCrew { get; private set; }
 
         internal CrewSkillType MainSkillTypeForTesting
         {
@@ -44,8 +45,6 @@ namespace Ships.Modules
 
         private float PixelEfficiency =>
             Mathf.Pow((float)PixelatedRigidbody.CurrentPixelCount / PixelatedRigidbody.StartPixelCount, 2);
-
-        public virtual float EnergyCapacity => Resources.energyCapacity * Efficiency;
 
         protected virtual void Awake()
         {
@@ -89,10 +88,15 @@ namespace Ships.Modules
             }
         }
 
+
+        public int AliveCrewCount => AliveCrew.Count;
+
+        public virtual float EnergyCapacity => Resources.energyCapacity * Efficiency;
+
         public float Efficiency => PixelEfficiency * GetCrewEfficiency();
 
         public IReadOnlyList<CrewMember> AssignedCrew => assignedCrew;
-        public int CrewMissingCount => CrewNeededCount - AliveCrewCount();
+        public int CrewMissingCount => Mathf.Max(0, CrewNeededCount - AliveCrewCount);
 
         [field: SerializeField]
         public Resources Resources { get; private set; }
@@ -101,12 +105,6 @@ namespace Ships.Modules
 
         public Transform Transform => transform;
         public ModuleType Type { get; protected set; }
-
-
-        public int AliveCrewCount()
-        {
-            return AliveCrew.Count;
-        }
 
         public virtual int CrewNeededCount => Mathf.CeilToInt(Resources.crewNeeded);
 
@@ -131,19 +129,25 @@ namespace Ships.Modules
 
             assignedCrew.Add(member);
             OnCrewChange();
+
+            member.OnDied += HandleCrewMemberDeath;
+
             return true;
         }
 
         public bool RemoveCrew(CrewMember member)
         {
             var crewRemoved = assignedCrew.Remove(member);
+            if (crewRemoved)
+                UnsubscribeCrew(member);
             OnCrewChange();
             return crewRemoved;
         }
 
         public virtual float GetCrewEfficiency()
         {
-            if (assignedCrew.Count == 0) return CrewNeededCount == 0 ? 1f : 0f;
+            if (CrewNeededCount == 0) return 1;
+            if (assignedCrew.Count == 0) return 0;
 
             return (1 - (float)CrewMissingCount / CrewNeededCount) *
                    (1 + _crewAppropriateSkillSum * Ship.CaptainMultiplier * CrewSkillBonusPerLevel);
@@ -157,6 +161,44 @@ namespace Ships.Modules
         public virtual float GetEnergyProduction()
         {
             return Resources.energyProduction * Efficiency;
+        }
+
+        public void KillAllCrew()
+        {
+            foreach (var crew in assignedCrew) KillCrewMember(crew);
+            assignedCrew.Clear();
+
+            OnCrewChange();
+        }
+
+        public void KillRandomCrew(int count)
+        {
+            AliveCrew.Shuffle();
+
+            for (var i = 0; i < count && AliveCrew.Count > 0; i++)
+            {
+                var crewToKill = AliveCrew[0];
+                KillCrewMember(crewToKill);
+                OnCrewChange();
+            }
+        }
+
+        private void HandleCrewMemberDeath(CrewMember member)
+        {
+            UnsubscribeCrew(member);
+            OnCrewChange();
+        }
+
+        private void UnsubscribeCrew(CrewMember member)
+        {
+            member.OnDied -= HandleCrewMemberDeath;
+        }
+
+        private void KillCrewMember(CrewMember crewToKill)
+        {
+            UnsubscribeCrew(crewToKill);
+            crewToKill.Kill();
+            OnCrewChange();
         }
 
         public void Setup(Ship ship)
@@ -263,16 +305,7 @@ namespace Ships.Modules
         private void OnCrewChange()
         {
             AliveCrew = assignedCrew.AsValueEnumerable().Where(crew => crew.IsAlive).ToList();
-            _crewAppropriateSkillSum = assignedCrew.AsValueEnumerable().Sum(crew => crew.GetSkillLevel(mainSkillType));
-        }
-
-        private void KillAllCrew()
-        {
-            foreach (var crew in assignedCrew)
-                crew.Kill();
-            assignedCrew.Clear();
-
-            OnCrewChange();
+            _crewAppropriateSkillSum = AliveCrew.AsValueEnumerable().Sum(crew => crew.GetSkillLevel(mainSkillType));
         }
 
         public void SetResources(Resources newResources)

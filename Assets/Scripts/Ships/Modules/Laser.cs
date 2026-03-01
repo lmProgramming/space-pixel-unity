@@ -36,6 +36,7 @@ namespace Ships.Modules
         private float reloadTime = 2.0f;
 
         private CancellationTokenSource _fireCts;
+        private readonly RaycastHit2D[] _hits = new RaycastHit2D[100];
         private bool _isFiring;
 
         private ManualTimer _reloadTimer;
@@ -143,13 +144,12 @@ namespace Ships.Modules
 
         private RaycastHit2D RaycastIgnoringOwnColliders(Vector2 origin, Vector2 direction)
         {
-            var hits = new RaycastHit2D[100];
-            var size = Physics2D.RaycastNonAlloc(origin, direction, hits, beamRange, hitLayers);
+            var size = Physics2D.RaycastNonAlloc(origin, direction, _hits, beamRange, hitLayers);
             var ownColliders = Ship?.OwnColliders;
 
-            for (var index = 0; index < Mathf.Min(size, hits.Length); index++)
+            for (var index = 0; index < Mathf.Min(size, _hits.Length); index++)
             {
-                var hit = hits[index];
+                var hit = _hits[index];
                 if (ownColliders == null || !IsOwnCollider(hit.collider, ownColliders))
                     return hit;
             }

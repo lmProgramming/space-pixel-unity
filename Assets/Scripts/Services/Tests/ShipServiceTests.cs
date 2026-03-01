@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Core.Gameplay.EasyTeam;
 using Core.Ship;
+using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
 using Object = UnityEngine.Object;

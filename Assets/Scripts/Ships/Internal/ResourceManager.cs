@@ -40,7 +40,7 @@ namespace Ships.Internal
                 energyProduction += module.GetEnergyProduction();
 
                 crewCapacity += module.CrewNeededCount;
-                crew += module.AliveCrewCount();
+                crew += module.AliveCrewCount;
             }
         }
 

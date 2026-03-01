@@ -9,6 +9,7 @@ using Random = UnityEngine.Random;
 
 namespace Ships
 {
+    [RequireComponent(typeof(Ship))]
     public class ShipCrewAssigner : MonoBehaviour
     {
         [SerializeField] private List<CrewMember> crewMembers = new();

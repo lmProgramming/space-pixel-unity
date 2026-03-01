@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Core.Services;
 using Core.Ship;
 using Gameplay.Navigation;
+using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
 
