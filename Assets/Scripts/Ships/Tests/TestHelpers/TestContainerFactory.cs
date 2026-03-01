@@ -1,6 +1,6 @@
 using Core.Services;
 using Events.Collision;
-using Services;
+using NSubstitute;
 using UnityEngine;
 using Zenject;
 
@@ -18,10 +18,10 @@ namespace Ships.Tests.TestHelpers
             var testDebrisSpawner = new TestDebrisSpawner();
             container.Bind<IDebrisSpawner>().FromInstance(testDebrisSpawner).AsSingle();
 
-            var mapInfo = new TestMapInfo(mapTransform);
+            var mapInfo = Substitute.For<IMapInfo>();
             container.Bind<IMapInfo>().FromInstance(mapInfo).AsSingle();
 
-            var shipService = new GameObject("ShipService").AddComponent<ShipService>();
+            var shipService = Substitute.For<IShipService>();
             container.Bind<IShipService>().FromInstance(shipService).AsSingle();
 
             return container;

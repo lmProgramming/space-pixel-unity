@@ -11,7 +11,9 @@
   "allowUnsafeCode": false,
   "overrideReferences": true,
   "precompiledReferences": [
-    "nunit.framework.dll"
+    "nunit.framework.dll",
+    "ZLinq.dll",
+    "NSubstitute.dll"
   ],
   "autoReferenced": false,
   "defineConstraints": [

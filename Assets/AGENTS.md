@@ -6,13 +6,10 @@ This game aims to be a bit similar to Highfleet, but expands on it by making ind
 ## Contributing
 
 Code quality is important. You can write comments, but 99% of comments should be deleted and code extracted to methods before presenting your work as done. Long method names are totally okay, as long as they are descriptive
-
 If a component/anything is necessary for the script, don't silently fail, fail hard with an error!
-
 Periodically check for errors - it sometimes takes a bit of time to auto compile .cs files after you write them
-
 This project uses assemblies, so if you want to use code from other assembly, double check if you should. If you should, write the code as if you used the assembly and after compiling and seeing errors, just please let me know in the chat. I will link them manually in my IDE
-
+Don't manually create or edit .meta files (including by automated agents) — let Unity generate them, and only commit the .meta files Unity creates.
 Do a quick code review before handing off as "done", thanks!
 
 ## Gotchas
@@ -57,7 +54,7 @@ UI = UIToolkit
   - Current modules inheritors: CommandModule (its position is the ship's position - don't use ship transform.position!). Cannon, Laser, Engine
   - Modules use efficiency based on how many pixels they have left
   - Modules have crew and power needs, and they can produce both
-- UI: UI (use UIToolkit)
+- UI: use UIToolkit
 
 Check `ASSEMBLY_GUIDS.md` for exact GUIDS for these and external assemblies
 
@@ -67,3 +64,4 @@ I will run tests after you are done. Make sure to test critical functionality in
 Tests are in AssemblyFolder/Tests in its own assembly
 To allow tests to see private methods/fields, add [assembly: InternalsVisibleTo("AssemblyName.Tests")]. Then create new properties `internal InternalXYZ => XYZ` or methods like XYZForTesting
 A similar pattern can be done to get access to private fields in Editor inspector extensions
+Use NSubstitute for mocking dependencies

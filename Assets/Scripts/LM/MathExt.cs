@@ -10,19 +10,9 @@ namespace LM
             return Mathf.Atan2(a.y - b.y, a.x - b.x) * Mathf.Rad2Deg;
         }
 
-        public static float SquaredDistance(Vector2 a, Vector2 b)
-        {
-            return Mathf.Pow(a.x - b.x, 2) + Mathf.Pow(a.y - b.y, 2);
-        }
-
         public static float SimpleDistance(Vector2 a, Vector2 b)
         {
             return Mathf.Abs(a.x - b.x) + Mathf.Abs(a.y - b.y);
-        }
-
-        public static int ClampInt(int value, int min, int max)
-        {
-            return Mathf.Min(Mathf.Max(min, value), max);
         }
 
         public static T RandomFrom<T>(List<T> list)
@@ -49,10 +39,39 @@ namespace LM
 
         public static T RandomFrom<T>(T[] array)
         {
-            if (array == null || array.Length == 0) return default;
+            if (array == null || array.Length == 0)
+            {
+#if UNITY_EDITOR
+                Debug.LogWarning("The list is empty or null. Returning default value.");
+#endif
+                return default;
+            }
 
             var randomIndex = Random.Range(0, array.Length);
             return array[randomIndex];
+        }
+
+        /// <summary>
+        ///     Randomly selects an element from the specified list, removes that element from the list, and returns it.
+        /// </summary>
+        /// <returns>
+        ///     The element that was removed from the list, or <c>default(T)</c> if the list is <c>null</c> or contains no
+        ///     elements.
+        /// </returns>
+        public static T RandomPullFrom<T>(List<T> list)
+        {
+            if (list == null || list.Count == 0)
+            {
+                Debug.LogWarning("The list is empty or null. Returning default value.");
+                return default;
+            }
+
+            var randomIndex = Random.Range(0, list.Count);
+
+            var value = list[randomIndex];
+
+            list.RemoveAt(randomIndex);
+            return value;
         }
 
         public static List<Vector2Int> FindGridIntersections(Vector2 aLineStart, Vector2 aDir, float aDistance)
@@ -129,9 +148,15 @@ namespace LM
         // angle between -90 and 90 symmetrical
         public static float AngleSym180(float angle)
         {
-            if (angle > 90)
-                angle -= (angle - 90) * 2;
-            else if (angle < -90) angle += (angle + 90) * 2;
+            switch (angle)
+            {
+                case > 90:
+                    angle -= (angle - 90) * 2;
+                    break;
+                case < -90:
+                    angle += (angle + 90) * 2;
+                    break;
+            }
 
             return angle;
         }
@@ -157,6 +182,28 @@ namespace LM
                 var k = Random.Range(0, n + 1);
                 (list[n], list[k]) = (list[k], list[n]);
             }
+        }
+
+        public static Vector2[] GetTriangleApexes(float sideLength)
+        {
+            var halfSideLength = sideLength / 2;
+            var triangleHeight = halfSideLength * Mathf.Sqrt(3);
+
+            var triangleCenter = new Vector2(0, triangleHeight / 2);
+            var triangleBias = new Vector2(0, triangleHeight / 3) - triangleCenter;
+
+            var vertexA = triangleBias + new Vector2(0, 2 * triangleHeight / 3);
+            var vertexB = triangleBias + new Vector2(-sideLength / 2, -triangleHeight / 3);
+            var vertexC = triangleBias + new Vector2(sideLength / 2, -triangleHeight / 3);
+
+            Vector2[] vertices = { vertexA, vertexB, vertexC };
+
+            return vertices;
+        }
+
+        public static int RandomInclusive(int x, int y)
+        {
+            return Random.Range(x, y + 1);
         }
     }
 }

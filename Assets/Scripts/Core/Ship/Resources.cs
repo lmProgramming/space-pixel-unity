@@ -9,17 +9,18 @@ namespace Core.Ship
         public float energyDraw;
         public float energyProduction;
 
-        public int crew;
-        public int crewCapacity;
+        public int crewNeeded;
+        public int crewQuarters;
 
-        public Resources(float energyCapacity, float energyDraw, int crew, float energyProduction, int crewCapacity)
+        public Resources(float energyCapacity, float energyDraw, int crewNeeded, float energyProduction,
+            int crewQuarters)
         {
             this.energyCapacity = energyCapacity;
             this.energyDraw = energyDraw;
             this.energyProduction = energyProduction;
 
-            this.crew = crew;
-            this.crewCapacity = crewCapacity;
+            this.crewNeeded = crewNeeded;
+            this.crewQuarters = crewQuarters;
         }
     }
 }

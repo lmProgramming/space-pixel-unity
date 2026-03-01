@@ -1,39 +1,55 @@
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Core.Pixelation;
 using Core.Ship;
+using LM;
 using Pixelation;
 using UnityEngine;
 using ZLinq;
 using Resources = Core.Ship.Resources;
 
 [assembly: InternalsVisibleTo("Game.Editor.InspectorExtensions")]
+[assembly: InternalsVisibleTo("Game.Ships.Tests")]
 
 namespace Ships.Modules
 {
     [RequireComponent(typeof(PixelatedRigidbody))]
     public class Module : MonoBehaviour, IModule
     {
+        private const float CrewSkillBonusPerLevel = 0.02f;
+        protected const float CaptainBonusPerLevel = 0.05f;
+
+        [SerializeField] private CrewSkillType mainSkillType;
+
+        [SerializeField]
+        private List<CrewMember> assignedCrew = new();
+
         private readonly Dictionary<Module, List<Vector2Int>> _connectionPoints = new();
         private readonly Dictionary<Module, FixedJoint2D> _connections = new();
 
-        protected Ship Ship { get; private set; }
+        private float _crewAppropriateSkillSum;
 
-        /// <summary>
-        ///     Gets a read-only view of connection points to other modules.
-        ///     Used for serialization and testing.
-        /// </summary>
-        public IReadOnlyDictionary<Module, List<Vector2Int>> ConnectionPoints => _connectionPoints;
+        protected List<CrewMember> AliveCrew { get; private set; }
 
-        protected float Efficiency => Mathf.Pow(
-            (float)PixelatedRigidbody.CurrentPixelCount / PixelatedRigidbody.StartPixelCount,
-            2);
+        internal CrewSkillType MainSkillTypeForTesting
+        {
+            set => mainSkillType = value;
+        }
+
+        protected IShip Ship { get; set; }
+
+        internal IReadOnlyDictionary<Module, List<Vector2Int>> ConnectionPoints => _connectionPoints;
 
         protected float ShipModuleEfficiency => Ship.GeneralEfficiency * Efficiency;
+
+        private float PixelEfficiency =>
+            Mathf.Pow((float)PixelatedRigidbody.CurrentPixelCount / PixelatedRigidbody.StartPixelCount, 2);
 
         protected virtual void Awake()
         {
             PixelatedRigidbody = GetComponent<PixelatedRigidbody>();
+            OnCrewChange();
         }
 
         private void Start()
@@ -47,6 +63,8 @@ namespace Ships.Modules
         private void OnDestroy()
         {
             if (PixelatedRigidbody != null) PixelatedRigidbody.OnPixelsLost -= CheckCohesion;
+
+            KillAllCrew();
 
             Ship?.OnModuleDestroyed(this);
         }
@@ -70,6 +88,16 @@ namespace Ships.Modules
             }
         }
 
+
+        public int AliveCrewCount => AliveCrew.Count;
+
+        public virtual float EnergyCapacity => Resources.energyCapacity * Efficiency;
+
+        public float Efficiency => PixelEfficiency * GetCrewEfficiency();
+
+        public IReadOnlyList<CrewMember> AssignedCrew => assignedCrew;
+        public int CrewMissingCount => Mathf.Max(0, CrewNeededCount - AliveCrewCount);
+
         [field: SerializeField]
         public Resources Resources { get; private set; }
 
@@ -78,20 +106,51 @@ namespace Ships.Modules
         public Transform Transform => transform;
         public ModuleType Type { get; protected set; }
 
+        public virtual int CrewNeededCount => Mathf.CeilToInt(Resources.crewNeeded);
 
-        public virtual int GetCrewCount()
+        public void FillCrewBySkill(List<CrewMember> crew, out List<CrewMember> remainingCrew)
         {
-            return Mathf.FloorToInt(Resources.crew * Efficiency);
+            if (crew == null) throw new ArgumentNullException(nameof(crew));
+
+            var membersOrderBySkill = crew.AsValueEnumerable().OrderByDescending(c => c.GetSkillLevel(mainSkillType));
+
+            var crewToAssign = membersOrderBySkill.Take(CrewMissingCount).ToList();
+
+            foreach (var crewMember in crewToAssign)
+                AssignCrew(crewMember);
+
+            remainingCrew = membersOrderBySkill.Skip(crewToAssign.Count).ToList();
         }
 
-        public virtual int GetCrewCapacity()
+        public bool AssignCrew(CrewMember member)
         {
-            return Mathf.FloorToInt(Resources.crewCapacity * Efficiency);
+            if (member == null) throw new ArgumentNullException(nameof(member));
+            if (assignedCrew.Contains(member)) return false;
+
+            assignedCrew.Add(member);
+            OnCrewChange();
+
+            member.OnDied += HandleCrewMemberDeath;
+
+            return true;
         }
 
-        public virtual float GetEnergyCapacity()
+        public bool RemoveCrew(CrewMember member)
         {
-            return Resources.energyCapacity * Efficiency;
+            var crewRemoved = assignedCrew.Remove(member);
+            if (crewRemoved)
+                UnsubscribeCrew(member);
+            OnCrewChange();
+            return crewRemoved;
+        }
+
+        public virtual float GetCrewEfficiency()
+        {
+            if (CrewNeededCount == 0) return 1;
+            if (assignedCrew.Count == 0) return 0;
+
+            return (1 - (float)CrewMissingCount / CrewNeededCount) *
+                   (1 + _crewAppropriateSkillSum * Ship.CaptainMultiplier * CrewSkillBonusPerLevel);
         }
 
         public virtual float GetEnergyDraw()
@@ -102,6 +161,44 @@ namespace Ships.Modules
         public virtual float GetEnergyProduction()
         {
             return Resources.energyProduction * Efficiency;
+        }
+
+        public void KillAllCrew()
+        {
+            foreach (var crew in assignedCrew) KillCrewMember(crew);
+            assignedCrew.Clear();
+
+            OnCrewChange();
+        }
+
+        public void KillRandomCrew(int count)
+        {
+            AliveCrew.Shuffle();
+
+            for (var i = 0; i < count && AliveCrew.Count > 0; i++)
+            {
+                var crewToKill = AliveCrew[0];
+                KillCrewMember(crewToKill);
+                OnCrewChange();
+            }
+        }
+
+        private void HandleCrewMemberDeath(CrewMember member)
+        {
+            UnsubscribeCrew(member);
+            OnCrewChange();
+        }
+
+        private void UnsubscribeCrew(CrewMember member)
+        {
+            member.OnDied -= HandleCrewMemberDeath;
+        }
+
+        private void KillCrewMember(CrewMember crewToKill)
+        {
+            UnsubscribeCrew(crewToKill);
+            crewToKill.Kill();
+            OnCrewChange();
         }
 
         public void Setup(Ship ship)
@@ -120,6 +217,13 @@ namespace Ships.Modules
             if (PixelatedRigidbody == null || otherModule == null || otherModule.PixelatedRigidbody == null)
             {
                 Debug.LogError("Cannot SetupConnections: Missing PixelatedRigidbody on self or other module.", this);
+                return;
+            }
+
+            if (PixelatedRigidbody.PixelGrid == null || otherModule.PixelatedRigidbody.PixelGrid == null)
+            {
+                Debug.LogError(
+                    $"Cannot SetupConnections: PixelGrid not initialized on '{name}' or '{otherModule.name}'!", this);
                 return;
             }
 
@@ -196,6 +300,12 @@ namespace Ships.Modules
 
             Debug.Log($"[Module] Calling RemoveEdge({name}, {otherModule.name})", this);
             Ship.ModuleGraph.RemoveEdge(this, otherModule);
+        }
+
+        private void OnCrewChange()
+        {
+            AliveCrew = assignedCrew.AsValueEnumerable().Where(crew => crew.IsAlive).ToList();
+            _crewAppropriateSkillSum = AliveCrew.AsValueEnumerable().Sum(crew => crew.GetSkillLevel(mainSkillType));
         }
 
         public void SetResources(Resources newResources)
