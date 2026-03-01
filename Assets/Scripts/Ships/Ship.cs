@@ -29,6 +29,8 @@ namespace Ships
         [SerializeField]
         private Team team;
 
+        private readonly List<Module> _allModulesCache = new();
+
         // ReSharper disable once CollectionNeverUpdated.Local
         private readonly DefaultDictionary<ModuleType, List<Module>> _modulesDictionary = new(() => new List<Module>());
 
@@ -47,8 +49,7 @@ namespace Ships
             set => moduleConnectionFactory = value;
         }
 
-        private List<Module> AllModules =>
-            ModuleGraph.GetAllNodes().AsValueEnumerable().OfType<Module>().ToList();
+        private IReadOnlyList<Module> AllModules => _allModulesCache;
 
         public float GeneralEfficiency => Math.Max(0.01f, ResourceManager.EnergyEfficiency);
 
@@ -66,6 +67,8 @@ namespace Ships
 
         public int CrewMissingCount =>
             ModuleGraph.GetAllNodes().AsValueEnumerable().Sum(module => module.CrewMissingCount);
+
+        public float CaptainMultiplier => CommandModule.GetCrewEfficiency();
 
         private void Awake()
         {
@@ -123,7 +126,7 @@ namespace Ships
 
         public IModule CommandModule { get; private set; }
 
-        public Collider2D[] OwnColliders { get; private set; } = Array.Empty<Collider2D>();
+        public Collider2D[] OwnColliders { get; } = Array.Empty<Collider2D>();
 
         public Vector2 GetPosition()
         {
@@ -176,12 +179,16 @@ namespace Ships
         private void RecacheModulesDictionary()
         {
             _modulesDictionary.Clear();
+            _allModulesCache.Clear();
 
-            foreach (var module in ModuleGraph.GetAllNodes()) _modulesDictionary[module.Type].Add(module as Module);
+            foreach (var module in ModuleGraph.GetAllNodes())
+            {
+                var mod = module as Module;
+                _modulesDictionary[module.Type].Add(mod);
+                _allModulesCache.Add(mod);
+            }
 
-            OwnColliders = GetComponentsInChildren<Collider2D>();
-
-            ResourceManager.Recalculate(AllModules);
+            ResourceManager.Recalculate(_allModulesCache);
         }
 
         internal void ReinitializeModules()

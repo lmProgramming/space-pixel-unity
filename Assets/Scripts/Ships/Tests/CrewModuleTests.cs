@@ -8,6 +8,7 @@ using Ships.Tests.TestHelpers;
 using UnityEngine;
 using UnityEngine.TestTools;
 using Zenject;
+using ZLinq;
 using Object = UnityEngine.Object;
 using Resources = Core.Ship.Resources;
 
@@ -27,9 +28,8 @@ namespace Ships.Tests
         [TearDown]
         public void TearDown()
         {
-            foreach (var obj in _createdObjects)
-                if (obj != null)
-                    Object.DestroyImmediate(obj);
+            foreach (var obj in _createdObjects.AsValueEnumerable().Where(obj => obj != null))
+                Object.DestroyImmediate(obj);
 
             if (_testRoot != null)
                 Object.DestroyImmediate(_testRoot);
@@ -506,7 +506,7 @@ namespace Ships.Tests
         {
             var module = CreateStandaloneModule(5);
 
-            Assert.AreEqual(5, module.GetCrewNeededCount());
+            Assert.AreEqual(5, module.CrewNeededCount);
         }
 
         [Test]
@@ -514,7 +514,7 @@ namespace Ships.Tests
         {
             var module = CreateStandaloneModule(0);
 
-            Assert.AreEqual(0, module.GetCrewNeededCount());
+            Assert.AreEqual(0, module.CrewNeededCount);
         }
     }
 }

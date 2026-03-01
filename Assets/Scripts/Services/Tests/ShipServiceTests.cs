@@ -1,9 +1,8 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Core.Gameplay.EasyTeam;
-using Core.Ship;
 using NUnit.Framework;
+using Services.Tests.TestHelpers;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -44,7 +43,7 @@ namespace Services.Tests
         [Test]
         public void RegisterShip_AddsShip_ToGetShips()
         {
-            var ship = new FakeShip(_teamA, Vector2.zero);
+            var ship = new MockShip(_teamA, Vector2.zero);
 
             _shipService.RegisterShip(ship);
 
@@ -55,7 +54,7 @@ namespace Services.Tests
         [Test]
         public void UnregisterShip_RemovesShip_FromGetShips()
         {
-            var ship = new FakeShip(_teamA, Vector2.zero);
+            var ship = new MockShip(_teamA, Vector2.zero);
             _shipService.RegisterShip(ship);
 
             _shipService.UnregisterShip(ship);
@@ -66,8 +65,8 @@ namespace Services.Tests
         [Test]
         public void GetShipsOfTeam_ReturnsOnlyShipsOnThatTeam()
         {
-            var shipA = new FakeShip(_teamA, Vector2.zero);
-            var shipB = new FakeShip(_teamB, Vector2.zero);
+            var shipA = new MockShip(_teamA, Vector2.zero);
+            var shipB = new MockShip(_teamB, Vector2.zero);
             _shipService.RegisterShip(shipA);
             _shipService.RegisterShip(shipB);
 
@@ -80,8 +79,8 @@ namespace Services.Tests
         [Test]
         public void GetEnemyShipsOf_ReturnsOnlyEnemyShips()
         {
-            var shipA = new FakeShip(_teamA, Vector2.zero);
-            var shipB = new FakeShip(_teamB, Vector2.zero);
+            var shipA = new MockShip(_teamA, Vector2.zero);
+            var shipB = new MockShip(_teamB, Vector2.zero);
             _shipService.RegisterShip(shipA);
             _shipService.RegisterShip(shipB);
 
@@ -94,8 +93,8 @@ namespace Services.Tests
         [Test]
         public void GetAlliedShipsOf_ReturnsSelf_AndAllies()
         {
-            var shipA = new FakeShip(_teamA, Vector2.zero);
-            var shipB = new FakeShip(_teamB, Vector2.zero);
+            var shipA = new MockShip(_teamA, Vector2.zero);
+            var shipB = new MockShip(_teamB, Vector2.zero);
             _shipService.RegisterShip(shipA);
             _shipService.RegisterShip(shipB);
 
@@ -108,8 +107,8 @@ namespace Services.Tests
         [Test]
         public void GetAlliedShipsOf_ReturnsSelf_AndAlliesTeams()
         {
-            var shipA = new FakeShip(_teamA, Vector2.zero);
-            var shipB = new FakeShip(_teamB, Vector2.zero);
+            var shipA = new MockShip(_teamA, Vector2.zero);
+            var shipB = new MockShip(_teamB, Vector2.zero);
             _shipService.RegisterShip(shipA);
             _shipService.RegisterShip(shipB);
 
@@ -124,8 +123,8 @@ namespace Services.Tests
         [Test]
         public void GetClosestEnemyShipOf_ReturnsClosestEnemy()
         {
-            var nearEnemy = new FakeShip(_teamB, new Vector2(5f, 0f));
-            var farEnemy = new FakeShip(_teamB, new Vector2(100f, 0f));
+            var nearEnemy = new MockShip(_teamB, new Vector2(5f, 0f));
+            var farEnemy = new MockShip(_teamB, new Vector2(100f, 0f));
             _shipService.RegisterShip(nearEnemy);
             _shipService.RegisterShip(farEnemy);
 
@@ -137,7 +136,7 @@ namespace Services.Tests
         [Test]
         public void GetClosestEnemyShipOf_ReturnsNull_WhenNoEnemies()
         {
-            var ally = new FakeShip(_teamA, new Vector2(5f, 0f));
+            var ally = new MockShip(_teamA, new Vector2(5f, 0f));
             _shipService.RegisterShip(ally);
 
             var closest = _shipService.GetClosestEnemyShipOf(_teamA, Vector2.zero);
@@ -148,32 +147,12 @@ namespace Services.Tests
         [Test]
         public void RegisterShip_CalledTwice_DoesNotDuplicate()
         {
-            var ship = new FakeShip(_teamA, Vector2.zero);
+            var ship = new MockShip(_teamA, Vector2.zero);
 
             _shipService.RegisterShip(ship);
             _shipService.RegisterShip(ship);
 
             Assert.AreEqual(1, _shipService.GetShips().Count);
-        }
-
-        private class FakeShip : IShip
-        {
-            private readonly Vector2 _position;
-
-            public FakeShip(ITeam team, Vector2 position)
-            {
-                Team = team;
-                _position = position;
-            }
-
-            public ITeam Team { get; }
-            public IModule CommandModule => null;
-            public Collider2D[] OwnColliders => Array.Empty<Collider2D>();
-
-            public Vector2 GetPosition()
-            {
-                return _position;
-            }
         }
 
         private class FakeTeam : ITeam

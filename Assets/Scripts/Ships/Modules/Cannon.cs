@@ -57,7 +57,7 @@ namespace Ships.Modules
         public void Shoot()
         {
             if (!_reloadTimer.IsReady) return;
-            if (!Ship) return;
+            if (Ship == null) return;
 
             var targetPosition = Ship.AttackTargetPosition;
 

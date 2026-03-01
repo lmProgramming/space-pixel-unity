@@ -1,9 +1,8 @@
-using System;
 using System.Collections.Generic;
-using Core.Gameplay.EasyTeam;
 using Core.Services;
 using Core.Ship;
 using Gameplay.Navigation;
+using Gameplay.Tests.TestHelpers;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -39,18 +38,6 @@ namespace Gameplay.Tests.Navigation
             {
                 var ships = shipsPerSector.GetValueOrDefault(sector);
                 return new SectorResult(false, false, 0f, ships);
-            }
-        }
-
-        private class FakeShip : IShip
-        {
-            public ITeam Team => null;
-            public IModule CommandModule => null;
-            public Collider2D[] OwnColliders => Array.Empty<Collider2D>();
-
-            public Vector2 GetPosition()
-            {
-                return Vector2.zero;
             }
         }
 
@@ -240,9 +227,9 @@ namespace Gameplay.Tests.Navigation
         [Test]
         public void CalculatePath_ShipAware_ThirdShipWithDebrisBlocksPath()
         {
-            var callerShip = new FakeShip();
-            var targetShip = new FakeShip();
-            var thirdShip = new FakeShip();
+            var callerShip = new MockShip();
+            var targetShip = new MockShip();
+            var thirdShip = new MockShip();
 
             // Sectors contain a third ship AND debris — both conditions independently block, together they definitely block
             var allNeighbours = new Dictionary<Vector2, SectorResult>
@@ -266,9 +253,9 @@ namespace Gameplay.Tests.Navigation
         [Test]
         public void CalculatePath_ShipAware_ThirdShipInSectorBlocksPath()
         {
-            var callerShip = new FakeShip();
-            var targetShip = new FakeShip();
-            var thirdShip = new FakeShip();
+            var callerShip = new MockShip();
+            var targetShip = new MockShip();
+            var thirdShip = new MockShip();
 
             // Place the third ship in the only direct route sector (0, SectorSize)
             // With only one neighbor available and it is blocked by a third ship,
@@ -291,8 +278,8 @@ namespace Gameplay.Tests.Navigation
         [Test]
         public void CalculatePath_ShipAware_CallerAndTargetShipsDoNotBlockPath()
         {
-            var callerShip = new FakeShip();
-            var targetShip = new FakeShip();
+            var callerShip = new MockShip();
+            var targetShip = new MockShip();
 
             // The only route forward (0, SectorSize) contains just the caller and target ships — must be passable
             var directRouteSector = new Vector2(0f, SectorSize);

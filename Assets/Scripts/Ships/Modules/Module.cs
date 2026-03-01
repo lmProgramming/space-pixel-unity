@@ -17,7 +17,7 @@ namespace Ships.Modules
     public class Module : MonoBehaviour, IModule
     {
         private const float CrewSkillBonusPerLevel = 0.02f;
-        private const float CaptainBonusPerLevel = 0.05f;
+        protected const float CaptainBonusPerLevel = 0.05f;
 
         [SerializeField] private CrewSkillType mainSkillType;
 
@@ -29,14 +29,14 @@ namespace Ships.Modules
 
         private float _crewAppropriateSkillSum;
 
-        private IReadOnlyList<CrewMember> AliveCrew { get; set; }
+        protected IReadOnlyList<CrewMember> AliveCrew { get; private set; }
 
         internal CrewSkillType MainSkillTypeForTesting
         {
             set => mainSkillType = value;
         }
 
-        protected Ship Ship { get; private set; }
+        protected IShip Ship { get; private set; }
 
         internal IReadOnlyDictionary<Module, List<Vector2Int>> ConnectionPoints => _connectionPoints;
 
@@ -44,6 +44,8 @@ namespace Ships.Modules
 
         private float PixelEfficiency =>
             Mathf.Pow((float)PixelatedRigidbody.CurrentPixelCount / PixelatedRigidbody.StartPixelCount, 2);
+
+        public virtual float EnergyCapacity => Resources.energyCapacity * Efficiency;
 
         protected virtual void Awake()
         {
@@ -90,7 +92,7 @@ namespace Ships.Modules
         public float Efficiency => PixelEfficiency * GetCrewEfficiency();
 
         public IReadOnlyList<CrewMember> AssignedCrew => assignedCrew;
-        public int CrewMissingCount => GetCrewNeededCount() - GetAliveCrewCount();
+        public int CrewMissingCount => CrewNeededCount - AliveCrewCount();
 
         [field: SerializeField]
         public Resources Resources { get; private set; }
@@ -101,15 +103,12 @@ namespace Ships.Modules
         public ModuleType Type { get; protected set; }
 
 
-        public int GetAliveCrewCount()
+        public int AliveCrewCount()
         {
             return AliveCrew.Count;
         }
 
-        public virtual int GetCrewNeededCount()
-        {
-            return Mathf.CeilToInt(Resources.crewNeeded);
-        }
+        public virtual int CrewNeededCount => Mathf.CeilToInt(Resources.crewNeeded);
 
         public void FillCrewBySkill(List<CrewMember> crew, out List<CrewMember> remainingCrew)
         {
@@ -142,9 +141,12 @@ namespace Ships.Modules
             return crewRemoved;
         }
 
-        public virtual float GetEnergyCapacity()
+        public virtual float GetCrewEfficiency()
         {
-            return Resources.energyCapacity * Efficiency;
+            if (assignedCrew.Count == 0) return CrewNeededCount == 0 ? 1f : 0f;
+
+            return (1 - (float)CrewMissingCount / CrewNeededCount) *
+                   (1 + _crewAppropriateSkillSum * Ship.CaptainMultiplier * CrewSkillBonusPerLevel);
         }
 
         public virtual float GetEnergyDraw()
@@ -256,19 +258,6 @@ namespace Ships.Modules
 
             Debug.Log($"[Module] Calling RemoveEdge({name}, {otherModule.name})", this);
             Ship.ModuleGraph.RemoveEdge(this, otherModule);
-        }
-
-        public virtual float GetCrewEfficiency()
-        {
-            if (assignedCrew.Count == 0) return GetCrewNeededCount() == 0 ? 1f : 0f;
-
-            var captainTotal = AliveCrew.AsValueEnumerable()
-                .Sum(crew => crew.GetSkillLevel(CrewSkillType.Captain));
-
-            var captainMultiplier = 1f + captainTotal * CaptainBonusPerLevel;
-
-            return (1 - (float)CrewMissingCount / GetCrewNeededCount()) *
-                   (1 + _crewAppropriateSkillSum * captainMultiplier * CrewSkillBonusPerLevel);
         }
 
         private void OnCrewChange()

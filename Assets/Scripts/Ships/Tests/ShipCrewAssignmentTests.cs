@@ -139,7 +139,7 @@ namespace Ships.Tests
             ship.AssignCrewBySkill(crew);
 
             var totalAssigned = ship.ModuleGraph.GetAllNodes().AsValueEnumerable()
-                .Sum(m => m.GetAliveCrewCount());
+                .Sum(m => m.AliveCrewCount());
             Assert.AreEqual(4, totalAssigned);
         }
 
@@ -153,7 +153,7 @@ namespace Ships.Tests
             ship.AssignCrewBySkill(new List<CrewMember>());
 
             var totalAssigned = ship.ModuleGraph.GetAllNodes().AsValueEnumerable()
-                .Sum(m => m.GetAliveCrewCount());
+                .Sum(m => m.AliveCrewCount());
             Assert.AreEqual(0, totalAssigned);
         }
 
@@ -172,9 +172,9 @@ namespace Ships.Tests
             ship.AssignCrewBySkill(crew);
 
             var totalNeeded = ship.ModuleGraph.GetAllNodes().AsValueEnumerable()
-                .Sum(m => m.GetCrewNeededCount());
+                .Sum(m => m.CrewNeededCount);
             var totalAssigned = ship.ModuleGraph.GetAllNodes().AsValueEnumerable()
-                .Sum(m => m.GetAliveCrewCount());
+                .Sum(m => m.AliveCrewCount());
             Assert.AreEqual(totalNeeded, totalAssigned);
         }
 
@@ -258,7 +258,7 @@ namespace Ships.Tests
             ship.AssignCrewBySkill(crew);
 
             var totalAssigned = ship.ModuleGraph.GetAllNodes().AsValueEnumerable()
-                .Sum(m => m.GetAliveCrewCount());
+                .Sum(m => m.AliveCrewCount());
             Assert.AreEqual(1, totalAssigned);
             Assert.Greater(ship.CrewMissingCount, 0);
         }
