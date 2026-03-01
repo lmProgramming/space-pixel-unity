@@ -182,14 +182,14 @@ namespace Pixelation
                     break;
             }
 
-            RecalculateMass(regions[^1].Count);
+            RecalculateMass();
 
             RecalculateColliders();
         }
 
-        private void RecalculateMass(int pixelsCount)
+        private void RecalculateMass()
         {
-            _body.Rigidbody.mass = pixelsCount * _body.MassMultiplier;
+            _body.Rigidbody.mass = _grid.PixelCount * _body.MassMultiplier;
         }
 
         private void RecalculateColliders()

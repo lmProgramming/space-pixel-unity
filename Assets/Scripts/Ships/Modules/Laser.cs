@@ -25,6 +25,7 @@ namespace Ships.Modules
 
         [SerializeField] private float maxFireDuration = 1.5f;
         [SerializeField] private float pixelsDestroyedPerSecond = 10f;
+        [SerializeField] private float laserDamagePerHit = 1f;
         [SerializeField] private LayerMask hitLayers;
 
         [SerializeField] private GameObject icon;
@@ -35,8 +36,9 @@ namespace Ships.Modules
         [SerializeField]
         private float reloadTime = 2.0f;
 
-        private CancellationTokenSource _fireCts;
         private readonly RaycastHit2D[] _hits = new RaycastHit2D[100];
+
+        private CancellationTokenSource _fireCts;
         private bool _isFiring;
 
         private ManualTimer _reloadTimer;
@@ -192,7 +194,7 @@ namespace Ships.Modules
                                 pixelatedRigidbody.WorldToLocalPoint(hit.point));
 
                             if (closestPixelPosition.HasValue)
-                                pixelatedRigidbody.RemovePixelAt(closestPixelPosition.Value, true);
+                                pixelatedRigidbody.DamagePixelAt(closestPixelPosition.Value, laserDamagePerHit, true);
                         }
                     }
                     else

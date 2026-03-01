@@ -401,6 +401,9 @@ MonoBehaviour:
   flipX: 0
   flipY: 0
   rotation: 0
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!50 &25841635
 Rigidbody2D:
@@ -818,6 +821,9 @@ MonoBehaviour:
   flipX: 1
   flipY: 0
   rotation: 0
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!114 &39741442
 MonoBehaviour:
@@ -1081,7 +1087,7 @@ MonoBehaviour:
     crewNeeded: 3
     crewQuarters: 0
   projectilePrefab: {fileID: 5654400622174641897, guid: 31131311ffb51fc42a911f89d07e56a6, type: 3}
-  projectileSpeed: 1500
+  projectileSpeed: 15000
   reloadTime: 1
   icon: {fileID: 1865393218821458671, guid: 58a346b199dceed4d81eff4d7a8b6025, type: 3}
 --- !u!114 &116197409
@@ -1100,6 +1106,9 @@ MonoBehaviour:
   flipX: 1
   flipY: 0
   rotation: 1
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!50 &116197410
 Rigidbody2D:
@@ -1715,6 +1724,9 @@ MonoBehaviour:
   flipX: 0
   flipY: 0
   rotation: 0
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!114 &180244043
 MonoBehaviour:
@@ -1810,6 +1822,9 @@ MonoBehaviour:
   flipX: 1
   flipY: 0
   rotation: 0
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!50 &185009414
 Rigidbody2D:
@@ -2564,6 +2579,9 @@ MonoBehaviour:
   flipX: 0
   flipY: 0
   rotation: 0
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!4 &323945049
 Transform:
@@ -2851,6 +2869,9 @@ MonoBehaviour:
   flipX: 1
   flipY: 0
   rotation: 0
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!114 &337337096
 MonoBehaviour:
@@ -3171,6 +3192,9 @@ MonoBehaviour:
   flipX: 0
   flipY: 0
   rotation: 0
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!4 &351339377
 Transform:
@@ -3580,6 +3604,9 @@ MonoBehaviour:
   flipX: 0
   flipY: 0
   rotation: 0
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!114 &441256664
 MonoBehaviour:
@@ -4142,6 +4169,9 @@ MonoBehaviour:
   flipX: 0
   flipY: 0
   rotation: 0
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!4 &496593024
 Transform:
@@ -4557,6 +4587,9 @@ MonoBehaviour:
   flipX: 1
   flipY: 0
   rotation: 2
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!50 &521192488
 Rigidbody2D:
@@ -4739,6 +4772,7 @@ MonoBehaviour:
   beamRange: 200
   maxFireDuration: 2
   pixelsDestroyedPerSecond: 5
+  laserDamagePerHit: 1
   hitLayers:
     serializedVersion: 2
     m_Bits: 961
@@ -5126,6 +5160,9 @@ MonoBehaviour:
   flipX: 1
   flipY: 0
   rotation: 0
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!114 &539151470
 MonoBehaviour:
@@ -5531,6 +5568,9 @@ MonoBehaviour:
   flipX: 1
   flipY: 0
   rotation: 1
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!114 &591781730
 MonoBehaviour:
@@ -5835,6 +5875,9 @@ MonoBehaviour:
   flipX: 0
   flipY: 0
   rotation: 2
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!50 &672308254
 Rigidbody2D:
@@ -6067,6 +6110,9 @@ MonoBehaviour:
   flipX: 1
   flipY: 0
   rotation: 0
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!50 &696995299
 Rigidbody2D:
@@ -6968,6 +7014,9 @@ MonoBehaviour:
   flipX: 0
   flipY: 0
   rotation: 0
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!4 &825322236
 Transform:
@@ -7299,6 +7348,9 @@ MonoBehaviour:
   flipX: 0
   flipY: 0
   rotation: 0
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!114 &902546474
 MonoBehaviour:
@@ -7709,6 +7761,9 @@ MonoBehaviour:
   flipX: 1
   flipY: 0
   rotation: 0
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!114 &950832980
 MonoBehaviour:
@@ -8287,6 +8342,9 @@ MonoBehaviour:
   flipX: 1
   flipY: 0
   rotation: 1
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!114 &1093244953
 MonoBehaviour:
@@ -8975,6 +9033,9 @@ MonoBehaviour:
   flipX: 1
   flipY: 0
   rotation: 1
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!114 &1260637138
 MonoBehaviour:
@@ -9209,6 +9270,9 @@ MonoBehaviour:
   flipX: 1
   flipY: 0
   rotation: 1
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!114 &1262830485
 MonoBehaviour:
@@ -9653,6 +9717,9 @@ MonoBehaviour:
   flipX: 0
   flipY: 0
   rotation: 2
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!114 &1356672410
 MonoBehaviour:
@@ -10212,6 +10279,9 @@ MonoBehaviour:
   flipX: 0
   flipY: 0
   rotation: 0
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!114 &1380669738
 MonoBehaviour:
@@ -10302,6 +10372,9 @@ MonoBehaviour:
   flipX: 0
   flipY: 0
   rotation: 0
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!50 &1384098531
 Rigidbody2D:
@@ -11018,6 +11091,9 @@ MonoBehaviour:
   flipX: 0
   flipY: 0
   rotation: 0
+  defaultPixelHealth: 1
+  armorMap: {fileID: 21300000, guid: ba1479cb2cd57352581a9fbb7a7b4a52, type: 3}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!114 &1477886125
 MonoBehaviour:
@@ -11113,6 +11189,9 @@ MonoBehaviour:
   flipX: 0
   flipY: 0
   rotation: 0
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!50 &1492072031
 Rigidbody2D:
@@ -12050,6 +12129,9 @@ MonoBehaviour:
   flipX: 0
   flipY: 0
   rotation: 0
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!4 &1579913509
 Transform:
@@ -12772,6 +12854,9 @@ MonoBehaviour:
   flipX: 1
   flipY: 0
   rotation: 2
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!114 &1689674630
 MonoBehaviour:
@@ -12797,6 +12882,7 @@ MonoBehaviour:
   beamRange: 200
   maxFireDuration: 2
   pixelsDestroyedPerSecond: 5
+  laserDamagePerHit: 1
   hitLayers:
     serializedVersion: 2
     m_Bits: 897
@@ -13387,6 +13473,9 @@ MonoBehaviour:
   flipX: 0
   flipY: 0
   rotation: 0
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!114 &1855745759
 MonoBehaviour:
@@ -13515,6 +13604,9 @@ MonoBehaviour:
   flipX: 1
   flipY: 0
   rotation: 1
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!50 &1884429654
 Rigidbody2D:
@@ -14119,6 +14211,9 @@ MonoBehaviour:
   flipX: 0
   flipY: 0
   rotation: 0
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!114 &1905540168
 MonoBehaviour:
@@ -14371,6 +14466,9 @@ MonoBehaviour:
   flipX: 0
   flipY: 0
   rotation: 0
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!114 &1940184200
 MonoBehaviour:
@@ -14548,6 +14646,9 @@ MonoBehaviour:
   flipX: 0
   flipY: 0
   rotation: 0
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!50 &1988705650
 Rigidbody2D:
@@ -15088,6 +15189,9 @@ MonoBehaviour:
   flipX: 0
   flipY: 0
   rotation: 0
+  defaultPixelHealth: 1
+  armorMap: {fileID: 0}
+  maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
 --- !u!114 &2015378337
 MonoBehaviour:

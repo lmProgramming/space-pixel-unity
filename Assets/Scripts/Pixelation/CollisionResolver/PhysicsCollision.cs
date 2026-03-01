@@ -13,15 +13,18 @@ namespace Pixelation.CollisionResolver
 
         public override IEnumerable<Vector2Int> ResolveCollision(IPixelatedRigidbody other, Collision2D collision)
         {
-            var pixelsToDestroyCount = collision.relativeVelocity.magnitude * Mathf.Sqrt(other.Rigidbody.mass) * 0.01f;
+            var totalDamage = collision.relativeVelocity.magnitude * Mathf.Sqrt(other.Rigidbody.mass) * 0.01f;
 
             var localPoint = PixelatedRigidbody.WorldToLocalPoint(collision.GetContact(0).point);
 
-            var pixelsToDestroy = CollisionHandler.GetClosestPixelPositions(localPoint, (int)pixelsToDestroyCount);
+            var pixelCount = Mathf.Max(1, (int)totalDamage);
+            var pixelsToDamage = CollisionHandler.GetClosestPixelPositions(localPoint, pixelCount);
 
-            PixelatedRigidbody.RemovePixels(pixelsToDestroy);
+            if (pixelsToDamage.Count == 0) return pixelsToDamage;
 
-            return pixelsToDestroy;
+            var damagePerPixel = totalDamage / pixelsToDamage.Count;
+
+            return PixelatedRigidbody.DamagePixels(pixelsToDamage, damagePerPixel);
         }
     }
 }
