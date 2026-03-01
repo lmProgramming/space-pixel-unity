@@ -1078,7 +1078,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a06280dcf2610f340b3409d0824e526a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mainSkillType: 0
+  mainSkillType: 1
   assignedCrew: []
   <Resources>k__BackingField:
     energyCapacity: 200
@@ -1796,7 +1796,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e58cee17deb728a4da8fdde864b3d57c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mainSkillType: 0
+  mainSkillType: 2
   assignedCrew: []
   <Resources>k__BackingField:
     energyCapacity: 100
@@ -4760,7 +4760,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 21aa0218bee341148b64f7ab86433ad1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mainSkillType: 0
+  mainSkillType: 1
   assignedCrew: []
   <Resources>k__BackingField:
     energyCapacity: 200
@@ -5846,7 +5846,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a06280dcf2610f340b3409d0824e526a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mainSkillType: 0
+  mainSkillType: 1
   assignedCrew: []
   <Resources>k__BackingField:
     energyCapacity: 200
@@ -14852,7 +14852,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e58cee17deb728a4da8fdde864b3d57c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mainSkillType: 0
+  mainSkillType: 2
   assignedCrew: []
   <Resources>k__BackingField:
     energyCapacity: 100

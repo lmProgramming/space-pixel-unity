@@ -170,7 +170,7 @@ namespace Pixelation
 
         public bool DamagePixelAt(Vector2Int point, float damage, bool simulateCollision = false)
         {
-            if (HealthGrid == null || !IsPixel(point)) return false;
+            if (!IsPixel(point)) return false;
 
             var killed = HealthGrid.DamagePixel(point, damage);
 
@@ -183,8 +183,6 @@ namespace Pixelation
         public List<Vector2Int> DamagePixels(IEnumerable<Vector2Int> points, float damagePerPixel,
             bool simulateCollision = false)
         {
-            if (HealthGrid == null) return new List<Vector2Int>();
-
             var destroyed = HealthGrid.DamagePixels(points, damagePerPixel);
 
             if (destroyed.Count > 0)
