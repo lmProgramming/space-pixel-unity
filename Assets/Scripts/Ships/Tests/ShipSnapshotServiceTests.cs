@@ -204,7 +204,7 @@ namespace Ships.Tests
             Assert.IsNotNull(newModule, "Should find a non-command module after apply");
             var newPixelatedRb = newModule.PixelatedRigidbody;
 
-            var pixel = newPixelatedRb.PixelGrid.GetColor(new Vector2Int(0, 0));
+            var pixel = newPixelatedRb.PixelGrid.GetValue(new Vector2Int(0, 0));
             Assert.AreEqual(0, pixel.r,
                 "Red channel should be 0 (snapshot blue), not 255 (sprite red) — snapshot must override sprite");
             Assert.AreEqual(255, pixel.b,
@@ -769,7 +769,7 @@ namespace Ships.Tests
             for (var y = 0; y < 3; y++)
             {
                 var expected = (x + y) % 2 == 0 ? red : blue;
-                var actual = grid.GetColor(new Vector2Int(x, y));
+                var actual = grid.GetValue(new Vector2Int(x, y));
                 Assert.AreEqual(expected.r, actual.r, $"Pixel ({x},{y}) red channel mismatch");
                 Assert.AreEqual(expected.g, actual.g, $"Pixel ({x},{y}) green channel mismatch");
                 Assert.AreEqual(expected.b, actual.b, $"Pixel ({x},{y}) blue channel mismatch");
@@ -888,17 +888,17 @@ namespace Ships.Tests
             Assert.IsNotNull(cmd, "Command module should exist after apply");
 
             var grid = cmd.PixelatedRigidbody.PixelGrid;
-            var c00 = grid.GetColor(new Vector2Int(0, 0));
+            var c00 = grid.GetValue(new Vector2Int(0, 0));
             Assert.AreEqual(10, c00.r, "Pixel (0,0) R should be 10 from JSON, not 99 from original");
             Assert.AreEqual(20, c00.g);
             Assert.AreEqual(30, c00.b);
 
-            var c10 = grid.GetColor(new Vector2Int(1, 0));
+            var c10 = grid.GetValue(new Vector2Int(1, 0));
             Assert.AreEqual(40, c10.r);
             Assert.AreEqual(50, c10.g);
             Assert.AreEqual(60, c10.b);
 
-            var c01 = grid.GetColor(new Vector2Int(0, 1));
+            var c01 = grid.GetValue(new Vector2Int(0, 1));
             Assert.AreEqual(70, c01.r);
             Assert.AreEqual(80, c01.g);
             Assert.AreEqual(90, c01.b);
@@ -959,7 +959,7 @@ namespace Ships.Tests
             for (var y = 0; y < 4; y++)
             {
                 var expected = cmdColors[x, y];
-                var actual = grid.GetColor(new Vector2Int(x, y));
+                var actual = grid.GetValue(new Vector2Int(x, y));
                 Assert.AreEqual(expected.r, actual.r, $"({x},{y}) R mismatch");
                 Assert.AreEqual(expected.g, actual.g, $"({x},{y}) G mismatch");
                 Assert.AreEqual(expected.b, actual.b, $"({x},{y}) B mismatch");

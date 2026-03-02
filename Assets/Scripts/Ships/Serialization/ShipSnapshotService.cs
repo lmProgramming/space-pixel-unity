@@ -130,7 +130,7 @@ namespace Ships.Serialization
             for (var x = 0; x < dimensions.x; x++)
             {
                 var pos = new Vector2Int(x, y);
-                if (grid.IsPixel(pos)) moduleSnapshot.pixelGrid.SetPixel(x, y, grid.GetColor(pos));
+                if (grid.IsPixel(pos)) moduleSnapshot.pixelGrid.SetPixel(x, y, grid.GetValue(pos));
             }
 
             return moduleSnapshot;

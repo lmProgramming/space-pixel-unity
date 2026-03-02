@@ -801,10 +801,11 @@ namespace Ships.Tests
             // --- Subscribe to events ---
             var pixelsLostEvents = new List<(List<Vector2Int> pixels, PixelLoseReason reason, int frame)>();
             var currentFrame = 0;
+            var frameCur = currentFrame;
             cannonModule.PixelatedRigidbody.OnPixelsLost += (pixels, reason) =>
             {
-                pixelsLostEvents.Add((new List<Vector2Int>(pixels), reason, currentFrame));
-                Debug.Log($"[Test] Frame {currentFrame}: OnPixelsLost reason={reason}, " +
+                pixelsLostEvents.Add((new List<Vector2Int>(pixels), reason, frameCur));
+                Debug.Log($"[Test] Frame {frameCur}: OnPixelsLost reason={reason}, " +
                           $"count={pixels.Count}, " +
                           $"x-values=[{string.Join(", ", pixels.Select(p => p.x).Distinct().OrderBy(x => x))}]");
             };
@@ -826,7 +827,6 @@ namespace Ships.Tests
             // --- Remove pixels across 5 frames ---
             for (var frame = 0; frame < batches.Count; frame++)
             {
-                currentFrame = frame;
                 var batch = batches[frame];
                 Debug.Log($"[Test] Frame {frame}: Removing {batch.Count} pixels: " +
                           $"[{string.Join(", ", batch)}]");

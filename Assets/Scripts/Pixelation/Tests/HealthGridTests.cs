@@ -5,11 +5,11 @@ using UnityEngine;
 namespace Pixelation.Tests
 {
     [TestFixture]
-    public class PixelHealthGridTests
+    public class HealthGridTests
     {
-        private static PixelHealthGrid CreateGrid(int width, int height, float defaultHealth)
+        private static HealthGrid CreateGrid(int width, int height, float defaultHealth)
         {
-            return new PixelHealthGrid(width, height, defaultHealth);
+            return new HealthGrid(width, height, defaultHealth);
         }
 
         [Test]
@@ -21,7 +21,7 @@ namespace Pixelation.Tests
 
             grid.DamagePixel(point, 3f);
 
-            Assert.AreEqual(7f, grid.GetHealth(point), 0.001);
+            Assert.AreEqual(7f, grid.GetValue(point), 0.001);
         }
 
         [Test]
@@ -57,7 +57,7 @@ namespace Pixelation.Tests
 
             grid.DamagePixel(point, 999f);
 
-            Assert.AreEqual(0f, grid.GetHealth(point));
+            Assert.AreEqual(0f, grid.GetValue(point));
         }
 
         [Test]
@@ -96,7 +96,7 @@ namespace Pixelation.Tests
 
             grid.RemovePixel(point);
 
-            Assert.AreEqual(0f, grid.GetHealth(point));
+            Assert.AreEqual(0f, grid.GetValue(point));
         }
 
         [Test]
@@ -129,7 +129,7 @@ namespace Pixelation.Tests
             grid.DamagePixel(point, 3f);
             grid.DamagePixel(point, 3f);
 
-            Assert.AreEqual(4f, grid.GetHealth(point), 0.001);
+            Assert.AreEqual(4f, grid.GetValue(point), 0.001);
             Assert.That(grid.IsAlive(point), Is.True);
         }
 
@@ -145,7 +145,7 @@ namespace Pixelation.Tests
             var killed = grid.DamagePixel(point, 4f);
 
             Assert.IsTrue(killed);
-            Assert.AreEqual(0f, grid.GetHealth(point));
+            Assert.AreEqual(0f, grid.GetValue(point));
         }
 
         [Test]
@@ -158,7 +158,7 @@ namespace Pixelation.Tests
             var points = new HashSet<Vector2Int> { point };
             var subGrid = grid.CreateSubGrid(new Vector2Int(2, 2), 4, 4, points);
 
-            Assert.AreEqual(7f, subGrid.GetHealth(new Vector2Int(1, 1)), 0.001);
+            Assert.AreEqual(7f, subGrid.GetValue(new Vector2Int(1, 1)), 0.001);
         }
 
         [Test]
@@ -175,7 +175,7 @@ namespace Pixelation.Tests
 
             grid.ApplyArmorMap(armorPixels, 2, 2, 10f);
 
-            Assert.AreEqual(10f, grid.GetHealth(new Vector2Int(0, 0)), 0.001);
+            Assert.AreEqual(10f, grid.GetValue(new Vector2Int(0, 0)), 0.001);
         }
 
         [Test]
@@ -192,7 +192,7 @@ namespace Pixelation.Tests
 
             grid.ApplyArmorMap(armorPixels, 2, 2, 10f);
 
-            Assert.AreEqual(1f, grid.GetHealth(new Vector2Int(0, 0)), 0.001);
+            Assert.AreEqual(1f, grid.GetValue(new Vector2Int(0, 0)), 0.001);
         }
 
         [Test]
@@ -210,7 +210,7 @@ namespace Pixelation.Tests
             grid.ApplyArmorMap(armorPixels, 2, 2, 10f);
 
             var expected = Mathf.Lerp(1f, 10f, 128f / 255f);
-            Assert.AreEqual(expected, grid.GetHealth(new Vector2Int(0, 0)), 0.01);
+            Assert.AreEqual(expected, grid.GetValue(new Vector2Int(0, 0)), 0.01);
         }
 
         [Test]
@@ -227,7 +227,7 @@ namespace Pixelation.Tests
 
             grid.ApplyArmorMap(armorPixels, 2, 2, 10f);
 
-            Assert.AreEqual(0f, grid.GetHealth(new Vector2Int(0, 0)));
+            Assert.AreEqual(0f, grid.GetValue(new Vector2Int(0, 0)));
         }
 
         [Test]
@@ -249,7 +249,7 @@ namespace Pixelation.Tests
             grid.DamagePixel(new Vector2Int(0, 0), 1f);
 
             Assert.That(grid.IsAlive(new Vector2Int(0, 0)), Is.True);
-            Assert.AreEqual(7f, grid.GetHealth(new Vector2Int(0, 0)), 0.001);
+            Assert.AreEqual(7f, grid.GetValue(new Vector2Int(0, 0)), 0.001);
         }
 
         [Test]
@@ -316,8 +316,8 @@ namespace Pixelation.Tests
 
             grid.RemovePixels(new HashSet<Vector2Int> { a, b });
 
-            Assert.AreEqual(0f, grid.GetHealth(a));
-            Assert.AreEqual(0f, grid.GetHealth(b));
+            Assert.AreEqual(0f, grid.GetValue(a));
+            Assert.AreEqual(0f, grid.GetValue(b));
         }
 
         [Test]
@@ -348,7 +348,7 @@ namespace Pixelation.Tests
 
             grid.RemovePixels(new[] { removed });
 
-            Assert.AreEqual(3f, grid.GetHealth(kept), 0.001);
+            Assert.AreEqual(3f, grid.GetValue(kept), 0.001);
             Assert.That(grid.IsAlive(kept), Is.True);
         }
     }

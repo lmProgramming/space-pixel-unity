@@ -118,15 +118,11 @@ namespace Ships
 
         public float CaptainMultiplier => CommandModule.GetCrewEfficiency();
 
-        public ITeam Team
-        {
-            get => team;
-            private set => team = value as Team;
-        }
+        public ITeam Team => team;
 
         public IModule CommandModule { get; private set; }
 
-        public Collider2D[] OwnColliders { get; set; } = Array.Empty<Collider2D>();
+        public Collider2D[] OwnColliders { get; private set; } = Array.Empty<Collider2D>();
 
         public Vector2 GetPosition()
         {

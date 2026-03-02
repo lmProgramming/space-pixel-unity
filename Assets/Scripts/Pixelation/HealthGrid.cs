@@ -5,55 +5,67 @@ using ZLinq;
 
 namespace Pixelation
 {
-    public class PixelHealthGrid
+    public class HealthGrid : IGrid<float>
     {
         private readonly float _defaultMaxHealth;
         private float[] _health;
-        private int _height;
-        private int _width;
 
-        public PixelHealthGrid(int width, int height, float defaultMaxHealth)
+        public HealthGrid(int width, int height, float defaultMaxHealth)
         {
-            _width = width;
-            _height = height;
+            Width = width;
+            Height = height;
             _defaultMaxHealth = defaultMaxHealth;
             _health = new float[width * height];
         }
 
         public float TotalHealth { get; private set; }
 
+        public Vector2 Center => new(Width / 2f, Height / 2f);
+        public int Width { get; private set; }
+        public int Height { get; private set; }
+
+        public float GetValue(Vector2Int point)
+        {
+            return _health[point.y * Width + point.x];
+        }
+
+        public bool InBounds(Vector2Int point)
+        {
+            return point.x >= 0 && point.x < Width && point.y >= 0 && point.y < Height;
+        }
+
+        public Vector2Int Dimensions()
+        {
+            return new Vector2Int(Width, Height);
+        }
+
         public void InitializeFromGrid(IPixelGrid grid)
         {
-            _width = grid.Width;
-            _height = grid.Height;
-            _health = new float[_width * _height];
+            Width = grid.Width;
+            Height = grid.Height;
+            _health = new float[Width * Height];
             TotalHealth = 0f;
 
-            for (var y = 0; y < _height; y++)
-            for (var x = 0; x < _width; x++)
+            for (var y = 0; y < Height; y++)
+            for (var x = 0; x < Width; x++)
             {
                 var point = new Vector2Int(x, y);
                 var h = grid.IsPixelAssumeInBounds(point) ? _defaultMaxHealth : 0f;
-                _health[y * _width + x] = h;
+                _health[y * Width + x] = h;
                 TotalHealth += h;
             }
         }
 
-        public float GetHealth(Vector2Int point)
-        {
-            return _health[point.y * _width + point.x];
-        }
-
         public void SetHealth(Vector2Int point, float health)
         {
-            var index = point.y * _width + point.x;
+            var index = point.y * Width + point.x;
             TotalHealth += health - _health[index];
             _health[index] = health;
         }
 
         public bool DamagePixel(Vector2Int point, float damage)
         {
-            var index = point.y * _width + point.x;
+            var index = point.y * Width + point.x;
             if (_health[index] <= 0f) return false;
 
             var before = _health[index];
@@ -69,7 +81,7 @@ namespace Pixelation
 
         public void RemovePixel(Vector2Int point)
         {
-            var index = point.y * _width + point.x;
+            var index = point.y * Width + point.x;
             TotalHealth -= _health[index];
             _health[index] = 0f;
         }
@@ -81,7 +93,7 @@ namespace Pixelation
 
         public bool IsAlive(Vector2Int point)
         {
-            return _health[point.y * _width + point.x] > 0f;
+            return _health[point.y * Width + point.x] > 0f;
         }
 
         /// <summary>
@@ -95,7 +107,7 @@ namespace Pixelation
             for (var y = 0; y < armorHeight; y++)
             for (var x = 0; x < armorWidth; x++)
             {
-                var index = y * _width + x;
+                var index = y * Width + x;
                 if (_health[index] <= 0f) continue;
 
                 var before = _health[index];
@@ -105,15 +117,15 @@ namespace Pixelation
             }
         }
 
-        public PixelHealthGrid CreateSubGrid(Vector2Int bottomLeft, int width, int height,
+        public HealthGrid CreateSubGrid(Vector2Int bottomLeft, int width, int height,
             HashSet<Vector2Int> points)
         {
-            var subGrid = new PixelHealthGrid(width, height, _defaultMaxHealth);
+            var subGrid = new HealthGrid(width, height, _defaultMaxHealth);
 
             foreach (var point in points)
             {
                 var localPoint = new Vector2Int(point.x - bottomLeft.x, point.y - bottomLeft.y);
-                subGrid.SetHealth(localPoint, GetHealth(point));
+                subGrid.SetHealth(localPoint, GetValue(point));
             }
 
             return subGrid;

@@ -237,7 +237,7 @@ namespace Pixelation
             var newColorsGrid = new Color32[width, height];
 
             foreach (var point in points)
-                newColorsGrid[point.x - leftBottomPoint.x, point.y - leftBottomPoint.y] = _grid.GetColor(point);
+                newColorsGrid[point.x - leftBottomPoint.x, point.y - leftBottomPoint.y] = _grid.GetValue(point);
 
             var globalPosition = _body.transform.TransformPoint(centrePoint - parentCenterPoint);
 

@@ -45,7 +45,7 @@ namespace Pixelation
         [Inject] private IDebrisSpawner _debrisSpawner;
 
         private bool _isSetup;
-        private PixelHealthGrid HealthGrid { get; set; }
+        private HealthGrid HealthGrid { get; set; }
 
         private bool HasArmorMap => armorMap != null && armorMap.ToString() != "null";
 
@@ -104,7 +104,7 @@ namespace Pixelation
 
         public Color32 GetColor(Vector2Int point)
         {
-            return PixelGrid.GetColor(point);
+            return PixelGrid.GetValue(point);
         }
 
         public bool IsPixel(Vector2Int point)
@@ -273,7 +273,7 @@ namespace Pixelation
 
             PixelGrid.Setup();
 
-            HealthGrid = new PixelHealthGrid(PixelGrid.Width, PixelGrid.Height, defaultPixelHealth);
+            HealthGrid = new HealthGrid(PixelGrid.Width, PixelGrid.Height, defaultPixelHealth);
             HealthGrid.InitializeFromGrid(PixelGrid);
 
             if (HasArmorMap)
