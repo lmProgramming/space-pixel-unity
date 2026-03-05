@@ -14,5 +14,6 @@ namespace Core.Pixelation
         void OnCollision(Collision2D collision);
         void ResolveCollision(IPixelatedRigidbody other, Collision2D collision);
         void Unsubscribe();
+        void ForceRecalculateColliders();
     }
 }

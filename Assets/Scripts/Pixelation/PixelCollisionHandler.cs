@@ -46,6 +46,11 @@ namespace Pixelation
             _body.OnPixelsLost -= PixelsLost;
         }
 
+        public void ForceRecalculateColliders()
+        {
+            RecalculateColliders();
+        }
+
         public Vector2Int? GetPointAlongPath(Vector2Int startPosition, Vector2 direction, bool getLast)
         {
             var pointsTraversed = GridMarcher.March(new Vector2Int(_grid.Width, _grid.Height),

@@ -235,7 +235,7 @@ namespace Pixelation
         }
 #endif
 
-        public void Setup(Color32[,] colors = null, bool forceSetup = false)
+        public void Setup(Color32[,] colors = null, bool forceSetup = false, bool recalculateColliders = false)
         {
             if (_isSetup && !forceSetup) return;
 
@@ -254,7 +254,7 @@ namespace Pixelation
 
             PixelGrid = new PixelGrid(SpriteRenderer);
 
-            if (_collisionEventChannelSO != null && _debrisSpawner != null)
+            if ((_collisionEventChannelSO != null && _debrisSpawner != null) || recalculateColliders)
                 CollisionHandler = new PixelCollisionHandler(PixelGrid, this, GetComponent<PolygonCollider2D>(),
                     _collisionEventChannelSO, _debrisSpawner);
 
@@ -284,6 +284,9 @@ namespace Pixelation
             WeightedCenter = CalculateWeightedCenter();
 
             OnPixelsLost?.Invoke(new List<Vector2Int>(), PixelLoseReason.Other);
+
+            if (recalculateColliders)
+                CollisionHandler?.ForceRecalculateColliders();
         }
 
         private void ApplyArmorMap()
@@ -388,6 +391,12 @@ namespace Pixelation
             var countBefore = PixelGrid.PixelCount + region.Count;
             NudgeWeightedCenter(region, countBefore);
             OnPixelsLost?.Invoke(region.AsValueEnumerable().ToList(), PixelLoseReason.Division);
+        }
+
+        public void SetSprites(Sprite visualSprite, Sprite armorSprite)
+        {
+            sprite = visualSprite;
+            armorMap = armorSprite;
         }
     }
 }
