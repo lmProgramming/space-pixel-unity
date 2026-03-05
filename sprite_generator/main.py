@@ -4,12 +4,9 @@ import random
 from PIL import Image
 
 SAVE_DIR = "Assets/Sprites/Generated"
-NOISE_VARIANCE = 12  # How much RGB shift to apply to metal/armor for texture
+READ_DIR = "sprite_generator/inputs"
+NOISE_VARIANCE = 12
 
-# Create Unity directory if it doesn't exist
-os.makedirs(SAVE_DIR, exist_ok=True)
-
-# Palettes
 VISUAL_PALETTES = {
     "player": {
         "0": (0, 0, 0, 0),  # Transparent
@@ -46,9 +43,7 @@ ARMOR_PALETTE = {
 
 
 def apply_noise(color_tuple):
-    """Applies slight RGB variation to add texture to metal, ignores transparent/lights."""
     r, g, b, a = color_tuple
-    # Skip transparency, pure black, and glowing lights (assuming lights are highly saturated)
     if (
         a == 0
         or (r, g, b) == (20, 20, 20)
@@ -56,7 +51,6 @@ def apply_noise(color_tuple):
         or max(r, g, b) > 210
     ):
         return color_tuple
-
     noise = random.randint(-NOISE_VARIANCE, NOISE_VARIANCE)
     return (
         max(0, min(255, r + noise)),
@@ -66,50 +60,47 @@ def apply_noise(color_tuple):
     )
 
 
-def process_file(filepath):
-    # Only process base visual files (skip the armor ones to avoid double-processing)
-    if filepath.endswith("_armor.txt"):
-        return
+# Find all text files in the directory
+txt_files = glob.glob(os.path.join(READ_DIR, "*.txt"))
 
-    base_name = os.path.splitext(os.path.basename(filepath))[0]
-    faction = "enemy" if "enemy" in base_name else "player"
-    palette = VISUAL_PALETTES[faction]
+if not txt_files:
+    print(f"No .txt files found in {READ_DIR}. Run the parser script first!")
+    exit()
 
-    armor_filepath = f"{base_name}_armor.txt"
-    has_armor = os.path.exists(armor_filepath)
+for filepath in txt_files:
+    filename = os.path.basename(filepath)
+    base_name = filename.replace(".txt", "")
 
-    # Read Visual Text
     with open(filepath, "r") as f:
-        visual_lines = [line.strip() for line in f.readlines() if line.strip()]
+        matrix = [line.strip() for line in f.readlines() if line.strip()]
 
-    width, height = len(visual_lines[0]), len(visual_lines)
+    if not matrix:
+        continue
 
-    # Generate Visual PNG
-    img_vis = Image.new("RGBA", (width, height))
-    vis_pixels = []
-    for row in visual_lines:
-        for char in row:
-            vis_pixels.append(
-                apply_noise(palette.get(char, (255, 0, 255, 255)))
-            )  # Magenta fallback
-    img_vis.putdata(vis_pixels)
-    img_vis.save(os.path.join(SAVE_DIR, f"{base_name}.png"))
+    width = len(matrix[0])
+    height = len(matrix)
 
-    # Generate Armor PNG
-    if has_armor:
-        with open(armor_filepath, "r") as f:
-            armor_lines = [line.strip() for line in f.readlines() if line.strip()]
-        img_arm = Image.new("RGBA", (width, height))
-        arm_pixels = [
-            ARMOR_PALETTE.get(char, (0, 0, 0, 0)) for row in armor_lines for char in row
-        ]
-        img_arm.putdata(arm_pixels)
-        img_arm.save(os.path.join(SAVE_DIR, f"{base_name}_armor.png"))
+    img = Image.new("RGBA", (width, height))
+    pixels = []
 
-    print(f"Processed: {base_name} ({width}x{height})")
+    # Generate Armor Map
+    if "_armor" in base_name:
+        for row in matrix:
+            for char in row:
+                pixels.append(ARMOR_PALETTE.get(char, (0, 0, 0, 0)))
 
+    # Generate Visual Map
+    else:
+        faction = "enemy" if "enemy" in base_name else "player"
+        palette = VISUAL_PALETTES[faction]
+        for row in matrix:
+            for char in row:
+                pixels.append(apply_noise(palette.get(char, (255, 0, 255, 255))))
 
-for txt_file in glob.glob("sprite_generator/inputs/*.txt"):
-    process_file(txt_file)
+    img.putdata(pixels)
+    png_path = os.path.join(SAVE_DIR, f"{base_name}.png")
+    img.save(png_path)
 
-print(f"All generated sprites saved to {SAVE_DIR}!")
+    print(f"Generated PNG: {png_path} ({width}x{height})")
+
+print("All PNGs generated successfully!")

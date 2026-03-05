@@ -21,10 +21,10 @@ using ZLinq;
 
 namespace Ships
 {
+    [RequireComponent(typeof(ModuleConnectionFactory), typeof(ResourceManager))]
     public class Ship : MonoBehaviour, IShip
     {
         private const float UpdateResourcesTimer = 0.1f;
-        [SerializeField] private ModuleConnectionFactory moduleConnectionFactory;
 
         [SerializeField]
         private Team team;
@@ -39,6 +39,8 @@ namespace Ships
         [Inject]
         private IMapInfo _mapInfo;
 
+        private ModuleConnectionFactory _moduleConnectionFactory;
+
         private Action<IPixelated> _onCommandModuleNoPixelsLeft;
 
         [Inject]
@@ -46,7 +48,7 @@ namespace Ships
 
         internal ModuleConnectionFactory ModuleConnectionFactoryForTesting
         {
-            set => moduleConnectionFactory = value;
+            set => _moduleConnectionFactory = value;
         }
 
         private IReadOnlyList<Module> AllModules => _allModulesCache;
@@ -65,7 +67,8 @@ namespace Ships
         private void Awake()
         {
             CommandModule ??= GetComponentInChildren<Command>();
-            ResourceManager ??= GetComponentInChildren<ResourceManager>();
+            ResourceManager = GetComponentInChildren<ResourceManager>();
+            _moduleConnectionFactory = GetComponent<ModuleConnectionFactory>();
         }
 
         protected virtual void Start()
@@ -76,7 +79,7 @@ namespace Ships
             _onCommandModuleNoPixelsLeft = _ => Destroy(gameObject);
             CommandModule.PixelatedRigidbody.OnNoPixelsLeft += _onCommandModuleNoPixelsLeft;
 
-            moduleConnectionFactory.ConnectModules(this);
+            _moduleConnectionFactory.ConnectModules(this);
 
             RecacheModulesDictionary();
 
@@ -215,7 +218,7 @@ namespace Ships
             _onCommandModuleNoPixelsLeft = _ => Destroy(gameObject);
             CommandModule.PixelatedRigidbody.OnNoPixelsLeft += _onCommandModuleNoPixelsLeft;
 
-            moduleConnectionFactory.ConnectModules(this);
+            _moduleConnectionFactory.ConnectModules(this);
 
             RecacheModulesDictionary();
         }
