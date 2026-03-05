@@ -183,6 +183,11 @@ namespace Ships.Modules
             }
         }
 
+        public void SetLocalPosition(Vector2 localPosition)
+        {
+            transform.localPosition = localPosition;
+        }
+
         private void HandleCrewMemberDeath(CrewMember member)
         {
             UnsubscribeCrew(member);

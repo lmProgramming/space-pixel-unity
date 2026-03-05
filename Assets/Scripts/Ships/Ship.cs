@@ -145,6 +145,18 @@ namespace Ships
             RecacheModulesDictionary();
         }
 
+        public void AddModule(IModule module)
+        {
+            if (module == null) throw new ArgumentNullException(nameof(module));
+            module.Transform.SetParent(transform);
+        }
+
+        public void RemoveModule(IModule module)
+        {
+            if (module == null) throw new ArgumentNullException(nameof(module));
+            module.Transform.SetParent(null);
+        }
+
         private void DestroyShip()
         {
             Debug.Log($"[Ship] Command module destroyed. Destroying ship: {gameObject.name}", gameObject);

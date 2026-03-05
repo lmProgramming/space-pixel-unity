@@ -10,9 +10,7 @@ try:
     with open(INPUT_FILE, "r") as f:
         lines = [line.strip() for line in f.readlines()]
 except FileNotFoundError:
-    print(
-        f"ERROR: Could not find '{INPUT_FILE}'. Create it and paste the LLM output inside."
-    )
+    print(f"ERROR: Could not find '{INPUT_FILE}'.")
     exit()
 
 current_filename = None

@@ -1,0 +1,40 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance"
+         noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="ShipFactory.uss"/>
+
+    <!-- Top bar -->
+    <ui:VisualElement name="top-bar" class="top-bar">
+        <ui:Label name="ship-label" text="Ship Factory  —  drag a module onto the ship" class="top-bar-label"/>
+    </ui:VisualElement>
+
+    <!-- Canvas area: drag-and-drop surface -->
+    <ui:VisualElement name="canvas-container" class="canvas-container">
+        <ui:VisualElement name="canvas-viewport" class="canvas-viewport">
+            <ui:VisualElement name="canvas-area" class="canvas-area"/>
+        </ui:VisualElement>
+    </ui:VisualElement>
+
+    <!-- Bottom palette panel -->
+    <ui:VisualElement name="palette-panel" class="palette-panel">
+        <!-- Module type tab buttons -->
+        <ui:VisualElement name="palette-tabs" class="palette-tabs">
+            <ui:Button name="tab-Command" text="Command" class="palette-tab"/>
+            <ui:Button name="tab-Production" text="Production" class="palette-tab"/>
+            <ui:Button name="tab-Storage" text="Storage" class="palette-tab"/>
+            <ui:Button name="tab-Weapon" text="Weapon" class="palette-tab"/>
+            <ui:Button name="tab-Engine" text="Engine" class="palette-tab"/>
+        </ui:VisualElement>
+
+        <!-- Module list for the selected type -->
+        <ui:ScrollView name="palette-scroll" class="palette-scroll" horizontal-scroller-visibility="Hidden"
+                       vertical-scroller-visibility="Hidden" mode="Horizontal">
+            <ui:VisualElement name="palette-content" class="palette-content"/>
+        </ui:ScrollView>
+    </ui:VisualElement>
+
+    <!-- Ghost element for drag preview (hidden by default, moved to top level) -->
+    <ui:VisualElement name="drag-ghost" class="drag-ghost hidden" picking-mode="Ignore"/>
+</ui:UXML>
+
+
+

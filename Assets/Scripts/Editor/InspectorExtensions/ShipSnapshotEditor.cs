@@ -15,16 +15,11 @@ namespace Editor.InspectorExtensions
     {
         private const string DefaultSaveFolder = "Assets/ShipSnapshots";
 
-        private IShipSnapshotService CreateSnapshotService()
+        private static IShipSnapshotService CreateSnapshotService()
         {
-            if (Application.isPlaying)
-            {
-                var sceneContext = FindAnyObjectByType<SceneContext>();
-                if (sceneContext != null)
-                    return new ShipSnapshotService(sceneContext.Container);
-            }
-
-            return new ShipSnapshotService();
+            if (!Application.isPlaying) return new ShipSnapshotService();
+            var sceneContext = FindAnyObjectByType<SceneContext>();
+            return sceneContext ? new ShipSnapshotService(sceneContext.Container) : new ShipSnapshotService();
         }
 
         public override void OnInspectorGUI()
@@ -53,7 +48,7 @@ namespace Editor.InspectorExtensions
             EditorUtility.RevealInFinder(DefaultSaveFolder);
         }
 
-        private void CaptureAndSaveSnapshot(Ship ship)
+        private static void CaptureAndSaveSnapshot(Ship ship)
         {
             var snapshotService = CreateSnapshotService();
             var snapshot = snapshotService.CaptureSnapshot(ship);
@@ -79,7 +74,7 @@ namespace Editor.InspectorExtensions
             EditorGUIUtility.PingObject(AssetDatabase.LoadAssetAtPath<Object>(fullPath));
         }
 
-        private void LoadSnapshotOntoShip(Ship ship)
+        private static void LoadSnapshotOntoShip(Ship ship)
         {
             if (!Application.isPlaying)
             {

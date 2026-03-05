@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1fb46062ffa47d199e5f34cc50b9964, type: 3}
+  m_Name: ModulePrefabLibrary
+  m_EditorClassIdentifier: ShipFactory::ShipFactory.ModulePrefabLibrary
+  entries:
+  - moduleType: 0
+    prefabs:
+    - {fileID: 8782039479673470742, guid: 8d784a0be5fd9090eb07b4ad56e3efe6, type: 3}
+  - moduleType: 1
+    prefabs:
+    - {fileID: 8782039479673470742, guid: 8d784a0be5fd9090eb07b4ad56e3efe6, type: 3}
