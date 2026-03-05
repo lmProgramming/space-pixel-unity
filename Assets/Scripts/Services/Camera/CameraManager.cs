@@ -1,4 +1,4 @@
-using LM;
+using LMPro;
 using UnityEngine;
 
 namespace Services.Camera

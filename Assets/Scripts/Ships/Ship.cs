@@ -9,8 +9,8 @@ using Core.Services;
 using Core.Ship;
 using Cysharp.Threading.Tasks;
 using Gameplay.EasyTeam;
-using LM;
-using LM.Graph;
+using LMPro;
+using LMPro.Graph;
 using Ships.Internal;
 using Ships.Modules;
 using UnityEngine;
@@ -134,10 +134,18 @@ namespace Ships
         {
             if (module == null) return;
 
+            if (module == CommandModule) DestroyShip();
+
             Debug.Log($"[Ship] Module destroyed: {module.Transform.name}", module.Transform);
 
             _biCohesionGraph.RemoveNode(module);
             RecacheModulesDictionary();
+        }
+
+        private void DestroyShip()
+        {
+            Debug.Log($"[Ship] Command module destroyed. Destroying ship: {gameObject.name}", gameObject);
+            Destroy(gameObject);
         }
 
         private async UniTaskVoid UpdateResourcesLoop()

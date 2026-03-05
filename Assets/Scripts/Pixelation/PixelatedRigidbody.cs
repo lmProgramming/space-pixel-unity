@@ -8,7 +8,7 @@ using Core.Services;
 using Cysharp.Threading.Tasks;
 using Events.Collision;
 using Grid;
-using LM;
+using LMPro;
 using UnityEngine;
 using Zenject;
 using ZLinq;

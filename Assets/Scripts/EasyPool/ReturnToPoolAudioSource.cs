@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using LM;
+using LMPro;
 using UnityEngine;
 using UnityEngine.Pool;
 

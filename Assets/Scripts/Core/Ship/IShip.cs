@@ -1,10 +1,11 @@
 using Core.Gameplay.EasyTeam;
-using LM.Graph;
+using External.IsAlive;
+using LMPro.Graph;
 using UnityEngine;
 
 namespace Core.Ship
 {
-    public interface IShip
+    public interface IShip : IHasAliveCheck
     {
         ITeam Team { get; }
         IModule CommandModule { get; }

@@ -3,7 +3,7 @@ using System.Threading;
 using Core.Gameplay.Combat;
 using Core.Ship;
 using Cysharp.Threading.Tasks;
-using LM;
+using LMPro;
 using Pixelation;
 using UnityEngine;
 using ZLinq;
@@ -174,7 +174,7 @@ namespace Ships.Modules
                 {
                     timeRemaining -= Time.deltaTime;
 
-                    var attackPosition = GameInput.WorldPointerPosition;
+                    var attackPosition = Ship.AttackTargetPosition;
                     Vector2 origin = originPoint.position;
                     var direction = (attackPosition - origin).normalized;
                     var endPoint = origin + direction * beamRange;

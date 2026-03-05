@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Core.Gameplay.Sound;
 using EasyPool;
 using Instantiation;
-using LM;
+using LMPro;
 using UnityEngine;
 
 namespace Services.Sound

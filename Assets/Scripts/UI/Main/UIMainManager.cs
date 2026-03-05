@@ -11,8 +11,14 @@ namespace UI.Main
 
         private void Update()
         {
+            if (!playerShip)
+            {
+                speedText.SetText("0.0");
+                return;
+            }
+
             speedText.SetText(
-                playerShip?.CommandModule?.PixelatedRigidbody?.Rigidbody?.linearVelocity.magnitude.ToString("F1"));
+                playerShip.CommandModule.PixelatedRigidbody.Rigidbody.linearVelocity.magnitude.ToString("F1"));
         }
     }
 }

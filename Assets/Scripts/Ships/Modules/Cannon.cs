@@ -3,7 +3,7 @@ using System.Threading;
 using Core.Gameplay.Combat;
 using Core.Services;
 using Core.Ship;
-using LM;
+using LMPro;
 using UnityEngine;
 using Zenject;
 

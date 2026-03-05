@@ -5,7 +5,7 @@ using Core.Pixelation;
 using Core.Services;
 using Events.Collision;
 using Grid;
-using LM;
+using LMPro;
 using Pixelation.CollisionResolver;
 using UnityEngine;
 using ZLinq;

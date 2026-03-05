@@ -2060,13 +2060,14 @@ GameObject:
   - component: {fileID: 254017986}
   - component: {fileID: 254017985}
   - component: {fileID: 254017984}
+  - component: {fileID: 254017990}
   m_Layer: 7
   m_Name: Enemy (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &254017983
 Transform:
   m_ObjectHideFlags: 0
@@ -2193,6 +2194,20 @@ MonoBehaviour:
   minThrustAlignment: 0.1
   avoidanceWeight: 1.2
   navigationSize: 1
+--- !u!114 &254017990
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 254017982}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 51beb7d3839b46ae91fd236d4f53e511, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Ships::Ships.ShipCrewAssigner
+  crewMembers: []
+  generateMissingCrewMembers: 1
 --- !u!1 &256191737
 GameObject:
   m_ObjectHideFlags: 0
@@ -3226,13 +3241,14 @@ GameObject:
   - component: {fileID: 397009036}
   - component: {fileID: 397009035}
   - component: {fileID: 397009034}
+  - component: {fileID: 397009040}
   m_Layer: 7
   m_Name: Enemy (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &397009033
 Transform:
   m_ObjectHideFlags: 0
@@ -3359,6 +3375,20 @@ MonoBehaviour:
   minThrustAlignment: 0.1
   avoidanceWeight: 1.2
   navigationSize: 1
+--- !u!114 &397009040
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 397009032}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 51beb7d3839b46ae91fd236d4f53e511, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Ships::Ships.ShipCrewAssigner
+  crewMembers: []
+  generateMissingCrewMembers: 1
 --- !u!1 &420075598
 GameObject:
   m_ObjectHideFlags: 0
@@ -3626,8 +3656,8 @@ MonoBehaviour:
     energyCapacity: 2000
     energyDraw: 30
     energyProduction: 150
-    crewNeeded: 7
-    crewQuarters: 20
+    crewNeeded: 3
+    crewQuarters: 12
 --- !u!1 &443114472
 GameObject:
   m_ObjectHideFlags: 0
@@ -6687,8 +6717,12 @@ GameObject:
   m_Component:
   - component: {fileID: 820889511}
   - component: {fileID: 820889514}
-  - component: {fileID: 820889513}
   - component: {fileID: 820889512}
+  - component: {fileID: 820889515}
+  - component: {fileID: 820889518}
+  - component: {fileID: 820889517}
+  - component: {fileID: 820889519}
+  - component: {fileID: 820889516}
   m_Layer: 6
   m_Name: Player (1)
   m_TagString: Untagged
@@ -6736,20 +6770,6 @@ MonoBehaviour:
   energyProduction: 6
   crewCapacity: 3
   crew: 2
---- !u!114 &820889513
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 820889510}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ca2084538397de84187ef625732233bb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Game.Ships::Ships.Ship
-  moduleConnectionFactory: {fileID: 820889514}
-  team: {fileID: 654231193}
 --- !u!114 &820889514
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6762,6 +6782,96 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cebb1390bd8548d4c9f27f21510f1fcb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &820889515
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 820889510}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 51beb7d3839b46ae91fd236d4f53e511, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Ships::Ships.ShipCrewAssigner
+  crewMembers: []
+  generateMissingCrewMembers: 1
+--- !u!114 &820889516
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 820889510}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a1eda6d5f4c1594c86a1d39cfc2d3fa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Ships::Ships.AIShip
+  moduleConnectionFactory: {fileID: 820889514}
+  team: {fileID: 654231193}
+  speedMultiplier: 1
+  rotationMultiplier: 1
+  stopDistance: 1.5
+  minThrustAlignment: 0.1
+  avoidanceWeight: 1.2
+  navigationSize: 1
+--- !u!114 &820889517
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 820889510}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 191a1ab4b8be47529871fc79b543e9b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Ships::Ships.StateMachines.Navigation.ShipNavigationStateMachine
+--- !u!114 &820889518
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 820889510}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8306ff83506c4050b5621d460b1a7dfb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Ships::Ships.ShipSensing
+  obstacleMask:
+    serializedVersion: 2
+    m_Bits: 0
+  losBlockersMask:
+    serializedVersion: 2
+    m_Bits: 0
+  shipMask:
+    serializedVersion: 2
+    m_Bits: 0
+  useDefaultMasks: 1
+  forwardSenseRange: 18
+  forwardSenseAngles:
+  - 0
+  - 15
+  - -15
+  - 30
+  - -30
+  useCircleCast: 0
+  circleCastRadius: 0.6
+  losMaxDistance: 200
+--- !u!114 &820889519
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 820889510}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bc27b73aee54799bad9239b6a29c5c4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Ships::Ships.StateMachines.Behaviour.BehaviourStateMachine
 --- !u!1 &825322231
 GameObject:
   m_ObjectHideFlags: 0
@@ -7369,7 +7479,7 @@ MonoBehaviour:
     energyCapacity: 100
     energyDraw: 30
     energyProduction: 0
-    crewNeeded: 2
+    crewNeeded: 4
     crewQuarters: 0
   thrust: 0
   maxThrust: 1
@@ -7782,7 +7892,7 @@ MonoBehaviour:
     energyCapacity: 100
     energyDraw: 30
     energyProduction: 0
-    crewNeeded: 2
+    crewNeeded: 4
     crewQuarters: 0
   thrust: 0
   maxThrust: 1
@@ -8363,7 +8473,7 @@ MonoBehaviour:
     energyCapacity: 200
     energyDraw: 20
     energyProduction: 0
-    crewNeeded: 4
+    crewNeeded: 1
     crewQuarters: 0
   projectilePrefab: {fileID: 5654400622174641897, guid: fbb05823f916f824da20fe66a7de32d4, type: 3}
   projectileSpeed: 200
@@ -12206,13 +12316,14 @@ GameObject:
   - component: {fileID: 1603701113}
   - component: {fileID: 1603701112}
   - component: {fileID: 1603701111}
+  - component: {fileID: 1603701117}
   m_Layer: 7
   m_Name: Enemy (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1603701110
 Transform:
   m_ObjectHideFlags: 0
@@ -12339,6 +12450,20 @@ MonoBehaviour:
   minThrustAlignment: 0.1
   avoidanceWeight: 1.2
   navigationSize: 1
+--- !u!114 &1603701117
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1603701109}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 51beb7d3839b46ae91fd236d4f53e511, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Ships::Ships.ShipCrewAssigner
+  crewMembers: []
+  generateMissingCrewMembers: 1
 --- !u!1 &1632795185
 GameObject:
   m_ObjectHideFlags: 0
@@ -12354,13 +12479,14 @@ GameObject:
   - component: {fileID: 1632795192}
   - component: {fileID: 1632795194}
   - component: {fileID: 1632795193}
+  - component: {fileID: 1632795195}
   m_Layer: 7
   m_Name: Enemy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1632795186
 Transform:
   m_ObjectHideFlags: 0
@@ -12487,6 +12613,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4bc27b73aee54799bad9239b6a29c5c4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game.Ships::Ships.StateMachines.Behaviour.BehaviourStateMachine
+--- !u!114 &1632795195
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1632795185}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 51beb7d3839b46ae91fd236d4f53e511, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Ships::Ships.ShipCrewAssigner
+  crewMembers: []
+  generateMissingCrewMembers: 1
 --- !u!28 &1633281666
 Texture2D:
   m_ObjectHideFlags: 0

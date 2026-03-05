@@ -1,15 +1,9 @@
 {
-  "name": "Game.Ships",
+  "name": "Instantiation",
   "rootNamespace": "",
   "references": [
-    "GUID:f51ebe6a0ceec4240a699833d6309b23",
-    "GUID:b588e3e7a964822d3a9d587848dfd885",
-    "GUID:4d277b042cf7c0655ad4c5179de9f659",
     "GUID:24173525d8afb24ad9153261c706727e",
-    "GUID:714d0c92b67330b6f964bc28ee4a69c4",
-    "GUID:3453562d1089a90fc973630db854c59c",
-    "GUID:34bdced8957d5654aa357c6c421984d1",
-    "GUID:dafce42528d287ef1b97d7edde5ce811"
+    "GUID:34bdced8957d5654aa357c6c421984d1"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

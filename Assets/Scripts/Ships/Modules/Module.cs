@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Core.Pixelation;
 using Core.Ship;
-using LM;
+using LMPro;
 using Pixelation;
 using UnityEngine;
 using ZLinq;
