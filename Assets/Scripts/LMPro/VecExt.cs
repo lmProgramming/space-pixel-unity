@@ -72,6 +72,16 @@ namespace LMPro
             return aVec;
         }
 
+        public static bool XYLowerThan(this Vector3 aVec, Vector3 bVec)
+        {
+            return aVec.x < bVec.x && aVec.y < bVec.y;
+        }
+
+        public static bool XYHigherThan(this Vector3 aVec, Vector3 bVec)
+        {
+            return aVec.x > bVec.x && aVec.y > bVec.y;
+        }
+
         // Vector4
         public static Vector4 SetX(this Vector4 aVec, float aXValue)
         {

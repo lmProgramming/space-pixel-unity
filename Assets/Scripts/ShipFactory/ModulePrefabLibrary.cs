@@ -21,11 +21,7 @@ namespace ShipFactory
         public IReadOnlyList<ShipModuleSO> GetModuleSOsOfType(ModuleType type)
         {
             foreach (var entry in entries.AsValueEnumerable().Where(entry => entry.moduleType == type))
-            {
-                Debug.Log(
-                    $"[ModulePrefabLibrary] '{name}' — type {type}: {entry.prefabs.Count} prefab(s) → [{string.Join(", ", entry.prefabs.ConvertAll(p => p != null ? p.name : "<null>"))}]");
                 return entry.prefabs;
-            }
 
             Debug.LogWarning(
                 $"[ModulePrefabLibrary] '{name}' — no entry for type {type}. Existing entries: [{string.Join(", ", entries.ConvertAll(e => e.moduleType.ToString()))}]");

@@ -22,11 +22,6 @@ namespace ShipFactory
                 Debug.LogError("[ShipFactoryController] ModulePrefabLibrary is not assigned!", this);
         }
 
-        private void Update()
-        {
-            _canvasController?.UpdateOverlays();
-        }
-
         private void OnEnable()
         {
             var root = _uiDocument.rootVisualElement;

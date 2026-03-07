@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Core.Ship;
+using JetBrains.Annotations;
 using Ships;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -12,8 +13,6 @@ namespace ShipFactory
     {
         private const int SnapUnits = 8;
 
-        private const string SelectedModuleClass = "placed-module--selected";
-
         // How many screen pixels equal one world unit at the default camera zoom.
         // Overlay elements are repositioned every frame via UpdateOverlays().
         private const int OverlayPixelsPerUnit = 16;
@@ -21,13 +20,11 @@ namespace ShipFactory
         private readonly Camera _cam;
 
         private readonly VisualElement _canvasArea;
-        private readonly VisualElement _dragGhost;
-        private readonly Dictionary<VisualElement, ShipModuleSOInstanceBundle> _placedModuleElements = new();
 
+        private readonly Dictionary<VisualElement, ShipModuleSOInstanceBundle> _placedModuleElements = new();
+        private ShipModuleSOInstanceBundle _draggedModuleBundle;
+        private VisualElement _dragGhost;
         private Vector2 _ghostSizePx;
-        private bool _isDraggingModule;
-        private ShipModuleSO _pendingModuleSO;
-        private VisualElement _selectedElement;
         private Ship _ship;
 
         public ShipFactoryCanvasController(VisualElement root)
@@ -36,9 +33,8 @@ namespace ShipFactory
 
             var canvasViewport = root.Q<VisualElement>("canvas-viewport");
             _canvasArea = root.Q<VisualElement>("canvas-area");
-            _dragGhost = root.Q<VisualElement>("drag-ghost");
 
-            if (canvasViewport == null || _canvasArea == null || _dragGhost == null)
+            if (canvasViewport == null || _canvasArea == null)
                 throw new InvalidOperationException(
                     "[ShipFactoryCanvasController] Required canvas elements not found in UXML!");
 
@@ -48,6 +44,8 @@ namespace ShipFactory
 
             RegisterDragEvents(root);
         }
+
+        private bool IsDraggingModule => _draggedModuleBundle != null;
 
         public event Action OnModuleDragFinished;
 
@@ -59,22 +57,27 @@ namespace ShipFactory
 
         public void BeginModuleDrop(ShipModuleSO shipModuleSO, Vector2 pointerScreenPos)
         {
-            _pendingModuleSO = shipModuleSO;
-            _isDraggingModule = true;
+            var worldPos = ScreenToSnappedWorldPosition(pointerScreenPos);
+            var bundle = InstantiateModule(shipModuleSO, worldPos);
 
-            _ghostSizePx = WorldSizeToScreenPx(shipModuleSO.Dimensions);
+            var dragGhost = AddOverlayElement(bundle);
+
+            BeginModuleDrop(bundle, pointerScreenPos, dragGhost);
+        }
+
+        private void BeginModuleDrop(ShipModuleSOInstanceBundle bundle, Vector2 pointerScreenPos,
+            VisualElement dragGhost)
+        {
+            _draggedModuleBundle = bundle;
+
+            _dragGhost = dragGhost;
+
+            _ghostSizePx = WorldSizeToScreenPx(bundle.ModuleSO.Dimensions);
 
             _dragGhost.style.width = _ghostSizePx.x;
             _dragGhost.style.height = _ghostSizePx.y;
-            _dragGhost.RemoveFromClassList("hidden");
 
             MoveGhostToPointer(pointerScreenPos);
-        }
-
-        public void UpdateOverlays()
-        {
-            foreach (var (element, module) in _placedModuleElements)
-                PositionOverlayElement(element, module);
         }
 
         private void RegisterDragEvents(VisualElement root)
@@ -85,27 +88,22 @@ namespace ShipFactory
 
         private void OnPointerMove(PointerMoveEvent evt)
         {
-            if (!_isDraggingModule) return;
+            if (!IsDraggingModule) return;
             MoveGhostToPointer(evt.position);
         }
 
         private void OnPointerUp(PointerUpEvent evt)
         {
-            if (!_isDraggingModule) return;
-
-            _dragGhost.AddToClassList("hidden");
-            _isDraggingModule = false;
+            if (!IsDraggingModule) return;
 
             if (_ship == null)
             {
                 Debug.LogWarning("[ShipFactory] No ship assigned — cannot place module.");
-                _pendingModuleSO = null;
+                _draggedModuleBundle = null;
                 return;
             }
 
-            var worldPos = ScreenToSnappedWorldPosition(evt.position);
-            PlaceModuleAtWorldPosition(_pendingModuleSO, worldPos);
-            _pendingModuleSO = null;
+            _draggedModuleBundle = null;
 
             OnModuleDragFinished?.Invoke();
         }
@@ -113,10 +111,12 @@ namespace ShipFactory
         private void MoveGhostToPointer(Vector2 screenPos)
         {
             var snapped = ScreenToSnappedWorldPosition(screenPos);
-            var snappedScreen = WorldToScreenPos(snapped);
+            var snappedOverlayPos = ScreenToSnappedWorldPosition(screenPos) + (Vector2)HackSoOverlayPlacedAppearsOk;
+            var snappedScreen = WorldToScreenPos(snappedOverlayPos);
 
             _dragGhost.style.left = snappedScreen.x - _ghostSizePx.x / 2f;
             _dragGhost.style.top = snappedScreen.y - _ghostSizePx.y / 2f;
+            _draggedModuleBundle.Instance.transform.position = snapped;
         }
 
         private static Vector2 ScreenToSnappedWorldPosition(Vector2 screenPos)
@@ -149,7 +149,8 @@ namespace ShipFactory
                 Mathf.Round(worldPosition.y / SnapUnits) * SnapUnits);
         }
 
-        private void PlaceModuleAtWorldPosition(ShipModuleSO shipModuleSO, Vector2 worldPosition)
+        [CanBeNull]
+        private ShipModuleSOInstanceBundle InstantiateModule(ShipModuleSO shipModuleSO, Vector2 worldPosition)
         {
             var instance = (GameObject)Object.Instantiate((Object)shipModuleSO.Prefab, _ship.transform);
             var module = instance.GetComponent<IModule>();
@@ -158,17 +159,19 @@ namespace ShipFactory
             {
                 Debug.LogError($"[ShipFactory] Prefab '{shipModuleSO.name}' has no IModule component!", shipModuleSO);
                 Object.Destroy(instance);
-                return;
+                return null;
             }
 
             var localPosition = (Vector2)_ship.transform.InverseTransformPoint(worldPosition);
             _ship.AddModule(module);
             module.SetLocalPosition(localPosition);
 
-            AddOverlayElement(new ShipModuleSOInstanceBundle(instance, shipModuleSO, module));
+            instance.GetComponent<Rigidbody2D>().simulated = false;
+
+            return new ShipModuleSOInstanceBundle(instance, shipModuleSO, module);
         }
 
-        private void AddOverlayElement(ShipModuleSOInstanceBundle moduleBundle)
+        private VisualElement AddOverlayElement(ShipModuleSOInstanceBundle moduleBundle)
         {
             var element = new VisualElement();
             element.AddToClassList("placed-module");
@@ -180,14 +183,16 @@ namespace ShipFactory
             element.RegisterCallback<PointerDownEvent>(evt =>
             {
                 if (evt.button != 0) return;
-                SelectModule(element, moduleBundle);
+                BeginModuleDrop(moduleBundle, evt.position, element);
                 evt.StopPropagation();
             });
 
             PositionOverlayElement(element, moduleBundle);
-            _canvasArea.pickingMode = PickingMode.Position; // temporarily allow picking for placed overlays
+            _canvasArea.pickingMode = PickingMode.Position;
             _canvasArea.Add(element);
             _placedModuleElements[element] = moduleBundle;
+
+            return element;
         }
 
         private void PositionOverlayElement(VisualElement element, ShipModuleSOInstanceBundle module)
@@ -211,19 +216,11 @@ namespace ShipFactory
             return new Vector2(Mathf.Abs(offset.x - origin.x), Mathf.Abs(offset.y - origin.y));
         }
 
-        private void SelectModule(VisualElement element, ShipModuleSOInstanceBundle moduleBundle)
-        {
-            _selectedElement?.RemoveFromClassList(SelectedModuleClass);
-            _selectedElement = element;
-            _selectedElement.AddToClassList(SelectedModuleClass);
-            Debug.Log($"[ShipFactory] Selected module: {moduleBundle.ModuleSO.Name}");
-        }
-
         private void RebuildOverlaysFromShip()
         {
             _canvasArea.Clear();
             _placedModuleElements.Clear();
-            _selectedElement = null;
+            _dragGhost = null;
 
             if (_ship == null) return;
 

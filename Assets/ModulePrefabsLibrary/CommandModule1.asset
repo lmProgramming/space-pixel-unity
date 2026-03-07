@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: CommandModule1
   m_EditorClassIdentifier: ShipFactory::ShipFactory.ShipModuleSO
   prefab: {fileID: 2393420695381017494, guid: 2757868da22a5937daa8d05fbeca50e0, type: 3}
-  dimensions: {x: 16, y: 16}
+  dimensions: {x: 48, y: 64}
   partName: Command Module mk1
   description: Sturdy stud

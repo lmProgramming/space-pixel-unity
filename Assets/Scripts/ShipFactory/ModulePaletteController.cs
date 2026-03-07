@@ -74,8 +74,6 @@ namespace ShipFactory
             _paletteContent.Clear();
 
             var moduleSOs = _library.GetModuleSOsOfType(_activeType);
-            Debug.Log(
-                $"[ShipFactory] Populating palette for type '{_activeType}': {moduleSOs.Count} prefab(s) found in library.");
 
             var built = 0;
             foreach (var moduleSO in moduleSOs)
@@ -90,8 +88,6 @@ namespace ShipFactory
                 _paletteContent.Add(BuildModuleCard(moduleSO));
                 built++;
             }
-
-            Debug.Log($"[ShipFactory] Built {built} module card(s) for type '{_activeType}'.");
         }
 
         private VisualElement BuildModuleCard(ShipModuleSO moduleSO)
@@ -122,7 +118,7 @@ namespace ShipFactory
 
         public void FinishModuleDrag()
         {
-            _draggingCard.RemoveFromClassList(DraggingCardClass);
+            _draggingCard?.RemoveFromClassList(DraggingCardClass);
             _draggingCard = null;
         }
 
