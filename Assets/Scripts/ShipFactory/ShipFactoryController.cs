@@ -48,9 +48,9 @@ namespace ShipFactory
         }
 
 
-        private void OnModuleDragStarted(GameObject prefab, Vector2 startPointerPosition)
+        private void OnModuleDragStarted(ShipModuleSO shipModuleSO, Vector2 startPointerPosition)
         {
-            _canvasController.BeginModuleDrop(prefab, startPointerPosition);
+            _canvasController.BeginModuleDrop(shipModuleSO, startPointerPosition);
         }
     }
 }

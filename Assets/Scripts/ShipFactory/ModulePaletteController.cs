@@ -1,4 +1,5 @@
 using System;
+using Core.Pixelation;
 using Core.Ship;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -36,7 +37,7 @@ namespace ShipFactory
             SelectTab(ModuleType.Command, root.Q<Button>("tab-Command"));
         }
 
-        public event Action<GameObject, Vector2> OnModuleDragStarted;
+        public event Action<ShipModuleSO, Vector2> OnModuleDragStarted;
 
         private void BindTabButtons(VisualElement root)
         {
@@ -71,51 +72,54 @@ namespace ShipFactory
         {
             _paletteContent.Clear();
 
-            var prefabs = _library.GetPrefabsOfType(_activeType);
+            var moduleSOs = _library.GetModuleSOsOfType(_activeType);
             Debug.Log(
-                $"[ShipFactory] Populating palette for type '{_activeType}': {prefabs.Count} prefab(s) found in library.");
+                $"[ShipFactory] Populating palette for type '{_activeType}': {moduleSOs.Count} prefab(s) found in library.");
 
             var built = 0;
-            foreach (var prefab in prefabs)
+            foreach (var moduleSO in moduleSOs)
             {
-                if (prefab == null)
+                if (moduleSO == null)
                 {
                     Debug.LogWarning(
                         $"[ShipFactory] Null prefab entry found in library for type '{_activeType}' — skipping.");
                     continue;
                 }
 
-                _paletteContent.Add(BuildModuleCard(prefab));
+                _paletteContent.Add(BuildModuleCard(moduleSO));
                 built++;
             }
 
             Debug.Log($"[ShipFactory] Built {built} module card(s) for type '{_activeType}'.");
         }
 
-        private VisualElement BuildModuleCard(GameObject prefab)
+        private VisualElement BuildModuleCard(ShipModuleSO moduleSO)
         {
             var card = new VisualElement();
             card.AddToClassList("module-card");
-            card.tooltip = prefab.name;
+            card.tooltip = moduleSO.Description;
+
+            var prefab = moduleSO.Prefab;
 
             var icon = new VisualElement();
             icon.AddToClassList("module-card-icon");
 
-            var spriteRenderer = prefab.GetComponentInChildren<SpriteRenderer>();
-            if (spriteRenderer != null && spriteRenderer.sprite != null)
-                icon.style.backgroundImage = Background.FromSprite(spriteRenderer.sprite);
+            var pixelatedRigidbody = prefab.GetComponent<IPixelatedSprite>();
+            var sprite = pixelatedRigidbody?.GetSprite();
+            if (sprite != null)
+                icon.style.backgroundImage = Background.FromSprite(sprite);
 
-            var label = new Label(prefab.name);
+            var label = new Label(moduleSO.Name);
             label.AddToClassList("module-card-label");
 
             card.Add(icon);
             card.Add(label);
 
-            RegisterCardDragEvents(card, prefab);
+            RegisterCardDragEvents(card, moduleSO);
             return card;
         }
 
-        private void RegisterCardDragEvents(VisualElement card, GameObject prefab)
+        private void RegisterCardDragEvents(VisualElement card, ShipModuleSO prefab)
         {
             card.RegisterCallback<PointerDownEvent>(evt =>
             {

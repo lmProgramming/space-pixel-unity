@@ -21,7 +21,7 @@ namespace Pixelation
     [RequireComponent(typeof(PolygonCollider2D))]
     [RequireComponent(typeof(Rigidbody2D))]
     [RequireComponent(typeof(SpriteRenderer))]
-    public class PixelatedRigidbody : MonoBehaviour, IPixelatedRigidbody
+    public class PixelatedRigidbody : MonoBehaviour, IPixelatedRigidbody, IPixelatedSprite
     {
         private const float SpeedLimitForDiscreteCollisionDetectionSquared = 0;
 
@@ -36,10 +36,11 @@ namespace Pixelation
         [Header("Armor Map (optional)")]
         [Tooltip("Grayscale sprite where brightness = armor strength. " +
                  "White (255) = maxArmorHealth, black (0) = defaultPixelHealth. Must match the color sprite dimensions.")]
-        [SerializeField] private Sprite armorMap;
+        [SerializeField]
+        private Sprite armorMap;
 
-        [Tooltip("Health value that a fully white (255) pixel in the armor map represents.")]
-        [SerializeField] private float maxArmorHealth = 10f;
+        [Tooltip("Health value that a fully white (255) pixel in the armor map represents.")] [SerializeField]
+        private float maxArmorHealth = 10f;
 
         [Inject] private CollisionEventChannelSO _collisionEventChannelSO;
         [Inject] private IDebrisSpawner _debrisSpawner;
@@ -85,8 +86,7 @@ namespace Pixelation
 
         public IPixelGrid PixelGrid { get; set; }
 
-        [field: SerializeField]
-        public float MassMultiplier { get; private set; } = 1;
+        [field: SerializeField] public float MassMultiplier { get; private set; } = 1;
 
         public int CurrentPixelCount => PixelGrid.PixelCount;
         public int StartPixelCount { get; private set; }
@@ -227,6 +227,17 @@ namespace Pixelation
         public event Action<IPixelated> OnNoPixelsLeft;
 
         public event Action<List<Vector2Int>, PixelLoseReason> OnPixelsLost;
+
+        public Sprite GetSprite()
+        {
+            return sprite;
+        }
+
+        public void SetSprite(Sprite newSprite)
+        {
+            sprite = newSprite;
+            Setup(forceSetup: true, recalculateColliders: true);
+        }
 
 #if UNITY_INCLUDE_TESTS
         internal void SetSpriteForTesting(Sprite testSprite)

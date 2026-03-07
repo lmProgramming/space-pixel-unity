@@ -16,16 +16,16 @@ namespace ShipFactory
 
         // How many screen pixels equal one world unit at the default camera zoom.
         // Overlay elements are repositioned every frame via UpdateOverlays().
-        private const float OverlayPixelsPerUnit = 32f;
+        private const int OverlayPixelsPerUnit = 16;
         private readonly Camera _cam;
 
         private readonly VisualElement _canvasArea;
         private readonly VisualElement _dragGhost;
-        private readonly Dictionary<VisualElement, IModule> _placedModuleElements = new();
+        private readonly Dictionary<VisualElement, ShipModuleSOInstanceBundle> _placedModuleElements = new();
 
         private Vector2 _ghostSizePx;
         private bool _isDraggingModule;
-        private GameObject _pendingPrefab;
+        private ShipModuleSO _pendingModuleSO;
         private VisualElement _selectedElement;
         private Ship _ship;
 
@@ -54,12 +54,12 @@ namespace ShipFactory
             RebuildOverlaysFromShip();
         }
 
-        public void BeginModuleDrop(GameObject prefab, Vector2 pointerScreenPos)
+        public void BeginModuleDrop(ShipModuleSO shipModuleSO, Vector2 pointerScreenPos)
         {
-            _pendingPrefab = prefab;
+            _pendingModuleSO = shipModuleSO;
             _isDraggingModule = true;
 
-            _ghostSizePx = EstimateScreenSizePx(prefab);
+            _ghostSizePx = WorldSizeToScreenPx(shipModuleSO.Dimensions);
 
             _dragGhost.style.width = _ghostSizePx.x;
             _dragGhost.style.height = _ghostSizePx.y;
@@ -96,13 +96,13 @@ namespace ShipFactory
             if (_ship == null)
             {
                 Debug.LogWarning("[ShipFactory] No ship assigned — cannot place module.");
-                _pendingPrefab = null;
+                _pendingModuleSO = null;
                 return;
             }
 
             var worldPos = ScreenToSnappedWorldPosition(evt.position);
-            PlaceModuleAtWorldPosition(_pendingPrefab, worldPos);
-            _pendingPrefab = null;
+            PlaceModuleAtWorldPosition(_pendingModuleSO, worldPos);
+            _pendingModuleSO = null;
         }
 
         private void MoveGhostToPointer(Vector2 screenPos)
@@ -144,14 +144,14 @@ namespace ShipFactory
                 Mathf.Round(worldPosition.y / SnapUnits) * SnapUnits);
         }
 
-        private void PlaceModuleAtWorldPosition(GameObject prefab, Vector2 worldPosition)
+        private void PlaceModuleAtWorldPosition(ShipModuleSO shipModuleSO, Vector2 worldPosition)
         {
-            var instance = (GameObject)Object.Instantiate((Object)prefab, _ship.transform);
+            var instance = (GameObject)Object.Instantiate((Object)shipModuleSO.Prefab, _ship.transform);
             var module = instance.GetComponent<IModule>();
 
             if (module == null)
             {
-                Debug.LogError($"[ShipFactory] Prefab '{prefab.name}' has no IModule component!", prefab);
+                Debug.LogError($"[ShipFactory] Prefab '{shipModuleSO.name}' has no IModule component!", shipModuleSO);
                 Object.Destroy(instance);
                 return;
             }
@@ -160,35 +160,36 @@ namespace ShipFactory
             _ship.AddModule(module);
             module.SetLocalPosition(localPosition);
 
-            AddOverlayElement(module);
+            AddOverlayElement(new ShipModuleSOInstanceBundle(instance, shipModuleSO, module));
         }
 
-        private void AddOverlayElement(IModule module)
+        private void AddOverlayElement(ShipModuleSOInstanceBundle moduleBundle)
         {
             var element = new VisualElement();
             element.AddToClassList("placed-module");
 
-            var label = new Label(module.Transform.name);
+            var label = new Label(moduleBundle.ModuleSO.Name);
             label.AddToClassList("placed-module-label");
             element.Add(label);
 
             element.RegisterCallback<PointerDownEvent>(evt =>
             {
                 if (evt.button != 0) return;
-                SelectModule(element, module);
+                SelectModule(element, moduleBundle);
                 evt.StopPropagation();
             });
 
-            PositionOverlayElement(element, module);
+            PositionOverlayElement(element, moduleBundle);
             _canvasArea.pickingMode = PickingMode.Position; // temporarily allow picking for placed overlays
             _canvasArea.Add(element);
-            _placedModuleElements[element] = module;
+            _placedModuleElements[element] = moduleBundle;
         }
 
-        private void PositionOverlayElement(VisualElement element, IModule module)
+        private void PositionOverlayElement(VisualElement element, ShipModuleSOInstanceBundle module)
         {
-            var screenPos = WorldToScreenPos(module.Transform.position);
-            var size = EstimateScreenSizePxFromModule(module);
+            var screenPos = WorldToScreenPos(module.Instance.transform.position + new Vector3(0, 8));
+
+            var size = WorldSizeToScreenPx(module.ModuleSO.Dimensions);
 
             element.style.left = screenPos.x - size.x / 2f;
             element.style.top = screenPos.y - size.y / 2f;
@@ -196,25 +197,7 @@ namespace ShipFactory
             element.style.height = size.y;
         }
 
-        private Vector2 EstimateScreenSizePx(GameObject prefab)
-        {
-            var sr = prefab.GetComponentInChildren<SpriteRenderer>();
-            if (sr != null && sr.sprite != null)
-                return WorldSizeToScreenPx(sr.sprite.bounds.size);
-
-            return WorldSizeToScreenPx(new Vector3(SnapUnits, SnapUnits, 0));
-        }
-
-        private Vector2 EstimateScreenSizePxFromModule(IModule module)
-        {
-            var sr = module.Transform.GetComponentInChildren<SpriteRenderer>();
-            if (sr && sr.sprite)
-                return WorldSizeToScreenPx(sr.sprite.bounds.size);
-
-            return WorldSizeToScreenPx(new Vector3(SnapUnits, SnapUnits, 0));
-        }
-
-        private Vector2 WorldSizeToScreenPx(Vector3 worldSize)
+        private Vector2 WorldSizeToScreenPx(Vector2 worldSize)
         {
             if (!_cam) return new Vector2(SnapUnits * OverlayPixelsPerUnit, SnapUnits * OverlayPixelsPerUnit);
 
@@ -223,12 +206,12 @@ namespace ShipFactory
             return new Vector2(Mathf.Abs(offset.x - origin.x), Mathf.Abs(offset.y - origin.y));
         }
 
-        private void SelectModule(VisualElement element, IModule module)
+        private void SelectModule(VisualElement element, ShipModuleSOInstanceBundle moduleBundle)
         {
             _selectedElement?.RemoveFromClassList(SelectedModuleClass);
             _selectedElement = element;
             _selectedElement.AddToClassList(SelectedModuleClass);
-            Debug.Log($"[ShipFactory] Selected module: {module.Transform.name}");
+            Debug.Log($"[ShipFactory] Selected module: {moduleBundle.ModuleSO.Name}");
         }
 
         private void RebuildOverlaysFromShip()
@@ -239,8 +222,27 @@ namespace ShipFactory
 
             if (_ship == null) return;
 
-            foreach (var module in _ship.GetComponentsInChildren<IModule>())
-                AddOverlayElement(module);
+            foreach (GameObject gameObject in _ship.gameObject.transform)
+            {
+                var shipModuleSO = gameObject.GetComponent<ShipModuleSO>();
+                var module = gameObject.GetComponent<IModule>();
+
+                AddOverlayElement(new ShipModuleSOInstanceBundle(gameObject, shipModuleSO, module));
+            }
+        }
+
+        private class ShipModuleSOInstanceBundle
+        {
+            public readonly GameObject Instance;
+            public readonly ShipModuleSO ModuleSO;
+            public readonly IModule PlacedModule;
+
+            public ShipModuleSOInstanceBundle(GameObject instance, ShipModuleSO moduleSO, IModule placedModule)
+            {
+                Instance = instance;
+                ModuleSO = moduleSO;
+                PlacedModule = placedModule;
+            }
         }
     }
 }

@@ -18,7 +18,7 @@ namespace ShipFactory
             LogLibraryContents();
         }
 
-        public IReadOnlyList<GameObject> GetPrefabsOfType(ModuleType type)
+        public IReadOnlyList<ShipModuleSO> GetModuleSOsOfType(ModuleType type)
         {
             foreach (var entry in entries.AsValueEnumerable().Where(entry => entry.moduleType == type))
             {
@@ -29,7 +29,7 @@ namespace ShipFactory
 
             Debug.LogWarning(
                 $"[ModulePrefabLibrary] '{name}' — no entry for type {type}. Existing entries: [{string.Join(", ", entries.ConvertAll(e => e.moduleType.ToString()))}]");
-            return new List<GameObject>();
+            return new List<ShipModuleSO>();
         }
 
         private void LogLibraryContents()
@@ -60,7 +60,7 @@ namespace ShipFactory
         public class ModuleTypeEntry
         {
             public ModuleType moduleType;
-            public List<GameObject> prefabs = new();
+            public List<ShipModuleSO> prefabs = new();
         }
     }
 }
