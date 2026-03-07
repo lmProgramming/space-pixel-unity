@@ -38,6 +38,7 @@ namespace ShipFactory
         }
 
         public event Action<ShipModuleSO, Vector2> OnModuleDragStarted;
+        public event Action OnModuleDragFinished;
 
         private void BindTabButtons(VisualElement root)
         {
@@ -119,7 +120,13 @@ namespace ShipFactory
             return card;
         }
 
-        private void RegisterCardDragEvents(VisualElement card, ShipModuleSO prefab)
+        public void FinishModuleDrag()
+        {
+            _draggingCard.RemoveFromClassList(DraggingCardClass);
+            _draggingCard = null;
+        }
+
+        private void RegisterCardDragEvents(VisualElement card, ShipModuleSO moduleSO)
         {
             card.RegisterCallback<PointerDownEvent>(evt =>
             {
@@ -127,15 +134,14 @@ namespace ShipFactory
                 _draggingCard = card;
                 card.AddToClassList(DraggingCardClass);
                 // Do NOT capture the pointer — the root needs PointerMove/Up for ghost tracking and drop.
-                OnModuleDragStarted?.Invoke(prefab, evt.position);
+                OnModuleDragStarted?.Invoke(moduleSO, evt.position);
                 evt.StopPropagation();
             });
 
             card.RegisterCallback<PointerUpEvent>(_ =>
             {
                 if (_draggingCard != card) return;
-                card.RemoveFromClassList(DraggingCardClass);
-                _draggingCard = null;
+                OnModuleDragFinished?.Invoke();
             });
         }
     }

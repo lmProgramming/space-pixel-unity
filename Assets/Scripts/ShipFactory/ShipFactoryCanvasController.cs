@@ -17,6 +17,7 @@ namespace ShipFactory
         // How many screen pixels equal one world unit at the default camera zoom.
         // Overlay elements are repositioned every frame via UpdateOverlays().
         private const int OverlayPixelsPerUnit = 16;
+        private static readonly Vector3 HackSoOverlayPlacedAppearsOk = new(0, 8);
         private readonly Camera _cam;
 
         private readonly VisualElement _canvasArea;
@@ -47,6 +48,8 @@ namespace ShipFactory
 
             RegisterDragEvents(root);
         }
+
+        public event Action OnModuleDragFinished;
 
         public void SetShip(Ship ship)
         {
@@ -103,6 +106,8 @@ namespace ShipFactory
             var worldPos = ScreenToSnappedWorldPosition(evt.position);
             PlaceModuleAtWorldPosition(_pendingModuleSO, worldPos);
             _pendingModuleSO = null;
+
+            OnModuleDragFinished?.Invoke();
         }
 
         private void MoveGhostToPointer(Vector2 screenPos)
@@ -187,7 +192,7 @@ namespace ShipFactory
 
         private void PositionOverlayElement(VisualElement element, ShipModuleSOInstanceBundle module)
         {
-            var screenPos = WorldToScreenPos(module.Instance.transform.position + new Vector3(0, 8));
+            var screenPos = WorldToScreenPos(module.Instance.transform.position + HackSoOverlayPlacedAppearsOk);
 
             var size = WorldSizeToScreenPx(module.ModuleSO.Dimensions);
 
@@ -222,12 +227,12 @@ namespace ShipFactory
 
             if (_ship == null) return;
 
-            foreach (GameObject gameObject in _ship.gameObject.transform)
+            foreach (Transform transform in _ship.gameObject.transform)
             {
-                var shipModuleSO = gameObject.GetComponent<ShipModuleSO>();
-                var module = gameObject.GetComponent<IModule>();
+                var shipModuleSO = transform.GetComponent<ShipModuleSOContainer>();
+                var module = transform.GetComponent<IModule>();
 
-                AddOverlayElement(new ShipModuleSOInstanceBundle(gameObject, shipModuleSO, module));
+                AddOverlayElement(new ShipModuleSOInstanceBundle(transform.gameObject, shipModuleSO.Module, module));
             }
         }
 

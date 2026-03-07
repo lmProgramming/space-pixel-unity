@@ -36,6 +36,8 @@ namespace ShipFactory
             _paletteController = new ModulePaletteController(root, modulePrefabLibrary);
 
             _paletteController.OnModuleDragStarted += OnModuleDragStarted;
+            _paletteController.OnModuleDragFinished += OnModuleDragFinished;
+            _canvasController.OnModuleDragFinished += OnModuleDragFinished;
 
             if (initialShip != null)
                 _canvasController.SetShip(initialShip);
@@ -43,10 +45,17 @@ namespace ShipFactory
 
         private void OnDisable()
         {
-            if (_paletteController != null)
-                _paletteController.OnModuleDragStarted -= OnModuleDragStarted;
+            if (_paletteController == null) return;
+
+            _paletteController.OnModuleDragStarted -= OnModuleDragStarted;
+            _paletteController.OnModuleDragFinished -= OnModuleDragFinished;
+            _canvasController.OnModuleDragFinished -= OnModuleDragFinished;
         }
 
+        private void OnModuleDragFinished()
+        {
+            _paletteController.FinishModuleDrag();
+        }
 
         private void OnModuleDragStarted(ShipModuleSO shipModuleSO, Vector2 startPointerPosition)
         {
