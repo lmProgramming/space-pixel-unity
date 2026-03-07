@@ -78,6 +78,16 @@
     justify-content: center;
 }
 
+.placed-module--inside-other {
+    background-color: rgba(255, 0, 0, 0.2);
+    border-color: rgb(255, 0, 0);
+}
+
+.placed-module--outside-ship {
+    background-color: rgba(255, 0, 0, 0.1);
+    border-color: rgb(255, 0, 0);
+}
+
 .placed-module:hover {
     border-color: rgb(160, 230, 255);
 }

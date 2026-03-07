@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Core.Ship;
 using JetBrains.Annotations;
+using ShipFactory.LegalPositionCalculator;
 using Ships;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -11,12 +12,14 @@ namespace ShipFactory
 {
     public class ShipFactoryCanvasController
     {
-        private const int SnapUnits = 8;
+        private const int OverlayPixelsPerUnit = 16;
+
+        private const string InsideOtherOverlayClassName = "placed-module--inside-other";
+        private const string OutsideShipOverlayClassName = "placed-module--outside-ship";
 
         // How many screen pixels equal one world unit at the default camera zoom.
         // Overlay elements are repositioned every frame via UpdateOverlays().
-        private const int OverlayPixelsPerUnit = 16;
-        private static readonly Vector3 HackSoOverlayPlacedAppearsOk = new(0, 8);
+        private static readonly Vector3 HackSoOverlayPlacedAppearsOk = new(0, Snapper.SnapUnits);
         private readonly Camera _cam;
 
         private readonly VisualElement _canvasArea;
@@ -114,6 +117,11 @@ namespace ShipFactory
             var snappedOverlayPos = ScreenToSnappedWorldPosition(screenPos) + (Vector2)HackSoOverlayPlacedAppearsOk;
             var snappedScreen = WorldToScreenPos(snappedOverlayPos);
 
+            var legality = Calculator.CalculateLegalityPosition(_draggedModuleBundle, _placedModuleElements.Values);
+
+            _dragGhost.EnableInClassList(InsideOtherOverlayClassName, legality == PositionLegality.InsideOther);
+            _dragGhost.EnableInClassList(OutsideShipOverlayClassName, legality == PositionLegality.OutsideShip);
+
             _dragGhost.style.left = snappedScreen.x - _ghostSizePx.x / 2f;
             _dragGhost.style.top = snappedScreen.y - _ghostSizePx.y / 2f;
             _draggedModuleBundle.Instance.transform.position = snapped;
@@ -130,7 +138,7 @@ namespace ShipFactory
 
             var unityScreenPos = new Vector3(screenPos.x, Screen.height - screenPos.y, cam.nearClipPlane);
             var worldPos = (Vector2)cam.ScreenToWorldPoint(unityScreenPos);
-            return SnapToGrid(worldPos);
+            return Snapper.SnapToGrid(worldPos);
         }
 
         private Vector2 WorldToScreenPos(Vector2 worldPos)
@@ -140,13 +148,6 @@ namespace ShipFactory
             var screenPos = _cam.WorldToScreenPoint(worldPos);
             // Convert Unity screen (y bottom-up) to UI Toolkit panel (y top-down)
             return new Vector2(screenPos.x, Screen.height - screenPos.y);
-        }
-
-        private static Vector2 SnapToGrid(Vector2 worldPosition)
-        {
-            return new Vector2(
-                Mathf.Round(worldPosition.x / SnapUnits) * SnapUnits,
-                Mathf.Round(worldPosition.y / SnapUnits) * SnapUnits);
         }
 
         [CanBeNull]
@@ -187,7 +188,7 @@ namespace ShipFactory
                 evt.StopPropagation();
             });
 
-            PositionOverlayElement(element, moduleBundle);
+            PositionInitialOverlayElement(element, moduleBundle);
             _canvasArea.pickingMode = PickingMode.Position;
             _canvasArea.Add(element);
             _placedModuleElements[element] = moduleBundle;
@@ -195,7 +196,7 @@ namespace ShipFactory
             return element;
         }
 
-        private void PositionOverlayElement(VisualElement element, ShipModuleSOInstanceBundle module)
+        private void PositionInitialOverlayElement(VisualElement element, ShipModuleSOInstanceBundle module)
         {
             var screenPos = WorldToScreenPos(module.Instance.transform.position + HackSoOverlayPlacedAppearsOk);
 
@@ -209,7 +210,7 @@ namespace ShipFactory
 
         private Vector2 WorldSizeToScreenPx(Vector2 worldSize)
         {
-            if (!_cam) return new Vector2(SnapUnits * OverlayPixelsPerUnit, SnapUnits * OverlayPixelsPerUnit);
+            if (!_cam) throw new InvalidOperationException("Missing camera");
 
             var origin = _cam.WorldToScreenPoint(Vector3.zero);
             var offset = _cam.WorldToScreenPoint(worldSize);
@@ -230,20 +231,6 @@ namespace ShipFactory
                 var module = transform.GetComponent<IModule>();
 
                 AddOverlayElement(new ShipModuleSOInstanceBundle(transform.gameObject, shipModuleSO.Module, module));
-            }
-        }
-
-        private class ShipModuleSOInstanceBundle
-        {
-            public readonly GameObject Instance;
-            public readonly ShipModuleSO ModuleSO;
-            public readonly IModule PlacedModule;
-
-            public ShipModuleSOInstanceBundle(GameObject instance, ShipModuleSO moduleSO, IModule placedModule)
-            {
-                Instance = instance;
-                ModuleSO = moduleSO;
-                PlacedModule = placedModule;
             }
         }
     }

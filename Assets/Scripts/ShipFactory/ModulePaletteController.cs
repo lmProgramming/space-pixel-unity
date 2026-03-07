@@ -75,7 +75,6 @@ namespace ShipFactory
 
             var moduleSOs = _library.GetModuleSOsOfType(_activeType);
 
-            var built = 0;
             foreach (var moduleSO in moduleSOs)
             {
                 if (moduleSO == null)
@@ -86,7 +85,6 @@ namespace ShipFactory
                 }
 
                 _paletteContent.Add(BuildModuleCard(moduleSO));
-                built++;
             }
         }
 
