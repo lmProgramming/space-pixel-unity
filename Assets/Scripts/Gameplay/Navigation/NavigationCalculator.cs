@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Core.Services;
 using Core.Ship;
-using External.FyiurAmron;
+using LMPro.External.FyiurAmron;
 using UnityEngine;
 using ZLinq;
 

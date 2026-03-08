@@ -25,7 +25,7 @@ namespace ShipFactory
 
             Debug.LogWarning(
                 $"[ModulePrefabLibrary] '{name}' — no entry for type {type}. Existing entries: [{string.Join(", ", entries.ConvertAll(e => e.moduleType.ToString()))}]");
-            return new List<ShipModuleSO>();
+            return Array.Empty<ShipModuleSO>();
         }
 
         private void LogLibraryContents()

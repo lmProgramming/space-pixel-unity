@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace External.IsAlive
+namespace LMPro.External.IsAlive
 {
     public interface IHasAliveCheck
     {

@@ -67,7 +67,7 @@ namespace Ships
         private void Awake()
         {
             CommandModule ??= GetComponentInChildren<Command>();
-            ResourceManager = GetComponentInChildren<ResourceManager>();
+            ResourceManager = GetComponent<ResourceManager>();
             _moduleConnectionFactory = GetComponent<ModuleConnectionFactory>();
         }
 

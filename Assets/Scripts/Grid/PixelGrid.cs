@@ -4,6 +4,7 @@ using Core.Grid;
 using LMPro;
 using Unity.Collections;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace Grid
 {
@@ -149,9 +150,7 @@ namespace Grid
             SetPixel(point, Color.clear);
             PixelCount--;
 
-#if UNITY_EDITOR
-            if (PixelCount < 0) Debug.LogError("Pixel count went below zero. This should not happen.");
-#endif
+            Assert.IsTrue(PixelCount >= 0, "Pixel count went below zero. This should not happen.");
         }
 
         public void RemovePixels(IEnumerable<Vector2Int> points)
@@ -161,14 +160,7 @@ namespace Grid
             ApplyPixels();
             PixelCount -= pointsList.Count;
 
-#if UNITY_EDITOR
-            if (PixelCount < 0) Debug.LogError("Pixel count went below zero. This should not happen.");
-#endif
-        }
-
-        public Color32 GetColor(Vector2Int point)
-        {
-            return Texture.GetPixel(point.x, point.y);
+            Assert.IsTrue(PixelCount >= 0, "Pixel count went below zero. This should not happen.");
         }
     }
 }

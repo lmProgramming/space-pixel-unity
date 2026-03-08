@@ -12,8 +12,6 @@ namespace ShipFactory
 {
     public class ShipFactoryCanvasController
     {
-        private const int OverlayPixelsPerUnit = 16;
-
         private const string InsideOtherOverlayClassName = "placed-module--inside-other";
         private const string OutsideShipOverlayClassName = "placed-module--outside-ship";
 

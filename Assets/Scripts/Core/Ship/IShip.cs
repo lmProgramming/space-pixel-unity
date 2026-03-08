@@ -1,5 +1,5 @@
 using Core.Gameplay.EasyTeam;
-using External.IsAlive;
+using LMPro.External.IsAlive;
 using LMPro.Graph;
 using UnityEngine;
 

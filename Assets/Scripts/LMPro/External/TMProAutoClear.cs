@@ -13,7 +13,7 @@
 using TMPro;
 using UnityEditor;
 
-namespace External
+namespace LMPro.External
 {
     internal class DynamicFontAssetAutoClear : AssetModificationProcessor
     {

@@ -1,8 +1,7 @@
 using System.Collections.Generic;
-using LMPro.Graph;
 using NUnit.Framework;
 
-namespace LM.Graph.Tests
+namespace LMPro.Graph.Tests
 {
     [TestFixture]
     public class BiCohesionGraphTests
