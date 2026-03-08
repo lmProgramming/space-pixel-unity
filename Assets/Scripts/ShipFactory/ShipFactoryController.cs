@@ -33,6 +33,10 @@ namespace ShipFactory
             _paletteController.OnModuleDragStarted += OnModuleDragStarted;
             _paletteController.OnModuleDragFinished += OnModuleDragFinished;
             _canvasController.OnModuleDragFinished += OnModuleDragFinished;
+            _canvasController.OnInputLockChanged += OnCanvasInputLockChanged;
+
+            _paletteController.OnModuleHoverStarted += OnPaletteModuleHoverStarted;
+            _paletteController.OnModuleHoverEnded += OnPaletteModuleHoverEnded;
 
             if (initialShip != null)
                 _canvasController.SetShip(initialShip);
@@ -40,11 +44,20 @@ namespace ShipFactory
 
         private void OnDisable()
         {
-            if (_paletteController == null) return;
+            if (_paletteController == null || _canvasController == null) return;
 
             _paletteController.OnModuleDragStarted -= OnModuleDragStarted;
             _paletteController.OnModuleDragFinished -= OnModuleDragFinished;
             _canvasController.OnModuleDragFinished -= OnModuleDragFinished;
+            _canvasController.OnInputLockChanged -= OnCanvasInputLockChanged;
+
+            _paletteController.OnModuleHoverStarted -= OnPaletteModuleHoverStarted;
+            _paletteController.OnModuleHoverEnded -= OnPaletteModuleHoverEnded;
+        }
+
+        private void OnCanvasInputLockChanged(bool isLocked)
+        {
+            _paletteController.SetInputLocked(isLocked);
         }
 
         private void OnModuleDragFinished()
@@ -54,7 +67,23 @@ namespace ShipFactory
 
         private void OnModuleDragStarted(ShipModuleSO shipModuleSO, Vector2 startPointerPosition)
         {
+            if (_canvasController.IsInputLocked)
+            {
+                _paletteController.FinishModuleDrag();
+                return;
+            }
+
             _canvasController.BeginModuleDrop(shipModuleSO, startPointerPosition);
+        }
+
+        private void OnPaletteModuleHoverStarted(ShipModuleSO moduleSO)
+        {
+            _canvasController.ShowPaletteModuleInfo(moduleSO);
+        }
+
+        private void OnPaletteModuleHoverEnded(ShipModuleSO moduleSO)
+        {
+            _canvasController.HidePaletteModuleInfo(moduleSO);
         }
     }
 }

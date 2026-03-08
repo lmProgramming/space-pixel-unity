@@ -7,7 +7,8 @@ namespace ShipFactory.LegalPositionCalculator
     {
         Correct,
         InsideOther,
-        OutsideShip
+        OutsideShip,
+        DisconnectsShip
     }
 
     public static class Calculator
@@ -15,11 +16,12 @@ namespace ShipFactory.LegalPositionCalculator
         public static PositionLegality CalculateLegalityPosition(ShipModuleSOInstanceBundle bundleToCheck,
             IEnumerable<ShipModuleSOInstanceBundle> placedElements)
         {
+            var allBundles = new List<ShipModuleSOInstanceBundle>(placedElements);
             var (leftBottomPos, rightTop) = GetBottomLeftAndTopRightPositions(bundleToCheck);
 
-            var positionLegality = PositionLegality.OutsideShip;
+            var hasAnyTouch = false;
 
-            foreach (var placedElement in placedElements)
+            foreach (var placedElement in allBundles)
             {
                 if (placedElement == bundleToCheck) continue;
 
@@ -29,10 +31,15 @@ namespace ShipFactory.LegalPositionCalculator
                     return PositionLegality.InsideOther;
 
                 if (TouchSides(leftBottomPos, rightTop, otherLeftBottomPos, otherRightTop))
-                    positionLegality = PositionLegality.Correct;
+                    hasAnyTouch = true;
             }
 
-            return positionLegality;
+            if (!hasAnyTouch)
+                return PositionLegality.OutsideShip;
+
+            return KeepsSingleConnectedShip(allBundles)
+                ? PositionLegality.Correct
+                : PositionLegality.DisconnectsShip;
         }
 
         private static (Vector2, Vector2) GetBottomLeftAndTopRightPositions(
@@ -66,6 +73,47 @@ namespace ShipFactory.LegalPositionCalculator
                 aMax.x > bMin.x && aMin.x < bMax.x;
 
             return touchVertical || touchHorizontal;
+        }
+
+        private static bool KeepsSingleConnectedShip(List<ShipModuleSOInstanceBundle> bundles)
+        {
+            if (bundles.Count <= 1)
+                return true;
+
+            var commandIndex = bundles.FindIndex(bundle => bundle.PlacedModule.Type == Core.Ship.ModuleType.Command);
+            if (commandIndex < 0)
+                throw new UnityException("[ShipFactory] No command module found while validating placement.");
+
+            var visited = new bool[bundles.Count];
+            var queue = new Queue<int>();
+
+            visited[commandIndex] = true;
+            queue.Enqueue(commandIndex);
+
+            while (queue.Count > 0)
+            {
+                var current = queue.Dequeue();
+                var (currentMin, currentMax) = GetBottomLeftAndTopRightPositions(bundles[current]);
+
+                for (var i = 0; i < bundles.Count; i++)
+                {
+                    if (visited[i] || i == current)
+                        continue;
+
+                    var (otherMin, otherMax) = GetBottomLeftAndTopRightPositions(bundles[i]);
+                    if (!TouchSides(currentMin, currentMax, otherMin, otherMax))
+                        continue;
+
+                    visited[i] = true;
+                    queue.Enqueue(i);
+                }
+            }
+
+            for (var i = 0; i < visited.Length; i++)
+                if (!visited[i])
+                    return false;
+
+            return true;
         }
     }
 }

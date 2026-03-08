@@ -18,6 +18,8 @@ namespace ShipFactory
         private ModuleType _activeType = ModuleType.Command;
         private VisualElement _draggingCard;
 
+        private bool _isInputLocked;
+
         public ModulePaletteController(VisualElement root, ModulePrefabLibrary library)
         {
             if (library == null)
@@ -39,6 +41,8 @@ namespace ShipFactory
 
         public event Action<ShipModuleSO, Vector2> OnModuleDragStarted;
         public event Action OnModuleDragFinished;
+        public event Action<ShipModuleSO> OnModuleHoverStarted;
+        public event Action<ShipModuleSO> OnModuleHoverEnded;
 
         private void BindTabButtons(VisualElement root)
         {
@@ -120,14 +124,26 @@ namespace ShipFactory
             _draggingCard = null;
         }
 
+        public void SetInputLocked(bool isLocked)
+        {
+            _isInputLocked = isLocked;
+        }
+
         private void RegisterCardDragEvents(VisualElement card, ShipModuleSO moduleSO)
         {
+            card.RegisterCallback<PointerEnterEvent>(_ =>
+            {
+                if (_isInputLocked || _draggingCard != null) return;
+                OnModuleHoverStarted?.Invoke(moduleSO);
+            });
+
+            card.RegisterCallback<PointerLeaveEvent>(_ => { OnModuleHoverEnded?.Invoke(moduleSO); });
+
             card.RegisterCallback<PointerDownEvent>(evt =>
             {
-                if (evt.button != 0) return;
+                if (evt.button != 0 || _isInputLocked) return;
                 _draggingCard = card;
                 card.AddToClassList(DraggingCardClass);
-                // Do NOT capture the pointer — the root needs PointerMove/Up for ghost tracking and drop.
                 OnModuleDragStarted?.Invoke(moduleSO, evt.position);
                 evt.StopPropagation();
             });

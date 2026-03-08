@@ -14,6 +14,26 @@
         </ui:VisualElement>
     </ui:VisualElement>
 
+    <!-- Bottom-left details panel for dragged/selected modules -->
+    <ui:VisualElement name="module-info-panel" class="module-info-panel">
+        <ui:Label text="Module Details" class="module-info-title"/>
+        <ui:Label name="module-info-name" text="No module selected" class="module-info-name"/>
+        <ui:Foldout name="module-info-main-foldout" text="Overview" class="module-info-foldout">
+            <ui:Label name="module-info-type" text="Type: -" class="module-info-field"/>
+            <ui:Label name="module-info-size" text="Size: -" class="module-info-field"/>
+            <ui:Label name="module-info-description" text="Hover or drag a module to inspect it."
+                      class="module-info-description"/>
+        </ui:Foldout>
+        <ui:Foldout name="module-info-resources-foldout" text="Resources" class="module-info-foldout">
+            <ui:Label name="module-info-resource-energy-production" text="Energy Production: -" class="module-info-field"/>
+            <ui:Label name="module-info-resource-energy-draw" text="Energy Draw: -" class="module-info-field"/>
+            <ui:Label name="module-info-resource-energy-capacity" text="Energy Capacity: -" class="module-info-field"/>
+            <ui:Label name="module-info-resource-crew-needed" text="Crew Needed: -" class="module-info-field"/>
+            <ui:Label name="module-info-resource-crew-quarters" text="Crew Quarters: -" class="module-info-field"/>
+        </ui:Foldout>
+        <ui:Button name="remove-module-button" text="Remove Module" class="remove-module-button remove-module-button--hidden"/>
+    </ui:VisualElement>
+
     <!-- Bottom palette panel -->
     <ui:VisualElement name="palette-panel" class="palette-panel">
         <!-- Module type tab buttons -->
@@ -32,9 +52,15 @@
         </ui:ScrollView>
     </ui:VisualElement>
 
+    <!-- Input blocker toggled when rollback animation is playing -->
+    <ui:VisualElement name="ship-factory-input-blocker" class="ship-factory-input-blocker"/>
+
     <!-- Ghost element for drag preview (hidden by default, moved to top level) -->
     <ui:VisualElement name="drag-ghost" class="drag-ghost hidden" picking-mode="Ignore"/>
+
+    <!-- Popup feedback for actions like blocked delete attempts -->
+    <ui:VisualElement name="action-popup" class="action-popup">
+        <ui:Label name="action-popup-label" class="action-popup-label"/>
+    </ui:VisualElement>
 </ui:UXML>
-
-
 

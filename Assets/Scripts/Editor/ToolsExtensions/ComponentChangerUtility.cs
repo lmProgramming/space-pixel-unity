@@ -4,39 +4,39 @@ using UnityEngine;
 
 namespace Editor.ToolsExtensions
 {
-    public class ComponentChangerUtility
+    public static class ComponentChangerUtility
     {
         [MenuItem("CONTEXT/Module/Change to Engine")]
         private static void ChangeToEngine(MenuCommand command)
         {
-            ChangeComponent<Engine>(command.context as MonoBehaviour);
+            ChangeComponent<Engine>(command.context as Module);
         }
 
         [MenuItem("CONTEXT/Module/Change to Command")]
         private static void ChangeToCommand(MenuCommand command)
         {
-            ChangeComponent<Command>(command.context as MonoBehaviour);
+            ChangeComponent<Command>(command.context as Module);
         }
 
         [MenuItem("CONTEXT/Module/Change to Cannon")]
         private static void ChangeToCannon(MenuCommand command)
         {
-            ChangeComponent<Cannon>(command.context as MonoBehaviour);
+            ChangeComponent<Cannon>(command.context as Module);
         }
 
         [MenuItem("CONTEXT/Module/Change to Laser Beam")]
         private static void ChangeToLaserBeam(MenuCommand command)
         {
-            ChangeComponent<LaserBeam>(command.context as MonoBehaviour);
+            ChangeComponent<LaserBeam>(command.context as Module);
         }
 
         [MenuItem("CONTEXT/Module/Change to Basic Module")]
         private static void ChangeToModule(MenuCommand command)
         {
-            ChangeComponent<Module>(command.context as MonoBehaviour);
+            ChangeComponent<Module>(command.context as Module);
         }
 
-        private static void ChangeComponent<TNew>(MonoBehaviour oldComponent) where TNew : MonoBehaviour
+        private static void ChangeComponent<TNew>(Module oldComponent) where TNew : Module
         {
             if (oldComponent == null) return;
 
@@ -46,7 +46,7 @@ namespace Editor.ToolsExtensions
 
             var oldValues = JsonUtility.ToJson(oldComponent);
 
-            Object.DestroyImmediate(oldComponent);
+            Undo.DestroyObjectImmediate(oldComponent);
 
             var newComponent = obj.AddComponent<TNew>();
 

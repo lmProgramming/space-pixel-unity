@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 2707227772532904364}
   - component: {fileID: 6779007553253220720}
   - component: {fileID: 4644378942835095449}
-  - component: {fileID: 7049765720728220537}
+  - component: {fileID: 3409616852078997581}
   m_Layer: 0
   m_Name: player_engine_medium_1_16x32
   m_TagString: Untagged
@@ -217,7 +217,7 @@ MonoBehaviour:
   armorMap: {fileID: 21300000, guid: 8b07d23d177e0bf32b1f40c5255f9fba, type: 3}
   maxArmorHealth: 10
   <MassMultiplier>k__BackingField: 1
---- !u!114 &7049765720728220537
+--- !u!114 &3409616852078997581
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -226,9 +226,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 3332165268971166862}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7c74bd59965beaa45ade28e76216186a, type: 3}
+  m_Script: {fileID: 11500000, guid: e58cee17deb728a4da8fdde864b3d57c, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Game.Ships::Ships.Modules.Module
+  m_EditorClassIdentifier: Game.Ships::Ships.Modules.Engine
   mainSkillType: 0
   assignedCrew: []
   <Resources>k__BackingField:
@@ -237,3 +237,5 @@ MonoBehaviour:
     energyProduction: 0
     crewNeeded: 0
     crewQuarters: 0
+  thrust: 0
+  maxThrust: 0
