@@ -140,7 +140,7 @@ namespace Ships.Tests
             pixelatedRb.Setup(null, true);
 
             var testModule = moduleGo.AddComponent<TestModule>();
-            testModule.SetModuleType(ModuleType.Production);
+            testModule.SetModuleType(ModuleType.Resources);
 
             var commandGo = new GameObject("Command");
             commandGo.transform.SetParent(shipGo.transform);
@@ -173,7 +173,7 @@ namespace Ships.Tests
                 pg.SetPixel(x, y, new Color32(0, 0, 255, 255));
             pg.RemovePixel(2, 2);
 
-            var moduleSnapshot = new ModuleSnapshot("Module", ModuleType.Production, nameof(Module))
+            var moduleSnapshot = new ModuleSnapshot("Module", ModuleType.Resources, nameof(Module))
             {
                 localPosition = Vector3.zero,
                 localRotation = Quaternion.identity,
@@ -242,7 +242,7 @@ namespace Ships.Tests
             pixelatedRb.Setup(null, true);
 
             var testModule = moduleGo.AddComponent<TestModule>();
-            testModule.SetModuleType(ModuleType.Production);
+            testModule.SetModuleType(ModuleType.Resources);
 
             var commandGo = new GameObject("Command");
             commandGo.transform.SetParent(shipGo.transform);
@@ -574,7 +574,7 @@ namespace Ships.Tests
                     },
                     {
                         ""moduleName"": ""Thruster"",
-                        ""moduleType"": 4,
+                        ""moduleType"": 3,
                         ""moduleTypeName"": ""Engine"",
                         ""localPosition"": { ""x"": -5.5, ""y"": 2.25, ""z"": 0.0 },
                         ""localRotation"": { ""x"": 0.0, ""y"": 0.0, ""z"": 0.3826834, ""w"": 0.9238795 },
@@ -915,7 +915,7 @@ namespace Ships.Tests
             var expectedPos = new Vector3(7.5f, -3.2f, 0f);
 
             var ship = CreateShipWithModules(cmdColors,
-                ("OffsetModule", ModuleType.Production, typeof(TestModule), extraColors, expectedPos)
+                ("OffsetModule", ModuleType.Resources, typeof(TestModule), extraColors, expectedPos)
             );
             yield return null;
 
@@ -976,8 +976,8 @@ namespace Ships.Tests
             var extraB = MakeSolidGrid(2, 2, new Color32(0, 100, 0, 255));
 
             var ship = CreateShipWithModules(cmdColors,
-                ("ModA", ModuleType.Production, typeof(TestModule), extraA, new Vector3(-3, 0, 0)),
-                ("ModB", ModuleType.Production, typeof(TestModule), extraB, new Vector3(3, 0, 0))
+                ("ModA", ModuleType.Resources, typeof(TestModule), extraA, new Vector3(-3, 0, 0)),
+                ("ModB", ModuleType.Resources, typeof(TestModule), extraB, new Vector3(3, 0, 0))
             );
             yield return null;
 

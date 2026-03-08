@@ -29,7 +29,7 @@ namespace ShipFactory.Tests.LegalPositionCalculator
         public void CalculateLegalityPosition_OverlappingModule_ReturnsInsideOther()
         {
             var command = CreateBundle("Command", ModuleType.Command, Vector2.zero, new Vector2Int(2, 2));
-            var overlap = CreateBundle("Overlap", ModuleType.Production, Vector2.zero, new Vector2Int(2, 2));
+            var overlap = CreateBundle("Overlap", ModuleType.Resources, Vector2.zero, new Vector2Int(2, 2));
 
             var legality = Calculator.CalculateLegalityPosition(overlap, new[] { command, overlap });
 
@@ -40,7 +40,7 @@ namespace ShipFactory.Tests.LegalPositionCalculator
         public void CalculateLegalityPosition_IsolatedModule_ReturnsOutsideShip()
         {
             var command = CreateBundle("Command", ModuleType.Command, Vector2.zero, new Vector2Int(2, 2));
-            var isolated = CreateBundle("Isolated", ModuleType.Production, new Vector2(10f, 0f), new Vector2Int(2, 2));
+            var isolated = CreateBundle("Isolated", ModuleType.Resources, new Vector2(10f, 0f), new Vector2Int(2, 2));
 
             var legality = Calculator.CalculateLegalityPosition(isolated, new[] { command, isolated });
 
@@ -51,7 +51,7 @@ namespace ShipFactory.Tests.LegalPositionCalculator
         public void CalculateLegalityPosition_ChainStillConnected_ReturnsCorrect()
         {
             var command = CreateBundle("A", ModuleType.Command, new Vector2(0f, 0f), new Vector2Int(2, 2));
-            var middle = CreateBundle("B", ModuleType.Production, new Vector2(2f, 0f), new Vector2Int(2, 2));
+            var middle = CreateBundle("B", ModuleType.Resources, new Vector2(2f, 0f), new Vector2Int(2, 2));
             var tail = CreateBundle("C", ModuleType.Engine, new Vector2(4f, 0f), new Vector2Int(2, 2));
 
             var legality = Calculator.CalculateLegalityPosition(middle, new[] { command, middle, tail });
@@ -63,7 +63,7 @@ namespace ShipFactory.Tests.LegalPositionCalculator
         public void CalculateLegalityPosition_ChainMiddleMovedAndTailDisconnected_ReturnsDisconnectsShip()
         {
             var command = CreateBundle("A", ModuleType.Command, new Vector2(0f, 0f), new Vector2Int(2, 2));
-            var movedMiddle = CreateBundle("B", ModuleType.Production, new Vector2(-2f, 0f), new Vector2Int(2, 2));
+            var movedMiddle = CreateBundle("B", ModuleType.Resources, new Vector2(-2f, 0f), new Vector2Int(2, 2));
             var tail = CreateBundle("C", ModuleType.Engine, new Vector2(4f, 0f), new Vector2Int(2, 2));
 
             var legality = Calculator.CalculateLegalityPosition(movedMiddle, new[] { command, movedMiddle, tail });

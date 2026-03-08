@@ -1,6 +1,7 @@
 using System;
 using AI.EasyState.States;
 using Core.Ship;
+using LMPro.External.IsAlive;
 using UnityEngine;
 
 namespace Ships.StateMachines.Behaviour
@@ -38,7 +39,7 @@ namespace Ships.StateMachines.Behaviour
             base.Update(stateMachine, deltaTime);
 
             // If no target, transition back to lookout
-            if (_targetEnemy == null)
+            if (!_targetEnemy.IsAlive())
             {
                 stateMachine.TransitionToState("Lookout");
                 return;

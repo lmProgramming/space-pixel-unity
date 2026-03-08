@@ -47,8 +47,7 @@ namespace ShipFactory
         private void BindTabButtons(VisualElement root)
         {
             BindTab(root, "tab-Command", ModuleType.Command);
-            BindTab(root, "tab-Production", ModuleType.Production);
-            BindTab(root, "tab-Storage", ModuleType.Storage);
+            BindTab(root, "tab-Resources", ModuleType.Resources);
             BindTab(root, "tab-Weapon", ModuleType.Weapon);
             BindTab(root, "tab-Engine", ModuleType.Engine);
         }

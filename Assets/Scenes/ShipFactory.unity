@@ -608,6 +608,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: ShipFactory::ShipFactory.ShipFactoryController
   modulePrefabLibrary: {fileID: 11400000, guid: c7f8c73c057efe68c87d7df2ac599fd9, type: 2}
   initialShip: {fileID: 821443508}
+  snapshotFolderName: ShipSnapshots
 --- !u!114 &779531618
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -666,9 +667,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 821443507}
-  - component: {fileID: 821443505}
   - component: {fileID: 821443508}
   - component: {fileID: 821443509}
+  - component: {fileID: 821443510}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -676,18 +677,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &821443505
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 821443504}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cebb1390bd8548d4c9f27f21510f1fcb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!4 &821443507
 Transform:
   m_ObjectHideFlags: 0
@@ -736,6 +725,18 @@ MonoBehaviour:
   energyProduction: 0
   crewCapacity: 0
   crew: 0
+--- !u!114 &821443510
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 821443504}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8824cc46352d4ebfaf44b4d0d6e1bbad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Ships::Ships.StaticModuleConnectionFactory
 --- !u!4 &1195709069 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6267824667243188324, guid: f3ced89c1b574421c935f29d86d67e02, type: 3}

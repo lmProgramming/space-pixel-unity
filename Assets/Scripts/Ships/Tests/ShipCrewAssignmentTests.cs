@@ -90,7 +90,7 @@ namespace Ships.Tests
             else
             {
                 var testModule = moduleGo.AddComponent<TestModule>();
-                testModule.SetModuleType(ModuleType.Production);
+                testModule.SetModuleType(ModuleType.Resources);
                 testModule.SetMainSkillType(mainSkill);
                 module = testModule;
             }
@@ -193,7 +193,7 @@ namespace Ships.Tests
             ship.AssignCrewBySkill(new List<CrewMember> { mechExpert, navExpert });
 
             var navModule = ship.ModuleGraph.GetAllNodes().AsValueEnumerable()
-                .First(m => m.Type == ModuleType.Production);
+                .First(m => m.Type == ModuleType.Resources);
 
             Assert.Contains(navExpert, (ICollection)navModule.AssignedCrew);
         }

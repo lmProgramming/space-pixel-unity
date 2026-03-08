@@ -188,6 +188,11 @@ namespace Ships.Modules
             transform.localPosition = localPosition;
         }
 
+        public void Setup(IShip ship)
+        {
+            Ship = ship;
+        }
+
         private void HandleCrewMemberDeath(CrewMember member)
         {
             UnsubscribeCrew(member);
@@ -204,11 +209,6 @@ namespace Ships.Modules
             UnsubscribeCrew(crewToKill);
             crewToKill.Kill();
             OnCrewChange();
-        }
-
-        public void Setup(Ship ship)
-        {
-            Ship = ship;
         }
 
         public void OnShipConnectionLost()

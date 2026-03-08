@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Core.Ship;
 using JetBrains.Annotations;
 using ShipFactory.LegalPositionCalculator;
 using Ships;
 using UnityEngine;
 using UnityEngine.UIElements;
+using ZLinq;
 using Object = UnityEngine.Object;
 using Resources = Core.Ship.Resources;
 
@@ -22,45 +24,44 @@ namespace ShipFactory
 
         private static readonly Vector3 HackSoOverlayPlacedAppearsOk = new(0, Snapper.SnapUnits);
 
+        private readonly VisualElement _actionPopup;
+        private readonly Label _actionPopupLabel;
+        private readonly Dictionary<ShipModuleSOInstanceBundle, VisualElement> _bundleToOverlay = new();
+
         private readonly Camera _cam;
         private readonly VisualElement _canvasArea;
         private readonly VisualElement _inputBlocker;
+        private readonly Label _moduleDescriptionLabel;
 
         private readonly Label _moduleNameLabel;
-        private readonly Label _moduleTypeLabel;
         private readonly Label _moduleSizeLabel;
-        private readonly Label _moduleDescriptionLabel;
-        private readonly Label _resourceEnergyProductionLabel;
-        private readonly Label _resourceEnergyDrawLabel;
-        private readonly Label _resourceEnergyCapacityLabel;
-        private readonly Label _resourceCrewNeededLabel;
-        private readonly Label _resourceCrewQuartersLabel;
-        private readonly Button _removeModuleButton;
-
-        private readonly VisualElement _actionPopup;
-        private readonly Label _actionPopupLabel;
+        private readonly Label _moduleTypeLabel;
 
         private readonly Dictionary<VisualElement, ShipModuleSOInstanceBundle> _placedModuleElements = new();
-        private readonly Dictionary<ShipModuleSOInstanceBundle, VisualElement> _bundleToOverlay = new();
+        private readonly Button _removeModuleButton;
+        private readonly Label _resourceCrewNeededLabel;
+        private readonly Label _resourceCrewQuartersLabel;
+        private readonly Label _resourceEnergyCapacityLabel;
+        private readonly Label _resourceEnergyDrawLabel;
+        private readonly Label _resourceEnergyProductionLabel;
+        private readonly VisualElement _shipResourceCrewFill;
+        private readonly Label _shipResourceCrewLabel;
+        private readonly VisualElement _shipResourceEnergyFill;
+        private readonly Label _shipResourceEnergyLabel;
+
+        private readonly VisualElement _shipResourcesPanel;
 
         private ShipModuleSOInstanceBundle _draggedModuleBundle;
-        private ShipModuleSOInstanceBundle _selectedModuleBundle;
-        private ShipModuleSOInstanceBundle _hoveredPlacedBundle;
-        private ShipModuleSO _hoveredPaletteModule;
-
-        private VisualElement _dragGhost;
-        private Vector2 _ghostSizePx;
-        private Vector2 _dragStartWorldPos;
         private bool _draggedModuleWasNew;
 
-        private Ship _ship;
+        private VisualElement _dragGhost;
+        private Vector2 _dragStartWorldPos;
+        private Vector2 _ghostSizePx;
+        private ShipModuleSO _hoveredPaletteModule;
+        private ShipModuleSOInstanceBundle _hoveredPlacedBundle;
+        private ShipModuleSOInstanceBundle _selectedModuleBundle;
 
-        private enum PopupLevel
-        {
-            Info,
-            Warning,
-            Error
-        }
+        private Ship _ship;
 
         public ShipFactoryCanvasController(VisualElement root)
         {
@@ -80,6 +81,11 @@ namespace ShipFactory
             _resourceCrewNeededLabel = root.Q<Label>("module-info-resource-crew-needed");
             _resourceCrewQuartersLabel = root.Q<Label>("module-info-resource-crew-quarters");
             _removeModuleButton = root.Q<Button>("remove-module-button");
+            _shipResourcesPanel = root.Q<VisualElement>("ship-resources-panel");
+            _shipResourceEnergyLabel = root.Q<Label>("ship-resource-energy-label");
+            _shipResourceCrewLabel = root.Q<Label>("ship-resource-crew-label");
+            _shipResourceEnergyFill = root.Q<VisualElement>("ship-resource-energy-fill");
+            _shipResourceCrewFill = root.Q<VisualElement>("ship-resource-crew-fill");
             _actionPopup = root.Q<VisualElement>("action-popup");
             _actionPopupLabel = root.Q<Label>("action-popup-label");
 
@@ -87,10 +93,13 @@ namespace ShipFactory
                 throw new InvalidOperationException(
                     "[ShipFactoryCanvasController] Required canvas elements not found in UXML!");
 
-            if (_inputBlocker == null || _moduleNameLabel == null || _moduleTypeLabel == null || _moduleSizeLabel == null ||
+            if (_inputBlocker == null || _moduleNameLabel == null || _moduleTypeLabel == null ||
+                _moduleSizeLabel == null ||
                 _moduleDescriptionLabel == null || _resourceEnergyProductionLabel == null ||
                 _resourceEnergyDrawLabel == null || _resourceEnergyCapacityLabel == null ||
                 _resourceCrewNeededLabel == null || _resourceCrewQuartersLabel == null || _removeModuleButton == null ||
+                _shipResourcesPanel == null || _shipResourceEnergyLabel == null || _shipResourceCrewLabel == null ||
+                _shipResourceEnergyFill == null || _shipResourceCrewFill == null ||
                 _actionPopup == null || _actionPopupLabel == null)
                 throw new InvalidOperationException(
                     "[ShipFactoryCanvasController] Required details panel elements are missing in UXML!");
@@ -102,6 +111,7 @@ namespace ShipFactory
 
             SetInputLocked(false);
             RefreshInfoPanelFromCurrentContext();
+            RefreshShipResourcesPanel();
             RegisterDragEvents(root);
         }
 
@@ -116,6 +126,7 @@ namespace ShipFactory
         {
             _ship = ship;
             RebuildOverlaysFromShip();
+            RefreshShipResourcesPanel();
         }
 
         public void BeginModuleDrop(ShipModuleSO shipModuleSO, Vector2 pointerScreenPos)
@@ -158,6 +169,43 @@ namespace ShipFactory
             RefreshInfoPanelFromCurrentContext();
         }
 
+        public void RefreshShipResourcesPanel()
+        {
+            if (!_ship || !_ship.ResourceManager)
+            {
+                _shipResourcesPanel.style.display = DisplayStyle.None;
+                return;
+            }
+
+            _shipResourcesPanel.style.display = DisplayStyle.Flex;
+
+            var rm = _ship.ResourceManager;
+            var energyPercent = rm.EnergyCapacity > 0f ? Mathf.Clamp01(rm.Energy / rm.EnergyCapacity) : 0f;
+            var crewPercent = rm.CrewCapacity > 0 ? Mathf.Clamp01((float)rm.Crew / rm.CrewCapacity) : 0f;
+
+            _shipResourceEnergyLabel.text =
+                $"Energy: {rm.Energy:0.#}/{rm.EnergyCapacity:0.#}  (+{rm.EnergyProduction:0.#} / -{rm.EnergyDraw:0.#})";
+            _shipResourceCrewLabel.text = $"Crew: {rm.Crew}/{rm.CrewCapacity}";
+
+            _shipResourceEnergyFill.style.width = Length.Percent(energyPercent * 100f);
+            _shipResourceCrewFill.style.width = Length.Percent(crewPercent * 100f);
+        }
+
+        public void ShowInfoMessage(string message)
+        {
+            ShowActionPopup(message);
+        }
+
+        public void ShowWarningMessage(string message)
+        {
+            ShowActionPopup(message, PopupLevel.Warning);
+        }
+
+        public void ShowErrorMessage(string message)
+        {
+            ShowActionPopup(message, PopupLevel.Error);
+        }
+
         private void RemoveSelectedModule()
         {
             if (_selectedModuleBundle == null || _ship == null || IsDraggingModule || IsInputLocked) return;
@@ -191,6 +239,7 @@ namespace ShipFactory
 
             SelectBundle(null);
             UpdateCanvasPickingMode();
+            RefreshShipResourcesPanel();
         }
 
         private void BeginModuleDrop(ShipModuleSOInstanceBundle bundle, Vector2 pointerScreenPos,
@@ -453,7 +502,8 @@ namespace ShipFactory
                 var module = transform.GetComponent<IModule>();
 
                 if (shipModuleSO == null || shipModuleSO.Module == null || module == null)
-                    throw new InvalidOperationException("[ShipFactoryCanvasController] Ship child is missing module setup.");
+                    throw new InvalidOperationException(
+                        "[ShipFactoryCanvasController] Ship child is missing module setup.");
 
                 AddOverlayElement(new ShipModuleSOInstanceBundle(transform.gameObject, shipModuleSO.Module, module));
             }
@@ -464,12 +514,14 @@ namespace ShipFactory
 
         private void SelectBundle(ShipModuleSOInstanceBundle bundle)
         {
-            if (_selectedModuleBundle != null && _bundleToOverlay.TryGetValue(_selectedModuleBundle, out var oldOverlay))
+            if (_selectedModuleBundle != null &&
+                _bundleToOverlay.TryGetValue(_selectedModuleBundle, out var oldOverlay))
                 oldOverlay.RemoveFromClassList(SelectedOverlayClassName);
 
             _selectedModuleBundle = bundle;
 
-            if (_selectedModuleBundle != null && _bundleToOverlay.TryGetValue(_selectedModuleBundle, out var newOverlay))
+            if (_selectedModuleBundle != null &&
+                _bundleToOverlay.TryGetValue(_selectedModuleBundle, out var newOverlay))
                 newOverlay.AddToClassList(SelectedOverlayClassName);
 
             RefreshInfoPanelFromCurrentContext();
@@ -487,7 +539,8 @@ namespace ShipFactory
                 ApplyEmptyInfo();
         }
 
-        private (ShipModuleSOInstanceBundle Bundle, ShipModuleSO PaletteModuleSO, bool IsNewModuleContext) ResolveContext()
+        private (ShipModuleSOInstanceBundle Bundle, ShipModuleSO PaletteModuleSO, bool IsNewModuleContext)
+            ResolveContext()
         {
             if (IsDraggingModule)
                 return (_draggedModuleBundle, null, _draggedModuleWasNew);
@@ -594,10 +647,19 @@ namespace ShipFactory
             _actionPopup.RemoveFromClassList(ActionPopupWarningClassName);
             _actionPopup.RemoveFromClassList(ActionPopupErrorClassName);
 
-            if (level == PopupLevel.Warning)
-                _actionPopup.AddToClassList(ActionPopupWarningClassName);
-            else if (level == PopupLevel.Error)
-                _actionPopup.AddToClassList(ActionPopupErrorClassName);
+            switch (level)
+            {
+                case PopupLevel.Warning:
+                    _actionPopup.AddToClassList(ActionPopupWarningClassName);
+                    break;
+                case PopupLevel.Error:
+                    _actionPopup.AddToClassList(ActionPopupErrorClassName);
+                    break;
+                case PopupLevel.Info:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(level), level, null);
+            }
 
             _actionPopupLabel.text = message;
             _actionPopup.style.display = DisplayStyle.Flex;
@@ -607,23 +669,19 @@ namespace ShipFactory
 
         private bool WouldRemovalCreateIslands(ShipModuleSOInstanceBundle bundleToRemove)
         {
-            var remainingBundles = new List<ShipModuleSOInstanceBundle>();
+            var remainingBundles = _placedModuleElements.Values.AsValueEnumerable()
+                .Where(bundle => bundle != bundleToRemove).ToList();
 
-            foreach (var bundle in _placedModuleElements.Values)
-                if (bundle != bundleToRemove)
-                    remainingBundles.Add(bundle);
+            return remainingBundles.Count > 1 && remainingBundles
+                .Select(bundle => Calculator.CalculateLegalityPosition(bundle, remainingBundles)).AsValueEnumerable()
+                .Any(legality => legality != PositionLegality.Correct);
+        }
 
-            if (remainingBundles.Count <= 1)
-                return false;
-
-            foreach (var bundle in remainingBundles)
-            {
-                var legality = Calculator.CalculateLegalityPosition(bundle, remainingBundles);
-                if (legality != PositionLegality.Correct)
-                    return true;
-            }
-
-            return false;
+        private enum PopupLevel
+        {
+            Info,
+            Warning,
+            Error
         }
     }
 }

@@ -31,6 +31,38 @@
     flex-grow: 1;
 }
 
+.ship-name-field {
+    min-width: 260px;
+    margin-right: 8px;
+}
+
+.ship-name-field .unity-base-text-field__label {
+    color: rgb(188, 212, 246);
+    min-width: 46px;
+}
+
+.ship-name-field .unity-base-text-field__input {
+    background-color: rgb(26, 34, 52);
+    border-color: rgb(70, 95, 140);
+    border-width: 1px;
+    color: rgb(230, 242, 255);
+}
+
+.save-ship-button {
+    height: 34px;
+    padding-left: 14px;
+    padding-right: 14px;
+    background-color: rgb(34, 90, 146);
+    border-color: rgb(90, 160, 230);
+    border-width: 2px;
+    color: rgb(232, 245, 255);
+    -unity-font-style: bold;
+}
+
+.save-ship-button:hover {
+    background-color: rgb(56, 120, 188);
+}
+
 .zoom-button {
     width: 44px;
     height: 44px;
@@ -107,7 +139,7 @@
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.9);
 }
 
-/* ---------- Palette panel — opaque strip at the bottom ---------- */
+/* ---------- Palette panel - opaque strip at the bottom ---------- */
 .palette-panel {
     height: 200px;
     flex-direction: column;
@@ -284,6 +316,56 @@
 
 .remove-module-button--hidden {
     display: none;
+}
+
+.ship-resources-panel {
+    position: absolute;
+    right: 12px;
+    bottom: 212px;
+    width: 320px;
+    padding: 10px;
+    background-color: rgba(8, 16, 34, 0.98);
+    border-color: rgb(92, 128, 186);
+    border-width: 2px;
+    border-radius: 6px;
+}
+
+.ship-resources-title {
+    color: rgb(226, 240, 255);
+    -unity-font-style: bold;
+    margin-bottom: 8px;
+}
+
+.ship-resource-row {
+    margin-bottom: 8px;
+}
+
+.ship-resource-label {
+    color: rgb(214, 232, 255);
+    font-size: 12px;
+    margin-bottom: 4px;
+}
+
+.ship-resource-bar-track {
+    height: 14px;
+    border-color: rgb(72, 92, 126);
+    border-width: 1px;
+    border-radius: 4px;
+    background-color: rgb(16, 25, 42);
+    overflow: hidden;
+}
+
+.ship-resource-bar-fill {
+    height: 100%;
+    width: 0;
+}
+
+.ship-resource-bar-fill--energy {
+    background-color: rgb(80, 172, 250);
+}
+
+.ship-resource-bar-fill--crew {
+    background-color: rgb(136, 208, 116);
 }
 
 .ship-factory-input-blocker {

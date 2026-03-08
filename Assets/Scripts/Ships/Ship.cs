@@ -14,6 +14,7 @@ using LMPro.Graph;
 using Ships.Internal;
 using Ships.Modules;
 using UnityEngine;
+using UnityEngine.Assertions;
 using Zenject;
 using ZLinq;
 
@@ -21,7 +22,7 @@ using ZLinq;
 
 namespace Ships
 {
-    [RequireComponent(typeof(ModuleConnectionFactory), typeof(ResourceManager))]
+    [RequireComponent(typeof(ResourceManager))]
     public class Ship : MonoBehaviour, IShip
     {
         private const float UpdateResourcesTimer = 0.1f;
@@ -39,14 +40,14 @@ namespace Ships
         [Inject]
         private IMapInfo _mapInfo;
 
-        private ModuleConnectionFactory _moduleConnectionFactory;
+        private IModuleConnectionFactory _moduleConnectionFactory;
 
         private Action<IPixelated> _onCommandModuleNoPixelsLeft;
 
         [Inject]
         protected IShipService ShipService;
 
-        internal ModuleConnectionFactory ModuleConnectionFactoryForTesting
+        internal IModuleConnectionFactory ModuleConnectionFactoryForTesting
         {
             set => _moduleConnectionFactory = value;
         }
@@ -68,7 +69,12 @@ namespace Ships
         {
             CommandModule ??= GetComponentInChildren<Command>();
             ResourceManager = GetComponent<ResourceManager>();
-            _moduleConnectionFactory = GetComponent<ModuleConnectionFactory>();
+
+            _moduleConnectionFactory =
+                GetComponent<IModuleConnectionFactory>();
+
+            Assert.IsNotNull(CommandModule, "CommandModule != null");
+            Assert.IsNotNull(_moduleConnectionFactory, "_moduleConnectionFactory != null");
         }
 
         protected virtual void Start()
@@ -149,12 +155,14 @@ namespace Ships
         {
             if (module == null) throw new ArgumentNullException(nameof(module));
             module.Transform.SetParent(transform);
+            ReinitializeModules();
         }
 
         public void RemoveModule(IModule module)
         {
             if (module == null) throw new ArgumentNullException(nameof(module));
             module.Transform.SetParent(null);
+            ReinitializeModules();
         }
 
         private void DestroyShip()

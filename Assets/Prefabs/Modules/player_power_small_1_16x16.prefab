@@ -208,8 +208,8 @@ MonoBehaviour:
   mainSkillType: 0
   assignedCrew: []
   <Resources>k__BackingField:
-    energyCapacity: 0
+    energyCapacity: 100
     energyDraw: 0
-    energyProduction: 0
-    crewNeeded: 0
+    energyProduction: 100
+    crewNeeded: 3
     crewQuarters: 0

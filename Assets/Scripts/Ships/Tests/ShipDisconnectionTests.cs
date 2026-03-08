@@ -210,7 +210,7 @@ namespace Ships.Tests
             else
             {
                 var testModule = moduleGo.AddComponent<TestModule>();
-                testModule.SetModuleType(ModuleType.Production);
+                testModule.SetModuleType(ModuleType.Resources);
                 module = testModule;
             }
 

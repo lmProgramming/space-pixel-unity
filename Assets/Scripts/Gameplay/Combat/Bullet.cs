@@ -13,9 +13,9 @@ namespace Gameplay.Combat
         private const float FadeOutTime = 2f;
         private const float LifeTime = 2f;
 
-        public override void Start()
+        protected override void Awake()
         {
-            base.Start();
+            base.Awake();
 
             DelayedFadeOutAsync().Forget();
 

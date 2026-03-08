@@ -3,8 +3,7 @@ namespace Core.Ship
     public enum ModuleType
     {
         Command,
-        Production,
-        Storage,
+        Resources,
         Weapon,
         Engine
     }

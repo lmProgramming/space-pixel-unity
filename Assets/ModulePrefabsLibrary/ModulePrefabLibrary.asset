@@ -16,6 +16,13 @@ MonoBehaviour:
   - moduleType: 0
     prefabs:
     - {fileID: 11400000, guid: 52a35855919b54b6ebba328fbd66afea, type: 2}
-  - moduleType: 4
+  - moduleType: 3
     prefabs:
     - {fileID: 11400000, guid: c67b1840233bb621b94521f12654d026, type: 2}
+  - moduleType: 1
+    prefabs:
+    - {fileID: 11400000, guid: c3a3a47eac934d71bb106f314739c1f8, type: 2}
+  - moduleType: 2
+    prefabs:
+    - {fileID: 11400000, guid: 6b7ca647b20a011f58fb83f990925d7f, type: 2}
+    - {fileID: 11400000, guid: fbac253c3da8ebf898b99b5a0dc95e51, type: 2}

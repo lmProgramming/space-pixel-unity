@@ -5,6 +5,9 @@
     <!-- Top bar -->
     <ui:VisualElement name="top-bar" class="top-bar">
         <ui:Label name="ship-label" text="Ship Factory  —  drag a module onto the ship" class="top-bar-label"/>
+        <ui:VisualElement class="spacer"/>
+        <ui:TextField name="ship-name-field" label="Name" value="Ship" class="ship-name-field" max-length="64"/>
+        <ui:Button name="save-ship-button" text="Save Snapshot" class="save-ship-button"/>
     </ui:VisualElement>
 
     <!-- Canvas area: drag-and-drop surface -->
@@ -34,13 +37,29 @@
         <ui:Button name="remove-module-button" text="Remove Module" class="remove-module-button remove-module-button--hidden"/>
     </ui:VisualElement>
 
+    <!-- Bottom-right resources panel -->
+    <ui:VisualElement name="ship-resources-panel" class="ship-resources-panel">
+        <ui:Label text="Ship Resources" class="ship-resources-title"/>
+        <ui:VisualElement class="ship-resource-row">
+            <ui:Label name="ship-resource-energy-label" text="Energy: -" class="ship-resource-label"/>
+            <ui:VisualElement class="ship-resource-bar-track">
+                <ui:VisualElement name="ship-resource-energy-fill" class="ship-resource-bar-fill ship-resource-bar-fill--energy"/>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement class="ship-resource-row">
+            <ui:Label name="ship-resource-crew-label" text="Crew: -" class="ship-resource-label"/>
+            <ui:VisualElement class="ship-resource-bar-track">
+                <ui:VisualElement name="ship-resource-crew-fill" class="ship-resource-bar-fill ship-resource-bar-fill--crew"/>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+
     <!-- Bottom palette panel -->
     <ui:VisualElement name="palette-panel" class="palette-panel">
         <!-- Module type tab buttons -->
         <ui:VisualElement name="palette-tabs" class="palette-tabs">
             <ui:Button name="tab-Command" text="Command" class="palette-tab"/>
-            <ui:Button name="tab-Production" text="Production" class="palette-tab"/>
-            <ui:Button name="tab-Storage" text="Storage" class="palette-tab"/>
+            <ui:Button name="tab-Resources" text="Resources" class="palette-tab"/>
             <ui:Button name="tab-Weapon" text="Weapon" class="palette-tab"/>
             <ui:Button name="tab-Engine" text="Engine" class="palette-tab"/>
         </ui:VisualElement>

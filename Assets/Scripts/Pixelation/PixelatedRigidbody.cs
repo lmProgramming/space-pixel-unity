@@ -50,13 +50,9 @@ namespace Pixelation
 
         private bool HasArmorMap => armorMap != null && armorMap.ToString() != "null";
 
-        private void Awake()
+        protected virtual void Awake()
         {
             Rigidbody = GetComponent<Rigidbody2D>();
-        }
-
-        public virtual void Start()
-        {
             Setup();
         }
 
@@ -100,11 +96,6 @@ namespace Pixelation
         public void ApplyPixels()
         {
             PixelGrid.ApplyPixels();
-        }
-
-        public Color32 GetColor(Vector2Int point)
-        {
-            return PixelGrid.GetValue(point);
         }
 
         public bool IsPixel(Vector2Int point)
@@ -237,6 +228,11 @@ namespace Pixelation
         {
             sprite = newSprite;
             Setup(forceSetup: true, recalculateColliders: true);
+        }
+
+        public Color32 GetColor(Vector2Int point)
+        {
+            return PixelGrid.GetValue(point);
         }
 
 #if UNITY_INCLUDE_TESTS
