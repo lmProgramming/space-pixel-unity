@@ -227,7 +227,7 @@ namespace ShipFactory
 
             if (!_bundleToOverlay.TryGetValue(_selectedModuleBundle, out var overlay)) return;
 
-            _ship.RemoveModule(_selectedModuleBundle.PlacedModule);
+            _ship.ManualRemoveModule(_selectedModuleBundle.PlacedModule);
             _placedModuleElements.Remove(overlay);
             _bundleToOverlay.Remove(_selectedModuleBundle);
             overlay.RemoveFromHierarchy();
@@ -298,7 +298,7 @@ namespace ShipFactory
                 AnimateBundleMovement(activeBundle, activeGhost, currentWorldPos, bottomWorldTarget, () =>
                 {
                     if (_ship != null)
-                        _ship.RemoveModule(activeBundle.PlacedModule);
+                        _ship.ManualRemoveModule(activeBundle.PlacedModule);
 
                     _placedModuleElements.Remove(activeGhost);
                     _bundleToOverlay.Remove(activeBundle);
@@ -414,7 +414,7 @@ namespace ShipFactory
             }
 
             var localPosition = (Vector2)_ship.transform.InverseTransformPoint(worldPosition);
-            _ship.AddModule(module);
+            _ship.ManualAddModule(module);
             module.SetLocalPosition(localPosition);
 
             instance.GetComponent<Rigidbody2D>().simulated = false;

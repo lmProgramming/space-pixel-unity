@@ -1,8 +1,9 @@
 using Core.Services;
+using Events.Collision;
 using UnityEngine;
 using Zenject;
 
-namespace Events.Collision
+namespace Gameplay.Collision
 {
     public class CollisionEffectSpawner : MonoBehaviour
     {
@@ -12,12 +13,12 @@ namespace Events.Collision
 
         private void OnEnable()
         {
-            if (_collisionEventChannel != null) _collisionEventChannel.RegisterListener(HandleCollision);
+            if (_collisionEventChannel != null) _collisionEventChannel.Register(HandleCollision);
         }
 
         private void OnDisable()
         {
-            if (_collisionEventChannel != null) _collisionEventChannel.UnregisterListener(HandleCollision);
+            if (_collisionEventChannel != null) _collisionEventChannel.Unregister(HandleCollision);
         }
 
         private void HandleCollision(CollisionData data)

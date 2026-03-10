@@ -73,7 +73,7 @@ namespace Ships.Serialization
             DestroyAllModules(ship);
             CreateModulesFromSnapshot(ship, snapshot);
 
-            ship.ReinitializeModules();
+            ship.InitializeModules();
 
             Debug.Log(
                 $"[ShipSnapshotService] Applied snapshot '{snapshot.shipName}' to '{ship.name}' ({snapshot.modules.Count} modules)");

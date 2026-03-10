@@ -670,6 +670,9 @@ GameObject:
   - component: {fileID: 821443508}
   - component: {fileID: 821443509}
   - component: {fileID: 821443510}
+  - component: {fileID: 821443511}
+  - component: {fileID: 821443512}
+  - component: {fileID: 821443513}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -737,6 +740,50 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8824cc46352d4ebfaf44b4d0d6e1bbad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game.Ships::Ships.StaticModuleConnectionFactory
+--- !u!114 &821443511
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 821443504}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 51beb7d3839b46ae91fd236d4f53e511, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Ships::Ships.ShipCrewAssigner
+  crewMembers: []
+  generateMissingCrewMembers: 1
+--- !u!114 &821443512
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 821443504}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a747b1e7f5694f06a7fd556bfeddaa77, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Ships::Ships.ShipInstaller
+--- !u!114 &821443513
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 821443504}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3ed55059763ffd34e8d3f04f52941d7a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Zenject::Zenject.GameObjectContext
+  _scriptableObjectInstallers: []
+  _monoInstallers:
+  - {fileID: 821443512}
+  _installerPrefabs: []
+  _autoRun: 1
+  _kernel: {fileID: 0}
 --- !u!4 &1195709069 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6267824667243188324, guid: f3ced89c1b574421c935f29d86d67e02, type: 3}
@@ -855,55 +902,19 @@ PrefabInstance:
       propertyPath: m_Name
       value: Context
       objectReference: {fileID: 0}
+    - target: {fileID: 5027755031202175661, guid: 6b91e2ab209d92ee783c5077a4b8d968, type: 3}
+      propertyPath: _monoInstallers.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5027755031202175661, guid: 6b91e2ab209d92ee783c5077a4b8d968, type: 3}
+      propertyPath: '_monoInstallers.Array.data[1]'
+      value: 
+      objectReference: {fileID: 821443512}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6b91e2ab209d92ee783c5077a4b8d968, type: 3}
---- !u!1 &1527475501
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1527475503}
-  - component: {fileID: 1527475502}
-  m_Layer: 0
-  m_Name: GameObject
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1527475502
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1527475501}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 553215e9bb674350ae2cbb925cd92998, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Services::Services.ShipService
---- !u!4 &1527475503
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1527475501}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 41.09673, y: -13.22639, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1752454466
 GameObject:
   m_ObjectHideFlags: 0
@@ -1115,10 +1126,9 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 354938597}
-  - {fileID: 821443507}
-  - {fileID: 1752454468}
-  - {fileID: 1527475503}
   - {fileID: 1453989135}
   - {fileID: 629814326}
+  - {fileID: 821443507}
+  - {fileID: 1752454468}
   - {fileID: 1319159258}
   - {fileID: 779531619}

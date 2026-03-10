@@ -16,7 +16,7 @@ namespace Core.Ship
         float CaptainMultiplier { get; }
         Vector2 GetPosition();
         void OnModuleDestroyed(IModule module);
-        void AddModule(IModule module);
-        void RemoveModule(IModule module);
+        void ManualAddModule(IModule module);
+        void ManualRemoveModule(IModule module);
     }
 }

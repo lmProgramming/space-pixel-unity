@@ -164,7 +164,7 @@ namespace Pixelation
                 pixelsGlobalPositions,
                 speedDifference
             );
-            _collisionEventChannel.RaiseEvent(data);
+            _collisionEventChannel.Raise(data);
         }
 
         private void PixelsLost(List<Vector2Int> pixels, PixelLoseReason reason)

@@ -8,6 +8,7 @@ using Core.Pixelation;
 using Core.Services;
 using Core.Ship;
 using Cysharp.Threading.Tasks;
+using Events.Ship;
 using Gameplay.EasyTeam;
 using LMPro;
 using LMPro.Graph;
@@ -45,6 +46,9 @@ namespace Ships
         private Action<IPixelated> _onCommandModuleNoPixelsLeft;
 
         [Inject]
+        private ShipInitializeModulesEventChannelSO _shipInitializeModulesEventChannelSO;
+
+        [Inject]
         protected IShipService ShipService;
 
         internal IModuleConnectionFactory ModuleConnectionFactoryForTesting
@@ -79,15 +83,7 @@ namespace Ships
 
         protected virtual void Start()
         {
-            _biCohesionGraph = new BiCohesionGraph<IModule>(CommandModule);
-            _biCohesionGraph.OnNodesRemovedDueToUnreachability += HandleUnreachableModules;
-
-            _onCommandModuleNoPixelsLeft = _ => Destroy(gameObject);
-            CommandModule.PixelatedRigidbody.OnNoPixelsLeft += _onCommandModuleNoPixelsLeft;
-
-            _moduleConnectionFactory.ConnectModules(this);
-
-            RecacheModulesDictionary();
+            InitializeModules();
 
             UpdateResourcesLoop().Forget();
         }
@@ -151,18 +147,18 @@ namespace Ships
             RecacheModulesDictionary();
         }
 
-        public void AddModule(IModule module)
+        public void ManualAddModule(IModule module)
         {
             if (module == null) throw new ArgumentNullException(nameof(module));
             module.Transform.SetParent(transform);
-            ReinitializeModules();
+            InitializeModules();
         }
 
-        public void RemoveModule(IModule module)
+        public void ManualRemoveModule(IModule module)
         {
             if (module == null) throw new ArgumentNullException(nameof(module));
             module.Transform.SetParent(null);
-            ReinitializeModules();
+            InitializeModules();
         }
 
         private void DestroyShip()
@@ -220,7 +216,9 @@ namespace Ships
             ResourceManager.Recalculate(_allModulesCache);
         }
 
-        internal void ReinitializeModules()
+        public event Action OnModulesInitialized;
+
+        internal void InitializeModules()
         {
             if (CommandModule != null && _onCommandModuleNoPixelsLeft != null)
                 CommandModule.PixelatedRigidbody.OnNoPixelsLeft -= _onCommandModuleNoPixelsLeft;
