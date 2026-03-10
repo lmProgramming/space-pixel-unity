@@ -46,7 +46,7 @@ namespace Ships
         private Action<IPixelated> _onCommandModuleNoPixelsLeft;
 
         [Inject]
-        private ShipInitializeModulesEventChannelSO _shipInitializeModulesEventChannelSO;
+        private ShipInitializeModulesEventChannel _shipInitializeModulesEventChannel;
 
         [Inject]
         protected IShipService ShipService;
@@ -216,8 +216,6 @@ namespace Ships
             ResourceManager.Recalculate(_allModulesCache);
         }
 
-        public event Action OnModulesInitialized;
-
         internal void InitializeModules()
         {
             if (CommandModule != null && _onCommandModuleNoPixelsLeft != null)
@@ -237,6 +235,8 @@ namespace Ships
             CommandModule.PixelatedRigidbody.OnNoPixelsLeft += _onCommandModuleNoPixelsLeft;
 
             _moduleConnectionFactory.ConnectModules(this);
+
+            _shipInitializeModulesEventChannel.Raise();
 
             RecacheModulesDictionary();
         }

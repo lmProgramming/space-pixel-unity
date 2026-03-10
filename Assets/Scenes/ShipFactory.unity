@@ -673,6 +673,7 @@ GameObject:
   - component: {fileID: 821443511}
   - component: {fileID: 821443512}
   - component: {fileID: 821443513}
+  - component: {fileID: 821443514}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -766,6 +767,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a747b1e7f5694f06a7fd556bfeddaa77, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game.Ships::Ships.ShipInstaller
+  shipInitializeModulesEventChannel: {fileID: 821443514}
 --- !u!114 &821443513
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -784,6 +786,33 @@ MonoBehaviour:
   _installerPrefabs: []
   _autoRun: 1
   _kernel: {fileID: 0}
+--- !u!114 &821443514
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 821443504}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1690d9065d14bc793277dfec53df977, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Events::Events.Ship.ShipInitializeModulesEventChannel
+  unityEvent:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 821443511}
+        m_TargetAssemblyTypeName: Ships.ShipCrewAssigner, Game.Ships
+        m_MethodName: GenerateAndAssignCrewMembers
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!4 &1195709069 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6267824667243188324, guid: f3ced89c1b574421c935f29d86d67e02, type: 3}

@@ -1,50 +1,44 @@
 using System;
-using UnityEngine;
-using UnityEngine.Events;
 
 namespace Events
 {
-    public abstract class EventChannelBase : ScriptableObject
+    public class EventChannelCore
     {
-        public UnityEvent unityEvent;
-        private event Action OnEventRaised;
+        protected event Action OnEvent;
 
         public void Raise()
         {
-            OnEventRaised?.Invoke();
-            unityEvent?.Invoke();
+            OnEvent?.Invoke();
         }
 
-        public void Register(Action listener)
+        public void Register(Action l)
         {
-            OnEventRaised += listener;
+            OnEvent += l;
         }
 
-        public void Unregister(Action listener)
+        public void Unregister(Action l)
         {
-            OnEventRaised -= listener;
+            OnEvent -= l;
         }
     }
 
-    public abstract class EventChannelBase<T> : ScriptableObject
+    public class EventChannelCore<T>
     {
-        public UnityEvent<T> unityEvent;
-        private event Action<T> OnEventRaised;
+        protected event Action<T> OnEvent;
 
         public void Raise(T data)
         {
-            OnEventRaised?.Invoke(data);
-            unityEvent?.Invoke(data);
+            OnEvent?.Invoke(data);
         }
 
-        public void Register(Action<T> listener)
+        public void Register(Action<T> l)
         {
-            OnEventRaised += listener;
+            OnEvent += l;
         }
 
-        public void Unregister(Action<T> listener)
+        public void Unregister(Action<T> l)
         {
-            OnEventRaised -= listener;
+            OnEvent -= l;
         }
     }
 }

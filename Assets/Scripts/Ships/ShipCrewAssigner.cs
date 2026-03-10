@@ -40,6 +40,11 @@ namespace Ships
 
         private void Start()
         {
+            GenerateAndAssignCrewMembers();
+        }
+
+        public void GenerateAndAssignCrewMembers()
+        {
             if (generateMissingCrewMembers) GenerateMissingCrewMembers();
             _ship.AssignCrewBySkill(crewMembers);
         }

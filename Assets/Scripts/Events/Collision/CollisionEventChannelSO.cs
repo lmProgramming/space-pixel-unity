@@ -3,7 +3,7 @@
 namespace Events.Collision
 {
     [CreateAssetMenu(menuName = "Events/Collision Event Channel")]
-    public class CollisionEventChannelSO : EventChannelBase<CollisionData>
+    public class CollisionEventChannelSO : EventChannelSO<CollisionData>
     {
     }
 }
