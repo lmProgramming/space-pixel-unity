@@ -15,7 +15,7 @@ using Resources = Core.Ship.Resources;
 namespace Ships.Modules
 {
     [RequireComponent(typeof(PixelatedRigidbody))]
-    public class Module : MonoBehaviour, IModule
+    public abstract class Module : MonoBehaviour, IModule
     {
         private const float CrewSkillBonusPerLevel = 0.02f;
         protected const float CaptainBonusPerLevel = 0.05f;
@@ -104,7 +104,7 @@ namespace Ships.Modules
         public IPixelatedRigidbody PixelatedRigidbody { get; private set; }
 
         public Transform Transform => transform;
-        public ModuleType Type { get; protected set; }
+        public ModuleType Type { get; protected set; } = ModuleType.Resources;
 
         public virtual int CrewNeededCount => Mathf.CeilToInt(Resources.crewNeeded);
 

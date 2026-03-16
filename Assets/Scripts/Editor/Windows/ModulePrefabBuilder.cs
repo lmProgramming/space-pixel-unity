@@ -75,7 +75,19 @@ namespace Editor.Windows
 
                 var go = new GameObject(baseName);
 
-                go.AddComponent<Module>();
+                var moduleClass = typeof(Basic);
+                var baseNameLower = moduleClass.Name.ToLower();
+                if (baseNameLower.Contains("command") || baseNameLower.Contains("control"))
+                    moduleClass = typeof(Command);
+                else if (baseNameLower.Contains("engine") || baseNameLower.Contains("propulsion"))
+                    moduleClass = typeof(Engine);
+                else if (baseNameLower.Contains("weapon") || baseNameLower.Contains("gun") ||
+                         baseNameLower.Contains("cannon"))
+                    moduleClass = typeof(Cannon);
+                else if (baseNameLower.Contains("laser"))
+                    moduleClass = typeof(LaserBeam);
+
+                go.AddComponent(moduleClass);
                 var pixelatedRigidbody = go.GetComponent<PixelatedRigidbody>();
                 pixelatedRigidbody.SetSprites(visualSprite, armorSprite);
 

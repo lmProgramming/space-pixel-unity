@@ -44,8 +44,10 @@ namespace ShipFactory
         private readonly Label _resourceEnergyCapacityLabel;
         private readonly Label _resourceEnergyDrawLabel;
         private readonly Label _resourceEnergyProductionLabel;
+        private readonly VisualElement _shipResourceCrewBufferFill;
         private readonly VisualElement _shipResourceCrewFill;
         private readonly Label _shipResourceCrewLabel;
+        private readonly VisualElement _shipResourceEnergyBufferFill;
         private readonly VisualElement _shipResourceEnergyFill;
         private readonly Label _shipResourceEnergyLabel;
 
@@ -86,7 +88,9 @@ namespace ShipFactory
             _shipResourceEnergyLabel = root.Q<Label>("ship-resource-energy-label");
             _shipResourceCrewLabel = root.Q<Label>("ship-resource-crew-label");
             _shipResourceEnergyFill = root.Q<VisualElement>("ship-resource-energy-fill");
+            _shipResourceEnergyBufferFill = root.Q<VisualElement>("ship-resource-energy-buffer-fill");
             _shipResourceCrewFill = root.Q<VisualElement>("ship-resource-crew-fill");
+            _shipResourceCrewBufferFill = root.Q<VisualElement>("ship-resource-crew-buffer-fill");
             _actionPopup = root.Q<VisualElement>("action-popup");
             _actionPopupLabel = root.Q<Label>("action-popup-label");
 
@@ -100,7 +104,8 @@ namespace ShipFactory
                 _resourceEnergyDrawLabel == null || _resourceEnergyCapacityLabel == null ||
                 _resourceCrewNeededLabel == null || _resourceCrewQuartersLabel == null || _removeModuleButton == null ||
                 _shipResourcesPanel == null || _shipResourceEnergyLabel == null || _shipResourceCrewLabel == null ||
-                _shipResourceEnergyFill == null || _shipResourceCrewFill == null ||
+                _shipResourceEnergyFill == null || _shipResourceEnergyBufferFill == null ||
+                _shipResourceCrewFill == null || _shipResourceCrewBufferFill == null ||
                 _actionPopup == null || _actionPopupLabel == null)
                 throw new InvalidOperationException(
                     "[ShipFactoryCanvasController] Required details panel elements are missing in UXML!");
@@ -181,15 +186,63 @@ namespace ShipFactory
             _shipResourcesPanel.style.display = DisplayStyle.Flex;
 
             var rm = _ship.ResourceManager;
-            var energyPercent = rm.EnergyCapacity > 0f ? Mathf.Clamp01(rm.Energy / rm.EnergyCapacity) : 0f;
-            var crewPercent = rm.CrewCapacity > 0 ? Mathf.Clamp01((float)rm.Crew / rm.CrewCapacity) : 0f;
+
+            var netEnergy = rm.EnergyProduction - rm.EnergyDraw;
+            var netEnergyFormatted = netEnergy >= 0 ? $"+{netEnergy:0.#}" : $"{netEnergy:0.#}";
 
             _shipResourceEnergyLabel.text =
-                $"Energy: {rm.Energy:0.#}/{rm.EnergyCapacity:0.#}  (+{rm.EnergyProduction:0.#} / -{rm.EnergyDraw:0.#})";
+                $"Energy capacity: {rm.EnergyCapacity:0.#}. Net energy: {netEnergyFormatted}";
             _shipResourceCrewLabel.text = $"Crew: {rm.Crew}/{rm.CrewCapacity}";
 
-            _shipResourceEnergyFill.style.width = Length.Percent(energyPercent * 100f);
-            _shipResourceCrewFill.style.width = Length.Percent(crewPercent * 100f);
+            ApplySegmentedResourceBar(
+                _shipResourceEnergyFill,
+                _shipResourceEnergyBufferFill,
+                rm.EnergyDraw,
+                rm.EnergyProduction,
+                new Color(80f / 255f, 172f / 255f, 250f / 255f));
+
+            ApplySegmentedResourceBar(
+                _shipResourceCrewFill,
+                _shipResourceCrewBufferFill,
+                rm.Crew,
+                rm.CrewCapacity,
+                new Color(80f / 255f, 172f / 255f, 250f / 255f));
+        }
+
+        private static void ApplySegmentedResourceBar(
+            VisualElement usageFill,
+            VisualElement bufferFill,
+            float usage,
+            float production,
+            Color usageHealthyColor)
+        {
+            var isIdle = Mathf.Approximately(usage, 0f) && Mathf.Approximately(production, 0f);
+
+            if (isIdle)
+            {
+                usageFill.style.backgroundColor = new Color(0.5f, 0.5f, 0.5f, 1f); // grey
+                usageFill.style.width = Length.Percent(0f);
+                bufferFill.style.width = Length.Percent(0f);
+                return;
+            }
+
+            var normalizationFactor = Mathf.Max(usage, production, 0.0001f);
+            var coveredUsage = Mathf.Min(usage, production);
+            var balanceDelta = production - usage; // negative = deficit, positive = surplus
+
+            var coveredPercent = Mathf.Clamp01(coveredUsage / normalizationFactor);
+            var deltaPercent = Mathf.Clamp01(Mathf.Abs(balanceDelta) / normalizationFactor);
+
+            usageFill.style.left = Length.Percent(0f);
+            usageFill.style.width = Length.Percent(coveredPercent * 100f);
+            usageFill.style.backgroundColor = usageHealthyColor;
+
+            var hasDeficit = balanceDelta < 0f; // production < usage
+            bufferFill.style.left = Length.Percent(coveredPercent * 100f);
+            bufferFill.style.width = Length.Percent(deltaPercent * 100f);
+            bufferFill.style.backgroundColor = hasDeficit
+                ? Color.red
+                : new Color(136f / 255f, 208f / 255f, 116f / 255f); // green for buffer
         }
 
         public void ShowInfoMessage(string message)

@@ -31,9 +31,9 @@ namespace Editor.ToolsExtensions
         }
 
         [MenuItem("CONTEXT/Module/Change to Basic Module")]
-        private static void ChangeToModule(MenuCommand command)
+        private static void ChangeToResource(MenuCommand command)
         {
-            ChangeComponent<Module>(command.context as Module);
+            ChangeComponent<Basic>(command.context as Module);
         }
 
         private static void ChangeComponent<TNew>(Module oldComponent) where TNew : Module

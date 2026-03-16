@@ -5,6 +5,7 @@ namespace Core.Ship
         Command,
         Resources,
         Weapon,
-        Engine
+        Engine,
+        Structural
     }
 }

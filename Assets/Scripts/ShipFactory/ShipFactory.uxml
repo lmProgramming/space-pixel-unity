@@ -28,13 +28,15 @@
                       class="module-info-description"/>
         </ui:Foldout>
         <ui:Foldout name="module-info-resources-foldout" text="Resources" class="module-info-foldout">
-            <ui:Label name="module-info-resource-energy-production" text="Energy Production: -" class="module-info-field"/>
+            <ui:Label name="module-info-resource-energy-production" text="Energy Production: -"
+                      class="module-info-field"/>
             <ui:Label name="module-info-resource-energy-draw" text="Energy Draw: -" class="module-info-field"/>
             <ui:Label name="module-info-resource-energy-capacity" text="Energy Capacity: -" class="module-info-field"/>
             <ui:Label name="module-info-resource-crew-needed" text="Crew Needed: -" class="module-info-field"/>
             <ui:Label name="module-info-resource-crew-quarters" text="Crew Quarters: -" class="module-info-field"/>
         </ui:Foldout>
-        <ui:Button name="remove-module-button" text="Remove Module" class="remove-module-button remove-module-button--hidden"/>
+        <ui:Button name="remove-module-button" text="Remove Module"
+                   class="remove-module-button remove-module-button--hidden"/>
     </ui:VisualElement>
 
     <!-- Bottom-right resources panel -->
@@ -43,13 +45,19 @@
         <ui:VisualElement class="ship-resource-row">
             <ui:Label name="ship-resource-energy-label" text="Energy: -" class="ship-resource-label"/>
             <ui:VisualElement class="ship-resource-bar-track">
-                <ui:VisualElement name="ship-resource-energy-fill" class="ship-resource-bar-fill ship-resource-bar-fill--energy"/>
+                <ui:VisualElement name="ship-resource-energy-fill"
+                                  class="ship-resource-bar-fill ship-resource-bar-fill--usage"/>
+                <ui:VisualElement name="ship-resource-energy-buffer-fill"
+                                  class="ship-resource-bar-fill ship-resource-bar-fill--buffer"/>
             </ui:VisualElement>
         </ui:VisualElement>
         <ui:VisualElement class="ship-resource-row">
             <ui:Label name="ship-resource-crew-label" text="Crew: -" class="ship-resource-label"/>
             <ui:VisualElement class="ship-resource-bar-track">
-                <ui:VisualElement name="ship-resource-crew-fill" class="ship-resource-bar-fill ship-resource-bar-fill--crew"/>
+                <ui:VisualElement name="ship-resource-crew-fill"
+                                  class="ship-resource-bar-fill ship-resource-bar-fill--usage"/>
+                <ui:VisualElement name="ship-resource-crew-buffer-fill"
+                                  class="ship-resource-bar-fill ship-resource-bar-fill--buffer"/>
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>

@@ -100,9 +100,9 @@ namespace Ships.Modules
 
         public override float GetEnergyDraw()
         {
-            return IsReady()
-                ? 0
-                : base.GetEnergyDraw();
+            return base.GetEnergyDraw() * (IsReady()
+                ? 0.25f
+                : 1f);
         }
 
         private void HandleReady()

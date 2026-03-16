@@ -347,6 +347,7 @@
 }
 
 .ship-resource-bar-track {
+    position: relative;
     height: 14px;
     border-color: rgb(72, 92, 126);
     border-width: 1px;
@@ -356,15 +357,18 @@
 }
 
 .ship-resource-bar-fill {
-    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
     width: 0;
 }
 
-.ship-resource-bar-fill--energy {
+.ship-resource-bar-fill--usage {
     background-color: rgb(80, 172, 250);
 }
 
-.ship-resource-bar-fill--crew {
+.ship-resource-bar-fill--buffer {
     background-color: rgb(136, 208, 116);
 }
 
