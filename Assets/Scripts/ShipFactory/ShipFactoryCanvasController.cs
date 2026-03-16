@@ -55,6 +55,7 @@ namespace ShipFactory
         private bool _draggedModuleWasNew;
 
         private VisualElement _dragGhost;
+        private Vector2 _dragGhostWorldPositionOffset;
         private Vector2 _dragStartWorldPos;
         private Vector2 _ghostSizePx;
         private ShipModuleSO _hoveredPaletteModule;
@@ -251,6 +252,10 @@ namespace ShipFactory
             _dragStartWorldPos = bundle.Instance.transform.position;
             _hoveredPaletteModule = null;
 
+            _dragGhostWorldPositionOffset = !isNewBundle
+                ? (Vector2)bundle.Instance.transform.position - ScreenToWorldPosition(pointerScreenPos)
+                : Vector2.zero;
+
             _ghostSizePx = WorldSizeToScreenPx(bundle.ModuleSO.Dimensions);
             _dragGhost.style.width = _ghostSizePx.x;
             _dragGhost.style.height = _ghostSizePx.y;
@@ -332,7 +337,8 @@ namespace ShipFactory
 
         private void MoveGhostToPointer(Vector2 screenPos)
         {
-            var snapped = ScreenToSnappedWorldPosition(screenPos);
+            var worldPos = ScreenToWorldPosition(screenPos) + _dragGhostWorldPositionOffset;
+            var snapped = Snapper.SnapToGrid(worldPos);
             SetBundleWorldAndOverlayPosition(_draggedModuleBundle, _dragGhost, snapped);
 
             var legality = Calculator.CalculateLegalityPosition(_draggedModuleBundle, _placedModuleElements.Values);
@@ -377,7 +383,7 @@ namespace ShipFactory
             overlay.style.top = overlayScreenPos.y - _ghostSizePx.y / 2f;
         }
 
-        private static Vector2 ScreenToSnappedWorldPosition(Vector2 screenPos)
+        private static Vector2 ScreenToWorldPosition(Vector2 screenPos)
         {
             var cam = Camera.main;
             if (cam == null)
@@ -388,7 +394,12 @@ namespace ShipFactory
 
             var unityScreenPos = new Vector3(screenPos.x, Screen.height - screenPos.y, cam.nearClipPlane);
             var worldPos = (Vector2)cam.ScreenToWorldPoint(unityScreenPos);
-            return Snapper.SnapToGrid(worldPos);
+            return worldPos;
+        }
+
+        private static Vector2 ScreenToSnappedWorldPosition(Vector2 screenPos)
+        {
+            return Snapper.SnapToGrid(ScreenToWorldPosition(screenPos));
         }
 
         private Vector2 WorldToScreenPos(Vector2 worldPos)

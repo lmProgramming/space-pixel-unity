@@ -4,10 +4,10 @@ using UnityEngine.Events;
 
 namespace Events
 {
-    public class EventChannelSO
+    public class EventChannelSO : ScriptableObject
     {
-        private readonly EventChannelCore _core = new();
         [SerializeField] private UnityEvent unityEvent;
+        private readonly EventChannelCore _core = new();
 
         public void Raise()
         {
