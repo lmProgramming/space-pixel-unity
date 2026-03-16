@@ -67,7 +67,7 @@ namespace Ships.Tests
             pxRb.SetTextureFromColors(colors);
 
             var module = go.AddComponent<TestModule>();
-            module.SetModuleType(ModuleType.Production);
+            module.SetModuleType(ModuleType.Resources);
             module.SetMainSkillType(mainSkill);
             module.SetResources(new Resources(0, 0, crewNeeded, 0, 0));
 

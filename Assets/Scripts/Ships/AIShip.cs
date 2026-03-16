@@ -9,6 +9,7 @@ namespace Ships
 {
     [RequireComponent(typeof(ShipSensing))]
     [RequireComponent(typeof(ShipNavigationStateMachine))]
+    [RequireComponent(typeof(BehaviourStateMachine))]
     public class AIShip : Ship, IAgent
     {
         [Header("Navigation")]

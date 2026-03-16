@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Editor.InspectorExtensions
 {
-    [CustomEditor(typeof(Module), true)]
+    [CustomEditor(typeof(Module), true)] [CanEditMultipleObjects]
     public class ModuleEditor : UnityEditor.Editor
     {
         public override void OnInspectorGUI()
@@ -12,13 +12,14 @@ namespace Editor.InspectorExtensions
             DrawDefaultInspector();
 
             if (!Application.isPlaying) return;
+            if (EditorUtility.IsPersistent(target)) return;
 
-            var module = (Module)target;
-            var efficiency = module.InternalEfficiency;
-
-            var efficiencyText = $"Efficiency: {efficiency:P1}";
-
-            EditorGUILayout.LabelField(efficiencyText);
+            foreach (var obj in targets)
+            {
+                if (obj is not Module module) continue;
+                var efficiency = module.InternalEfficiency;
+                EditorGUILayout.LabelField($"Efficiency: {efficiency:P1}");
+            }
         }
     }
 }

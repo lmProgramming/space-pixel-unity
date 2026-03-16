@@ -5,14 +5,8 @@ using ZLinq;
 
 namespace Ships
 {
-    public class ModuleConnectionFactory : MonoBehaviour
+    public class ModuleConnectionFactory : MonoBehaviour, IModuleConnectionFactory
     {
-        private List<Module> GetModules(Transform parent)
-        {
-            var modules = GetComponentsInChildren<Module>(parent).AsValueEnumerable().ToList();
-            return modules;
-        }
-
         public void ConnectModules(Ship ship)
         {
             var modules = GetModules(ship.transform);
@@ -41,6 +35,12 @@ namespace Ships
             }
 
             foreach (var module in modules) module.Setup(ship);
+        }
+
+        private List<Module> GetModules(Transform parent)
+        {
+            var modules = GetComponentsInChildren<Module>(parent).AsValueEnumerable().ToList();
+            return modules;
         }
     }
 }

@@ -1,0 +1,25 @@
+{
+  "name": "Pixelation.Tests",
+  "rootNamespace": "",
+  "references": [
+    "GUID:4d277b042cf7c0655ad4c5179de9f659",
+    "GUID:27619889b8ba8c24980f49ee34dbb44a",
+    "GUID:24173525d8afb24ad9153261c706727e"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": true,
+  "precompiledReferences": [
+    "nunit.framework.dll",
+    "ZLinq.dll",
+    "NSubstitute.dll"
+  ],
+  "autoReferenced": false,
+  "defineConstraints": [
+    "UNITY_INCLUDE_TESTS"
+  ],
+  "versionDefines": [],
+  "noEngineReferences": false
+}
+

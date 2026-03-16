@@ -8,12 +8,14 @@ using Core.Pixelation;
 using Core.Services;
 using Core.Ship;
 using Cysharp.Threading.Tasks;
+using Events.Ship;
 using Gameplay.EasyTeam;
-using LM;
-using LM.Graph;
+using LMPro;
+using LMPro.Graph;
 using Ships.Internal;
 using Ships.Modules;
 using UnityEngine;
+using UnityEngine.Assertions;
 using Zenject;
 using ZLinq;
 
@@ -21,10 +23,10 @@ using ZLinq;
 
 namespace Ships
 {
+    [RequireComponent(typeof(ResourceManager))]
     public class Ship : MonoBehaviour, IShip
     {
         private const float UpdateResourcesTimer = 0.1f;
-        [SerializeField] private ModuleConnectionFactory moduleConnectionFactory;
 
         [SerializeField]
         private Team team;
@@ -39,14 +41,19 @@ namespace Ships
         [Inject]
         private IMapInfo _mapInfo;
 
+        private IModuleConnectionFactory _moduleConnectionFactory;
+
         private Action<IPixelated> _onCommandModuleNoPixelsLeft;
+
+        [Inject]
+        private ShipInitializeModulesEventChannel _shipInitializeModulesEventChannel;
 
         [Inject]
         protected IShipService ShipService;
 
-        internal ModuleConnectionFactory ModuleConnectionFactoryForTesting
+        internal IModuleConnectionFactory ModuleConnectionFactoryForTesting
         {
-            set => moduleConnectionFactory = value;
+            set => _moduleConnectionFactory = value;
         }
 
         private IReadOnlyList<Module> AllModules => _allModulesCache;
@@ -65,20 +72,18 @@ namespace Ships
         private void Awake()
         {
             CommandModule ??= GetComponentInChildren<Command>();
-            ResourceManager ??= GetComponentInChildren<ResourceManager>();
+            ResourceManager = GetComponent<ResourceManager>();
+
+            _moduleConnectionFactory =
+                GetComponent<IModuleConnectionFactory>();
+
+            Assert.IsNotNull(CommandModule, "CommandModule != null");
+            Assert.IsNotNull(_moduleConnectionFactory, "_moduleConnectionFactory != null");
         }
 
         protected virtual void Start()
         {
-            _biCohesionGraph = new BiCohesionGraph<IModule>(CommandModule);
-            _biCohesionGraph.OnNodesRemovedDueToUnreachability += HandleUnreachableModules;
-
-            _onCommandModuleNoPixelsLeft = _ => Destroy(gameObject);
-            CommandModule.PixelatedRigidbody.OnNoPixelsLeft += _onCommandModuleNoPixelsLeft;
-
-            moduleConnectionFactory.ConnectModules(this);
-
-            RecacheModulesDictionary();
+            InitializeModules();
 
             UpdateResourcesLoop().Forget();
         }
@@ -118,15 +123,11 @@ namespace Ships
 
         public float CaptainMultiplier => CommandModule.GetCrewEfficiency();
 
-        public ITeam Team
-        {
-            get => team;
-            private set => team = value as Team;
-        }
+        public ITeam Team => team;
 
         public IModule CommandModule { get; private set; }
 
-        public Collider2D[] OwnColliders { get; set; } = Array.Empty<Collider2D>();
+        public Collider2D[] OwnColliders { get; private set; } = Array.Empty<Collider2D>();
 
         public Vector2 GetPosition()
         {
@@ -138,10 +139,32 @@ namespace Ships
         {
             if (module == null) return;
 
+            if (module == CommandModule) DestroyShip();
+
             Debug.Log($"[Ship] Module destroyed: {module.Transform.name}", module.Transform);
 
             _biCohesionGraph.RemoveNode(module);
             RecacheModulesDictionary();
+        }
+
+        public void ManualAddModule(IModule module)
+        {
+            if (module == null) throw new ArgumentNullException(nameof(module));
+            module.Transform.SetParent(transform);
+            InitializeModules();
+        }
+
+        public void ManualRemoveModule(IModule module)
+        {
+            if (module == null) throw new ArgumentNullException(nameof(module));
+            module.Transform.SetParent(null);
+            InitializeModules();
+        }
+
+        private void DestroyShip()
+        {
+            Debug.Log($"[Ship] Command module destroyed. Destroying ship: {gameObject.name}", gameObject);
+            Destroy(gameObject);
         }
 
         private async UniTaskVoid UpdateResourcesLoop()
@@ -193,7 +216,7 @@ namespace Ships
             ResourceManager.Recalculate(_allModulesCache);
         }
 
-        internal void ReinitializeModules()
+        internal void InitializeModules()
         {
             if (CommandModule != null && _onCommandModuleNoPixelsLeft != null)
                 CommandModule.PixelatedRigidbody.OnNoPixelsLeft -= _onCommandModuleNoPixelsLeft;
@@ -211,7 +234,9 @@ namespace Ships
             _onCommandModuleNoPixelsLeft = _ => Destroy(gameObject);
             CommandModule.PixelatedRigidbody.OnNoPixelsLeft += _onCommandModuleNoPixelsLeft;
 
-            moduleConnectionFactory.ConnectModules(this);
+            _moduleConnectionFactory.ConnectModules(this);
+
+            _shipInitializeModulesEventChannel.Raise();
 
             RecacheModulesDictionary();
         }

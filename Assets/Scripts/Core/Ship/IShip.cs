@@ -1,10 +1,11 @@
 using Core.Gameplay.EasyTeam;
-using LM.Graph;
+using LMPro.External.IsAlive;
+using LMPro.Graph;
 using UnityEngine;
 
 namespace Core.Ship
 {
-    public interface IShip
+    public interface IShip : IHasAliveCheck
     {
         ITeam Team { get; }
         IModule CommandModule { get; }
@@ -15,5 +16,7 @@ namespace Core.Ship
         float CaptainMultiplier { get; }
         Vector2 GetPosition();
         void OnModuleDestroyed(IModule module);
+        void ManualAddModule(IModule module);
+        void ManualRemoveModule(IModule module);
     }
 }

@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Core.Grid;
-using LM;
+using LMPro;
 using Unity.Collections;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace Grid
 {
@@ -34,11 +35,6 @@ namespace Grid
             Texture.Apply();
         }
 
-        public Color32 GetColor(Vector2Int point)
-        {
-            return Texture.GetPixel(point.x, point.y);
-        }
-
         public bool IsPixel(Vector2Int point)
         {
             return InBounds(point) && IsPixelAssumeInBounds(point);
@@ -47,6 +43,11 @@ namespace Grid
         public bool IsPixelAssumeInBounds(Vector2Int point)
         {
             return Texture.GetPixel(point.x, point.y).a > 0;
+        }
+
+        public Color32 GetValue(Vector2Int point)
+        {
+            return Texture.GetPixel(point.x, point.y);
         }
 
         public bool InBounds(Vector2Int point)
@@ -131,7 +132,7 @@ namespace Grid
             _spriteRenderer.sprite = _internalSprite;
         }
 
-        public Vector2Int? GetPointAlongPath(Vector2Int startPosition, Vector2 direction, bool getLast)
+        public Vector2Int? GetFirstPixelAlongPath(Vector2Int startPosition, Vector2 direction, bool getLast)
         {
             var pointsTraversed = GridMarcher.March(new Vector2Int(Texture.width, Texture.height), startPosition,
                 direction);
@@ -149,9 +150,7 @@ namespace Grid
             SetPixel(point, Color.clear);
             PixelCount--;
 
-#if UNITY_EDITOR
-            if (PixelCount < 0) Debug.LogError("Pixel count went below zero. This should not happen.");
-#endif
+            Assert.IsTrue(PixelCount >= 0, "Pixel count went below zero. This should not happen.");
         }
 
         public void RemovePixels(IEnumerable<Vector2Int> points)
@@ -161,9 +160,7 @@ namespace Grid
             ApplyPixels();
             PixelCount -= pointsList.Count;
 
-#if UNITY_EDITOR
-            if (PixelCount < 0) Debug.LogError("Pixel count went below zero. This should not happen.");
-#endif
+            Assert.IsTrue(PixelCount >= 0, "Pixel count went below zero. This should not happen.");
         }
     }
 }

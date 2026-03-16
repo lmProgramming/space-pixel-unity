@@ -3,7 +3,7 @@ using System.Threading;
 using Core.Gameplay.Combat;
 using Core.Services;
 using Core.Ship;
-using LM;
+using LMPro;
 using UnityEngine;
 using Zenject;
 
@@ -100,9 +100,9 @@ namespace Ships.Modules
 
         public override float GetEnergyDraw()
         {
-            return IsReady()
-                ? 0
-                : base.GetEnergyDraw();
+            return base.GetEnergyDraw() * (IsReady()
+                ? 0.25f
+                : 1f);
         }
 
         private void HandleReady()

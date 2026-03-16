@@ -19,7 +19,8 @@ namespace Ships.Modules
 
         public override float GetEnergyDraw()
         {
-            return _active ? base.GetEnergyDraw() : 0;
+            return base.GetEnergyDraw() *
+                   (_active ? 1f : 0.25f);
         }
 
         public void SetActive(bool active)

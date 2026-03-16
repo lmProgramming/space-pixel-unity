@@ -8,7 +8,7 @@ using Core.Services;
 using Cysharp.Threading.Tasks;
 using Events.Collision;
 using Grid;
-using LM;
+using LMPro;
 using UnityEngine;
 using Zenject;
 using ZLinq;
@@ -21,7 +21,7 @@ namespace Pixelation
     [RequireComponent(typeof(PolygonCollider2D))]
     [RequireComponent(typeof(Rigidbody2D))]
     [RequireComponent(typeof(SpriteRenderer))]
-    public class PixelatedRigidbody : MonoBehaviour, IPixelatedRigidbody
+    public class PixelatedRigidbody : MonoBehaviour, IPixelatedRigidbody, IPixelatedSprite
     {
         private const float SpeedLimitForDiscreteCollisionDetectionSquared = 0;
 
@@ -36,26 +36,23 @@ namespace Pixelation
         [Header("Armor Map (optional)")]
         [Tooltip("Grayscale sprite where brightness = armor strength. " +
                  "White (255) = maxArmorHealth, black (0) = defaultPixelHealth. Must match the color sprite dimensions.")]
-        [SerializeField] private Sprite armorMap;
+        [SerializeField]
+        private Sprite armorMap;
 
-        [Tooltip("Health value that a fully white (255) pixel in the armor map represents.")]
-        [SerializeField] private float maxArmorHealth = 10f;
+        [Tooltip("Health value that a fully white (255) pixel in the armor map represents.")] [SerializeField]
+        private float maxArmorHealth = 10f;
 
         [Inject] private CollisionEventChannelSO _collisionEventChannelSO;
         [Inject] private IDebrisSpawner _debrisSpawner;
 
         private bool _isSetup;
-        private PixelHealthGrid HealthGrid { get; set; }
+        private HealthGrid HealthGrid { get; set; }
 
         private bool HasArmorMap => armorMap != null && armorMap.ToString() != "null";
 
-        private void Awake()
+        protected virtual void Awake()
         {
             Rigidbody = GetComponent<Rigidbody2D>();
-        }
-
-        public virtual void Start()
-        {
             Setup();
         }
 
@@ -85,8 +82,7 @@ namespace Pixelation
 
         public IPixelGrid PixelGrid { get; set; }
 
-        [field: SerializeField]
-        public float MassMultiplier { get; private set; } = 1;
+        [field: SerializeField] public float MassMultiplier { get; private set; } = 1;
 
         public int CurrentPixelCount => PixelGrid.PixelCount;
         public int StartPixelCount { get; private set; }
@@ -100,11 +96,6 @@ namespace Pixelation
         public void ApplyPixels()
         {
             PixelGrid.ApplyPixels();
-        }
-
-        public Color32 GetColor(Vector2Int point)
-        {
-            return PixelGrid.GetColor(point);
         }
 
         public bool IsPixel(Vector2Int point)
@@ -228,6 +219,22 @@ namespace Pixelation
 
         public event Action<List<Vector2Int>, PixelLoseReason> OnPixelsLost;
 
+        public Sprite GetSprite()
+        {
+            return sprite;
+        }
+
+        public void SetSprite(Sprite newSprite)
+        {
+            sprite = newSprite;
+            Setup(forceSetup: true, recalculateColliders: true);
+        }
+
+        public Color32 GetColor(Vector2Int point)
+        {
+            return PixelGrid.GetValue(point);
+        }
+
 #if UNITY_INCLUDE_TESTS
         internal void SetSpriteForTesting(Sprite testSprite)
         {
@@ -235,7 +242,7 @@ namespace Pixelation
         }
 #endif
 
-        public void Setup(Color32[,] colors = null, bool forceSetup = false)
+        public void Setup(Color32[,] colors = null, bool forceSetup = false, bool recalculateColliders = false)
         {
             if (_isSetup && !forceSetup) return;
 
@@ -254,7 +261,7 @@ namespace Pixelation
 
             PixelGrid = new PixelGrid(SpriteRenderer);
 
-            if (_collisionEventChannelSO != null && _debrisSpawner != null)
+            if ((_collisionEventChannelSO != null && _debrisSpawner != null) || recalculateColliders)
                 CollisionHandler = new PixelCollisionHandler(PixelGrid, this, GetComponent<PolygonCollider2D>(),
                     _collisionEventChannelSO, _debrisSpawner);
 
@@ -273,7 +280,7 @@ namespace Pixelation
 
             PixelGrid.Setup();
 
-            HealthGrid = new PixelHealthGrid(PixelGrid.Width, PixelGrid.Height, defaultPixelHealth);
+            HealthGrid = new HealthGrid(PixelGrid.Width, PixelGrid.Height, defaultPixelHealth);
             HealthGrid.InitializeFromGrid(PixelGrid);
 
             if (HasArmorMap)
@@ -284,6 +291,9 @@ namespace Pixelation
             WeightedCenter = CalculateWeightedCenter();
 
             OnPixelsLost?.Invoke(new List<Vector2Int>(), PixelLoseReason.Other);
+
+            if (recalculateColliders)
+                CollisionHandler?.ForceRecalculateColliders();
         }
 
         private void ApplyArmorMap()
@@ -388,6 +398,12 @@ namespace Pixelation
             var countBefore = PixelGrid.PixelCount + region.Count;
             NudgeWeightedCenter(region, countBefore);
             OnPixelsLost?.Invoke(region.AsValueEnumerable().ToList(), PixelLoseReason.Division);
+        }
+
+        public void SetSprites(Sprite visualSprite, Sprite armorSprite)
+        {
+            sprite = visualSprite;
+            armorMap = armorSprite;
         }
     }
 }

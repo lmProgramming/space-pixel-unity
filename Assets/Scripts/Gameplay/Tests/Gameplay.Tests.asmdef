@@ -1,0 +1,26 @@
+{
+  "name": "Gameplay.Tests",
+  "rootNamespace": "",
+  "references": [
+    "GUID:3453562d1089a90fc973630db854c59c",
+    "GUID:27619889b8ba8c24980f49ee34dbb44a",
+    "GUID:24173525d8afb24ad9153261c706727e",
+    "GUID:b588e3e7a964822d3a9d587848dfd885"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": true,
+  "precompiledReferences": [
+    "nunit.framework.dll",
+    "ZLinq.dll",
+    "NSubstitute.dll"
+  ],
+  "autoReferenced": false,
+  "defineConstraints": [
+    "UNITY_INCLUDE_TESTS"
+  ],
+  "versionDefines": [],
+  "noEngineReferences": false
+}
+

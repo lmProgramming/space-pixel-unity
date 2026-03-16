@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Core.Ship;
-using LM;
+using LMPro;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -39,6 +39,11 @@ namespace Ships
         }
 
         private void Start()
+        {
+            GenerateAndAssignCrewMembers();
+        }
+
+        public void GenerateAndAssignCrewMembers()
         {
             if (generateMissingCrewMembers) GenerateMissingCrewMembers();
             _ship.AssignCrewBySkill(crewMembers);

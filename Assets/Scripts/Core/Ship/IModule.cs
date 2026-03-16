@@ -24,5 +24,7 @@ namespace Core.Ship
         float GetEnergyProduction();
         void KillAllCrew();
         void KillRandomCrew(int count);
+        void SetLocalPosition(Vector2 localPosition);
+        void Setup(IShip ship);
     }
 }

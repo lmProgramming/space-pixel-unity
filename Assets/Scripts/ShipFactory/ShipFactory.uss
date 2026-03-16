@@ -1,0 +1,444 @@
+/* ===== Ship Factory UI - Modern Sci-Fi Theme ===== */
+
+/* ---------- Global Variables & Root ---------- */
+:root {
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0);
+    /* Font family can be set here if you have a custom sci-fi font */
+}
+
+/* ---------- Top bar ---------- */
+.top-bar {
+    flex-direction: row;
+    align-items: center;
+    height: 56px;
+    padding: 8px 16px;
+    background-color: rgba(10, 14, 20, 0.95);
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(0, 229, 255, 0.3); /* Neon Cyan subtle border */
+    flex-shrink: 0;
+}
+
+.top-bar-label {
+    color: #ffffff;
+    font-size: 20px;
+    -unity-font-style: bold;
+    letter-spacing: 1px;
+    margin-right: 16px;
+}
+
+.spacer {
+    flex-grow: 1;
+}
+
+.ship-name-field {
+    min-width: 260px;
+    margin-right: 12px;
+}
+
+.ship-name-field .unity-base-text-field__label {
+    color: #8ab4f8;
+    min-width: 46px;
+    font-size: 14px;
+}
+
+.ship-name-field .unity-base-text-field__input {
+    background-color: rgba(20, 28, 40, 0.8);
+    border-color: rgba(138, 180, 248, 0.4);
+    border-width: 1px;
+    border-radius: 4px;
+    color: #e8f0fe;
+    padding: 4px 8px;
+    font-size: 14px;
+}
+
+.save-ship-button {
+    height: 32px;
+    padding: 0 20px;
+    background-color: rgba(0, 140, 255, 0.2);
+    border-color: #00aaff;
+    border-width: 1px;
+    border-radius: 4px;
+    color: #e8f0fe;
+    font-size: 14px;
+    -unity-font-style: bold;
+    transition-duration: 0.2s;
+}
+
+.save-ship-button:hover {
+    background-color: rgba(0, 170, 255, 0.4);
+    border-color: #00e5ff;
+    color: #ffffff;
+}
+
+.zoom-button {
+    width: 32px;
+    height: 32px;
+    margin-left: 8px;
+    background-color: rgba(20, 28, 40, 0.8);
+    color: #8ab4f8;
+    border-color: rgba(138, 180, 248, 0.4);
+    border-width: 1px;
+    border-radius: 4px;
+    font-size: 18px;
+    -unity-text-align: middle-center;
+    transition-duration: 0.2s;
+}
+
+.zoom-button:hover {
+    background-color: rgba(138, 180, 248, 0.2);
+    color: #ffffff;
+}
+
+/* ---------- Canvas Area ---------- */
+.canvas-container {
+    flex-grow: 1;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.canvas-viewport, .canvas-area {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+/* ---------- Placed Module Overlays ---------- */
+.placed-module {
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0);
+    border-color: rgba(255, 255, 255, 0.15);
+    border-width: 1px;
+    border-radius: 2px;
+    align-items: center;
+    justify-content: center;
+    transition-duration: 0.15s;
+}
+
+.placed-module:hover {
+    background-color: rgba(0, 229, 255, 0.1);
+    border-color: #00e5ff;
+}
+
+.placed-module--selected {
+    background-color: rgba(255, 180, 0, 0.15);
+    border-color: #ffb400;
+    border-width: 2px;
+}
+
+.placed-module--inside-other {
+    background-color: rgba(255, 50, 50, 0.3);
+    border-color: #ff3232;
+    border-width: 2px;
+}
+
+.placed-module--outside-ship {
+    background-color: rgba(255, 100, 50, 0.2);
+    border-color: #ff6432;
+}
+
+.placed-module-label {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 14px;
+    -unity-text-align: middle-center;
+    -unity-font-style: bold;
+    white-space: normal;
+    overflow: hidden;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+/* ---------- Bottom Palette Panel ---------- */
+.palette-panel {
+    height: 180px;
+    flex-direction: column;
+    background-color: rgba(12, 16, 24, 0.98);
+    border-top-width: 1px;
+    border-top-color: rgba(138, 180, 248, 0.3);
+    flex-shrink: 0;
+}
+
+.palette-tabs {
+    flex-direction: row;
+    height: 40px;
+    background-color: rgba(8, 12, 18, 1);
+}
+
+.palette-tab {
+    flex-grow: 1;
+    height: 100%;
+    background-color: transparent;
+    color: #8ab4f8;
+    border-width: 0;
+    border-bottom-width: 2px;
+    border-bottom-color: transparent;
+    border-radius: 0;
+    font-size: 14px;
+    -unity-text-align: middle-center;
+    transition-duration: 0.2s;
+}
+
+.palette-tab:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #e8f0fe;
+}
+
+.palette-tab--active {
+    color: #00e5ff;
+    border-bottom-color: #00e5ff;
+    -unity-font-style: bold;
+    background-color: rgba(0, 229, 255, 0.05);
+}
+
+.palette-scroll {
+    flex-grow: 1;
+    padding: 12px;
+}
+
+.palette-content {
+    flex-direction: row;
+    align-items: center;
+    height: 100%;
+}
+
+/* Individual module card */
+.module-card {
+    width: 100px;
+    height: 110px;
+    margin-right: 12px;
+    background-color: rgba(24, 32, 48, 0.8);
+    border-color: rgba(138, 180, 248, 0.2);
+    border-width: 1px;
+    border-radius: 6px;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    flex-shrink: 0;
+    transition-duration: 0.2s;
+}
+
+.module-card:hover {
+    background-color: rgba(36, 48, 72, 0.9);
+    border-color: #00e5ff;
+}
+
+.module-card--dragging {
+    opacity: 0.3;
+}
+
+.module-card-icon {
+    width: 50px;
+    height: 50px;
+    margin-bottom: 8px;
+    flex-shrink: 0;
+}
+
+.module-card-label {
+    color: #e8f0fe;
+    font-size: 12px;
+    -unity-text-align: middle-center;
+    white-space: normal;
+    overflow: hidden;
+    width: 100%;
+}
+
+/* ---------- Left Panel: Module Info ---------- */
+.module-info-panel {
+    position: absolute;
+    left: 16px;
+    bottom: 200px;
+    width: 320px;
+    min-height: 150px;
+    padding: 16px;
+    background-color: rgba(12, 16, 24, 0.9);
+    border-left-width: 3px;
+    border-left-color: #00e5ff; /* HUD accent line */
+    border-top-width: 1px;
+    border-top-color: rgba(255, 255, 255, 0.1);
+    border-right-width: 1px;
+    border-right-color: rgba(255, 255, 255, 0.1);
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+.module-info-name {
+    color: #ffffff;
+    font-size: 18px;
+    -unity-font-style: bold;
+    margin-bottom: 4px;
+}
+
+.module-info-title, .module-info-field {
+    color: #8ab4f8;
+    font-size: 13px;
+    margin-bottom: 2px;
+}
+
+.module-info-description {
+    color: #bdc1c6;
+    font-size: 12px;
+    margin-top: 8px;
+    margin-bottom: 12px;
+    white-space: normal;
+}
+
+/* Foldouts */
+.module-info-foldout {
+    margin-bottom: 8px;
+    border-top-width: 1px;
+    border-top-color: rgba(255, 255, 255, 0.1);
+    padding-top: 4px;
+}
+
+.module-info-foldout > .unity-foldout__toggle {
+    color: #e8f0fe;
+    -unity-font-style: bold;
+    font-size: 13px;
+}
+
+.module-info-foldout .unity-foldout__text {
+    color: #bdc1c6;
+    font-size: 12px;
+}
+
+.remove-module-button {
+    height: 28px;
+    margin-top: 12px;
+    background-color: rgba(220, 50, 50, 0.15);
+    border-color: #ff4a4a;
+    border-width: 1px;
+    border-radius: 4px;
+    color: #ffc4c4;
+    font-size: 13px;
+    -unity-font-style: bold;
+    transition-duration: 0.2s;
+}
+
+.remove-module-button:hover {
+    background-color: #ff4a4a;
+    color: #ffffff;
+}
+
+.remove-module-button--hidden {
+    display: none;
+}
+
+/* ---------- Right Panel: Ship Resources ---------- */
+.ship-resources-panel {
+    position: absolute;
+    right: 16px;
+    bottom: 200px;
+    width: 280px;
+    padding: 16px;
+    background-color: rgba(12, 16, 24, 0.9);
+    border-right-width: 3px;
+    border-right-color: #00e5ff;
+    border-top-width: 1px;
+    border-top-color: rgba(255, 255, 255, 0.1);
+    border-left-width: 1px;
+    border-left-color: rgba(255, 255, 255, 0.1);
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+.ship-resources-title {
+    color: #ffffff;
+    font-size: 16px;
+    -unity-font-style: bold;
+    margin-bottom: 12px;
+}
+
+.ship-resource-row {
+    margin-bottom: 12px;
+}
+
+.ship-resource-label {
+    color: #8ab4f8;
+    font-size: 13px;
+    margin-bottom: 4px;
+}
+
+.ship-resource-bar-track {
+    position: relative;
+    height: 8px;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-color: rgba(255, 255, 255, 0.1);
+    border-width: 1px;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.ship-resource-bar-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 0;
+}
+
+.ship-resource-bar-fill--usage {
+    background-color: #00e5ff;
+}
+
+.ship-resource-bar-fill--buffer {
+    background-color: #00ff66; /* Bright neon green for safe buffer */
+}
+
+/* ---------- Input Blocker & Popups ---------- */
+.ship-factory-input-blocker {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.3); /* Slight dim to show lock */
+    display: none;
+}
+
+.action-popup {
+    position: absolute;
+    left: 50%;
+    top: 80px;
+    translate: -50% 0;
+    max-width: 400px;
+    padding: 12px 24px;
+    background-color: rgba(20, 30, 45, 0.95);
+    border-width: 1px;
+    border-radius: 6px;
+    display: none;
+    border-bottom-width: 3px;
+}
+
+.action-popup-label {
+    color: #ffffff;
+    -unity-font-style: bold;
+    font-size: 15px;
+    -unity-text-align: middle-center;
+    white-space: normal;
+}
+
+/* Default / Info level */
+.action-popup {
+    border-color: #00e5ff;
+}
+
+.action-popup--warning {
+    background-color: rgba(40, 30, 10, 0.95);
+    border-color: #ffb400;
+}
+
+.action-popup--warning .action-popup-label {
+    color: #ffe8b3;
+}
+
+.action-popup--error {
+    background-color: rgba(45, 15, 20, 0.95);
+    border-color: #ff4a4a;
+}
+
+.action-popup--error .action-popup-label {
+    color: #ffc4c4;
+}

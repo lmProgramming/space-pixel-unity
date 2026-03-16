@@ -5,7 +5,7 @@ using Core.Pixelation;
 using Core.Services;
 using Events.Collision;
 using Grid;
-using LM;
+using LMPro;
 using Pixelation.CollisionResolver;
 using UnityEngine;
 using ZLinq;
@@ -44,6 +44,11 @@ namespace Pixelation
         public void Unsubscribe()
         {
             _body.OnPixelsLost -= PixelsLost;
+        }
+
+        public void ForceRecalculateColliders()
+        {
+            RecalculateColliders();
         }
 
         public Vector2Int? GetPointAlongPath(Vector2Int startPosition, Vector2 direction, bool getLast)
@@ -159,7 +164,7 @@ namespace Pixelation
                 pixelsGlobalPositions,
                 speedDifference
             );
-            _collisionEventChannel.RaiseEvent(data);
+            _collisionEventChannel.Raise(data);
         }
 
         private void PixelsLost(List<Vector2Int> pixels, PixelLoseReason reason)
@@ -237,7 +242,7 @@ namespace Pixelation
             var newColorsGrid = new Color32[width, height];
 
             foreach (var point in points)
-                newColorsGrid[point.x - leftBottomPoint.x, point.y - leftBottomPoint.y] = _grid.GetColor(point);
+                newColorsGrid[point.x - leftBottomPoint.x, point.y - leftBottomPoint.y] = _grid.GetValue(point);
 
             var globalPosition = _body.transform.TransformPoint(centrePoint - parentCenterPoint);
 

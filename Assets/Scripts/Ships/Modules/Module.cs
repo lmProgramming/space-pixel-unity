@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Core.Pixelation;
 using Core.Ship;
-using LM;
+using LMPro;
 using Pixelation;
 using UnityEngine;
 using ZLinq;
@@ -15,7 +15,7 @@ using Resources = Core.Ship.Resources;
 namespace Ships.Modules
 {
     [RequireComponent(typeof(PixelatedRigidbody))]
-    public class Module : MonoBehaviour, IModule
+    public abstract class Module : MonoBehaviour, IModule
     {
         private const float CrewSkillBonusPerLevel = 0.02f;
         protected const float CaptainBonusPerLevel = 0.05f;
@@ -104,7 +104,7 @@ namespace Ships.Modules
         public IPixelatedRigidbody PixelatedRigidbody { get; private set; }
 
         public Transform Transform => transform;
-        public ModuleType Type { get; protected set; }
+        public ModuleType Type { get; protected set; } = ModuleType.Resources;
 
         public virtual int CrewNeededCount => Mathf.CeilToInt(Resources.crewNeeded);
 
@@ -183,6 +183,16 @@ namespace Ships.Modules
             }
         }
 
+        public void SetLocalPosition(Vector2 localPosition)
+        {
+            transform.localPosition = localPosition;
+        }
+
+        public void Setup(IShip ship)
+        {
+            Ship = ship;
+        }
+
         private void HandleCrewMemberDeath(CrewMember member)
         {
             UnsubscribeCrew(member);
@@ -199,11 +209,6 @@ namespace Ships.Modules
             UnsubscribeCrew(crewToKill);
             crewToKill.Kill();
             OnCrewChange();
-        }
-
-        public void Setup(Ship ship)
-        {
-            Ship = ship;
         }
 
         public void OnShipConnectionLost()
