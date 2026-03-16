@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
+using Core.Ship;
 using Pixelation;
 using Ships.Modules;
 using UnityEngine;
 using Zenject;
+using Module = Ships.Modules.Module;
 using Object = UnityEngine.Object;
 
 namespace Ships.Serialization
@@ -92,13 +95,27 @@ namespace Ships.Serialization
         private static Dictionary<string, Type> BuildModuleTypeMap()
         {
             var baseType = typeof(Module);
-            var assembly = baseType.Assembly;
-            var map = new Dictionary<string, Type>();
-            foreach (var type in assembly.GetTypes())
+            var map = new Dictionary<string, Type>(StringComparer.Ordinal);
+
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
-                if (!baseType.IsAssignableFrom(type))
-                    continue;
-                map[type.Name] = type;
+                Type[] types;
+                try
+                {
+                    types = assembly.GetTypes();
+                }
+                catch (ReflectionTypeLoadException ex)
+                {
+                    types = ex.Types;
+                }
+
+                foreach (var type in types)
+                {
+                    if (type == null || type.IsAbstract || !baseType.IsAssignableFrom(type))
+                        continue;
+
+                    map[type.Name] = type;
+                }
             }
 
             return map;
@@ -157,6 +174,9 @@ namespace Ships.Serialization
                 createdModules.Add((moduleGo, ms));
 
                 var module = moduleGo.GetComponent<Module>();
+                if (!module)
+                    throw new UnityException(
+                        $"[ShipSnapshotService] Failed to add a Module component for '{ms.moduleName}' (typeName: '{ms.moduleTypeName}', moduleType: {ms.moduleType}).");
 
                 if (!string.IsNullOrEmpty(ms.moduleComponentJson))
                     JsonUtility.FromJsonOverwrite(ms.moduleComponentJson, module);
@@ -191,7 +211,7 @@ namespace Ships.Serialization
 
             moduleGo.AddComponent<PolygonCollider2D>();
 
-            var moduleType = ResolveModuleType(ms.moduleTypeName);
+            var moduleType = ResolveModuleType(ms);
 
             if (moduleType == typeof(LaserBeam))
                 moduleGo.AddComponent<LineRenderer>();
@@ -202,13 +222,28 @@ namespace Ships.Serialization
             return moduleGo;
         }
 
-        private static Type ResolveModuleType(string typeName)
+        private static Type ResolveModuleType(ModuleSnapshot moduleSnapshot)
         {
+            var typeName = moduleSnapshot.moduleTypeName;
             if (!string.IsNullOrEmpty(typeName) && ModuleTypeMap.TryGetValue(typeName, out var type))
                 return type;
 
-            Debug.LogWarning($"[ShipSnapshotService] Unknown module type name '{typeName}', falling back to Module");
-            return typeof(Module);
+            var fallbackType = ResolveFallbackModuleType(moduleSnapshot.moduleType);
+            Debug.LogWarning(
+                $"[ShipSnapshotService] Unknown module type name '{typeName}', falling back to '{fallbackType.Name}' for module type '{moduleSnapshot.moduleType}'.");
+
+            return fallbackType;
+        }
+
+        private static Type ResolveFallbackModuleType(ModuleType moduleType)
+        {
+            return moduleType switch
+            {
+                ModuleType.Command => typeof(Command),
+                ModuleType.Engine => typeof(Engine),
+                ModuleType.Weapon => typeof(Cannon),
+                _ => typeof(Basic)
+            };
         }
 
         private static void ApplyPixelData(PixelatedRigidbody pixelatedRb, PixelGridSnapshot pg, string moduleName)

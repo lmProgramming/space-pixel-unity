@@ -173,7 +173,7 @@ namespace Ships.Tests
                 pg.SetPixel(x, y, new Color32(0, 0, 255, 255));
             pg.RemovePixel(2, 2);
 
-            var moduleSnapshot = new ModuleSnapshot("Module", ModuleType.Resources, nameof(Module))
+            var moduleSnapshot = new ModuleSnapshot("Basic", ModuleType.Resources, nameof(Basic))
             {
                 localPosition = Vector3.zero,
                 localRotation = Quaternion.identity,

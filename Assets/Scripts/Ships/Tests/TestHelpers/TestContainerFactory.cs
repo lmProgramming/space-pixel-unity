@@ -1,5 +1,6 @@
 using Core.Services;
 using Events.Collision;
+using Events.Ship;
 using NSubstitute;
 using UnityEngine;
 using Zenject;
@@ -23,6 +24,10 @@ namespace Ships.Tests.TestHelpers
 
             var shipService = Substitute.For<IShipService>();
             container.Bind<IShipService>().FromInstance(shipService).AsSingle();
+
+            var shipInitializeModulesEventChannel = Substitute.For<ShipInitializeModulesEventChannel>();
+            container.Bind<ShipInitializeModulesEventChannel>().FromInstance(shipInitializeModulesEventChannel)
+                .AsSingle();
 
             return container;
         }
