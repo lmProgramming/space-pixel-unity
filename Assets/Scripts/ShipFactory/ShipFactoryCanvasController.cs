@@ -543,42 +543,6 @@ namespace ShipFactory
             return new Vector2(Mathf.Abs(offset.x - origin.x), Mathf.Abs(offset.y - origin.y));
         }
 
-        private float GetPanelHeight()
-        {
-            var panelHeight = _canvasArea.panel?.visualTree.layout.height;
-            if (panelHeight.HasValue && panelHeight.Value > 0f)
-                return panelHeight.Value;
-
-            return Screen.height;
-        }
-
-        private static Vector2 PanelToScreenPosition(IPanel panel, Vector2 panelPosition)
-        {
-            var panelAtScreenOrigin = RuntimePanelUtils.ScreenToPanel(panel, Vector2.zero);
-            var panelAtScreenX = RuntimePanelUtils.ScreenToPanel(panel, Vector2.right);
-            var panelAtScreenY = RuntimePanelUtils.ScreenToPanel(panel, Vector2.up);
-
-            var a = panelAtScreenX.x - panelAtScreenOrigin.x;
-            var b = panelAtScreenY.x - panelAtScreenOrigin.x;
-            var c = panelAtScreenX.y - panelAtScreenOrigin.y;
-            var d = panelAtScreenY.y - panelAtScreenOrigin.y;
-
-            var det = a * d - b * c;
-            var dx = panelPosition.x - panelAtScreenOrigin.x;
-            var dy = panelPosition.y - panelAtScreenOrigin.y;
-
-            if (Mathf.Abs(det) <= 0.00001f)
-            {
-                var sx = Mathf.Abs(a) > 0.00001f ? dx / a : panelPosition.x;
-                var sy = Mathf.Abs(d) > 0.00001f ? dy / d : panelPosition.y;
-                return new Vector2(sx, sy);
-            }
-
-            var screenX = (d * dx - b * dy) / det;
-            var screenY = (-c * dx + a * dy) / det;
-            return new Vector2(screenX, screenY);
-        }
-
         private void RebuildOverlaysFromShip()
         {
             _canvasArea.Clear();

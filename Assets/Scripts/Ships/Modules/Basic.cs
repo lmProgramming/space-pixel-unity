@@ -12,12 +12,6 @@ namespace Ships.Modules
 
         private void OnValidate()
         {
-            if (moduleType != ModuleType.Resources && moduleType != ModuleType.Structural)
-            {
-                Debug.LogError("Basic module can only be of type Resources or Structural.");
-                moduleType = ModuleType.Resources;
-            }
-
             Type = moduleType;
         }
     }

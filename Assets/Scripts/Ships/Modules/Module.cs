@@ -15,6 +15,7 @@ using Resources = Core.Ship.Resources;
 namespace Ships.Modules
 {
     [RequireComponent(typeof(PixelatedRigidbody))]
+    [DisallowMultipleComponent]
     public abstract class Module : MonoBehaviour, IModule
     {
         private const float CrewSkillBonusPerLevel = 0.02f;

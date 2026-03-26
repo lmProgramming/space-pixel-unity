@@ -3,7 +3,6 @@ using Core.Ship;
 using Ships.StateMachines.Behaviour;
 using Ships.StateMachines.Navigation;
 using UnityEngine;
-using ZLinq;
 
 namespace Ships
 {
@@ -54,12 +53,12 @@ namespace Ships
 
             if (_navigationStateMachine.ShouldMove)
                 NavigateTowards(_navigationStateMachine.Target);
+            else
+                MarkEnginesActivity(ApplyMovement(Vector2.zero, CommandModule.Transform.up));
         }
 
         private void NavigateTowards(Vector2 targetPosition)
         {
-            var selfRigidbody = CommandModule.PixelatedRigidbody?.Rigidbody;
-
             var position = (Vector2)CommandModule.Transform.position;
             var toTarget = targetPosition - position;
             var distance = toTarget.magnitude;
@@ -85,29 +84,24 @@ namespace Ships
                 }
             }
 
-            ApplyMovement(selfRigidbody, forward, desired);
+            MarkEnginesActivity(ApplyMovement(desired, forward));
         }
 
-        private void ApplyMovement(Rigidbody2D selfRigidbody, Vector2 forward, Vector2 desiredDirection)
+        private bool ApplyMovement(Vector2 desiredDirection, Vector2 forward)
         {
-            var availableThrust = Engines.AsValueEnumerable().Sum(e => e.MaxThrust);
-            if (availableThrust <= 0f) return;
-
-            var alignment = Mathf.Clamp01(Vector2.Dot(forward, desiredDirection));
-            if (alignment >= minThrustAlignment)
-            {
-                var acceleration = speedMultiplier * availableThrust * alignment;
-                selfRigidbody.AddForce(forward * acceleration);
-            }
-
+            var forwardInput = 0f;
             if (desiredDirection.sqrMagnitude > 0f)
             {
-                var turn = -Vector2.SignedAngle(forward, desiredDirection);
-                var torque = rotationMultiplier * availableThrust * Mathf.Sign(turn) * Mathf.Abs(turn) / 180f;
-                selfRigidbody.AddTorque(torque);
+                var alignment = Mathf.Clamp01(Vector2.Dot(forward.normalized, desiredDirection.normalized));
+                if (alignment >= minThrustAlignment)
+                    forwardInput = speedMultiplier * alignment;
             }
 
-            MarkEnginesActivity(true);
+            var turnInput = 0f;
+            if (desiredDirection.sqrMagnitude > 0f)
+                turnInput = rotationMultiplier * (-Vector2.SignedAngle(forward, desiredDirection) / 180f);
+
+            return ApplyEngineForces(forwardInput, turnInput, Time.deltaTime, true);
         }
 
         private void InitializeStateMachines()

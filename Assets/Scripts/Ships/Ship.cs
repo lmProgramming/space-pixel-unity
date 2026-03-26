@@ -24,12 +24,30 @@ using ZLinq;
 namespace Ships
 {
     [RequireComponent(typeof(ResourceManager))]
+    [DisallowMultipleComponent]
     public class Ship : MonoBehaviour, IShip
     {
         private const float UpdateResourcesTimer = 0.1f;
 
         [SerializeField]
         private Team team;
+
+        [Header("SAS")]
+        [SerializeField] private float sasTurnReleaseThreshold = 0.05f;
+
+        [SerializeField] private float sasHeadingDeadZoneDegrees = 0.3f;
+        [SerializeField] private float sasHeadingGain = 0.04f;
+        [SerializeField] private float sasAngularVelocityGain = 0.03f;
+        [SerializeField] private float sasMaxTurnInput = 2f;
+        [SerializeField] private float sasForwardCompensationStrength = 1f;
+        [SerializeField] private float sasForwardCompensationMaxTurnInput = 1.5f;
+
+        [Header("Control Allocator")]
+        [SerializeField] private int allocatorIterations = 14;
+
+        [SerializeField] private float allocatorForceWeight = 1f;
+        [SerializeField] private float allocatorTorqueWeight = 0.4f;
+        [SerializeField] private float allocatorRegularization = 0.02f;
 
         private readonly List<Module> _allModulesCache = new();
 
@@ -38,12 +56,18 @@ namespace Ships
 
         private BiCohesionGraph<IModule> _biCohesionGraph;
 
+        private ControlAllocator _controlAllocator;
+
+        private EngineDirectionSolver _engineDirectionSolver;
+
         [Inject]
         private IMapInfo _mapInfo;
 
         private IModuleConnectionFactory _moduleConnectionFactory;
 
         private Action<IPixelated> _onCommandModuleNoPixelsLeft;
+
+        private SasTurnInputResolver _sasTurnInputResolver;
 
         [Inject]
         private ShipInitializeModulesEventChannel _shipInitializeModulesEventChannel;
@@ -73,17 +97,23 @@ namespace Ships
         {
             CommandModule ??= GetComponentInChildren<Command>();
             ResourceManager = GetComponent<ResourceManager>();
-
-            _moduleConnectionFactory =
-                GetComponent<IModuleConnectionFactory>();
+            _moduleConnectionFactory = GetComponent<IModuleConnectionFactory>();
+            _engineDirectionSolver = new EngineDirectionSolver();
+            _controlAllocator = new ControlAllocator();
+            _sasTurnInputResolver = new SasTurnInputResolver(_engineDirectionSolver);
 
             Assert.IsNotNull(CommandModule, "CommandModule != null");
+            Assert.IsNotNull(ResourceManager, "ResourceManager != null");
             Assert.IsNotNull(_moduleConnectionFactory, "_moduleConnectionFactory != null");
+            Assert.IsNotNull(_engineDirectionSolver, "_engineDirectionSolver != null");
+            Assert.IsNotNull(_controlAllocator, "_controlAllocator != null");
+            Assert.IsNotNull(_sasTurnInputResolver, "_sasTurnInputResolver != null");
         }
 
         protected virtual void Start()
         {
             InitializeModules();
+            _sasTurnInputResolver.CaptureDesiredHeading(GetCurrentHeadingDegrees());
 
             UpdateResourcesLoop().Forget();
         }
@@ -255,7 +285,7 @@ namespace Ships
                 weapon.Shoot();
         }
 
-        public void StopShooting()
+        protected void StopShooting()
         {
             foreach (var weapon in Weapons)
                 weapon.StopShooting();
@@ -278,6 +308,101 @@ namespace Ships
                 engine.SetActive(active);
         }
 
+        protected bool ApplyEngineForces(float forwardInput, float turnInput, float deltaTime,
+            bool sasEnabled = false)
+        {
+            forwardInput = Mathf.Clamp(forwardInput, -1f, 1f);
+            turnInput = Mathf.Clamp(turnInput, -1f, 1f);
+
+            var selfRigidbody = CommandModule.PixelatedRigidbody?.Rigidbody;
+            Assert.IsNotNull(selfRigidbody, "CommandModule.PixelatedRigidbody.Rigidbody != null");
+
+            var engines = Engines;
+            if (engines.Count == 0) return false;
+
+            var forward = CommandModule.Transform.up;
+            var centerOfMass = selfRigidbody.worldCenterOfMass;
+            var maxLeverArm = _engineDirectionSolver.GetMaxLeverArmLength(engines, centerOfMass);
+            var finalTurnInput = sasEnabled
+                ? _sasTurnInputResolver.ResolveTurnInput(turnInput, forwardInput, selfRigidbody,
+                    GetCurrentHeadingDegrees(), engines, forward, centerOfMass, maxLeverArm, GetSasSettings())
+                : turnInput;
+            var desiredDirectionPerEngine = new Vector2[engines.Count];
+
+            for (var i = 0; i < engines.Count; i++)
+            {
+                var engine = engines[i];
+                if (engine.MaxThrust <= 0f)
+                {
+                    engine.RotateThrusterTowards(0f, deltaTime);
+                    engine.SetCurrentThrust(0f);
+                    desiredDirectionPerEngine[i] = Vector2.zero;
+                    continue;
+                }
+
+                var desiredDirection = _engineDirectionSolver.GetDesiredEngineDirection(
+                    forward, centerOfMass, maxLeverArm, engine, forwardInput, finalTurnInput);
+                desiredDirectionPerEngine[i] = desiredDirection;
+
+                if (desiredDirection.sqrMagnitude <= Mathf.Epsilon)
+                {
+                    engine.RotateThrusterTowards(0f, deltaTime);
+                    engine.SetCurrentThrust(0f);
+                    continue;
+                }
+
+                var desiredAngle = Vector2.SignedAngle(engine.Transform.up, desiredDirection.normalized);
+                engine.RotateThrusterTowards(desiredAngle, deltaTime);
+            }
+
+            var thrustRatios = _controlAllocator.Allocate(engines, desiredDirectionPerEngine, centerOfMass, forward,
+                forwardInput, finalTurnInput, maxLeverArm, GetControlAllocatorSettings());
+
+            var anyForceApplied = false;
+
+            for (var i = 0; i < engines.Count; i++)
+            {
+                var engine = engines[i];
+
+                if (engine.MaxThrust <= 0f)
+                {
+                    engine.SetCurrentThrust(0f);
+                    continue;
+                }
+
+                var thrust = Mathf.Clamp01(thrustRatios[i]) * engine.MaxThrust;
+                engine.SetCurrentThrust(thrust);
+
+                if (thrust <= Mathf.Epsilon) continue;
+
+                var force = engine.WorldThrustDirection * thrust;
+
+                selfRigidbody.AddForceAtPosition(force, engine.WorldThrustPoint);
+                anyForceApplied |= force.sqrMagnitude > Mathf.Epsilon;
+            }
+
+            return anyForceApplied;
+        }
+
+        private ControlAllocatorSettings GetControlAllocatorSettings()
+        {
+            return new ControlAllocatorSettings(allocatorIterations, allocatorForceWeight,
+                allocatorTorqueWeight, allocatorRegularization);
+        }
+
+        private SasTurnInputSettings GetSasSettings()
+        {
+            return new SasTurnInputSettings(sasTurnReleaseThreshold, sasHeadingDeadZoneDegrees, sasHeadingGain,
+                sasAngularVelocityGain, sasMaxTurnInput, sasForwardCompensationStrength,
+                sasForwardCompensationMaxTurnInput);
+        }
+
+        private float GetCurrentHeadingDegrees()
+        {
+            return CommandModule.Transform.eulerAngles.z;
+        }
+
+
         protected IShip FindClosestEnemy(float maxRange = float.MaxValue)
         {
             var allShips = ShipService.GetEnemyShipsOf(Team);
@@ -295,5 +420,22 @@ namespace Ships
 
             return closestEnemy;
         }
+
+#if UNITY_INCLUDE_TESTS
+        internal void ApplyEngineForcesForTesting(float forwardInput, float turnInput, float deltaTime,
+            bool sasEnabled = false)
+        {
+            ApplyEngineForces(forwardInput, turnInput, deltaTime, sasEnabled);
+        }
+
+        internal void ConfigureAllocatorForTesting(bool isEnabled, int iterations = 24, float forceWeight = 1f,
+            float torqueWeight = 0.35f, float regularization = 0.001f)
+        {
+            allocatorIterations = iterations;
+            allocatorForceWeight = forceWeight;
+            allocatorTorqueWeight = torqueWeight;
+            allocatorRegularization = regularization;
+        }
+#endif
     }
 }

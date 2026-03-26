@@ -1,6 +1,5 @@
 using LMPro;
 using UnityEngine;
-using ZLinq;
 
 namespace Ships
 {
@@ -9,20 +8,18 @@ namespace Ships
         [SerializeField] private float speedMultiplier;
 
         [SerializeField] private float rotationMultiplier;
+        [SerializeField] private bool sasEnabled = true;
+        [SerializeField] private KeyCode sasToggleKey = KeyCode.T;
 
         protected override void Move()
         {
-            var availableThrust = Engines.AsValueEnumerable().Sum(e => e.MaxThrust);
+            if (Input.GetKeyDown(sasToggleKey))
+                sasEnabled = !sasEnabled;
 
-            var acceleration = Input.GetAxis("Vertical") * speedMultiplier * availableThrust;
+            var forwardInput = Input.GetAxis("Vertical") * speedMultiplier;
+            var turnInput = Input.GetAxis("Horizontal") * rotationMultiplier;
 
-            CommandModule.PixelatedRigidbody.Rigidbody.AddForce(CommandModule.Transform.up * acceleration);
-
-            var turn = Input.GetAxis("Horizontal") * rotationMultiplier * availableThrust;
-
-            CommandModule.PixelatedRigidbody.Rigidbody.AddTorque(turn);
-
-            MarkEnginesActivity(acceleration != 0 || turn != 0);
+            MarkEnginesActivity(ApplyEngineForces(forwardInput, turnInput, Time.deltaTime, sasEnabled));
         }
 
         protected override void HandleWeapons()
