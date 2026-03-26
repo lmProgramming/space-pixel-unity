@@ -77,9 +77,12 @@ namespace Editor.ToolsExtensions
             var oldShipValues = JsonUtility.ToJson(oldShip);
 
             var shipCrewAssigner = obj.GetComponent<ShipCrewAssigner>();
-            var oldShipCrewAssignerValues = JsonUtility.ToJson(shipCrewAssigner);
+            string oldShipCrewAssignerValues = null;
             if (shipCrewAssigner != null)
+            {
+                oldShipCrewAssignerValues = JsonUtility.ToJson(shipCrewAssigner);
                 Undo.DestroyObjectImmediate(shipCrewAssigner);
+            }
 
             Undo.DestroyObjectImmediate(oldShip);
 
@@ -87,9 +90,9 @@ namespace Editor.ToolsExtensions
 
             JsonUtility.FromJsonOverwrite(oldShipValues, newShipComponent);
 
-            var newShipCrewAssigner = obj.GetComponent<ShipCrewAssigner>();
-            if (newShipCrewAssigner == null) return;
-            newShipCrewAssigner = obj.AddComponent<ShipCrewAssigner>();
+            var newShipCrewAssigner = obj.GetComponent<ShipCrewAssigner>() ?? obj.AddComponent<ShipCrewAssigner>();
+
+            if (newShipCrewAssigner == null || oldShipCrewAssignerValues == null) return;
             JsonUtility.FromJsonOverwrite(oldShipCrewAssignerValues, newShipCrewAssigner);
         }
     }

@@ -311,6 +311,9 @@ namespace Ships
         protected bool ApplyEngineForces(float forwardInput, float turnInput, float deltaTime,
             bool sasEnabled = false)
         {
+            forwardInput = Mathf.Clamp(forwardInput, -1f, 1f);
+            turnInput = Mathf.Clamp(turnInput, -1f, 1f);
+
             var selfRigidbody = CommandModule.PixelatedRigidbody?.Rigidbody;
             Assert.IsNotNull(selfRigidbody, "CommandModule.PixelatedRigidbody.Rigidbody != null");
 

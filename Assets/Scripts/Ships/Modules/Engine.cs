@@ -11,9 +11,9 @@ namespace Ships.Modules
         [SerializeField] private float gimbalSpeed = 240f;
 
         [SerializeField] private ParticleSystem exhaustParticles;
+        [SerializeField] internal float currentThrustRatioForDebug;
 
         private bool _active;
-        private float _currentThrusterAngle;
         private float _currentThrustRatio;
         private Quaternion _exhaustBaseLocalRotation;
         private float _exhaustBaseRateOverDistanceMultiplier;
@@ -51,14 +51,15 @@ namespace Ships.Modules
             ApplyExhaustVisuals();
         }
 
+#if UNITY_EDITOR
         private void Update()
         {
-#if UNITY_EDITOR
-#endif
+            currentThrustRatioForDebug = _currentThrustRatio;
         }
+#endif
 
 #if UNITY_INCLUDE_TESTS
-        internal void ConfigureForTesting(float maxThrustValue, Vector2 thrustPointValue,
+        internal void ConfigureForTesting(float maxThrustValue,
             float maxGimbalAngleValue = 35f,
             float gimbalSpeedValue = 9999f)
         {

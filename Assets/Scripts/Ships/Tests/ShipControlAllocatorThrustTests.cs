@@ -8,6 +8,7 @@ using Ships.Tests.TestHelpers;
 using UnityEngine;
 using UnityEngine.TestTools;
 using Zenject;
+using ZLinq;
 using Object = UnityEngine.Object;
 
 namespace Ships.Tests
@@ -26,9 +27,8 @@ namespace Ships.Tests
         [TearDown]
         public void TearDown()
         {
-            foreach (var obj in _createdObjects)
-                if (obj != null)
-                    Object.DestroyImmediate(obj);
+            foreach (var obj in _createdObjects.AsValueEnumerable().Where(obj => obj != null))
+                Object.DestroyImmediate(obj);
         }
 
         private struct EngineSpec
@@ -36,7 +36,6 @@ namespace Ships.Tests
             public Vector2 LocalPosition;
             public float LocalRotationZ;
             public float MaxThrust;
-            public Vector2 ThrustPoint;
         }
 
         private sealed class ShipTestProxy : Ship
@@ -58,8 +57,7 @@ namespace Ships.Tests
                 {
                     LocalPosition = new Vector2(0f, -5f),
                     LocalRotationZ = 0f,
-                    MaxThrust = 10f,
-                    ThrustPoint = Vector2.zero
+                    MaxThrust = 10f
                 });
 
             yield return WaitForLifecycle();
@@ -78,15 +76,13 @@ namespace Ships.Tests
                 {
                     LocalPosition = new Vector2(0f, -5f),
                     LocalRotationZ = 180f,
-                    MaxThrust = 10f,
-                    ThrustPoint = Vector2.zero
+                    MaxThrust = 10f
                 },
                 new EngineSpec
                 {
                     LocalPosition = new Vector2(0f, 5f),
                     LocalRotationZ = 0f,
-                    MaxThrust = 10f,
-                    ThrustPoint = Vector2.zero
+                    MaxThrust = 10f
                 });
 
             yield return WaitForLifecycle();
@@ -105,15 +101,13 @@ namespace Ships.Tests
                 {
                     LocalPosition = new Vector2(0f, -5f),
                     LocalRotationZ = 180f,
-                    MaxThrust = 10f,
-                    ThrustPoint = Vector2.zero
+                    MaxThrust = 10f
                 },
                 new EngineSpec
                 {
                     LocalPosition = new Vector2(0f, 5f),
                     LocalRotationZ = 0f,
-                    MaxThrust = 10f,
-                    ThrustPoint = Vector2.zero
+                    MaxThrust = 10f
                 });
 
             yield return WaitForLifecycle();
@@ -167,7 +161,7 @@ namespace Ships.Tests
             particleRoot.AddComponent<ParticleSystem>();
 
             var engine = engineGo.AddComponent<Engine>();
-            engine.ConfigureForTesting(spec.MaxThrust, spec.ThrustPoint);
+            engine.ConfigureForTesting(spec.MaxThrust);
 
             return engine;
         }
