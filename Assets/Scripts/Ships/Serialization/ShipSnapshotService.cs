@@ -96,26 +96,24 @@ namespace Ships.Serialization
         {
             var baseType = typeof(Module);
             var map = new Dictionary<string, Type>(StringComparer.Ordinal);
+            var shipsAssembly = typeof(Module).Assembly;
 
-            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+            Type[] types;
+            try
             {
-                Type[] types;
-                try
-                {
-                    types = assembly.GetTypes();
-                }
-                catch (ReflectionTypeLoadException ex)
-                {
-                    types = ex.Types;
-                }
+                types = shipsAssembly.GetTypes();
+            }
+            catch (ReflectionTypeLoadException ex)
+            {
+                types = ex.Types;
+            }
 
-                foreach (var type in types)
-                {
-                    if (type == null || type.IsAbstract || !baseType.IsAssignableFrom(type))
-                        continue;
+            foreach (var type in types)
+            {
+                if (type == null || type.IsAbstract || !baseType.IsAssignableFrom(type))
+                    continue;
 
-                    map[type.Name] = type;
-                }
+                map[type.Name] = type;
             }
 
             return map;

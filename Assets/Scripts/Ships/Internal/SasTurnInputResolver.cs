@@ -13,7 +13,6 @@ namespace Ships.Internal
         private bool _hasDesiredHeading;
         private bool _wasTurning;
 
-        [Inject]
         public SasTurnInputResolver(EngineDirectionSolver engineDirectionSolver)
         {
             _engineDirectionSolver = engineDirectionSolver;
