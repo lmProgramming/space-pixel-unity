@@ -65,8 +65,7 @@ namespace Ships.Tests
             yield return WaitForLifecycle();
 
             shipWithEngines.Ship.ConfigureAllocatorForTesting(true);
-            shipWithEngines.Ship.ApplyEngineForcesForTesting(1f, 0f, 0.02f,
-                false);
+            shipWithEngines.Ship.ApplyEngineForcesForTesting(1f, 0f, 0.02f);
 
             Assert.That(shipWithEngines.Engines[0].CurrentThrustRatioForTesting, Is.GreaterThanOrEqualTo(0.9f));
         }
@@ -93,8 +92,7 @@ namespace Ships.Tests
             yield return WaitForLifecycle();
 
             shipWithEngines.Ship.ConfigureAllocatorForTesting(true);
-            shipWithEngines.Ship.ApplyEngineForcesForTesting(-1f, 0f, 0.02f,
-                false);
+            shipWithEngines.Ship.ApplyEngineForcesForTesting(-1f, 0f, 0.02f);
 
             Assert.That(shipWithEngines.Engines[0].CurrentThrustRatioForTesting, Is.GreaterThanOrEqualTo(0.9f));
         }
@@ -121,8 +119,7 @@ namespace Ships.Tests
             yield return WaitForLifecycle();
 
             shipWithEngines.Ship.ConfigureAllocatorForTesting(true);
-            shipWithEngines.Ship.ApplyEngineForcesForTesting(-1f, 0f, 0.02f,
-                false);
+            shipWithEngines.Ship.ApplyEngineForcesForTesting(-1f, 0f, 0.02f);
 
             Assert.That(shipWithEngines.Engines[1].CurrentThrustRatioForTesting, Is.LessThanOrEqualTo(0.1f));
         }

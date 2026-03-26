@@ -43,9 +43,8 @@ namespace Ships
         [SerializeField] private float sasForwardCompensationMaxTurnInput = 1.5f;
 
         [Header("Control Allocator")]
-        [SerializeField] private bool useControlAllocator = true;
-
         [SerializeField] private int allocatorIterations = 14;
+
         [SerializeField] private float allocatorForceWeight = 1f;
         [SerializeField] private float allocatorTorqueWeight = 0.4f;
         [SerializeField] private float allocatorRegularization = 0.02f;
@@ -57,15 +56,18 @@ namespace Ships
 
         private BiCohesionGraph<IModule> _biCohesionGraph;
 
+        private ControlAllocator _controlAllocator;
+
+        private EngineDirectionSolver _engineDirectionSolver;
+
         [Inject]
         private IMapInfo _mapInfo;
 
         private IModuleConnectionFactory _moduleConnectionFactory;
 
         private Action<IPixelated> _onCommandModuleNoPixelsLeft;
-        private float _sasDesiredHeadingDegrees;
-        private bool _sasHasDesiredHeading;
-        private bool _sasWasTurning;
+
+        private SasTurnInputResolver _sasTurnInputResolver;
 
         [Inject]
         private ShipInitializeModulesEventChannel _shipInitializeModulesEventChannel;
@@ -95,18 +97,23 @@ namespace Ships
         {
             CommandModule ??= GetComponentInChildren<Command>();
             ResourceManager = GetComponent<ResourceManager>();
-
-            _moduleConnectionFactory =
-                GetComponent<IModuleConnectionFactory>();
+            _moduleConnectionFactory = GetComponent<IModuleConnectionFactory>();
+            _engineDirectionSolver = new EngineDirectionSolver();
+            _controlAllocator = new ControlAllocator();
+            _sasTurnInputResolver = new SasTurnInputResolver(_engineDirectionSolver);
 
             Assert.IsNotNull(CommandModule, "CommandModule != null");
+            Assert.IsNotNull(ResourceManager, "ResourceManager != null");
             Assert.IsNotNull(_moduleConnectionFactory, "_moduleConnectionFactory != null");
+            Assert.IsNotNull(_engineDirectionSolver, "_engineDirectionSolver != null");
+            Assert.IsNotNull(_controlAllocator, "_controlAllocator != null");
+            Assert.IsNotNull(_sasTurnInputResolver, "_sasTurnInputResolver != null");
         }
 
         protected virtual void Start()
         {
             InitializeModules();
-            CaptureSasHeadingFromCurrent();
+            _sasTurnInputResolver.CaptureDesiredHeading(GetCurrentHeadingDegrees());
 
             UpdateResourcesLoop().Forget();
         }
@@ -307,14 +314,16 @@ namespace Ships
             var selfRigidbody = CommandModule.PixelatedRigidbody?.Rigidbody;
             Assert.IsNotNull(selfRigidbody, "CommandModule.PixelatedRigidbody.Rigidbody != null");
 
-            var finalTurnInput = GetFinalTurnInput(turnInput, forwardInput, selfRigidbody, sasEnabled);
-
             var engines = Engines;
             if (engines.Count == 0) return false;
 
             var forward = CommandModule.Transform.up;
             var centerOfMass = selfRigidbody.worldCenterOfMass;
-            var maxLeverArm = GetMaxLeverArmLength(engines, centerOfMass);
+            var maxLeverArm = _engineDirectionSolver.GetMaxLeverArmLength(engines, centerOfMass);
+            var finalTurnInput = sasEnabled
+                ? _sasTurnInputResolver.ResolveTurnInput(turnInput, forwardInput, selfRigidbody,
+                    GetCurrentHeadingDegrees(), engines, forward, centerOfMass, maxLeverArm, GetSasSettings())
+                : turnInput;
             var desiredDirectionPerEngine = new Vector2[engines.Count];
 
             for (var i = 0; i < engines.Count; i++)
@@ -328,13 +337,8 @@ namespace Ships
                     continue;
                 }
 
-                var desiredDirection = GetDesiredEngineDirection(
-                    forward,
-                    centerOfMass,
-                    maxLeverArm,
-                    engine,
-                    forwardInput,
-                    finalTurnInput);
+                var desiredDirection = _engineDirectionSolver.GetDesiredEngineDirection(
+                    forward, centerOfMass, maxLeverArm, engine, forwardInput, finalTurnInput);
                 desiredDirectionPerEngine[i] = desiredDirection;
 
                 if (desiredDirection.sqrMagnitude <= Mathf.Epsilon)
@@ -348,10 +352,8 @@ namespace Ships
                 engine.RotateThrusterTowards(desiredAngle, deltaTime);
             }
 
-            var thrustRatios = useControlAllocator
-                ? AllocateControlInputs(engines, desiredDirectionPerEngine, centerOfMass, forward, forwardInput,
-                    finalTurnInput, maxLeverArm)
-                : AllocateLegacyInputs(engines, desiredDirectionPerEngine);
+            var thrustRatios = _controlAllocator.Allocate(engines, desiredDirectionPerEngine, centerOfMass, forward,
+                forwardInput, finalTurnInput, maxLeverArm, GetControlAllocatorSettings());
 
             var anyForceApplied = false;
 
@@ -379,193 +381,17 @@ namespace Ships
             return anyForceApplied;
         }
 
-        private static float[] AllocateLegacyInputs(IReadOnlyList<Engine> engines,
-            IReadOnlyList<Vector2> desiredDirections)
+        private ControlAllocatorSettings GetControlAllocatorSettings()
         {
-            var thrustRatios = new float[engines.Count];
-
-            for (var i = 0; i < engines.Count; i++)
-            {
-                if (engines[i].MaxThrust <= 0f || desiredDirections[i].sqrMagnitude <= Mathf.Epsilon)
-                    continue;
-
-                thrustRatios[i] = Mathf.Clamp01(desiredDirections[i].magnitude);
-            }
-
-            return thrustRatios;
+            return new ControlAllocatorSettings(allocatorIterations, allocatorForceWeight,
+                allocatorTorqueWeight, allocatorRegularization);
         }
 
-        private float[] AllocateControlInputs(IReadOnlyList<Engine> engines, IReadOnlyList<Vector2> desiredDirections,
-            Vector2 centerOfMass, Vector2 forward, float forwardInput, float turnInput, float maxLeverArm)
+        private SasTurnInputSettings GetSasSettings()
         {
-            var thrustRatios = new float[engines.Count];
-            var requestedForceDirection = forwardInput >= 0f ? forward : -forward;
-            var requestedForceMagnitude = Mathf.Abs(forwardInput);
-
-            var columns = new Vector3[engines.Count];
-            var hasAnyEffectiveColumn = false;
-            var totalThrustCapacity = 0f;
-            var totalTorqueCapacity = 0f;
-
-            for (var i = 0; i < engines.Count; i++)
-            {
-                var engine = engines[i];
-                if (engine.MaxThrust <= 0f || desiredDirections[i].sqrMagnitude <= Mathf.Epsilon)
-                    continue;
-
-                var dir = engine.WorldThrustDirection;
-                var lever = engine.WorldThrustPoint - centerOfMass;
-                var torquePerUnit = lever.x * dir.y - lever.y * dir.x;
-
-                columns[i] = new Vector3(
-                    dir.x * engine.MaxThrust * allocatorForceWeight,
-                    dir.y * engine.MaxThrust * allocatorForceWeight,
-                    torquePerUnit * engine.MaxThrust * allocatorTorqueWeight);
-
-                hasAnyEffectiveColumn = hasAnyEffectiveColumn || columns[i].sqrMagnitude > Mathf.Epsilon;
-
-                totalThrustCapacity += engine.MaxThrust;
-                totalTorqueCapacity += Mathf.Abs(torquePerUnit) * engine.MaxThrust;
-            }
-
-            if (!hasAnyEffectiveColumn)
-                return thrustRatios;
-
-            var targetForceMagnitude = requestedForceMagnitude * totalThrustCapacity * allocatorForceWeight;
-            var targetX = requestedForceDirection.x * targetForceMagnitude;
-            var targetY = requestedForceDirection.y * targetForceMagnitude;
-
-            var torqueScale = Mathf.Max(totalTorqueCapacity, Mathf.Max(1f, maxLeverArm));
-            var targetTorque = turnInput * torqueScale * allocatorTorqueWeight;
-
-            var denominator = Mathf.Max(0.0001f, allocatorRegularization) +
-                              columns.AsValueEnumerable().Sum(t => t.sqrMagnitude);
-
-            var stepSize = 1f / denominator;
-            var iterations = Mathf.Clamp(allocatorIterations, 1, 64);
-
-            for (var iteration = 0; iteration < iterations; iteration++)
-            {
-                var residualX = -targetX;
-                var residualY = -targetY;
-                var residualTorque = -targetTorque;
-
-                for (var i = 0; i < thrustRatios.Length; i++)
-                {
-                    residualX += columns[i].x * thrustRatios[i];
-                    residualY += columns[i].y * thrustRatios[i];
-                    residualTorque += columns[i].z * thrustRatios[i];
-                }
-
-                for (var i = 0; i < thrustRatios.Length; i++)
-                {
-                    if (columns[i].sqrMagnitude <= Mathf.Epsilon) continue;
-
-                    var gradient = columns[i].x * residualX + columns[i].y * residualY +
-                                   columns[i].z * residualTorque + allocatorRegularization * thrustRatios[i];
-
-                    thrustRatios[i] = Mathf.Clamp01(thrustRatios[i] - stepSize * gradient);
-                }
-            }
-
-            return thrustRatios;
-        }
-
-        private float GetFinalTurnInput(float requestedTurnInput, float forwardInput, Rigidbody2D selfRigidbody,
-            bool sasEnabled)
-        {
-            if (!sasEnabled) return requestedTurnInput;
-
-            UpdateSasDesiredHeadingOnTurnRelease(requestedTurnInput);
-
-            var headingHoldTurnInput = GetSasHeadingHoldTurnInput(requestedTurnInput, selfRigidbody);
-            if (Mathf.Abs(requestedTurnInput) > sasTurnReleaseThreshold || Mathf.Abs(forwardInput) <= Mathf.Epsilon)
-                return headingHoldTurnInput;
-
-            var forwardCompensation = CalculateForwardThrustCompensationTurnInput(forwardInput);
-            var withForwardCompensation = headingHoldTurnInput +
-                                          forwardCompensation * sasForwardCompensationStrength;
-
-            return Mathf.Clamp(withForwardCompensation, -sasMaxTurnInput, sasMaxTurnInput);
-        }
-
-        private void UpdateSasDesiredHeadingOnTurnRelease(float requestedTurnInput)
-        {
-            CaptureSasHeadingFromCurrentIfNeeded();
-
-            var isTurning = Mathf.Abs(requestedTurnInput) > sasTurnReleaseThreshold;
-            if (_sasWasTurning && !isTurning) CaptureSasHeadingFromCurrent();
-
-            _sasWasTurning = isTurning;
-        }
-
-        private float GetSasHeadingHoldTurnInput(float requestedTurnInput, Rigidbody2D selfRigidbody)
-        {
-            if (Mathf.Abs(requestedTurnInput) > sasTurnReleaseThreshold) return requestedTurnInput;
-
-            CaptureSasHeadingFromCurrentIfNeeded();
-
-            var headingError = Mathf.DeltaAngle(GetCurrentHeadingDegrees(), _sasDesiredHeadingDegrees);
-            if (Mathf.Abs(headingError) < sasHeadingDeadZoneDegrees)
-                headingError = 0f;
-
-            var angularVelocityDamping = -selfRigidbody.angularVelocity * sasAngularVelocityGain;
-            var turnCorrection = headingError * sasHeadingGain + angularVelocityDamping;
-
-            return Mathf.Clamp(turnCorrection, -sasMaxTurnInput, sasMaxTurnInput);
-        }
-
-        private float CalculateForwardThrustCompensationTurnInput(float forwardInput)
-        {
-            var selfRigidbody = CommandModule.PixelatedRigidbody?.Rigidbody;
-            Assert.IsNotNull(selfRigidbody, "CommandModule.PixelatedRigidbody.Rigidbody != null");
-
-            var engines = Engines;
-            if (engines.Count == 0) return 0f;
-
-            var forward = CommandModule.Transform.up;
-            var centerOfMass = selfRigidbody.worldCenterOfMass;
-            var maxLeverArm = GetMaxLeverArmLength(engines, centerOfMass);
-
-            const float sampleTurnInput = 0.2f;
-
-            var baselineTorque = EstimateNetTorqueForTurnInput(engines, forward, centerOfMass, maxLeverArm,
-                forwardInput, 0f);
-            if (Mathf.Abs(baselineTorque) <= 0.0001f) return 0f;
-
-            var positiveSampleTorque = EstimateNetTorqueForTurnInput(engines, forward, centerOfMass, maxLeverArm,
-                forwardInput, sampleTurnInput);
-            var negativeSampleTorque = EstimateNetTorqueForTurnInput(engines, forward, centerOfMass, maxLeverArm,
-                forwardInput, -sampleTurnInput);
-
-            var torqueSlope = (positiveSampleTorque - negativeSampleTorque) / (sampleTurnInput * 2f);
-            if (Mathf.Abs(torqueSlope) <= 0.0001f) return 0f;
-
-            var compensation = -baselineTorque / torqueSlope;
-            return Mathf.Clamp(compensation, -sasForwardCompensationMaxTurnInput, sasForwardCompensationMaxTurnInput);
-        }
-
-        private static float EstimateNetTorqueForTurnInput(IReadOnlyList<Engine> engines, Vector2 shipForward,
-            Vector2 centerOfMass, float maxLeverArm, float forwardInput, float turnInput)
-        {
-            var netTorque = 0f;
-
-            foreach (var engine in engines)
-            {
-                if (engine.MaxThrust <= 0f) continue;
-
-                var desiredDirection = GetDesiredEngineDirection(shipForward, centerOfMass, maxLeverArm, engine,
-                    forwardInput, turnInput);
-
-                if (desiredDirection.sqrMagnitude <= Mathf.Epsilon) continue;
-
-                var thrust = Mathf.Clamp01(desiredDirection.magnitude) * engine.MaxThrust;
-                var force = desiredDirection.normalized * thrust;
-                var lever = engine.WorldThrustPoint - centerOfMass;
-                netTorque += lever.x * force.y - lever.y * force.x;
-            }
-
-            return netTorque;
+            return new SasTurnInputSettings(sasTurnReleaseThreshold, sasHeadingDeadZoneDegrees, sasHeadingGain,
+                sasAngularVelocityGain, sasMaxTurnInput, sasForwardCompensationStrength,
+                sasForwardCompensationMaxTurnInput);
         }
 
         private float GetCurrentHeadingDegrees()
@@ -573,33 +399,6 @@ namespace Ships
             return CommandModule.Transform.eulerAngles.z;
         }
 
-        private void CaptureSasHeadingFromCurrentIfNeeded()
-        {
-            if (!_sasHasDesiredHeading)
-                CaptureSasHeadingFromCurrent();
-        }
-
-        private void CaptureSasHeadingFromCurrent()
-        {
-            _sasDesiredHeadingDegrees = GetCurrentHeadingDegrees();
-            _sasHasDesiredHeading = true;
-        }
-
-        private static float GetMaxLeverArmLength(IEnumerable<Engine> engines, Vector2 centerOfMass)
-        {
-            var maxLeverArm = engines.AsValueEnumerable().Select(engine => engine.WorldThrustPoint - centerOfMass)
-                .Aggregate(0f, (current, lever) => Mathf.Max(current, lever.magnitude));
-
-            return Mathf.Max(maxLeverArm, 0.01f);
-        }
-
-        private static Vector2 GetDesiredEngineDirection(Vector2 shipForward, Vector2 centerOfMass, float maxLeverArm,
-            Engine engine, float forwardInput, float turnInput)
-        {
-            var lever = engine.WorldThrustPoint - centerOfMass;
-            var rotationalDirection = new Vector2(-lever.y, lever.x) / maxLeverArm;
-            return shipForward * forwardInput + rotationalDirection * turnInput;
-        }
 
         protected IShip FindClosestEnemy(float maxRange = float.MaxValue)
         {
@@ -629,7 +428,6 @@ namespace Ships
         internal void ConfigureAllocatorForTesting(bool isEnabled, int iterations = 24, float forceWeight = 1f,
             float torqueWeight = 0.35f, float regularization = 0.001f)
         {
-            useControlAllocator = isEnabled;
             allocatorIterations = iterations;
             allocatorForceWeight = forceWeight;
             allocatorTorqueWeight = torqueWeight;
