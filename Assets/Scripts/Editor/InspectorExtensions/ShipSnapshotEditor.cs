@@ -13,7 +13,7 @@ namespace Editor.InspectorExtensions
     [CustomEditor(typeof(Ship), true)]
     public class ShipSnapshotEditor : UnityEditor.Editor
     {
-        private const string DefaultSaveFolder = "Assets/ShipSnapshots";
+        private static string DefaultSaveFolder => Path.Combine(Application.persistentDataPath, "ShipSnapshots");
 
         private static IShipSnapshotService CreateSnapshotService()
         {
