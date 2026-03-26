@@ -10,10 +10,11 @@ namespace Ships.Modules
         [SerializeField] private float maxThrust;
         [SerializeField] private float maxGimbalAngle = 35f;
         [SerializeField] private float gimbalSpeed = 240f;
-        [SerializeField] private Vector2 thrustPoint;
 
         [FormerlySerializedAs("particleSystem")]
         [SerializeField] private ParticleSystem exhaustParticles;
+
+        [field: SerializeField] private float CurrentThrustRatio { get; set; }
 
         private bool _active;
         private float _currentThrustRatio;
@@ -21,11 +22,12 @@ namespace Ships.Modules
         private float _exhaustBaseRateOverDistanceMultiplier;
         private float _exhaustBaseRateOverTimeMultiplier;
         private float _exhaustBaseStartSpeedMultiplier;
+        private Vector2 ThrustPoint => exhaustParticles.transform.localPosition;
 
         public float MaxThrust => maxThrust * ShipModuleEfficiency;
         private float CurrentThrusterAngle { get; set; }
 
-        public Vector2 WorldThrustPoint => transform.TransformPoint(thrustPoint);
+        public Vector2 WorldThrustPoint => transform.TransformPoint(ThrustPoint);
 
         public Vector2 WorldThrustDirection =>
             (Quaternion.AngleAxis(CurrentThrusterAngle, Vector3.forward) * transform.up).normalized;
@@ -46,6 +48,13 @@ namespace Ships.Modules
             _exhaustBaseStartSpeedMultiplier = main.startSpeedMultiplier;
 
             ApplyExhaustVisuals();
+        }
+
+        private void Update()
+        {
+#if UNITY_EDITOR
+            CurrentThrustRatio = _currentThrustRatio;
+#endif
         }
 
         public override float GetEnergyDraw()

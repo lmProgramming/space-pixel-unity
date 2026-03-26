@@ -1,4 +1,5 @@
-﻿using Ships.Modules;
+﻿using Ships;
+using Ships.Modules;
 using UnityEditor;
 using UnityEngine;
 
@@ -36,6 +37,18 @@ namespace Editor.ToolsExtensions
             ChangeComponent<Basic>(command.context as Module);
         }
 
+        [MenuItem("CONTEXT/Ship/Change to AI Ship")]
+        private static void ChangeToAIShip(MenuCommand command)
+        {
+            ChangeShip<AIShip>(command.context as Ship);
+        }
+
+        [MenuItem("CONTEXT/Ship/Change to Player Ship")]
+        private static void ChangeToPlayerShip(MenuCommand command)
+        {
+            ChangeShip<PlayerShip>(command.context as Ship);
+        }
+
         private static void ChangeComponent<TNew>(Module oldComponent) where TNew : Module
         {
             if (oldComponent == null) return;
@@ -51,6 +64,33 @@ namespace Editor.ToolsExtensions
             var newComponent = obj.AddComponent<TNew>();
 
             JsonUtility.FromJsonOverwrite(oldValues, newComponent);
+        }
+
+        private static void ChangeShip<TNew>(Ship oldShip) where TNew : Ship
+        {
+            if (oldShip == null) return;
+
+            var obj = oldShip.gameObject;
+
+            Undo.RegisterCompleteObjectUndo(obj, "Change Ship");
+
+            var oldShipValues = JsonUtility.ToJson(oldShip);
+
+            var shipCrewAssigner = obj.GetComponent<ShipCrewAssigner>();
+            var oldShipCrewAssignerValues = JsonUtility.ToJson(shipCrewAssigner);
+            if (shipCrewAssigner != null)
+                Undo.DestroyObjectImmediate(shipCrewAssigner);
+
+            Undo.DestroyObjectImmediate(oldShip);
+
+            var newShipComponent = obj.AddComponent<TNew>();
+
+            JsonUtility.FromJsonOverwrite(oldShipValues, newShipComponent);
+
+            var newShipCrewAssigner = obj.GetComponent<ShipCrewAssigner>();
+            if (newShipCrewAssigner == null) return;
+            newShipCrewAssigner = obj.AddComponent<ShipCrewAssigner>();
+            JsonUtility.FromJsonOverwrite(oldShipCrewAssignerValues, newShipCrewAssigner);
         }
     }
 }
