@@ -241,7 +241,15 @@ PrefabInstance:
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 7600325497820868301, guid: 40f3e4b86c734021785044ddd5531c89, type: 3}
+      propertyPath: maxGimbalAngle
+      value: 45
+      objectReference: {fileID: 0}
+    - target: {fileID: 7600325497820868301, guid: 40f3e4b86c734021785044ddd5531c89, type: 3}
       propertyPath: particleSystem
+      value: 
+      objectReference: {fileID: 1682787697}
+    - target: {fileID: 7600325497820868301, guid: 40f3e4b86c734021785044ddd5531c89, type: 3}
+      propertyPath: exhaustParticles
       value: 
       objectReference: {fileID: 1682787697}
     - target: {fileID: 7600325497820868301, guid: 40f3e4b86c734021785044ddd5531c89, type: 3}
@@ -1146,7 +1154,7 @@ Transform:
   m_GameObject: {fileID: 538499310}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: -8.42, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -3234,7 +3242,7 @@ Transform:
   m_GameObject: {fileID: 1682787694}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: 0.8314698, w: -0.55557}
-  m_LocalPosition: {x: -0.61, y: -7.11, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -9069,8 +9077,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   team: {fileID: 654231193}
-  speedMultiplier: 48000
-  rotationMultiplier: -320000
+  speedMultiplier: 1
+  rotationMultiplier: -1
 --- !u!50 &5952967916003628084
 Rigidbody2D:
   serializedVersion: 5

@@ -1,6 +1,5 @@
 using LMPro;
 using UnityEngine;
-using ZLinq;
 
 namespace Ships
 {
@@ -12,17 +11,10 @@ namespace Ships
 
         protected override void Move()
         {
-            var availableThrust = Engines.AsValueEnumerable().Sum(e => e.MaxThrust);
+            var forwardInput = Input.GetAxis("Vertical") * speedMultiplier;
+            var turnInput = Input.GetAxis("Horizontal") * rotationMultiplier;
 
-            var acceleration = Input.GetAxis("Vertical") * speedMultiplier * availableThrust;
-
-            CommandModule.PixelatedRigidbody.Rigidbody.AddForce(CommandModule.Transform.up * acceleration);
-
-            var turn = Input.GetAxis("Horizontal") * rotationMultiplier * availableThrust;
-
-            CommandModule.PixelatedRigidbody.Rigidbody.AddTorque(turn);
-
-            MarkEnginesActivity(acceleration != 0 || turn != 0);
+            MarkEnginesActivity(ApplyEngineForces(forwardInput, turnInput, Time.deltaTime));
         }
 
         protected override void HandleWeapons()

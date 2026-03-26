@@ -21,6 +21,7 @@ namespace Pixelation
     [RequireComponent(typeof(PolygonCollider2D))]
     [RequireComponent(typeof(Rigidbody2D))]
     [RequireComponent(typeof(SpriteRenderer))]
+    [DisallowMultipleComponent]
     public class PixelatedRigidbody : MonoBehaviour, IPixelatedRigidbody, IPixelatedSprite
     {
         private const float SpeedLimitForDiscreteCollisionDetectionSquared = 0;

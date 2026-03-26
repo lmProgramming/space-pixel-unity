@@ -24,6 +24,7 @@ using ZLinq;
 namespace Ships
 {
     [RequireComponent(typeof(ResourceManager))]
+    [DisallowMultipleComponent]
     public class Ship : MonoBehaviour, IShip
     {
         private const float UpdateResourcesTimer = 0.1f;
@@ -276,6 +277,71 @@ namespace Ships
         {
             foreach (var engine in Engines)
                 engine.SetActive(active);
+        }
+
+        protected bool ApplyEngineForces(float forwardInput, float turnInput, float deltaTime)
+        {
+            var selfRigidbody = CommandModule.PixelatedRigidbody?.Rigidbody;
+            Assert.IsNotNull(selfRigidbody, "CommandModule.PixelatedRigidbody.Rigidbody != null");
+
+            var engines = Engines;
+            if (engines.Count == 0) return false;
+
+            var forward = (Vector2)CommandModule.Transform.up;
+            var centerOfMass = selfRigidbody.worldCenterOfMass;
+            var maxLeverArm = GetMaxLeverArmLength(engines, centerOfMass);
+
+            var anyForceApplied = false;
+
+            foreach (var engine in engines)
+            {
+                if (engine.MaxThrust <= 0f)
+                {
+                    engine.RotateThrusterTowards(0f, deltaTime);
+                    continue;
+                }
+
+                var desiredDirection = GetDesiredEngineDirection(
+                    forward,
+                    centerOfMass,
+                    maxLeverArm,
+                    engine,
+                    forwardInput,
+                    turnInput);
+
+                if (desiredDirection.sqrMagnitude <= Mathf.Epsilon)
+                {
+                    engine.RotateThrusterTowards(0f, deltaTime);
+                    continue;
+                }
+
+                var desiredAngle = Vector2.SignedAngle(engine.Transform.up, desiredDirection.normalized);
+                engine.RotateThrusterTowards(desiredAngle, deltaTime);
+
+                var thrust = Mathf.Clamp01(desiredDirection.magnitude) * engine.MaxThrust;
+                var force = engine.WorldThrustDirection * thrust;
+
+                selfRigidbody.AddForceAtPosition(force, engine.WorldThrustPoint);
+                anyForceApplied |= force.sqrMagnitude > Mathf.Epsilon;
+            }
+
+            return anyForceApplied;
+        }
+
+        private static float GetMaxLeverArmLength(IEnumerable<Engine> engines, Vector2 centerOfMass)
+        {
+            var maxLeverArm = engines.AsValueEnumerable().Select(engine => engine.WorldThrustPoint - centerOfMass)
+                .Aggregate(0f, (current, lever) => Mathf.Max(current, lever.magnitude));
+
+            return Mathf.Max(maxLeverArm, 0.01f);
+        }
+
+        private static Vector2 GetDesiredEngineDirection(Vector2 shipForward, Vector2 centerOfMass, float maxLeverArm,
+            Engine engine, float forwardInput, float turnInput)
+        {
+            var lever = engine.WorldThrustPoint - centerOfMass;
+            var rotationalDirection = new Vector2(-lever.y, lever.x) / maxLeverArm;
+            return shipForward * forwardInput + rotationalDirection * turnInput;
         }
 
         protected IShip FindClosestEnemy(float maxRange = float.MaxValue)
