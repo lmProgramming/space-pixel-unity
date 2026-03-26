@@ -1,7 +1,6 @@
 using Core.Ship;
 using UnityEngine;
 using UnityEngine.Assertions;
-using UnityEngine.Serialization;
 
 namespace Ships.Modules
 {
@@ -11,17 +10,17 @@ namespace Ships.Modules
         [SerializeField] private float maxGimbalAngle = 35f;
         [SerializeField] private float gimbalSpeed = 240f;
 
-        [FormerlySerializedAs("particleSystem")]
         [SerializeField] private ParticleSystem exhaustParticles;
 
-        [field: SerializeField] private float CurrentThrustRatio { get; set; }
-
         private bool _active;
+        private float _currentThrusterAngle;
         private float _currentThrustRatio;
         private Quaternion _exhaustBaseLocalRotation;
         private float _exhaustBaseRateOverDistanceMultiplier;
         private float _exhaustBaseRateOverTimeMultiplier;
         private float _exhaustBaseStartSpeedMultiplier;
+
+        internal float CurrentThrustRatioForTesting => _currentThrustRatio;
         private Vector2 ThrustPoint => exhaustParticles.transform.localPosition;
 
         public float MaxThrust => maxThrust * ShipModuleEfficiency;
@@ -36,6 +35,8 @@ namespace Ships.Modules
         {
             base.Awake();
             Type = ModuleType.Engine;
+
+            exhaustParticles ??= GetComponentInChildren<ParticleSystem>();
 
             Assert.IsNotNull(exhaustParticles, "Engine requires an exhaustParticles ParticleSystem reference");
             _exhaustBaseLocalRotation = exhaustParticles.transform.localRotation;
@@ -53,9 +54,19 @@ namespace Ships.Modules
         private void Update()
         {
 #if UNITY_EDITOR
-            CurrentThrustRatio = _currentThrustRatio;
 #endif
         }
+
+#if UNITY_INCLUDE_TESTS
+        internal void ConfigureForTesting(float maxThrustValue, Vector2 thrustPointValue,
+            float maxGimbalAngleValue = 35f,
+            float gimbalSpeedValue = 9999f)
+        {
+            maxThrust = maxThrustValue;
+            maxGimbalAngle = maxGimbalAngleValue;
+            gimbalSpeed = gimbalSpeedValue;
+        }
+#endif
 
         public override float GetEnergyDraw()
         {

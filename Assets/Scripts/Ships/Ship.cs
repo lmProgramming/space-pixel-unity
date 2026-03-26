@@ -42,6 +42,14 @@ namespace Ships
         [SerializeField] private float sasForwardCompensationStrength = 1f;
         [SerializeField] private float sasForwardCompensationMaxTurnInput = 1.5f;
 
+        [Header("Control Allocator")]
+        [SerializeField] private bool useControlAllocator = true;
+
+        [SerializeField] private int allocatorIterations = 14;
+        [SerializeField] private float allocatorForceWeight = 1f;
+        [SerializeField] private float allocatorTorqueWeight = 0.4f;
+        [SerializeField] private float allocatorRegularization = 0.02f;
+
         private readonly List<Module> _allModulesCache = new();
 
         // ReSharper disable once CollectionNeverUpdated.Local
@@ -307,15 +315,16 @@ namespace Ships
             var forward = CommandModule.Transform.up;
             var centerOfMass = selfRigidbody.worldCenterOfMass;
             var maxLeverArm = GetMaxLeverArmLength(engines, centerOfMass);
+            var desiredDirectionPerEngine = new Vector2[engines.Count];
 
-            var anyForceApplied = false;
-
-            foreach (var engine in engines)
+            for (var i = 0; i < engines.Count; i++)
             {
+                var engine = engines[i];
                 if (engine.MaxThrust <= 0f)
                 {
                     engine.RotateThrusterTowards(0f, deltaTime);
                     engine.SetCurrentThrust(0f);
+                    desiredDirectionPerEngine[i] = Vector2.zero;
                     continue;
                 }
 
@@ -326,6 +335,7 @@ namespace Ships
                     engine,
                     forwardInput,
                     finalTurnInput);
+                desiredDirectionPerEngine[i] = desiredDirection;
 
                 if (desiredDirection.sqrMagnitude <= Mathf.Epsilon)
                 {
@@ -336,9 +346,30 @@ namespace Ships
 
                 var desiredAngle = Vector2.SignedAngle(engine.Transform.up, desiredDirection.normalized);
                 engine.RotateThrusterTowards(desiredAngle, deltaTime);
+            }
 
-                var thrust = Mathf.Clamp01(desiredDirection.magnitude) * engine.MaxThrust;
+            var thrustRatios = useControlAllocator
+                ? AllocateControlInputs(engines, desiredDirectionPerEngine, centerOfMass, forward, forwardInput,
+                    finalTurnInput, maxLeverArm)
+                : AllocateLegacyInputs(engines, desiredDirectionPerEngine);
+
+            var anyForceApplied = false;
+
+            for (var i = 0; i < engines.Count; i++)
+            {
+                var engine = engines[i];
+
+                if (engine.MaxThrust <= 0f)
+                {
+                    engine.SetCurrentThrust(0f);
+                    continue;
+                }
+
+                var thrust = Mathf.Clamp01(thrustRatios[i]) * engine.MaxThrust;
                 engine.SetCurrentThrust(thrust);
+
+                if (thrust <= Mathf.Epsilon) continue;
+
                 var force = engine.WorldThrustDirection * thrust;
 
                 selfRigidbody.AddForceAtPosition(force, engine.WorldThrustPoint);
@@ -346,6 +377,98 @@ namespace Ships
             }
 
             return anyForceApplied;
+        }
+
+        private static float[] AllocateLegacyInputs(IReadOnlyList<Engine> engines,
+            IReadOnlyList<Vector2> desiredDirections)
+        {
+            var thrustRatios = new float[engines.Count];
+
+            for (var i = 0; i < engines.Count; i++)
+            {
+                if (engines[i].MaxThrust <= 0f || desiredDirections[i].sqrMagnitude <= Mathf.Epsilon)
+                    continue;
+
+                thrustRatios[i] = Mathf.Clamp01(desiredDirections[i].magnitude);
+            }
+
+            return thrustRatios;
+        }
+
+        private float[] AllocateControlInputs(IReadOnlyList<Engine> engines, IReadOnlyList<Vector2> desiredDirections,
+            Vector2 centerOfMass, Vector2 forward, float forwardInput, float turnInput, float maxLeverArm)
+        {
+            var thrustRatios = new float[engines.Count];
+            var requestedForceDirection = forwardInput >= 0f ? forward : -forward;
+            var requestedForceMagnitude = Mathf.Abs(forwardInput);
+
+            var columns = new Vector3[engines.Count];
+            var hasAnyEffectiveColumn = false;
+            var totalThrustCapacity = 0f;
+            var totalTorqueCapacity = 0f;
+
+            for (var i = 0; i < engines.Count; i++)
+            {
+                var engine = engines[i];
+                if (engine.MaxThrust <= 0f || desiredDirections[i].sqrMagnitude <= Mathf.Epsilon)
+                    continue;
+
+                var dir = engine.WorldThrustDirection;
+                var lever = engine.WorldThrustPoint - centerOfMass;
+                var torquePerUnit = lever.x * dir.y - lever.y * dir.x;
+
+                columns[i] = new Vector3(
+                    dir.x * engine.MaxThrust * allocatorForceWeight,
+                    dir.y * engine.MaxThrust * allocatorForceWeight,
+                    torquePerUnit * engine.MaxThrust * allocatorTorqueWeight);
+
+                hasAnyEffectiveColumn = hasAnyEffectiveColumn || columns[i].sqrMagnitude > Mathf.Epsilon;
+
+                totalThrustCapacity += engine.MaxThrust;
+                totalTorqueCapacity += Mathf.Abs(torquePerUnit) * engine.MaxThrust;
+            }
+
+            if (!hasAnyEffectiveColumn)
+                return thrustRatios;
+
+            var targetForceMagnitude = requestedForceMagnitude * totalThrustCapacity * allocatorForceWeight;
+            var targetX = requestedForceDirection.x * targetForceMagnitude;
+            var targetY = requestedForceDirection.y * targetForceMagnitude;
+
+            var torqueScale = Mathf.Max(totalTorqueCapacity, Mathf.Max(1f, maxLeverArm));
+            var targetTorque = turnInput * torqueScale * allocatorTorqueWeight;
+
+            var denominator = Mathf.Max(0.0001f, allocatorRegularization) +
+                              columns.AsValueEnumerable().Sum(t => t.sqrMagnitude);
+
+            var stepSize = 1f / denominator;
+            var iterations = Mathf.Clamp(allocatorIterations, 1, 64);
+
+            for (var iteration = 0; iteration < iterations; iteration++)
+            {
+                var residualX = -targetX;
+                var residualY = -targetY;
+                var residualTorque = -targetTorque;
+
+                for (var i = 0; i < thrustRatios.Length; i++)
+                {
+                    residualX += columns[i].x * thrustRatios[i];
+                    residualY += columns[i].y * thrustRatios[i];
+                    residualTorque += columns[i].z * thrustRatios[i];
+                }
+
+                for (var i = 0; i < thrustRatios.Length; i++)
+                {
+                    if (columns[i].sqrMagnitude <= Mathf.Epsilon) continue;
+
+                    var gradient = columns[i].x * residualX + columns[i].y * residualY +
+                                   columns[i].z * residualTorque + allocatorRegularization * thrustRatios[i];
+
+                    thrustRatios[i] = Mathf.Clamp01(thrustRatios[i] - stepSize * gradient);
+                }
+            }
+
+            return thrustRatios;
         }
 
         private float GetFinalTurnInput(float requestedTurnInput, float forwardInput, Rigidbody2D selfRigidbody,
@@ -495,5 +618,23 @@ namespace Ships
 
             return closestEnemy;
         }
+
+#if UNITY_INCLUDE_TESTS
+        internal void ApplyEngineForcesForTesting(float forwardInput, float turnInput, float deltaTime,
+            bool sasEnabled = false)
+        {
+            ApplyEngineForces(forwardInput, turnInput, deltaTime, sasEnabled);
+        }
+
+        internal void ConfigureAllocatorForTesting(bool isEnabled, int iterations = 24, float forceWeight = 1f,
+            float torqueWeight = 0.35f, float regularization = 0.001f)
+        {
+            useControlAllocator = isEnabled;
+            allocatorIterations = iterations;
+            allocatorForceWeight = forceWeight;
+            allocatorTorqueWeight = torqueWeight;
+            allocatorRegularization = regularization;
+        }
+#endif
     }
 }
