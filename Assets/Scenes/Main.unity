@@ -234,7 +234,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7600325497820868301, guid: 40f3e4b86c734021785044ddd5531c89, type: 3}
       propertyPath: maxThrust
-      value: 1
+      value: 3000
       objectReference: {fileID: 0}
     - target: {fileID: 7600325497820868301, guid: 40f3e4b86c734021785044ddd5531c89, type: 3}
       propertyPath: mainSkillType
@@ -9077,8 +9077,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   team: {fileID: 654231193}
+  sasTurnReleaseThreshold: 0.05
+  sasHeadingDeadZoneDegrees: 0.3
+  sasHeadingGain: 0.04
+  sasAngularVelocityGain: 0.03
+  sasMaxTurnInput: 2
+  sasForwardCompensationStrength: 1
+  sasForwardCompensationMaxTurnInput: 1.5
   speedMultiplier: 1
   rotationMultiplier: -1
+  sasEnabled: 1
+  sasToggleKey: 116
 --- !u!50 &5952967916003628084
 Rigidbody2D:
   serializedVersion: 5

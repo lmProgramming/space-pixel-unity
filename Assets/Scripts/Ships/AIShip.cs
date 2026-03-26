@@ -101,7 +101,7 @@ namespace Ships
             if (desiredDirection.sqrMagnitude > 0f)
                 turnInput = rotationMultiplier * (-Vector2.SignedAngle(forward, desiredDirection) / 180f);
 
-            return ApplyEngineForces(forwardInput, turnInput, Time.deltaTime);
+            return ApplyEngineForces(forwardInput, turnInput, Time.deltaTime, true);
         }
 
         private void InitializeStateMachines()
