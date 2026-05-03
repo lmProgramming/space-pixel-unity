@@ -2,14 +2,7 @@
 
 A drop-in **design system for Unity 6 UI Toolkit** (UIDocument + UXML + USS). Tokens, components, icons, mobile responsiveness, and a runtime helper — all themed dark, all keyboard-and-touch-ready, all editable from one stylesheet.
 
-<blockquote>
-<a href="https://store.steampowered.com/app/2269500/"><img src="docs/leap-of-legends-icon.png" align="left" width="70" height="70" alt="Leap of Legends"></a>
-Built for and battle-tested in <strong><a href="https://leapoflegends.com">Leap of Legends</a></strong> — a cross-platform multiplayer game in active development on Steam, Google Play (internal testing), TestFlight, and macOS. Every menu, HUD, lobby, and store screen in the game is built on this design system. <a href="https://store.steampowered.com/app/2269500/">Wishlist on Steam</a> — public mobile store pages coming soon.
-</blockquote>
-
----
-
-```
+```txt
 .ds-btn ds-btn--primary       →  rounded green CTA, hover/press/disabled built in
 .ds-input    .ds-search       →  text fields with leading-icon slot + placeholder
 .ds-tab      .ds-tabs         →  segmented strip with .is-active state
@@ -37,7 +30,7 @@ What you get on day one:
 
 Open `Assets/DesignSystem/Resources/UI/Styles/DesignSystem/DesignSystemShowcase.uxml` in the UI Builder or attach it to a `UIDocument`. Every component, every state, every icon — one screen, scrollable.
 
-```
+```txt
 COLORS         BUTTONS         INPUTS         TABS & FILTERS    ANIMAL CARD
 TYPOGRAPHY     ICONS           BADGES & LABELS  TOGGLES & CHECKS  ANIMAL DETAIL
 NAVIGATION     SLIDERS         MODALS / PANELS  TOASTS            EMPTY STATES
@@ -59,7 +52,7 @@ No other external dependencies. No NuGet, no asmdef requirements, no editor scri
 
 The design system is a single folder you drop into your project's `Assets/`:
 
-```
+```txt
 your-unity-project/
 └── Assets/
     └── DesignSystem/                  ← drop the whole folder
@@ -165,7 +158,7 @@ Adding a new icon: drop the SVG into `Resources/Textures/Icons/`, set `svgType: 
 
 ## Architecture
 
-```
+```txt
 DesignSystem.uss                  ← master, @imports the rest in order
 ├── DesignTokens.uss              ← :root variables (colors, radii, spacing, motion)
 ├── Typography.uss                ← .ds-h1 / .ds-h2 / .ds-h3 / .ds-body-1 / .ds-caption
