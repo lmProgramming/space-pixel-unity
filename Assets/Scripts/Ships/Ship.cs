@@ -340,7 +340,7 @@ namespace Ships
                     continue;
                 }
 
-                var desiredDirection = _engineDirectionSolver.GetDesiredEngineDirection(
+                var desiredDirection = EngineDirectionSolver.GetDesiredEngineDirection(
                     forward, centerOfMass, maxLeverArm, engine, forwardInput, finalTurnInput);
                 desiredDirectionPerEngine[i] = desiredDirection;
 

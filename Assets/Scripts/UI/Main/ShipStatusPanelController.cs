@@ -22,7 +22,12 @@ namespace UI.Main
         private VisualElement _energyBarFill;
         private VisualElement _energyBarGlow;
         private Label _energyFlowLabel;
-        private float _lastNetEnergy;
+        private VisualElement _mainHudRoot;
+        private VisualElement _sasCluster;
+        private bool _sasClickRegistered;
+        private Label _sasStatusLabel;
+        private Button _sasToggleButton;
+        private Label _speedValueLabel;
 
         private VisualElement _root;
         private VisualElement _shipStatusPanel;
@@ -36,13 +41,31 @@ namespace UI.Main
 
         private void Update()
         {
-            if (!playerShip || !playerShip.ResourceManager)
+            if (_mainHudRoot == null && uiDocument != null && uiDocument.rootVisualElement != null)
             {
-                SetPanelVisible(false);
+                _root = uiDocument.rootVisualElement;
+                CacheUIReferences();
+                RegisterSasButton();
+            }
+
+            if (!playerShip)
+            {
+                SetMainHudVisible(false);
                 return;
             }
 
-            SetPanelVisible(true);
+            SetMainHudVisible(true);
+
+            UpdateSpeedDisplay();
+            UpdateSasDisplay();
+
+            if (!playerShip.ResourceManager)
+            {
+                SetShipStatusBlockVisible(false);
+                return;
+            }
+
+            SetShipStatusBlockVisible(true);
 
             var resourceManager = playerShip.ResourceManager;
             UpdateEnergyDisplay(resourceManager);
@@ -57,21 +80,94 @@ namespace UI.Main
 
             _root = uiDocument.rootVisualElement;
             CacheUIReferences();
+            RegisterSasButton();
+        }
+
+        private void OnDisable()
+        {
+            UnregisterSasButton();
         }
 
         private void CacheUIReferences()
         {
+            _mainHudRoot = _root.Q<VisualElement>("main-hud-root");
+            _sasCluster = _root.Q<VisualElement>("hud-sas-cluster");
             _shipStatusPanel = _root.Q<VisualElement>("ship-status-panel");
             _energyBarFill = _root.Q<VisualElement>("energy-bar-fill");
             _energyBarGlow = _root.Q<VisualElement>("energy-bar-glow");
             _energyFlowLabel = _root.Q<Label>("energy-flow-label");
             _crewCountLabel = _root.Q<Label>("crew-count-label");
+            _speedValueLabel = _root.Q<Label>("speed-value-label");
+            _sasStatusLabel = _root.Q<Label>("sas-status-label");
+            _sasToggleButton = _root.Q<Button>("sas-toggle-button");
         }
 
-        private void SetPanelVisible(bool visible)
+        private void RegisterSasButton()
+        {
+            if (_sasClickRegistered || _sasToggleButton == null)
+                return;
+
+            _sasToggleButton.clicked += OnSasToggleClicked;
+            _sasClickRegistered = true;
+        }
+
+        private void UnregisterSasButton()
+        {
+            if (!_sasClickRegistered || _sasToggleButton == null)
+                return;
+
+            _sasToggleButton.clicked -= OnSasToggleClicked;
+            _sasClickRegistered = false;
+        }
+
+        private void OnSasToggleClicked()
+        {
+            if (playerShip is PlayerShip playerShipTyped)
+                playerShipTyped.ToggleSas();
+        }
+
+        private void SetMainHudVisible(bool visible)
+        {
+            if (_mainHudRoot != null)
+                _mainHudRoot.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
+        }
+
+        private void SetShipStatusBlockVisible(bool visible)
         {
             if (_shipStatusPanel != null)
                 _shipStatusPanel.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
+        }
+
+        private void UpdateSpeedDisplay()
+        {
+            if (_speedValueLabel == null)
+                return;
+
+            var rb = playerShip.CommandModule?.PixelatedRigidbody?.Rigidbody;
+            var magnitude = rb != null ? rb.linearVelocity.magnitude : 0f;
+            _speedValueLabel.text = magnitude.ToString("F1");
+        }
+
+        private void UpdateSasDisplay()
+        {
+            var playerShipTyped = playerShip as PlayerShip;
+
+            if (playerShipTyped == null)
+            {
+                if (_sasCluster != null)
+                    _sasCluster.style.display = DisplayStyle.None;
+                return;
+            }
+
+            if (_sasCluster != null)
+                _sasCluster.style.display = DisplayStyle.Flex;
+
+            var on = playerShipTyped.SasEnabled;
+            if (_sasStatusLabel != null)
+                _sasStatusLabel.text = on ? "SAS · ON" : "SAS · OFF";
+
+            if (_sasToggleButton != null)
+                _sasToggleButton.text = on ? "Turn off" : "Turn on";
         }
 
         private void UpdateEnergyDisplay(ResourceManager resourceManager)

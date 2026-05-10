@@ -3,30 +3,45 @@ using System.Collections.Generic;
 using Core.Gameplay.Combat;
 using Ships;
 using UnityEngine;
+using UnityEngine.UIElements;
 using ZLinq;
+using Image = UnityEngine.UI.Image;
 
 namespace UI.Main
 {
     public class UIReloadVisualizer : MonoBehaviour
     {
-        [SerializeField] private GameObject smallCannonPrefab;
-        [SerializeField] private GameObject bigCannonPrefab;
         [SerializeField] private Ship playerShip;
-
-        [SerializeField] private Transform iconContainer;
-
+        [SerializeField] private UIDocument hudDocument;
         private Dictionary<IWeapon, Action> _onNotReadyActions;
         private Dictionary<IWeapon, Action> _onReadyActions;
 
-        private Dictionary<IWeapon, GameObject> _weaponIconDictionary;
+        private VisualElement _weaponQueue;
+
+        private Dictionary<IWeapon, VisualElement> _weaponSlotDictionary;
+
+        private void Awake()
+        {
+            ResolveHudDocument();
+        }
 
         private void Start()
         {
-            _weaponIconDictionary = new Dictionary<IWeapon, GameObject>();
+            ResolveHudDocument();
+
+            _weaponSlotDictionary = new Dictionary<IWeapon, VisualElement>();
             _onReadyActions = new Dictionary<IWeapon, Action>();
             _onNotReadyActions = new Dictionary<IWeapon, Action>();
 
-            if (!ValidateSetup()) return;
+            if (!ValidateSetup())
+                return;
+
+            _weaponQueue = hudDocument.rootVisualElement.Q<VisualElement>("weapon-queue");
+            if (_weaponQueue == null)
+            {
+                Debug.LogError("weapon-queue VisualElement not found on HUD UIDocument.", this);
+                return;
+            }
 
             var weapons = playerShip.Weapons;
             if (weapons == null) return;
@@ -35,10 +50,12 @@ namespace UI.Main
             {
                 if (weapon == null) continue;
 
-                var icon = CreateIcon(weapon);
-                if (icon == null) continue;
+                var slot = CreateWeaponSlot(weapon);
+                if (slot == null) continue;
 
-                _weaponIconDictionary.Add(weapon, icon);
+                _weaponQueue.Add(slot);
+                _weaponSlotDictionary.Add(weapon, slot);
+                ApplyReadyVisuals(weapon, slot);
 
                 Action onReadyAction = () => HandleWeaponStateChange(weapon, true);
                 Action onNotReadyAction = () => HandleWeaponStateChange(weapon, false);
@@ -50,76 +67,115 @@ namespace UI.Main
                 weapon.OnNotReady += onNotReadyAction;
             }
 
-            SortAllIcons();
+            SortAllSlots();
         }
 
         private void OnDestroy()
         {
-            if (_weaponIconDictionary == null) return;
-            foreach (var kvp in _weaponIconDictionary)
+            if (_weaponSlotDictionary == null) return;
+            foreach (var weapon in _weaponSlotDictionary.AsValueEnumerable().Select(kvp => kvp.Key)
+                         .Where(weapon => weapon != null))
             {
-                var weapon = kvp.Key;
-                if (weapon == null) continue;
                 if (_onReadyActions.TryGetValue(weapon, out var readyAction)) weapon.OnReady -= readyAction;
                 if (_onNotReadyActions.TryGetValue(weapon, out var notReadyAction))
                     weapon.OnNotReady -= notReadyAction;
             }
         }
 
-        private void HandleWeaponStateChange(IWeapon weapon, bool becameReady)
+        private void ResolveHudDocument()
         {
-            if (_weaponIconDictionary.TryGetValue(weapon, out var icon) && icon != null)
-                UpdateIconPosition(icon, becameReady);
-            else
-                Debug.LogWarning($"Icon not found for weapon {weapon} during state change.", this);
+            if (hudDocument != null)
+                return;
+
+            var statusPanel = FindAnyObjectByType<ShipStatusPanelController>(FindObjectsInactive.Include);
+            if (statusPanel != null)
+                hudDocument = statusPanel.GetComponent<UIDocument>();
         }
 
-        private void UpdateIconPosition(GameObject icon, bool isReady)
+        private void HandleWeaponStateChange(IWeapon weapon, bool becameReady)
         {
-            if (icon == null || iconContainer == null || icon.transform.parent != iconContainer)
+            if (!_weaponSlotDictionary.TryGetValue(weapon, out var slot) || slot == null)
+            {
+                Debug.LogWarning($"Weapon slot not found for {weapon} during state change.", this);
+                return;
+            }
+
+            ApplyReadyVisuals(weapon, slot);
+            UpdateSlotIndex(slot, becameReady);
+        }
+
+        private static void ApplyReadyVisuals(IWeapon weapon, VisualElement slot)
+        {
+            var ready = weapon != null && weapon.IsReady();
+            slot.EnableInClassList("is-ready", ready);
+            slot.EnableInClassList("is-reloading", !ready);
+        }
+
+        private void UpdateSlotIndex(VisualElement slot, bool isReady)
+        {
+            if (_weaponQueue == null || slot.parent != _weaponQueue)
                 return;
 
             if (isReady)
             {
                 var readyCount = 0;
-                foreach (Transform child in iconContainer)
+                foreach (var child in _weaponQueue.Children())
                 {
-                    var weaponKvp = _weaponIconDictionary.AsValueEnumerable()
-                        .FirstOrDefault(kvp => kvp.Value == child.gameObject);
-                    if (weaponKvp.Key != null && weaponKvp.Key.IsReady() &&
-                        child.gameObject != icon)
+                    var weaponKvp = _weaponSlotDictionary.AsValueEnumerable()
+                        .FirstOrDefault(kvp => kvp.Value == child);
+                    if (weaponKvp.Key != null && weaponKvp.Key.IsReady() && child != slot)
                         readyCount++;
                 }
 
-                icon.transform.SetSiblingIndex(readyCount);
+                _weaponQueue.Insert(readyCount, slot);
             }
             else
             {
-                icon.transform.SetAsLastSibling();
+                _weaponQueue.Add(slot);
             }
         }
 
-        private void SortAllIcons()
+        private void SortAllSlots()
         {
-            if (iconContainer == null || _weaponIconDictionary == null) return;
+            if (_weaponQueue == null || _weaponSlotDictionary == null) return;
 
-            var orderedWeapons = _weaponIconDictionary.Keys.AsValueEnumerable()
+            var orderedWeapons = _weaponSlotDictionary.Keys.AsValueEnumerable()
                 .OrderByDescending(w => w.IsReady())
                 .ToList();
 
-            for (var i = 0; i < orderedWeapons.Count; i++)
-                if (_weaponIconDictionary.TryGetValue(orderedWeapons[i], out var icon) && icon != null)
-                    icon.transform.SetSiblingIndex(i);
+            foreach (var w in orderedWeapons)
+            {
+                if (!_weaponSlotDictionary.TryGetValue(w, out var slot) || slot == null || slot.parent != _weaponQueue)
+                    continue;
+                _weaponQueue.Remove(slot);
+            }
+
+            foreach (var w in orderedWeapons)
+            {
+                if (!_weaponSlotDictionary.TryGetValue(w, out var slot) || slot == null)
+                    continue;
+                _weaponQueue.Add(slot);
+            }
         }
 
-
-        private GameObject CreateIcon(IWeapon weapon)
+        private static VisualElement CreateWeaponSlot(IWeapon weapon)
         {
-            if (weapon == null || iconContainer == null) return null;
+            var iconPrefab = weapon?.GetIcon();
+            var sprite = TryGetSpriteFromIconPrefab(iconPrefab);
 
-            var chosenPrefab = weapon.GetIcon();
+            var slot = new VisualElement();
+            slot.AddToClassList("hud-weapon-slot");
+            if (sprite != null)
+                slot.style.backgroundImage = new StyleBackground(sprite);
 
-            return chosenPrefab == null ? null : Instantiate(chosenPrefab, iconContainer);
+            return slot;
+        }
+
+        private static Sprite TryGetSpriteFromIconPrefab(GameObject iconPrefab)
+        {
+            if (iconPrefab == null) return null;
+            var image = iconPrefab.GetComponentInChildren<Image>(true);
+            return image?.sprite;
         }
 
         private bool ValidateSetup()
@@ -127,20 +183,17 @@ namespace UI.Main
             var isValid = true;
             if (playerShip == null)
             {
-                Debug.LogError("Player Ship reference not set!", this);
+                Debug.LogError("Player Ship reference not set on UIReloadVisualizer.", this);
                 isValid = false;
             }
 
-            if (iconContainer == null)
+            if (hudDocument == null)
             {
-                Debug.LogError("Icon Holder Transform not set!", this);
+                Debug.LogError("HUD UIDocument reference not set on UIReloadVisualizer.", this);
                 isValid = false;
             }
 
-            if (smallCannonPrefab != null && bigCannonPrefab != null) return isValid;
-
-            Debug.LogError("Icon prefabs not set!", this);
-            return false;
+            return isValid;
         }
     }
 }

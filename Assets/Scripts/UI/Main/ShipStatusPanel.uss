@@ -1,9 +1,87 @@
-/* Ship Status Panel - Retro Mobile Style */
+/* Main HUD — layout + energy/crew; colors from design tokens */
+
+.main-hud-root {
+    flex-grow: 1;
+    width: 100%;
+    height: 100%;
+}
+
+.hud-top-bar {
+    position: absolute;
+    top: var(--space-4);
+    left: var(--space-4);
+    right: var(--space-4);
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.hud-weapons-cluster {
+    flex-direction: column;
+    align-items: flex-start;
+    max-width: 55%;
+    gap: var(--space-2);
+}
+
+.hud-weapons-title {
+    color: var(--color-text-secondary);
+}
+
+.weapon-queue {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
+.hud-weapon-slot {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    border-radius: var(--radius-md);
+    border-width: var(--border-thin);
+    border-color: var(--color-border);
+    background-color: var(--color-surface-elev);
+    -unity-background-scale-mode: scale-to-fit;
+    padding: var(--space-1);
+    transition-property: opacity, border-color;
+    transition-duration: var(--transition-medium);
+}
+
+.hud-weapon-slot.is-ready {
+    border-color: var(--color-primary);
+    border-width: var(--border-regular);
+    opacity: 1;
+}
+
+.hud-weapon-slot.is-reloading {
+    opacity: 0.42;
+}
+
+.hud-sas-cluster {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-4);
+    background-color: var(--color-surface);
+    border-radius: var(--radius-lg);
+    border-width: var(--border-thin);
+    border-color: var(--color-border);
+}
+
+.sas-status-label {
+    color: var(--color-text-primary);
+    white-space: nowrap;
+}
+
+.sas-toggle-button {
+    flex-shrink: 0;
+}
 
 .ship-status-panel {
     position: absolute;
-    left: 16px;
-    bottom: 16px;
+    left: var(--space-4);
+    bottom: var(--space-4);
     width: 52px;
     height: 400px;
     flex-direction: column;
@@ -11,7 +89,6 @@
     justify-content: flex-end;
 }
 
-/* Vertical Energy Bar - Chunky Retro Style */
 .energy-bar-container {
     width: 100%;
     height: 300px;
@@ -22,10 +99,10 @@
 .energy-bar-background {
     width: 32px;
     height: 100%;
-    background-color: rgb(15, 15, 25);
-    border-radius: 0;
-    border-width: 3px;
-    border-color: rgb(60, 70, 90);
+    background-color: var(--color-surface);
+    border-radius: var(--radius-sm);
+    border-width: var(--border-regular);
+    border-color: var(--color-border-strong);
     overflow: hidden;
     flex-direction: column-reverse;
 }
@@ -33,8 +110,8 @@
 .energy-bar-fill {
     width: 100%;
     height: 50%;
-    background-color: rgb(50, 180, 220);
-    border-radius: 0;
+    background-color: var(--color-secondary);
+    border-radius: var(--radius-xs);
     transition-property: height, background-color;
     transition-duration: 0.25s;
     transition-timing-function: ease-out;
@@ -46,91 +123,109 @@
     right: 3px;
     bottom: 3px;
     height: 50%;
-    background-color: rgba(120, 220, 255, 0.2);
-    border-radius: 0;
+    background-color: var(--color-secondary-soft);
+    border-radius: var(--radius-xs);
     transition-property: height;
     transition-duration: 0.25s;
 }
 
-/* Energy Flow Indicator - Big Retro Box */
 .energy-flow-indicator {
     width: 52px;
     height: 32px;
-    margin-top: 8px;
+    margin-top: var(--space-2);
     align-items: center;
     justify-content: center;
-    background-color: rgb(15, 15, 25);
-    border-radius: 0;
-    border-width: 3px;
-    border-color: rgb(60, 70, 90);
+    background-color: var(--color-surface);
+    border-radius: var(--radius-sm);
+    border-width: var(--border-regular);
+    border-color: var(--color-border-strong);
     flex-shrink: 0;
 }
 
 .energy-flow-label {
-    font-size: 22px;
     -unity-font-style: bold;
     -unity-text-align: middle-center;
-    color: rgb(80, 255, 120);
+    color: var(--color-primary);
     transition-property: color;
-    transition-duration: 0.15s;
+    transition-duration: var(--transition-fast);
 }
 
 .energy-flow-label.negative {
-    color: rgb(255, 80, 80);
+    color: var(--color-danger);
 }
 
 .energy-flow-label.neutral {
-    color: rgb(120, 120, 140);
+    color: var(--color-text-disabled);
 }
 
-/* Crew Section - Retro Counter */
 .crew-section {
     width: 52px;
     height: 36px;
-    margin-top: 8px;
+    margin-top: var(--space-2);
     align-items: center;
     justify-content: center;
-    background-color: rgb(15, 15, 25);
-    border-radius: 0;
-    border-width: 3px;
-    border-color: rgb(180, 150, 60);
+    background-color: var(--color-surface);
+    border-radius: var(--radius-sm);
+    border-width: var(--border-regular);
+    border-color: var(--color-warning);
     flex-shrink: 0;
 }
 
 .crew-count {
-    font-size: 18px;
     -unity-text-align: middle-center;
-    color: rgb(255, 210, 80);
+    color: var(--color-warning);
     -unity-font-style: bold;
     transition-property: scale, color;
-    transition-duration: 0.1s;
+    transition-duration: var(--transition-fast);
 }
 
-/* State Classes - Bold Retro Colors */
 .energy-critical .energy-bar-background {
-    border-color: rgb(200, 50, 50);
+    border-color: var(--color-danger);
 }
 
 .energy-critical .energy-bar-fill {
-    background-color: rgb(220, 60, 60);
+    background-color: var(--color-danger);
 }
 
 .energy-gaining .energy-bar-fill {
-    background-color: rgb(60, 220, 100);
+    background-color: var(--color-primary);
 }
 
 .energy-gaining .energy-bar-background {
-    border-color: rgb(50, 180, 80);
+    border-color: var(--color-primary);
 }
 
 .energy-draining .energy-bar-fill {
-    background-color: rgb(220, 140, 50);
+    background-color: var(--color-warning);
 }
 
 .energy-draining .energy-bar-background {
-    border-color: rgb(180, 110, 40);
+    border-color: var(--color-warning);
 }
 
 .pulse {
     scale: 1.1;
+}
+
+.hud-speed-readout {
+    position: absolute;
+    bottom: var(--space-4);
+    left: 50%;
+    translate: -50% 0;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--space-3) var(--space-6);
+    background-color: var(--color-surface);
+    border-radius: var(--radius-lg);
+    border-width: var(--border-thin);
+    border-color: var(--color-border-strong);
+}
+
+.hud-speed-caption {
+    color: var(--color-text-secondary);
+}
+
+.hud-speed-value {
+    color: var(--color-text-primary);
+    -unity-text-align: middle-center;
 }
