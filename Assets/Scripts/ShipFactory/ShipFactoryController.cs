@@ -26,6 +26,7 @@ namespace ShipFactory
         private bool _isPaused;
         private ModulePaletteController _paletteController;
         private VisualElement _pauseOverlay;
+        private VisualElement _pauseOverlayHost;
         private bool _pauseUiInitialized;
         private Button _saveShipButton;
         private SettingsPanelController _settingsPanelController;
@@ -186,6 +187,7 @@ namespace ShipFactory
                 return;
 
             _pauseOverlay = root.Q<VisualElement>("pause-overlay");
+            _pauseOverlayHost = root.Q<VisualElement>("pause-overlay-host");
             var title = root.Q<Label>("pause-title");
             var resumeButton = root.Q<Button>("pause-resume-button");
             var settingsButton = root.Q<Button>("pause-settings-button");
@@ -196,6 +198,8 @@ namespace ShipFactory
                     "[ShipFactoryController] Pause elements missing in ShipFactory UXML.");
 
             title.text = "Ship Factory Paused";
+            if (_pauseOverlayHost != null)
+                _pauseOverlayHost.style.display = DisplayStyle.None;
             _pauseOverlay.style.display = DisplayStyle.None;
             resumeButton.clicked += () => { SetPaused(false); };
             settingsButton.clicked += () => { _settingsPanelController.Toggle(); };
@@ -226,6 +230,8 @@ namespace ShipFactory
             _isPaused = paused;
             Time.timeScale = paused ? 0f : 1f;
 
+            if (_pauseOverlayHost != null)
+                _pauseOverlayHost.style.display = paused ? DisplayStyle.Flex : DisplayStyle.None;
             if (_pauseOverlay != null)
                 _pauseOverlay.style.display = paused ? DisplayStyle.Flex : DisplayStyle.None;
 
@@ -238,7 +244,7 @@ namespace ShipFactory
 
         private void QuitToMainMenu()
         {
-            SetPaused(false);
+            Time.timeScale = 1f;
             SceneManager.LoadScene(MainMenuSceneName);
         }
     }

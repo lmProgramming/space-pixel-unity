@@ -11,6 +11,7 @@ namespace UI.Common
         private const string EffectsVolumeKey = "effectVolume";
 
         private readonly VisualElement _backdrop;
+        private readonly VisualElement _overlayHost;
         private readonly Slider _effectsSlider;
         private readonly bool _isMainMenu;
         private readonly Slider _masterSlider;
@@ -24,6 +25,7 @@ namespace UI.Common
                 throw new ArgumentNullException(nameof(parent));
 
             _isMainMenu = isMainMenu;
+            _overlayHost = parent.Q<VisualElement>("settings-overlay-host");
             _backdrop = parent.Q<VisualElement>("settings-overlay");
             var titleLabel = parent.Q<Label>("settings-title");
             _masterSlider = parent.Q<Slider>("settings-master-slider");
@@ -34,13 +36,15 @@ namespace UI.Common
             if (titleLabel == null || _masterSlider == null || _musicSlider == null || _effectsSlider == null ||
                 closeButton == null || _backdrop == null)
                 throw new InvalidOperationException(
-                    "[SoundSettingsPanelController] Required settings elements are missing in UIDocument.");
+                    "[SettingsPanelController] Required settings elements are missing in UIDocument.");
 
             titleLabel.text = _isMainMenu ? $"{title} (Main Menu)" : title;
-            _masterSlider.showInputField = true;
-            _musicSlider.showInputField = true;
-            _effectsSlider.showInputField = true;
+            StyleSliderInputField(_masterSlider);
+            StyleSliderInputField(_musicSlider);
+            StyleSliderInputField(_effectsSlider);
             closeButton.clicked += Hide;
+            if (_overlayHost != null)
+                _overlayHost.style.display = DisplayStyle.None;
             _backdrop.style.display = DisplayStyle.None;
 
             _masterSlider.RegisterValueChangedCallback(OnMasterVolumeChanged);
@@ -55,12 +59,16 @@ namespace UI.Common
         private void Show()
         {
             LoadFromPlayerPrefs();
+            if (_overlayHost != null)
+                _overlayHost.style.display = DisplayStyle.Flex;
             _backdrop.style.display = DisplayStyle.Flex;
         }
 
         public void Hide()
         {
             _backdrop.style.display = DisplayStyle.None;
+            if (_overlayHost != null)
+                _overlayHost.style.display = DisplayStyle.None;
         }
 
         public void Toggle()
@@ -108,6 +116,24 @@ namespace UI.Common
         {
             PlayerPrefs.SetFloat(key, Mathf.Clamp01(value));
             PlayerPrefs.Save();
+        }
+
+        private static void StyleSliderInputField(Slider slider)
+        {
+            var textField = slider.Q<TextField>();
+            if (textField == null)
+                return;
+
+            textField.AddToClassList("ds-input");
+            textField.style.minWidth = 72f;
+            textField.style.maxWidth = 72f;
+            textField.style.marginLeft = 8f;
+            textField.style.flexShrink = 0;
+            textField.style.alignSelf = Align.Center;
+
+            var inputParent = textField.parent;
+            if (inputParent != null)
+                inputParent.style.alignSelf = Align.Center;
         }
     }
 }

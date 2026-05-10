@@ -1,7 +1,8 @@
-using System.Runtime.InteropServices;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.UI;
+using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 
 namespace UIDocumentDesignSystem.Showcase
@@ -12,9 +13,10 @@ namespace UIDocumentDesignSystem.Showcase
     // recreated programmatically every Play.
     public static class ShowcaseBootstrap
     {
-        const string SHOWCASE_RES_PATH = "UI/Styles/DesignSystem/DesignSystemShowcase";
-        const string THEME_RES_PATH    = "UnityDefaultRuntimeTheme";
-        const int    MOBILE_BREAKPOINT = 768;
+        private const string SHOWCASE_RES_PATH = "UI/Styles/DesignSystem/DesignSystemShowcase";
+        private const string THEME_RES_PATH = "UnityDefaultRuntimeTheme";
+        private const int MOBILE_BREAKPOINT = 768;
+        private const string SCENE_NAME = "Showcase";
 
 #if UNITY_WEBGL && !UNITY_EDITOR
         [DllImport("__Internal")]
@@ -33,7 +35,7 @@ namespace UIDocumentDesignSystem.Showcase
         // 5K iMac). We approximate DPR as Screen.dpi/96 (96 dpi being the
         // Windows / CSS reference) and floor at 1 so non-HiDPI desktops
         // render unchanged.
-        static float GetEffectiveDpr()
+        private static float GetEffectiveDpr()
         {
 #if UNITY_WEBGL && !UNITY_EDITOR
             try
@@ -43,14 +45,18 @@ namespace UIDocumentDesignSystem.Showcase
             }
             catch { /* fall through to Screen.dpi heuristic */ }
 #endif
-            float dpi = Screen.dpi;
+            var dpi = Screen.dpi;
             if (dpi <= 0f) return 1f;
             return Mathf.Max(1f, dpi / 96f);
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-        static void Initialize()
+        private static void Initialize()
         {
+            var currentSceneName = SceneManager.GetActiveScene().name;
+            if (currentSceneName != SCENE_NAME)
+                return;
+
             var showcaseUxml = Resources.Load<VisualTreeAsset>(SHOWCASE_RES_PATH);
             if (showcaseUxml == null)
             {
@@ -69,15 +75,13 @@ namespace UIDocumentDesignSystem.Showcase
             // the first time you make a PanelSettings asset in the editor.
             var theme = Resources.Load<ThemeStyleSheet>(THEME_RES_PATH);
             if (theme == null)
-            {
                 Debug.LogWarning($"[ShowcaseBootstrap] Could not load {THEME_RES_PATH}.tss from Resources. " +
                                  "Default control styling will be missing. " +
                                  "Confirm Assets/Showcase/Resources/UnityDefaultRuntimeTheme.tss exists.");
-            }
 
             var showcaseGO = new GameObject("Showcase");
             var showcaseDoc = showcaseGO.AddComponent<UIDocument>();
-            showcaseDoc.panelSettings = MakePanelSettings(sortingOrder: 0, name: "ShowcasePanelSettings", theme: theme);
+            showcaseDoc.panelSettings = MakePanelSettings(0, "ShowcasePanelSettings", theme);
             showcaseDoc.visualTreeAsset = showcaseUxml;
 
             // Showcase-only override stylesheet — adds the universal
@@ -142,7 +146,7 @@ namespace UIDocumentDesignSystem.Showcase
 
             var overlayGO = new GameObject("ShowcaseDocOverlay");
             var overlayDoc = overlayGO.AddComponent<UIDocument>();
-            overlayDoc.panelSettings = MakePanelSettings(sortingOrder: 1, name: "DocOverlayPanelSettings", theme: theme);
+            overlayDoc.panelSettings = MakePanelSettings(1, "DocOverlayPanelSettings", theme);
 
             var overlay = overlayGO.AddComponent<ShowcaseDocOverlay>();
             overlay.AttachTo(showcaseDoc, overlayDoc);
@@ -151,10 +155,10 @@ namespace UIDocumentDesignSystem.Showcase
             // which may fire BEFORE our AfterSceneLoad init — so the GameObjects
             // we just created would miss the initial attach. Nudge it manually.
             // The runtime is idempotent; calling twice is a no-op.
-            UIDocumentDesignSystem.DesignSystemRuntime.AttachToAllUIDocuments();
+            DesignSystemRuntime.AttachToAllUIDocuments();
         }
 
-        static PanelSettings MakePanelSettings(int sortingOrder, string name, ThemeStyleSheet theme)
+        private static PanelSettings MakePanelSettings(int sortingOrder, string name, ThemeStyleSheet theme)
         {
             var ps = ScriptableObject.CreateInstance<PanelSettings>();
             ps.name = name;
@@ -186,7 +190,7 @@ namespace UIDocumentDesignSystem.Showcase
             return ps;
         }
 
-        static void ApplyMobileClass(VisualElement root)
+        private static void ApplyMobileClass(VisualElement root)
         {
             if (root == null) return;
 
@@ -197,14 +201,14 @@ namespace UIDocumentDesignSystem.Showcase
             // 1290 < 768. Using rootVisualElement.layout when it has resolved
             // (post-GeometryChangedEvent) gives true panel-coordinate width;
             // before then, fall back to Screen.width / panel.scale.
-            float panelWidth = root.layout.width;
+            var panelWidth = root.layout.width;
             if (panelWidth <= 0f || float.IsNaN(panelWidth))
             {
-                float dpr = GetEffectiveDpr();
+                var dpr = GetEffectiveDpr();
                 panelWidth = Screen.width / Mathf.Max(1f, dpr);
             }
 
-            bool mobile = panelWidth < MOBILE_BREAKPOINT;
+            var mobile = panelWidth < MOBILE_BREAKPOINT;
             if (mobile && !root.ClassListContains("mobile")) root.AddToClassList("mobile");
             if (!mobile && root.ClassListContains("mobile")) root.RemoveFromClassList("mobile");
         }
@@ -224,7 +228,7 @@ namespace UIDocumentDesignSystem.Showcase
         // Idempotent: if another scene already created an EventSystem (e.g.
         // a project that drops the showcase into an existing app), we leave
         // it alone.
-        static void EnsureInputSystem()
+        private static void EnsureInputSystem()
         {
             if (EventSystem.current != null) return;
 
@@ -239,7 +243,7 @@ namespace UIDocumentDesignSystem.Showcase
         // is a good anchor: it's near the top, it's the most semantically
         // meaningful control, and focusing a Toggle reads cleanly with the
         // focus ring.
-        static void SetInitialFocus(VisualElement root)
+        private static void SetInitialFocus(VisualElement root)
         {
             if (root == null) return;
             // Toggle and Button share VisualElement/Focusable, but C#'s ??
@@ -253,11 +257,12 @@ namespace UIDocumentDesignSystem.Showcase
         // Wire the promo-banner buttons in DesignSystemShowcase.uxml to real
         // URLs. Application.OpenURL works in the WebGL build — clicking
         // opens a new browser tab with the GitHub repo / Steam page.
-        static void WirePromoLinks(VisualElement root)
+        private static void WirePromoLinks(VisualElement root)
         {
             if (root == null) return;
             var gh = root.Q<Button>("promo-github");
-            if (gh != null) gh.clicked += () => Application.OpenURL("https://github.com/sinanata/unity-ui-document-design-system");
+            if (gh != null)
+                gh.clicked += () => Application.OpenURL("https://github.com/sinanata/unity-ui-document-design-system");
             var st = root.Q<Button>("promo-steam");
             if (st != null) st.clicked += () => Application.OpenURL("https://store.steampowered.com/app/2269500/");
         }
@@ -266,22 +271,22 @@ namespace UIDocumentDesignSystem.Showcase
         // DesignTokens.uss), second is the light-theme hex (matches the
         // .theme-light block in Showcase/Resources/ShowcaseTheme.uss).
         // Keep in sync with both files when adjusting palettes.
-        static readonly System.Collections.Generic.Dictionary<string, (string Dark, string Light)> SwatchHex =
-            new System.Collections.Generic.Dictionary<string, (string, string)>
+        private static readonly Dictionary<string, (string Dark, string Light)> SwatchHex =
+            new()
             {
-                { "hex-primary",         ("#22C55E", "#16A34A") },
-                { "hex-primary-hover",   ("#16A34A", "#15803D") },
-                { "hex-secondary",       ("#3B82F6", "#2563EB") },
-                { "hex-tertiary",        ("#A855F7", "#9333EA") },
-                { "hex-warning",         ("#F59E0B", "#D97706") },
-                { "hex-danger",          ("#EF4444", "#DC2626") },
-                { "hex-text-primary",    ("#F2F4F7", "#0F172A") },
-                { "hex-text-secondary",  ("#A1A7B3", "#475569") },
-                { "hex-text-disabled",   ("#677085", "#94A3B8") },
-                { "hex-bg",              ("#0B0F17", "#F8FAFC") },
-                { "hex-surface",         ("#131A24", "#FFFFFF") },
-                { "hex-surface-elev",    ("#1A2330", "#F1F5F9") },
-                { "hex-border",          ("#263041", "#E2E8F0") },
+                { "hex-primary", ("#22C55E", "#16A34A") },
+                { "hex-primary-hover", ("#16A34A", "#15803D") },
+                { "hex-secondary", ("#3B82F6", "#2563EB") },
+                { "hex-tertiary", ("#A855F7", "#9333EA") },
+                { "hex-warning", ("#F59E0B", "#D97706") },
+                { "hex-danger", ("#EF4444", "#DC2626") },
+                { "hex-text-primary", ("#F2F4F7", "#0F172A") },
+                { "hex-text-secondary", ("#A1A7B3", "#475569") },
+                { "hex-text-disabled", ("#677085", "#94A3B8") },
+                { "hex-bg", ("#0B0F17", "#F8FAFC") },
+                { "hex-surface", ("#131A24", "#FFFFFF") },
+                { "hex-surface-elev", ("#1A2330", "#F1F5F9") },
+                { "hex-border", ("#263041", "#E2E8F0") }
             };
 
         // Wire the day/night toggle in the COLORS section header. Adds /
@@ -295,29 +300,29 @@ namespace UIDocumentDesignSystem.Showcase
         // under panel.visualTree. Without the class on that ancestor the
         // popup never sees the .theme-light token overrides and stays dark
         // while the rest of the showcase flips to light mode.
-        static void WireThemeToggle(VisualElement root)
+        private static void WireThemeToggle(VisualElement root)
         {
             if (root == null) return;
             var toggle = root.Q<Toggle>("theme-toggle");
             if (toggle == null) return;
             toggle.RegisterValueChangedCallback(evt =>
             {
-                bool light = evt.newValue;
+                var light = evt.newValue;
                 if (light) root.AddToClassList("theme-light");
-                else       root.RemoveFromClassList("theme-light");
+                else root.RemoveFromClassList("theme-light");
 
                 var panelRoot = root.panel?.visualTree;
                 if (panelRoot != null && panelRoot != root)
                 {
                     if (light) panelRoot.AddToClassList("theme-light");
-                    else       panelRoot.RemoveFromClassList("theme-light");
+                    else panelRoot.RemoveFromClassList("theme-light");
                 }
 
                 UpdateHexLabels(root, light);
             });
         }
 
-        static void UpdateHexLabels(VisualElement root, bool light)
+        private static void UpdateHexLabels(VisualElement root, bool light)
         {
             foreach (var kv in SwatchHex)
             {
@@ -332,22 +337,22 @@ namespace UIDocumentDesignSystem.Showcase
         // on the wrapper; the USS rules drive the rest. Each demo wires three
         // closers — the close button, plus (for the overlay variants) the
         // backdrop, which dismisses the drawer when the dim layer is clicked.
-        static void WireDrawerDemos(VisualElement root)
+        private static void WireDrawerDemos(VisualElement root)
         {
             if (root == null) return;
 
-            UIDocumentDesignSystem.DesignSystemRuntime.WireDrawer(
+            DesignSystemRuntime.WireDrawer(
                 root.Q<Button>("drawer-top-burger"),
                 root.Q("drawer-top-wrap"),
                 root.Q<Button>("drawer-top-close"));
 
-            UIDocumentDesignSystem.DesignSystemRuntime.WireDrawer(
+            DesignSystemRuntime.WireDrawer(
                 root.Q<Button>("drawer-right-burger"),
                 root.Q("drawer-right-wrap"),
                 root.Q<Button>("drawer-right-close"),
                 root.Q("drawer-right-backdrop"));
 
-            UIDocumentDesignSystem.DesignSystemRuntime.WireDrawer(
+            DesignSystemRuntime.WireDrawer(
                 root.Q<Button>("drawer-push-burger"),
                 root.Q("drawer-push-wrap"),
                 root.Q<Button>("drawer-push-close"));
@@ -356,11 +361,11 @@ namespace UIDocumentDesignSystem.Showcase
         // Touch-friendly auto-hide for the auto-hiding scrollbar demo. Desktop
         // users get the pure-USS `:hover` rule for free; this helper covers
         // mobile, where there's no hover signal.
-        static void WireAutoHideScroll(VisualElement root)
+        private static void WireAutoHideScroll(VisualElement root)
         {
             if (root == null) return;
             var sv = root.Q<ScrollView>("auto-hide-scroll");
-            UIDocumentDesignSystem.DesignSystemRuntime.WireScrollAutoHide(sv);
+            DesignSystemRuntime.WireScrollAutoHide(sv);
         }
     }
 }

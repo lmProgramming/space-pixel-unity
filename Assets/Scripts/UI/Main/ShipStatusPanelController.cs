@@ -30,6 +30,7 @@ namespace UI.Main
         private bool _isPaused;
         private VisualElement _mainHudRoot;
         private VisualElement _pauseOverlay;
+        private VisualElement _pauseOverlayHost;
         private bool _pauseUiInitialized;
 
         private VisualElement _root;
@@ -158,6 +159,7 @@ namespace UI.Main
                 return;
 
             _pauseOverlay = _root.Q<VisualElement>("pause-overlay");
+            _pauseOverlayHost = _root.Q<VisualElement>("pause-overlay-host");
             var title = _root.Q<Label>("pause-title");
             var resumeButton = _root.Q<Button>("pause-resume-button");
             var settingsButton = _root.Q<Button>("pause-settings-button");
@@ -167,6 +169,8 @@ namespace UI.Main
                 throw new InvalidOperationException("[ShipStatusPanelController] Pause elements missing in HUD UXML.");
 
             title.text = "Paused";
+            if (_pauseOverlayHost != null)
+                _pauseOverlayHost.style.display = DisplayStyle.None;
             _pauseOverlay.style.display = DisplayStyle.None;
             resumeButton.clicked += () => { SetPaused(false); };
             settingsButton.clicked += () => { _settingsPanelController.Toggle(); };
@@ -189,6 +193,8 @@ namespace UI.Main
             _isPaused = paused;
             Time.timeScale = paused ? 0f : 1f;
 
+            if (_pauseOverlayHost != null)
+                _pauseOverlayHost.style.display = paused ? DisplayStyle.Flex : DisplayStyle.None;
             if (_pauseOverlay != null)
                 _pauseOverlay.style.display = paused ? DisplayStyle.Flex : DisplayStyle.None;
 
@@ -198,7 +204,7 @@ namespace UI.Main
 
         private void QuitToMainMenu()
         {
-            SetPaused(false);
+            Time.timeScale = 1f;
             SceneManager.LoadScene(MainMenuSceneName);
         }
 

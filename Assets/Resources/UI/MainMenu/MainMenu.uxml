@@ -1,8 +1,9 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
     <Style src="project://database/Assets/DesignSystem/Resources/UI/Styles/DesignSystem/DesignSystem.uss"/>
+    <ui:Template name="settingsOverlayTemplate" src="project://database/Assets/Scripts/UI/Common/SettingsOverlay.uxml"/>
 
     <ui:VisualElement name="main-menu-root"
-                      style="flex-grow: 1; width: 100%; height: 100%; align-items: center; justify-content: center; background-color: rgba(13,20,31,255);">
+                      style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; align-items: center; justify-content: center; background-color: rgba(13,20,31,255);">
         <ui:VisualElement name="main-menu-panel" class="ds-modal" style="width: 520px; max-width: 520px;">
             <ui:Label text="Space Pixel" class="ds-h1" style="unity-text-align: middle-center; margin-bottom: 4px;"/>
             <ui:Label text="Main Menu" class="ds-body-1 ds-text-primary"
@@ -32,20 +33,10 @@
             </ui:VisualElement>
         </ui:VisualElement>
 
-        <ui:VisualElement name="settings-overlay"
-                          style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; align-items: center; justify-content: center; background-color: rgba(0,0,0,179); display: none;">
-            <ui:VisualElement name="settings-dialog" class="ds-dialog" style="width: 460px; max-width: 460px;">
-                <ui:Label name="settings-title" text="Settings" class="ds-dialog__title"/>
-                <ui:Slider name="settings-master-slider" label="Master Volume" low-value="0" high-value="1"
-                           class="ds-slider" style="margin-bottom: 8px;"/>
-                <ui:Slider name="settings-music-slider" label="Music Volume" low-value="0" high-value="1"
-                           class="ds-slider" style="margin-bottom: 8px;"/>
-                <ui:Slider name="settings-effects-slider" label="Effects Volume" low-value="0" high-value="1"
-                           class="ds-slider"/>
-                <ui:VisualElement class="ds-dialog__actions" style="margin-top: 8px;">
-                    <ui:Button name="settings-close-button" text="Close" class="ds-btn ds-btn--secondary"/>
-                </ui:VisualElement>
-            </ui:VisualElement>
+        <ui:VisualElement name="settings-overlay-host"
+                          style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; display: none;">
+            <ui:Instance template="settingsOverlayTemplate"
+                         style="position: absolute; left: 0; right: 0; top: 0; bottom: 0;"/>
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>
