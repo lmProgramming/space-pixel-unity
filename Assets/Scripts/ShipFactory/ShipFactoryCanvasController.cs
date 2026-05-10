@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Core.Ship;
+using Cysharp.Threading.Tasks;
 using JetBrains.Annotations;
+using LMPro;
 using ShipFactory.LegalPositionCalculator;
 using Ships;
 using UnityEngine;
@@ -15,29 +18,21 @@ namespace ShipFactory
 {
     public class ShipFactoryCanvasController
     {
-        private const string InsideOtherOverlayClassName = "placed-module--inside-other";
-        private const string OutsideShipOverlayClassName = "placed-module--outside-ship";
-        private const string SelectedOverlayClassName = "placed-module--selected";
+        private const int OverlaySortingOrder = 100;
         private const string RemoveButtonHiddenClassName = "remove-module-button--hidden";
         private const string ActionPopupWarningClassName = "action-popup--warning";
         private const string ActionPopupErrorClassName = "action-popup--error";
 
-        private static readonly Vector3 HackSoOverlayPlacedAppearsOk = new(0, Snapper.SnapUnits);
-
         private readonly VisualElement _actionPopup;
         private readonly Label _actionPopupLabel;
-        private readonly Dictionary<ShipModuleSOInstanceBundle, VisualElement> _bundleToOverlay = new();
-
+        private readonly Dictionary<ShipModuleSOInstanceBundle, ModuleOverlay> _bundleToOverlay = new();
         private readonly Camera _cam;
-        private readonly VisualElement _canvasArea;
         private readonly VisualElement _inputBlocker;
         private readonly Label _moduleDescriptionLabel;
-
         private readonly Label _moduleNameLabel;
         private readonly Label _moduleSizeLabel;
         private readonly Label _moduleTypeLabel;
-
-        private readonly Dictionary<VisualElement, ShipModuleSOInstanceBundle> _placedModuleElements = new();
+        private readonly Transform _overlayRoot;
         private readonly Button _removeModuleButton;
         private readonly Label _resourceCrewNeededLabel;
         private readonly Label _resourceCrewQuartersLabel;
@@ -50,28 +45,26 @@ namespace ShipFactory
         private readonly VisualElement _shipResourceEnergyBufferFill;
         private readonly VisualElement _shipResourceEnergyFill;
         private readonly Label _shipResourceEnergyLabel;
-
         private readonly VisualElement _shipResourcesPanel;
 
+        private CancellationTokenSource _animationCts;
+        private int _animationRunId;
         private ShipModuleSOInstanceBundle _draggedModuleBundle;
         private bool _draggedModuleWasNew;
-
-        private VisualElement _dragGhost;
-        private Vector2 _dragGhostWorldPositionOffset;
+        private ModuleOverlay _draggedOverlay;
         private Vector2 _dragStartWorldPos;
-        private Vector2 _ghostSizePx;
+        private Vector2 _dragWorldOffset;
         private ShipModuleSO _hoveredPaletteModule;
         private ShipModuleSOInstanceBundle _hoveredPlacedBundle;
+        private bool _isPointerOverCanvas;
         private ShipModuleSOInstanceBundle _selectedModuleBundle;
-
         private Ship _ship;
 
         public ShipFactoryCanvasController(VisualElement root)
         {
             _cam = Camera.main;
 
-            var canvasViewport = root.Q<VisualElement>("canvas-viewport");
-            _canvasArea = root.Q<VisualElement>("canvas-area");
+            var canvasContainer = root.Q<VisualElement>("canvas-container");
             _inputBlocker = root.Q<VisualElement>("ship-factory-input-blocker");
 
             _moduleNameLabel = root.Q<Label>("module-info-name");
@@ -94,9 +87,9 @@ namespace ShipFactory
             _actionPopup = root.Q<VisualElement>("action-popup");
             _actionPopupLabel = root.Q<Label>("action-popup-label");
 
-            if (canvasViewport == null || _canvasArea == null)
+            if (canvasContainer == null)
                 throw new InvalidOperationException(
-                    "[ShipFactoryCanvasController] Required canvas elements not found in UXML!");
+                    "[ShipFactoryCanvasController] canvas-container not found in UXML!");
 
             if (_inputBlocker == null || _moduleNameLabel == null || _moduleTypeLabel == null ||
                 _moduleSizeLabel == null ||
@@ -110,15 +103,14 @@ namespace ShipFactory
                 throw new InvalidOperationException(
                     "[ShipFactoryCanvasController] Required details panel elements are missing in UXML!");
 
-            _canvasArea.pickingMode = PickingMode.Ignore;
-            canvasViewport.pickingMode = PickingMode.Ignore;
+            _overlayRoot = new GameObject("ModuleOverlays").transform;
 
+            RegisterInputEvents(root, canvasContainer);
             _removeModuleButton.clicked += RemoveSelectedModule;
 
             SetInputLocked(false);
             RefreshInfoPanelFromCurrentContext();
             RefreshShipResourcesPanel();
-            RegisterDragEvents(root);
         }
 
         private bool IsDraggingModule => _draggedModuleBundle != null;
@@ -127,6 +119,16 @@ namespace ShipFactory
 
         public event Action OnModuleDragFinished;
         public event Action<bool> OnInputLockChanged;
+
+        public void Dispose()
+        {
+            _animationRunId++;
+            _animationCts?.Cancel();
+            _animationCts = null;
+
+            if (_overlayRoot != null)
+                Object.Destroy(_overlayRoot.gameObject);
+        }
 
         public void SetExternalInputLock(bool isLocked)
         {
@@ -140,7 +142,7 @@ namespace ShipFactory
             RefreshShipResourcesPanel();
         }
 
-        public void BeginModuleDrop(ShipModuleSO shipModuleSO, Vector2 pointerScreenPos)
+        public void BeginModuleDrop(ShipModuleSO shipModuleSO)
         {
             if (IsInputLocked) return;
 
@@ -152,12 +154,12 @@ namespace ShipFactory
 
             _hoveredPaletteModule = null;
 
-            var worldPos = ScreenToSnappedWorldPosition(pointerScreenPos);
+            var worldPos = Snapper.SnapToGrid(GameInput.WorldPointerPosition);
             var bundle = InstantiateModule(shipModuleSO, worldPos);
             if (bundle == null) return;
 
-            var dragGhost = AddOverlayElement(bundle);
-            BeginModuleDrop(bundle, pointerScreenPos, dragGhost, true);
+            var overlay = CreateOverlay(bundle);
+            BeginModuleDrag(bundle, overlay, true);
         }
 
         public void ShowPaletteModuleInfo(ShipModuleSO moduleSO)
@@ -214,42 +216,6 @@ namespace ShipFactory
                 new Color(80f / 255f, 172f / 255f, 250f / 255f));
         }
 
-        private static void ApplySegmentedResourceBar(
-            VisualElement usageFill,
-            VisualElement bufferFill,
-            float usage,
-            float production,
-            Color usageHealthyColor)
-        {
-            var isIdle = Mathf.Approximately(usage, 0f) && Mathf.Approximately(production, 0f);
-
-            if (isIdle)
-            {
-                usageFill.style.backgroundColor = new Color(0.5f, 0.5f, 0.5f, 1f); // grey
-                usageFill.style.width = Length.Percent(0f);
-                bufferFill.style.width = Length.Percent(0f);
-                return;
-            }
-
-            var normalizationFactor = Mathf.Max(usage, production, 0.0001f);
-            var coveredUsage = Mathf.Min(usage, production);
-            var balanceDelta = production - usage; // negative = deficit, positive = surplus
-
-            var coveredPercent = Mathf.Clamp01(coveredUsage / normalizationFactor);
-            var deltaPercent = Mathf.Clamp01(Mathf.Abs(balanceDelta) / normalizationFactor);
-
-            usageFill.style.left = Length.Percent(0f);
-            usageFill.style.width = Length.Percent(coveredPercent * 100f);
-            usageFill.style.backgroundColor = usageHealthyColor;
-
-            var hasDeficit = balanceDelta < 0f; // production < usage
-            bufferFill.style.left = Length.Percent(coveredPercent * 100f);
-            bufferFill.style.width = Length.Percent(deltaPercent * 100f);
-            bufferFill.style.backgroundColor = hasDeficit
-                ? Color.red
-                : new Color(136f / 255f, 208f / 255f, 116f / 255f); // green for buffer
-        }
-
         public void ShowInfoMessage(string message)
         {
             ShowActionPopup(message);
@@ -265,209 +231,7 @@ namespace ShipFactory
             ShowActionPopup(message, PopupLevel.Error);
         }
 
-        private void RemoveSelectedModule()
-        {
-            if (_selectedModuleBundle == null || _ship == null || IsDraggingModule || IsInputLocked) return;
-            if (_selectedModuleBundle.PlacedModule.Type == ModuleType.Command)
-            {
-                const string message = "Command module cannot be removed.";
-                ShowActionPopup(message, PopupLevel.Warning);
-                Debug.LogWarning($"[ShipFactory] {message}");
-                return;
-            }
-
-            if (WouldRemovalCreateIslands(_selectedModuleBundle))
-            {
-                const string message = "Cannot remove this module: it would split the ship into islands.";
-                ShowActionPopup(message, PopupLevel.Error);
-                Debug.LogWarning($"[ShipFactory] {message}");
-                return;
-            }
-
-            if (!_bundleToOverlay.TryGetValue(_selectedModuleBundle, out var overlay)) return;
-
-            _ship.ManualRemoveModule(_selectedModuleBundle.PlacedModule);
-            _placedModuleElements.Remove(overlay);
-            _bundleToOverlay.Remove(_selectedModuleBundle);
-            overlay.RemoveFromHierarchy();
-
-            Object.Destroy(_selectedModuleBundle.Instance);
-
-            if (_hoveredPlacedBundle == _selectedModuleBundle)
-                _hoveredPlacedBundle = null;
-
-            SelectBundle(null);
-            UpdateCanvasPickingMode();
-            RefreshShipResourcesPanel();
-        }
-
-        private void BeginModuleDrop(ShipModuleSOInstanceBundle bundle, Vector2 pointerScreenPos,
-            VisualElement dragGhost, bool isNewBundle)
-        {
-            _draggedModuleBundle = bundle;
-            _dragGhost = dragGhost;
-            _draggedModuleWasNew = isNewBundle;
-            _dragStartWorldPos = bundle.Instance.transform.position;
-            _hoveredPaletteModule = null;
-
-            _dragGhostWorldPositionOffset = !isNewBundle
-                ? (Vector2)bundle.Instance.transform.position - ScreenToWorldPosition(pointerScreenPos)
-                : Vector2.zero;
-
-            _ghostSizePx = WorldSizeToScreenPx(bundle.ModuleSO.Dimensions);
-            _dragGhost.style.width = _ghostSizePx.x;
-            _dragGhost.style.height = _ghostSizePx.y;
-
-            SelectBundle(bundle);
-            RefreshInfoPanelFromCurrentContext();
-            MoveGhostToPointer(pointerScreenPos);
-        }
-
-        private void RegisterDragEvents(VisualElement root)
-        {
-            root.RegisterCallback<PointerMoveEvent>(OnPointerMove, TrickleDown.TrickleDown);
-            root.RegisterCallback<PointerUpEvent>(OnPointerUp, TrickleDown.TrickleDown);
-        }
-
-        private void OnPointerMove(PointerMoveEvent evt)
-        {
-            if (!IsDraggingModule || IsInputLocked) return;
-            MoveGhostToPointer(evt.position);
-        }
-
-        private void OnPointerUp(PointerUpEvent evt)
-        {
-            if (!IsDraggingModule || IsInputLocked) return;
-
-            var legality = Calculator.CalculateLegalityPosition(_draggedModuleBundle, _placedModuleElements.Values);
-            if (legality == PositionLegality.Correct)
-            {
-                FinishActiveDrag();
-                return;
-            }
-
-            var activeBundle = _draggedModuleBundle;
-            var activeGhost = _dragGhost;
-            var currentWorldPos = (Vector2)activeBundle.Instance.transform.position;
-
-            SetInputLocked(true);
-
-            if (_draggedModuleWasNew)
-            {
-                var currentScreen = WorldToScreenPos(currentWorldPos + (Vector2)HackSoOverlayPlacedAppearsOk);
-                var bottomScreenTarget = new Vector2(currentScreen.x, Screen.height - 16f);
-                var bottomWorldTarget = ScreenToSnappedWorldPosition(bottomScreenTarget);
-
-                AnimateBundleMovement(activeBundle, activeGhost, currentWorldPos, bottomWorldTarget, () =>
-                {
-                    if (_ship != null)
-                        _ship.ManualRemoveModule(activeBundle.PlacedModule);
-
-                    _placedModuleElements.Remove(activeGhost);
-                    _bundleToOverlay.Remove(activeBundle);
-                    activeGhost.RemoveFromHierarchy();
-                    Object.Destroy(activeBundle.Instance);
-
-                    SelectBundle(null);
-                    FinishActiveDrag();
-                    SetInputLocked(false);
-                });
-
-                return;
-            }
-
-            AnimateBundleMovement(activeBundle, activeGhost, currentWorldPos, _dragStartWorldPos, () =>
-            {
-                FinishActiveDrag();
-                SetInputLocked(false);
-            });
-        }
-
-        private void FinishActiveDrag()
-        {
-            _draggedModuleBundle = null;
-            _dragGhost = null;
-            _draggedModuleWasNew = false;
-
-            RefreshInfoPanelFromCurrentContext();
-            OnModuleDragFinished?.Invoke();
-        }
-
-        private void MoveGhostToPointer(Vector2 screenPos)
-        {
-            var worldPos = ScreenToWorldPosition(screenPos) + _dragGhostWorldPositionOffset;
-            var snapped = Snapper.SnapToGrid(worldPos);
-            SetBundleWorldAndOverlayPosition(_draggedModuleBundle, _dragGhost, snapped);
-
-            var legality = Calculator.CalculateLegalityPosition(_draggedModuleBundle, _placedModuleElements.Values);
-            _dragGhost.EnableInClassList(InsideOtherOverlayClassName, legality == PositionLegality.InsideOther);
-            _dragGhost.EnableInClassList(OutsideShipOverlayClassName,
-                legality is PositionLegality.OutsideShip or PositionLegality.DisconnectsShip);
-        }
-
-        private void AnimateBundleMovement(ShipModuleSOInstanceBundle bundle, VisualElement overlay, Vector2 from,
-            Vector2 to, Action onComplete)
-        {
-            const float duration = 0.22f;
-            var startedAt = Time.unscaledTime;
-            var finished = false;
-
-            _canvasArea.schedule.Execute(() =>
-            {
-                if (finished) return;
-
-                var t = Mathf.Clamp01((Time.unscaledTime - startedAt) / duration);
-                var eased = 1f - Mathf.Pow(1f - t, 3f);
-                var world = Vector2.Lerp(from, to, eased);
-
-                SetBundleWorldAndOverlayPosition(bundle, overlay, world);
-
-                if (t < 1f) return;
-
-                finished = true;
-                overlay.RemoveFromClassList(InsideOtherOverlayClassName);
-                overlay.RemoveFromClassList(OutsideShipOverlayClassName);
-                onComplete?.Invoke();
-            }).Every(16);
-        }
-
-        private void SetBundleWorldAndOverlayPosition(ShipModuleSOInstanceBundle bundle, VisualElement overlay,
-            Vector2 snappedWorldPos)
-        {
-            bundle.Instance.transform.position = snappedWorldPos;
-
-            var overlayScreenPos = WorldToScreenPos(snappedWorldPos + (Vector2)HackSoOverlayPlacedAppearsOk);
-            overlay.style.left = overlayScreenPos.x - _ghostSizePx.x / 2f;
-            overlay.style.top = overlayScreenPos.y - _ghostSizePx.y / 2f;
-        }
-
-        private static Vector2 ScreenToWorldPosition(Vector2 screenPos)
-        {
-            var cam = Camera.main;
-            if (cam == null)
-            {
-                Debug.LogError("[ShipFactory] No main camera found!");
-                return Vector2.zero;
-            }
-
-            var unityScreenPos = new Vector3(screenPos.x, Screen.height - screenPos.y, cam.nearClipPlane);
-            var worldPos = (Vector2)cam.ScreenToWorldPoint(unityScreenPos);
-            return worldPos;
-        }
-
-        private static Vector2 ScreenToSnappedWorldPosition(Vector2 screenPos)
-        {
-            return Snapper.SnapToGrid(ScreenToWorldPosition(screenPos));
-        }
-
-        private Vector2 WorldToScreenPos(Vector2 worldPos)
-        {
-            if (!_cam) return Vector2.zero;
-
-            var screenPos = _cam.WorldToScreenPoint(worldPos);
-            // Convert Unity screen (y bottom-up) to UI Toolkit panel (y top-down)
-            return new Vector2(screenPos.x, Screen.height - screenPos.y);
-        }
+        #region Module Instantiation
 
         [CanBeNull]
         private ShipModuleSOInstanceBundle InstantiateModule(ShipModuleSO shipModuleSO, Vector2 worldPosition)
@@ -491,69 +255,259 @@ namespace ShipFactory
             return new ShipModuleSOInstanceBundle(instance, shipModuleSO, module);
         }
 
-        private VisualElement AddOverlayElement(ShipModuleSOInstanceBundle moduleBundle)
+        #endregion
+
+        #region Resource Bar
+
+        private static void ApplySegmentedResourceBar(
+            VisualElement usageFill,
+            VisualElement bufferFill,
+            float usage,
+            float production,
+            Color usageHealthyColor)
         {
-            var element = new VisualElement();
-            element.AddToClassList("placed-module");
+            var isIdle = Mathf.Approximately(usage, 0f) && Mathf.Approximately(production, 0f);
 
-            element.RegisterCallback<PointerEnterEvent>(_ =>
+            if (isIdle)
             {
-                if (IsDraggingModule || IsInputLocked) return;
-                _hoveredPlacedBundle = moduleBundle;
-                _hoveredPaletteModule = null;
-                RefreshInfoPanelFromCurrentContext();
-            });
+                usageFill.style.backgroundColor = new Color(0.5f, 0.5f, 0.5f, 1f);
+                usageFill.style.width = Length.Percent(0f);
+                bufferFill.style.width = Length.Percent(0f);
+                return;
+            }
 
-            element.RegisterCallback<PointerLeaveEvent>(_ =>
-            {
-                if (_hoveredPlacedBundle != moduleBundle) return;
-                _hoveredPlacedBundle = null;
-                RefreshInfoPanelFromCurrentContext();
-            });
+            var normalizationFactor = Mathf.Max(usage, production, 0.0001f);
+            var coveredUsage = Mathf.Min(usage, production);
+            var balanceDelta = production - usage;
 
-            element.RegisterCallback<PointerDownEvent>(evt =>
-            {
-                if (evt.button != 0 || IsInputLocked) return;
-                BeginModuleDrop(moduleBundle, evt.position, element, false);
-                evt.StopPropagation();
-            });
+            var coveredPercent = Mathf.Clamp01(coveredUsage / normalizationFactor);
+            var deltaPercent = Mathf.Clamp01(Mathf.Abs(balanceDelta) / normalizationFactor);
 
-            PositionInitialOverlayElement(element, moduleBundle);
-            _canvasArea.Add(element);
+            usageFill.style.left = Length.Percent(0f);
+            usageFill.style.width = Length.Percent(coveredPercent * 100f);
+            usageFill.style.backgroundColor = usageHealthyColor;
 
-            _placedModuleElements[element] = moduleBundle;
-            _bundleToOverlay[moduleBundle] = element;
-            UpdateCanvasPickingMode();
-
-            return element;
+            var hasDeficit = balanceDelta < 0f;
+            bufferFill.style.left = Length.Percent(coveredPercent * 100f);
+            bufferFill.style.width = Length.Percent(deltaPercent * 100f);
+            bufferFill.style.backgroundColor = hasDeficit
+                ? Color.red
+                : new Color(136f / 255f, 208f / 255f, 116f / 255f);
         }
 
-        private void PositionInitialOverlayElement(VisualElement element, ShipModuleSOInstanceBundle module)
-        {
-            var screenPos = WorldToScreenPos(module.Instance.transform.position + HackSoOverlayPlacedAppearsOk);
-            var size = WorldSizeToScreenPx(module.ModuleSO.Dimensions);
+        #endregion
 
-            element.style.left = screenPos.x - size.x / 2f;
-            element.style.top = screenPos.y - size.y / 2f;
-            element.style.width = size.x;
-            element.style.height = size.y;
+        #region Validation
+
+        private bool WouldRemovalCreateIslands(ShipModuleSOInstanceBundle bundleToRemove)
+        {
+            var remainingBundles = _bundleToOverlay.Keys.AsValueEnumerable()
+                .Where(bundle => bundle != bundleToRemove).ToList();
+
+            return remainingBundles.Count > 1 && remainingBundles
+                .Select(bundle => Calculator.CalculateLegalityPosition(bundle, remainingBundles)).AsValueEnumerable()
+                .Any(legality => legality != PositionLegality.Correct);
         }
 
-        private Vector2 WorldSizeToScreenPx(Vector2 worldSize)
-        {
-            if (!_cam) throw new InvalidOperationException("Missing camera");
+        #endregion
 
-            var origin = _cam.WorldToScreenPoint(Vector3.zero);
-            var offset = _cam.WorldToScreenPoint(worldSize);
-            return new Vector2(Mathf.Abs(offset.x - origin.x), Mathf.Abs(offset.y - origin.y));
+        private enum PopupLevel
+        {
+            Info,
+            Warning,
+            Error
+        }
+
+        #region Input
+
+        private void RegisterInputEvents(VisualElement root, VisualElement canvasContainer)
+        {
+            canvasContainer.RegisterCallback<PointerEnterEvent>(_ => _isPointerOverCanvas = true);
+            canvasContainer.RegisterCallback<PointerLeaveEvent>(_ => OnCanvasPointerLeave());
+            canvasContainer.RegisterCallback<PointerDownEvent>(OnCanvasPointerDown);
+
+            root.RegisterCallback<PointerMoveEvent>(OnPointerMove, TrickleDown.TrickleDown);
+            root.RegisterCallback<PointerUpEvent>(OnPointerUp, TrickleDown.TrickleDown);
+        }
+
+        private void OnCanvasPointerLeave()
+        {
+            _isPointerOverCanvas = false;
+            if (IsDraggingModule || IsInputLocked) return;
+            if (_hoveredPlacedBundle == null) return;
+
+            var oldHovered = _hoveredPlacedBundle;
+            _hoveredPlacedBundle = null;
+            RefreshOverlayColor(oldHovered);
+            RefreshInfoPanelFromCurrentContext();
+        }
+
+        private void OnCanvasPointerDown(PointerDownEvent evt)
+        {
+            if (evt.button != 0 || IsInputLocked || IsDraggingModule) return;
+
+            var bundle = FindBundleAtWorldPosition(GameInput.WorldPointerPosition);
+            if (bundle == null) return;
+
+            if (!_bundleToOverlay.TryGetValue(bundle, out var overlay)) return;
+
+            BeginModuleDrag(bundle, overlay, false);
+            evt.StopPropagation();
+        }
+
+        private void OnPointerMove(PointerMoveEvent evt)
+        {
+            if (IsInputLocked) return;
+
+            if (IsDraggingModule)
+            {
+                MoveGhostToPointer();
+                return;
+            }
+
+            if (!_isPointerOverCanvas) return;
+            UpdateHover();
+        }
+
+        private void OnPointerUp(PointerUpEvent evt)
+        {
+            if (!IsDraggingModule || IsInputLocked) return;
+            HandleDragRelease();
+        }
+
+        private void UpdateHover()
+        {
+            var bundle = FindBundleAtWorldPosition(GameInput.WorldPointerPosition);
+
+            if (bundle == _hoveredPlacedBundle) return;
+
+            var oldHovered = _hoveredPlacedBundle;
+            _hoveredPlacedBundle = bundle;
+            _hoveredPaletteModule = null;
+
+            if (oldHovered != null) RefreshOverlayColor(oldHovered);
+            if (_hoveredPlacedBundle != null) RefreshOverlayColor(_hoveredPlacedBundle);
+
+            RefreshInfoPanelFromCurrentContext();
+        }
+
+        #endregion
+
+        #region Drag
+
+        private void BeginModuleDrag(ShipModuleSOInstanceBundle bundle, ModuleOverlay overlay, bool isNewBundle)
+        {
+            _draggedModuleBundle = bundle;
+            _draggedOverlay = overlay;
+            _draggedModuleWasNew = isNewBundle;
+            _dragStartWorldPos = bundle.Instance.transform.position;
+            _hoveredPaletteModule = null;
+
+            _dragWorldOffset = !isNewBundle
+                ? (Vector2)bundle.Instance.transform.position - GameInput.WorldPointerPosition
+                : Vector2.zero;
+
+            SelectBundle(bundle);
+            RefreshInfoPanelFromCurrentContext();
+            MoveGhostToPointer();
+        }
+
+        private void MoveGhostToPointer()
+        {
+            var snapped = Snapper.SnapToGrid(GameInput.WorldPointerPosition + _dragWorldOffset);
+            SetBundleAndOverlayPosition(_draggedModuleBundle, _draggedOverlay, snapped);
+
+            var legality = Calculator.CalculateLegalityPosition(_draggedModuleBundle, _bundleToOverlay.Keys);
+            var color = legality switch
+            {
+                PositionLegality.InsideOther => ModuleOverlay.InsideOtherColor,
+                PositionLegality.OutsideShip or PositionLegality.DisconnectsShip => ModuleOverlay.OutsideShipColor,
+                _ => ModuleOverlay.SelectedColor
+            };
+            _draggedOverlay.SetColor(color);
+        }
+
+        private void HandleDragRelease()
+        {
+            var legality = Calculator.CalculateLegalityPosition(_draggedModuleBundle, _bundleToOverlay.Keys);
+            if (legality == PositionLegality.Correct)
+            {
+                FinishActiveDrag();
+                return;
+            }
+
+            var activeBundle = _draggedModuleBundle;
+            var activeOverlay = _draggedOverlay;
+            var currentWorldPos = (Vector2)activeBundle.Instance.transform.position;
+
+            SetInputLocked(true);
+
+            if (_draggedModuleWasNew)
+            {
+                var bottomWorldTarget = CalculateOffScreenBottomPosition(currentWorldPos.x);
+
+                AnimateBundleMovement(activeBundle, activeOverlay, currentWorldPos, bottomWorldTarget, () =>
+                {
+                    if (_ship != null)
+                        _ship.ManualRemoveModule(activeBundle.PlacedModule);
+
+                    _bundleToOverlay.Remove(activeBundle);
+                    Object.Destroy(activeOverlay.gameObject);
+                    Object.Destroy(activeBundle.Instance);
+
+                    SelectBundle(null);
+                    FinishActiveDrag();
+                    SetInputLocked(false);
+                });
+
+                return;
+            }
+
+            AnimateBundleMovement(activeBundle, activeOverlay, currentWorldPos, _dragStartWorldPos, () =>
+            {
+                FinishActiveDrag();
+                SetInputLocked(false);
+            });
+        }
+
+        private void FinishActiveDrag()
+        {
+            var finishedBundle = _draggedModuleBundle;
+            _draggedModuleBundle = null;
+            _draggedOverlay = null;
+            _draggedModuleWasNew = false;
+
+            if (finishedBundle != null)
+                RefreshOverlayColor(finishedBundle);
+
+            RefreshInfoPanelFromCurrentContext();
+            OnModuleDragFinished?.Invoke();
+        }
+
+        #endregion
+
+        #region Overlay Management
+
+        private ModuleOverlay CreateOverlay(ShipModuleSOInstanceBundle bundle)
+        {
+            var overlay = ModuleOverlay.Create(bundle, _overlayRoot, OverlaySortingOrder);
+            _bundleToOverlay[bundle] = overlay;
+            return overlay;
+        }
+
+        private void DestroyAllOverlays()
+        {
+            foreach (var overlay in _bundleToOverlay.Values)
+                if (overlay != null)
+                    Object.Destroy(overlay.gameObject);
+
+            _bundleToOverlay.Clear();
         }
 
         private void RebuildOverlaysFromShip()
         {
-            _canvasArea.Clear();
-            _placedModuleElements.Clear();
-            _bundleToOverlay.Clear();
-            _dragGhost = null;
+            DestroyAllOverlays();
+            _draggedOverlay = null;
             _draggedModuleBundle = null;
             _selectedModuleBundle = null;
             _hoveredPlacedBundle = null;
@@ -561,40 +515,180 @@ namespace ShipFactory
             if (_ship == null)
             {
                 RefreshInfoPanelFromCurrentContext();
-                UpdateCanvasPickingMode();
                 return;
             }
 
-            foreach (Transform transform in _ship.gameObject.transform)
+            foreach (Transform child in _ship.gameObject.transform)
             {
-                var shipModuleSO = transform.GetComponent<ShipModuleSOContainer>();
-                var module = transform.GetComponent<IModule>();
+                var container = child.GetComponent<ShipModuleSOContainer>();
+                var module = child.GetComponent<IModule>();
 
-                if (shipModuleSO == null || shipModuleSO.Module == null || module == null)
+                if (container == null || container.Module == null || module == null)
                     throw new InvalidOperationException(
                         "[ShipFactoryCanvasController] Ship child is missing module setup.");
 
-                AddOverlayElement(new ShipModuleSOInstanceBundle(transform.gameObject, shipModuleSO.Module, module));
+                CreateOverlay(new ShipModuleSOInstanceBundle(child.gameObject, container.Module, module));
             }
 
             RefreshInfoPanelFromCurrentContext();
-            UpdateCanvasPickingMode();
         }
+
+        private void RefreshOverlayColor(ShipModuleSOInstanceBundle bundle)
+        {
+            if (!_bundleToOverlay.TryGetValue(bundle, out var overlay)) return;
+            if (bundle == _draggedModuleBundle) return;
+
+            if (bundle == _selectedModuleBundle)
+                overlay.SetColor(ModuleOverlay.SelectedColor);
+            else if (bundle == _hoveredPlacedBundle)
+                overlay.SetColor(ModuleOverlay.HoverColor);
+            else
+                overlay.SetColor(ModuleOverlay.NormalColor);
+        }
+
+        #endregion
+
+        #region Position & Hit Testing
+
+        private static void SetBundleAndOverlayPosition(ShipModuleSOInstanceBundle bundle, ModuleOverlay overlay,
+            Vector2 worldPos)
+        {
+            bundle.Instance.transform.position = worldPos;
+            overlay.transform.position = worldPos;
+        }
+
+        [CanBeNull]
+        private ShipModuleSOInstanceBundle FindBundleAtWorldPosition(Vector2 worldPos)
+        {
+            foreach (var (bundle, _) in _bundleToOverlay)
+            {
+                var pos = (Vector2)bundle.Instance.transform.position;
+                var halfDims = (Vector2)bundle.ModuleSO.Dimensions / 2f;
+
+                if (worldPos.x >= pos.x - halfDims.x && worldPos.x <= pos.x + halfDims.x &&
+                    worldPos.y >= pos.y - halfDims.y && worldPos.y <= pos.y + halfDims.y)
+                    return bundle;
+            }
+
+            return null;
+        }
+
+        private Vector2 CalculateOffScreenBottomPosition(float worldX)
+        {
+            if (_cam)
+            {
+                var viewportBottom = _cam.ViewportToWorldPoint(new Vector3(0.5f, -0.15f, _cam.nearClipPlane));
+                return Snapper.SnapToGrid(new Vector2(worldX, viewportBottom.y));
+            }
+
+            return Snapper.SnapToGrid(new Vector2(worldX, -100f));
+        }
+
+        #endregion
+
+        #region Animation
+
+        private void AnimateBundleMovement(ShipModuleSOInstanceBundle bundle, ModuleOverlay overlay,
+            Vector2 from, Vector2 to, Action onComplete)
+        {
+            _animationRunId++;
+            _animationCts?.Cancel();
+
+            var cts = new CancellationTokenSource();
+            _animationCts = cts;
+            var runId = _animationRunId;
+
+            AnimateBundleMovementAsync(bundle, overlay, from, to, onComplete, cts, runId).Forget();
+        }
+
+        private async UniTask AnimateBundleMovementAsync(ShipModuleSOInstanceBundle bundle, ModuleOverlay overlay,
+            Vector2 from, Vector2 to, Action onComplete, CancellationTokenSource cts, int runId)
+        {
+            try
+            {
+                var token = cts.Token;
+                const float duration = 0.22f;
+                var elapsed = 0f;
+
+                while (elapsed < duration)
+                {
+                    elapsed += Time.unscaledDeltaTime;
+                    var t = Mathf.Clamp01(elapsed / duration);
+                    var eased = 1f - Mathf.Pow(1f - t, 3f);
+                    var world = Vector2.Lerp(from, to, eased);
+
+                    SetBundleAndOverlayPosition(bundle, overlay, world);
+                    await UniTask.Yield(PlayerLoopTiming.Update, token);
+                }
+
+                SetBundleAndOverlayPosition(bundle, overlay, to);
+                onComplete?.Invoke();
+            }
+            catch (OperationCanceledException)
+            {
+                // Superseded by a newer animation or Dispose.
+            }
+            finally
+            {
+                if (_animationRunId == runId)
+                    _animationCts = null;
+
+                cts.Dispose();
+            }
+        }
+
+        #endregion
+
+        #region Selection & Removal
 
         private void SelectBundle(ShipModuleSOInstanceBundle bundle)
         {
-            if (_selectedModuleBundle != null &&
-                _bundleToOverlay.TryGetValue(_selectedModuleBundle, out var oldOverlay))
-                oldOverlay.RemoveFromClassList(SelectedOverlayClassName);
-
+            var oldSelected = _selectedModuleBundle;
             _selectedModuleBundle = bundle;
 
-            if (_selectedModuleBundle != null &&
-                _bundleToOverlay.TryGetValue(_selectedModuleBundle, out var newOverlay))
-                newOverlay.AddToClassList(SelectedOverlayClassName);
+            if (oldSelected != null) RefreshOverlayColor(oldSelected);
+            if (_selectedModuleBundle != null) RefreshOverlayColor(_selectedModuleBundle);
 
             RefreshInfoPanelFromCurrentContext();
         }
+
+        private void RemoveSelectedModule()
+        {
+            if (_selectedModuleBundle == null || _ship == null || IsDraggingModule || IsInputLocked) return;
+
+            if (_selectedModuleBundle.PlacedModule.Type == ModuleType.Command)
+            {
+                const string message = "Command module cannot be removed.";
+                ShowActionPopup(message, PopupLevel.Warning);
+                Debug.LogWarning($"[ShipFactory] {message}");
+                return;
+            }
+
+            if (WouldRemovalCreateIslands(_selectedModuleBundle))
+            {
+                const string message = "Cannot remove this module: it would split the ship into islands.";
+                ShowActionPopup(message, PopupLevel.Error);
+                Debug.LogWarning($"[ShipFactory] {message}");
+                return;
+            }
+
+            if (!_bundleToOverlay.TryGetValue(_selectedModuleBundle, out var overlay)) return;
+
+            _ship.ManualRemoveModule(_selectedModuleBundle.PlacedModule);
+            _bundleToOverlay.Remove(_selectedModuleBundle);
+            Object.Destroy(overlay.gameObject);
+            Object.Destroy(_selectedModuleBundle.Instance);
+
+            if (_hoveredPlacedBundle == _selectedModuleBundle)
+                _hoveredPlacedBundle = null;
+
+            SelectBundle(null);
+            RefreshShipResourcesPanel();
+        }
+
+        #endregion
+
+        #region Info Panel
 
         private void RefreshInfoPanelFromCurrentContext()
         {
@@ -693,10 +787,12 @@ namespace ShipFactory
             }
 
             _removeModuleButton.RemoveFromClassList(RemoveButtonHiddenClassName);
-
-            // Keep button clickable for placed command modules so we can show explicit feedback popup.
             _removeModuleButton.SetEnabled(!IsInputLocked && !IsDraggingModule);
         }
+
+        #endregion
+
+        #region Input Lock & Popups
 
         private void SetInputLocked(bool isLocked)
         {
@@ -704,11 +800,6 @@ namespace ShipFactory
             _inputBlocker.style.display = isLocked ? DisplayStyle.Flex : DisplayStyle.None;
             RefreshInfoPanelFromCurrentContext();
             OnInputLockChanged?.Invoke(isLocked);
-        }
-
-        private void UpdateCanvasPickingMode()
-        {
-            _canvasArea.pickingMode = _placedModuleElements.Count > 0 ? PickingMode.Position : PickingMode.Ignore;
         }
 
         private void ShowActionPopup(string message, PopupLevel level = PopupLevel.Info)
@@ -736,21 +827,6 @@ namespace ShipFactory
             _actionPopup.schedule.Execute(() => { _actionPopup.style.display = DisplayStyle.None; }).StartingIn(1600);
         }
 
-        private bool WouldRemovalCreateIslands(ShipModuleSOInstanceBundle bundleToRemove)
-        {
-            var remainingBundles = _placedModuleElements.Values.AsValueEnumerable()
-                .Where(bundle => bundle != bundleToRemove).ToList();
-
-            return remainingBundles.Count > 1 && remainingBundles
-                .Select(bundle => Calculator.CalculateLegalityPosition(bundle, remainingBundles)).AsValueEnumerable()
-                .Any(legality => legality != PositionLegality.Correct);
-        }
-
-        private enum PopupLevel
-        {
-            Info,
-            Warning,
-            Error
-        }
+        #endregion
     }
 }

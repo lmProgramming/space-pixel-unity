@@ -85,6 +85,8 @@ namespace ShipFactory
             if (_saveShipButton != null)
                 _saveShipButton.clicked -= SaveSnapshot;
 
+            _canvasController?.Dispose();
+
             if (_paletteController == null || _canvasController == null)
                 return;
 
@@ -168,7 +170,7 @@ namespace ShipFactory
                 return;
             }
 
-            _canvasController.BeginModuleDrop(shipModuleSO, startPointerPosition);
+            _canvasController.BeginModuleDrop(shipModuleSO);
         }
 
         private void OnPaletteModuleHoverStarted(ShipModuleSO moduleSO)

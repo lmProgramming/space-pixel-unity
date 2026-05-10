@@ -50,50 +50,6 @@
     background-color: rgba(0, 0, 0, 0);
 }
 
-/* ---------- Placed Module Overlays ---------- */
-.placed-module {
-    position: absolute;
-    background-color: rgba(0, 0, 0, 0);
-    border-color: rgba(255, 255, 255, 0.15);
-    border-width: 1px;
-    border-radius: 2px;
-    align-items: center;
-    justify-content: center;
-    transition-duration: 0.15s;
-}
-
-.placed-module:hover {
-    background-color: rgba(0, 229, 255, 0.1);
-    border-color: #00e5ff;
-}
-
-.placed-module--selected {
-    background-color: rgba(255, 180, 0, 0.15);
-    border-color: #ffb400;
-    border-width: 2px;
-}
-
-.placed-module--inside-other {
-    background-color: rgba(255, 50, 50, 0.3);
-    border-color: #ff3232;
-    border-width: 2px;
-}
-
-.placed-module--outside-ship {
-    background-color: rgba(255, 100, 50, 0.2);
-    border-color: #ff6432;
-}
-
-.placed-module-label {
-    color: rgba(255, 255, 255, 0.8);
-    font-size: 14px;
-    -unity-text-align: middle-center;
-    -unity-font-style: bold;
-    white-space: normal;
-    overflow: hidden;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
-}
-
 /* ---------- Bottom Palette Panel ---------- */
 .palette-panel {
     height: 180px;
