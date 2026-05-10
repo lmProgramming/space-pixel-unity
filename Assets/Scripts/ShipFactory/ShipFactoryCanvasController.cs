@@ -128,6 +128,11 @@ namespace ShipFactory
         public event Action OnModuleDragFinished;
         public event Action<bool> OnInputLockChanged;
 
+        public void SetExternalInputLock(bool isLocked)
+        {
+            SetInputLocked(isLocked);
+        }
+
         public void SetShip(Ship ship)
         {
             _ship = ship;

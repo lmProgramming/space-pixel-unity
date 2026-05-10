@@ -30,5 +30,33 @@
             <ui:Label text="SPEED" class="ds-caption hud-speed-caption" />
             <ui:Label name="speed-value-label" text="0.0" class="ds-h3 hud-speed-value" />
         </ui:VisualElement>
+
+        <ui:VisualElement name="pause-overlay"
+                          style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; align-items: center; justify-content: center; background-color: rgba(0,0,0,184); display: none;">
+            <ui:VisualElement name="pause-dialog" class="ds-dialog" style="width: 360px; max-width: 360px;">
+                <ui:Label name="pause-title" text="Paused" class="ds-dialog__title"/>
+                <ui:Button name="pause-resume-button" text="Resume" class="ds-btn ds-btn--primary ds-btn--block"
+                           style="margin-bottom: 8px;"/>
+                <ui:Button name="pause-settings-button" text="Settings" class="ds-btn ds-btn--secondary ds-btn--block"
+                           style="margin-bottom: 8px;"/>
+                <ui:Button name="pause-quit-button" text="Quit" class="ds-btn ds-btn--danger ds-btn--block"/>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:VisualElement name="settings-overlay"
+                          style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; align-items: center; justify-content: center; background-color: rgba(0,0,0,179); display: none;">
+            <ui:VisualElement name="settings-dialog" class="ds-dialog" style="width: 460px; max-width: 460px;">
+                <ui:Label name="settings-title" text="Settings" class="ds-dialog__title"/>
+                <ui:Slider name="settings-master-slider" label="Master Volume" low-value="0" high-value="1"
+                           class="ds-slider" style="margin-bottom: 8px;"/>
+                <ui:Slider name="settings-music-slider" label="Music Volume" low-value="0" high-value="1"
+                           class="ds-slider" style="margin-bottom: 8px;"/>
+                <ui:Slider name="settings-effects-slider" label="Effects Volume" low-value="0" high-value="1"
+                           class="ds-slider"/>
+                <ui:VisualElement class="ds-dialog__actions" style="margin-top: 8px;">
+                    <ui:Button name="settings-close-button" text="Close" class="ds-btn ds-btn--secondary"/>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

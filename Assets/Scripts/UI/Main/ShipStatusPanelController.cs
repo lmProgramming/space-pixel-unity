@@ -1,12 +1,17 @@
+using System;
 using Ships;
 using Ships.Internal;
+using UI.Common;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 
 namespace UI.Main
 {
     public class ShipStatusPanelController : MonoBehaviour
     {
+        private const string MainMenuSceneName = "MainMenu";
+
         [Header("References")]
         [SerializeField] private Ship playerShip;
 
@@ -22,15 +27,19 @@ namespace UI.Main
         private VisualElement _energyBarFill;
         private VisualElement _energyBarGlow;
         private Label _energyFlowLabel;
+        private bool _isPaused;
         private VisualElement _mainHudRoot;
-        private VisualElement _sasCluster;
-        private bool _sasClickRegistered;
-        private Label _sasStatusLabel;
-        private Button _sasToggleButton;
-        private Label _speedValueLabel;
+        private VisualElement _pauseOverlay;
+        private bool _pauseUiInitialized;
 
         private VisualElement _root;
+        private bool _sasClickRegistered;
+        private VisualElement _sasCluster;
+        private Label _sasStatusLabel;
+        private Button _sasToggleButton;
+        private SettingsPanelController _settingsPanelController;
         private VisualElement _shipStatusPanel;
+        private Label _speedValueLabel;
         private float _targetEnergyBarHeight;
 
         private void Awake()
@@ -46,6 +55,7 @@ namespace UI.Main
                 _root = uiDocument.rootVisualElement;
                 CacheUIReferences();
                 RegisterSasButton();
+                InitializePauseUi();
             }
 
             if (!playerShip)
@@ -73,6 +83,20 @@ namespace UI.Main
             AnimateBars();
         }
 
+        private void LateUpdate()
+        {
+            if (!Input.GetKeyDown(KeyCode.Escape))
+                return;
+
+            if (_settingsPanelController != null && _settingsPanelController.IsOpen)
+            {
+                _settingsPanelController.Hide();
+                return;
+            }
+
+            SetPaused(!_isPaused);
+        }
+
         private void OnEnable()
         {
             if (uiDocument == null || uiDocument.rootVisualElement == null)
@@ -81,11 +105,13 @@ namespace UI.Main
             _root = uiDocument.rootVisualElement;
             CacheUIReferences();
             RegisterSasButton();
+            InitializePauseUi();
         }
 
         private void OnDisable()
         {
             UnregisterSasButton();
+            SetPaused(false);
         }
 
         private void CacheUIReferences()
@@ -126,10 +152,54 @@ namespace UI.Main
                 playerShipTyped.ToggleSas();
         }
 
+        private void InitializePauseUi()
+        {
+            if (_pauseUiInitialized || _root == null)
+                return;
+
+            _pauseOverlay = _root.Q<VisualElement>("pause-overlay");
+            var title = _root.Q<Label>("pause-title");
+            var resumeButton = _root.Q<Button>("pause-resume-button");
+            var settingsButton = _root.Q<Button>("pause-settings-button");
+            var quitButton = _root.Q<Button>("pause-quit-button");
+
+            if (title == null || resumeButton == null || settingsButton == null || quitButton == null)
+                throw new InvalidOperationException("[ShipStatusPanelController] Pause elements missing in HUD UXML.");
+
+            title.text = "Paused";
+            _pauseOverlay.style.display = DisplayStyle.None;
+            resumeButton.clicked += () => { SetPaused(false); };
+            settingsButton.clicked += () => { _settingsPanelController.Toggle(); };
+            quitButton.clicked += QuitToMainMenu;
+            _settingsPanelController = new SettingsPanelController(_root, false);
+            _pauseUiInitialized = true;
+        }
+
         private void SetMainHudVisible(bool visible)
         {
             if (_mainHudRoot != null)
                 _mainHudRoot.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
+        }
+
+        private void SetPaused(bool paused)
+        {
+            if (_isPaused == paused)
+                return;
+
+            _isPaused = paused;
+            Time.timeScale = paused ? 0f : 1f;
+
+            if (_pauseOverlay != null)
+                _pauseOverlay.style.display = paused ? DisplayStyle.Flex : DisplayStyle.None;
+
+            if (!paused && _settingsPanelController != null && _settingsPanelController.IsOpen)
+                _settingsPanelController.Hide();
+        }
+
+        private void QuitToMainMenu()
+        {
+            SetPaused(false);
+            SceneManager.LoadScene(MainMenuSceneName);
         }
 
         private void SetShipStatusBlockVisible(bool visible)
