@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 
-namespace UI.Main
+namespace UI.MainGame
 {
     public class ShipStatusPanelController : MonoBehaviour
     {
@@ -51,7 +51,7 @@ namespace UI.Main
 
         private void Update()
         {
-            if (_mainHudRoot == null && uiDocument != null && uiDocument.rootVisualElement != null)
+            if (_mainHudRoot == null && uiDocument && uiDocument.rootVisualElement != null)
             {
                 _root = uiDocument.rootVisualElement;
                 CacheUIReferences();
@@ -202,7 +202,7 @@ namespace UI.Main
                 _settingsPanelController.Hide();
         }
 
-        private void QuitToMainMenu()
+        private static void QuitToMainMenu()
         {
             Time.timeScale = 1f;
             SceneManager.LoadScene(MainMenuSceneName);
@@ -220,7 +220,7 @@ namespace UI.Main
                 return;
 
             var rb = playerShip.CommandModule?.PixelatedRigidbody?.Rigidbody;
-            var magnitude = rb != null ? rb.linearVelocity.magnitude : 0f;
+            var magnitude = rb ? rb.linearVelocity.magnitude : 0f;
             _speedValueLabel.text = magnitude.ToString("F1");
         }
 
@@ -228,7 +228,7 @@ namespace UI.Main
         {
             var playerShipTyped = playerShip as PlayerShip;
 
-            if (playerShipTyped == null)
+            if (!playerShipTyped)
             {
                 if (_sasCluster != null)
                     _sasCluster.style.display = DisplayStyle.None;

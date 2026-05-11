@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using Zenject;
 
-namespace UI.Main
+namespace UI.MainGame
 {
     public class MissionResultUIController : MonoBehaviour
     {

@@ -7,7 +7,7 @@ using UnityEngine.UIElements;
 using ZLinq;
 using Image = UnityEngine.UI.Image;
 
-namespace UI.Main
+namespace UI.MainGame
 {
     public class UIReloadVisualizer : MonoBehaviour
     {

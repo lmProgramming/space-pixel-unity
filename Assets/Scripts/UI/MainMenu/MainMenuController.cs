@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using UI.Common;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
@@ -10,7 +9,7 @@ using UnityEngine.UIElements;
 using UnityEditor;
 #endif
 
-namespace UI.Main
+namespace UI.MainMenu
 {
     [RequireComponent(typeof(UIDocument))]
     public class MainMenuController : MonoBehaviour
@@ -115,7 +114,6 @@ namespace UI.Main
             PlayerPrefs.SetString(SelectedSnapshotFileKey, selectedFile);
             PlayerPrefs.Save();
 
-            CloseShipSelectionDialog();
             SceneManager.LoadScene(ResolveCombatSceneName());
         }
 
