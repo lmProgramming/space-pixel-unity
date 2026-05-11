@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using Core.Ship;
 using Ships;
 using Ships.Serialization;
 using UnityEditor;

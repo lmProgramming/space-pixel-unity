@@ -1,9 +1,7 @@
 using System;
-using Core.Ship;
 using UnityEngine;
-using Resources = Core.Ship.Resources;
 
-namespace Ships.Serialization
+namespace Core.Ship
 {
     [Serializable]
     public class ModuleSnapshot

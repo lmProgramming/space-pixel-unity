@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Ships.Serialization
+namespace Core.Ship
 {
     [Serializable]
     public class ModuleConnection

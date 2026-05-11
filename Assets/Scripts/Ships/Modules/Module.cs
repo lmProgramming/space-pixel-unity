@@ -226,7 +226,7 @@ namespace Ships.Modules
                 return;
             }
 
-            if (PixelatedRigidbody.PixelGrid == null || otherModule.PixelatedRigidbody.PixelGrid == null)
+            if (PixelatedRigidbody.TexturePixelGrid == null || otherModule.PixelatedRigidbody.TexturePixelGrid == null)
             {
                 Debug.LogError(
                     $"Cannot SetupConnections: PixelGrid not initialized on '{name}' or '{otherModule.name}'!", this);

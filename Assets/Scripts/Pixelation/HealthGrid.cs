@@ -39,7 +39,7 @@ namespace Pixelation
             return new Vector2Int(Width, Height);
         }
 
-        public void InitializeFromGrid(IPixelGrid grid)
+        public void InitializeFromGrid(ITexturePixelGrid grid)
         {
             Width = grid.Width;
             Height = grid.Height;

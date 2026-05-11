@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Core.State;
 using UI.Common;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -15,8 +16,6 @@ namespace UI.MainMenu
     public class MainMenuController : MonoBehaviour
     {
         private const string SnapshotFolderName = "ShipSnapshots";
-        private const string SelectedSnapshotNameKey = "selectedShipSnapshotName";
-        private const string SelectedSnapshotFileKey = "selectedShipSnapshotFile";
         private const string ShipFactorySceneName = "ShipFactory";
         private const string FallbackCombatSceneName = "MainGame";
         private const string LegacyCombatSceneName = "Main";
@@ -104,15 +103,18 @@ namespace UI.MainMenu
 
         private void LaunchCombat()
         {
-            var selectedIndex = Mathf.Max(0, _snapshotDisplayNames.IndexOf(_shipDropdown.value));
-            var selectedName = _snapshotDisplayNames.Count > 0 ? _snapshotDisplayNames[selectedIndex] : "Default Ship";
-            var selectedFile = _snapshotFilePaths.Count > selectedIndex
-                ? _snapshotFilePaths[selectedIndex]
-                : string.Empty;
+            if (_snapshotFilePaths.Count == 0)
+            {
+                Debug.LogError($"[{nameof(MainMenuController)}] No ship snapshots found!");
+                return;
+            }
 
-            PlayerPrefs.SetString(SelectedSnapshotNameKey, selectedName);
-            PlayerPrefs.SetString(SelectedSnapshotFileKey, selectedFile);
-            PlayerPrefs.Save();
+            var selectedIndex = Mathf.Max(0, _snapshotDisplayNames.IndexOf(_shipDropdown.value));
+            var selectedName = _snapshotDisplayNames[selectedIndex];
+            var selectedFile = _snapshotFilePaths[selectedIndex];
+
+            SaveState.PlayerShipName = selectedName;
+            SaveState.PlayerShipSnapshotFile = selectedFile;
 
             SceneManager.LoadScene(ResolveCombatSceneName());
         }

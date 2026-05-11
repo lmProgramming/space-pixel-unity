@@ -1,10 +1,10 @@
-namespace Ships.Serialization
+namespace Core.Ship
 {
     public interface IShipSnapshotService
     {
-        ShipSnapshot CaptureSnapshot(Ship ship);
+        ShipSnapshot CaptureSnapshot(IShip ship);
 
-        void ApplySnapshot(Ship ship, ShipSnapshot snapshot);
+        void ApplySnapshot(IShip ship, ShipSnapshot snapshot);
 
         string ToJson(ShipSnapshot snapshot, bool prettyPrint = true);
 

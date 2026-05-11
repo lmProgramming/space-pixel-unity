@@ -8,13 +8,13 @@ using UnityEngine.Assertions;
 
 namespace Grid
 {
-    public class PixelGrid : IPixelGrid
+    public class TexturePixelGrid : ITexturePixelGrid
     {
         private readonly SpriteRenderer _spriteRenderer;
         private Sprite _internalSprite;
         private Texture2D _internalTexture;
 
-        public PixelGrid(SpriteRenderer spriteRenderer)
+        public TexturePixelGrid(SpriteRenderer spriteRenderer)
         {
             _spriteRenderer = spriteRenderer;
         }

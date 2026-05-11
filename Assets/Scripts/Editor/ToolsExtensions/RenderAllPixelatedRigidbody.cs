@@ -11,7 +11,7 @@ namespace Editor.ToolsExtensions
         private static void RenderAllPixelated()
         {
             var allObjects =
-                FindObjectsByType<PixelatedRigidbody>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+                FindObjectsByType<PixelatedRigidbody>(FindObjectsInactive.Exclude);
 
             foreach (var obj in allObjects)
             {

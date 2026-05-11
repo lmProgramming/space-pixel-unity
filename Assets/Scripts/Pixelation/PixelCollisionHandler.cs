@@ -21,13 +21,13 @@ namespace Pixelation
         private readonly CollisionEventChannelSO _collisionEventChannel;
         private readonly CollisionResolver.CollisionResolver _collisionResolver;
         private readonly IDebrisSpawner _debrisSpawner;
-        private readonly IPixelGrid _grid;
+        private readonly ITexturePixelGrid _grid;
         private readonly GridContourTracer _gridContourTracer = new();
         private readonly float _lineSimplificationTolerance;
 
         private bool _didCollide;
 
-        public PixelCollisionHandler(IPixelGrid grid, PixelatedRigidbody body, PolygonCollider2D collider,
+        public PixelCollisionHandler(ITexturePixelGrid grid, PixelatedRigidbody body, PolygonCollider2D collider,
             CollisionEventChannelSO collisionEventChannel, IDebrisSpawner debrisSpawner)
         {
             _grid = grid;

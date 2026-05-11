@@ -81,11 +81,11 @@ namespace Pixelation
 
         public Vector2 WeightedCenter { get; private set; }
 
-        public IPixelGrid PixelGrid { get; set; }
+        public ITexturePixelGrid TexturePixelGrid { get; set; }
 
         [field: SerializeField] public float MassMultiplier { get; private set; } = 1;
 
-        public int CurrentPixelCount => PixelGrid.PixelCount;
+        public int CurrentPixelCount => TexturePixelGrid.PixelCount;
         public int StartPixelCount { get; private set; }
 
         public bool HasSprite => sprite != null && sprite.ToString() != "null";
@@ -96,7 +96,7 @@ namespace Pixelation
 
         public void ApplyPixels()
         {
-            PixelGrid.ApplyPixels();
+            TexturePixelGrid.ApplyPixels();
         }
 
         public bool IsPixel(Vector2Int point)
@@ -106,22 +106,22 @@ namespace Pixelation
 
         public bool IsPixelAssumeInBounds(Vector2Int point)
         {
-            return PixelGrid.IsPixelAssumeInBounds(point);
+            return TexturePixelGrid.IsPixelAssumeInBounds(point);
         }
 
         public bool InBounds(Vector2Int point)
         {
-            return PixelGrid.InBounds(point);
+            return TexturePixelGrid.InBounds(point);
         }
 
         public Vector2Int Dimensions()
         {
-            return PixelGrid.Dimensions();
+            return TexturePixelGrid.Dimensions();
         }
 
         public void SetPixel(Vector2Int point, Color32 color)
         {
-            PixelGrid.SetPixel(point, color);
+            TexturePixelGrid.SetPixel(point, color);
         }
 
         public void SetTextureFromColors(Color32[,] colors)
@@ -131,7 +131,7 @@ namespace Pixelation
 
         public void SetPixelNoApply(Vector2Int point, Color32 color)
         {
-            PixelGrid.SetPixelNoApply(point, color);
+            TexturePixelGrid.SetPixelNoApply(point, color);
         }
 
         public void RemovePixels(IEnumerable<Vector2Int> points, bool simulateCollision = false)
@@ -142,8 +142,8 @@ namespace Pixelation
 
             HealthGrid?.RemovePixels(pointsArray);
 
-            var countBefore = PixelGrid.PixelCount;
-            PixelGrid.RemovePixels(pointsArray);
+            var countBefore = TexturePixelGrid.PixelCount;
+            TexturePixelGrid.RemovePixels(pointsArray);
             NudgeWeightedCenter(pointsArray, countBefore);
 
             OnPixelsLost?.Invoke(pointsArray.AsValueEnumerable().ToList(), PixelLoseReason.Destroyed);
@@ -190,7 +190,7 @@ namespace Pixelation
         {
             var position = transform.InverseTransformPoint(worldPosition);
 
-            return new Vector2(position.x + (float)PixelGrid.Width / 2, position.y + (float)PixelGrid.Height / 2);
+            return new Vector2(position.x + (float)TexturePixelGrid.Width / 2, position.y + (float)TexturePixelGrid.Height / 2);
         }
 
         public Vector2Int WorldToLocalPixel(Vector2 worldPosition)
@@ -202,16 +202,16 @@ namespace Pixelation
 
         public Vector2 LocalToWorldPoint(Vector2Int localPosition)
         {
-            Vector2 position = transform.TransformPoint(new Vector2(localPosition.x - (float)PixelGrid.Width / 2,
-                localPosition.y - (float)PixelGrid.Height / 2));
+            Vector2 position = transform.TransformPoint(new Vector2(localPosition.x - (float)TexturePixelGrid.Width / 2,
+                localPosition.y - (float)TexturePixelGrid.Height / 2));
 
             return position;
         }
 
         public Vector2 LocalToWorldPoint(Vector2 localPosition)
         {
-            Vector2 position = transform.TransformPoint(new Vector2(localPosition.x - (float)PixelGrid.Width / 2,
-                localPosition.y - (float)PixelGrid.Height / 2));
+            Vector2 position = transform.TransformPoint(new Vector2(localPosition.x - (float)TexturePixelGrid.Width / 2,
+                localPosition.y - (float)TexturePixelGrid.Height / 2));
 
             return position;
         }
@@ -233,7 +233,7 @@ namespace Pixelation
 
         public Color32 GetColor(Vector2Int point)
         {
-            return PixelGrid.GetValue(point);
+            return TexturePixelGrid.GetValue(point);
         }
 
 #if UNITY_INCLUDE_TESTS
@@ -260,15 +260,15 @@ namespace Pixelation
 
             GetComponents();
 
-            PixelGrid = new PixelGrid(SpriteRenderer);
+            TexturePixelGrid = new TexturePixelGrid(SpriteRenderer);
 
             if ((_collisionEventChannelSO != null && _debrisSpawner != null) || recalculateColliders)
-                CollisionHandler = new PixelCollisionHandler(PixelGrid, this, GetComponent<PolygonCollider2D>(),
+                CollisionHandler = new PixelCollisionHandler(TexturePixelGrid, this, GetComponent<PolygonCollider2D>(),
                     _collisionEventChannelSO, _debrisSpawner);
 
             if (colors is not null)
             {
-                PixelGrid.SetTextureFromColors(colors);
+                TexturePixelGrid.SetTextureFromColors(colors);
             }
             else if (HasSprite)
             {
@@ -276,18 +276,18 @@ namespace Pixelation
                     (sprite.texture.GetPixels32(), sprite.texture.width, sprite.texture.height);
                 colorsArray = EasyImage.ReorientTexture(colorsArray, width, height, flipX, flipY);
                 (colorsArray, width, height) = EasyImage.RotateTexture(colorsArray, width, height, rotation);
-                PixelGrid.SetTextureFromColors(colorsArray, width, height);
+                TexturePixelGrid.SetTextureFromColors(colorsArray, width, height);
             }
 
-            PixelGrid.Setup();
+            TexturePixelGrid.Setup();
 
-            HealthGrid = new HealthGrid(PixelGrid.Width, PixelGrid.Height, defaultPixelHealth);
-            HealthGrid.InitializeFromGrid(PixelGrid);
+            HealthGrid = new HealthGrid(TexturePixelGrid.Width, TexturePixelGrid.Height, defaultPixelHealth);
+            HealthGrid.InitializeFromGrid(TexturePixelGrid);
 
             if (HasArmorMap)
                 ApplyArmorMap();
 
-            StartPixelCount = PixelGrid.PixelCount;
+            StartPixelCount = TexturePixelGrid.PixelCount;
 
             WeightedCenter = CalculateWeightedCenter();
 
@@ -307,11 +307,11 @@ namespace Pixelation
             (armorPixels, armorWidth, armorHeight) =
                 EasyImage.RotateTexture(armorPixels, armorWidth, armorHeight, rotation);
 
-            if (armorWidth != PixelGrid.Width || armorHeight != PixelGrid.Height)
+            if (armorWidth != TexturePixelGrid.Width || armorHeight != TexturePixelGrid.Height)
             {
                 Debug.LogError(
                     $"[PixelatedRigidbody] Armor map size ({armorWidth}x{armorHeight}) doesn't match " +
-                    $"sprite size ({PixelGrid.Width}x{PixelGrid.Height}) on '{name}'. Armor map ignored.");
+                    $"sprite size ({TexturePixelGrid.Width}x{TexturePixelGrid.Height}) on '{name}'. Armor map ignored.");
                 return;
             }
 
@@ -321,28 +321,28 @@ namespace Pixelation
         private Vector2 CalculateWeightedCenter()
         {
             var sum = Vector2.zero;
-            var dims = PixelGrid.Dimensions();
+            var dims = TexturePixelGrid.Dimensions();
 
             for (var x = 0; x < dims.x; x++)
             for (var y = 0; y < dims.y; y++)
-                if (PixelGrid.IsPixelAssumeInBounds(new Vector2Int(x, y)))
+                if (TexturePixelGrid.IsPixelAssumeInBounds(new Vector2Int(x, y)))
                     sum += new Vector2(x, y);
 
-            return PixelGrid.PixelCount > 0 ? sum / PixelGrid.PixelCount : PixelGrid.Center;
+            return TexturePixelGrid.PixelCount > 0 ? sum / TexturePixelGrid.PixelCount : TexturePixelGrid.Center;
         }
 
         private void NudgeWeightedCenter(IEnumerable<Vector2Int> removedPixels, int countBefore)
         {
-            if (PixelGrid.PixelCount <= 0)
+            if (TexturePixelGrid.PixelCount <= 0)
             {
-                WeightedCenter = PixelGrid.Center;
+                WeightedCenter = TexturePixelGrid.Center;
                 return;
             }
 
             var removedSum = removedPixels.AsValueEnumerable()
                 .Aggregate(Vector2.zero, (current, p) => current + new Vector2(p.x, p.y));
 
-            WeightedCenter = (WeightedCenter * countBefore - removedSum) / PixelGrid.PixelCount;
+            WeightedCenter = (WeightedCenter * countBefore - removedSum) / TexturePixelGrid.PixelCount;
         }
 
         private void GetComponents()
@@ -396,7 +396,7 @@ namespace Pixelation
         {
             HealthGrid?.RemovePixels(region);
 
-            var countBefore = PixelGrid.PixelCount + region.Count;
+            var countBefore = TexturePixelGrid.PixelCount + region.Count;
             NudgeWeightedCenter(region, countBefore);
             OnPixelsLost?.Invoke(region.AsValueEnumerable().ToList(), PixelLoseReason.Division);
         }

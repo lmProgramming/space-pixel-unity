@@ -11,11 +11,10 @@ namespace UI.Common
         private const string EffectsVolumeKey = "effectVolume";
 
         private readonly VisualElement _backdrop;
-        private readonly VisualElement _overlayHost;
         private readonly Slider _effectsSlider;
-        private readonly bool _isMainMenu;
         private readonly Slider _masterSlider;
         private readonly Slider _musicSlider;
+        private readonly VisualElement _overlayHost;
 
         private bool _suppressPersist;
 
@@ -24,7 +23,6 @@ namespace UI.Common
             if (parent == null)
                 throw new ArgumentNullException(nameof(parent));
 
-            _isMainMenu = isMainMenu;
             _overlayHost = parent.Q<VisualElement>("settings-overlay-host");
             _backdrop = parent.Q<VisualElement>("settings-overlay");
             var titleLabel = parent.Q<Label>("settings-title");
@@ -38,7 +36,7 @@ namespace UI.Common
                 throw new InvalidOperationException(
                     "[SettingsPanelController] Required settings elements are missing in UIDocument.");
 
-            titleLabel.text = _isMainMenu ? $"{title} (Main Menu)" : title;
+            titleLabel.text = isMainMenu ? $"{title} (Main Menu)" : title;
             StyleSliderInputField(_masterSlider);
             StyleSliderInputField(_musicSlider);
             StyleSliderInputField(_effectsSlider);

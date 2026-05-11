@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5bc99cc63f8d46b09bca4c524b363a17, type: 3}
   m_Name: Engine
   m_EditorClassIdentifier: ShipFactory::ShipFactory.ShipModuleSO
-  prefab: {fileID: 3332165268971166862, guid: 7c2a589aa959decb7bb194d7b914ff3b, type: 3}
+  prefab: {fileID: 3093169380510831534, guid: 40f3e4b86c734021785044ddd5531c89, type: 3}
   dimensions: {x: 16, y: 32}
   partName: Engine mk1
   description: Sturdy engine

@@ -1,13 +1,14 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using Core.Ship;
+using LMPro.External.IsAlive;
 using Pixelation;
 using Ships.Modules;
 using UnityEngine;
 using Zenject;
 using Module = Ships.Modules.Module;
-using Object = UnityEngine.Object;
 
 namespace Ships.Serialization
 {
@@ -27,17 +28,17 @@ namespace Ships.Serialization
             _container = container;
         }
 
-        public ShipSnapshot CaptureSnapshot(Ship ship)
+        public ShipSnapshot CaptureSnapshot(IShip ship)
         {
-            if (!ship)
+            if (!ship.IsAlive())
             {
                 Debug.LogError("[ShipSnapshotService] Cannot capture snapshot: ship is null");
                 return null;
             }
 
-            var snapshot = new ShipSnapshot(ship.name);
-            var modules = ship.GetComponentsInChildren<Module>();
-            var moduleToIndex = new Dictionary<Module, int>();
+            var snapshot = new ShipSnapshot(ship.Name);
+            var modules = ship.AllModules.ToArray();
+            var moduleToIndex = new Dictionary<IModule, int>();
 
             for (var i = 0; i < modules.Length; i++)
             {
@@ -47,21 +48,21 @@ namespace Ships.Serialization
                 var moduleSnapshot = CaptureModuleSnapshot(module);
                 snapshot.modules.Add(moduleSnapshot);
 
-                if (ship.CommandModule != null && module == (Module)ship.CommandModule)
+                if (ship.CommandModule != null && (Module)module == (Module)ship.CommandModule)
                     snapshot.commandModuleIndex = i;
             }
 
             ModuleConnectionDetector.DetectAndCaptureConnections(snapshot, modules, moduleToIndex);
 
             Debug.Log(
-                $"[ShipSnapshotService] Captured snapshot of '{ship.name}' with {snapshot.modules.Count} modules and {snapshot.connections.Count} connections");
+                $"[ShipSnapshotService] Captured snapshot of '{ship.Name}' with {snapshot.modules.Count} modules and {snapshot.connections.Count} connections");
 
             return snapshot;
         }
 
-        public void ApplySnapshot(Ship ship, ShipSnapshot snapshot)
+        public void ApplySnapshot(IShip ship, ShipSnapshot snapshot)
         {
-            if (!ship)
+            if (!ship.IsAlive())
             {
                 Debug.LogError("[ShipSnapshotService] Cannot apply snapshot: ship is null");
                 return;
@@ -73,13 +74,13 @@ namespace Ships.Serialization
                 return;
             }
 
-            DestroyAllModules(ship);
+            ship.DestroyAllModules();
             CreateModulesFromSnapshot(ship, snapshot);
 
             ship.InitializeModules();
 
             Debug.Log(
-                $"[ShipSnapshotService] Applied snapshot '{snapshot.shipName}' to '{ship.name}' ({snapshot.modules.Count} modules)");
+                $"[ShipSnapshotService] Applied snapshot '{snapshot.shipName}' to '{ship.Name}' ({snapshot.modules.Count} modules)");
         }
 
         public string ToJson(ShipSnapshot snapshot, bool prettyPrint = true)
@@ -119,25 +120,25 @@ namespace Ships.Serialization
             return map;
         }
 
-        private static ModuleSnapshot CaptureModuleSnapshot(Module module)
+        private static ModuleSnapshot CaptureModuleSnapshot(IModule module)
         {
             var typeName = module.GetType().Name;
-            var moduleSnapshot = new ModuleSnapshot(module.name, module.Type, typeName)
+            var moduleSnapshot = new ModuleSnapshot(module.Transform.name, module.Type, typeName)
             {
-                localPosition = module.transform.localPosition,
-                localRotation = module.transform.localRotation,
+                localPosition = module.Transform.localPosition,
+                localRotation = module.Transform.localRotation,
                 resources = module.Resources,
                 moduleComponentJson = JsonUtility.ToJson(module)
             };
 
             var pixelatedRb = module.PixelatedRigidbody as PixelatedRigidbody;
 
-            if (pixelatedRb && pixelatedRb.PixelGrid == null)
+            if (pixelatedRb && pixelatedRb.TexturePixelGrid == null)
                 pixelatedRb.Setup(null, true);
 
-            if (pixelatedRb?.PixelGrid == null) return moduleSnapshot;
+            if (pixelatedRb?.TexturePixelGrid == null) return moduleSnapshot;
 
-            var grid = pixelatedRb.PixelGrid;
+            var grid = pixelatedRb.TexturePixelGrid;
             var dimensions = grid.Dimensions();
             moduleSnapshot.pixelGrid = new PixelGridSnapshot(dimensions.x, dimensions.y);
 
@@ -151,24 +152,13 @@ namespace Ships.Serialization
             return moduleSnapshot;
         }
 
-        private static void DestroyAllModules(Ship ship)
-        {
-            var existingModules = ship.GetComponentsInChildren<Module>();
-
-            foreach (var module in existingModules)
-                module.Setup(null);
-
-            foreach (var module in existingModules)
-                Object.DestroyImmediate(module.gameObject);
-        }
-
-        private void CreateModulesFromSnapshot(Ship ship, ShipSnapshot snapshot)
+        private void CreateModulesFromSnapshot(IShip ship, ShipSnapshot snapshot)
         {
             var createdModules = new List<(GameObject go, ModuleSnapshot ms)>();
 
             foreach (var ms in snapshot.modules)
             {
-                var moduleGo = CreateModuleGameObject(ms, ship.transform);
+                var moduleGo = CreateModuleGameObject(ms, (ship as Ship)?.transform);
                 createdModules.Add((moduleGo, ms));
 
                 var module = moduleGo.GetComponent<Module>();

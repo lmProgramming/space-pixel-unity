@@ -204,12 +204,12 @@ namespace Ships.Tests
             Assert.IsNotNull(newModule, "Should find a non-command module after apply");
             var newPixelatedRb = newModule.PixelatedRigidbody;
 
-            var pixel = newPixelatedRb.PixelGrid.GetValue(new Vector2Int(0, 0));
+            var pixel = newPixelatedRb.TexturePixelGrid.GetValue(new Vector2Int(0, 0));
             Assert.AreEqual(0, pixel.r,
                 "Red channel should be 0 (snapshot blue), not 255 (sprite red) — snapshot must override sprite");
             Assert.AreEqual(255, pixel.b,
                 "Blue channel should be 255 from snapshot color, not overridden by sprite");
-            Assert.IsFalse(newPixelatedRb.PixelGrid.IsPixel(new Vector2Int(2, 2)),
+            Assert.IsFalse(newPixelatedRb.TexturePixelGrid.IsPixel(new Vector2Int(2, 2)),
                 "Pixel (2,2) should be transparent as set in snapshot");
 
             Object.DestroyImmediate(shipGo);
@@ -286,11 +286,11 @@ namespace Ships.Tests
 
             Assert.IsNotNull(newPixelatedRb, "Should find a non-command module's PixelatedRigidbody after apply");
 
-            Assert.IsFalse(newPixelatedRb.PixelGrid.IsPixel(new Vector2Int(0, 0)),
+            Assert.IsFalse(newPixelatedRb.TexturePixelGrid.IsPixel(new Vector2Int(0, 0)),
                 "Pixel (0,0) was removed before capture — must stay removed after round-trip, not be restored by sprite");
-            Assert.IsFalse(newPixelatedRb.PixelGrid.IsPixel(new Vector2Int(3, 3)),
+            Assert.IsFalse(newPixelatedRb.TexturePixelGrid.IsPixel(new Vector2Int(3, 3)),
                 "Pixel (3,3) was removed before capture — must stay removed after round-trip, not be restored by sprite");
-            Assert.IsTrue(newPixelatedRb.PixelGrid.IsPixel(new Vector2Int(1, 1)),
+            Assert.IsTrue(newPixelatedRb.TexturePixelGrid.IsPixel(new Vector2Int(1, 1)),
                 "Pixel (1,1) was intact — must still be set after round-trip");
 
             Object.DestroyImmediate(shipGo);
@@ -763,7 +763,7 @@ namespace Ships.Tests
 
             var cmdModule = ship.GetComponentInChildren<Command>();
             Assert.IsNotNull(cmdModule);
-            var grid = cmdModule.PixelatedRigidbody.PixelGrid;
+            var grid = cmdModule.PixelatedRigidbody.TexturePixelGrid;
 
             for (var x = 0; x < 3; x++)
             for (var y = 0; y < 3; y++)
@@ -797,7 +797,7 @@ namespace Ships.Tests
             _service.ApplySnapshot(ship, fromJson);
 
             var newCmd = ship.GetComponentInChildren<Command>();
-            var grid = newCmd.PixelatedRigidbody.PixelGrid;
+            var grid = newCmd.PixelatedRigidbody.TexturePixelGrid;
 
             Assert.IsFalse(grid.IsPixel(new Vector2Int(0, 0)), "(0,0) was removed, must stay removed");
             Assert.IsFalse(grid.IsPixel(new Vector2Int(3, 3)), "(3,3) was removed, must stay removed");
@@ -887,7 +887,7 @@ namespace Ships.Tests
             var cmd = ship.GetComponentInChildren<Command>();
             Assert.IsNotNull(cmd, "Command module should exist after apply");
 
-            var grid = cmd.PixelatedRigidbody.PixelGrid;
+            var grid = cmd.PixelatedRigidbody.TexturePixelGrid;
             var c00 = grid.GetValue(new Vector2Int(0, 0));
             Assert.AreEqual(10, c00.r, "Pixel (0,0) R should be 10 from JSON, not 99 from original");
             Assert.AreEqual(20, c00.g);
@@ -953,7 +953,7 @@ namespace Ships.Tests
 
             _service.ApplySnapshot(ship, restored);
 
-            var grid = ship.GetComponentInChildren<Command>().PixelatedRigidbody.PixelGrid;
+            var grid = ship.GetComponentInChildren<Command>().PixelatedRigidbody.TexturePixelGrid;
 
             for (var x = 0; x < 4; x++)
             for (var y = 0; y < 4; y++)

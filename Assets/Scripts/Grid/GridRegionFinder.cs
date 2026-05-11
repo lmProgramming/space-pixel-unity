@@ -9,7 +9,7 @@ namespace Grid
 {
     public static class GridRegionFinder
     {
-        public static List<HashSet<Vector2Int>> FloodFindCohesiveRegions(IPixelGrid grid)
+        public static List<HashSet<Vector2Int>> FloodFindCohesiveRegions(ITexturePixelGrid grid)
         {
             var texture = grid.Texture;
             if (!texture) return new List<HashSet<Vector2Int>>();
@@ -21,7 +21,7 @@ namespace Grid
             return analyzer.FindAllRegions();
         }
 
-        public static List<HashSet<Vector2Int>> FloodFindCohesiveRegions(Vector2Int lostPixel, IPixelGrid grid)
+        public static List<HashSet<Vector2Int>> FloodFindCohesiveRegions(Vector2Int lostPixel, ITexturePixelGrid grid)
         {
             var texture = grid.Texture;
             if (!texture) return new List<HashSet<Vector2Int>>();
@@ -33,7 +33,7 @@ namespace Grid
             return analyzer.FindRegionsFromNeighbors(lostPixel);
         }
 
-        public static List<HashSet<Vector2Int>> FloodFindCohesiveRegionsWithJobs(PixelGrid grid)
+        public static List<HashSet<Vector2Int>> FloodFindCohesiveRegionsWithJobs(TexturePixelGrid grid)
         {
             var texture = grid.Texture;
             if (texture == null) return new List<HashSet<Vector2Int>>();
