@@ -43,13 +43,37 @@
 }
 
 /* Color modifiers */
-.ds-text-primary   { color: var(--color-text-primary); }
-.ds-text-secondary { color: var(--color-text-secondary); }
-.ds-text-disabled  { color: var(--color-text-disabled); }
-.ds-text-success   { color: var(--color-primary); }
-.ds-text-warning   { color: var(--color-warning); }
-.ds-text-danger    { color: var(--color-danger); }
-.ds-text-info      { color: var(--color-secondary); }
+* {
+    -unity-font-definition: url("project://database/Assets/Fonts/PixeloidSans.asset");
+}
+
+.ds-text-primary {
+    color: var(--color-text-primary);
+}
+
+.ds-text-secondary {
+    color: var(--color-text-secondary);
+}
+
+.ds-text-disabled {
+    color: var(--color-text-disabled);
+}
+
+.ds-text-success {
+    color: var(--color-primary);
+}
+
+.ds-text-warning {
+    color: var(--color-warning);
+}
+
+.ds-text-danger {
+    color: var(--color-danger);
+}
+
+.ds-text-info {
+    color: var(--color-secondary);
+}
 
 /* Section labels (small caps style headers like "COLORS", "TYPOGRAPHY") */
 .ds-section-label {
