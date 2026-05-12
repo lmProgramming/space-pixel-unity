@@ -4,7 +4,7 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace UIDocumentDesignSystem.Showcase
+namespace DesignSystem.Showcase.Runtime
 {
     // Overlay attached to a higher-sortingOrder UIDocument that visualises the
     // selector chain of whatever element the user is hovering / tapping in the
@@ -13,57 +13,77 @@ namespace UIDocumentDesignSystem.Showcase
     // pass through.
     public class ShowcaseDocOverlay : MonoBehaviour
     {
-        const int    MOBILE_BREAKPOINT = 768;
-        const int    PANEL_WIDTH       = 320;
-        const int    PANEL_MAX_HEIGHT  = 360;
-
-        // Token-aligned palette (kept in sync with DesignTokens.uss). The
-        // overlay deliberately does NOT load the design-system stylesheet —
-        // styling it programmatically isolates the overlay from any USS
-        // changes a contributor makes to the showcase.
-        static readonly Color CSurface  = new Color(0.075f, 0.102f, 0.141f, 0.96f);
-        static readonly Color CBorder   = new Color(0.149f, 0.188f, 0.255f, 1f);
-        static readonly Color CText     = new Color(0.949f, 0.957f, 0.969f, 1f);
-        static readonly Color CTextDim  = new Color(0.631f, 0.655f, 0.702f, 1f);
-        static readonly Color CMuted    = new Color(0.404f, 0.439f, 0.522f, 1f);
-        static readonly Color CPrimary  = new Color(0.133f, 0.773f, 0.369f, 1f);
-        static readonly Color CChainTxt = new Color(0.882f, 0.898f, 0.929f, 1f);
-
-        UIDocument _showcaseDoc;
-        UIDocument _overlayDoc;
-
-        VisualElement _panel;
-        VisualElement _highlight;
-        Label _titleLabel;
-        ScrollView _chainScroll;
-        Label _classesLabel;
-        Label _hintLabel;
-
-        VisualElement _currentLeaf;
-        bool _pinned;
+        private const int MobileBreakpoint = 768;
+        private const int PanelWidth = 320;
+        private const int PanelMaxHeight = 360;
 
         // Idle-fade state: when the cursor sits on containers / empty space
         // for FADE_DELAY_MS the panel + highlight fade out via inline
         // opacity transition. Hovering a meaningful component (or pinning)
         // cancels the timer and brings them back.
-        const long FADE_DELAY_MS    = 2000;
-        const long FADE_DURATION_MS = 240;
-        IVisualElementScheduledItem _fadeOutTimer;
-        IVisualElementScheduledItem _hideAfterFade;
-        bool _isFadedOut;
+        private const long FadeDelayMS = 2000;
+        private const long FadeDurationMS = 240;
 
-        public void AttachTo(UIDocument showcaseDoc, UIDocument overlayDoc)
-        {
-            _showcaseDoc = showcaseDoc;
-            _overlayDoc  = overlayDoc;
-        }
+        // Token-aligned palette (kept in sync with DesignTokens.uss). The
+        // overlay deliberately does NOT load the design-system stylesheet —
+        // styling it programmatically isolates the overlay from any USS
+        // changes a contributor makes to the showcase.
+        private static readonly Color CSurface = new(0.075f, 0.102f, 0.141f, 0.96f);
+        private static readonly Color CBorder = new(0.149f, 0.188f, 0.255f, 1f);
+        private static readonly Color CText = new(0.949f, 0.957f, 0.969f, 1f);
+        private static readonly Color CTextDim = new(0.631f, 0.655f, 0.702f, 1f);
+        private static readonly Color CMuted = new(0.404f, 0.439f, 0.522f, 1f);
+        private static readonly Color CPrimary = new(0.133f, 0.773f, 0.369f, 1f);
+        private static readonly Color CChainTxt = new(0.882f, 0.898f, 0.929f, 1f);
 
-        void OnEnable()
+        // ── Inspection ──────────────────────────────────────────────────────
+
+        // Showcase-only layout wrappers that exist to group / arrange the demo
+        // page itself, not to ship as design-system components. Hovering them
+        // should walk past, not stop.
+        private static readonly HashSet<string> ContainerClasses =
+            new()
+            {
+                "ds-root",
+                "ds-section",
+                "ds-section__title",
+                "ds-row",
+                "ds-swatch-row"
+            };
+
+        private ScrollView _chainScroll;
+        private Label _classesLabel;
+
+        private VisualElement _currentLeaf;
+        private IVisualElementScheduledItem _fadeOutTimer;
+        private IVisualElementScheduledItem _hideAfterFade;
+        private VisualElement _highlight;
+
+        // ── Highlight ───────────────────────────────────────────────────────
+
+        private IVisualElementScheduledItem _highlightTracker;
+        private Label _hintLabel;
+        private bool _isFadedOut;
+        private UIDocument _overlayDoc;
+
+        private VisualElement _panel;
+        private bool _pinned;
+
+        private UIDocument _showcaseDoc;
+        private Label _titleLabel;
+
+        private void OnEnable()
         {
             StartCoroutine(WaitForRootsThenSetup());
         }
 
-        IEnumerator WaitForRootsThenSetup()
+        public void AttachTo(UIDocument showcaseDoc, UIDocument overlayDoc)
+        {
+            _showcaseDoc = showcaseDoc;
+            _overlayDoc = overlayDoc;
+        }
+
+        private IEnumerator WaitForRootsThenSetup()
         {
             // UIDocument doesn't build its rootVisualElement until its own
             // OnEnable; we attach in Bootstrap before that fires.
@@ -82,15 +102,17 @@ namespace UIDocumentDesignSystem.Showcase
 
         // ── Overlay construction ────────────────────────────────────────────
 
-        void BuildOverlay(VisualElement root)
+        private void BuildOverlay(VisualElement root)
         {
             // The overlay doc's root must pass events through wherever we
             // don't have an interactive surface; only the panel itself
             // captures input.
             root.pickingMode = PickingMode.Ignore;
             root.style.position = Position.Absolute;
-            root.style.left = 0; root.style.top = 0;
-            root.style.right = 0; root.style.bottom = 0;
+            root.style.left = 0;
+            root.style.top = 0;
+            root.style.right = 0;
+            root.style.bottom = 0;
 
             _highlight = MakeHighlight();
             root.Add(_highlight);
@@ -135,7 +157,7 @@ namespace UIDocumentDesignSystem.Showcase
             _panel.Add(_hintLabel);
         }
 
-        VisualElement MakeHighlight()
+        private VisualElement MakeHighlight()
         {
             var h = new VisualElement { name = "doc-overlay-highlight" };
             h.pickingMode = PickingMode.Ignore;
@@ -145,15 +167,17 @@ namespace UIDocumentDesignSystem.Showcase
             return h;
         }
 
-        VisualElement MakePanel()
+        private VisualElement MakePanel()
         {
             var p = new VisualElement { name = "doc-overlay-panel" };
             p.pickingMode = PickingMode.Position;
             p.style.position = Position.Absolute;
-            p.style.width = PANEL_WIDTH;
-            p.style.maxHeight = PANEL_MAX_HEIGHT;
-            p.style.paddingTop = 12; p.style.paddingBottom = 12;
-            p.style.paddingLeft = 14; p.style.paddingRight = 14;
+            p.style.width = PanelWidth;
+            p.style.maxHeight = PanelMaxHeight;
+            p.style.paddingTop = 12;
+            p.style.paddingBottom = 12;
+            p.style.paddingLeft = 14;
+            p.style.paddingRight = 14;
             p.style.backgroundColor = CSurface;
             ApplyBorder(p, CBorder, 1, 10);
             p.style.display = DisplayStyle.None;
@@ -166,7 +190,7 @@ namespace UIDocumentDesignSystem.Showcase
             return p;
         }
 
-        Label MakeTitle(string text)
+        private Label MakeTitle(string text)
         {
             var t = new Label(text);
             t.style.color = CText;
@@ -176,25 +200,31 @@ namespace UIDocumentDesignSystem.Showcase
             return t;
         }
 
-        static void ApplyBorder(VisualElement el, Color color, int width, int radius)
+        private static void ApplyBorder(VisualElement el, Color color, int width, int radius)
         {
-            el.style.borderTopWidth = width; el.style.borderBottomWidth = width;
-            el.style.borderLeftWidth = width; el.style.borderRightWidth = width;
-            el.style.borderTopColor = color; el.style.borderBottomColor = color;
-            el.style.borderLeftColor = color; el.style.borderRightColor = color;
-            el.style.borderTopLeftRadius = radius; el.style.borderTopRightRadius = radius;
-            el.style.borderBottomLeftRadius = radius; el.style.borderBottomRightRadius = radius;
+            el.style.borderTopWidth = width;
+            el.style.borderBottomWidth = width;
+            el.style.borderLeftWidth = width;
+            el.style.borderRightWidth = width;
+            el.style.borderTopColor = color;
+            el.style.borderBottomColor = color;
+            el.style.borderLeftColor = color;
+            el.style.borderRightColor = color;
+            el.style.borderTopLeftRadius = radius;
+            el.style.borderTopRightRadius = radius;
+            el.style.borderBottomLeftRadius = radius;
+            el.style.borderBottomRightRadius = radius;
         }
 
         // ── Input ───────────────────────────────────────────────────────────
 
-        void OnPointerMove(PointerMoveEvent evt)
+        private void OnPointerMove(PointerMoveEvent evt)
         {
             if (_pinned) return;
             UpdateInspection(evt.target as VisualElement);
         }
 
-        void OnPointerDown(PointerDownEvent evt)
+        private void OnPointerDown(PointerDownEvent evt)
         {
             // Mobile primary-trigger; on desktop also re-inspects on click
             // outside the pinned selection.
@@ -202,22 +232,7 @@ namespace UIDocumentDesignSystem.Showcase
             UpdateInspection(evt.target as VisualElement);
         }
 
-        // ── Inspection ──────────────────────────────────────────────────────
-
-        // Showcase-only layout wrappers that exist to group / arrange the demo
-        // page itself, not to ship as design-system components. Hovering them
-        // should walk past, not stop.
-        static readonly System.Collections.Generic.HashSet<string> ContainerClasses =
-            new System.Collections.Generic.HashSet<string>
-            {
-                "ds-root",
-                "ds-section",
-                "ds-section__title",
-                "ds-row",
-                "ds-swatch-row",
-            };
-
-        void UpdateInspection(VisualElement leaf)
+        private void UpdateInspection(VisualElement leaf)
         {
             if (leaf == null) return;
 
@@ -268,31 +283,31 @@ namespace UIDocumentDesignSystem.Showcase
 
         // ── Fade ────────────────────────────────────────────────────────────
 
-        void ConfigureOpacityTransition(VisualElement el)
+        private void ConfigureOpacityTransition(VisualElement el)
         {
             el.style.transitionProperty = new StyleList<StylePropertyName>(
-                new List<StylePropertyName> { new StylePropertyName("opacity") });
+                new List<StylePropertyName> { new("opacity") });
             el.style.transitionDuration = new StyleList<TimeValue>(
-                new List<TimeValue> { new TimeValue(FADE_DURATION_MS, TimeUnit.Millisecond) });
+                new List<TimeValue> { new(FadeDurationMS, TimeUnit.Millisecond) });
             el.style.transitionTimingFunction = new StyleList<EasingFunction>(
-                new List<EasingFunction> { new EasingFunction(EasingMode.EaseOut) });
+                new List<EasingFunction> { new(EasingMode.EaseOut) });
         }
 
-        void ScheduleFadeOut()
+        private void ScheduleFadeOut()
         {
-            if (_pinned) return;                                  // pinned panels don't auto-hide
-            if (_isFadedOut) return;                              // already faded
-            if (_fadeOutTimer != null) return;                    // already scheduled
+            if (_pinned) return; // pinned panels don't auto-hide
+            if (_isFadedOut) return; // already faded
+            if (_fadeOutTimer != null) return; // already scheduled
             if (_panel.style.display == DisplayStyle.None) return; // never been shown
 
             _fadeOutTimer = _panel.schedule.Execute(() =>
             {
                 _fadeOutTimer = null;
                 DoFadeOut();
-            }).StartingIn(FADE_DELAY_MS);
+            }).StartingIn(FadeDelayMS);
         }
 
-        void CancelFade()
+        private void CancelFade()
         {
             _fadeOutTimer?.Pause();
             _fadeOutTimer = null;
@@ -300,7 +315,7 @@ namespace UIDocumentDesignSystem.Showcase
             _hideAfterFade = null;
         }
 
-        void DoFadeOut()
+        private void DoFadeOut()
         {
             if (_pinned) return;
             _isFadedOut = true;
@@ -319,10 +334,10 @@ namespace UIDocumentDesignSystem.Showcase
                     _panel.style.display = DisplayStyle.None;
                     _highlight.style.display = DisplayStyle.None;
                 }
-            }).StartingIn(FADE_DURATION_MS + 50);
+            }).StartingIn(FadeDurationMS + 50);
         }
 
-        void EnsureVisible()
+        private void EnsureVisible()
         {
             // Already fully visible — nothing to do.
             if (!_isFadedOut && _panel.style.display == DisplayStyle.Flex)
@@ -345,7 +360,7 @@ namespace UIDocumentDesignSystem.Showcase
             }).StartingIn(0);
         }
 
-        static bool IsMeaningfulComponent(VisualElement el)
+        private static bool IsMeaningfulComponent(VisualElement el)
         {
             foreach (var c in el.GetClasses())
             {
@@ -353,10 +368,11 @@ namespace UIDocumentDesignSystem.Showcase
                 if (ContainerClasses.Contains(c)) continue;
                 return true;
             }
+
             return false;
         }
 
-        static bool IsInsideChrome(VisualElement el)
+        private static bool IsInsideChrome(VisualElement el)
         {
             var node = el;
             while (node != null)
@@ -364,26 +380,32 @@ namespace UIDocumentDesignSystem.Showcase
                 if (node.ClassListContains("showcase-chrome")) return true;
                 node = node.parent;
             }
+
             return false;
         }
 
-        void RebuildChainPanel()
+        private void RebuildChainPanel()
         {
             _chainScroll.Clear();
             _titleLabel.text = "SELECTOR CHAIN";
 
             var stack = new List<VisualElement>();
             var node = _currentLeaf;
-            while (node != null) { stack.Add(node); node = node.parent; }
+            while (node != null)
+            {
+                stack.Add(node);
+                node = node.parent;
+            }
+
             stack.Reverse();
 
-            int displayedDepth = 0;
-            for (int i = 0; i < stack.Count; i++)
+            var displayedDepth = 0;
+            for (var i = 0; i < stack.Count; i++)
             {
                 var el = stack[i];
-                if (!ShouldShowInChain(el, isLeaf: i == stack.Count - 1)) continue;
+                if (!ShouldShowInChain(el, i == stack.Count - 1)) continue;
 
-                bool isLeaf = (i == stack.Count - 1);
+                var isLeaf = i == stack.Count - 1;
                 _chainScroll.Add(MakeChainRow(el, displayedDepth, isLeaf));
                 displayedDepth++;
             }
@@ -391,21 +413,22 @@ namespace UIDocumentDesignSystem.Showcase
             _classesLabel.text = JoinClasses(_currentLeaf);
         }
 
-        Label MakeChainRow(VisualElement el, int depth, bool isLeaf)
+        private Label MakeChainRow(VisualElement el, int depth, bool isLeaf)
         {
             var row = new Label(FormatNode(el, depth, isLeaf));
             row.style.fontSize = 11;
             row.style.color = isLeaf ? CPrimary : CChainTxt;
             row.style.unityFontStyleAndWeight = isLeaf ? FontStyle.Bold : FontStyle.Normal;
             row.style.whiteSpace = WhiteSpace.NoWrap;
-            row.style.marginTop = 1; row.style.marginBottom = 1;
+            row.style.marginTop = 1;
+            row.style.marginBottom = 1;
             return row;
         }
 
-        static string FormatNode(VisualElement el, int depth, bool isLeaf)
+        private static string FormatNode(VisualElement el, int depth, bool isLeaf)
         {
             var sb = new StringBuilder();
-            for (int i = 0; i < depth; i++) sb.Append("  ");
+            for (var i = 0; i < depth; i++) sb.Append("  ");
             if (depth > 0) sb.Append("└ ");
             sb.Append(el.GetType().Name);
             if (!string.IsNullOrEmpty(el.name) && !el.name.StartsWith("unity-"))
@@ -415,11 +438,12 @@ namespace UIDocumentDesignSystem.Showcase
                 if (c.StartsWith("unity-")) continue;
                 sb.Append(".").Append(c);
             }
+
             if (isLeaf) sb.Append("  ◀");
             return sb.ToString();
         }
 
-        static string JoinClasses(VisualElement el)
+        private static string JoinClasses(VisualElement el)
         {
             if (el == null) return "—";
             var sb = new StringBuilder();
@@ -429,20 +453,22 @@ namespace UIDocumentDesignSystem.Showcase
                 if (sb.Length > 0) sb.Append(" ");
                 sb.Append(".").Append(c);
             }
+
             return sb.Length == 0 ? "(no ds-* classes)" : sb.ToString();
         }
 
-        static bool HasDsClass(VisualElement el)
+        private static bool HasDsClass(VisualElement el)
         {
             foreach (var c in el.GetClasses())
-                if (c.StartsWith("ds-")) return true;
+                if (c.StartsWith("ds-"))
+                    return true;
             return false;
         }
 
         // Render rows for elements that carry meaning to a reader: anything
         // with a ds-* class, the leaf itself, and any element with a
         // hand-set name. Hide Unity's auto-generated wrappers.
-        static bool ShouldShowInChain(VisualElement el, bool isLeaf)
+        private static bool ShouldShowInChain(VisualElement el, bool isLeaf)
         {
             if (isLeaf) return true;
             if (HasDsClass(el)) return true;
@@ -450,17 +476,15 @@ namespace UIDocumentDesignSystem.Showcase
             return false;
         }
 
-        // ── Highlight ───────────────────────────────────────────────────────
-
-        IVisualElementScheduledItem _highlightTracker;
-
-        void UpdateHighlight()
+        private void UpdateHighlight()
         {
             _highlightTracker?.Pause();
-            if (_currentLeaf == null) {
+            if (_currentLeaf == null)
+            {
                 _highlight.style.display = DisplayStyle.None;
                 return;
             }
+
             _highlight.style.display = DisplayStyle.Flex;
 
             // 16ms tick (~60Hz) — cheap; only writes 4 style fields per frame.
@@ -468,21 +492,23 @@ namespace UIDocumentDesignSystem.Showcase
             // would lag scroll/resize by one event.
             _highlightTracker = _highlight.schedule.Execute(() =>
             {
-                if (_currentLeaf == null || _currentLeaf.panel == null) {
+                if (_currentLeaf == null || _currentLeaf.panel == null)
+                {
                     _highlight.style.display = DisplayStyle.None;
                     return;
                 }
+
                 var b = _currentLeaf.worldBound;
-                _highlight.style.left   = b.x - 2;
-                _highlight.style.top    = b.y - 2;
-                _highlight.style.width  = b.width + 4;
+                _highlight.style.left = b.x - 2;
+                _highlight.style.top = b.y - 2;
+                _highlight.style.width = b.width + 4;
                 _highlight.style.height = b.height + 4;
             }).Every(16);
         }
 
         // ── Panel positioning ───────────────────────────────────────────────
 
-        void PositionPanelNear(VisualElement target)
+        private void PositionPanelNear(VisualElement target)
         {
             // worldBound and the inline style coordinates we set live in panel
             // coordinate space, which now equals CSS pixels on every device
@@ -492,40 +518,40 @@ namespace UIDocumentDesignSystem.Showcase
             // against Screen.width here would mix CSS-px with buffer-px and
             // dock the panel off-screen on every Retina display.
             var overlayRoot = _overlayDoc != null ? _overlayDoc.rootVisualElement : null;
-            float panelW = overlayRoot != null ? overlayRoot.layout.width  : 0f;
-            float panelH = overlayRoot != null ? overlayRoot.layout.height : 0f;
+            var panelW = overlayRoot != null ? overlayRoot.layout.width : 0f;
+            var panelH = overlayRoot != null ? overlayRoot.layout.height : 0f;
             if (panelW <= 0f || float.IsNaN(panelW)) panelW = Screen.width;
             if (panelH <= 0f || float.IsNaN(panelH)) panelH = Screen.height;
 
-            if (panelW < MOBILE_BREAKPOINT)
+            if (panelW < MobileBreakpoint)
             {
                 // Mobile: docked along the bottom, full-width minus margin.
-                _panel.style.left   = 12;
-                _panel.style.right  = 12;
+                _panel.style.left = 12;
+                _panel.style.right = 12;
                 _panel.style.bottom = 12;
-                _panel.style.top    = StyleKeyword.Auto;
-                _panel.style.width  = StyleKeyword.Auto;
+                _panel.style.top = StyleKeyword.Auto;
+                _panel.style.width = StyleKeyword.Auto;
                 _panel.style.maxHeight = 240;
                 return;
             }
 
             var b = target.worldBound;
-            float left = b.xMax + 12;
-            float top  = b.yMin;
-            if (left + PANEL_WIDTH > panelW)        left = Mathf.Max(12, b.xMin - PANEL_WIDTH - 12);
-            if (top  + PANEL_MAX_HEIGHT > panelH)   top  = Mathf.Max(12, panelH - PANEL_MAX_HEIGHT - 12);
+            var left = b.xMax + 12;
+            var top = b.yMin;
+            if (left + PanelWidth > panelW) left = Mathf.Max(12, b.xMin - PanelWidth - 12);
+            if (top + PanelMaxHeight > panelH) top = Mathf.Max(12, panelH - PanelMaxHeight - 12);
 
-            _panel.style.left   = left;
-            _panel.style.top    = top;
-            _panel.style.right  = StyleKeyword.Auto;
+            _panel.style.left = left;
+            _panel.style.top = top;
+            _panel.style.right = StyleKeyword.Auto;
             _panel.style.bottom = StyleKeyword.Auto;
-            _panel.style.width  = PANEL_WIDTH;
-            _panel.style.maxHeight = PANEL_MAX_HEIGHT;
+            _panel.style.width = PanelWidth;
+            _panel.style.maxHeight = PanelMaxHeight;
         }
 
         // ── Hint / clipboard ────────────────────────────────────────────────
 
-        void UpdatePanelHint()
+        private void UpdatePanelHint()
         {
             _hintLabel.text = _pinned
                 ? "Pinned. Click panel to unpin."
@@ -533,7 +559,7 @@ namespace UIDocumentDesignSystem.Showcase
             _hintLabel.style.color = _pinned ? CPrimary : CMuted;
         }
 
-        void CopyClassesToClipboard()
+        private void CopyClassesToClipboard()
         {
             var s = JoinClasses(_currentLeaf);
             if (string.IsNullOrEmpty(s) || s == "—" || s.StartsWith("(no ")) return;

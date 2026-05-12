@@ -1,11 +1,12 @@
 using System.Collections.Generic;
+using DesignSystem.Runtime;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.UI;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 
-namespace UIDocumentDesignSystem.Showcase
+namespace DesignSystem.Showcase.Runtime
 {
     // Spawns the showcase + doc-overlay UIDocuments at runtime so the .unity
     // scene stays empty (one camera). Means the scene file has no MonoBehaviour
@@ -13,10 +14,10 @@ namespace UIDocumentDesignSystem.Showcase
     // recreated programmatically every Play.
     public static class ShowcaseBootstrap
     {
-        private const string SHOWCASE_RES_PATH = "UI/Styles/DesignSystem/DesignSystemShowcase";
-        private const string THEME_RES_PATH = "UnityDefaultRuntimeTheme";
-        private const int MOBILE_BREAKPOINT = 768;
-        private const string SCENE_NAME = "Showcase";
+        private const string ShowcaseResPath = "UI/Styles/DesignSystem/DesignSystemShowcase";
+        private const string ThemeResPath = "UnityDefaultRuntimeTheme";
+        private const int MobileBreakpoint = 768;
+        private const string SceneName = "Showcase";
 
 #if UNITY_WEBGL && !UNITY_EDITOR
         [DllImport("__Internal")]
@@ -54,13 +55,13 @@ namespace UIDocumentDesignSystem.Showcase
         private static void Initialize()
         {
             var currentSceneName = SceneManager.GetActiveScene().name;
-            if (currentSceneName != SCENE_NAME)
+            if (currentSceneName != SceneName)
                 return;
 
-            var showcaseUxml = Resources.Load<VisualTreeAsset>(SHOWCASE_RES_PATH);
+            var showcaseUxml = Resources.Load<VisualTreeAsset>(ShowcaseResPath);
             if (showcaseUxml == null)
             {
-                Debug.LogError($"[ShowcaseBootstrap] Could not load {SHOWCASE_RES_PATH}.uxml from Resources. " +
+                Debug.LogError($"[ShowcaseBootstrap] Could not load {ShowcaseResPath}.uxml from Resources. " +
                                "Confirm Assets/DesignSystem/Resources/UI/Styles/DesignSystem/DesignSystemShowcase.uxml exists.");
                 return;
             }
@@ -73,14 +74,14 @@ namespace UIDocumentDesignSystem.Showcase
             // renders invisible. The TSS at Resources/ just imports
             // unity-theme://default — same as the file Unity auto-creates
             // the first time you make a PanelSettings asset in the editor.
-            var theme = Resources.Load<ThemeStyleSheet>(THEME_RES_PATH);
+            var theme = Resources.Load<ThemeStyleSheet>(ThemeResPath);
             if (theme == null)
-                Debug.LogWarning($"[ShowcaseBootstrap] Could not load {THEME_RES_PATH}.tss from Resources. " +
+                Debug.LogWarning($"[ShowcaseBootstrap] Could not load {ThemeResPath}.tss from Resources. " +
                                  "Default control styling will be missing. " +
                                  "Confirm Assets/Showcase/Resources/UnityDefaultRuntimeTheme.tss exists.");
 
-            var showcaseGO = new GameObject("Showcase");
-            var showcaseDoc = showcaseGO.AddComponent<UIDocument>();
+            var showcaseGo = new GameObject("Showcase");
+            var showcaseDoc = showcaseGo.AddComponent<UIDocument>();
             showcaseDoc.panelSettings = MakePanelSettings(0, "ShowcasePanelSettings", theme);
             showcaseDoc.visualTreeAsset = showcaseUxml;
 
@@ -144,11 +145,11 @@ namespace UIDocumentDesignSystem.Showcase
                 root.RegisterCallback<GeometryChangedEvent>(_ => ApplyMobileClass(root));
             }).StartingIn(0);
 
-            var overlayGO = new GameObject("ShowcaseDocOverlay");
-            var overlayDoc = overlayGO.AddComponent<UIDocument>();
+            var overlayGo = new GameObject("ShowcaseDocOverlay");
+            var overlayDoc = overlayGo.AddComponent<UIDocument>();
             overlayDoc.panelSettings = MakePanelSettings(1, "DocOverlayPanelSettings", theme);
 
-            var overlay = overlayGO.AddComponent<ShowcaseDocOverlay>();
+            var overlay = overlayGo.AddComponent<ShowcaseDocOverlay>();
             overlay.AttachTo(showcaseDoc, overlayDoc);
 
             // The DesignSystemRuntime auto-attaches via SceneManager.sceneLoaded
@@ -208,7 +209,7 @@ namespace UIDocumentDesignSystem.Showcase
                 panelWidth = Screen.width / Mathf.Max(1f, dpr);
             }
 
-            var mobile = panelWidth < MOBILE_BREAKPOINT;
+            var mobile = panelWidth < MobileBreakpoint;
             if (mobile && !root.ClassListContains("mobile")) root.AddToClassList("mobile");
             if (!mobile && root.ClassListContains("mobile")) root.RemoveFromClassList("mobile");
         }
