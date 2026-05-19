@@ -131,10 +131,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: player_engine_small_2_16x16 (2)
       objectReference: {fileID: 0}
-    - target: {fileID: 3093169380510831534, guid: 40f3e4b86c734021785044ddd5531c89, type: 3}
-      propertyPath: m_Layer
-      value: 6
-      objectReference: {fileID: 0}
     - target: {fileID: 3116695596761612814, guid: 40f3e4b86c734021785044ddd5531c89, type: 3}
       propertyPath: m_LocalPosition.x
       value: 2.999998
@@ -174,38 +170,6 @@ PrefabInstance:
     - target: {fileID: 3116695596761612814, guid: 40f3e4b86c734021785044ddd5531c89, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 180
-      objectReference: {fileID: 0}
-    - target: {fileID: 5488925489007624031, guid: 40f3e4b86c734021785044ddd5531c89, type: 3}
-      propertyPath: m_GravityScale
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7600325497820868301, guid: 40f3e4b86c734021785044ddd5531c89, type: 3}
-      propertyPath: thrust
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7600325497820868301, guid: 40f3e4b86c734021785044ddd5531c89, type: 3}
-      propertyPath: maxThrust
-      value: 3000
-      objectReference: {fileID: 0}
-    - target: {fileID: 7600325497820868301, guid: 40f3e4b86c734021785044ddd5531c89, type: 3}
-      propertyPath: mainSkillType
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 7600325497820868301, guid: 40f3e4b86c734021785044ddd5531c89, type: 3}
-      propertyPath: maxGimbalAngle
-      value: 45
-      objectReference: {fileID: 0}
-    - target: {fileID: 7600325497820868301, guid: 40f3e4b86c734021785044ddd5531c89, type: 3}
-      propertyPath: particleSystem
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 7600325497820868301, guid: 40f3e4b86c734021785044ddd5531c89, type: 3}
-      propertyPath: exhaustParticles
-      value: 
-      objectReference: {fileID: 1261576060}
-    - target: {fileID: 7600325497820868301, guid: 40f3e4b86c734021785044ddd5531c89, type: 3}
-      propertyPath: <Resources>k__BackingField.crewNeeded
-      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -273,10 +237,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: player_engine_small_2_16x16
       objectReference: {fileID: 0}
-    - target: {fileID: 3093169380510831534, guid: 40f3e4b86c734021785044ddd5531c89, type: 3}
-      propertyPath: m_Layer
-      value: 6
-      objectReference: {fileID: 0}
     - target: {fileID: 3116695596761612814, guid: 40f3e4b86c734021785044ddd5531c89, type: 3}
       propertyPath: m_LocalPosition.x
       value: 3
@@ -317,18 +277,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 5488925489007624031, guid: 40f3e4b86c734021785044ddd5531c89, type: 3}
-      propertyPath: m_GravityScale
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7600325497820868301, guid: 40f3e4b86c734021785044ddd5531c89, type: 3}
-      propertyPath: thrust
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7600325497820868301, guid: 40f3e4b86c734021785044ddd5531c89, type: 3}
-      propertyPath: particleSystem
-      value: 
-      objectReference: {fileID: 1682787697}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -907,6 +855,17 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &387271192 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3629323190215071535, guid: c9fdcbb0df9d8753088130f6567e0059, type: 3}
+  m_PrefabInstance: {fileID: 675408359115638743}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c4dbe50d5bc653142bf2cbb73c5aa09b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &420075600 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3093317461146592837, guid: 5774789d6ded6835389754ba4211dc9a, type: 3}
@@ -1950,11 +1909,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1998466619}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!198 &1122726235 stripped
-ParticleSystem:
-  m_CorrespondingSourceObject: {fileID: 1840818974746900837, guid: 40f3e4b86c734021785044ddd5531c89, type: 3}
-  m_PrefabInstance: {fileID: 2034862446}
-  m_PrefabAsset: {fileID: 0}
 --- !u!213 &1165100214
 Sprite:
   m_ObjectHideFlags: 0
@@ -2244,11 +2198,6 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
---- !u!198 &1261576060 stripped
-ParticleSystem:
-  m_CorrespondingSourceObject: {fileID: 1840818974746900837, guid: 40f3e4b86c734021785044ddd5531c89, type: 3}
-  m_PrefabInstance: {fileID: 58348148}
-  m_PrefabAsset: {fileID: 0}
 --- !u!28 &1315293367
 Texture2D:
   m_ObjectHideFlags: 0
@@ -3253,11 +3202,6 @@ Texture2D:
     offset: 0
     size: 0
     path: 
---- !u!198 &1682787697 stripped
-ParticleSystem:
-  m_CorrespondingSourceObject: {fileID: 1840818974746900837, guid: 40f3e4b86c734021785044ddd5531c89, type: 3}
-  m_PrefabInstance: {fileID: 198099948}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &1773153334 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3116695596761612814, guid: 40f3e4b86c734021785044ddd5531c89, type: 3}
@@ -3770,10 +3714,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: player_engine_small_2_16x16 (1)
       objectReference: {fileID: 0}
-    - target: {fileID: 3093169380510831534, guid: 40f3e4b86c734021785044ddd5531c89, type: 3}
-      propertyPath: m_Layer
-      value: 6
-      objectReference: {fileID: 0}
     - target: {fileID: 3116695596761612814, guid: 40f3e4b86c734021785044ddd5531c89, type: 3}
       propertyPath: m_LocalPosition.x
       value: 18
@@ -3813,38 +3753,6 @@ PrefabInstance:
     - target: {fileID: 3116695596761612814, guid: 40f3e4b86c734021785044ddd5531c89, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 90
-      objectReference: {fileID: 0}
-    - target: {fileID: 5488925489007624031, guid: 40f3e4b86c734021785044ddd5531c89, type: 3}
-      propertyPath: m_GravityScale
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7600325497820868301, guid: 40f3e4b86c734021785044ddd5531c89, type: 3}
-      propertyPath: thrust
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7600325497820868301, guid: 40f3e4b86c734021785044ddd5531c89, type: 3}
-      propertyPath: maxThrust
-      value: 3000
-      objectReference: {fileID: 0}
-    - target: {fileID: 7600325497820868301, guid: 40f3e4b86c734021785044ddd5531c89, type: 3}
-      propertyPath: mainSkillType
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 7600325497820868301, guid: 40f3e4b86c734021785044ddd5531c89, type: 3}
-      propertyPath: maxGimbalAngle
-      value: 45
-      objectReference: {fileID: 0}
-    - target: {fileID: 7600325497820868301, guid: 40f3e4b86c734021785044ddd5531c89, type: 3}
-      propertyPath: particleSystem
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 7600325497820868301, guid: 40f3e4b86c734021785044ddd5531c89, type: 3}
-      propertyPath: exhaustParticles
-      value: 
-      objectReference: {fileID: 1122726235}
-    - target: {fileID: 7600325497820868301, guid: 40f3e4b86c734021785044ddd5531c89, type: 3}
-      propertyPath: <Resources>k__BackingField.crewNeeded
-      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -4767,6 +4675,10 @@ PrefabInstance:
       propertyPath: mapTransform
       value: 
       objectReference: {fileID: 1998466619}
+    - target: {fileID: 7089449176851662191, guid: 5774789d6ded6835389754ba4211dc9a, type: 3}
+      propertyPath: cameraManager
+      value: 
+      objectReference: {fileID: 387271192}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

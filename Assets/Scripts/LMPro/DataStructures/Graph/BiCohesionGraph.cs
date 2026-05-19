@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using ZLinq;
 
-namespace LMPro.Graph
+namespace LMPro.DataStructures.Graph
 {
     public class BiCohesionGraph<T> : Graph<T>
     {

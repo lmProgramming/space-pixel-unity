@@ -24,7 +24,7 @@ namespace Ships.Tests
         {
             _root = new GameObject("Root");
             _container = TestContainerFactory.CreateTestContainer(_root.transform);
-            _service = new ShipSnapshotService(_container);
+            _service = new ShipSnapshotService(_container, null);
         }
 
         [TearDown]

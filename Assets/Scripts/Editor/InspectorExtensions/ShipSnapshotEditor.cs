@@ -100,6 +100,7 @@ namespace Editor.InspectorExtensions
             }
 
             _shipSnapshotService.ApplySnapshot(ship, snapshot);
+            ship.InitializeModules();
         }
 
         private static void EnsureSnapshotFolderExists()

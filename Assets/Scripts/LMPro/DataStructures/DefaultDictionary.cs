@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace LMPro
+namespace LMPro.DataStructures
 {
     public class DefaultDictionary<TKey, TValue> : Dictionary<TKey, TValue>
     {

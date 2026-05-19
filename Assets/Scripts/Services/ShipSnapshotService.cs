@@ -21,11 +21,13 @@ namespace Services
         private static readonly Dictionary<string, Type> ModuleTypeMap = BuildModuleTypeMap();
 
         private readonly DiContainer _container;
+        private readonly SceneContextRegistry _sceneContextRegistry;
 
         [Inject]
-        public ShipSnapshotService(DiContainer container)
+        public ShipSnapshotService(DiContainer container, SceneContextRegistry sceneContextRegistry)
         {
             _container = container;
+            _sceneContextRegistry = sceneContextRegistry;
         }
 
         public ShipSnapshot CaptureSnapshot(IShip ship)
@@ -76,8 +78,6 @@ namespace Services
 
             ship.DestroyAllModules();
             CreateModulesFromSnapshot(ship, snapshot);
-
-            ship.InitializeModules();
 
             Debug.Log(
                 $"[ShipSnapshotService] Applied snapshot '{snapshot.shipName}' to '{ship.Name}' ({snapshot.modules.Count} modules)");
@@ -162,6 +162,7 @@ namespace Services
 
         private void CreateModulesFromSnapshot(IShip ship, ShipSnapshot snapshot)
         {
+            var injectionContainer = ResolveInjectionContainer(ship);
             var createdModules = new List<(GameObject go, ModuleSnapshot ms)>();
 
             foreach (var ms in snapshot.modules)
@@ -182,13 +183,27 @@ namespace Services
 
             foreach (var (moduleGo, ms) in createdModules)
             {
-                moduleGo.SetActive(true);
-
-                _container?.InjectGameObject(moduleGo);
+                injectionContainer.InjectGameObject(moduleGo);
 
                 var pixelatedRb = moduleGo.GetComponent<PixelatedRigidbody>();
                 ApplyPixelData(pixelatedRb, ms.pixelGrid, ms.moduleName);
+
+                moduleGo.SetActive(true);
             }
+        }
+
+        private DiContainer ResolveInjectionContainer(IShip ship)
+        {
+            if (ship is Component shipComponent && _sceneContextRegistry != null)
+            {
+                var sceneContainer =
+                    _sceneContextRegistry.TryGetContainerForScene(shipComponent.gameObject.scene);
+
+                if (sceneContainer != null)
+                    return sceneContainer;
+            }
+
+            return _container;
         }
 
         private static GameObject CreateModuleGameObject(ModuleSnapshot ms, Transform parent)

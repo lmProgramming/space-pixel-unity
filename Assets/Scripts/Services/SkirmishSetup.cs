@@ -2,6 +2,7 @@ using Core;
 using Core.Services;
 using Core.Ship;
 using Core.State;
+using Services.Camera;
 using UnityEngine;
 using Zenject;
 
@@ -9,6 +10,8 @@ namespace Services
 {
     public class SkirmishSetup : MonoBehaviour
     {
+        [SerializeField] private CameraManager cameraManager;
+
         [Inject(Id = Constants.PlayerShipId)]
         private IShip _playerShip;
 
@@ -19,7 +22,13 @@ namespace Services
         {
             var playerShipSnapshotFile = SaveState.PlayerShipSnapshotFilePath;
 
-            _snapshotService.ApplySnapshot(_playerShip, _snapshotService.LoadSnapshotFromFile(playerShipSnapshotFile));
+            if (playerShipSnapshotFile != null)
+                _snapshotService.ApplySnapshot(_playerShip,
+                    _snapshotService.LoadSnapshotFromFile(playerShipSnapshotFile));
+
+            _playerShip.InitializeModules();
+
+            cameraManager.StartFollowingObject((_playerShip.CommandModule as MonoBehaviour)?.gameObject);
         }
     }
 }

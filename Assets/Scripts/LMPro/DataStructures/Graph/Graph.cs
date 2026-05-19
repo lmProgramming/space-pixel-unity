@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace LMPro.Graph
+namespace LMPro.DataStructures.Graph
 {
     public class Graph<T>
     {

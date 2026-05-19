@@ -1,6 +1,6 @@
 using NUnit.Framework;
 
-namespace LMPro.Graph.Tests
+namespace LMPro.DataStructures.Graph.Tests
 {
     [TestFixture]
     public class GraphTests

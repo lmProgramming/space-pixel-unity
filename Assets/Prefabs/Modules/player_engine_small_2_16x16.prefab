@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 3621332158313288645}
   - component: {fileID: 7302436686150657163}
   - component: {fileID: 7600325497820868301}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: player_engine_small_2_16x16
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -115,7 +115,7 @@ Rigidbody2D:
   m_Mass: 195
   m_LinearDamping: 0
   m_AngularDamping: 0.05
-  m_GravityScale: 1
+  m_GravityScale: 0
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2

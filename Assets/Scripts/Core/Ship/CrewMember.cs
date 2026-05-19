@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using LMPro.DataStructures;
 using UnityEngine;
 
 namespace Core.Ship
@@ -19,7 +20,8 @@ namespace Core.Ship
         [field: SerializeField]
         public int Age { get; private set; }
 
-        private readonly Dictionary<CrewSkillType, int> _skills;
+        [SerializeField]
+        private SerializableDictionary<CrewSkillType, int> skills;
 
         public CrewMember(string firstName, string lastName, int age,
             Dictionary<CrewSkillType, int> skills = null)
@@ -27,7 +29,9 @@ namespace Core.Ship
             FirstName = firstName;
             LastName = lastName;
             Age = age;
-            _skills = skills ?? new Dictionary<CrewSkillType, int>();
+            this.skills = skills != null
+                ? new SerializableDictionary<CrewSkillType, int>(skills)
+                : new SerializableDictionary<CrewSkillType, int>();
             IsAlive = true;
         }
 
@@ -35,7 +39,8 @@ namespace Core.Ship
 
         public int GetSkillLevel(CrewSkillType skillType)
         {
-            return _skills.GetValueOrDefault(skillType, 0);
+            if (skills == null) Debug.LogWarning("[CrewMember] Skills not assigned");
+            return skills?.GetValueOrDefault(skillType, 0) ?? 0;
         }
 
         public void Kill()
