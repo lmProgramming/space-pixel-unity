@@ -1,4 +1,6 @@
-namespace Core.Ship
+using Core.Ship;
+
+namespace Core.Services
 {
     public interface IShipSnapshotService
     {
@@ -8,6 +10,6 @@ namespace Core.Ship
 
         string ToJson(ShipSnapshot snapshot, bool prettyPrint = true);
 
-        ShipSnapshot FromJson(string json);
+        ShipSnapshot LoadSnapshotFromFile(string path);
     }
 }

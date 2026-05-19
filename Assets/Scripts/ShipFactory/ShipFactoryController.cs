@@ -1,12 +1,13 @@
 using System;
 using System.IO;
+using Core.Services;
 using ShipFactory.Serialization;
 using Ships;
-using Ships.Serialization;
 using UI.Common;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
+using Zenject;
 
 namespace ShipFactory
 {
@@ -32,6 +33,10 @@ namespace ShipFactory
         private SettingsPanelController _settingsPanelController;
 
         private TextField _shipNameField;
+
+        [Inject]
+        private IShipSnapshotService _snapshotService;
+
         private UIDocument _uiDocument;
 
         private void Awake()
@@ -131,8 +136,7 @@ namespace ShipFactory
                 return;
             }
 
-            var snapshotService = new ShipSnapshotService();
-            var snapshot = snapshotService.CaptureSnapshot(initialShip);
+            var snapshot = _snapshotService.CaptureSnapshot(initialShip);
             if (snapshot == null)
             {
                 _canvasController.ShowErrorMessage("Failed to capture ship snapshot.");
@@ -140,7 +144,7 @@ namespace ShipFactory
             }
 
             snapshot.shipName = requestedName;
-            var json = snapshotService.ToJson(snapshot);
+            var json = _snapshotService.ToJson(snapshot);
 
             var sanitizedName = SnapshotNameUtility.SanitizeFileName(requestedName);
             var outputPath = Path.Combine(snapshotFolderPath, sanitizedName + SnapshotExtension);

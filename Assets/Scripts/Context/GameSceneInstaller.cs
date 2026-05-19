@@ -1,3 +1,4 @@
+using Core;
 using Core.Gameplay.Sound;
 using Core.Services;
 using Core.Ship;
@@ -25,16 +26,11 @@ namespace Context
         [SerializeField] private EffectsSpawner effectSpawner;
         [SerializeField] private NavigationService navigationService;
         [SerializeField] private MissionService missionService;
+
         [SerializeField] private PlayerShip playerShip;
 
         public override void InstallBindings()
         {
-            if (!physicsCollisionChannelAsset)
-            {
-                Debug.LogError("PhysicsCollisionChannel Asset is not assigned in GameSceneInstaller!", this);
-                return;
-            }
-
             Container.Bind<CollisionEventChannelSO>()
                 .FromInstance(physicsCollisionChannelAsset)
                 .AsSingle();
@@ -72,9 +68,8 @@ namespace Context
                 .AsSingle();
 
             Container.Bind<IShip>()
-                .WithId(MissionService.PlayerShipId)
-                .FromInstance(playerShip)
-                .AsSingle();
+                .WithId(Constants.PlayerShipId)
+                .FromInstance(playerShip);
         }
     }
 }

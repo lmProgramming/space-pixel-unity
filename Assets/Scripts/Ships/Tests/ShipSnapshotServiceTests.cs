@@ -3,9 +3,9 @@ using System.Collections;
 using Core.Ship;
 using NUnit.Framework;
 using Pixelation;
+using Services;
 using Ships.Internal;
 using Ships.Modules;
-using Ships.Serialization;
 using Ships.Tests.TestHelpers;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -465,7 +465,7 @@ namespace Ships.Tests
             snapshot.connections.Add(conn);
 
             var json = _service.ToJson(snapshot);
-            var restored = _service.FromJson(json);
+            var restored = ShipSnapshotService.FromJson(json);
 
             Assert.AreEqual("MyShip", restored.shipName);
             Assert.AreEqual(0, restored.commandModuleIndex);
@@ -526,7 +526,7 @@ namespace Ships.Tests
                 ""commandModuleIndex"": 0
             }";
 
-            var snapshot = _service.FromJson(json);
+            var snapshot = ShipSnapshotService.FromJson(json);
 
             Assert.AreEqual("TinyShip", snapshot.shipName);
             Assert.AreEqual(1, snapshot.modules.Count);
@@ -607,7 +607,7 @@ namespace Ships.Tests
                 ""commandModuleIndex"": 0
             }";
 
-            var snapshot = _service.FromJson(json);
+            var snapshot = ShipSnapshotService.FromJson(json);
 
             Assert.AreEqual("DualShip", snapshot.shipName);
             Assert.AreEqual(2, snapshot.modules.Count);
@@ -661,7 +661,7 @@ namespace Ships.Tests
             original.commandModuleIndex = 0;
 
             var json = _service.ToJson(original);
-            var restored = _service.FromJson(json);
+            var restored = ShipSnapshotService.FromJson(json);
 
             Assert.AreEqual(original.shipName, restored.shipName);
             Assert.AreEqual(original.commandModuleIndex, restored.commandModuleIndex);
@@ -707,7 +707,7 @@ namespace Ships.Tests
             snapshot.modules[3].pixelGrid.SetPixel(0, 0, new Color32(4, 4, 4, 255));
 
             var json = _service.ToJson(snapshot);
-            var restored = _service.FromJson(json);
+            var restored = ShipSnapshotService.FromJson(json);
 
             Assert.AreEqual(4, restored.modules.Count);
             Assert.AreEqual(nameof(Command), restored.modules[0].moduleTypeName);
@@ -734,7 +734,7 @@ namespace Ships.Tests
 
             var snapshot = _service.CaptureSnapshot(ship);
             var json = _service.ToJson(snapshot);
-            var restored = _service.FromJson(json);
+            var restored = ShipSnapshotService.FromJson(json);
 
             var pg = restored.modules[snapshot.commandModuleIndex].pixelGrid;
             Assert.AreEqual(2, pg.width);
@@ -757,7 +757,7 @@ namespace Ships.Tests
 
             var snapshot = _service.CaptureSnapshot(ship);
             var json = _service.ToJson(snapshot);
-            var fromJson = _service.FromJson(json);
+            var fromJson = ShipSnapshotService.FromJson(json);
 
             _service.ApplySnapshot(ship, fromJson);
 
@@ -793,7 +793,7 @@ namespace Ships.Tests
 
             var snapshot = _service.CaptureSnapshot(ship);
             var json = _service.ToJson(snapshot);
-            var fromJson = _service.FromJson(json);
+            var fromJson = ShipSnapshotService.FromJson(json);
             _service.ApplySnapshot(ship, fromJson);
 
             var newCmd = ship.GetComponentInChildren<Command>();
@@ -823,7 +823,7 @@ namespace Ships.Tests
             Assert.AreEqual(3, snapshot.modules.Count, "Should capture 3 modules");
 
             var json = _service.ToJson(snapshot);
-            var fromJson = _service.FromJson(json);
+            var fromJson = ShipSnapshotService.FromJson(json);
 
             Assert.AreEqual(3, fromJson.modules.Count, "JSON round-trip should preserve 3 modules");
 
@@ -881,7 +881,7 @@ namespace Ships.Tests
                 ""commandModuleIndex"": 0
             }";
 
-            var snapshot = _service.FromJson(json);
+            var snapshot = ShipSnapshotService.FromJson(json);
             _service.ApplySnapshot(ship, snapshot);
 
             var cmd = ship.GetComponentInChildren<Command>();
@@ -921,7 +921,7 @@ namespace Ships.Tests
 
             var snapshot = _service.CaptureSnapshot(ship);
             var json = _service.ToJson(snapshot);
-            var restored = _service.FromJson(json);
+            var restored = ShipSnapshotService.FromJson(json);
 
             var offsetMs =
                 restored.modules.AsValueEnumerable().FirstOrDefault(ms => ms.moduleName == "OffsetModule");
@@ -949,7 +949,7 @@ namespace Ships.Tests
 
             var snapshot = _service.CaptureSnapshot(ship);
             var json = _service.ToJson(snapshot);
-            var restored = _service.FromJson(json);
+            var restored = ShipSnapshotService.FromJson(json);
 
             _service.ApplySnapshot(ship, restored);
 
@@ -1020,7 +1020,7 @@ namespace Ships.Tests
 
             var snapshot = _service.CaptureSnapshot(ship);
             var json = _service.ToJson(snapshot);
-            var restored = _service.FromJson(json);
+            var restored = ShipSnapshotService.FromJson(json);
 
             var cmdSnap = restored.modules[restored.commandModuleIndex];
             Assert.AreEqual(200f, cmdSnap.resources.energyCapacity, 0.001f);

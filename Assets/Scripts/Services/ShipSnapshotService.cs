@@ -1,26 +1,26 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
+using Core.Services;
 using Core.Ship;
 using LMPro.External.IsAlive;
 using Pixelation;
+using Ships;
 using Ships.Modules;
+using Ships.Serialization;
 using UnityEngine;
 using Zenject;
 using Module = Ships.Modules.Module;
 
-namespace Ships.Serialization
+namespace Services
 {
     public class ShipSnapshotService : IShipSnapshotService
     {
         private static readonly Dictionary<string, Type> ModuleTypeMap = BuildModuleTypeMap();
 
         private readonly DiContainer _container;
-
-        public ShipSnapshotService()
-        {
-        }
 
         [Inject]
         public ShipSnapshotService(DiContainer container)
@@ -88,7 +88,15 @@ namespace Ships.Serialization
             return JsonUtility.ToJson(snapshot, prettyPrint);
         }
 
-        public ShipSnapshot FromJson(string json)
+        public ShipSnapshot LoadSnapshotFromFile(string path)
+        {
+            var json = File.ReadAllText(path);
+            var snapshot = FromJson(json);
+
+            return snapshot;
+        }
+
+        public static ShipSnapshot FromJson(string json)
         {
             return JsonUtility.FromJson<ShipSnapshot>(json);
         }

@@ -114,7 +114,7 @@ namespace UI.MainMenu
             var selectedFile = _snapshotFilePaths[selectedIndex];
 
             SaveState.PlayerShipName = selectedName;
-            SaveState.PlayerShipSnapshotFile = selectedFile;
+            SaveState.PlayerShipSnapshotFilePath = selectedFile;
 
             SceneManager.LoadScene(ResolveCombatSceneName());
         }
