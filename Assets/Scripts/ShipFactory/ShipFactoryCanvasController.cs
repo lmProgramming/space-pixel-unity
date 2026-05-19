@@ -695,9 +695,9 @@ namespace ShipFactory
             var context = ResolveContext();
 
             if (context.Bundle != null)
-                ApplyBundleInfo(context.Bundle, context.IsNewModuleContext);
-            else if (context.PaletteModuleSO != null)
-                ApplyPaletteInfo(context.PaletteModuleSO);
+                ApplyPaletteInfo(context.Bundle.ModuleSO, context.IsNewModuleContext);
+            else if (context.PaletteModuleSO)
+                ApplyPaletteInfo(context.PaletteModuleSO, true);
             else
                 ApplyEmptyInfo();
         }
@@ -711,7 +711,7 @@ namespace ShipFactory
             if (_hoveredPlacedBundle != null)
                 return (_hoveredPlacedBundle, null, false);
 
-            if (_hoveredPaletteModule != null)
+            if (_hoveredPaletteModule)
                 return (null, _hoveredPaletteModule, true);
 
             if (_selectedModuleBundle != null)
@@ -720,20 +720,7 @@ namespace ShipFactory
             return (null, null, false);
         }
 
-        private void ApplyBundleInfo(ShipModuleSOInstanceBundle bundle, bool isNewModuleContext)
-        {
-            _moduleNameLabel.text = bundle.ModuleSO.Name;
-            _moduleTypeLabel.text = $"Type: {bundle.PlacedModule.Type}";
-            _moduleSizeLabel.text = $"Dimensions: {bundle.ModuleSO.Dimensions.x}x{bundle.ModuleSO.Dimensions.y}";
-            _moduleDescriptionLabel.text = string.IsNullOrWhiteSpace(bundle.ModuleSO.Description)
-                ? "No description."
-                : bundle.ModuleSO.Description;
-
-            ApplyResources(bundle.PlacedModule.Resources);
-            UpdateRemoveButton(isNewModuleContext);
-        }
-
-        private void ApplyPaletteInfo(ShipModuleSO moduleSO)
+        private void ApplyPaletteInfo(ShipModuleSO moduleSO, bool isNewModuleContext)
         {
             var module = moduleSO.Prefab.GetComponent<IModule>();
             if (module == null)
@@ -748,7 +735,7 @@ namespace ShipFactory
                 : moduleSO.Description;
 
             ApplyResources(module.Resources);
-            UpdateRemoveButton(true);
+            UpdateRemoveButton(isNewModuleContext);
         }
 
         private void ApplyResources(Resources resources)

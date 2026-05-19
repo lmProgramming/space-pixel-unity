@@ -43,6 +43,7 @@ namespace Ships.Modules
         private bool _isFiring;
 
         private ManualTimer _reloadTimer;
+        public override ModuleType Type => ModuleType.Weapon;
 
         protected override void Awake()
         {

@@ -26,24 +26,20 @@
     <ui:VisualElement name="module-info-panel" class="module-info-panel">
         <ui:Label text="Module Details" class="module-info-title ds-h3"/>
         <ui:Label name="module-info-name" text="No module selected" class="module-info-name ds-body-1"/>
-        <ui:Foldout name="module-info-main-foldout" text="Overview" class="module-info-foldout">
-            <ui:Label name="module-info-type" text="Type: -" class="module-info-field ds-body-2"/>
-            <ui:Label name="module-info-size" text="Size: -" class="module-info-field ds-body-2"/>
-            <ui:Label name="module-info-description" text="Hover or drag a module to inspect it."
-                      class="module-info-description ds-body-2"/>
-        </ui:Foldout>
-        <ui:Foldout name="module-info-resources-foldout" text="Resources" class="module-info-foldout">
-            <ui:Label name="module-info-resource-energy-production" text="Energy Production: -"
-                      class="module-info-field ds-body-2"/>
-            <ui:Label name="module-info-resource-energy-draw" text="Energy Draw: -"
-                      class="module-info-field ds-body-2"/>
-            <ui:Label name="module-info-resource-energy-capacity" text="Energy Capacity: -"
-                      class="module-info-field ds-body-2"/>
-            <ui:Label name="module-info-resource-crew-needed" text="Crew Needed: -"
-                      class="module-info-field ds-body-2"/>
-            <ui:Label name="module-info-resource-crew-quarters" text="Crew Quarters: -"
-                      class="module-info-field ds-body-2"/>
-        </ui:Foldout>
+        <ui:Label name="module-info-type" text="Type: -" class="module-info-field ds-body-2"/>
+        <ui:Label name="module-info-size" text="Size: -" class="module-info-field ds-body-2"/>
+        <ui:Label name="module-info-description" text="Hover or drag a module to inspect it."
+                  class="module-info-description ds-body-2"/>
+        <ui:Label name="module-info-resource-energy-production" text="Energy Production: -"
+                  class="module-info-field ds-body-2"/>
+        <ui:Label name="module-info-resource-energy-draw" text="Energy Draw: -"
+                  class="module-info-field ds-body-2"/>
+        <ui:Label name="module-info-resource-energy-capacity" text="Energy Capacity: -"
+                  class="module-info-field ds-body-2"/>
+        <ui:Label name="module-info-resource-crew-needed" text="Crew Needed: -"
+                  class="module-info-field ds-body-2"/>
+        <ui:Label name="module-info-resource-crew-quarters" text="Crew Quarters: -"
+                  class="module-info-field ds-body-2"/>
         <ui:Button name="remove-module-button" text="Remove Module"
                    class="ds-btn ds-btn--danger remove-module-button remove-module-button--hidden"/>
     </ui:VisualElement>

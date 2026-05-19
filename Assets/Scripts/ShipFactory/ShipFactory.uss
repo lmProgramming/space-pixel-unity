@@ -138,10 +138,6 @@
     margin-bottom: 2px;
 }
 
-.module-info-field {
-    margin-bottom: 2px;
-}
-
 .module-info-description {
     margin-top: 8px;
     margin-bottom: 12px;
