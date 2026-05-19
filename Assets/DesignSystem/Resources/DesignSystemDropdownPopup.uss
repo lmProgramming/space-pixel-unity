@@ -1,12 +1,13 @@
 /* ============================================================================
    DROPDOWN POPUP CHROME
-   Loaded at panel-root scope by ShowcaseBootstrap so the rules reach the
+   Loaded at panel-root scope by DesignSystemRuntime so the rules reach the
    `unity-base-dropdown` popup that Unity 6's GenericDropdownMenu adds under
-   `m_TargetElement.GetRootVisualContainer()` — a SIBLING of `.ds-root`, not
-   a descendant. The full design-system stylesheet ships at rootVisualElement
-   scope (via the UXML <Style> import) and never reaches the popup. We only
-   pull THIS file up to panel-root so the popup gets exactly the styling it
-   needs without bringing along the rest of the design-system rules.
+   `m_TargetElement.GetRootVisualContainer()` — a SIBLING of the UIDocument
+   root, not a descendant. The full design-system stylesheet ships at
+   rootVisualElement scope (via the UXML <Style> import) and never reaches the
+   popup. We only pull THIS file up to panel-root so the popup gets exactly
+   the styling it needs without bringing along the rest of the design-system
+   rules.
 
    IMPORTANT — element responsibilities:
    The OUTER `.unity-base-dropdown` element is intentionally sized by Unity
@@ -42,9 +43,9 @@
    Color values are inlined (literal hex) rather than `var(--color-*)` so this
    stylesheet doesn't depend on DesignTokens.uss being reachable from the
    panel-root scope. The `.theme-light` block at the bottom mirrors the
-   light-theme palette in `ShowcaseTheme.uss`; ShowcaseBootstrap.WireThemeToggle
-   adds the `theme-light` class to BOTH `.ds-root` AND `panel.visualTree` so
-   the popup picks up the override.
+   light-theme palette in `ShowcaseTheme.uss`; add `theme-light` to BOTH your
+   screen root AND `panel.visualTree` if you use light mode so the popup
+   picks up the override.
    ============================================================================ */
 
 /* ---- Dark theme defaults (no .theme-light class) ---- */

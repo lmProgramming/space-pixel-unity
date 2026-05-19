@@ -1,18 +1,18 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uic="UI.Common" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/DesignSystem/Resources/UI/Styles/DesignSystem/DesignSystem.uss" />
     <Style src="ShipStatusPanel.uss" />
     <ui:Template name="pauseOverlayTemplate" src="project://database/Assets/Scripts/UI/Common/PauseOverlay.uxml"/>
     <ui:Template name="settingsOverlayTemplate" src="project://database/Assets/Scripts/UI/Common/SettingsOverlay.uxml"/>
     <ui:VisualElement name="main-hud-root" class="main-hud-root">
         <ui:VisualElement class="hud-top-bar">
-            <ui:VisualElement class="hud-weapons-cluster">
+            <uic:ChildAnnotator class="hud-weapons-cluster">
                 <ui:Label text="Weapons" class="ds-caption hud-weapons-title" />
-                <ui:VisualElement name="weapon-queue" class="weapon-queue" />
-            </ui:VisualElement>
-            <ui:VisualElement name="hud-sas-cluster" class="hud-sas-cluster">
+                <uic:ChildAnnotator name="weapon-queue" class="weapon-queue" check-interval="250" />
+            </uic:ChildAnnotator>
+            <uic:ChildAnnotator name="hud-sas-cluster" class="hud-sas-cluster">
                 <ui:Label name="sas-status-label" text="SAS · ON" class="ds-body-2 sas-status-label" />
                 <ui:Button name="sas-toggle-button" text="SAS" class="ds-btn ds-btn--secondary ds-btn--sm sas-toggle-button" />
-            </ui:VisualElement>
+            </uic:ChildAnnotator>
         </ui:VisualElement>
         <ui:VisualElement name="ship-status-panel" class="ship-status-panel">
             <ui:VisualElement name="energy-bar-container" class="energy-bar-container">

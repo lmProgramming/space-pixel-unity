@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Core.Gameplay.Combat;
 using Ships;
+using UI.Common;
 using UnityEngine;
 using UnityEngine.UIElements;
 using ZLinq;
@@ -36,7 +37,7 @@ namespace UI.MainGame
             if (!ValidateSetup())
                 return;
 
-            _weaponQueue = hudDocument.rootVisualElement.Q<VisualElement>("weapon-queue");
+            _weaponQueue = hudDocument.rootVisualElement.Q<ChildAnnotator>("weapon-queue");
             if (_weaponQueue == null)
             {
                 Debug.LogError("weapon-queue VisualElement not found on HUD UIDocument.", this);
@@ -68,6 +69,7 @@ namespace UI.MainGame
             }
 
             SortAllSlots();
+            RefreshWeaponQueueChildClasses();
         }
 
         private void OnDestroy()
@@ -133,6 +135,8 @@ namespace UI.MainGame
             {
                 _weaponQueue.Add(slot);
             }
+
+            RefreshWeaponQueueChildClasses();
         }
 
         private void SortAllSlots()
@@ -156,6 +160,14 @@ namespace UI.MainGame
                     continue;
                 _weaponQueue.Add(slot);
             }
+
+            RefreshWeaponQueueChildClasses();
+        }
+
+        private void RefreshWeaponQueueChildClasses()
+        {
+            if (_weaponQueue is ChildAnnotator annotator)
+                annotator.ChildChanger.CheckChildChange();
         }
 
         private static VisualElement CreateWeaponSlot(IWeapon weapon)

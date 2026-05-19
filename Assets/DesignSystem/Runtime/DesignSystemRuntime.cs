@@ -16,6 +16,10 @@ namespace DesignSystem.Runtime
     ///     <VisualElement class="ds-toggle__knob" />
     ///     if one is missing
     ///     - Skeleton shimmer translation (sliding overlay)
+    ///     - Dropdown popup chrome: Unity's GenericDropdownMenu renders under
+    ///     panel.visualTree (a sibling of rootVisualElement), so UXML-imported
+    ///     DesignSystem.uss never reaches the open list — this runtime loads
+    ///     DesignSystemDropdownPopup.uss onto the panel root once per panel.
     ///     Authoring tip: hand-author the toggle knob in UXML when you can — it
     ///     avoids a one-frame "no knob" flash during template clone. The runtime
     ///     is the safety net for screens that didn't.
@@ -29,6 +33,9 @@ namespace DesignSystem.Runtime
         private const string ToggleKnobClass = "ds-toggle__knob";
         private const string SkeletonClass = "ds-skeleton";
         private const string ShimmerClass = "ds-skeleton__shimmer";
+        private const string DropdownPopupStyleResource = "DesignSystemDropdownPopup";
+
+        private static StyleSheet _dropdownPopupStylesheet;
 
         private UIDocument _doc;
         private float _spinAngle;
@@ -83,6 +90,7 @@ namespace DesignSystem.Runtime
         private void InitFor(VisualElement root)
         {
             if (root == null) return;
+            EnsureDropdownPopupStyles(root);
             EnsureToggleKnobs(root);
             EnsureSkeletonShimmers(root);
             StartSpinners(root);
@@ -140,6 +148,28 @@ namespace DesignSystem.Runtime
                 el.RemoveFromClassList(SpinnerActiveClass);
                 el.style.rotate = new StyleRotate(new Rotate(0f));
             }
+        }
+
+        /// <summary>
+        ///     Attach dropdown-popup USS to <c>panel.visualTree</c>. Unity's
+        ///     GenericDropdownMenu is a sibling of <c>rootVisualElement</c>, so
+        ///     stylesheets imported via UXML never reach the open list.
+        /// </summary>
+        public static void EnsureDropdownPopupStyles(VisualElement root)
+        {
+            if (root == null) return;
+
+            root.schedule.Execute(() =>
+            {
+                var panelRoot = root.parent;
+                if (panelRoot == null) return;
+
+                _dropdownPopupStylesheet ??=
+                    Resources.Load<StyleSheet>(DropdownPopupStyleResource);
+                if (_dropdownPopupStylesheet == null) return;
+                if (panelRoot.styleSheets.Contains(_dropdownPopupStylesheet)) return;
+                panelRoot.styleSheets.Add(_dropdownPopupStylesheet);
+            }).StartingIn(0);
         }
 
         /// <summary>
@@ -308,6 +338,17 @@ namespace DesignSystem.Runtime
         {
             SceneManager.sceneLoaded -= OnSceneLoaded;
             SceneManager.sceneLoaded += OnSceneLoaded;
+        }
+
+        // Fires on every Play-mode entry, including when Project Settings →
+        // Enter Play Mode Options has "Reload Scene" disabled. sceneLoaded does
+        // NOT fire in that case, which is why sceneLoaded alone left game scenes
+        // without a runtime helper while the showcase (AfterSceneLoad bootstrap)
+        // still worked.
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        private static void AttachOnPlayModeStart()
+        {
+            AttachToAllUIDocuments();
         }
 
         private static void OnSceneLoaded(Scene scene, LoadSceneMode mode)

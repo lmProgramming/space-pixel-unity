@@ -20,7 +20,14 @@
     flex-direction: column;
     align-items: flex-start;
     max-width: 55%;
-    gap: var(--space-2);
+}
+
+.hud-weapons-cluster > * {
+    margin-bottom: var(--space-2);
+}
+
+.hud-weapons-cluster > .last-child {
+    margin-bottom: 0;
 }
 
 .hud-weapons-title {
@@ -30,7 +37,16 @@
 .weapon-queue {
     flex-direction: row;
     flex-wrap: wrap;
-    gap: var(--space-2);
+}
+
+.weapon-queue > * {
+    margin-right: var(--space-2);
+    margin-bottom: var(--space-2);
+}
+
+.weapon-queue > .last-child {
+    margin-right: 0;
+    margin-bottom: 0;
 }
 
 .hud-weapon-slot {
@@ -61,12 +77,19 @@
 .hud-sas-cluster {
     flex-direction: row;
     align-items: center;
-    gap: var(--space-3);
     padding: var(--space-2) var(--space-4);
     background-color: var(--color-surface);
     border-radius: var(--radius-lg);
     border-width: var(--border-thin);
     border-color: var(--color-border);
+}
+
+.hud-sas-cluster > * {
+    margin-right: var(--space-3);
+}
+
+.hud-sas-cluster > .last-child {
+    margin-right: 0;
 }
 
 .sas-status-label {

@@ -123,13 +123,7 @@ namespace DesignSystem.Showcase.Runtime
                 var root = showcaseDoc.rootVisualElement;
                 if (root == null) return;
 
-                var panelRoot = root.parent;
-                if (panelRoot != null)
-                {
-                    var popupChrome = Resources.Load<StyleSheet>("ShowcaseDropdownPopup");
-                    if (popupChrome != null && !panelRoot.styleSheets.Contains(popupChrome))
-                        panelRoot.styleSheets.Add(popupChrome);
-                }
+                DesignSystemRuntime.EnsureDropdownPopupStyles(root);
 
                 ApplyMobileClass(root);
                 WirePromoLinks(root);
