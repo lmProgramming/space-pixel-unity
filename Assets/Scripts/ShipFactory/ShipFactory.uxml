@@ -41,7 +41,8 @@
         <ui:Label name="module-info-resource-crew-quarters" text="Crew Quarters: -"
                   class="module-info-field ds-body-2"/>
         <ui:Button name="remove-module-button" text="Remove Module"
-                   class="ds-btn ds-btn--danger remove-module-button remove-module-button--hidden"/>
+                   class="remove-module-button remove-module-button--hidden ds-btn ds-btn--danger"
+                   style="margin-top: 18px;"/>
     </ui:VisualElement>
 
     <!-- Bottom-right resources panel -->
@@ -91,8 +92,9 @@
     <ui:VisualElement name="drag-ghost" class="drag-ghost hidden" picking-mode="Ignore"/>
 
     <!-- Popup feedback for actions like blocked delete attempts -->
-    <ui:VisualElement name="action-popup" class="action-popup">
-        <ui:Label name="action-popup-label" class="action-popup-label ds-body-1"/>
+    <ui:VisualElement name="action-popup" class="action-popup ds-toast ds-toast--warning">
+        <ui:VisualElement class="ds-icon ds-icon--sm ds-icon--warning ds-toast__icon"/>
+        <ui:Label text="LOOOL" name="action-popup-label" class="ds-toast__message"/>
     </ui:VisualElement>
 
     <ui:VisualElement name="pause-overlay-host"

@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 4f18baab9109118bbad62f61fa810b9c
+guid: a48c1d1dacb7cd9e68c1d0d3ea218765
 TrueTypeFontImporter:
   externalObjects: {}
   serializedVersion: 4
@@ -9,7 +9,7 @@ TrueTypeFontImporter:
   characterPadding: 1
   includeFontData: 1
   fontNames:
-  - withered
+  - Pixelify Sans
   fallbackFontReferences: []
   customCharacters: 
   fontRenderingMode: 0

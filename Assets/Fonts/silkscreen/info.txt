@@ -1,0 +1,7 @@
+Silkscreen Regular
+license: SIL Open Font License 1.1 (commercial use OK)
+link: https://fonts.google.com/specimen/Silkscreen
+source: https://github.com/google/fonts/tree/main/ofl/silkscreen
+
+Classic tight pixel UI font (smaller/x denser than Pixelify). Same Unity import steps as
+pixelify-sans/info.txt — recommend Custom 8 or 16 pt sampling with RASTER_HINTED.

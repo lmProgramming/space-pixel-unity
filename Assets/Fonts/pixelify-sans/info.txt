@@ -1,0 +1,18 @@
+Pixelify Sans (variable font, all weights in one file)
+license: SIL Open Font License 1.1 (commercial use OK)
+link: https://fonts.google.com/specimen/Pixelify+Sans
+source: https://github.com/google/fonts/tree/main/ofl/pixelifysans
+
+Unity UI Toolkit import:
+1. Select PixelifySans-Variable.ttf in Project window.
+2. Right-click → Create → Text → Font Asset.
+3. Font Asset Creator settings:
+   - Sampling Point Size: Custom 16 (or 18)
+   - Render Mode: RASTER_HINTED (crisp pixels) or SDF32 (slightly softer, flexible sizes)
+   - Padding: 2
+   - Atlas: 512×512, Static population mode
+   - Character Set: ASCII
+4. Generate Font Atlas → save as PixelifySans-16.asset in this folder.
+5. In DesignTokens.uss :root, set:
+   -unity-font-definition: url("project://database/Assets/Fonts/pixelify-sans/PixelifySans-16.asset");
+6. Display font-size at 16 / 32 / 48 px only. No fake bold on single-weight fonts.

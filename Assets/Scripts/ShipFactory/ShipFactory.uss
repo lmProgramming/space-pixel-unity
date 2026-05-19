@@ -150,7 +150,7 @@
 }
 
 .remove-module-button {
-    margin-top: 12px;
+    margin-top: 24px;
 }
 
 .remove-module-button--hidden {
@@ -224,10 +224,9 @@
     left: 50%;
     top: 80px;
     translate: -50% 0;
-    max-width: 400px;
-    padding: 12px 24px;
     display: none;
-    border-radius: 6px;
+    min-width: 0;
+    max-width: 600px;
 }
 
 .action-popup-label {
