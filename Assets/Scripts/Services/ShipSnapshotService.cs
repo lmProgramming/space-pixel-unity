@@ -18,6 +18,10 @@ namespace Services
 {
     public class ShipSnapshotService : IShipSnapshotService
     {
+        // todo: newly spawned cannons don't have projectile prefabs assigned and icons
+        // todo: newly spawned engines don't have particle system
+        // todo: don't shoot at UI
+
         private static readonly Dictionary<string, Type> ModuleTypeMap = BuildModuleTypeMap();
 
         private readonly DiContainer _container;
