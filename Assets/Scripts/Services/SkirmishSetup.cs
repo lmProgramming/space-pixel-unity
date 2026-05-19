@@ -17,7 +17,6 @@ namespace Services
 
         private void Start()
         {
-            var playerShipName = SaveState.PlayerShipName;
             var playerShipSnapshotFile = SaveState.PlayerShipSnapshotFilePath;
 
             _snapshotService.ApplySnapshot(_playerShip, _snapshotService.LoadSnapshotFromFile(playerShipSnapshotFile));
