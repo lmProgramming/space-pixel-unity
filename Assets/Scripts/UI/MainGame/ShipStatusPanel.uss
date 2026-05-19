@@ -84,20 +84,12 @@
     border-color: var(--color-border);
 }
 
-.hud-sas-cluster > * {
+.hud-sas-caption {
+    color: var(--color-text-secondary);
     margin-right: var(--space-3);
 }
 
-.hud-sas-cluster > .last-child {
-    margin-right: 0;
-}
-
-.sas-status-label {
-    color: var(--color-text-primary);
-    white-space: nowrap;
-}
-
-.sas-toggle-button {
+.sas-toggle {
     flex-shrink: 0;
 }
 

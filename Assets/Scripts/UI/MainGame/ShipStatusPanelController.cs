@@ -34,10 +34,10 @@ namespace UI.MainGame
         private bool _pauseUiInitialized;
 
         private VisualElement _root;
-        private bool _sasClickRegistered;
+        private bool _sasHandlersRegistered;
+        private bool _sasSyncing;
         private VisualElement _sasCluster;
-        private Label _sasStatusLabel;
-        private Button _sasToggleButton;
+        private Toggle _sasToggle;
         private SettingsPanelController _settingsPanelController;
         private VisualElement _shipStatusPanel;
         private Label _speedValueLabel;
@@ -55,7 +55,7 @@ namespace UI.MainGame
             {
                 _root = uiDocument.rootVisualElement;
                 CacheUIReferences();
-                RegisterSasButton();
+                RegisterSasToggle();
                 InitializePauseUi();
             }
 
@@ -105,13 +105,13 @@ namespace UI.MainGame
 
             _root = uiDocument.rootVisualElement;
             CacheUIReferences();
-            RegisterSasButton();
+            RegisterSasToggle();
             InitializePauseUi();
         }
 
         private void OnDisable()
         {
-            UnregisterSasButton();
+            UnregisterSasToggle();
             SetPaused(false);
         }
 
@@ -125,32 +125,34 @@ namespace UI.MainGame
             _energyFlowLabel = _root.Q<Label>("energy-flow-label");
             _crewCountLabel = _root.Q<Label>("crew-count-label");
             _speedValueLabel = _root.Q<Label>("speed-value-label");
-            _sasStatusLabel = _root.Q<Label>("sas-status-label");
-            _sasToggleButton = _root.Q<Button>("sas-toggle-button");
+            _sasToggle = _root.Q<Toggle>("sas-status-toggle");
         }
 
-        private void RegisterSasButton()
+        private void RegisterSasToggle()
         {
-            if (_sasClickRegistered || _sasToggleButton == null)
+            if (_sasHandlersRegistered || _sasToggle == null)
                 return;
 
-            _sasToggleButton.clicked += OnSasToggleClicked;
-            _sasClickRegistered = true;
+            _sasToggle.RegisterValueChangedCallback(OnSasToggleChanged);
+            _sasHandlersRegistered = true;
         }
 
-        private void UnregisterSasButton()
+        private void UnregisterSasToggle()
         {
-            if (!_sasClickRegistered || _sasToggleButton == null)
+            if (!_sasHandlersRegistered || _sasToggle == null)
                 return;
 
-            _sasToggleButton.clicked -= OnSasToggleClicked;
-            _sasClickRegistered = false;
+            _sasToggle.UnregisterValueChangedCallback(OnSasToggleChanged);
+            _sasHandlersRegistered = false;
         }
 
-        private void OnSasToggleClicked()
+        private void OnSasToggleChanged(ChangeEvent<bool> evt)
         {
-            if (playerShip is PlayerShip playerShipTyped)
-                playerShipTyped.ToggleSas();
+            if (_sasSyncing || playerShip is not PlayerShip playerShipTyped)
+                return;
+            if (playerShipTyped.SasEnabled == evt.newValue)
+                return;
+            playerShipTyped.ToggleSas();
         }
 
         private void InitializePauseUi()
@@ -238,12 +240,12 @@ namespace UI.MainGame
             if (_sasCluster != null)
                 _sasCluster.style.display = DisplayStyle.Flex;
 
-            var on = playerShipTyped.SasEnabled;
-            if (_sasStatusLabel != null)
-                _sasStatusLabel.text = on ? "SAS · ON" : "SAS · OFF";
+            if (_sasToggle == null)
+                return;
 
-            if (_sasToggleButton != null)
-                _sasToggleButton.text = on ? "Turn off" : "Turn on";
+            _sasSyncing = true;
+            _sasToggle.SetValueWithoutNotify(playerShipTyped.SasEnabled);
+            _sasSyncing = false;
         }
 
         private void UpdateEnergyDisplay(ResourceManager resourceManager)

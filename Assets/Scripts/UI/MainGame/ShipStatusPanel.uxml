@@ -1,36 +1,40 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uic="UI.Common" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <Style src="project://database/Assets/DesignSystem/Resources/UI/Styles/DesignSystem/DesignSystem.uss" />
-    <Style src="ShipStatusPanel.uss" />
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uic="UI.Common" xsi="http://www.w3.org/2001/XMLSchema-instance"
+         engine="UnityEngine.UIElements" editor="UnityEditor.UIElements"
+         noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/DesignSystem/Resources/UI/Styles/DesignSystem/DesignSystem.uss"/>
+    <Style src="ShipStatusPanel.uss"/>
     <ui:Template name="pauseOverlayTemplate" src="project://database/Assets/Scripts/UI/Common/PauseOverlay.uxml"/>
     <ui:Template name="settingsOverlayTemplate" src="project://database/Assets/Scripts/UI/Common/SettingsOverlay.uxml"/>
     <ui:VisualElement name="main-hud-root" class="main-hud-root">
         <ui:VisualElement class="hud-top-bar">
             <uic:ChildAnnotator class="hud-weapons-cluster">
-                <ui:Label text="Weapons" class="ds-caption hud-weapons-title" />
-                <uic:ChildAnnotator name="weapon-queue" class="weapon-queue" check-interval="250" />
+                <ui:Label text="Weapons" class="ds-caption hud-weapons-title"/>
+                <uic:ChildAnnotator name="weapon-queue" class="weapon-queue" check-interval="250"/>
             </uic:ChildAnnotator>
-            <uic:ChildAnnotator name="hud-sas-cluster" class="hud-sas-cluster">
-                <ui:Label name="sas-status-label" text="SAS · ON" class="ds-body-2 sas-status-label" />
-                <ui:Button name="sas-toggle-button" text="SAS" class="ds-btn ds-btn--secondary ds-btn--sm sas-toggle-button" />
-            </uic:ChildAnnotator>
+            <ui:VisualElement name="hud-sas-cluster" class="hud-sas-cluster">
+                <ui:Label text="SAS" class="ds-caption hud-sas-caption"/>
+                <ui:Toggle name="sas-status-toggle" value="true" class="ds-toggle sas-toggle">
+                    <ui:VisualElement class="ds-toggle__knob"/>
+                </ui:Toggle>
+            </ui:VisualElement>
         </ui:VisualElement>
         <ui:VisualElement name="ship-status-panel" class="ship-status-panel">
             <ui:VisualElement name="energy-bar-container" class="energy-bar-container">
                 <ui:VisualElement name="energy-bar-background" class="energy-bar-background">
-                    <ui:VisualElement name="energy-bar-fill" class="energy-bar-fill" />
-                    <ui:VisualElement name="energy-bar-glow" class="energy-bar-glow" />
+                    <ui:VisualElement name="energy-bar-fill" class="energy-bar-fill"/>
+                    <ui:VisualElement name="energy-bar-glow" class="energy-bar-glow"/>
                 </ui:VisualElement>
                 <ui:VisualElement name="energy-flow-indicator" class="energy-flow-indicator">
-                    <ui:Label name="energy-flow-label" text="+" class="energy-flow-label ds-body-1" />
+                    <ui:Label name="energy-flow-label" text="+" class="energy-flow-label ds-body-1"/>
                 </ui:VisualElement>
             </ui:VisualElement>
             <ui:VisualElement name="crew-section" class="crew-section">
-                <ui:Label name="crew-count-label" text="24" class="crew-count ds-body-1" />
+                <ui:Label name="crew-count-label" text="24" class="crew-count ds-body-1"/>
             </ui:VisualElement>
         </ui:VisualElement>
         <ui:VisualElement name="speed-readout" class="hud-speed-readout">
-            <ui:Label text="SPEED" class="ds-caption hud-speed-caption" />
-            <ui:Label name="speed-value-label" text="0.0" class="ds-h3 hud-speed-value" />
+            <ui:Label text="SPEED" class="ds-caption hud-speed-caption"/>
+            <ui:Label name="speed-value-label" text="0.0" class="ds-h3 hud-speed-value"/>
         </ui:VisualElement>
 
         <ui:VisualElement name="pause-overlay-host"
