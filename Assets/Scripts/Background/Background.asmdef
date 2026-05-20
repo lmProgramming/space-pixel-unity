@@ -1,3 +1,7 @@
 {
-	"name": "Background"
+  "name": "Background",
+  "references": [
+    "GUID:24173525d8afb24ad9153261c706727e",
+    "GUID:b588e3e7a964822d3a9d587848dfd885"
+  ]
 }

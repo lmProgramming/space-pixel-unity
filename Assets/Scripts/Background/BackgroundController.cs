@@ -1,4 +1,7 @@
-﻿using UnityEngine;
+﻿using Core;
+using Core.Ship;
+using UnityEngine;
+using Zenject;
 
 namespace Background
 {
@@ -93,18 +96,16 @@ namespace Background
         private float _initialCameraSize;
         private Vector3 _initialPlayerPosition;
 
+        [Inject(Id = Constants.PlayerShipId)]
+        private IShip _playerShip;
+
         private void Start()
         {
             meshRenderer.material = starBackgroundMaterial;
             meshRenderer.enabled = true;
 
-            if (playerTransform == null)
-            {
-                playerTransform = GameObject.FindGameObjectWithTag("Player")?.transform;
-
-                if (playerTransform == null)
-                    Debug.LogWarning("Player transform not assigned to StarBackgroundController.");
-            }
+            if (_playerShip.CommandModule.Transform == null)
+                Debug.LogWarning("Player transform not assigned to StarBackgroundController.");
 
             if (mainCamera == null)
             {
