@@ -6,7 +6,6 @@ using UI.Common;
 using UnityEngine;
 using UnityEngine.UIElements;
 using ZLinq;
-using Image = UnityEngine.UI.Image;
 
 namespace UI.MainGame
 {
@@ -120,14 +119,11 @@ namespace UI.MainGame
 
             if (isReady)
             {
-                var readyCount = 0;
-                foreach (var child in _weaponQueue.Children())
-                {
-                    var weaponKvp = _weaponSlotDictionary.AsValueEnumerable()
-                        .FirstOrDefault(kvp => kvp.Value == child);
-                    if (weaponKvp.Key != null && weaponKvp.Key.IsReady() && child != slot)
-                        readyCount++;
-                }
+                var readyCount = (from child in _weaponQueue.Children().AsValueEnumerable()
+                    let weaponKvp = _weaponSlotDictionary.AsValueEnumerable()
+                        .FirstOrDefault(kvp => kvp.Value == child)
+                    where weaponKvp.Key != null && weaponKvp.Key.IsReady() && child != slot
+                    select child).Count();
 
                 _weaponQueue.Insert(readyCount, slot);
             }
@@ -172,8 +168,7 @@ namespace UI.MainGame
 
         private static VisualElement CreateWeaponSlot(IWeapon weapon)
         {
-            var iconPrefab = weapon?.GetIcon();
-            var sprite = TryGetSpriteFromIconPrefab(iconPrefab);
+            var sprite = weapon?.GetSprite();
 
             var slot = new VisualElement();
             slot.AddToClassList("hud-weapon-slot");
@@ -181,13 +176,6 @@ namespace UI.MainGame
                 slot.style.backgroundImage = new StyleBackground(sprite);
 
             return slot;
-        }
-
-        private static Sprite TryGetSpriteFromIconPrefab(GameObject iconPrefab)
-        {
-            if (iconPrefab == null) return null;
-            var image = iconPrefab.GetComponentInChildren<Image>(true);
-            return image?.sprite;
         }
 
         private bool ValidateSetup()

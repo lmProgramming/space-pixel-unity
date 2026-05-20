@@ -161,7 +161,7 @@ MonoBehaviour:
   projectilePrefab: {fileID: 5654400622174641897, guid: fbb05823f916f824da20fe66a7de32d4, type: 3}
   projectileSpeed: 250
   reloadTime: 0.2
-  icon: {fileID: 1865393218821458671, guid: c388e61b26f07a841805d089806cdf1d, type: 3}
+  sprite: {fileID: 21300000, guid: 6f500dda68d0d774c89dab8e263d82e1, type: 3}
 --- !u!114 &9119335749253381856
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -435,7 +435,7 @@ MonoBehaviour:
   hitLayers:
     serializedVersion: 2
     m_Bits: 961
-  icon: {fileID: 1865393218821458671, guid: 8f61f8d23847b2d46b2c194f226b8f84, type: 3}
+  sprite: {fileID: 21300000, guid: 8ceea1dc8a2af984b88f4e972aac2a85, type: 3}
   originPoint: {fileID: 544986188448317240}
   reloadTime: 5
 --- !u!114 &8888559138276760025
@@ -784,7 +784,7 @@ MonoBehaviour:
   projectilePrefab: {fileID: 5654400622174641897, guid: 31131311ffb51fc42a911f89d07e56a6, type: 3}
   projectileSpeed: 2500
   reloadTime: 1
-  icon: {fileID: 1865393218821458671, guid: 58a346b199dceed4d81eff4d7a8b6025, type: 3}
+  sprite: {fileID: 21300000, guid: 7c2d492cea4e25443af7e154e1f40adc, type: 3}
 --- !u!114 &1066751633303061428
 MonoBehaviour:
   m_ObjectHideFlags: 0

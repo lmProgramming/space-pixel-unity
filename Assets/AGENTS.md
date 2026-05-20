@@ -10,6 +10,7 @@ If a component/anything is necessary for the script, don't silently fail, fail h
 Periodically check for errors by calling tools - it sometimes takes a bit of time to auto compile .cs files after you write them
 This project uses assemblies, so if you want to use code from other assembly, double check if you should. If you should, write the code as if you used the assembly and after compiling and seeing errors, just please let me know in the chat. I will link them manually in my IDE
 Don't manually create or edit .meta files (including by automated agents) — let Unity generate them, and only commit the .meta files Unity creates.
+Do not maintain both "legacy" and new systems. If something must be changed, remove the legacy code, the game is very early in development
 Do not use "Bootstrappers" - scripts that generate scenes or load resources dynamically. Rather, present me with a guide how can I manually integrate your changes, thanks!
 
 ## Gotchas

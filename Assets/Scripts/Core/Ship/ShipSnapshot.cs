@@ -6,10 +6,10 @@ namespace Core.Ship
     [Serializable]
     public class ShipSnapshot
     {
+        public int schemaVersion = 1;
         public string shipName;
+        public string commandModuleInstanceId;
         public List<ModuleSnapshot> modules = new();
-        public int commandModuleIndex;
-        public List<ModuleConnection> connections = new();
 
         public ShipSnapshot()
         {

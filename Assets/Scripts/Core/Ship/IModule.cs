@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Core.Pixelation;
+using Core.Services;
 using UnityEngine;
 
 namespace Core.Ship
@@ -24,7 +25,10 @@ namespace Core.Ship
         float GetEnergyProduction();
         void KillAllCrew();
         void KillRandomCrew(int count);
+        void SetResources(Resources newResources);
         void SetLocalPosition(Vector2 localPosition);
         void Setup(IShip ship);
+        string CaptureTypePayloadJson(IGameContentCatalog contentCatalog);
+        void ApplyTypePayloadJson(string typePayloadJson, IGameContentCatalog contentCatalog);
     }
 }

@@ -74,3 +74,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9cbc2cfd7e02b6ee1ab46a0c8cdd47c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Context::Context.GameProjectInstaller
+  shipModuleCatalog: {fileID: 11400000, guid: c7f8c73c057efe68c87d7df2ac599fd9, type: 2}
+  gameContentCatalog: {fileID: 11400000, guid: 219f1022e4678b052824091903047da7, type: 2}

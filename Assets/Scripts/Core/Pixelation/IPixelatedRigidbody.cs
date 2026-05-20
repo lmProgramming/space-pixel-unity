@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Core.Grid;
+using Core.Ship;
 using UnityEngine;
 
 namespace Core.Pixelation
@@ -20,6 +21,12 @@ namespace Core.Pixelation
         Vector2Int WorldToLocalPixel(Vector2 worldPosition);
         Vector2 LocalToWorldPoint(Vector2Int localPosition);
         Vector2 LocalToWorldPoint(Vector2 localPosition);
+        float DefaultPixelHealthForSnapshot { get; }
+        float MaxArmorHealthForSnapshot { get; }
+        ArmorGridSnapshot CaptureArmorGridSnapshot();
+        HealthGridSnapshot CaptureHealthGridSnapshot();
+        void ApplyArmorGridSnapshot(ArmorGridSnapshot snapshot);
+        void ApplyHealthGridSnapshot(HealthGridSnapshot snapshot);
         event Action<IPixelated> OnNoPixelsLeft;
         event Action<List<Vector2Int>, PixelLoseReason> OnPixelsLost;
     }

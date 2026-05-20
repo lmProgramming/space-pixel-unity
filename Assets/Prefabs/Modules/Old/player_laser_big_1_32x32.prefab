@@ -351,6 +351,6 @@ MonoBehaviour:
   hitLayers:
     serializedVersion: 2
     m_Bits: 0
-  icon: {fileID: 0}
+  sprite: {fileID: 21300000, guid: 8ceea1dc8a2af984b88f4e972aac2a85, type: 3}
   originPoint: {fileID: 0}
   reloadTime: 2

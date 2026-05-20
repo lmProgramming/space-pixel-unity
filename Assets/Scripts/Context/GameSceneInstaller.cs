@@ -69,7 +69,8 @@ namespace Context
 
             Container.Bind<IShip>()
                 .WithId(Constants.PlayerShipId)
-                .FromInstance(playerShip);
+                .FromInstance(playerShip)
+                .AsSingle();
         }
     }
 }

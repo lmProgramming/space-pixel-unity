@@ -228,4 +228,4 @@ MonoBehaviour:
   projectilePrefab: {fileID: 5654400622174641897, guid: 31131311ffb51fc42a911f89d07e56a6, type: 3}
   projectileSpeed: 1000
   reloadTime: 0
-  icon: {fileID: 5654400622174641897, guid: 31131311ffb51fc42a911f89d07e56a6, type: 3}
+  sprite: {fileID: 21300000, guid: 7c2d492cea4e25443af7e154e1f40adc, type: 3}
