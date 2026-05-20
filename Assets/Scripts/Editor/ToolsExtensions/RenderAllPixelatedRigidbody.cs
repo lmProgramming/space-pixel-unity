@@ -6,7 +6,6 @@ namespace Editor.ToolsExtensions
 {
     public class RenderAllPixelatedRigidbody : EditorWindow
     {
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         [MenuItem("Tools/Render all pixelated rigidbodies")]
         private static void RenderAllPixelated()
         {
