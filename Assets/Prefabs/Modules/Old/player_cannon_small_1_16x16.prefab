@@ -217,7 +217,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a06280dcf2610f340b3409d0824e526a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game.Ships::Ships.Modules.Cannon
-  mainSkillType: 0
+  mainSkillType: 1
   assignedCrew: []
   <Resources>k__BackingField:
     energyCapacity: 0
@@ -225,7 +225,7 @@ MonoBehaviour:
     energyProduction: 0
     crewNeeded: 0
     crewQuarters: 0
-  projectilePrefab: {fileID: 0}
-  projectileSpeed: 0
-  reloadTime: 0
-  icon: {fileID: 0}
+  projectilePrefab: {fileID: 5654400622174641897, guid: fbb05823f916f824da20fe66a7de32d4, type: 3}
+  projectileSpeed: 1000
+  reloadTime: 1
+  sprite: {fileID: 21300000, guid: 6f500dda68d0d774c89dab8e263d82e1, type: 3}

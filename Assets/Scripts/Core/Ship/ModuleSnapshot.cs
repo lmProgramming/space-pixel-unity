@@ -4,32 +4,48 @@ using UnityEngine;
 namespace Core.Ship
 {
     [Serializable]
-    public class ModuleSnapshot
+    public abstract class ModuleSnapshotBase
     {
+        public string instanceId;
         public string moduleName;
         public ModuleType moduleType;
         public string moduleTypeName;
+        public ModuleOrigin origin;
+        public string archetypeId;
         public Vector3 localPosition;
         public Quaternion localRotation;
-        public PixelGridSnapshot pixelGrid;
+        public PixelGridSnapshot colorGrid;
+        public ArmorGridSnapshot armorGrid;
+        public HealthGridSnapshot healthGrid;
+        public float defaultPixelHealth = 1f;
+        public float maxArmorHealth = 10f;
         public Resources resources;
 
-        /// <summary>
-        ///     Full JSON of the Module component's serialized fields (reloadTime, projectilePrefab, etc.).
-        ///     Captured via JsonUtility.ToJson, restored via JsonUtility.FromJsonOverwrite.
-        ///     Object references (prefabs) only survive within the same editor session.
-        /// </summary>
-        public string moduleComponentJson;
+        protected ModuleSnapshotBase()
+        {
+        }
+
+        protected ModuleSnapshotBase(string instanceIdValue, string name, ModuleType type, string typeName)
+        {
+            instanceId = instanceIdValue;
+            moduleName = name;
+            moduleType = type;
+            moduleTypeName = typeName;
+        }
+    }
+
+    [Serializable]
+    public class ModuleSnapshot : ModuleSnapshotBase
+    {
+        public string typePayloadJson;
 
         public ModuleSnapshot()
         {
         }
 
-        public ModuleSnapshot(string name, ModuleType type, string typeName)
+        public ModuleSnapshot(string instanceIdValue, string name, ModuleType type, string typeName) :
+            base(instanceIdValue, name, type, typeName)
         {
-            moduleName = name;
-            moduleType = type;
-            moduleTypeName = typeName;
         }
     }
 }

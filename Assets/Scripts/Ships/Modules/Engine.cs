@@ -1,4 +1,6 @@
+using Core.Services;
 using Core.Ship;
+using Core.Ship.ModuleSnapshotPayloads;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -117,6 +119,47 @@ namespace Ships.Modules
 
             var main = exhaustParticles.main;
             main.startSpeedMultiplier = _exhaustBaseStartSpeedMultiplier * thrustRatio;
+        }
+
+        public override string CaptureTypePayloadJson(IGameContentCatalog contentCatalog)
+        {
+            var data = new EngineModuleData
+            {
+                maxThrust = maxThrust,
+                maxGimbalAngle = maxGimbalAngle,
+                gimbalSpeed = gimbalSpeed
+            };
+
+            if (contentCatalog != null && exhaustParticles != null &&
+                contentCatalog.TryGetContentId(exhaustParticles.gameObject, out var exhaustContentId))
+                data.exhaustTemplateContentId = exhaustContentId;
+
+            return JsonUtility.ToJson(data);
+        }
+
+        public override void ApplyTypePayloadJson(string typePayloadJson, IGameContentCatalog contentCatalog)
+        {
+            if (string.IsNullOrWhiteSpace(typePayloadJson))
+                return;
+
+            var data = JsonUtility.FromJson<EngineModuleData>(typePayloadJson);
+            if (data == null)
+                return;
+
+            maxThrust = data.maxThrust;
+            maxGimbalAngle = data.maxGimbalAngle;
+            gimbalSpeed = data.gimbalSpeed;
+
+            if (contentCatalog != null &&
+                contentCatalog.TryGetPrefab(data.exhaustTemplateContentId, out var exhaustTemplate))
+            {
+                if (exhaustParticles != null)
+                    Destroy(exhaustParticles.gameObject);
+                var exhaustObject = Instantiate(exhaustTemplate, transform);
+                exhaustParticles = exhaustObject.GetComponent<ParticleSystem>();
+                if (exhaustParticles == null)
+                    throw new UnityException("[Engine] Exhaust template must contain ParticleSystem.");
+            }
         }
     }
 }

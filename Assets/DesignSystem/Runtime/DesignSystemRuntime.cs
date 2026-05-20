@@ -35,8 +35,15 @@ namespace DesignSystem.Runtime
         private const string SkeletonClass = "ds-skeleton";
         private const string ShimmerClass = "ds-skeleton__shimmer";
         private const string DropdownPopupStyleResource = "DesignSystemDropdownPopup";
+        private const string RuntimeCursorTextureResource = "UI/Cursors/bibata-modern-classic-cursor-arrow";
+        private const int RuntimeCursorMaxSizePx = 32;
+
+        private static readonly Vector2 RuntimeCursorHotspot = new(2f, 2f);
 
         private static StyleSheet _dropdownPopupStylesheet;
+        private static Texture2D _runtimeCursorTexture;
+        private static Texture2D _runtimeCursorTexturePrepared;
+        private static bool _runtimeCursorMissingWarningLogged;
 
         private UIDocument _doc;
         private float _spinAngle;
@@ -92,6 +99,7 @@ namespace DesignSystem.Runtime
         {
             if (root == null) return;
             EnsureDropdownPopupStyles(root);
+            EnsureInteractiveCursorTexture(root);
             EnsureToggleKnobs(root);
             EnsureSkeletonShimmers(root);
             StartSpinners(root);
@@ -108,6 +116,7 @@ namespace DesignSystem.Runtime
             // helpers no-op if the children already exist.
             root.schedule.Execute(() =>
             {
+                EnsureInteractiveCursorTexture(root);
                 EnsureToggleKnobs(root);
                 EnsureSkeletonShimmers(root);
             }).Every(250);
@@ -171,6 +180,71 @@ namespace DesignSystem.Runtime
                 if (panelRoot.styleSheets.Contains(_dropdownPopupStylesheet)) return;
                 panelRoot.styleSheets.Add(_dropdownPopupStylesheet);
             }).StartingIn(0);
+        }
+
+        /// <summary>
+        ///     Runtime UI Toolkit only supports non-default cursors via texture.
+        ///     Assign one shared cursor texture for the whole document.
+        /// </summary>
+        public static void EnsureInteractiveCursorTexture(VisualElement root)
+        {
+            if (root == null) return;
+
+            _runtimeCursorTexture ??= Resources.Load<Texture2D>(RuntimeCursorTextureResource);
+            if (_runtimeCursorTexture == null)
+            {
+                if (!_runtimeCursorMissingWarningLogged)
+                {
+                    _runtimeCursorMissingWarningLogged = true;
+                    Debug.LogWarning(
+                        $"[DesignSystemRuntime] Could not load cursor texture at Resources/{RuntimeCursorTextureResource}.png");
+                }
+
+                return;
+            }
+
+            var cursorTexture = GetPreparedRuntimeCursorTexture(_runtimeCursorTexture);
+            var cursor = new UnityEngine.UIElements.Cursor
+            {
+                texture = cursorTexture,
+                hotspot = RuntimeCursorHotspot
+            };
+
+            var styleCursor = new StyleCursor(cursor);
+            root.style.cursor = styleCursor;
+        }
+
+        private static Texture2D GetPreparedRuntimeCursorTexture(Texture2D source)
+        {
+            if (source == null) return null;
+            if (_runtimeCursorTexturePrepared != null)
+                return _runtimeCursorTexturePrepared;
+
+            var sizeScale = Mathf.Min(
+                RuntimeCursorMaxSizePx / (float)source.width,
+                RuntimeCursorMaxSizePx / (float)source.height);
+            var useScale = source.width > RuntimeCursorMaxSizePx || source.height > RuntimeCursorMaxSizePx;
+            if (!useScale) sizeScale = 1f;
+
+            var targetWidth = Mathf.Max(1, Mathf.RoundToInt(source.width * sizeScale));
+            var targetHeight = Mathf.Max(1, Mathf.RoundToInt(source.height * sizeScale));
+
+            var rt = RenderTexture.GetTemporary(targetWidth, targetHeight, 0, RenderTextureFormat.ARGB32);
+            var previousActive = RenderTexture.active;
+            Graphics.Blit(source, rt);
+            RenderTexture.active = rt;
+
+            _runtimeCursorTexturePrepared = new Texture2D(targetWidth, targetHeight, TextureFormat.RGBA32, false)
+            {
+                name = $"{source.name}_runtimeCursorScaled"
+            };
+            _runtimeCursorTexturePrepared.ReadPixels(new Rect(0, 0, targetWidth, targetHeight), 0, 0);
+            // Cursor validation requires a readable RGBA32 texture with no mip chain.
+            _runtimeCursorTexturePrepared.Apply(false, false);
+
+            RenderTexture.active = previousActive;
+            RenderTexture.ReleaseTemporary(rt);
+            return _runtimeCursorTexturePrepared;
         }
 
         /// <summary>

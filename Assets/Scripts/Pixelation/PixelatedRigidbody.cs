@@ -5,6 +5,7 @@ using System.Threading;
 using Core.Grid;
 using Core.Pixelation;
 using Core.Services;
+using Core.Ship;
 using Cysharp.Threading.Tasks;
 using Events.Collision;
 using Grid;
@@ -405,6 +406,86 @@ namespace Pixelation
         {
             sprite = visualSprite;
             armorMap = armorSprite;
+        }
+
+        public float DefaultPixelHealthForSnapshot => defaultPixelHealth;
+        public float MaxArmorHealthForSnapshot => maxArmorHealth;
+
+        public ArmorGridSnapshot CaptureArmorGridSnapshot()
+        {
+            if (TexturePixelGrid == null)
+                return null;
+
+            var dims = TexturePixelGrid.Dimensions();
+            if (!HasArmorMap)
+                return null;
+
+            var armorSnapshot = new ArmorGridSnapshot(dims.x, dims.y);
+            var armorPixels = armorMap.texture.GetPixels32();
+            var armorWidth = armorMap.texture.width;
+            var armorHeight = armorMap.texture.height;
+
+            armorPixels = EasyImage.ReorientTexture(armorPixels, armorWidth, armorHeight, flipX, flipY);
+            (armorPixels, armorWidth, armorHeight) =
+                EasyImage.RotateTexture(armorPixels, armorWidth, armorHeight, rotation);
+
+            if (armorWidth != dims.x || armorHeight != dims.y)
+                return null;
+
+            for (var y = 0; y < armorHeight; y++)
+            for (var x = 0; x < armorWidth; x++)
+                armorSnapshot.SetValue(x, y, armorPixels[y * armorWidth + x].r);
+
+            return armorSnapshot;
+        }
+
+        public HealthGridSnapshot CaptureHealthGridSnapshot()
+        {
+            if (TexturePixelGrid == null || HealthGrid == null)
+                return null;
+
+            var dims = TexturePixelGrid.Dimensions();
+            var snapshot = new HealthGridSnapshot(dims.x, dims.y);
+            for (var y = 0; y < dims.y; y++)
+            for (var x = 0; x < dims.x; x++)
+                snapshot.SetValue(x, y, HealthGrid.GetValue(new Vector2Int(x, y)));
+
+            return snapshot;
+        }
+
+        public void ApplyArmorGridSnapshot(ArmorGridSnapshot snapshot)
+        {
+            if (snapshot == null || HealthGrid == null || TexturePixelGrid == null)
+                return;
+
+            var dims = TexturePixelGrid.Dimensions();
+            if (snapshot.width != dims.x || snapshot.height != dims.y)
+                throw new UnityException("[PixelatedRigidbody] Armor grid snapshot dimensions do not match pixel grid.");
+
+            for (var y = 0; y < snapshot.height; y++)
+            for (var x = 0; x < snapshot.width; x++)
+            {
+                var point = new Vector2Int(x, y);
+                if (!TexturePixelGrid.IsPixelAssumeInBounds(point))
+                    continue;
+                var brightness = snapshot.GetValue(x, y) / 255f;
+                var health = Mathf.Lerp(defaultPixelHealth, maxArmorHealth, brightness);
+                HealthGrid.SetHealth(point, health);
+            }
+        }
+
+        public void ApplyHealthGridSnapshot(HealthGridSnapshot snapshot)
+        {
+            if (snapshot == null || HealthGrid == null || TexturePixelGrid == null)
+                return;
+
+            var dims = TexturePixelGrid.Dimensions();
+            if (snapshot.width != dims.x || snapshot.height != dims.y)
+                throw new UnityException("[PixelatedRigidbody] Health grid snapshot dimensions do not match pixel grid.");
+
+            for (var y = 0; y < snapshot.height; y++)
+            for (var x = 0; x < snapshot.width; x++)
+                HealthGrid.SetHealth(new Vector2Int(x, y), snapshot.GetValue(x, y));
         }
     }
 }

@@ -1,7 +1,9 @@
 using System;
 using System.Threading;
 using Core.Gameplay.Combat;
+using Core.Services;
 using Core.Ship;
+using Core.Ship.ModuleSnapshotPayloads;
 using Cysharp.Threading.Tasks;
 using LMPro;
 using Pixelation;
@@ -29,7 +31,7 @@ namespace Ships.Modules
 
         [SerializeField] private LayerMask hitLayers;
 
-        [SerializeField] private GameObject icon;
+        [SerializeField] private Sprite sprite;
 
         [SerializeField] private Transform originPoint;
 
@@ -95,9 +97,9 @@ namespace Ships.Modules
             return !_isFiring && _reloadTimer is { IsReady: true };
         }
 
-        public GameObject GetIcon()
+        public Sprite GetSprite()
         {
-            return icon;
+            return sprite;
         }
 
         public void StopShooting()
@@ -107,6 +109,38 @@ namespace Ships.Modules
             StopFiringCleanup();
 
             _reloadTimer?.Reset();
+        }
+
+        public override string CaptureTypePayloadJson(IGameContentCatalog contentCatalog)
+        {
+            var data = new LaserBeamModuleData
+            {
+                reloadTime = reloadTime,
+                beamRange = beamRange
+            };
+
+            if (contentCatalog != null && sprite != null &&
+                contentCatalog.TryGetSpriteContentId(sprite, out var contentId))
+                data.spriteContentId = contentId;
+
+            return JsonUtility.ToJson(data);
+        }
+
+        public override void ApplyTypePayloadJson(string typePayloadJson, IGameContentCatalog contentCatalog)
+        {
+            if (string.IsNullOrWhiteSpace(typePayloadJson))
+                return;
+
+            var data = JsonUtility.FromJson<LaserBeamModuleData>(typePayloadJson);
+            if (data == null)
+                return;
+
+            reloadTime = data.reloadTime;
+            beamRange = data.beamRange;
+            _reloadTimer = new ManualTimer(reloadTime);
+
+            if (contentCatalog != null && contentCatalog.TryGetSprite(data.spriteContentId, out var spriteValue))
+                sprite = spriteValue;
         }
 
         public override float GetEnergyDraw()

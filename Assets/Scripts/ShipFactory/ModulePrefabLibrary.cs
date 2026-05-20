@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Core.Services;
 using Core.Ship;
 using UnityEngine;
 using ZLinq;
@@ -7,7 +8,7 @@ using ZLinq;
 namespace ShipFactory
 {
     [CreateAssetMenu(fileName = "ModulePrefabLibrary", menuName = "Ship Factory/Module Prefab Library")]
-    public class ModulePrefabLibrary : ScriptableObject
+    public class ModulePrefabLibrary : ScriptableObject, IShipModuleCatalog
     {
         [SerializeField] private List<ModuleTypeEntry> entries = new();
 
@@ -16,6 +17,25 @@ namespace ShipFactory
         private void OnEnable()
         {
             LogLibraryContents();
+        }
+
+        public bool TryGetModulePrefab(string archetypeId, out GameObject prefab)
+        {
+            prefab = null;
+            if (string.IsNullOrWhiteSpace(archetypeId))
+                return false;
+
+            foreach (var shipModule in from entry in entries.AsValueEnumerable()
+                     from shipModule in entry.prefabs
+                     where shipModule != null
+                     where string.Equals(shipModule.ArchetypeId, archetypeId, StringComparison.Ordinal)
+                     select shipModule)
+            {
+                prefab = shipModule.Prefab;
+                return prefab;
+            }
+
+            return false;
         }
 
         public IReadOnlyList<ShipModuleSO> GetModuleSOsOfType(ModuleType type)

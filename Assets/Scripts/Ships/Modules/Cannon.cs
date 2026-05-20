@@ -3,6 +3,7 @@ using System.Threading;
 using Core.Gameplay.Combat;
 using Core.Services;
 using Core.Ship;
+using Core.Ship.ModuleSnapshotPayloads;
 using LMPro;
 using UnityEngine;
 using Zenject;
@@ -17,7 +18,7 @@ namespace Ships.Modules
 
         [SerializeField] private float reloadTime;
 
-        [SerializeField] private GameObject icon;
+        [SerializeField] private Sprite sprite;
         private CancellationTokenSource _cts;
 
         [Inject] private IProjectilesSpawner _projectilesSpawner;
@@ -91,13 +92,54 @@ namespace Ships.Modules
             return _reloadTimer.IsReady;
         }
 
-        public GameObject GetIcon()
+        public Sprite GetSprite()
         {
-            return icon;
+            return sprite;
         }
 
         public event Action OnReady;
         public event Action OnNotReady;
+
+        public override string CaptureTypePayloadJson(IGameContentCatalog contentCatalog)
+        {
+            var data = new CannonModuleData
+            {
+                reloadTime = reloadTime,
+                projectileSpeed = projectileSpeed
+            };
+
+            if (contentCatalog != null && projectilePrefab != null &&
+                contentCatalog.TryGetContentId(projectilePrefab, out var projectileContentId))
+                data.projectileContentId = projectileContentId;
+
+            if (contentCatalog != null && sprite != null &&
+                contentCatalog.TryGetSpriteContentId(sprite, out var spriteContentId))
+                data.spriteContentId = spriteContentId;
+
+            return JsonUtility.ToJson(data);
+        }
+
+        public override void ApplyTypePayloadJson(string typePayloadJson, IGameContentCatalog contentCatalog)
+        {
+            if (string.IsNullOrWhiteSpace(typePayloadJson))
+                return;
+
+            var data = JsonUtility.FromJson<CannonModuleData>(typePayloadJson);
+            if (data == null)
+                return;
+
+            reloadTime = data.reloadTime;
+            projectileSpeed = data.projectileSpeed;
+            _reloadTimer = new ManualTimer(reloadTime);
+
+            if (contentCatalog != null &&
+                contentCatalog.TryGetPrefab(data.projectileContentId, out var projectilePrefabValue))
+                projectilePrefab = projectilePrefabValue;
+
+            if (contentCatalog != null &&
+                contentCatalog.TryGetSprite(data.spriteContentId, out var spriteValue))
+                sprite = spriteValue;
+        }
 
         public override float GetEnergyDraw()
         {

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Core.Pixelation;
+using Core.Services;
 using Core.Ship;
 using LMPro;
 using Pixelation;
@@ -317,6 +318,15 @@ namespace Ships.Modules
         public void SetResources(Resources newResources)
         {
             Resources = newResources;
+        }
+
+        public virtual string CaptureTypePayloadJson(IGameContentCatalog contentCatalog)
+        {
+            return string.Empty;
+        }
+
+        public virtual void ApplyTypePayloadJson(string typePayloadJson, IGameContentCatalog contentCatalog)
+        {
         }
 
 #if UNITY_EDITOR

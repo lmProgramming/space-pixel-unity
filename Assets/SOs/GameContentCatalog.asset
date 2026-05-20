@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd1a66cf60e16f007a52720403ab9298, type: 3}
+  m_Name: GameContentCatalog
+  m_EditorClassIdentifier: Services::Services.GameContentCatalog
+  entries:
+  - contentId: bullet_big
+    prefab: {fileID: 5654400622174641897, guid: 31131311ffb51fc42a911f89d07e56a6, type: 3}
+  - contentId: bullet_small
+    prefab: {fileID: 5654400622174641897, guid: fbb05823f916f824da20fe66a7de32d4, type: 3}
+  - contentId: engine_exhaust
+    prefab: {fileID: 3462669467172030845, guid: f4f8a9b261b845c9191125c9572d5247, type: 3}
+  spriteEntries:
+  - contentId: sprite_bullet_small
+    sprite: {fileID: 21300000, guid: 6f500dda68d0d774c89dab8e263d82e1, type: 3}
+  - contentId: sprite_bullet_big
+    sprite: {fileID: 21300000, guid: 7c2d492cea4e25443af7e154e1f40adc, type: 3}
+  - contentId: sprite_laser
+    sprite: {fileID: 21300000, guid: 8ceea1dc8a2af984b88f4e972aac2a85, type: 3}

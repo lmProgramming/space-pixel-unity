@@ -232,4 +232,4 @@ MonoBehaviour:
   projectilePrefab: {fileID: 0}
   projectileSpeed: 0
   reloadTime: 0
-  icon: {fileID: 0}
+  sprite: {fileID: 0}

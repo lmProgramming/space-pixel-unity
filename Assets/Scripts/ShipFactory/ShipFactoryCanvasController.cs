@@ -387,6 +387,11 @@ namespace ShipFactory
             _ship.ManualAddModule(module);
             module.SetLocalPosition(localPosition);
 
+            var identity = instance.GetComponent<ModuleInstanceIdentity>();
+            if (identity == null)
+                identity = instance.AddComponent<ModuleInstanceIdentity>();
+            identity.EnsureAssigned(ModuleOrigin.CatalogPrefab, shipModuleSO.ArchetypeId);
+
             instance.GetComponent<Rigidbody2D>().simulated = false;
 
             return new ShipModuleSOInstanceBundle(instance, shipModuleSO, module);

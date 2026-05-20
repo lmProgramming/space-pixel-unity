@@ -1,37 +1,32 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Reflection;
+using Core.Pixelation;
 using Core.Services;
 using Core.Ship;
 using LMPro.External.IsAlive;
-using Pixelation;
 using Ships;
-using Ships.Modules;
-using Ships.Serialization;
 using UnityEngine;
 using Zenject;
-using Module = Ships.Modules.Module;
 
 namespace Services
 {
     public class ShipSnapshotService : IShipSnapshotService
     {
-        // todo: newly spawned cannons don't have projectile prefabs assigned and icons
-        // todo: newly spawned engines don't have particle system
-        // todo: don't shoot at UI
-
-        private static readonly Dictionary<string, Type> ModuleTypeMap = BuildModuleTypeMap();
-
         private readonly DiContainer _container;
+        private readonly IGameContentCatalog _gameContentCatalog;
+        private readonly ModuleRestoreFactory _moduleRestoreFactory;
         private readonly SceneContextRegistry _sceneContextRegistry;
 
         [Inject]
-        public ShipSnapshotService(DiContainer container, SceneContextRegistry sceneContextRegistry)
+        public ShipSnapshotService(DiContainer container,
+            SceneContextRegistry sceneContextRegistry,
+            IShipModuleCatalog shipModuleCatalog,
+            IGameContentCatalog gameContentCatalog)
         {
             _container = container;
             _sceneContextRegistry = sceneContextRegistry;
+            _gameContentCatalog = gameContentCatalog;
+            _moduleRestoreFactory = new ModuleRestoreFactory(shipModuleCatalog);
         }
 
         public ShipSnapshot CaptureSnapshot(IShip ship)
@@ -43,25 +38,17 @@ namespace Services
             }
 
             var snapshot = new ShipSnapshot(ship.Name);
-            var modules = ship.AllModules.ToArray();
-            var moduleToIndex = new Dictionary<IModule, int>();
-
-            for (var i = 0; i < modules.Length; i++)
+            foreach (var module in ship.AllModules)
             {
-                var module = modules[i];
-                moduleToIndex[module] = i;
-
                 var moduleSnapshot = CaptureModuleSnapshot(module);
                 snapshot.modules.Add(moduleSnapshot);
 
-                if (ship.CommandModule != null && (Module)module == (Module)ship.CommandModule)
-                    snapshot.commandModuleIndex = i;
+                if (ship.CommandModule == module)
+                    snapshot.commandModuleInstanceId = moduleSnapshot.instanceId;
             }
 
-            ModuleConnectionDetector.DetectAndCaptureConnections(snapshot, modules, moduleToIndex);
-
             Debug.Log(
-                $"[ShipSnapshotService] Captured snapshot of '{ship.Name}' with {snapshot.modules.Count} modules and {snapshot.connections.Count} connections");
+                $"[ShipSnapshotService] Captured snapshot of '{ship.Name}' with {snapshot.modules.Count} modules");
 
             return snapshot;
         }
@@ -105,61 +92,46 @@ namespace Services
             return JsonUtility.FromJson<ShipSnapshot>(json);
         }
 
-        private static Dictionary<string, Type> BuildModuleTypeMap()
+        private ModuleSnapshot CaptureModuleSnapshot(IModule module)
         {
-            var baseType = typeof(Module);
-            var map = new Dictionary<string, Type>(StringComparer.Ordinal);
-            var shipsAssembly = typeof(Module).Assembly;
-
-            Type[] types;
-            try
+            var identity = module.Transform.GetComponent<ModuleInstanceIdentity>();
+            if (identity == null)
             {
-                types = shipsAssembly.GetTypes();
+                identity = module.Transform.gameObject.AddComponent<ModuleInstanceIdentity>();
+                identity.EnsureAssigned(ModuleOrigin.Custom);
             }
-            catch (ReflectionTypeLoadException ex)
+            else if (string.IsNullOrWhiteSpace(identity.InstanceId))
             {
-                types = ex.Types;
+                identity.EnsureAssigned(identity.Origin, identity.ArchetypeId);
             }
 
-            foreach (var type in types)
-            {
-                if (type == null || type.IsAbstract || !baseType.IsAssignableFrom(type))
-                    continue;
-
-                map[type.Name] = type;
-            }
-
-            return map;
-        }
-
-        private static ModuleSnapshot CaptureModuleSnapshot(IModule module)
-        {
             var typeName = module.GetType().Name;
-            var moduleSnapshot = new ModuleSnapshot(module.Transform.name, module.Type, typeName)
+            var moduleSnapshot = new ModuleSnapshot(identity.InstanceId, module.Transform.name, module.Type, typeName)
             {
+                origin = identity.Origin,
+                archetypeId = identity.ArchetypeId,
                 localPosition = module.Transform.localPosition,
                 localRotation = module.Transform.localRotation,
                 resources = module.Resources,
-                moduleComponentJson = JsonUtility.ToJson(module)
+                defaultPixelHealth = module.PixelatedRigidbody.DefaultPixelHealthForSnapshot,
+                maxArmorHealth = module.PixelatedRigidbody.MaxArmorHealthForSnapshot,
+                typePayloadJson = module.CaptureTypePayloadJson(_gameContentCatalog)
             };
 
-            var pixelatedRb = module.PixelatedRigidbody as PixelatedRigidbody;
-
-            if (pixelatedRb && pixelatedRb.TexturePixelGrid == null)
-                pixelatedRb.Setup(null, true);
-
-            if (pixelatedRb?.TexturePixelGrid == null) return moduleSnapshot;
-
-            var grid = pixelatedRb.TexturePixelGrid;
+            var grid = module.PixelatedRigidbody.TexturePixelGrid;
+            if (grid == null) return moduleSnapshot;
             var dimensions = grid.Dimensions();
-            moduleSnapshot.pixelGrid = new PixelGridSnapshot(dimensions.x, dimensions.y);
+            moduleSnapshot.colorGrid = new PixelGridSnapshot(dimensions.x, dimensions.y);
 
             for (var y = 0; y < dimensions.y; y++)
             for (var x = 0; x < dimensions.x; x++)
             {
                 var pos = new Vector2Int(x, y);
-                if (grid.IsPixel(pos)) moduleSnapshot.pixelGrid.SetPixel(x, y, grid.GetValue(pos));
+                if (grid.IsPixel(pos)) moduleSnapshot.colorGrid.SetPixel(x, y, grid.GetValue(pos));
             }
+
+            moduleSnapshot.armorGrid = module.PixelatedRigidbody.CaptureArmorGridSnapshot();
+            moduleSnapshot.healthGrid = module.PixelatedRigidbody.CaptureHealthGridSnapshot();
 
             return moduleSnapshot;
         }
@@ -167,30 +139,37 @@ namespace Services
         private void CreateModulesFromSnapshot(IShip ship, ShipSnapshot snapshot)
         {
             var injectionContainer = ResolveInjectionContainer(ship);
-            var createdModules = new List<(GameObject go, ModuleSnapshot ms)>();
+            var createdModules = new List<(GameObject go, ModuleSnapshot ms, IModule module)>();
 
             foreach (var ms in snapshot.modules)
             {
-                var moduleGo = CreateModuleGameObject(ms, (ship as Ship)?.transform);
-                createdModules.Add((moduleGo, ms));
+                var moduleGo = _moduleRestoreFactory.CreateModuleObject(ms, (ship as Ship)?.transform);
+                moduleGo.SetActive(false);
+                moduleGo.transform.localPosition = ms.localPosition;
+                moduleGo.transform.localRotation = ms.localRotation;
 
-                var module = moduleGo.GetComponent<Module>();
-                if (!module)
+                var identity = moduleGo.GetComponent<ModuleInstanceIdentity>();
+                if (identity == null)
+                    identity = moduleGo.AddComponent<ModuleInstanceIdentity>();
+                identity.RestoreFromSnapshot(ms.instanceId, ms.origin, ms.archetypeId);
+
+                var module = moduleGo.GetComponent<IModule>();
+                if (module == null)
                     throw new UnityException(
                         $"[ShipSnapshotService] Failed to add a Module component for '{ms.moduleName}' (typeName: '{ms.moduleTypeName}', moduleType: {ms.moduleType}).");
 
-                if (!string.IsNullOrEmpty(ms.moduleComponentJson))
-                    JsonUtility.FromJsonOverwrite(ms.moduleComponentJson, module);
-
                 module.SetResources(ms.resources);
+                module.ApplyTypePayloadJson(ms.typePayloadJson, _gameContentCatalog);
+                createdModules.Add((moduleGo, ms, module));
             }
 
-            foreach (var (moduleGo, ms) in createdModules)
+            foreach (var (moduleGo, ms, module) in createdModules)
             {
                 injectionContainer.InjectGameObject(moduleGo);
 
-                var pixelatedRb = moduleGo.GetComponent<PixelatedRigidbody>();
-                ApplyPixelData(pixelatedRb, ms.pixelGrid, ms.moduleName);
+                ApplyPixelData(module.PixelatedRigidbody, ms.colorGrid, ms.moduleName);
+                module.PixelatedRigidbody.ApplyArmorGridSnapshot(ms.armorGrid);
+                module.PixelatedRigidbody.ApplyHealthGridSnapshot(ms.healthGrid);
 
                 moduleGo.SetActive(true);
             }
@@ -210,60 +189,9 @@ namespace Services
             return _container;
         }
 
-        private static GameObject CreateModuleGameObject(ModuleSnapshot ms, Transform parent)
+        private static void ApplyPixelData(IPixelatedRigidbody pixelatedRb, PixelGridSnapshot pg, string moduleName)
         {
-            var moduleGo = new GameObject(ms.moduleName);
-            moduleGo.SetActive(false);
-            moduleGo.transform.SetParent(parent);
-            moduleGo.transform.localPosition = ms.localPosition;
-            moduleGo.transform.localRotation = ms.localRotation;
-
-            moduleGo.AddComponent<SpriteRenderer>();
-
-            var rb = moduleGo.AddComponent<Rigidbody2D>();
-            rb.bodyType = RigidbodyType2D.Dynamic;
-            rb.gravityScale = 0f;
-
-            moduleGo.AddComponent<PolygonCollider2D>();
-
-            var moduleType = ResolveModuleType(ms);
-
-            if (moduleType == typeof(LaserBeam))
-                moduleGo.AddComponent<LineRenderer>();
-
-            moduleGo.AddComponent<PixelatedRigidbody>();
-            moduleGo.AddComponent(moduleType);
-
-            return moduleGo;
-        }
-
-        private static Type ResolveModuleType(ModuleSnapshot moduleSnapshot)
-        {
-            var typeName = moduleSnapshot.moduleTypeName;
-            if (!string.IsNullOrEmpty(typeName) && ModuleTypeMap.TryGetValue(typeName, out var type))
-                return type;
-
-            var fallbackType = ResolveFallbackModuleType(moduleSnapshot.moduleType);
-            Debug.LogWarning(
-                $"[ShipSnapshotService] Unknown module type name '{typeName}', falling back to '{fallbackType.Name}' for module type '{moduleSnapshot.moduleType}'.");
-
-            return fallbackType;
-        }
-
-        private static Type ResolveFallbackModuleType(ModuleType moduleType)
-        {
-            return moduleType switch
-            {
-                ModuleType.Command => typeof(Command),
-                ModuleType.Engine => typeof(Engine),
-                ModuleType.Weapon => typeof(Cannon),
-                _ => typeof(Basic)
-            };
-        }
-
-        private static void ApplyPixelData(PixelatedRigidbody pixelatedRb, PixelGridSnapshot pg, string moduleName)
-        {
-            if (!pixelatedRb)
+            if (pixelatedRb == null)
                 throw new UnityException(
                     $"[ShipSnapshotService] PixelatedRigidbody is null on module '{moduleName}'");
 

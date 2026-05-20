@@ -10,7 +10,7 @@ namespace Core.Gameplay.Combat
 
         bool IsReady();
 
-        GameObject GetIcon();
+        Sprite GetSprite();
 
         event Action OnReady;
         event Action OnNotReady;
