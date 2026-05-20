@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Ships.Modules;
+using Core.Ship;
 using UnityEngine;
 
 namespace Ships.Internal
@@ -24,7 +24,7 @@ namespace Ships.Internal
         public int Crew => crew;
         public int CrewCapacity => crewCapacity;
 
-        public void Recalculate(IReadOnlyList<Module> modules)
+        public void Recalculate(IReadOnlyList<IModule> modules)
         {
             energyCapacity = 0;
             energyDraw = 0;

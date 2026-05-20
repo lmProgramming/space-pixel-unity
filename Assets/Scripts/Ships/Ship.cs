@@ -11,7 +11,8 @@ using Cysharp.Threading.Tasks;
 using Events.Ship;
 using Gameplay.EasyTeam;
 using LMPro;
-using LMPro.Graph;
+using LMPro.DataStructures;
+using LMPro.DataStructures.Graph;
 using Ships.Internal;
 using Ships.Modules;
 using UnityEngine;
@@ -80,8 +81,6 @@ namespace Ships
             set => _moduleConnectionFactory = value;
         }
 
-        private IReadOnlyList<Module> AllModules => _allModulesCache;
-
         public List<IWeapon> Weapons =>
             _modulesDictionary[ModuleType.Weapon].AsValueEnumerable().Cast<IWeapon>().ToList();
 
@@ -145,6 +144,9 @@ namespace Ships
                 CommandModule.PixelatedRigidbody.OnNoPixelsLeft -= _onCommandModuleNoPixelsLeft;
         }
 
+        public string Name => transform.name;
+        public IReadOnlyList<IModule> AllModules => _allModulesCache;
+
         public float GeneralEfficiency => Math.Max(0.01f, ResourceManager.EnergyEfficiency);
 
         public Graph<IModule> ModuleGraph => _biCohesionGraph;
@@ -189,6 +191,42 @@ namespace Ships
             if (module == null) throw new ArgumentNullException(nameof(module));
             module.Transform.SetParent(null);
             InitializeModules();
+        }
+
+        public void DestroyAllModules()
+        {
+            var existingModules = GetComponentsInChildren<Module>();
+
+            foreach (var module in existingModules)
+                module.Setup(null);
+
+            foreach (var module in existingModules)
+                DestroyImmediate(module.gameObject);
+        }
+
+        public void InitializeModules()
+        {
+            if (CommandModule != null && _onCommandModuleNoPixelsLeft != null)
+                CommandModule.PixelatedRigidbody.OnNoPixelsLeft -= _onCommandModuleNoPixelsLeft;
+
+            CommandModule = GetComponentInChildren<Command>();
+            if (CommandModule == null)
+                throw new UnityException("[Ship] ReinitializeModules: No Command module found on ship!");
+
+            if (_biCohesionGraph != null)
+                _biCohesionGraph.OnNodesRemovedDueToUnreachability -= HandleUnreachableModules;
+
+            _biCohesionGraph = new BiCohesionGraph<IModule>(CommandModule);
+            _biCohesionGraph.OnNodesRemovedDueToUnreachability += HandleUnreachableModules;
+
+            _onCommandModuleNoPixelsLeft = _ => Destroy(gameObject);
+            CommandModule.PixelatedRigidbody.OnNoPixelsLeft += _onCommandModuleNoPixelsLeft;
+
+            _moduleConnectionFactory.ConnectModules(this);
+
+            _shipInitializeModulesEventChannel.Raise();
+
+            RecacheModulesDictionary();
         }
 
         private void DestroyShip()
@@ -244,31 +282,6 @@ namespace Ships
             OwnColliders = GetComponentsInChildren<Collider2D>();
 
             ResourceManager.Recalculate(_allModulesCache);
-        }
-
-        internal void InitializeModules()
-        {
-            if (CommandModule != null && _onCommandModuleNoPixelsLeft != null)
-                CommandModule.PixelatedRigidbody.OnNoPixelsLeft -= _onCommandModuleNoPixelsLeft;
-
-            CommandModule = GetComponentInChildren<Command>();
-            if (CommandModule == null)
-                throw new UnityException("[Ship] ReinitializeModules: No Command module found on ship!");
-
-            if (_biCohesionGraph != null)
-                _biCohesionGraph.OnNodesRemovedDueToUnreachability -= HandleUnreachableModules;
-
-            _biCohesionGraph = new BiCohesionGraph<IModule>(CommandModule);
-            _biCohesionGraph.OnNodesRemovedDueToUnreachability += HandleUnreachableModules;
-
-            _onCommandModuleNoPixelsLeft = _ => Destroy(gameObject);
-            CommandModule.PixelatedRigidbody.OnNoPixelsLeft += _onCommandModuleNoPixelsLeft;
-
-            _moduleConnectionFactory.ConnectModules(this);
-
-            _shipInitializeModulesEventChannel.Raise();
-
-            RecacheModulesDictionary();
         }
 
         protected virtual void Move()
@@ -340,7 +353,7 @@ namespace Ships
                     continue;
                 }
 
-                var desiredDirection = _engineDirectionSolver.GetDesiredEngineDirection(
+                var desiredDirection = EngineDirectionSolver.GetDesiredEngineDirection(
                     forward, centerOfMass, maxLeverArm, engine, forwardInput, finalTurnInput);
                 desiredDirectionPerEngine[i] = desiredDirection;
 

@@ -1,0 +1,246 @@
+/* Main HUD — layout + energy/crew; colors from design tokens */
+
+.main-hud-root {
+    flex-grow: 1;
+    width: 100%;
+    height: 100%;
+}
+
+.hud-top-bar {
+    position: absolute;
+    top: var(--space-4);
+    left: var(--space-4);
+    right: var(--space-4);
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.hud-weapons-cluster {
+    flex-direction: column;
+    align-items: flex-start;
+    max-width: 55%;
+}
+
+.hud-weapons-cluster > * {
+    margin-bottom: var(--space-2);
+}
+
+.hud-weapons-cluster > .last-child {
+    margin-bottom: 0;
+}
+
+.hud-weapons-title {
+    color: var(--color-text-secondary);
+}
+
+.weapon-queue {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.weapon-queue > * {
+    margin-right: var(--space-2);
+    margin-bottom: var(--space-2);
+}
+
+.weapon-queue > .last-child {
+    margin-right: 0;
+    margin-bottom: 0;
+}
+
+.hud-weapon-slot {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    border-radius: var(--radius-md);
+    border-width: var(--border-thin);
+    border-color: var(--color-border);
+    background-color: var(--color-surface-elev);
+    -unity-background-scale-mode: scale-to-fit;
+    padding: var(--space-1);
+    transition-property: opacity, border-color;
+    transition-duration: var(--transition-medium);
+}
+
+.hud-weapon-slot.is-ready {
+    border-color: var(--color-primary);
+    border-width: var(--border-regular);
+    opacity: 1;
+}
+
+.hud-weapon-slot.is-reloading {
+    opacity: 0.42;
+}
+
+.hud-sas-cluster {
+    flex-direction: row;
+    align-items: center;
+    padding: var(--space-2) var(--space-4);
+    background-color: var(--color-surface);
+    border-radius: var(--radius-lg);
+    border-width: var(--border-thin);
+    border-color: var(--color-border);
+}
+
+.hud-sas-caption {
+    color: var(--color-text-secondary);
+    margin-right: var(--space-3);
+}
+
+.sas-toggle {
+    flex-shrink: 0;
+}
+
+.ship-status-panel {
+    position: absolute;
+    left: var(--space-4);
+    bottom: var(--space-4);
+    width: 52px;
+    height: 400px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.energy-bar-container {
+    width: 100%;
+    height: 300px;
+    flex-direction: column;
+    align-items: center;
+}
+
+.energy-bar-background {
+    width: 32px;
+    height: 100%;
+    background-color: var(--color-surface);
+    border-radius: var(--radius-sm);
+    border-width: var(--border-regular);
+    border-color: var(--color-border-strong);
+    overflow: hidden;
+    flex-direction: column-reverse;
+}
+
+.energy-bar-fill {
+    width: 100%;
+    height: 50%;
+    background-color: var(--color-secondary);
+    border-radius: var(--radius-xs);
+    transition-property: height, background-color;
+    transition-duration: 0.25s;
+    transition-timing-function: ease-out;
+}
+
+.energy-bar-glow {
+    position: absolute;
+    left: 3px;
+    right: 3px;
+    bottom: 3px;
+    height: 50%;
+    background-color: var(--color-secondary-soft);
+    border-radius: var(--radius-xs);
+    transition-property: height;
+    transition-duration: 0.25s;
+}
+
+.energy-flow-indicator {
+    width: 52px;
+    height: 32px;
+    margin-top: var(--space-2);
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-surface);
+    border-radius: var(--radius-sm);
+    border-width: var(--border-regular);
+    border-color: var(--color-border-strong);
+    flex-shrink: 0;
+}
+
+.energy-flow-label {
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    color: var(--color-primary);
+    transition-property: color;
+    transition-duration: var(--transition-fast);
+}
+
+.energy-flow-label.negative {
+    color: var(--color-danger);
+}
+
+.energy-flow-label.neutral {
+    color: var(--color-text-disabled);
+}
+
+.crew-section {
+    width: 52px;
+    height: 36px;
+    margin-top: var(--space-2);
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-surface);
+    border-radius: var(--radius-sm);
+    border-width: var(--border-regular);
+    border-color: var(--color-warning);
+    flex-shrink: 0;
+}
+
+.crew-count {
+    -unity-text-align: middle-center;
+    color: var(--color-warning);
+    -unity-font-style: bold;
+    transition-property: scale, color;
+    transition-duration: var(--transition-fast);
+}
+
+.energy-critical .energy-bar-background {
+    border-color: var(--color-danger);
+}
+
+.energy-critical .energy-bar-fill {
+    background-color: var(--color-danger);
+}
+
+.energy-gaining .energy-bar-fill {
+    background-color: var(--color-primary);
+}
+
+.energy-gaining .energy-bar-background {
+    border-color: var(--color-primary);
+}
+
+.energy-draining .energy-bar-fill {
+    background-color: var(--color-warning);
+}
+
+.energy-draining .energy-bar-background {
+    border-color: var(--color-warning);
+}
+
+.pulse {
+    scale: 1.1;
+}
+
+.hud-speed-readout {
+    position: absolute;
+    bottom: var(--space-4);
+    left: 50%;
+    translate: -50% 0;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--space-3) var(--space-6);
+    background-color: var(--color-surface);
+    border-radius: var(--radius-lg);
+    border-width: var(--border-thin);
+    border-color: var(--color-border-strong);
+}
+
+.hud-speed-caption {
+    color: var(--color-text-secondary);
+}
+
+.hud-speed-value {
+    color: var(--color-text-primary);
+    -unity-text-align: middle-center;
+}

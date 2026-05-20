@@ -24,10 +24,11 @@ namespace Ships.Modules
 
         private ManualTimer _reloadTimer;
 
+        public override ModuleType Type => ModuleType.Weapon;
+
         protected override void Awake()
         {
             base.Awake();
-            Type = ModuleType.Weapon;
 
             _reloadTimer = new ManualTimer(reloadTime);
             _cts = new CancellationTokenSource();

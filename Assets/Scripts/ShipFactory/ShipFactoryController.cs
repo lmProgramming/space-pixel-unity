@@ -1,10 +1,13 @@
 using System;
 using System.IO;
+using Core.Services;
 using ShipFactory.Serialization;
 using Ships;
-using Ships.Serialization;
+using UI.Common;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
+using Zenject;
 
 namespace ShipFactory
 {
@@ -13,6 +16,7 @@ namespace ShipFactory
     {
         private const string SnapshotExtension = ".json";
         private const string DefaultShipName = "Ship";
+        private const string MainMenuSceneName = "MainMenu";
 
         [SerializeField] private ModulePrefabLibrary modulePrefabLibrary;
         [SerializeField] private Ship initialShip;
@@ -20,10 +24,19 @@ namespace ShipFactory
         [SerializeField] private string snapshotFolderName = "ShipSnapshots";
 
         private ShipFactoryCanvasController _canvasController;
+        private bool _isPaused;
         private ModulePaletteController _paletteController;
+        private VisualElement _pauseOverlay;
+        private VisualElement _pauseOverlayHost;
+        private bool _pauseUiInitialized;
         private Button _saveShipButton;
+        private SettingsPanelController _settingsPanelController;
 
         private TextField _shipNameField;
+
+        [Inject]
+        private IShipSnapshotService _snapshotService;
+
         private UIDocument _uiDocument;
 
         private void Awake()
@@ -37,6 +50,7 @@ namespace ShipFactory
         private void Update()
         {
             _canvasController?.RefreshShipResourcesPanel();
+            HandlePauseInput();
         }
 
         private void OnEnable()
@@ -67,12 +81,16 @@ namespace ShipFactory
 
             if (initialShip != null)
                 _canvasController.SetShip(initialShip);
+
+            InitializePauseUi(root);
         }
 
         private void OnDisable()
         {
             if (_saveShipButton != null)
                 _saveShipButton.clicked -= SaveSnapshot;
+
+            _canvasController?.Dispose();
 
             if (_paletteController == null || _canvasController == null)
                 return;
@@ -83,6 +101,8 @@ namespace ShipFactory
             _canvasController.OnInputLockChanged -= OnCanvasInputLockChanged;
             _paletteController.OnModuleHoverStarted -= OnPaletteModuleHoverStarted;
             _paletteController.OnModuleHoverEnded -= OnPaletteModuleHoverEnded;
+
+            SetPaused(false);
         }
 
         private void SaveSnapshot()
@@ -116,8 +136,7 @@ namespace ShipFactory
                 return;
             }
 
-            var snapshotService = new ShipSnapshotService();
-            var snapshot = snapshotService.CaptureSnapshot(initialShip);
+            var snapshot = _snapshotService.CaptureSnapshot(initialShip);
             if (snapshot == null)
             {
                 _canvasController.ShowErrorMessage("Failed to capture ship snapshot.");
@@ -125,7 +144,7 @@ namespace ShipFactory
             }
 
             snapshot.shipName = requestedName;
-            var json = snapshotService.ToJson(snapshot);
+            var json = _snapshotService.ToJson(snapshot);
 
             var sanitizedName = SnapshotNameUtility.SanitizeFileName(requestedName);
             var outputPath = Path.Combine(snapshotFolderPath, sanitizedName + SnapshotExtension);
@@ -155,7 +174,7 @@ namespace ShipFactory
                 return;
             }
 
-            _canvasController.BeginModuleDrop(shipModuleSO, startPointerPosition);
+            _canvasController.BeginModuleDrop(shipModuleSO);
         }
 
         private void OnPaletteModuleHoverStarted(ShipModuleSO moduleSO)
@@ -166,6 +185,73 @@ namespace ShipFactory
         private void OnPaletteModuleHoverEnded(ShipModuleSO moduleSO)
         {
             _canvasController.HidePaletteModuleInfo(moduleSO);
+        }
+
+        private void InitializePauseUi(VisualElement root)
+        {
+            if (_pauseUiInitialized)
+                return;
+
+            _pauseOverlay = root.Q<VisualElement>("pause-overlay");
+            _pauseOverlayHost = root.Q<VisualElement>("pause-overlay-host");
+            var title = root.Q<Label>("pause-title");
+            var resumeButton = root.Q<Button>("pause-resume-button");
+            var settingsButton = root.Q<Button>("pause-settings-button");
+            var quitButton = root.Q<Button>("pause-quit-button");
+
+            if (title == null || resumeButton == null || settingsButton == null || quitButton == null)
+                throw new InvalidOperationException(
+                    "[ShipFactoryController] Pause elements missing in ShipFactory UXML.");
+
+            title.text = "Ship Factory Paused";
+            if (_pauseOverlayHost != null)
+                _pauseOverlayHost.style.display = DisplayStyle.None;
+            _pauseOverlay.style.display = DisplayStyle.None;
+            resumeButton.clicked += () => { SetPaused(false); };
+            settingsButton.clicked += () => { _settingsPanelController.Toggle(); };
+            quitButton.clicked += QuitToMainMenu;
+            _settingsPanelController = new SettingsPanelController(root, false);
+            _pauseUiInitialized = true;
+        }
+
+        private void HandlePauseInput()
+        {
+            if (!Input.GetKeyDown(KeyCode.Escape))
+                return;
+
+            if (_settingsPanelController != null && _settingsPanelController.IsOpen)
+            {
+                _settingsPanelController.Hide();
+                return;
+            }
+
+            SetPaused(!_isPaused);
+        }
+
+        private void SetPaused(bool paused)
+        {
+            if (_isPaused == paused)
+                return;
+
+            _isPaused = paused;
+            Time.timeScale = paused ? 0f : 1f;
+
+            if (_pauseOverlayHost != null)
+                _pauseOverlayHost.style.display = paused ? DisplayStyle.Flex : DisplayStyle.None;
+            if (_pauseOverlay != null)
+                _pauseOverlay.style.display = paused ? DisplayStyle.Flex : DisplayStyle.None;
+
+            _canvasController?.SetExternalInputLock(paused);
+            _paletteController?.SetInputLocked(paused);
+
+            if (!paused && _settingsPanelController != null && _settingsPanelController.IsOpen)
+                _settingsPanelController.Hide();
+        }
+
+        private void QuitToMainMenu()
+        {
+            Time.timeScale = 1f;
+            SceneManager.LoadScene(MainMenuSceneName);
         }
     }
 }

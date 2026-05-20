@@ -15,7 +15,7 @@ namespace Ships.Internal
             return Mathf.Max(maxLeverArm, 0.01f);
         }
 
-        public Vector2 GetDesiredEngineDirection(Vector2 shipForward, Vector2 centerOfMass, float maxLeverArm,
+        public static Vector2 GetDesiredEngineDirection(Vector2 shipForward, Vector2 centerOfMass, float maxLeverArm,
             Engine engine, float forwardInput, float turnInput)
         {
             var lever = engine.WorldThrustPoint - centerOfMass;

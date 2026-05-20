@@ -3,9 +3,9 @@ using System.Collections;
 using Core.Ship;
 using NUnit.Framework;
 using Pixelation;
+using Services;
 using Ships.Internal;
 using Ships.Modules;
-using Ships.Serialization;
 using Ships.Tests.TestHelpers;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -24,7 +24,7 @@ namespace Ships.Tests
         {
             _root = new GameObject("Root");
             _container = TestContainerFactory.CreateTestContainer(_root.transform);
-            _service = new ShipSnapshotService(_container);
+            _service = new ShipSnapshotService(_container, null);
         }
 
         [TearDown]
@@ -121,9 +121,9 @@ namespace Ships.Tests
             var moduleGo = new GameObject("Module");
             moduleGo.transform.SetParent(shipGo.transform);
             moduleGo.AddComponent<SpriteRenderer>();
-            var rb2d = moduleGo.AddComponent<Rigidbody2D>();
-            rb2d.bodyType = RigidbodyType2D.Dynamic;
-            rb2d.gravityScale = 0f;
+            var rb2D = moduleGo.AddComponent<Rigidbody2D>();
+            rb2D.bodyType = RigidbodyType2D.Dynamic;
+            rb2D.gravityScale = 0f;
             moduleGo.AddComponent<PolygonCollider2D>();
             var pixelatedRb = moduleGo.AddComponent<PixelatedRigidbody>();
             _container.Inject(pixelatedRb);
@@ -145,9 +145,9 @@ namespace Ships.Tests
             var commandGo = new GameObject("Command");
             commandGo.transform.SetParent(shipGo.transform);
             commandGo.AddComponent<SpriteRenderer>();
-            var cmdRb2d = commandGo.AddComponent<Rigidbody2D>();
-            cmdRb2d.bodyType = RigidbodyType2D.Dynamic;
-            cmdRb2d.gravityScale = 0f;
+            var cmdRb2D = commandGo.AddComponent<Rigidbody2D>();
+            cmdRb2D.bodyType = RigidbodyType2D.Dynamic;
+            cmdRb2D.gravityScale = 0f;
             commandGo.AddComponent<PolygonCollider2D>();
             var commandPixelatedRb = commandGo.AddComponent<PixelatedRigidbody>();
             _container.Inject(commandPixelatedRb);
@@ -204,12 +204,12 @@ namespace Ships.Tests
             Assert.IsNotNull(newModule, "Should find a non-command module after apply");
             var newPixelatedRb = newModule.PixelatedRigidbody;
 
-            var pixel = newPixelatedRb.PixelGrid.GetValue(new Vector2Int(0, 0));
+            var pixel = newPixelatedRb.TexturePixelGrid.GetValue(new Vector2Int(0, 0));
             Assert.AreEqual(0, pixel.r,
                 "Red channel should be 0 (snapshot blue), not 255 (sprite red) — snapshot must override sprite");
             Assert.AreEqual(255, pixel.b,
                 "Blue channel should be 255 from snapshot color, not overridden by sprite");
-            Assert.IsFalse(newPixelatedRb.PixelGrid.IsPixel(new Vector2Int(2, 2)),
+            Assert.IsFalse(newPixelatedRb.TexturePixelGrid.IsPixel(new Vector2Int(2, 2)),
                 "Pixel (2,2) should be transparent as set in snapshot");
 
             Object.DestroyImmediate(shipGo);
@@ -224,9 +224,9 @@ namespace Ships.Tests
             var moduleGo = new GameObject("Module");
             moduleGo.transform.SetParent(shipGo.transform);
             moduleGo.AddComponent<SpriteRenderer>();
-            var rb2d = moduleGo.AddComponent<Rigidbody2D>();
-            rb2d.bodyType = RigidbodyType2D.Dynamic;
-            rb2d.gravityScale = 0f;
+            var rb2D = moduleGo.AddComponent<Rigidbody2D>();
+            rb2D.bodyType = RigidbodyType2D.Dynamic;
+            rb2D.gravityScale = 0f;
             moduleGo.AddComponent<PolygonCollider2D>();
             var pixelatedRb = moduleGo.AddComponent<PixelatedRigidbody>();
             _container.Inject(pixelatedRb);
@@ -247,9 +247,9 @@ namespace Ships.Tests
             var commandGo = new GameObject("Command");
             commandGo.transform.SetParent(shipGo.transform);
             commandGo.AddComponent<SpriteRenderer>();
-            var cmdRb2d = commandGo.AddComponent<Rigidbody2D>();
-            cmdRb2d.bodyType = RigidbodyType2D.Dynamic;
-            cmdRb2d.gravityScale = 0f;
+            var cmdRb2D = commandGo.AddComponent<Rigidbody2D>();
+            cmdRb2D.bodyType = RigidbodyType2D.Dynamic;
+            cmdRb2D.gravityScale = 0f;
             commandGo.AddComponent<PolygonCollider2D>();
             var commandPixelatedRb = commandGo.AddComponent<PixelatedRigidbody>();
             _container.Inject(commandPixelatedRb);
@@ -286,11 +286,11 @@ namespace Ships.Tests
 
             Assert.IsNotNull(newPixelatedRb, "Should find a non-command module's PixelatedRigidbody after apply");
 
-            Assert.IsFalse(newPixelatedRb.PixelGrid.IsPixel(new Vector2Int(0, 0)),
+            Assert.IsFalse(newPixelatedRb.TexturePixelGrid.IsPixel(new Vector2Int(0, 0)),
                 "Pixel (0,0) was removed before capture — must stay removed after round-trip, not be restored by sprite");
-            Assert.IsFalse(newPixelatedRb.PixelGrid.IsPixel(new Vector2Int(3, 3)),
+            Assert.IsFalse(newPixelatedRb.TexturePixelGrid.IsPixel(new Vector2Int(3, 3)),
                 "Pixel (3,3) was removed before capture — must stay removed after round-trip, not be restored by sprite");
-            Assert.IsTrue(newPixelatedRb.PixelGrid.IsPixel(new Vector2Int(1, 1)),
+            Assert.IsTrue(newPixelatedRb.TexturePixelGrid.IsPixel(new Vector2Int(1, 1)),
                 "Pixel (1,1) was intact — must still be set after round-trip");
 
             Object.DestroyImmediate(shipGo);
@@ -465,7 +465,7 @@ namespace Ships.Tests
             snapshot.connections.Add(conn);
 
             var json = _service.ToJson(snapshot);
-            var restored = _service.FromJson(json);
+            var restored = ShipSnapshotService.FromJson(json);
 
             Assert.AreEqual("MyShip", restored.shipName);
             Assert.AreEqual(0, restored.commandModuleIndex);
@@ -526,7 +526,7 @@ namespace Ships.Tests
                 ""commandModuleIndex"": 0
             }";
 
-            var snapshot = _service.FromJson(json);
+            var snapshot = ShipSnapshotService.FromJson(json);
 
             Assert.AreEqual("TinyShip", snapshot.shipName);
             Assert.AreEqual(1, snapshot.modules.Count);
@@ -607,7 +607,7 @@ namespace Ships.Tests
                 ""commandModuleIndex"": 0
             }";
 
-            var snapshot = _service.FromJson(json);
+            var snapshot = ShipSnapshotService.FromJson(json);
 
             Assert.AreEqual("DualShip", snapshot.shipName);
             Assert.AreEqual(2, snapshot.modules.Count);
@@ -661,7 +661,7 @@ namespace Ships.Tests
             original.commandModuleIndex = 0;
 
             var json = _service.ToJson(original);
-            var restored = _service.FromJson(json);
+            var restored = ShipSnapshotService.FromJson(json);
 
             Assert.AreEqual(original.shipName, restored.shipName);
             Assert.AreEqual(original.commandModuleIndex, restored.commandModuleIndex);
@@ -707,7 +707,7 @@ namespace Ships.Tests
             snapshot.modules[3].pixelGrid.SetPixel(0, 0, new Color32(4, 4, 4, 255));
 
             var json = _service.ToJson(snapshot);
-            var restored = _service.FromJson(json);
+            var restored = ShipSnapshotService.FromJson(json);
 
             Assert.AreEqual(4, restored.modules.Count);
             Assert.AreEqual(nameof(Command), restored.modules[0].moduleTypeName);
@@ -734,7 +734,7 @@ namespace Ships.Tests
 
             var snapshot = _service.CaptureSnapshot(ship);
             var json = _service.ToJson(snapshot);
-            var restored = _service.FromJson(json);
+            var restored = ShipSnapshotService.FromJson(json);
 
             var pg = restored.modules[snapshot.commandModuleIndex].pixelGrid;
             Assert.AreEqual(2, pg.width);
@@ -757,13 +757,13 @@ namespace Ships.Tests
 
             var snapshot = _service.CaptureSnapshot(ship);
             var json = _service.ToJson(snapshot);
-            var fromJson = _service.FromJson(json);
+            var fromJson = ShipSnapshotService.FromJson(json);
 
             _service.ApplySnapshot(ship, fromJson);
 
             var cmdModule = ship.GetComponentInChildren<Command>();
             Assert.IsNotNull(cmdModule);
-            var grid = cmdModule.PixelatedRigidbody.PixelGrid;
+            var grid = cmdModule.PixelatedRigidbody.TexturePixelGrid;
 
             for (var x = 0; x < 3; x++)
             for (var y = 0; y < 3; y++)
@@ -793,11 +793,11 @@ namespace Ships.Tests
 
             var snapshot = _service.CaptureSnapshot(ship);
             var json = _service.ToJson(snapshot);
-            var fromJson = _service.FromJson(json);
+            var fromJson = ShipSnapshotService.FromJson(json);
             _service.ApplySnapshot(ship, fromJson);
 
             var newCmd = ship.GetComponentInChildren<Command>();
-            var grid = newCmd.PixelatedRigidbody.PixelGrid;
+            var grid = newCmd.PixelatedRigidbody.TexturePixelGrid;
 
             Assert.IsFalse(grid.IsPixel(new Vector2Int(0, 0)), "(0,0) was removed, must stay removed");
             Assert.IsFalse(grid.IsPixel(new Vector2Int(3, 3)), "(3,3) was removed, must stay removed");
@@ -823,7 +823,7 @@ namespace Ships.Tests
             Assert.AreEqual(3, snapshot.modules.Count, "Should capture 3 modules");
 
             var json = _service.ToJson(snapshot);
-            var fromJson = _service.FromJson(json);
+            var fromJson = ShipSnapshotService.FromJson(json);
 
             Assert.AreEqual(3, fromJson.modules.Count, "JSON round-trip should preserve 3 modules");
 
@@ -881,13 +881,13 @@ namespace Ships.Tests
                 ""commandModuleIndex"": 0
             }";
 
-            var snapshot = _service.FromJson(json);
+            var snapshot = ShipSnapshotService.FromJson(json);
             _service.ApplySnapshot(ship, snapshot);
 
             var cmd = ship.GetComponentInChildren<Command>();
             Assert.IsNotNull(cmd, "Command module should exist after apply");
 
-            var grid = cmd.PixelatedRigidbody.PixelGrid;
+            var grid = cmd.PixelatedRigidbody.TexturePixelGrid;
             var c00 = grid.GetValue(new Vector2Int(0, 0));
             Assert.AreEqual(10, c00.r, "Pixel (0,0) R should be 10 from JSON, not 99 from original");
             Assert.AreEqual(20, c00.g);
@@ -921,7 +921,7 @@ namespace Ships.Tests
 
             var snapshot = _service.CaptureSnapshot(ship);
             var json = _service.ToJson(snapshot);
-            var restored = _service.FromJson(json);
+            var restored = ShipSnapshotService.FromJson(json);
 
             var offsetMs =
                 restored.modules.AsValueEnumerable().FirstOrDefault(ms => ms.moduleName == "OffsetModule");
@@ -949,11 +949,11 @@ namespace Ships.Tests
 
             var snapshot = _service.CaptureSnapshot(ship);
             var json = _service.ToJson(snapshot);
-            var restored = _service.FromJson(json);
+            var restored = ShipSnapshotService.FromJson(json);
 
             _service.ApplySnapshot(ship, restored);
 
-            var grid = ship.GetComponentInChildren<Command>().PixelatedRigidbody.PixelGrid;
+            var grid = ship.GetComponentInChildren<Command>().PixelatedRigidbody.TexturePixelGrid;
 
             for (var x = 0; x < 4; x++)
             for (var y = 0; y < 4; y++)
@@ -1020,7 +1020,7 @@ namespace Ships.Tests
 
             var snapshot = _service.CaptureSnapshot(ship);
             var json = _service.ToJson(snapshot);
-            var restored = _service.FromJson(json);
+            var restored = ShipSnapshotService.FromJson(json);
 
             var cmdSnap = restored.modules[restored.commandModuleIndex];
             Assert.AreEqual(200f, cmdSnap.resources.energyCapacity, 0.001f);

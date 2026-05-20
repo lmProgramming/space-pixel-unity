@@ -5,6 +5,8 @@ namespace Ships.Modules
 {
     public class Command : Module
     {
+        public override ModuleType Type => ModuleType.Command;
+
         protected override void Awake()
         {
             base.Awake();

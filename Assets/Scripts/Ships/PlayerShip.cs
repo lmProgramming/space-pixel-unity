@@ -11,10 +11,17 @@ namespace Ships
         [SerializeField] private bool sasEnabled = true;
         [SerializeField] private KeyCode sasToggleKey = KeyCode.T;
 
+        public bool SasEnabled => sasEnabled;
+
+        public void ToggleSas()
+        {
+            sasEnabled = !sasEnabled;
+        }
+
         protected override void Move()
         {
             if (Input.GetKeyDown(sasToggleKey))
-                sasEnabled = !sasEnabled;
+                ToggleSas();
 
             var forwardInput = Input.GetAxis("Vertical") * speedMultiplier;
             var turnInput = Input.GetAxis("Horizontal") * rotationMultiplier;

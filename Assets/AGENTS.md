@@ -7,10 +7,10 @@ This game aims to be a bit similar to Highfleet, but expands on it by making ind
 
 Code quality is important. You can write comments, but 99% of comments should be deleted and code extracted to methods before presenting your work as done. Long method names are totally okay, as long as they are descriptive
 If a component/anything is necessary for the script, don't silently fail, fail hard with an error!
-Periodically check for errors - it sometimes takes a bit of time to auto compile .cs files after you write them
+Periodically check for errors by calling tools - it sometimes takes a bit of time to auto compile .cs files after you write them
 This project uses assemblies, so if you want to use code from other assembly, double check if you should. If you should, write the code as if you used the assembly and after compiling and seeing errors, just please let me know in the chat. I will link them manually in my IDE
 Don't manually create or edit .meta files (including by automated agents) — let Unity generate them, and only commit the .meta files Unity creates.
-Do a quick code review before handing off as "done", thanks!
+Do not use "Bootstrappers" - scripts that generate scenes or load resources dynamically. Rather, present me with a guide how can I manually integrate your changes, thanks!
 
 ## Gotchas
 
@@ -31,7 +31,7 @@ All of the physically destructible objects are/inherit from PixelatedRigidbody.
 
 Ship is the base class for ship, with PlayerShip and AIShip inheriting from it. AIShip has state machines: behaviour and navigation.
 
-UI = UIToolkit
+UI = UIToolkit with custom DesignSystem - for all UI work, refer to Assets/DesignSystem/Docs/COMPONENTS.md. Always create dedicated UXML assets, instead of runtime-built VisualElements. DesignSystem (DS) should handle 90% of styling already
 
 ### Assemblies
 

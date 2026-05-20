@@ -1,4 +1,5 @@
 using System;
+using Core;
 using Core.Gameplay.EasyTeam;
 using Core.Pixelation;
 using Core.Services;
@@ -11,10 +12,9 @@ namespace Services
 {
     public class MissionService : MonoBehaviour, IMissionService
     {
-        public const string PlayerShipId = "PlayerShip";
         private bool _missionOver;
 
-        [Inject(Id = PlayerShipId)]
+        [Inject(Id = Constants.PlayerShipId)]
         private IShip _playerShip;
 
         private ITeam _playerTeam;

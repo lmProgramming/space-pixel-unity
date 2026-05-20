@@ -8,7 +8,7 @@ namespace ShipFactory
 {
     public class ModulePaletteController
     {
-        private const string ActiveTabClass = "palette-tab--active";
+        private const string ActiveTabClass = "is-active";
         private const string DraggingCardClass = "module-card--dragging";
         private readonly ModulePrefabLibrary _library;
 

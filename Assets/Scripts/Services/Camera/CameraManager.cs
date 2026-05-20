@@ -18,6 +18,8 @@ namespace Services.Camera
         [SerializeField] private float maxZoom = 10f;
         [SerializeField] private float minZoom = 1f;
 
+        [SerializeField] private bool canZoomOnUI = true;
+
         public bool updateCamera = true;
 
         private UnityEngine.Camera _mainCamera;
@@ -123,7 +125,7 @@ namespace Services.Camera
 
         private void ProcessZoom()
         {
-            if (GameInput.IsPointerOverUI)
+            if (!canZoomOnUI && GameInput.IsPointerOverUI)
                 return;
 
             var zoomIncrement = IsMobile ? GetMobileZoomIncrement() : -Input.GetAxis("Mouse ScrollWheel");

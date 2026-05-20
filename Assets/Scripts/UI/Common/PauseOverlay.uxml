@@ -1,0 +1,13 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <ui:VisualElement name="pause-overlay"
+                      style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; align-items: center; justify-content: center; background-color: rgba(0,0,0,184); display: none;">
+        <ui:VisualElement name="pause-dialog" class="ds-dialog" style="width: 420px; max-width: 90%;">
+            <ui:Label name="pause-title" text="Paused" class="ds-dialog__title" style="margin-bottom: 16px;"/>
+            <ui:Button name="pause-resume-button" text="Resume" class="ds-btn ds-btn--primary ds-btn--block"
+                       style="margin-bottom: 8px;"/>
+            <ui:Button name="pause-settings-button" text="Settings" class="ds-btn ds-btn--secondary ds-btn--block"
+                       style="margin-bottom: 8px;"/>
+            <ui:Button name="pause-quit-button" text="Quit" class="ds-btn ds-btn--danger ds-btn--block"/>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

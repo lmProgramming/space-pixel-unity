@@ -26,17 +26,17 @@ namespace Editor.Standalone
 
             var pixelPoint = pixelated.WorldToLocalPixel(GameInput.WorldPointerPosition);
 
-            if (pixelated.PixelGrid.InBounds(pixelPoint)) pixelated.RemovePixelAt(pixelPoint);
+            if (pixelated.TexturePixelGrid.InBounds(pixelPoint)) pixelated.RemovePixelAt(pixelPoint);
 
             if (!Input.GetKey(KeyCode.RightShift)) return;
 
-            if (pixelated.PixelGrid.InBounds(pixelPoint + Vector2Int.left))
+            if (pixelated.TexturePixelGrid.InBounds(pixelPoint + Vector2Int.left))
                 pixelated.RemovePixelAt(pixelPoint + Vector2Int.left);
-            if (pixelated.PixelGrid.InBounds(pixelPoint + Vector2Int.right))
+            if (pixelated.TexturePixelGrid.InBounds(pixelPoint + Vector2Int.right))
                 pixelated.RemovePixelAt(pixelPoint + Vector2Int.right);
-            if (pixelated.PixelGrid.InBounds(pixelPoint + Vector2Int.down))
+            if (pixelated.TexturePixelGrid.InBounds(pixelPoint + Vector2Int.down))
                 pixelated.RemovePixelAt(pixelPoint + Vector2Int.down);
-            if (pixelated.PixelGrid.InBounds(pixelPoint + Vector2Int.up))
+            if (pixelated.TexturePixelGrid.InBounds(pixelPoint + Vector2Int.up))
                 pixelated.RemovePixelAt(pixelPoint + Vector2Int.up);
         }
 #endif

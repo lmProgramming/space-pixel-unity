@@ -1,12 +1,11 @@
-/* ===== Ship Factory UI - Modern Sci-Fi Theme ===== */
+/* ===== Ship Factory UI ===== */
 
-/* ---------- Global Variables & Root ---------- */
+/* ---------- Global Layout ---------- */
 :root {
     flex-direction: column;
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0);
-    /* Font family can be set here if you have a custom sci-fi font */
 }
 
 /* ---------- Top bar ---------- */
@@ -15,17 +14,13 @@
     align-items: center;
     height: 56px;
     padding: 8px 16px;
-    background-color: rgba(10, 14, 20, 0.95);
+    background-color: var(--color-surface-elev);
     border-bottom-width: 1px;
-    border-bottom-color: rgba(0, 229, 255, 0.3); /* Neon Cyan subtle border */
+    border-bottom-color: var(--color-border);
     flex-shrink: 0;
 }
 
 .top-bar-label {
-    color: #ffffff;
-    font-size: 20px;
-    -unity-font-style: bold;
-    letter-spacing: 1px;
     margin-right: 16px;
 }
 
@@ -38,58 +33,8 @@
     margin-right: 12px;
 }
 
-.ship-name-field .unity-base-text-field__label {
-    color: #8ab4f8;
-    min-width: 46px;
-    font-size: 14px;
-}
-
-.ship-name-field .unity-base-text-field__input {
-    background-color: rgba(20, 28, 40, 0.8);
-    border-color: rgba(138, 180, 248, 0.4);
-    border-width: 1px;
-    border-radius: 4px;
-    color: #e8f0fe;
-    padding: 4px 8px;
-    font-size: 14px;
-}
-
 .save-ship-button {
-    height: 32px;
-    padding: 0 20px;
-    background-color: rgba(0, 140, 255, 0.2);
-    border-color: #00aaff;
-    border-width: 1px;
-    border-radius: 4px;
-    color: #e8f0fe;
-    font-size: 14px;
-    -unity-font-style: bold;
-    transition-duration: 0.2s;
-}
-
-.save-ship-button:hover {
-    background-color: rgba(0, 170, 255, 0.4);
-    border-color: #00e5ff;
-    color: #ffffff;
-}
-
-.zoom-button {
-    width: 32px;
-    height: 32px;
     margin-left: 8px;
-    background-color: rgba(20, 28, 40, 0.8);
-    color: #8ab4f8;
-    border-color: rgba(138, 180, 248, 0.4);
-    border-width: 1px;
-    border-radius: 4px;
-    font-size: 18px;
-    -unity-text-align: middle-center;
-    transition-duration: 0.2s;
-}
-
-.zoom-button:hover {
-    background-color: rgba(138, 180, 248, 0.2);
-    color: #ffffff;
 }
 
 /* ---------- Canvas Area ---------- */
@@ -105,90 +50,18 @@
     background-color: rgba(0, 0, 0, 0);
 }
 
-/* ---------- Placed Module Overlays ---------- */
-.placed-module {
-    position: absolute;
-    background-color: rgba(0, 0, 0, 0);
-    border-color: rgba(255, 255, 255, 0.15);
-    border-width: 1px;
-    border-radius: 2px;
-    align-items: center;
-    justify-content: center;
-    transition-duration: 0.15s;
-}
-
-.placed-module:hover {
-    background-color: rgba(0, 229, 255, 0.1);
-    border-color: #00e5ff;
-}
-
-.placed-module--selected {
-    background-color: rgba(255, 180, 0, 0.15);
-    border-color: #ffb400;
-    border-width: 2px;
-}
-
-.placed-module--inside-other {
-    background-color: rgba(255, 50, 50, 0.3);
-    border-color: #ff3232;
-    border-width: 2px;
-}
-
-.placed-module--outside-ship {
-    background-color: rgba(255, 100, 50, 0.2);
-    border-color: #ff6432;
-}
-
-.placed-module-label {
-    color: rgba(255, 255, 255, 0.8);
-    font-size: 14px;
-    -unity-text-align: middle-center;
-    -unity-font-style: bold;
-    white-space: normal;
-    overflow: hidden;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
-}
-
 /* ---------- Bottom Palette Panel ---------- */
 .palette-panel {
     height: 180px;
     flex-direction: column;
-    background-color: rgba(12, 16, 24, 0.98);
+    background-color: var(--color-surface-elev);
     border-top-width: 1px;
-    border-top-color: rgba(138, 180, 248, 0.3);
+    border-top-color: var(--color-border);
     flex-shrink: 0;
 }
 
 .palette-tabs {
     flex-direction: row;
-    height: 40px;
-    background-color: rgba(8, 12, 18, 1);
-}
-
-.palette-tab {
-    flex-grow: 1;
-    height: 100%;
-    background-color: transparent;
-    color: #8ab4f8;
-    border-width: 0;
-    border-bottom-width: 2px;
-    border-bottom-color: transparent;
-    border-radius: 0;
-    font-size: 14px;
-    -unity-text-align: middle-center;
-    transition-duration: 0.2s;
-}
-
-.palette-tab:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-    color: #e8f0fe;
-}
-
-.palette-tab--active {
-    color: #00e5ff;
-    border-bottom-color: #00e5ff;
-    -unity-font-style: bold;
-    background-color: rgba(0, 229, 255, 0.05);
 }
 
 .palette-scroll {
@@ -251,74 +124,33 @@
     width: 320px;
     min-height: 150px;
     padding: 16px;
-    background-color: rgba(12, 16, 24, 0.9);
-    border-left-width: 3px;
-    border-left-color: #00e5ff; /* HUD accent line */
-    border-top-width: 1px;
-    border-top-color: rgba(255, 255, 255, 0.1);
-    border-right-width: 1px;
-    border-right-color: rgba(255, 255, 255, 0.1);
-    border-bottom-width: 1px;
-    border-bottom-color: rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
+    background-color: var(--color-surface);
+    border-width: 1px;
+    border-color: var(--color-border);
+    border-radius: var(--radius-lg);
 }
 
 .module-info-name {
-    color: #ffffff;
-    font-size: 18px;
-    -unity-font-style: bold;
     margin-bottom: 4px;
 }
 
-.module-info-title, .module-info-field {
-    color: #8ab4f8;
-    font-size: 13px;
+.module-info-title {
     margin-bottom: 2px;
 }
 
 .module-info-description {
-    color: #bdc1c6;
-    font-size: 12px;
     margin-top: 8px;
     margin-bottom: 12px;
     white-space: normal;
 }
 
-/* Foldouts */
 .module-info-foldout {
     margin-bottom: 8px;
-    border-top-width: 1px;
-    border-top-color: rgba(255, 255, 255, 0.1);
     padding-top: 4px;
 }
 
-.module-info-foldout > .unity-foldout__toggle {
-    color: #e8f0fe;
-    -unity-font-style: bold;
-    font-size: 13px;
-}
-
-.module-info-foldout .unity-foldout__text {
-    color: #bdc1c6;
-    font-size: 12px;
-}
-
 .remove-module-button {
-    height: 28px;
-    margin-top: 12px;
-    background-color: rgba(220, 50, 50, 0.15);
-    border-color: #ff4a4a;
-    border-width: 1px;
-    border-radius: 4px;
-    color: #ffc4c4;
-    font-size: 13px;
-    -unity-font-style: bold;
-    transition-duration: 0.2s;
-}
-
-.remove-module-button:hover {
-    background-color: #ff4a4a;
-    color: #ffffff;
+    margin-top: 24px;
 }
 
 .remove-module-button--hidden {
@@ -332,22 +164,13 @@
     bottom: 200px;
     width: 280px;
     padding: 16px;
-    background-color: rgba(12, 16, 24, 0.9);
-    border-right-width: 3px;
-    border-right-color: #00e5ff;
-    border-top-width: 1px;
-    border-top-color: rgba(255, 255, 255, 0.1);
-    border-left-width: 1px;
-    border-left-color: rgba(255, 255, 255, 0.1);
-    border-bottom-width: 1px;
-    border-bottom-color: rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
+    background-color: var(--color-surface);
+    border-width: 1px;
+    border-color: var(--color-border);
+    border-radius: var(--radius-lg);
 }
 
 .ship-resources-title {
-    color: #ffffff;
-    font-size: 16px;
-    -unity-font-style: bold;
     margin-bottom: 12px;
 }
 
@@ -356,18 +179,16 @@
 }
 
 .ship-resource-label {
-    color: #8ab4f8;
-    font-size: 13px;
     margin-bottom: 4px;
 }
 
 .ship-resource-bar-track {
     position: relative;
     height: 8px;
-    background-color: rgba(0, 0, 0, 0.5);
-    border-color: rgba(255, 255, 255, 0.1);
+    background-color: var(--color-surface);
     border-width: 1px;
-    border-radius: 4px;
+    border-color: var(--color-border);
+    border-radius: var(--radius-sm);
     overflow: hidden;
 }
 
@@ -384,7 +205,7 @@
 }
 
 .ship-resource-bar-fill--buffer {
-    background-color: #00ff66; /* Bright neon green for safe buffer */
+    background-color: #00ff66;
 }
 
 /* ---------- Input Blocker & Popups ---------- */
@@ -394,7 +215,7 @@
     top: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.3); /* Slight dim to show lock */
+    background-color: rgba(0, 0, 0, 0.3);
     display: none;
 }
 
@@ -403,42 +224,12 @@
     left: 50%;
     top: 80px;
     translate: -50% 0;
-    max-width: 400px;
-    padding: 12px 24px;
-    background-color: rgba(20, 30, 45, 0.95);
-    border-width: 1px;
-    border-radius: 6px;
     display: none;
-    border-bottom-width: 3px;
+    min-width: 0;
+    max-width: 600px;
 }
 
 .action-popup-label {
-    color: #ffffff;
-    -unity-font-style: bold;
-    font-size: 15px;
     -unity-text-align: middle-center;
     white-space: normal;
-}
-
-/* Default / Info level */
-.action-popup {
-    border-color: #00e5ff;
-}
-
-.action-popup--warning {
-    background-color: rgba(40, 30, 10, 0.95);
-    border-color: #ffb400;
-}
-
-.action-popup--warning .action-popup-label {
-    color: #ffe8b3;
-}
-
-.action-popup--error {
-    background-color: rgba(45, 15, 20, 0.95);
-    border-color: #ff4a4a;
-}
-
-.action-popup--error .action-popup-label {
-    color: #ffc4c4;
 }

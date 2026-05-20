@@ -1,0 +1,42 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/DesignSystem/Resources/UI/Styles/DesignSystem/DesignSystem.uss"/>
+    <ui:Template name="settingsOverlayTemplate" src="project://database/Assets/Scripts/UI/Common/SettingsOverlay.uxml"/>
+
+    <ui:VisualElement name="main-menu-root"
+                      style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; align-items: center; justify-content: center; background-color: rgba(13,20,31,255);">
+        <ui:VisualElement name="main-menu-panel" class="ds-modal" style="width: 520px; max-width: 520px;">
+            <ui:Label text="Space Pixel" class="ds-h1" style="unity-text-align: middle-center; margin-bottom: 4px;"/>
+            <ui:Label text="Main Menu" class="ds-body-1 ds-text-primary"
+                      style="unity-text-align: middle-center; margin-bottom: 12px; opacity: 0.9;"/>
+
+            <ui:Button name="start-button" text="Start" class="ds-btn ds-btn--primary ds-btn--block"
+                       style="margin-bottom: 8px;"/>
+            <ui:Button name="ship-factory-button" text="ShipFactory" class="ds-btn ds-btn--secondary ds-btn--block"
+                       style="margin-bottom: 8px;"/>
+            <ui:Button name="settings-button" text="Settings" class="ds-btn ds-btn--secondary ds-btn--block"
+                       style="margin-bottom: 8px;"/>
+            <ui:Button name="quit-button" text="Quit" class="ds-btn ds-btn--danger ds-btn--block"/>
+        </ui:VisualElement>
+
+        <ui:VisualElement name="ship-select-overlay"
+                          style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; align-items: center; justify-content: center; background-color: rgba(0,0,0,179); display: none;">
+            <ui:VisualElement name="ship-select-dialog" class="ds-dialog" style="width: 520px; max-width: 520px;">
+                <ui:Label text="Select Ship" class="ds-dialog__title"/>
+                <ui:DropdownField name="ship-dropdown" label="Snapshot" class="ds-dropdown"
+                                  style="margin-bottom: 8px; min-width: 450px;"/>
+                <ui:Label text="Saved snapshots come from ShipFactory." class="ds-body-2 ds-text-primary"
+                          style="margin-bottom: 8px; opacity: 0.9;"/>
+                <ui:VisualElement class="ds-dialog__actions">
+                    <ui:Button name="ship-select-cancel-button" text="Cancel" class="ds-btn ds-btn--secondary"/>
+                    <ui:Button name="ship-select-launch-button" text="Launch" class="ds-btn ds-btn--primary"/>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:VisualElement name="settings-overlay-host"
+                          style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; display: none;">
+            <ui:Instance template="settingsOverlayTemplate"
+                         style="position: absolute; left: 0; right: 0; top: 0; bottom: 0;"/>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

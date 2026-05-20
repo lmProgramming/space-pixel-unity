@@ -1,13 +1,18 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance"
          noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="ShipFactory.uss"/>
+    <Style src="project://database/Assets/DesignSystem/Resources/UI/Styles/DesignSystem/DesignSystem.uss"/>
+    <ui:Template name="pauseOverlayTemplate" src="project://database/Assets/Scripts/UI/Common/PauseOverlay.uxml"/>
+    <ui:Template name="settingsOverlayTemplate" src="project://database/Assets/Scripts/UI/Common/SettingsOverlay.uxml"/>
 
     <!-- Top bar -->
     <ui:VisualElement name="top-bar" class="top-bar">
-        <ui:Label name="ship-label" text="Ship Factory  —  drag a module onto the ship" class="top-bar-label"/>
+        <ui:Label name="ship-label" text="Ship Factory  —  drag a module onto the ship"
+                  class="top-bar-label ds-body-1"/>
         <ui:VisualElement class="spacer"/>
-        <ui:TextField name="ship-name-field" label="Name" value="Ship" class="ship-name-field" max-length="64"/>
-        <ui:Button name="save-ship-button" text="Save Snapshot" class="save-ship-button"/>
+        <ui:TextField name="ship-name-field" label="Name" value="Ship" class="ds-input ship-name-field"
+                      max-length="64"/>
+        <ui:Button name="save-ship-button" text="Save Snapshot" class="ds-btn ds-btn--primary save-ship-button"/>
     </ui:VisualElement>
 
     <!-- Canvas area: drag-and-drop surface -->
@@ -19,31 +24,32 @@
 
     <!-- Bottom-left details panel for dragged/selected modules -->
     <ui:VisualElement name="module-info-panel" class="module-info-panel">
-        <ui:Label text="Module Details" class="module-info-title"/>
-        <ui:Label name="module-info-name" text="No module selected" class="module-info-name"/>
-        <ui:Foldout name="module-info-main-foldout" text="Overview" class="module-info-foldout">
-            <ui:Label name="module-info-type" text="Type: -" class="module-info-field"/>
-            <ui:Label name="module-info-size" text="Size: -" class="module-info-field"/>
-            <ui:Label name="module-info-description" text="Hover or drag a module to inspect it."
-                      class="module-info-description"/>
-        </ui:Foldout>
-        <ui:Foldout name="module-info-resources-foldout" text="Resources" class="module-info-foldout">
-            <ui:Label name="module-info-resource-energy-production" text="Energy Production: -"
-                      class="module-info-field"/>
-            <ui:Label name="module-info-resource-energy-draw" text="Energy Draw: -" class="module-info-field"/>
-            <ui:Label name="module-info-resource-energy-capacity" text="Energy Capacity: -" class="module-info-field"/>
-            <ui:Label name="module-info-resource-crew-needed" text="Crew Needed: -" class="module-info-field"/>
-            <ui:Label name="module-info-resource-crew-quarters" text="Crew Quarters: -" class="module-info-field"/>
-        </ui:Foldout>
+        <ui:Label text="Module Details" class="module-info-title ds-h3"/>
+        <ui:Label name="module-info-name" text="No module selected" class="module-info-name ds-body-1"/>
+        <ui:Label name="module-info-type" text="Type: -" class="module-info-field ds-body-2"/>
+        <ui:Label name="module-info-size" text="Size: -" class="module-info-field ds-body-2"/>
+        <ui:Label name="module-info-description" text="Hover or drag a module to inspect it."
+                  class="module-info-description ds-body-2"/>
+        <ui:Label name="module-info-resource-energy-production" text="Energy Production: -"
+                  class="module-info-field ds-body-2"/>
+        <ui:Label name="module-info-resource-energy-draw" text="Energy Draw: -"
+                  class="module-info-field ds-body-2"/>
+        <ui:Label name="module-info-resource-energy-capacity" text="Energy Capacity: -"
+                  class="module-info-field ds-body-2"/>
+        <ui:Label name="module-info-resource-crew-needed" text="Crew Needed: -"
+                  class="module-info-field ds-body-2"/>
+        <ui:Label name="module-info-resource-crew-quarters" text="Crew Quarters: -"
+                  class="module-info-field ds-body-2"/>
         <ui:Button name="remove-module-button" text="Remove Module"
-                   class="remove-module-button remove-module-button--hidden"/>
+                   class="remove-module-button remove-module-button--hidden ds-btn ds-btn--danger"
+                   style="margin-top: 18px;"/>
     </ui:VisualElement>
 
     <!-- Bottom-right resources panel -->
     <ui:VisualElement name="ship-resources-panel" class="ship-resources-panel">
-        <ui:Label text="Ship Resources" class="ship-resources-title"/>
+        <ui:Label text="Ship Resources" class="ship-resources-title ds-h3"/>
         <ui:VisualElement class="ship-resource-row">
-            <ui:Label name="ship-resource-energy-label" text="Energy: -" class="ship-resource-label"/>
+            <ui:Label name="ship-resource-energy-label" text="Energy: -" class="ship-resource-label ds-body-2"/>
             <ui:VisualElement class="ship-resource-bar-track">
                 <ui:VisualElement name="ship-resource-energy-fill"
                                   class="ship-resource-bar-fill ship-resource-bar-fill--usage"/>
@@ -52,7 +58,7 @@
             </ui:VisualElement>
         </ui:VisualElement>
         <ui:VisualElement class="ship-resource-row">
-            <ui:Label name="ship-resource-crew-label" text="Crew: -" class="ship-resource-label"/>
+            <ui:Label name="ship-resource-crew-label" text="Crew: -" class="ship-resource-label ds-body-2"/>
             <ui:VisualElement class="ship-resource-bar-track">
                 <ui:VisualElement name="ship-resource-crew-fill"
                                   class="ship-resource-bar-fill ship-resource-bar-fill--usage"/>
@@ -65,11 +71,11 @@
     <!-- Bottom palette panel -->
     <ui:VisualElement name="palette-panel" class="palette-panel">
         <!-- Module type tab buttons -->
-        <ui:VisualElement name="palette-tabs" class="palette-tabs">
-            <ui:Button name="tab-Command" text="Command" class="palette-tab"/>
-            <ui:Button name="tab-Resources" text="Resources" class="palette-tab"/>
-            <ui:Button name="tab-Weapon" text="Weapon" class="palette-tab"/>
-            <ui:Button name="tab-Engine" text="Engine" class="palette-tab"/>
+        <ui:VisualElement name="palette-tabs" class="palette-tabs ds-tabs">
+            <ui:Button name="tab-Command" text="Command" class="palette-tab ds-tab is-active"/>
+            <ui:Button name="tab-Resources" text="Resources" class="palette-tab ds-tab"/>
+            <ui:Button name="tab-Weapon" text="Weapon" class="palette-tab ds-tab"/>
+            <ui:Button name="tab-Engine" text="Engine" class="palette-tab ds-tab"/>
         </ui:VisualElement>
 
         <!-- Module list for the selected type -->
@@ -86,8 +92,21 @@
     <ui:VisualElement name="drag-ghost" class="drag-ghost hidden" picking-mode="Ignore"/>
 
     <!-- Popup feedback for actions like blocked delete attempts -->
-    <ui:VisualElement name="action-popup" class="action-popup">
-        <ui:Label name="action-popup-label" class="action-popup-label"/>
+    <ui:VisualElement name="action-popup" class="action-popup ds-toast ds-toast--warning">
+        <ui:VisualElement class="ds-icon ds-icon--sm ds-icon--warning ds-toast__icon"/>
+        <ui:Label text="LOOOL" name="action-popup-label" class="ds-toast__message"/>
+    </ui:VisualElement>
+
+    <ui:VisualElement name="pause-overlay-host"
+                      style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; display: none;">
+        <ui:Instance template="pauseOverlayTemplate"
+                     style="position: absolute; left: 0; right: 0; top: 0; bottom: 0;"/>
+    </ui:VisualElement>
+
+    <ui:VisualElement name="settings-overlay-host"
+                      style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; display: none;">
+        <ui:Instance template="settingsOverlayTemplate"
+                     style="position: absolute; left: 0; right: 0; top: 0; bottom: 0;"/>
     </ui:VisualElement>
 </ui:UXML>
 

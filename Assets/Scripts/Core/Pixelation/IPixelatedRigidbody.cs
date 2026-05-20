@@ -10,7 +10,7 @@ namespace Core.Pixelation
         float MassMultiplier { get; }
         bool HasSprite { get; }
         Vector2 WeightedCenter { get; }
-        IPixelGrid PixelGrid { get; set; }
+        ITexturePixelGrid TexturePixelGrid { get; set; }
         IPixelCollisionHandler CollisionHandler { get; }
         Rigidbody2D Rigidbody { get; }
         SpriteRenderer SpriteRenderer { get; set; }

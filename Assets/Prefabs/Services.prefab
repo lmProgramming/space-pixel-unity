@@ -159,6 +159,7 @@ Transform:
   - {fileID: 1915667895679141724}
   - {fileID: 555606569669095793}
   - {fileID: 375311044477010568}
+  - {fileID: 7609549270592582794}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1874324338140894250
@@ -207,6 +208,50 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   <ProjectilesHolder>k__BackingField: {fileID: 0}
   instantiator: {fileID: 0}
+--- !u!1 &4672088879280202694
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7609549270592582794}
+  - component: {fileID: 7089449176851662191}
+  m_Layer: 0
+  m_Name: SkirmishSetup
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7609549270592582794
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4672088879280202694}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4556120524637556072}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7089449176851662191
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4672088879280202694}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d4282e20c6d341309875e6d4c48a0749, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Services::Services.SkirmishSetup
 --- !u!1 &5974959927986485287
 GameObject:
   m_ObjectHideFlags: 0

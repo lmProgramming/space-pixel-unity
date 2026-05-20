@@ -1,7 +1,7 @@
 import os
 import glob
 import random
-from PIL import Image
+from PIL import Image  # type: ignore[import-untyped]
 
 SAVE_DIR = "Assets/Sprites/Generated"
 READ_DIR = "sprite_generator/inputs"

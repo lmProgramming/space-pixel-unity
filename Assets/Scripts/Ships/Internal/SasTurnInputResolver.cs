@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using Ships.Modules;
 using UnityEngine;
-using Zenject;
 
 namespace Ships.Internal
 {

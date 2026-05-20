@@ -1,6 +1,7 @@
+using System.Collections.Generic;
 using Core.Gameplay.EasyTeam;
+using LMPro.DataStructures.Graph;
 using LMPro.External.IsAlive;
-using LMPro.Graph;
 using UnityEngine;
 
 namespace Core.Ship
@@ -14,9 +15,13 @@ namespace Core.Ship
         Graph<IModule> ModuleGraph { get; }
         Vector2 AttackTargetPosition { get; }
         float CaptainMultiplier { get; }
+        string Name { get; }
+        IReadOnlyList<IModule> AllModules { get; }
         Vector2 GetPosition();
         void OnModuleDestroyed(IModule module);
         void ManualAddModule(IModule module);
         void ManualRemoveModule(IModule module);
+        void DestroyAllModules();
+        void InitializeModules();
     }
 }

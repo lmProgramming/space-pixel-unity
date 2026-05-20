@@ -1,8 +1,9 @@
 using System;
 using System.IO;
 using System.Linq;
+using Core;
+using Core.Services;
 using Ships;
-using Ships.Serialization;
 using UnityEditor;
 using UnityEngine;
 using Zenject;
@@ -13,14 +14,8 @@ namespace Editor.InspectorExtensions
     [CustomEditor(typeof(Ship), true)]
     public class ShipSnapshotEditor : UnityEditor.Editor
     {
-        private static string DefaultSaveFolder => Path.Combine(Application.persistentDataPath, "ShipSnapshots");
-
-        private static IShipSnapshotService CreateSnapshotService()
-        {
-            if (!Application.isPlaying) return new ShipSnapshotService();
-            var sceneContext = FindAnyObjectByType<SceneContext>();
-            return sceneContext ? new ShipSnapshotService(sceneContext.Container) : new ShipSnapshotService();
-        }
+        [Inject]
+        private IShipSnapshotService _shipSnapshotService;
 
         public override void OnInspectorGUI()
         {
@@ -31,41 +26,49 @@ namespace Editor.InspectorExtensions
 
             var ship = (Ship)target;
 
+            EditorGUI.BeginDisabledGroup(!Application.isPlaying);
             if (GUILayout.Button("Capture Snapshot to JSON")) CaptureAndSaveSnapshot(ship);
 
-            EditorGUI.BeginDisabledGroup(!Application.isPlaying);
             if (GUILayout.Button("Load Snapshot from JSON")) LoadSnapshotOntoShip(ship);
             EditorGUI.EndDisabledGroup();
 
             if (!Application.isPlaying)
-                EditorGUILayout.HelpBox("Loading snapshots is only available in Play Mode.", MessageType.Info);
+                EditorGUILayout.HelpBox("Loading and capturing snapshots is only available in Play Mode.",
+                    MessageType.Info);
 
             EditorGUILayout.Space(5);
 
             if (!GUILayout.Button("Open Snapshots Folder")) return;
 
             EnsureSnapshotFolderExists();
-            EditorUtility.RevealInFinder(DefaultSaveFolder);
+            EditorUtility.RevealInFinder(Constants.DefaultSaveFolder);
         }
 
-        private static void CaptureAndSaveSnapshot(Ship ship)
+        private void CaptureAndSaveSnapshot(Ship ship)
         {
-            var snapshotService = CreateSnapshotService();
-            var snapshot = snapshotService.CaptureSnapshot(ship);
+            if (!Application.isPlaying)
+            {
+                Debug.LogError("[ShipSnapshotEditor] Capturing snapshots is only supported in Play Mode.");
+                return;
+            }
+
+            ProjectContext.Instance.Container.Inject(this);
+
+            var snapshot = _shipSnapshotService.CaptureSnapshot(ship);
             if (snapshot == null)
             {
                 Debug.LogError("[ShipSnapshotEditor] Failed to capture snapshot");
                 return;
             }
 
-            var json = snapshotService.ToJson(snapshot);
+            var json = _shipSnapshotService.ToJson(snapshot);
 
             EnsureSnapshotFolderExists();
 
             var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
             var sanitizedName = SanitizeFileName(ship.name);
             var filename = $"{sanitizedName}_{timestamp}.json";
-            var fullPath = Path.Combine(DefaultSaveFolder, filename);
+            var fullPath = Path.Combine(Constants.DefaultSaveFolder, filename);
 
             File.WriteAllText(fullPath, json);
             AssetDatabase.Refresh();
@@ -74,7 +77,7 @@ namespace Editor.InspectorExtensions
             EditorGUIUtility.PingObject(AssetDatabase.LoadAssetAtPath<Object>(fullPath));
         }
 
-        private static void LoadSnapshotOntoShip(Ship ship)
+        private void LoadSnapshotOntoShip(Ship ship)
         {
             if (!Application.isPlaying)
             {
@@ -82,13 +85,13 @@ namespace Editor.InspectorExtensions
                 return;
             }
 
-            var path = EditorUtility.OpenFilePanel("Load Ship Snapshot", DefaultSaveFolder, "json");
+            ProjectContext.Instance.Container.Inject(this);
+
+            var path = EditorUtility.OpenFilePanel("Load Ship Snapshot", Constants.DefaultSaveFolder, "json");
 
             if (string.IsNullOrEmpty(path)) return;
 
-            var json = File.ReadAllText(path);
-            var snapshotService = CreateSnapshotService();
-            var snapshot = snapshotService.FromJson(json);
+            var snapshot = _shipSnapshotService.LoadSnapshotFromFile(path);
 
             if (snapshot == null)
             {
@@ -96,12 +99,13 @@ namespace Editor.InspectorExtensions
                 return;
             }
 
-            snapshotService.ApplySnapshot(ship, snapshot);
+            _shipSnapshotService.ApplySnapshot(ship, snapshot);
+            ship.InitializeModules();
         }
 
         private static void EnsureSnapshotFolderExists()
         {
-            if (!Directory.Exists(DefaultSaveFolder)) Directory.CreateDirectory(DefaultSaveFolder);
+            if (!Directory.Exists(Constants.DefaultSaveFolder)) Directory.CreateDirectory(Constants.DefaultSaveFolder);
         }
 
         private static string SanitizeFileName(string name)

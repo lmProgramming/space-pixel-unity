@@ -1,6 +1,6 @@
 using System.Collections.Generic;
+using Core.Ship;
 using Pixelation;
-using Ships.Modules;
 
 namespace Ships.Serialization
 {
@@ -8,8 +8,8 @@ namespace Ships.Serialization
     {
         public static void DetectAndCaptureConnections(
             ShipSnapshot snapshot,
-            Module[] modules,
-            Dictionary<Module, int> moduleToIndex)
+            IModule[] modules,
+            Dictionary<IModule, int> moduleToIndex)
         {
             for (var i = 0; i < modules.Length - 1; i++)
             for (var j = i + 1; j < modules.Length; j++)

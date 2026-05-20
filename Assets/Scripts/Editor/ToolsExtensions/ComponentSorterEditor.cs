@@ -30,14 +30,10 @@ namespace Editor.ToolsExtensions
         [MenuItem("Tools/Sort Components in All GameObjects")]
         private static void SortAllComponents()
         {
-            var allObjects = FindObjectsByType<GameObject>(FindObjectsSortMode.None);
-            var sortedCount = 0;
-
-            foreach (var obj in allObjects)
-            {
-                if (PrefabUtility.IsPartOfAnyPrefab(obj)) continue;
-                if (SortComponents(obj)) sortedCount++;
-            }
+            var allObjects = FindObjectsByType<GameObject>();
+            var sortedCount = allObjects.AsValueEnumerable()
+                .Where(obj => !PrefabUtility.IsPartOfAnyPrefab(obj))
+                .Count(SortComponents);
 
             Debug.Log($"Components sorted for {sortedCount} GameObjects.");
         }

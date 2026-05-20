@@ -105,7 +105,7 @@ namespace Ships.Modules
         public IPixelatedRigidbody PixelatedRigidbody { get; private set; }
 
         public Transform Transform => transform;
-        public ModuleType Type { get; protected set; } = ModuleType.Resources;
+        public virtual ModuleType Type { get; protected set; } = ModuleType.Resources;
 
         public virtual int CrewNeededCount => Mathf.CeilToInt(Resources.crewNeeded);
 
@@ -226,7 +226,7 @@ namespace Ships.Modules
                 return;
             }
 
-            if (PixelatedRigidbody.PixelGrid == null || otherModule.PixelatedRigidbody.PixelGrid == null)
+            if (PixelatedRigidbody.TexturePixelGrid == null || otherModule.PixelatedRigidbody.TexturePixelGrid == null)
             {
                 Debug.LogError(
                     $"Cannot SetupConnections: PixelGrid not initialized on '{name}' or '{otherModule.name}'!", this);

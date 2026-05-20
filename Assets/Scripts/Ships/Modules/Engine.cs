@@ -19,6 +19,7 @@ namespace Ships.Modules
         private float _exhaustBaseRateOverDistanceMultiplier;
         private float _exhaustBaseRateOverTimeMultiplier;
         private float _exhaustBaseStartSpeedMultiplier;
+        public override ModuleType Type => ModuleType.Engine;
 
         internal float CurrentThrustRatioForTesting => _currentThrustRatio;
         private Vector2 ThrustPoint => exhaustParticles.transform.localPosition;
