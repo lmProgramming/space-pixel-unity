@@ -23,5 +23,6 @@ namespace Core.Ship
         void ManualRemoveModule(IModule module);
         void DestroyAllModules();
         void InitializeModules();
+        void SetTeam(ITeam newTeam);
     }
 }

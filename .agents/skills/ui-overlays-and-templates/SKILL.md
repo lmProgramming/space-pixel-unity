@@ -46,12 +46,12 @@ disable-model-invocation: true
 ### 5) Slider input fields
 
 - Put `show-input-field="true|false"` in UXML (declarative source of truth).
-- If enabled, style generated `TextField` from controller:
-  - add `ds-input`
-  - fixed width
-  - `alignSelf = Center`
-  - left margin
-- If DS colors are missing, first verify class assignment and theme USS import.
+- Use `class="ds-slider"` on the slider; styling is in Design System USS + runtime:
+  - Unity generates a nested **TextField** (`.unity-base-slider__text-field` under `.unity-base-field__input`)
+  - layout: `Controls.uss` (`.ds-slider .unity-base-slider__text-field`)
+  - input box: `Inputs.uss` + `DesignSystemRuntime.EnsureSliderInputFields` adds `ds-input`
+- Do not style the generated numeric field from screen controllers.
+- If DS colors are missing, verify `DesignSystem.uss` is imported on the `UIDocument` and inspect hierarchy with UI Toolkit Debugger.
 
 ## Layout Spacing Rule
 

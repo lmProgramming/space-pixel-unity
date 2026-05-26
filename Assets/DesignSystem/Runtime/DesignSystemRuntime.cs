@@ -32,6 +32,8 @@ namespace DesignSystem.Runtime
         private const string SpinnerActiveClass = "is-spinning";
         private const string ToggleClass = "ds-toggle";
         private const string ToggleKnobClass = "ds-toggle__knob";
+        private const string SliderClass = "ds-slider";
+        private const string InputClass = "ds-input";
         private const string SkeletonClass = "ds-skeleton";
         private const string ShimmerClass = "ds-skeleton__shimmer";
         private const string DropdownPopupStyleResource = "DesignSystemDropdownPopup";
@@ -101,6 +103,7 @@ namespace DesignSystem.Runtime
             EnsureDropdownPopupStyles(root);
             EnsureInteractiveCursorTexture(root);
             EnsureToggleKnobs(root);
+            EnsureSliderInputFields(root);
             EnsureSkeletonShimmers(root);
             StartSpinners(root);
 
@@ -118,6 +121,7 @@ namespace DesignSystem.Runtime
             {
                 EnsureInteractiveCursorTexture(root);
                 EnsureToggleKnobs(root);
+                EnsureSliderInputFields(root);
                 EnsureSkeletonShimmers(root);
             }).Every(250);
         }
@@ -245,6 +249,28 @@ namespace DesignSystem.Runtime
             RenderTexture.active = previousActive;
             RenderTexture.ReleaseTemporary(rt);
             return _runtimeCursorTexturePrepared;
+        }
+
+        /// <summary>
+        ///     Apply <c>ds-input</c> to the generated <c>TextField</c> inside
+        ///     <c>.ds-slider</c> when <c>show-input-field</c> is enabled. Unity
+        ///     nests it under <c>.unity-base-field__input</c> and tags it
+        ///     <c>unity-base-slider__text-field</c> (not authorable in UXML).
+        /// </summary>
+        public static void EnsureSliderInputFields(VisualElement root)
+        {
+            if (root == null) return;
+            const string sliderTextFieldClass = "unity-base-slider__text-field";
+            root.Query(className: SliderClass).ForEach(slider =>
+            {
+                slider.Query(className: sliderTextFieldClass).ForEach(ApplySliderInputClass);
+            });
+        }
+
+        private static void ApplySliderInputClass(VisualElement field)
+        {
+            if (!field.ClassListContains(InputClass))
+                field.AddToClassList(InputClass);
         }
 
         /// <summary>

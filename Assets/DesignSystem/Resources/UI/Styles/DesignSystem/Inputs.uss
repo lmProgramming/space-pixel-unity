@@ -23,7 +23,11 @@
 .ds-input .unity-text-input,
 .ds-input .unity-text-field__input,
 .ds-input .unity-base-text-field__input,
-.ds-input .unity-base-field__input {
+.ds-input .unity-base-field__input,
+.ds-slider .unity-base-slider__text-field .unity-text-input,
+.ds-slider .unity-base-slider__text-field .unity-text-field__input,
+.ds-slider .unity-base-slider__text-field .unity-base-text-field__input,
+.ds-slider .unity-base-slider__text-field .unity-base-field__input {
     background-color: var(--color-surface-elev);
     color: var(--color-text-primary);
     border-width: var(--border-thin);
@@ -46,13 +50,19 @@
 
 .ds-input .unity-text-input:hover,
 .ds-input .unity-text-field__input:hover,
-.ds-input .unity-base-text-field__input:hover {
+.ds-input .unity-base-text-field__input:hover,
+.ds-slider .unity-base-slider__text-field .unity-text-input:hover,
+.ds-slider .unity-base-slider__text-field .unity-text-field__input:hover,
+.ds-slider .unity-base-slider__text-field .unity-base-text-field__input:hover {
     border-color: var(--color-border-strong);
 }
 
 .ds-input .unity-text-input:focus,
 .ds-input .unity-text-field__input:focus,
-.ds-input .unity-base-text-field__input:focus {
+.ds-input .unity-base-text-field__input:focus,
+.ds-slider .unity-base-slider__text-field .unity-text-input:focus,
+.ds-slider .unity-base-slider__text-field .unity-text-field__input:focus,
+.ds-slider .unity-base-slider__text-field .unity-base-text-field__input:focus {
     border-color: var(--color-primary);
     background-color: var(--color-surface);
 }
@@ -71,7 +81,9 @@
 
 .ds-input:disabled .unity-text-input,
 .ds-input.is-disabled .unity-text-input,
-.ds-input:disabled .unity-text-field__input {
+.ds-input:disabled .unity-text-field__input,
+.ds-slider .unity-base-slider__text-field:disabled .unity-text-input,
+.ds-slider .unity-base-slider__text-field:disabled .unity-text-field__input {
     background-color: var(--color-surface);
     color: var(--color-text-disabled);
     border-color: var(--color-border);
@@ -191,6 +203,9 @@
 .ds-input .unity-base-field__label,
 .ds-input .unity-base-text-field__label,
 .ds-input .unity-text-field__label,
+.ds-slider .unity-base-slider__text-field .unity-base-field__label,
+.ds-slider .unity-base-slider__text-field .unity-base-text-field__label,
+.ds-slider .unity-base-slider__text-field .unity-text-field__label,
 .ds-search .unity-base-field__label,
 .ds-search .unity-base-text-field__label,
 .ds-search .unity-text-field__label,
