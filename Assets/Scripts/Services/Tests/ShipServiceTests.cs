@@ -1,10 +1,10 @@
 using System.Collections.Generic;
-using System.Linq;
 using Core.Gameplay.EasyTeam;
 using Core.Ship;
 using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
+using ZLinq;
 using Object = UnityEngine.Object;
 
 namespace Services.Tests
@@ -57,7 +57,7 @@ namespace Services.Tests
             _shipService.RegisterShip(ship);
 
             Assert.AreEqual(1, _shipService.GetShips().Count);
-            Assert.IsTrue(_shipService.GetShips().Contains(ship));
+            Assert.IsTrue(_shipService.GetShips().AsValueEnumerable().Contains(ship));
         }
 
         [Test]
@@ -79,7 +79,7 @@ namespace Services.Tests
             _shipService.RegisterShip(shipA);
             _shipService.RegisterShip(shipB);
 
-            var teamAShips = _shipService.GetShipsOfTeam(_teamA).ToList();
+            var teamAShips = _shipService.GetShipsOfTeam(_teamA).AsValueEnumerable().ToList();
 
             Assert.AreEqual(1, teamAShips.Count);
             Assert.Contains(shipA, teamAShips);
@@ -93,7 +93,7 @@ namespace Services.Tests
             _shipService.RegisterShip(shipA);
             _shipService.RegisterShip(shipB);
 
-            var enemies = _shipService.GetEnemyShipsOf(_teamA).ToList();
+            var enemies = _shipService.GetEnemyShipsOf(_teamA).AsValueEnumerable().ToList();
 
             Assert.AreEqual(1, enemies.Count);
             Assert.Contains(shipB, enemies);
@@ -107,7 +107,7 @@ namespace Services.Tests
             _shipService.RegisterShip(shipA);
             _shipService.RegisterShip(shipB);
 
-            var allies = _shipService.GetAlliedShipsOf(_teamA).ToList();
+            var allies = _shipService.GetAlliedShipsOf(_teamA).AsValueEnumerable().ToList();
 
             Assert.AreEqual(1, allies.Count);
             Assert.Contains(shipA, allies);
@@ -123,7 +123,7 @@ namespace Services.Tests
 
             _teamA.AddAlly(_teamB);
 
-            var allies = _shipService.GetAlliedShipsOf(_teamA).ToList();
+            var allies = _shipService.GetAlliedShipsOf(_teamA).AsValueEnumerable().ToList();
 
             Assert.AreEqual(2, allies.Count);
             Assert.Contains(shipA, allies);

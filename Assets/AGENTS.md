@@ -22,7 +22,7 @@ Do not use "Bootstrappers" - scripts that generate scenes or load resources dyna
 
 Prefer these over their standard-library equivalents:
 
-- **ZLinq** (`using ZLinq;`): use `.AsValueEnumerable()` instead of `System.Linq` for collection queries
+- **ZLinq** (`using ZLinq;`): use `.AsValueEnumerable()` instead of `System.Linq` for collection queries. It does not allocate memory
 - **UniTask** (`using Cysharp.Threading.Tasks;`): use `async UniTask` / `async UniTaskVoid` instead of `async Task` / `async void`
 - **Zenject** (`using Zenject;`): dependency injection — use `[Inject]` on private fields, register new services in `GameSceneInstaller`
 

@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-using System.Linq;
+using ZLinq;
 
 namespace ShipFactory.Serialization
 {
@@ -10,7 +10,8 @@ namespace ShipFactory.Serialization
         {
             var candidate = string.IsNullOrWhiteSpace(name) ? "Ship" : name.Trim();
             var invalidChars = Path.GetInvalidFileNameChars();
-            return invalidChars.Aggregate(candidate, (current, invalid) => current.Replace(invalid, '_'));
+            return invalidChars.AsValueEnumerable()
+                .Aggregate(candidate, (current, invalid) => current.Replace(invalid, '_'));
         }
 
         public static string GetNextCopyName(string baseName, Func<string, bool> nameExists)
@@ -33,4 +34,3 @@ namespace ShipFactory.Serialization
         }
     }
 }
-

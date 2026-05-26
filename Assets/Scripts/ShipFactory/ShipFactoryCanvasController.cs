@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using Core.Ship;
 using JetBrains.Annotations;
 using LMPro;
@@ -365,8 +364,8 @@ namespace ShipFactory
             var remainingBundles = _overlayManager.AllBundles.AsValueEnumerable()
                 .Where(bundle => bundle != bundleToRemove).ToList();
 
-            return remainingBundles.Count > 1 && remainingBundles
-                .Select(bundle => Calculator.CalculateLegalityPosition(bundle, remainingBundles)).AsValueEnumerable()
+            return remainingBundles.Count > 1 && remainingBundles.AsValueEnumerable()
+                .Select(bundle => Calculator.CalculateLegalityPosition(bundle, remainingBundles))
                 .Any(legality => legality != PositionLegality.Correct);
         }
 

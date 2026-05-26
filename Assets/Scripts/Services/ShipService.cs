@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Core.Gameplay.EasyTeam;
 using Core.Services;
 using Core.Ship;
@@ -6,6 +7,7 @@ using UnityEngine;
 
 namespace Services
 {
+    // uses Linq on purpose as ZLinq here doesn't make sense for method return types
     public class ShipService : MonoBehaviour, IShipService
     {
         private readonly HashSet<IShip> _ships = new();
@@ -27,23 +29,17 @@ namespace Services
 
         public IEnumerable<IShip> GetShipsOfTeam(ITeam team)
         {
-            foreach (var ship in _ships)
-                if (ship.Team == team)
-                    yield return ship;
+            return _ships.Where(ship => ship.Team == team);
         }
 
         public IEnumerable<IShip> GetEnemyShipsOf(ITeam team)
         {
-            foreach (var ship in _ships)
-                if (team.IsEnemy(ship.Team))
-                    yield return ship;
+            return _ships.Where(ship => team.IsEnemy(ship.Team));
         }
 
         public IEnumerable<IShip> GetAlliedShipsOf(ITeam team)
         {
-            foreach (var ship in _ships)
-                if (team.IsAllied(ship.Team))
-                    yield return ship;
+            return _ships.Where(ship => team.IsAllied(ship.Team));
         }
 
 

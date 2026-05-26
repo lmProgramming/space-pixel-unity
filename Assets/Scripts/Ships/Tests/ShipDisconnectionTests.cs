@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using Core.Pixelation;
 using Core.Ship;
 using NUnit.Framework;
@@ -11,6 +10,7 @@ using Ships.Tests.TestHelpers;
 using UnityEngine;
 using UnityEngine.TestTools;
 using Zenject;
+using ZLinq;
 using Module = Ships.Modules.Module;
 
 namespace Ships.Tests
@@ -244,11 +244,11 @@ namespace Ships.Tests
         /// <summary>
         ///     Gets the connection points between two modules.
         /// </summary>
-        private List<Vector2Int> GetConnectionPoints(Module from, Module to)
+        private static List<Vector2Int> GetConnectionPoints(Module from, Module to)
         {
-            if (from.ConnectionPoints.TryGetValue(to, out var points))
-                return points.ToList();
-            return new List<Vector2Int>();
+            return from.ConnectionPoints.TryGetValue(to, out var points)
+                ? points.AsValueEnumerable().ToList()
+                : new List<Vector2Int>();
         }
 
         /// <summary>
@@ -408,7 +408,7 @@ namespace Ships.Tests
             if (connectionPoints.Count < 2) Assert.Inconclusive("Need at least 2 connection points for this test");
 
             // Act: Destroy only SOME connection points (leave at least one)
-            var pointsToDestroy = connectionPoints.Take(connectionPoints.Count - 1).ToList();
+            var pointsToDestroy = connectionPoints.AsValueEnumerable().Take(connectionPoints.Count - 1).ToList();
             commandModule.PixelatedRigidbody.RemovePixels(pointsToDestroy);
 
             yield return null;
@@ -649,7 +649,7 @@ namespace Ships.Tests
             {
                 pixelsLostEvents.Add((new List<Vector2Int>(pixels), reason));
                 Debug.Log($"[Test] OnPixelsLost fired: reason={reason}, pixelCount={pixels.Count}, " +
-                          $"pixels=[{string.Join(", ", pixels.Take(20))}{(pixels.Count > 20 ? "..." : "")}]");
+                          $"pixels=[{string.Join(", ", pixels.AsValueEnumerable().Take(20))}{(pixels.Count > 20 ? "..." : "")}]");
             };
 
             cannonModule.PixelatedRigidbody.RemovePixels(slicePixels);
@@ -665,8 +665,10 @@ namespace Ships.Tests
             // We expect at least 2 events: one for Destroyed (the sliced pixels), one for Division
             Assert.IsTrue(pixelsLostEvents.Count >= 1, "At least one OnPixelsLost event should have fired");
 
-            var destroyedEvent = pixelsLostEvents.FirstOrDefault(e => e.reason == PixelLoseReason.Destroyed);
-            var divisionEvents = pixelsLostEvents.Where(e => e.reason == PixelLoseReason.Division).ToList();
+            var destroyedEvent = pixelsLostEvents.AsValueEnumerable()
+                .FirstOrDefault(e => e.reason == PixelLoseReason.Destroyed);
+            var divisionEvents = pixelsLostEvents.AsValueEnumerable().Where(e => e.reason == PixelLoseReason.Division)
+                .ToList();
 
             Assert.IsNotNull(destroyedEvent.pixels, "A Destroyed event should have fired for the sliced pixels");
             Debug.Log($"[Test] Destroyed event: {destroyedEvent.pixels.Count} pixels");
@@ -718,12 +720,13 @@ namespace Ships.Tests
                 // Division happened — check which pixels were in the division
                 foreach (var divEvt in divisionEvents)
                 {
-                    var divXValues = divEvt.pixels.Select(p => p.x).Distinct().OrderBy(x => x).ToList();
+                    var divXValues = divEvt.pixels.AsValueEnumerable().Select(p => p.x).Distinct().OrderBy(x => x)
+                        .ToList();
                     Debug.Log($"[Test] Division region x-values: [{string.Join(", ", divXValues)}], " +
                               $"pixel count: {divEvt.pixels.Count}");
 
                     // Check if connection points overlap with division pixels
-                    var connectionPointsInDivision = cannonToCommandPoints
+                    var connectionPointsInDivision = cannonToCommandPoints.AsValueEnumerable()
                         .Where(cp => divEvt.pixels.Contains(cp)).ToList();
                     Debug.Log("[Test] Connection points in this division region: " +
                               $"{connectionPointsInDivision.Count} of {cannonToCommandPoints.Count}");
@@ -807,7 +810,7 @@ namespace Ships.Tests
                 pixelsLostEvents.Add((new List<Vector2Int>(pixels), reason, frameCur));
                 Debug.Log($"[Test] Frame {frameCur}: OnPixelsLost reason={reason}, " +
                           $"count={pixels.Count}, " +
-                          $"x-values=[{string.Join(", ", pixels.Select(p => p.x).Distinct().OrderBy(x => x))}]");
+                          $"x-values=[{string.Join(", ", pixels.AsValueEnumerable().Select(p => p.x).Distinct().OrderBy(x => x))}]");
             };
 
             // --- Build the 30 pixels to remove (x=12,13,14 × y=0..9) ---
@@ -848,7 +851,8 @@ namespace Ships.Tests
             foreach (var evt in pixelsLostEvents)
                 Debug.Log($"[Test]   Frame {evt.frame}: reason={evt.reason}, count={evt.pixels.Count}");
 
-            var divisionEvents = pixelsLostEvents.Where(e => e.reason == PixelLoseReason.Division).ToList();
+            var divisionEvents = pixelsLostEvents.AsValueEnumerable().Where(e => e.reason == PixelLoseReason.Division)
+                .ToList();
             Debug.Log($"[Test] Division events total: {divisionEvents.Count}");
 
             // --- Check if division happened at all ---
@@ -856,8 +860,9 @@ namespace Ships.Tests
             {
                 foreach (var divEvt in divisionEvents)
                 {
-                    var divXValues = divEvt.pixels.Select(p => p.x).Distinct().OrderBy(x => x).ToList();
-                    var connectionPointsInDivision = cannonToCommandPoints
+                    var divXValues = divEvt.pixels.AsValueEnumerable().Select(p => p.x).Distinct().OrderBy(x => x)
+                        .ToList();
+                    var connectionPointsInDivision = cannonToCommandPoints.AsValueEnumerable()
                         .Where(cp => divEvt.pixels.Contains(cp)).ToList();
                     Debug.Log($"[Test] Division at frame {divEvt.frame}: " +
                               $"x-values=[{string.Join(", ", divXValues)}], " +

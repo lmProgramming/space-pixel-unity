@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using Core.Grid;
 using LMPro;
 using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Assertions;
+using ZLinq;
 
 namespace Grid
 {
@@ -103,7 +103,7 @@ namespace Grid
             _internalSprite = Sprite.Create(Texture, new Rect(0, 0, width, height),
                 new Vector2(0.5f, 0.5f), 1);
 
-            PixelCount = colors.Count(c => c.a > 0);
+            PixelCount = colors.AsValueEnumerable().Count(c => c.a > 0);
         }
 
         public void SetTextureFromColors(Color32[] colors, int width, int height)
@@ -119,7 +119,7 @@ namespace Grid
             _internalSprite = Sprite.Create(Texture, new Rect(0, 0, width, height),
                 new Vector2(0.5f, 0.5f), 1);
 
-            PixelCount = colors.Count(c => c.a > 0);
+            PixelCount = colors.AsValueEnumerable().Count(c => c.a > 0);
         }
 
         public void SetTexture(Texture2D texture)
@@ -139,7 +139,7 @@ namespace Grid
 
             if (getLast) pointsTraversed.Reverse();
 
-            foreach (var point in pointsTraversed.Where(IsPixel))
+            foreach (var point in pointsTraversed.AsValueEnumerable().Where(IsPixel))
                 return new Vector2Int(point.x, point.y);
 
             return null;
@@ -155,7 +155,7 @@ namespace Grid
 
         public void RemovePixels(IEnumerable<Vector2Int> points)
         {
-            var pointsList = points.ToList();
+            var pointsList = points.AsValueEnumerable().ToList();
             foreach (var point in pointsList) SetPixelNoApply(point, Color.clear);
             ApplyPixels();
             PixelCount -= pointsList.Count;
