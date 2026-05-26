@@ -141,15 +141,20 @@ namespace Services
             var injectionContainer = ResolveInjectionContainer(ship);
             var createdModules = new List<(GameObject go, ModuleSnapshot ms, IModule module)>();
 
+            var concreteShip = ship as Ship;
+
+            Debug.Assert(concreteShip,
+                "[ShipSnapshotService] Ship is not a concrete Ship class. Module restoration may fail if the ship's module attachment logic is customized.");
+
             foreach (var ms in snapshot.modules)
             {
-                var moduleGo = _moduleRestoreFactory.CreateModuleObject(ms, (ship as Ship)?.transform);
+                var moduleGo = _moduleRestoreFactory.CreateModuleObject(ms, concreteShip.transform);
                 moduleGo.SetActive(false);
                 moduleGo.transform.localPosition = ms.localPosition;
                 moduleGo.transform.localRotation = ms.localRotation;
 
                 var identity = moduleGo.GetComponent<ModuleInstanceIdentity>();
-                if (identity == null)
+                if (!identity)
                     identity = moduleGo.AddComponent<ModuleInstanceIdentity>();
                 identity.RestoreFromSnapshot(ms.instanceId, ms.origin, ms.archetypeId);
 
@@ -172,6 +177,7 @@ namespace Services
                 module.PixelatedRigidbody.ApplyHealthGridSnapshot(ms.healthGrid);
 
                 moduleGo.SetActive(true);
+                moduleGo.gameObject.layer = concreteShip.gameObject.layer;
             }
         }
 

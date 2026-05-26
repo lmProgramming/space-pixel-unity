@@ -19,8 +19,8 @@ GameObject:
   - component: {fileID: 7212375899802020741}
   - component: {fileID: 154214562210573461}
   - component: {fileID: 2234408972828058361}
-  m_Layer: 6
-  m_Name: AIShipShell
+  m_Layer: 7
+  m_Name: AIShipShellEnemy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
