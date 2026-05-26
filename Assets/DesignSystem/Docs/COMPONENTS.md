@@ -67,6 +67,7 @@ Set placeholders via `field.textEdition.placeholder = "..."` in C#. Unity 6's AP
 | Class | Use |
 | --- | --- |
 | `.ds-slider` | Single-value `<Slider>`; thumb cross-centred via `margin-top: -9px`. |
+| `.ds-slider` + `show-input-field="true"` | Nested `TextField` (`.unity-base-slider__text-field`); layout in `Controls.uss`, input box in `Inputs.uss`; runtime adds `ds-input`. |
 | `.ds-slider--filled` | Variant that highlights the filled portion. |
 | `.ds-range` | `<MinMaxSlider>`; tracker, dragger, and both thumbs cross-centred via `top: 50%; margin-top: -<half>px;`. |
 | `.ds-progress` | `<ProgressBar>`; 8 px tall by default. |

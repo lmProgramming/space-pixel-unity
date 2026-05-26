@@ -37,9 +37,6 @@ namespace UI.Common
                     "[SettingsPanelController] Required settings elements are missing in UIDocument.");
 
             titleLabel.text = isMainMenu ? $"{title} (Main Menu)" : title;
-            StyleSliderInputField(_masterSlider);
-            StyleSliderInputField(_musicSlider);
-            StyleSliderInputField(_effectsSlider);
             closeButton.clicked += Hide;
             if (_overlayHost != null)
                 _overlayHost.style.display = DisplayStyle.None;
@@ -114,24 +111,6 @@ namespace UI.Common
         {
             PlayerPrefs.SetFloat(key, Mathf.Clamp01(value));
             PlayerPrefs.Save();
-        }
-
-        private static void StyleSliderInputField(Slider slider)
-        {
-            var textField = slider.Q<TextField>();
-            if (textField == null)
-                return;
-
-            textField.AddToClassList("ds-input");
-            textField.style.minWidth = 72f;
-            textField.style.maxWidth = 72f;
-            textField.style.marginLeft = 8f;
-            textField.style.flexShrink = 0;
-            textField.style.alignSelf = Align.Center;
-
-            var inputParent = textField.parent;
-            if (inputParent != null)
-                inputParent.style.alignSelf = Align.Center;
         }
     }
 }

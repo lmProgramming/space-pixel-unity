@@ -94,14 +94,12 @@ namespace Ships
 
         private void Awake()
         {
-            CommandModule ??= GetComponentInChildren<Command>();
             ResourceManager = GetComponent<ResourceManager>();
             _moduleConnectionFactory = GetComponent<IModuleConnectionFactory>();
             _engineDirectionSolver = new EngineDirectionSolver();
             _controlAllocator = new ControlAllocator();
             _sasTurnInputResolver = new SasTurnInputResolver(_engineDirectionSolver);
 
-            Assert.IsNotNull(CommandModule, "CommandModule != null");
             Assert.IsNotNull(ResourceManager, "ResourceManager != null");
             Assert.IsNotNull(_moduleConnectionFactory, "_moduleConnectionFactory != null");
             Assert.IsNotNull(_engineDirectionSolver, "_engineDirectionSolver != null");
@@ -111,6 +109,10 @@ namespace Ships
 
         protected virtual void Start()
         {
+            CommandModule ??= GetComponentInChildren<Command>();
+
+            Assert.IsNotNull(CommandModule, "CommandModule != null");
+
             InitializeModules();
             _sasTurnInputResolver.CaptureDesiredHeading(GetCurrentHeadingDegrees());
 
@@ -227,6 +229,12 @@ namespace Ships
             _shipInitializeModulesEventChannel.Raise();
 
             RecacheModulesDictionary();
+        }
+
+
+        public void SetTeam(ITeam newTeam)
+        {
+            team = newTeam as Team;
         }
 
         private void DestroyShip()

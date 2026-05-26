@@ -160,6 +160,7 @@ Transform:
   - {fileID: 555606569669095793}
   - {fileID: 375311044477010568}
   - {fileID: 7609549270592582794}
+  - {fileID: 5930703160384591267}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1874324338140894250
@@ -252,6 +253,65 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d4282e20c6d341309875e6d4c48a0749, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Services::Services.SkirmishSetup
+--- !u!1 &5413508329958306110
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5930703160384591267}
+  - component: {fileID: 7585502007258304629}
+  m_Layer: 0
+  m_Name: SkirmishSpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5930703160384591267
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5413508329958306110}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4556120524637556072}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7585502007258304629
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5413508329958306110}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 759b3ce7fa41a091a8af42ac4990be18, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Services::Services.SkirmishSpawner
+  asteroidPrefab: {fileID: 131938536724509382, guid: 30bedfd2c697a46c2b9734629bd0d881, type: 3}
+  enemyShipShellPrefab: {fileID: 7092472564742756392, guid: c57d73256ec300e6da35ccf8ed7b4775, type: 3}
+  friendlyShipShellPrefab: {fileID: 7092472564742756392, guid: ea0ec5d1929f73db08c13efa187b5d57, type: 3}
+  enemyTeam: {fileID: 0}
+  friendlyTeam: {fileID: 0}
+  spawnArea: {fileID: 0}
+  spawnParent: {fileID: 0}
+  cameraManager: {fileID: 0}
+  asteroidSeparationRadius: 25
+  shipSeparationRadius: 40
+  maxSpawnAttempts: 50
+  blockingMask:
+    serializedVersion: 2
+    m_Bits: 0
+  instantiator: {fileID: 0}
 --- !u!1 &5974959927986485287
 GameObject:
   m_ObjectHideFlags: 0

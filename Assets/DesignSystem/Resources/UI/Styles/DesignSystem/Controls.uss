@@ -201,6 +201,29 @@
     background-color: var(--color-surface-elev);
 }
 
+/* Numeric TextField when show-input-field="true" — nested under
+   .unity-base-field__input with class .unity-base-slider__text-field
+   (input box colors in Inputs.uss). */
+.ds-slider .unity-base-slider__text-field {
+    min-width: 72px;
+    max-width: 72px;
+    margin-left: var(--space-2);
+    margin-top: 0;
+    margin-bottom: 0;
+    margin-right: 0;
+    flex-shrink: 0;
+    align-self: center;
+    height: 40px;
+}
+.ds-slider > .unity-base-field__input {
+    align-self: center;
+    flex-shrink: 0;
+}
+.ds-slider .unity-base-slider__drag-container {
+    align-self: center;
+    flex-grow: 1;
+}
+
 /* ---------- Range / MinMax slider ----------
    Anatomy (verified against Unity 6 docs, MinMaxSlider class table):
      .unity-min-max-slider                  (root)

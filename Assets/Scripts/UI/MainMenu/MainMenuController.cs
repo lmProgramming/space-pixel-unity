@@ -19,9 +19,15 @@ namespace UI.MainMenu
         private const string ShipFactorySceneName = "ShipFactory";
         private const string FallbackCombatSceneName = "MainGame";
         private const string LegacyCombatSceneName = "Main";
+        private const float DefaultAsteroidCount = 6f;
+        private const float DefaultEnemyShipCount = 0f;
+        private const float DefaultFriendlyShipCount = 0f;
 
         private readonly List<string> _snapshotDisplayNames = new();
         private readonly List<string> _snapshotFilePaths = new();
+        private Slider _asteroidCountSlider;
+        private Slider _enemyCountSlider;
+        private Slider _friendlyCountSlider;
         private Button _quitButton;
         private Button _settingsButton;
         private SettingsPanelController _settingsPanelController;
@@ -54,10 +60,14 @@ namespace UI.MainMenu
             _shipDropdown = root.Q<DropdownField>("ship-dropdown");
             _shipSelectCancelButton = root.Q<Button>("ship-select-cancel-button");
             _shipSelectLaunchButton = root.Q<Button>("ship-select-launch-button");
+            _asteroidCountSlider = root.Q<Slider>("asteroid-count-slider");
+            _enemyCountSlider = root.Q<Slider>("enemy-count-slider");
+            _friendlyCountSlider = root.Q<Slider>("friendly-count-slider");
 
             if (_startButton == null || _shipFactoryButton == null || _settingsButton == null || _quitButton == null ||
                 _shipSelectionOverlay == null || _shipDropdown == null || _shipSelectCancelButton == null ||
-                _shipSelectLaunchButton == null)
+                _shipSelectLaunchButton == null || _asteroidCountSlider == null || _enemyCountSlider == null ||
+                _friendlyCountSlider == null)
                 throw new InvalidOperationException(
                     "[MainMenuController] Required UI elements are missing in template.");
 
@@ -67,6 +77,9 @@ namespace UI.MainMenu
             _quitButton.clicked += QuitGame;
             _shipSelectCancelButton.clicked += CloseShipSelectionDialog;
             _shipSelectLaunchButton.clicked += LaunchCombat;
+            ConfigureCountSlider(_asteroidCountSlider, DefaultAsteroidCount);
+            ConfigureCountSlider(_enemyCountSlider, DefaultEnemyShipCount);
+            ConfigureCountSlider(_friendlyCountSlider, DefaultFriendlyShipCount);
 
             _settingsPanelController = new SettingsPanelController(root, true);
         }
@@ -115,6 +128,9 @@ namespace UI.MainMenu
 
             SaveState.PlayerShipName = selectedName;
             SaveState.PlayerShipSnapshotFilePath = selectedFile;
+            SaveState.AsteroidCount = Mathf.RoundToInt(_asteroidCountSlider.value);
+            SaveState.EnemyShipCount = Mathf.RoundToInt(_enemyCountSlider.value);
+            SaveState.FriendlyShipCount = Mathf.RoundToInt(_friendlyCountSlider.value);
 
             SceneManager.LoadScene(ResolveCombatSceneName());
         }
@@ -147,6 +163,12 @@ namespace UI.MainMenu
 
             _shipDropdown.choices = _snapshotDisplayNames;
             _shipDropdown.index = 0;
+        }
+
+        private static void ConfigureCountSlider(Slider slider, float defaultValue)
+        {
+            slider.SetValueWithoutNotify(defaultValue);
+            slider.RegisterValueChangedCallback(evt => slider.SetValueWithoutNotify(Mathf.Round(evt.newValue)));
         }
     }
 }

@@ -26,6 +26,7 @@ namespace Context
         [SerializeField] private EffectsSpawner effectSpawner;
         [SerializeField] private NavigationService navigationService;
         [SerializeField] private MissionService missionService;
+        [SerializeField] private SkirmishSpawner skirmishSpawner;
 
         [SerializeField] private PlayerShip playerShip;
 
@@ -65,6 +66,10 @@ namespace Context
 
             Container.Bind<IMissionService>()
                 .FromInstance(missionService)
+                .AsSingle();
+
+            Container.Bind<ISkirmishSpawner>()
+                .FromInstance(skirmishSpawner)
                 .AsSingle();
 
             Container.Bind<IShip>()
