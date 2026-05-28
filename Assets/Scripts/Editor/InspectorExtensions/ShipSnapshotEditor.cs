@@ -1,12 +1,12 @@
 using System;
 using System.IO;
-using System.Linq;
 using Core;
 using Core.Services;
 using Ships;
 using UnityEditor;
 using UnityEngine;
 using Zenject;
+using ZLinq;
 using Object = UnityEngine.Object;
 
 namespace Editor.InspectorExtensions
@@ -111,7 +111,7 @@ namespace Editor.InspectorExtensions
         private static string SanitizeFileName(string name)
         {
             var invalidChars = Path.GetInvalidFileNameChars();
-            return invalidChars.Aggregate(name, (current, c) => current.Replace(c, '_'));
+            return invalidChars.AsValueEnumerable().Aggregate(name, (current, c) => current.Replace(c, '_'));
         }
     }
 }

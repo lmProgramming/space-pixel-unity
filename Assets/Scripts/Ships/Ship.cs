@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using Core.Gameplay.Combat;
 using Core.Gameplay.EasyTeam;
@@ -314,12 +313,12 @@ namespace Ships
 
         public void AssignCrewBySkill(IEnumerable<CrewMember> crew)
         {
-            var crewList = crew.ToList();
+            var crewList = crew.AsValueEnumerable().ToList();
 
             foreach (var module in ModuleGraph.GetAllNodes())
             {
                 module.FillCrewBySkill(crewList, out var remainingCrew);
-                crewList = remainingCrew.ToList();
+                crewList = remainingCrew.AsValueEnumerable().ToList();
             }
         }
 
@@ -376,7 +375,7 @@ namespace Ships
                 engine.RotateThrusterTowards(desiredAngle, deltaTime);
             }
 
-            var thrustRatios = _controlAllocator.Allocate(engines, desiredDirectionPerEngine, centerOfMass, forward,
+            var thrustRatios = ControlAllocator.AllocateControlInputs(engines, desiredDirectionPerEngine, centerOfMass, forward,
                 forwardInput, finalTurnInput, maxLeverArm, GetControlAllocatorSettings());
 
             var anyForceApplied = false;
