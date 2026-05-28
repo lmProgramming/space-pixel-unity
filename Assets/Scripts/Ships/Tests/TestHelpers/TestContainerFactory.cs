@@ -25,6 +25,9 @@ namespace Ships.Tests.TestHelpers
             var shipService = Substitute.For<IShipService>();
             container.Bind<IShipService>().FromInstance(shipService).AsSingle();
 
+            var projectilesSpawner = Substitute.For<IProjectilesSpawner>();
+            container.Bind<IProjectilesSpawner>().FromInstance(projectilesSpawner).AsSingle();
+
             var shipInitializeModulesEventChannel = Substitute.For<ShipInitializeModulesEventChannel>();
             container.Bind<ShipInitializeModulesEventChannel>().FromInstance(shipInitializeModulesEventChannel)
                 .AsSingle();

@@ -14,6 +14,7 @@ namespace Ships.Modules
 
         [SerializeField] private ParticleSystem exhaustParticles;
         [SerializeField] internal float currentThrustRatioForDebug;
+        [SerializeField] internal float currentGimbalAngle;
 
         private bool _active;
         private float _currentThrustRatio;
@@ -24,6 +25,10 @@ namespace Ships.Modules
         public override ModuleType Type => ModuleType.Engine;
 
         internal float CurrentThrustRatioForTesting => _currentThrustRatio;
+        internal float CurrentThrusterAngleForDebug => CurrentThrusterAngle;
+        internal bool IsActiveForDebug => _active;
+        internal float MaxThrustBaseForDebug => maxThrust;
+        internal float ShipModuleEfficiencyForDebug => ShipModuleEfficiency;
         private Vector2 ThrustPoint => exhaustParticles.transform.localPosition;
 
         public float MaxThrust => maxThrust * ShipModuleEfficiency;
@@ -58,6 +63,7 @@ namespace Ships.Modules
         private void Update()
         {
             currentThrustRatioForDebug = _currentThrustRatio;
+            currentGimbalAngle = CurrentThrusterAngle;
         }
 #endif
 

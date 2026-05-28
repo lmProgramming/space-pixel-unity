@@ -7,17 +7,10 @@ namespace Ships.Internal
 {
     public class ControlAllocator
     {
-        public float[] Allocate(IReadOnlyList<Engine> engines, IReadOnlyList<Vector2> desiredDirections,
+        public static float[] AllocateControlInputs(IReadOnlyList<Engine> engines,
+            IReadOnlyList<Vector2> desiredDirections,
             Vector2 centerOfMass, Vector2 forward, float forwardInput, float turnInput, float maxLeverArm,
-            in ControlAllocatorSettings settings)
-        {
-            return AllocateControlInputs(engines, desiredDirections, centerOfMass, forward, forwardInput, turnInput,
-                maxLeverArm, settings);
-        }
-
-        private static float[] AllocateControlInputs(IReadOnlyList<Engine> engines,
-            IReadOnlyList<Vector2> desiredDirections, Vector2 centerOfMass, Vector2 forward, float forwardInput,
-            float turnInput, float maxLeverArm, in ControlAllocatorSettings settings)
+            ControlAllocatorSettings settings)
         {
             var thrustRatios = new float[engines.Count];
             var requestedForceDirection = forwardInput >= 0f ? forward : -forward;
@@ -31,10 +24,14 @@ namespace Ships.Internal
             for (var i = 0; i < engines.Count; i++)
             {
                 var engine = engines[i];
-                if (engine.MaxThrust <= 0f || desiredDirections[i].sqrMagnitude <= Mathf.Epsilon)
-                    continue;
+                if (engine.MaxThrust <= 0f) continue;
 
-                var dir = engine.WorldThrustDirection;
+                if (desiredDirections[i].sqrMagnitude <= Mathf.Epsilon) continue;
+
+                var dir = desiredDirections[i].normalized;
+                var worldDotDesired = Vector2.Dot(engine.WorldThrustDirection, dir);
+                if (worldDotDesired <= 0f) continue;
+
                 var lever = engine.WorldThrustPoint - centerOfMass;
                 var torquePerUnit = lever.x * dir.y - lever.y * dir.x;
 
@@ -49,8 +46,7 @@ namespace Ships.Internal
                 totalTorqueCapacity += Mathf.Abs(torquePerUnit) * engine.MaxThrust;
             }
 
-            if (!hasAnyEffectiveColumn)
-                return thrustRatios;
+            if (!hasAnyEffectiveColumn) return thrustRatios;
 
             var targetForceMagnitude = requestedForceMagnitude * totalThrustCapacity * settings.ForceWeight;
             var targetX = requestedForceDirection.x * targetForceMagnitude;
@@ -58,6 +54,23 @@ namespace Ships.Internal
 
             var torqueScale = Mathf.Max(totalTorqueCapacity, Mathf.Max(1f, maxLeverArm));
             var targetTorque = turnInput * torqueScale * settings.TorqueWeight;
+
+            var forceNormalization = Mathf.Max(totalThrustCapacity * settings.ForceWeight, 1f);
+            var torqueNormalization = Mathf.Max(torqueScale * settings.TorqueWeight, 1f);
+
+            for (var i = 0; i < columns.Length; i++)
+            {
+                if (columns[i].sqrMagnitude <= Mathf.Epsilon) continue;
+
+                columns[i] = new Vector3(
+                    columns[i].x / forceNormalization,
+                    columns[i].y / forceNormalization,
+                    columns[i].z / torqueNormalization);
+            }
+
+            targetX /= forceNormalization;
+            targetY /= forceNormalization;
+            targetTorque /= torqueNormalization;
 
             var denominator = Mathf.Max(0.0001f, settings.Regularization) +
                               columns.AsValueEnumerable().Sum(t => t.sqrMagnitude);

@@ -61,6 +61,13 @@ namespace Services
             if (moduleType == typeof(LaserBeam))
                 moduleGo.AddComponent<LineRenderer>();
 
+            if (moduleType == typeof(Engine))
+            {
+                var exhaustGo = new GameObject("EngineExhaust");
+                exhaustGo.transform.SetParent(moduleGo.transform, false);
+                exhaustGo.AddComponent<ParticleSystem>();
+            }
+
             moduleGo.AddComponent<PixelatedRigidbody>();
             moduleGo.AddComponent(moduleType);
             return moduleGo;

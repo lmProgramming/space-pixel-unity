@@ -3,13 +3,10 @@ using System.Collections.Generic;
 using Core.Pixelation;
 using Core.Ship;
 using NUnit.Framework;
-using Pixelation;
-using Ships.Internal;
 using Ships.Modules;
 using Ships.Tests.TestHelpers;
 using UnityEngine;
 using UnityEngine.TestTools;
-using Zenject;
 using ZLinq;
 using Module = Ships.Modules.Module;
 
@@ -21,44 +18,15 @@ namespace Ships.Tests
     ///     BiCohesionGraph.RemoveEdge → HandleUnreachableModules
     /// </summary>
     [TestFixture]
-    public class ShipDisconnectionTests
+    public class ShipDisconnectionTests : ShipTestBase
     {
-        [SetUp]
-        public void SetUp()
-        {
-            _createdObjects = new List<GameObject>();
-
-            // Create a root for the map (where disconnected modules go)
-            _testRoot = new GameObject("TestRoot");
-            _mapTransform = _testRoot.transform;
-
-            // Create test container with real service implementations
-            _container = TestContainerFactory.CreateTestContainer(_mapTransform);
-        }
-
-        [TearDown]
-        public void TearDown()
-        {
-            foreach (var obj in _createdObjects)
-                if (obj != null)
-                    Object.DestroyImmediate(obj);
-
-            if (_testRoot != null)
-                Object.DestroyImmediate(_testRoot);
-        }
-
-        private DiContainer _container;
-        private GameObject _testRoot;
-        private Transform _mapTransform;
-        private List<GameObject> _createdObjects;
-
         /// <summary>
         ///     Creates a simple two-module ship where modules are adjacent on the X axis.
         ///     Command module on the left, other module on the right, touching at their edges.
         /// </summary>
         private TestShipComponents CreateTwoModuleShip(int moduleWidth = 5, int moduleHeight = 5)
         {
-            var shipGo = CreateGameObject("TestShip");
+            var shipGo = ModuleFactory.CreateGameObject("TestShip", CreatedObjects);
 
             // Create command module (left side)
             var commandModule = CreateModule("Command", shipGo.transform,
@@ -69,16 +37,7 @@ namespace Ships.Tests
             var module2 = CreateModule("Module2", shipGo.transform,
                 new Vector2(moduleWidth, 0), moduleWidth, moduleHeight, false);
 
-            // Add required ship infrastructure
-            var connectionFactory = shipGo.AddComponent<ModuleConnectionFactory>();
-            shipGo.AddComponent<ResourceManager>();
-
-            // Disable before adding Ship to prevent OnEnable from running before injection
-            shipGo.SetActive(false);
-            var ship = shipGo.AddComponent<Ship>();
-            _container.Inject(ship);
-            ship.ModuleConnectionFactoryForTesting = connectionFactory;
-            shipGo.SetActive(true);
+            var ship = ModuleFactory.WireShip<Ship>(shipGo, Container);
 
             return new TestShipComponents(ship, commandModule, new List<Module> { module2 });
         }
@@ -88,7 +47,7 @@ namespace Ships.Tests
         /// </summary>
         private TestShipComponents CreateThreeModuleLinearShip(int moduleWidth = 5, int moduleHeight = 5)
         {
-            var shipGo = CreateGameObject("TestShip");
+            var shipGo = ModuleFactory.CreateGameObject("TestShip", CreatedObjects);
 
             var commandModule = CreateModule("Command", shipGo.transform,
                 new Vector2(0, 0), moduleWidth, moduleHeight, true);
@@ -99,15 +58,7 @@ namespace Ships.Tests
             var module3 = CreateModule("Module3", shipGo.transform,
                 new Vector2(moduleWidth * 2, 0), moduleWidth, moduleHeight, false);
 
-            var connectionFactory = shipGo.AddComponent<ModuleConnectionFactory>();
-            shipGo.AddComponent<ResourceManager>();
-
-            // Disable before adding Ship to prevent OnEnable from running before injection
-            shipGo.SetActive(false);
-            var ship = shipGo.AddComponent<Ship>();
-            _container.Inject(ship);
-            ship.ModuleConnectionFactoryForTesting = connectionFactory;
-            shipGo.SetActive(true);
+            var ship = ModuleFactory.WireShip<Ship>(shipGo, Container);
 
             return new TestShipComponents(ship, commandModule, new List<Module> { module2, module3 });
         }
@@ -117,7 +68,7 @@ namespace Ships.Tests
         /// </summary>
         private TestShipComponents CreateShipWithAlternatePaths()
         {
-            var shipGo = CreateGameObject("TestShip");
+            var shipGo = ModuleFactory.CreateGameObject("TestShip", CreatedObjects);
             var moduleSize = 5;
 
             // Command module at origin
@@ -136,15 +87,7 @@ namespace Ships.Tests
             var moduleC = CreateModule("ModuleC", shipGo.transform,
                 new Vector2(moduleSize, moduleSize), moduleSize, moduleSize, false);
 
-            var connectionFactory = shipGo.AddComponent<ModuleConnectionFactory>();
-            shipGo.AddComponent<ResourceManager>();
-
-            // Disable before adding Ship to prevent OnEnable from running before injection
-            shipGo.SetActive(false);
-            var ship = shipGo.AddComponent<Ship>();
-            _container.Inject(ship);
-            ship.ModuleConnectionFactoryForTesting = connectionFactory;
-            shipGo.SetActive(true);
+            var ship = ModuleFactory.WireShip<Ship>(shipGo, Container);
 
             return new TestShipComponents(ship, commandModule, new List<Module> { moduleA, moduleB, moduleC });
         }
@@ -155,7 +98,7 @@ namespace Ships.Tests
         /// </summary>
         private TestShipComponents CreateVerticalThreeModuleShip(int moduleWidth = 5, int moduleHeight = 10)
         {
-            var shipGo = CreateGameObject("TestShip");
+            var shipGo = ModuleFactory.CreateGameObject("TestShip", CreatedObjects);
 
             // Module B (command) in the center
             var commandModule = CreateModule("CommandB", shipGo.transform,
@@ -169,15 +112,7 @@ namespace Ships.Tests
             var moduleC = CreateModule("ModuleC", shipGo.transform,
                 new Vector2(0, -moduleHeight), moduleWidth, moduleHeight, false);
 
-            var connectionFactory = shipGo.AddComponent<ModuleConnectionFactory>();
-            shipGo.AddComponent<ResourceManager>();
-
-            // Disable before adding Ship to prevent OnEnable from running before injection
-            shipGo.SetActive(false);
-            var ship = shipGo.AddComponent<Ship>();
-            _container.Inject(ship);
-            ship.ModuleConnectionFactoryForTesting = connectionFactory;
-            shipGo.SetActive(true);
+            var ship = ModuleFactory.WireShip<Ship>(shipGo, Container);
 
             return new TestShipComponents(ship, commandModule, new List<Module> { moduleA, moduleC });
         }
@@ -185,21 +120,8 @@ namespace Ships.Tests
         private Module CreateModule(string name, Transform parent, Vector2 localPosition,
             int width, int height, bool isCommand)
         {
-            var moduleGo = CreateGameObject(name);
-            moduleGo.transform.SetParent(parent);
-            moduleGo.transform.localPosition = localPosition;
-
-            // Add required components
-            moduleGo.AddComponent<SpriteRenderer>();
-            var rigidbody = moduleGo.AddComponent<Rigidbody2D>();
-            rigidbody.bodyType = RigidbodyType2D.Dynamic;
-            rigidbody.gravityScale = 0f;
-
-            moduleGo.AddComponent<PolygonCollider2D>();
-
-            // Add PixelatedRigidbody and inject
-            var pixelatedRb = moduleGo.AddComponent<PixelatedRigidbody>();
-            _container.Inject(pixelatedRb);
+            var moduleGo = ModuleFactory.CreateModuleBase(name, parent, localPosition, 0f, Container, CreatedObjects,
+                width, height);
 
             // Add module component
             Module module;
@@ -214,30 +136,7 @@ namespace Ships.Tests
                 module = testModule;
             }
 
-            // Initialize the pixel grid with solid pixels
-            var colors = CreateSolidPixelGrid(width, height);
-            pixelatedRb.SetTextureFromColors(colors);
-
             return module;
-        }
-
-        private Color32[,] CreateSolidPixelGrid(int width, int height)
-        {
-            var colors = new Color32[width, height];
-            var solidColor = new Color32(100, 100, 100, 255);
-
-            for (var x = 0; x < width; x++)
-            for (var y = 0; y < height; y++)
-                colors[x, y] = solidColor;
-
-            return colors;
-        }
-
-        private GameObject CreateGameObject(string name)
-        {
-            var go = new GameObject(name);
-            _createdObjects.Add(go);
-            return go;
         }
 
 
@@ -251,21 +150,13 @@ namespace Ships.Tests
                 : new List<Vector2Int>();
         }
 
-        /// <summary>
-        ///     Waits for Unity lifecycle methods to execute.
-        /// </summary>
-        private IEnumerator WaitForStart()
-        {
-            yield return null; // Wait for Start
-            yield return null; // Extra frame for safety
-        }
 
         [UnityTest]
         public IEnumerator DestroyAllConnectionPoints_ModuleDisconnects()
         {
             // Arrange: Create a two-module ship
             var components = CreateTwoModuleShip();
-            yield return WaitForStart();
+            yield return WaitForLifecycle();
 
             var ship = components.Ship;
             var commandModule = components.CommandModule;
@@ -296,7 +187,7 @@ namespace Ships.Tests
         {
             // Arrange: Create Command -- Module2 -- Module3
             var components = CreateThreeModuleLinearShip();
-            yield return WaitForStart();
+            yield return WaitForLifecycle();
 
             var ship = components.Ship;
             var module2 = components.OtherModules[0];
@@ -326,7 +217,7 @@ namespace Ships.Tests
         {
             // Arrange: Create ship with alternate paths
             var components = CreateShipWithAlternatePaths();
-            yield return WaitForStart();
+            yield return WaitForLifecycle();
 
             var ship = components.Ship;
             var moduleA = components.OtherModules[0];
@@ -369,7 +260,7 @@ namespace Ships.Tests
         {
             // Arrange: Create a simple ship
             var components = CreateTwoModuleShip(3, 3);
-            yield return WaitForStart();
+            yield return WaitForLifecycle();
 
             var ship = components.Ship;
             var commandModule = components.CommandModule;
@@ -396,7 +287,7 @@ namespace Ships.Tests
         {
             // Arrange: Create a two-module ship with larger modules (more connection points)
             var components = CreateTwoModuleShip(10, 10);
-            yield return WaitForStart();
+            yield return WaitForLifecycle();
 
             var ship = components.Ship;
             var commandModule = components.CommandModule;
@@ -425,7 +316,7 @@ namespace Ships.Tests
         {
             // Arrange: Create vertical ship A (top) -- B (central/command) -- C (bottom)
             var components = CreateVerticalThreeModuleShip();
-            yield return WaitForStart();
+            yield return WaitForLifecycle();
 
             var ship = components.Ship;
             var commandModule = components.CommandModule; // B - central
@@ -471,7 +362,7 @@ namespace Ships.Tests
         {
             // Arrange: Create vertical ship A (top) -- B (central/command) -- C (bottom)
             var components = CreateVerticalThreeModuleShip();
-            yield return WaitForStart();
+            yield return WaitForLifecycle();
 
             var ship = components.Ship;
             var commandModule = components.CommandModule; // B - central
@@ -512,7 +403,7 @@ namespace Ships.Tests
         {
             // Arrange: Create vertical ship A (top) -- B (central/command) -- C (bottom)
             var components = CreateVerticalThreeModuleShip();
-            yield return WaitForStart();
+            yield return WaitForLifecycle();
 
             var ship = components.Ship;
             var commandModule = components.CommandModule; // B - central
@@ -569,7 +460,7 @@ namespace Ships.Tests
             const int commandWidth = 6;
             const int commandHeight = 10;
 
-            var shipGo = CreateGameObject("TestShip");
+            var shipGo = ModuleFactory.CreateGameObject("TestShip", CreatedObjects);
 
             var commandModule = CreateModule("Command", shipGo.transform,
                 new Vector2((cannonWidth + commandWidth) / 2f, 0), commandWidth, commandHeight, true);
@@ -577,16 +468,9 @@ namespace Ships.Tests
             var cannonModule = CreateModule("Cannon", shipGo.transform,
                 new Vector2(0, 0), cannonWidth, cannonHeight, false);
 
-            var connectionFactory = shipGo.AddComponent<ModuleConnectionFactory>();
-            shipGo.AddComponent<ResourceManager>();
+            var ship = ModuleFactory.WireShip<Ship>(shipGo, Container);
 
-            shipGo.SetActive(false);
-            var ship = shipGo.AddComponent<Ship>();
-            _container.Inject(ship);
-            ship.ModuleConnectionFactoryForTesting = connectionFactory;
-            shipGo.SetActive(true);
-
-            yield return WaitForStart();
+            yield return WaitForLifecycle();
 
             // --- Step 1: Verify modules exist in graph ---
             Assert.IsTrue(ship.ModuleGraph.ContainsNode(cannonModule), "Cannon should be in graph initially");
@@ -769,7 +653,7 @@ namespace Ships.Tests
             const int commandWidth = 6;
             const int commandHeight = 10;
 
-            var shipGo = CreateGameObject("TestShip");
+            var shipGo = ModuleFactory.CreateGameObject("TestShip", CreatedObjects);
 
             var commandModule = CreateModule("Command", shipGo.transform,
                 new Vector2((cannonWidth + commandWidth) / 2f, 0), commandWidth, commandHeight, true);
@@ -777,16 +661,9 @@ namespace Ships.Tests
             var cannonModule = CreateModule("Cannon", shipGo.transform,
                 new Vector2(0, 0), cannonWidth, cannonHeight, false);
 
-            var connectionFactory = shipGo.AddComponent<ModuleConnectionFactory>();
-            shipGo.AddComponent<ResourceManager>();
+            var ship = ModuleFactory.WireShip<Ship>(shipGo, Container);
 
-            shipGo.SetActive(false);
-            var ship = shipGo.AddComponent<Ship>();
-            _container.Inject(ship);
-            ship.ModuleConnectionFactoryForTesting = connectionFactory;
-            shipGo.SetActive(true);
-
-            yield return WaitForStart();
+            yield return WaitForLifecycle();
 
             // --- Verify initial state ---
             Assert.IsTrue(ship.ModuleGraph.ContainsNode(cannonModule), "Cannon should be in graph initially");

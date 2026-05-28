@@ -108,11 +108,11 @@ namespace Ships.Modules
                 projectileSpeed = projectileSpeed
             };
 
-            if (contentCatalog != null && projectilePrefab != null &&
+            if (contentCatalog != null && projectilePrefab &&
                 contentCatalog.TryGetContentId(projectilePrefab, out var projectileContentId))
                 data.projectileContentId = projectileContentId;
 
-            if (contentCatalog != null && sprite != null &&
+            if (contentCatalog != null && sprite &&
                 contentCatalog.TryGetSpriteContentId(sprite, out var spriteContentId))
                 data.spriteContentId = spriteContentId;
 
