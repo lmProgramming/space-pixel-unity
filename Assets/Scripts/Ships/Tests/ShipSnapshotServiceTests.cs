@@ -6,41 +6,31 @@ using Core.Ship;
 using NUnit.Framework;
 using Pixelation;
 using Services;
-using Ships.Internal;
 using Ships.Modules;
 using Ships.Tests.TestHelpers;
 using UnityEngine;
 using UnityEngine.TestTools;
-using Zenject;
-using Object = UnityEngine.Object;
 using Resources = Core.Ship.Resources;
 
 namespace Ships.Tests
 {
     [TestFixture]
-    public class ShipSnapshotServiceTests
+    public class ShipSnapshotServiceTests : ShipTestBase
     {
         [SetUp]
-        public void SetUp()
+        public override void SetUp()
         {
-            _root = new GameObject("Root");
-            _container = TestContainerFactory.CreateTestContainer(_root.transform);
+            base.SetUp();
             _contentCatalog = new TestContentCatalog();
             _moduleCatalog = new TestModuleCatalog();
-            _service = new ShipSnapshotService(_container, null, _moduleCatalog, _contentCatalog);
-        }
-
-        [TearDown]
-        public void TearDown()
-        {
-            Object.DestroyImmediate(_root);
+            _service = new ShipSnapshotService(Container, null, _moduleCatalog, _contentCatalog);
         }
 
         private sealed class TestContentCatalog : IGameContentCatalog
         {
             private readonly Dictionary<string, GameObject> _idToPrefab = new();
-            private readonly Dictionary<GameObject, string> _prefabToId = new();
             private readonly Dictionary<string, Sprite> _idToSprite = new();
+            private readonly Dictionary<GameObject, string> _prefabToId = new();
             private readonly Dictionary<Sprite, string> _spriteToId = new();
 
             public bool TryGetPrefab(string contentId, out GameObject prefab)
@@ -91,10 +81,8 @@ namespace Ships.Tests
             }
         }
 
-        private DiContainer _container;
         private TestContentCatalog _contentCatalog;
         private TestModuleCatalog _moduleCatalog;
-        private GameObject _root;
         private ShipSnapshotService _service;
 
         [UnityTest]
@@ -102,7 +90,7 @@ namespace Ships.Tests
         {
             var projectilePrefab = new GameObject("ProjectilePrefab");
             var weaponSprite = CreateTestSprite();
-            projectilePrefab.transform.SetParent(_root.transform);
+            projectilePrefab.transform.SetParent(TestRoot.transform);
             _contentCatalog.AddPrefab("bullet_big", projectilePrefab);
             _contentCatalog.AddSprite("sprite_cannon", weaponSprite);
 
@@ -164,38 +152,38 @@ namespace Ships.Tests
 
         private Ship CreateShipWithCommandAndCannon(GameObject cannonPrefab, string archetypeId)
         {
-            var shipGo = new GameObject("Ship");
-            shipGo.transform.SetParent(_root.transform);
+            var shipGo = ModuleFactory.CreateGameObject("Ship", CreatedObjects);
+            shipGo.transform.SetParent(TestRoot.transform);
             shipGo.SetActive(false);
 
             CreateCommandModule(shipGo.transform);
 
             var cannonInstance = Object.Instantiate(cannonPrefab, shipGo.transform);
             cannonInstance.transform.localPosition = new Vector3(2f, 0f, 0f);
+            cannonInstance.SetActive(true);
+            var cannonPixelRb = cannonInstance.GetComponent<PixelatedRigidbody>();
+            cannonPixelRb.SetTextureFromColors(ModuleFactory.CreateSolidPixelGrid(5, 5));
             var cannonIdentity = cannonInstance.GetComponent<ModuleInstanceIdentity>();
             if (cannonIdentity == null)
                 cannonIdentity = cannonInstance.AddComponent<ModuleInstanceIdentity>();
             cannonIdentity.EnsureAssigned(ModuleOrigin.CatalogPrefab, archetypeId);
 
-            shipGo.AddComponent<ModuleConnectionFactory>();
-            shipGo.AddComponent<ResourceManager>();
-            var ship = shipGo.AddComponent<Ship>();
-            _container.Inject(ship);
-            shipGo.SetActive(true);
+            var ship = ModuleFactory.WireShip<Ship>(shipGo, Container);
             ship.InitializeModules();
             return ship;
         }
 
         private Ship CreateShipWithScratchEngine()
         {
-            var shipGo = new GameObject("Ship");
-            shipGo.transform.SetParent(_root.transform);
+            var shipGo = ModuleFactory.CreateGameObject("Ship", CreatedObjects);
+            shipGo.transform.SetParent(TestRoot.transform);
             shipGo.SetActive(false);
 
             CreateCommandModule(shipGo.transform);
 
-            var engineGo = CreateModuleBase("Engine", shipGo.transform, new Vector3(2f, 0f, 0f));
-            var exhaustRoot = new GameObject("Exhaust");
+            var engineGo = ModuleFactory.CreateModuleBase("Engine", shipGo.transform, new Vector2(2f, 0f), 0f,
+                Container, CreatedObjects, 5, 5);
+            var exhaustRoot = ModuleFactory.CreateGameObject("Exhaust", CreatedObjects);
             exhaustRoot.transform.SetParent(engineGo.transform, false);
             exhaustRoot.AddComponent<ParticleSystem>();
             var engine = engineGo.AddComponent<Engine>();
@@ -203,18 +191,15 @@ namespace Ships.Tests
             var identity = engineGo.AddComponent<ModuleInstanceIdentity>();
             identity.EnsureAssigned(ModuleOrigin.Custom);
 
-            shipGo.AddComponent<ModuleConnectionFactory>();
-            shipGo.AddComponent<ResourceManager>();
-            var ship = shipGo.AddComponent<Ship>();
-            _container.Inject(ship);
-            shipGo.SetActive(true);
+            var ship = ModuleFactory.WireShip<Ship>(shipGo, Container);
             ship.InitializeModules();
             return ship;
         }
 
         private void CreateCommandModule(Transform parent)
         {
-            var commandGo = CreateModuleBase("Command", parent, Vector3.zero);
+            var commandGo = ModuleFactory.CreateModuleBase("Command", parent, Vector2.zero, 0f, Container,
+                CreatedObjects, 5, 5);
             var command = commandGo.AddComponent<Command>();
             command.SetResources(new Resources(0, 0, 0, 0, 0));
             var identity = commandGo.AddComponent<ModuleInstanceIdentity>();
@@ -223,7 +208,9 @@ namespace Ships.Tests
 
         private GameObject CreateCannonPrefab(GameObject projectilePrefab, Sprite weaponSprite)
         {
-            var go = CreateModuleBase("CannonPrefab", _root.transform, Vector3.zero);
+            var go = ModuleFactory.CreateModuleBase("CannonPrefab", TestRoot.transform, Vector2.zero, 0f,
+                Container, CreatedObjects, 5, 5);
+            go.SetActive(false);
             var cannon = go.AddComponent<Cannon>();
             cannon.SetResources(new Resources(0, 1, 0, 0, 0));
             SetPrivateField(cannon, "projectilePrefab", projectilePrefab);
@@ -231,31 +218,6 @@ namespace Ships.Tests
             SetPrivateField(cannon, "reloadTime", 1.5f);
             SetPrivateField(cannon, "projectileSpeed", 20f);
             return go;
-        }
-
-        private GameObject CreateModuleBase(string name, Transform parent, Vector3 localPos)
-        {
-            var go = new GameObject(name);
-            go.transform.SetParent(parent);
-            go.transform.localPosition = localPos;
-            go.AddComponent<SpriteRenderer>();
-            var rb = go.AddComponent<Rigidbody2D>();
-            rb.bodyType = RigidbodyType2D.Dynamic;
-            rb.gravityScale = 0f;
-            go.AddComponent<PolygonCollider2D>();
-            var px = go.AddComponent<PixelatedRigidbody>();
-            _container.Inject(px);
-            px.SetTextureFromColors(MakeSolidGrid(5, 5, new Color32(100, 100, 100, 255)));
-            return go;
-        }
-
-        private static Color32[,] MakeSolidGrid(int width, int height, Color32 color)
-        {
-            var result = new Color32[width, height];
-            for (var x = 0; x < width; x++)
-            for (var y = 0; y < height; y++)
-                result[x, y] = color;
-            return result;
         }
 
         private static Sprite CreateTestSprite()

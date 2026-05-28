@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Pixelation;
+using Ships.Internal;
 using Ships.Modules;
 using UnityEngine;
 using Zenject;
@@ -28,9 +29,9 @@ namespace Ships.Tests.TestHelpers
 
         public static void CreateEngineModule(Transform parent, Vector2 localPosition, DiContainer container,
             ICollection<GameObject> createdObjects, float engineMaxThrust,
-            int modulePixelWidth, int modulePixelHeight)
+            int modulePixelWidth, int modulePixelHeight, float localRotationZ = 0f)
         {
-            var engineGo = CreateModuleBase("Engine", parent, localPosition, 0f, container, createdObjects,
+            var engineGo = CreateModuleBase("Engine", parent, localPosition, localRotationZ, container, createdObjects,
                 modulePixelWidth, modulePixelHeight);
 
             var particleRoot = CreateGameObject("EngineExhaust", createdObjects);
@@ -67,14 +68,32 @@ namespace Ships.Tests.TestHelpers
 
         public static Color32[,] CreateSolidPixelGrid(int width, int height)
         {
+            return CreateSolidPixelGrid(width, height, new Color32(100, 100, 100, 255));
+        }
+
+        public static Color32[,] CreateSolidPixelGrid(int width, int height, Color32 color)
+        {
             var colors = new Color32[width, height];
-            var solidColor = new Color32(100, 100, 100, 255);
 
             for (var x = 0; x < width; x++)
             for (var y = 0; y < height; y++)
-                colors[x, y] = solidColor;
+                colors[x, y] = color;
 
             return colors;
+        }
+
+        public static T WireShip<T>(GameObject shipGo, DiContainer container) where T : Ship
+        {
+            var connectionFactory = shipGo.AddComponent<ModuleConnectionFactory>();
+            shipGo.AddComponent<ResourceManager>();
+
+            shipGo.SetActive(false);
+            var ship = shipGo.AddComponent<T>();
+            container.Inject(ship);
+            ship.ModuleConnectionFactoryForTesting = connectionFactory;
+            shipGo.SetActive(true);
+
+            return ship;
         }
 
         public static GameObject CreateGameObject(string name, ICollection<GameObject> createdObjects)

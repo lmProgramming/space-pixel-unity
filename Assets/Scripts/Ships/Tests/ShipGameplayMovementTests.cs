@@ -1,42 +1,19 @@
 using System.Collections;
-using System.Collections.Generic;
+using NUnit.Framework;
 using Ships.Tests.TestHelpers;
 using UnityEngine;
 using UnityEngine.TestTools;
-using NUnit.Framework;
-using Zenject;
-using ZLinq;
-using Object = UnityEngine.Object;
 
 namespace Ships.Tests
 {
     [TestFixture]
-    public class ShipGameplayMovementTests
+    public class ShipGameplayMovementTests : ShipTestBase
     {
         private const float MovementSimulationSeconds = 2f;
         private const float SasSettleSeconds = 5f;
         private const float MinForwardDistance = 1f;
         private const float MinTurnDegrees = 5f;
         private const float SasHeadingOffsetDegrees = 45f;
-
-        [SetUp]
-        public void SetUp()
-        {
-            _testRoot = new GameObject("TestRoot");
-            _createdObjects.Add(_testRoot);
-            _container = TestContainerFactory.CreateTestContainer(_testRoot.transform);
-        }
-
-        [TearDown]
-        public void TearDown()
-        {
-            foreach (var obj in _createdObjects.AsValueEnumerable().Where(obj => obj != null))
-                Object.DestroyImmediate(obj);
-        }
-
-        private DiContainer _container;
-        private readonly List<GameObject> _createdObjects = new();
-        private GameObject _testRoot;
 
         [UnityTest]
         public IEnumerator Ship_MovesForward_WhenInstructedToMoveForward()
@@ -124,13 +101,7 @@ namespace Ships.Tests
 
         private MovableShipTestProxy CreateReadyShip()
         {
-            return SmallMovableShipTestFactory.Create(_container, _createdObjects);
-        }
-
-        private static IEnumerator WaitForLifecycle()
-        {
-            yield return null;
-            yield return null;
+            return SmallMovableShipTestFactory.Create(Container, CreatedObjects);
         }
 
         private static IEnumerator SimulateForSeconds(float seconds)

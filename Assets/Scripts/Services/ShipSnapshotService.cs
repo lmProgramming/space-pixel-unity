@@ -163,18 +163,20 @@ namespace Services
                     throw new UnityException(
                         $"[ShipSnapshotService] Failed to add a Module component for '{ms.moduleName}' (typeName: '{ms.moduleTypeName}', moduleType: {ms.moduleType}).");
 
+                module.Setup(ship);
                 module.SetResources(ms.resources);
                 module.ApplyTypePayloadJson(ms.typePayloadJson, _gameContentCatalog);
                 createdModules.Add((moduleGo, ms, module));
             }
 
-            foreach (var (moduleGo, ms, module) in createdModules)
+            foreach (var (moduleGo, ms, _) in createdModules)
             {
                 injectionContainer.InjectGameObject(moduleGo);
 
-                ApplyPixelData(module.PixelatedRigidbody, ms.colorGrid, ms.moduleName);
-                module.PixelatedRigidbody.ApplyArmorGridSnapshot(ms.armorGrid);
-                module.PixelatedRigidbody.ApplyHealthGridSnapshot(ms.healthGrid);
+                var pixelatedRigidbody = moduleGo.GetComponent<IPixelatedRigidbody>();
+                ApplyPixelData(pixelatedRigidbody, ms.colorGrid, ms.moduleName);
+                pixelatedRigidbody.ApplyArmorGridSnapshot(ms.armorGrid);
+                pixelatedRigidbody.ApplyHealthGridSnapshot(ms.healthGrid);
 
                 moduleGo.SetActive(true);
                 moduleGo.gameObject.layer = concreteShip.gameObject.layer;

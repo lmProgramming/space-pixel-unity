@@ -5,66 +5,25 @@ using System.Reflection;
 using Core.Ship;
 using NSubstitute;
 using NUnit.Framework;
-using Pixelation;
 using Ships.Tests.TestHelpers;
 using UnityEngine;
 using UnityEngine.TestTools;
-using Zenject;
-using ZLinq;
 using Object = UnityEngine.Object;
 using Resources = Core.Ship.Resources;
 
 namespace Ships.Tests
 {
     [TestFixture]
-    public class CrewModuleTests
+    public class CrewModuleTests : ShipTestBase
     {
-        [SetUp]
-        public void SetUp()
-        {
-            _createdObjects = new List<GameObject>();
-            _testRoot = new GameObject("TestRoot");
-            _container = TestContainerFactory.CreateTestContainer(_testRoot.transform);
-        }
-
-        [TearDown]
-        public void TearDown()
-        {
-            foreach (var obj in _createdObjects.AsValueEnumerable().Where(obj => obj != null))
-                Object.DestroyImmediate(obj);
-
-            if (_testRoot != null)
-                Object.DestroyImmediate(_testRoot);
-        }
-
-        private DiContainer _container;
-        private GameObject _testRoot;
-        private List<GameObject> _createdObjects;
-
         private TestModule CreateStandaloneModule(
             int crewNeeded = 3,
             CrewSkillType mainSkill = CrewSkillType.Navigation,
             float shipCaptainMultiplier = 1f
         )
         {
-            var go = new GameObject("Module");
-            _createdObjects.Add(go);
-
-            go.AddComponent<SpriteRenderer>();
-            var rb = go.AddComponent<Rigidbody2D>();
-            rb.bodyType = RigidbodyType2D.Dynamic;
-            rb.gravityScale = 0f;
-            go.AddComponent<PolygonCollider2D>();
-
-            var pxRb = go.AddComponent<PixelatedRigidbody>();
-            _container.Inject(pxRb);
-
-            var colors = new Color32[5, 5];
-            var solid = new Color32(100, 100, 100, 255);
-            for (var x = 0; x < 5; x++)
-            for (var y = 0; y < 5; y++)
-                colors[x, y] = solid;
-            pxRb.SetTextureFromColors(colors);
+            var go = ModuleFactory.CreateModuleBase("Module", null, Vector2.zero, 0f, Container, CreatedObjects, 5,
+                5);
 
             var module = go.AddComponent<TestModule>();
             module.SetModuleType(ModuleType.Resources);
@@ -76,12 +35,6 @@ namespace Ships.Tests
             module.SetShip(ship);
 
             return module;
-        }
-
-        private static CrewMember MakeCrew(string first = "John", string last = "Doe", int age = 30,
-            Dictionary<CrewSkillType, int> skills = null)
-        {
-            return new CrewMember(first, last, age, skills);
         }
 
         private static Delegate GetOnDiedDelegate(CrewMember crew)

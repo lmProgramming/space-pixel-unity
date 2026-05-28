@@ -1,6 +1,5 @@
 using Core.Ship;
 using Ships.Modules;
-using UnityEngine;
 
 namespace Ships.Tests.TestHelpers
 {
@@ -12,6 +11,9 @@ namespace Ships.Tests.TestHelpers
             Type = ModuleType.Resources;
         }
 
-        public override float GetEnergyProduction() => 1000f;
+        public override float GetEnergyProduction()
+        {
+            return 1000f;
+        }
     }
 }
