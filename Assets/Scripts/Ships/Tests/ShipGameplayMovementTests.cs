@@ -41,17 +41,15 @@ namespace Ships.Tests
             var ship = CreateReadyShip();
             yield return WaitForLifecycle();
 
-            var startHeading = ship.GetHeadingDegreesForTesting();
-
             ship.ForwardInput = 0f;
             ship.TurnInput = -1f;
             ship.SasEnabled = false;
 
-            yield return SimulateForSeconds(MovementSimulationSeconds);
+            var heading = new HeadingChangeAccumulator(ship);
+            yield return SimulateForSeconds(MovementSimulationSeconds, heading.Sample);
 
-            var headingDelta = Mathf.DeltaAngle(startHeading, ship.GetHeadingDegreesForTesting());
-            Assert.That(headingDelta, Is.LessThan(-MinTurnDegrees),
-                () => $"Expected right turn > {MinTurnDegrees}°, got {headingDelta:F2}°.");
+            Assert.That(heading.TotalDegrees, Is.LessThan(-MinTurnDegrees),
+                () => $"Expected right turn > {MinTurnDegrees}°, got {heading.TotalDegrees:F2}°.");
         }
 
         [UnityTest]
@@ -60,17 +58,15 @@ namespace Ships.Tests
             var ship = CreateReadyShip();
             yield return WaitForLifecycle();
 
-            var startHeading = ship.GetHeadingDegreesForTesting();
-
             ship.ForwardInput = 0f;
             ship.TurnInput = 1f;
             ship.SasEnabled = false;
 
-            yield return SimulateForSeconds(MovementSimulationSeconds);
+            var heading = new HeadingChangeAccumulator(ship);
+            yield return SimulateForSeconds(MovementSimulationSeconds, heading.Sample);
 
-            var headingDelta = Mathf.DeltaAngle(startHeading, ship.GetHeadingDegreesForTesting());
-            Assert.That(headingDelta, Is.GreaterThan(MinTurnDegrees),
-                () => $"Expected left turn > {MinTurnDegrees}°, got {headingDelta:F2}°.");
+            Assert.That(heading.TotalDegrees, Is.GreaterThan(MinTurnDegrees),
+                () => $"Expected left turn > {MinTurnDegrees}°, got {heading.TotalDegrees:F2}°.");
         }
 
         [UnityTest]
@@ -104,13 +100,35 @@ namespace Ships.Tests
             return SmallMovableShipTestFactory.Create(Container, CreatedObjects);
         }
 
-        private static IEnumerator SimulateForSeconds(float seconds)
+        private static IEnumerator SimulateForSeconds(float seconds, System.Action onFixedStep = null)
         {
             var elapsed = 0f;
             while (elapsed < seconds)
             {
                 yield return new WaitForFixedUpdate();
                 elapsed += Time.fixedDeltaTime;
+                onFixedStep?.Invoke();
+            }
+        }
+
+        private sealed class HeadingChangeAccumulator
+        {
+            private readonly MovableShipTestProxy _ship;
+            private float _previousHeading;
+
+            public HeadingChangeAccumulator(MovableShipTestProxy ship)
+            {
+                _ship = ship;
+                _previousHeading = ship.GetHeadingDegreesForTesting();
+            }
+
+            public float TotalDegrees { get; private set; }
+
+            public void Sample()
+            {
+                var currentHeading = _ship.GetHeadingDegreesForTesting();
+                TotalDegrees += Mathf.DeltaAngle(_previousHeading, currentHeading);
+                _previousHeading = currentHeading;
             }
         }
     }
