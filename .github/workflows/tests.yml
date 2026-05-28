@@ -3,6 +3,8 @@ name: Tests
 on:
   pull_request:
   push:
+    branches:
+      - main
   workflow_dispatch:
 
 # Cancel superseded runs on the same PR/branch to save CI minutes.
@@ -12,33 +14,42 @@ concurrency:
 
 jobs:
   test:
-    name: Test in ${{ matrix.testMode }}
+    name: Unity tests
     runs-on: ubuntu-latest
     permissions:
       checks: write
       contents: read
-    strategy:
-      fail-fast: false
-      matrix:
-        testMode:
-          - editmode
-          - playmode
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           lfs: true
 
+      - name: Read Unity version
+        id: unity
+        run: |
+          version=$(grep 'm_EditorVersion:' ProjectSettings/ProjectVersion.txt | awk '{print $2}')
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "image=unityci/editor:ubuntu-${version}-base-3" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Unity Docker image
+        uses: ScribeMD/docker-cache@0.5.0
+        with:
+          key: docker-${{ runner.os }}-unity-${{ steps.unity.outputs.version }}-base-3
+
+      - name: Pull Unity editor image
+        run: docker pull ${{ steps.unity.outputs.image }}
+
       - name: Cache Library
         uses: actions/cache@v4
         with:
           path: Library
-          key: Library-${{ matrix.testMode }}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          key: Library-${{ steps.unity.outputs.version }}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
           restore-keys: |
-            Library-${{ matrix.testMode }}-
+            Library-${{ steps.unity.outputs.version }}-
             Library-
 
-      - name: Run ${{ matrix.testMode }} tests
+      - name: Run tests
         id: tests
         uses: game-ci/unity-test-runner@v4
         env:
@@ -47,15 +58,15 @@ jobs:
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
           projectPath: .
-          unityVersion: auto
-          testMode: ${{ matrix.testMode }}
-          artifactsPath: ${{ matrix.testMode }}-artifacts
+          customImage: ${{ steps.unity.outputs.image }}
+          testMode: all
+          artifactsPath: test-artifacts
           githubToken: ${{ secrets.GITHUB_TOKEN }}
-          checkName: ${{ matrix.testMode }} test results
+          checkName: Unity test results
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: Test results (${{ matrix.testMode }})
+          name: Test results
           path: ${{ steps.tests.outputs.artifactsPath }}
