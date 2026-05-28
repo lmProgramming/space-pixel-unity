@@ -23,8 +23,10 @@ namespace Ships
             if (Input.GetKeyDown(sasToggleKey))
                 ToggleSas();
 
-            var forwardInput = Input.GetAxis("Vertical") * speedMultiplier;
-            var turnInput = Input.GetAxis("Horizontal") * rotationMultiplier;
+            var rawVertical = Input.GetAxis("Vertical");
+            var rawHorizontal = Input.GetAxis("Horizontal");
+            var forwardInput = rawVertical * speedMultiplier;
+            var turnInput = rawHorizontal * rotationMultiplier;
 
             MarkEnginesActivity(ApplyEngineForces(forwardInput, turnInput, Time.deltaTime, sasEnabled));
         }
@@ -33,7 +35,7 @@ namespace Ships
         {
             AttackTargetPosition = GameInput.WorldPointerPosition;
 
-            if (Input.GetMouseButton(0)) Shoot();
+            if (Input.GetMouseButton(0) && !GameInput.IsPointerOverUI) Shoot();
 
             if (Input.GetMouseButtonUp(0)) StopShooting();
         }

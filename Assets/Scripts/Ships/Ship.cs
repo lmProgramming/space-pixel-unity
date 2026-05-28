@@ -375,7 +375,8 @@ namespace Ships
                 engine.RotateThrusterTowards(desiredAngle, deltaTime);
             }
 
-            var thrustRatios = ControlAllocator.AllocateControlInputs(engines, desiredDirectionPerEngine, centerOfMass, forward,
+            var thrustRatios = ControlAllocator.AllocateControlInputs(engines, desiredDirectionPerEngine, centerOfMass,
+                forward,
                 forwardInput, finalTurnInput, maxLeverArm, GetControlAllocatorSettings());
 
             var anyForceApplied = false;
@@ -442,6 +443,21 @@ namespace Ships
         }
 
 #if UNITY_INCLUDE_TESTS
+        internal void SetSasDesiredHeadingForTesting(float headingDegrees)
+        {
+            _sasTurnInputResolver.CaptureDesiredHeading(headingDegrees);
+        }
+
+        internal float GetHeadingDegreesForTesting()
+        {
+            return GetCurrentHeadingDegrees();
+        }
+
+        internal Vector2 GetForwardForTesting()
+        {
+            return CommandModule.Transform.up;
+        }
+
         internal void ApplyEngineForcesForTesting(float forwardInput, float turnInput, float deltaTime,
             bool sasEnabled = false)
         {

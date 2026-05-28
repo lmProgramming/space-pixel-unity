@@ -94,6 +94,27 @@ namespace Ships.Tests
         }
 
         [UnityTest]
+        public IEnumerator ForwardInput_FiveHighThrustWingEngines_UsesAtLeastNinetyPercentThrust()
+        {
+            var shipWithEngines = CreateShipWithEngines(
+                new EngineSpec { LocalPosition = new Vector2(-20f, -45f), LocalRotationZ = 0f, MaxThrust = 3000f },
+                new EngineSpec { LocalPosition = new Vector2(-20f, -50f), LocalRotationZ = 0f, MaxThrust = 3000f },
+                new EngineSpec { LocalPosition = new Vector2(0f, -48f), LocalRotationZ = 0f, MaxThrust = 3000f },
+                new EngineSpec { LocalPosition = new Vector2(20f, -50f), LocalRotationZ = 0f, MaxThrust = 3000f },
+                new EngineSpec { LocalPosition = new Vector2(20f, -45f), LocalRotationZ = 0f, MaxThrust = 3000f });
+
+            yield return WaitForLifecycle();
+
+            shipWithEngines.Ship.ConfigureAllocatorForTesting(true, 14, 1f,
+                0.4f, 0.02f);
+
+            shipWithEngines.Ship.ApplyEngineForcesForTesting(1f, 0f, 0.02f);
+
+            foreach (var engine in shipWithEngines.Engines)
+                Assert.That(engine.CurrentThrustRatioForTesting, Is.GreaterThanOrEqualTo(0.9f));
+        }
+
+        [UnityTest]
         public IEnumerator BackwardInput_ForwardFacingEngine_UsesAtMostTenPercentThrust()
         {
             var shipWithEngines = CreateShipWithEngines(
@@ -118,7 +139,7 @@ namespace Ships.Tests
             Assert.That(shipWithEngines.Engines[1].CurrentThrustRatioForTesting, Is.LessThanOrEqualTo(0.1f));
         }
 
-        private IEnumerator WaitForLifecycle()
+        private static IEnumerator WaitForLifecycle()
         {
             yield return null;
             yield return null;
@@ -130,9 +151,8 @@ namespace Ships.Tests
 
             CreateCommandModule(shipGo.transform, Vector2.zero);
 
-            var engines = new List<Engine>();
-            foreach (var spec in engineSpecs)
-                engines.Add(CreateEngineModule(shipGo.transform, spec));
+            var engines = engineSpecs.AsValueEnumerable()
+                .Select(spec => CreateEngineModule(shipGo.transform, spec)).ToList();
 
             var connectionFactory = shipGo.AddComponent<ModuleConnectionFactory>();
             shipGo.AddComponent<ResourceManager>();
@@ -186,18 +206,6 @@ namespace Ships.Tests
             pixelatedRb.SetTextureFromColors(CreateSolidPixelGrid(5, 5));
 
             return moduleGo;
-        }
-
-        private Color32[,] CreateSolidPixelGrid(int width, int height)
-        {
-            var colors = new Color32[width, height];
-            var solidColor = new Color32(100, 100, 100, 255);
-
-            for (var x = 0; x < width; x++)
-            for (var y = 0; y < height; y++)
-                colors[x, y] = solidColor;
-
-            return colors;
         }
 
         private GameObject CreateGameObject(string name)
