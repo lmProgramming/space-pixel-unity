@@ -32,11 +32,6 @@ jobs:
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "image=unityci/editor:ubuntu-${version}-base-3" >> "$GITHUB_OUTPUT"
 
-      - name: Cache Unity Docker image
-        uses: ScribeMD/docker-cache@0.5.0
-        with:
-          key: docker-${{ runner.os }}-unity-${{ steps.unity.outputs.version }}-base-3
-
       - name: Pull Unity editor image
         run: docker pull ${{ steps.unity.outputs.image }}
 
