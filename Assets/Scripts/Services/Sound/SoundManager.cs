@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Core;
 using Core.Gameplay.Sound;
 using EasyPool;
 using Instantiation;
@@ -28,6 +29,7 @@ namespace Services.Sound
         private float _musicVolume = 1f;
 
         private Dictionary<SoundIdentifier, Sound> _soundsDictionary;
+        private readonly Dictionary<SoundIdentifier, List<AudioSource>> _activePooledSources = new();
 
         private void Awake()
         {
@@ -95,9 +97,9 @@ namespace Services.Sound
 
         private void Start()
         {
-            _masterVolume = PlayerPrefs.GetFloat("masterVolume", 1f);
-            _musicVolume = PlayerPrefs.GetFloat("musicVolume", 1f);
-            _effectsVolume = PlayerPrefs.GetFloat("effectVolume", 1f);
+            _masterVolume = PlayerPrefs.GetFloat(PlayerPrefsKeys.MasterVolume, 1f);
+            _musicVolume = PlayerPrefs.GetFloat(PlayerPrefsKeys.MusicVolume, 1f);
+            _effectsVolume = PlayerPrefs.GetFloat(PlayerPrefsKeys.EffectsVolume, 1f);
 
             ApplyAllVolumes();
         }
@@ -153,8 +155,13 @@ namespace Services.Sound
             }
 
             ConfigureAudioSource(audioSource, sound, position);
+            RegisterActivePooledSource(sound.identifier, audioSource);
 
-            if (audioSource.GetComponent<IReturnToPool<AudioSource>>() is { } returner) returner.OnConfigured();
+            if (audioSource.GetComponent<ReturnToPoolAudioSource>() is { } returner)
+            {
+                returner.SetOnReturnedToPool(() => UnregisterActivePooledSource(sound.identifier, audioSource));
+                returner.OnConfigured();
+            }
 
             audioSource.Play();
         }
@@ -184,49 +191,121 @@ namespace Services.Sound
 
         public void Stop(SoundIdentifier identifier)
         {
-            if (_soundsDictionary.TryGetValue(identifier, out var sound) && !sound.allowOverlap &&
-                sound.dedicatedSource != null)
-                sound.dedicatedSource.Stop();
-            else if (sound is { allowOverlap: true })
-                Debug.LogWarning(
-                    $"Stop() called on overlapping sound '{identifier}'. Only stops dedicated source, not pooled instances.");
+            if (!_soundsDictionary.TryGetValue(identifier, out var sound))
+            {
+                Debug.LogError($"Sound '{identifier}' not found in dictionary!");
+                return;
+            }
+
+            if (!sound.allowOverlap)
+            {
+                if (sound.dedicatedSource != null)
+                    sound.dedicatedSource.Stop();
+                return;
+            }
+
+            StopAllActivePooledSources(identifier);
         }
 
         public void Pause(SoundIdentifier identifier)
         {
-            if (_soundsDictionary.TryGetValue(identifier, out var sound) && !sound.allowOverlap &&
-                sound.dedicatedSource != null)
-                sound.dedicatedSource.Pause();
-            else if (sound is { allowOverlap: true })
-                Debug.LogWarning(
-                    $"Pause() called on overlapping sound '{identifier}'. Not supported for pooled instances.");
+            if (!_soundsDictionary.TryGetValue(identifier, out var sound))
+            {
+                Debug.LogError($"Sound '{identifier}' not found in dictionary!");
+                return;
+            }
+
+            if (!sound.allowOverlap)
+            {
+                if (sound.dedicatedSource != null)
+                    sound.dedicatedSource.Pause();
+                return;
+            }
+
+            if (!_activePooledSources.TryGetValue(identifier, out var sources))
+                return;
+
+            foreach (var source in sources)
+                if (source) source.Pause();
         }
 
         public void UnPause(SoundIdentifier identifier)
         {
-            if (_soundsDictionary.TryGetValue(identifier, out var sound) && !sound.allowOverlap &&
-                sound.dedicatedSource != null)
-                sound.dedicatedSource.UnPause();
-            else if (sound is { allowOverlap: true })
-                Debug.LogWarning(
-                    $"UnPause() called on overlapping sound '{identifier}'. Not supported for pooled instances.");
+            if (!_soundsDictionary.TryGetValue(identifier, out var sound))
+            {
+                Debug.LogError($"Sound '{identifier}' not found in dictionary!");
+                return;
+            }
+
+            if (!sound.allowOverlap)
+            {
+                if (sound.dedicatedSource != null)
+                    sound.dedicatedSource.UnPause();
+                return;
+            }
+
+            if (!_activePooledSources.TryGetValue(identifier, out var sources))
+                return;
+
+            foreach (var source in sources)
+                if (source) source.UnPause();
         }
 
         public bool IsPlaying(SoundIdentifier identifier)
         {
             if (!_soundsDictionary.TryGetValue(identifier, out var sound)) return false;
 
-            switch (sound.allowOverlap)
+            if (!sound.allowOverlap)
+                return sound.dedicatedSource != null && sound.dedicatedSource.isPlaying;
+
+            if (!_activePooledSources.TryGetValue(identifier, out var sources))
+                return false;
+
+            foreach (var source in sources)
+                if (source && source.isPlaying)
+                    return true;
+
+            return false;
+        }
+
+        private void RegisterActivePooledSource(SoundIdentifier identifier, AudioSource source)
+        {
+            if (!_activePooledSources.TryGetValue(identifier, out var sources))
             {
-                case false when sound.dedicatedSource != null:
-                    return sound.dedicatedSource.isPlaying;
-                case true:
-                    Debug.LogWarning($"IsPlaying() check for overlapping sound '{identifier}' is simplified.");
-                    return false;
+                sources = new List<AudioSource>();
+                _activePooledSources[identifier] = sources;
             }
 
-            Debug.LogError($"Sound '{identifier}' not found for IsPlaying check!");
-            return false;
+            if (!sources.Contains(source))
+                sources.Add(source);
+        }
+
+        private void UnregisterActivePooledSource(SoundIdentifier identifier, AudioSource source)
+        {
+            if (!_activePooledSources.TryGetValue(identifier, out var sources))
+                return;
+
+            sources.Remove(source);
+            if (sources.Count == 0)
+                _activePooledSources.Remove(identifier);
+        }
+
+        private void StopAllActivePooledSources(SoundIdentifier identifier)
+        {
+            if (!_activePooledSources.TryGetValue(identifier, out var sources) || sources.Count == 0)
+                return;
+
+            var snapshot = sources.ToArray();
+            foreach (var source in snapshot)
+            {
+                if (!source)
+                    continue;
+
+                source.Stop();
+                _audioSourcePool.Release(source);
+            }
+
+            _activePooledSources.Remove(identifier);
         }
 
         #endregion
@@ -249,21 +328,21 @@ namespace Services.Sound
         public void SetMasterVolume(float volume)
         {
             _masterVolume = Mathf.Clamp01(volume);
-            PlayerPrefs.SetFloat("masterVolume", _masterVolume);
+            PlayerPrefs.SetFloat(PlayerPrefsKeys.MasterVolume, _masterVolume);
             ApplyAllVolumes();
         }
 
         public void SetMusicVolume(float volume)
         {
             _musicVolume = Mathf.Clamp01(volume);
-            PlayerPrefs.SetFloat("musicVolume", _musicVolume);
+            PlayerPrefs.SetFloat(PlayerPrefsKeys.MusicVolume, _musicVolume);
             ApplyAllVolumes();
         }
 
         public void SetEffectsVolume(float volume)
         {
             _effectsVolume = Mathf.Clamp01(volume);
-            PlayerPrefs.SetFloat("effectVolume", _effectsVolume);
+            PlayerPrefs.SetFloat(PlayerPrefsKeys.EffectsVolume, _effectsVolume);
             ApplyAllVolumes();
         }
 

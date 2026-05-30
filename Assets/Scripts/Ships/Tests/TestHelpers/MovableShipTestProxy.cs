@@ -8,9 +8,16 @@ namespace Ships.Tests.TestHelpers
         public float TurnInput { get; set; }
         public bool SasEnabled { get; set; }
 
-        protected override void Move()
+        protected override void ReadMovementInput()
         {
-            MarkEnginesActivity(ApplyEngineForces(ForwardInput, TurnInput, Time.deltaTime, SasEnabled));
+            PendingForwardInput = ForwardInput;
+            PendingTurnInput = TurnInput;
+        }
+
+        protected override void ApplyMovementPhysics()
+        {
+            MarkEnginesActivity(ApplyEngineForces(PendingForwardInput, PendingTurnInput, Time.fixedDeltaTime,
+                SasEnabled));
         }
     }
 }

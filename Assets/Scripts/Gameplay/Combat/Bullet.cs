@@ -1,4 +1,5 @@
 using System;
+using Core;
 using Cysharp.Threading.Tasks;
 using Pixelation;
 using UnityEngine;
@@ -19,7 +20,7 @@ namespace Gameplay.Combat
 
             DelayedFadeOutAsync().Forget();
 
-            OnPixelsLost += (_, _) => SetLayer(LayerMask.NameToLayer("Default"));
+            OnPixelsLost += (_, _) => SetLayer(PhysicsLayers.Default);
         }
 
         private void OnDestroy()

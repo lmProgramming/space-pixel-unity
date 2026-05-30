@@ -12,6 +12,7 @@ namespace EasyPool
     {
         private CancellationTokenSource _cts;
         private AudioSource _mainComponent;
+        private Action _onReturnedToPool;
         private IObjectPool<AudioSource> _pool;
 
         private void Awake()
@@ -39,6 +40,11 @@ namespace EasyPool
             _pool = pool;
         }
 
+        public void SetOnReturnedToPool(Action onReturnedToPool)
+        {
+            _onReturnedToPool = onReturnedToPool;
+        }
+
         public void OnConfigured()
         {
             var duration = _mainComponent.Duration();
@@ -48,6 +54,8 @@ namespace EasyPool
 
         public void ResetState()
         {
+            _onReturnedToPool?.Invoke();
+            _onReturnedToPool = null;
         }
 
         private async UniTaskVoid ReturnAfterDelayAsync(float delay, CancellationToken token)

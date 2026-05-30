@@ -1,4 +1,5 @@
 using System;
+using Core;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -6,10 +7,6 @@ namespace UI.Common
 {
     public class SettingsPanelController
     {
-        private const string MasterVolumeKey = "masterVolume";
-        private const string MusicVolumeKey = "musicVolume";
-        private const string EffectsVolumeKey = "effectVolume";
-
         private readonly VisualElement _backdrop;
         private readonly Slider _effectsSlider;
         private readonly Slider _masterSlider;
@@ -23,13 +20,13 @@ namespace UI.Common
             if (parent == null)
                 throw new ArgumentNullException(nameof(parent));
 
-            _overlayHost = parent.Q<VisualElement>("settings-overlay-host");
-            _backdrop = parent.Q<VisualElement>("settings-overlay");
-            var titleLabel = parent.Q<Label>("settings-title");
-            _masterSlider = parent.Q<Slider>("settings-master-slider");
-            _musicSlider = parent.Q<Slider>("settings-music-slider");
-            _effectsSlider = parent.Q<Slider>("settings-effects-slider");
-            var closeButton = parent.Q<Button>("settings-close-button");
+            _overlayHost = parent.Q<VisualElement>(SharedUiElementNames.Settings.OverlayHost);
+            _backdrop = parent.Q<VisualElement>(SharedUiElementNames.Settings.Overlay);
+            var titleLabel = parent.Q<Label>(SharedUiElementNames.Settings.Title);
+            _masterSlider = parent.Q<Slider>(SharedUiElementNames.Settings.MasterSlider);
+            _musicSlider = parent.Q<Slider>(SharedUiElementNames.Settings.MusicSlider);
+            _effectsSlider = parent.Q<Slider>(SharedUiElementNames.Settings.EffectsSlider);
+            var closeButton = parent.Q<Button>(SharedUiElementNames.Settings.CloseButton);
 
             if (titleLabel == null || _masterSlider == null || _musicSlider == null || _effectsSlider == null ||
                 closeButton == null || _backdrop == null)
@@ -77,9 +74,9 @@ namespace UI.Common
         private void LoadFromPlayerPrefs()
         {
             _suppressPersist = true;
-            _masterSlider.SetValueWithoutNotify(PlayerPrefs.GetFloat(MasterVolumeKey, 1f));
-            _musicSlider.SetValueWithoutNotify(PlayerPrefs.GetFloat(MusicVolumeKey, 1f));
-            _effectsSlider.SetValueWithoutNotify(PlayerPrefs.GetFloat(EffectsVolumeKey, 1f));
+            _masterSlider.SetValueWithoutNotify(PlayerPrefs.GetFloat(PlayerPrefsKeys.MasterVolume, 1f));
+            _musicSlider.SetValueWithoutNotify(PlayerPrefs.GetFloat(PlayerPrefsKeys.MusicVolume, 1f));
+            _effectsSlider.SetValueWithoutNotify(PlayerPrefs.GetFloat(PlayerPrefsKeys.EffectsVolume, 1f));
             _suppressPersist = false;
         }
 
@@ -88,7 +85,7 @@ namespace UI.Common
             if (_suppressPersist)
                 return;
 
-            PersistVolume(MasterVolumeKey, evt.newValue);
+            PersistVolume(PlayerPrefsKeys.MasterVolume, evt.newValue);
         }
 
         private void OnMusicVolumeChanged(ChangeEvent<float> evt)
@@ -96,7 +93,7 @@ namespace UI.Common
             if (_suppressPersist)
                 return;
 
-            PersistVolume(MusicVolumeKey, evt.newValue);
+            PersistVolume(PlayerPrefsKeys.MusicVolume, evt.newValue);
         }
 
         private void OnEffectsVolumeChanged(ChangeEvent<float> evt)
@@ -104,7 +101,7 @@ namespace UI.Common
             if (_suppressPersist)
                 return;
 
-            PersistVolume(EffectsVolumeKey, evt.newValue);
+            PersistVolume(PlayerPrefsKeys.EffectsVolume, evt.newValue);
         }
 
         private static void PersistVolume(string key, float value)

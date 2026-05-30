@@ -1443,6 +1443,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.UI::UI.Main.ShipStatusPanelController
   playerShip: {fileID: 4229628396879989915}
   uiDocument: {fileID: 938120422}
+  pointerOverUiChannel: {fileID: 11400000, guid: fe59adb565b6e2758b87bd8eda75cff1, type: 2}
+  pauseStateChannel: {fileID: 11400000, guid: 74f53e084322486ddb6ba9576741f3e3, type: 2}
   barAnimationSpeed: 5
   criticalEnergyThreshold: 0.2
 --- !u!114 &938120422
