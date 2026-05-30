@@ -7,7 +7,7 @@
     <ui:Template name="settingsOverlayTemplate" src="project://database/Assets/Scripts/UI/Common/SettingsOverlay.uxml"/>
     <ui:VisualElement name="main-hud-root" class="main-hud-root">
         <ui:VisualElement class="hud-top-bar">
-            <uic:ChildAnnotator class="hud-weapons-cluster">
+            <uic:ChildAnnotator name="hud-weapons-cluster" class="hud-weapons-cluster">
                 <ui:Label text="Weapons" class="ds-caption hud-weapons-title"/>
                 <uic:ChildAnnotator name="weapon-queue" class="weapon-queue" check-interval="250"/>
             </uic:ChildAnnotator>

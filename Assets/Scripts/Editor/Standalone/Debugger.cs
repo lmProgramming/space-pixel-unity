@@ -1,5 +1,6 @@
-using LMPro;
+using Core.Services;
 using Pixelation;
+using Services.GameInput;
 using UnityEngine;
 
 namespace Editor.Standalone
@@ -7,8 +8,14 @@ namespace Editor.Standalone
     public class Debugger : MonoBehaviour
     {
 #if UNITY_EDITOR
+        private IGameInput _gameInput;
+
+        private IGameInput GameInput => _gameInput ??= FindAnyObjectByType<GameInput>();
+
         private void Update()
         {
+            if (GameInput == null) return;
+
             if (Input.GetKey(KeyCode.Delete)) HandleDelete();
 
             if (Input.GetKeyDown(KeyCode.Home)) Debug.Log(GameInput.WorldPointerPosition.ToString());
@@ -16,7 +23,7 @@ namespace Editor.Standalone
             if (Input.GetKeyDown(KeyCode.P)) Debug.Break();
         }
 
-        private static void HandleDelete()
+        private void HandleDelete()
         {
             var gameObjectUnderPointer = GameInput.ObjectUnderPointer;
 

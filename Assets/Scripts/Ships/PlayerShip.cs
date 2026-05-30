@@ -1,5 +1,6 @@
-using LMPro;
+using Core.Services;
 using UnityEngine;
+using Zenject;
 
 namespace Ships
 {
@@ -11,6 +12,8 @@ namespace Ships
         [SerializeField] private bool sasEnabled = true;
         [SerializeField] private KeyCode sasToggleKey = KeyCode.T;
 
+        [Inject] private IGameInput _gameInput;
+
         public bool SasEnabled => sasEnabled;
 
         public void ToggleSas()
@@ -20,6 +23,9 @@ namespace Ships
 
         protected override void Move()
         {
+            if (!_gameInput.CanControlShip)
+                return;
+
             if (Input.GetKeyDown(sasToggleKey))
                 ToggleSas();
 
@@ -33,9 +39,15 @@ namespace Ships
 
         protected override void HandleWeapons()
         {
-            AttackTargetPosition = GameInput.WorldPointerPosition;
+            if (!_gameInput.CanFireWeapons)
+            {
+                StopShooting();
+                return;
+            }
 
-            if (Input.GetMouseButton(0) && !GameInput.IsPointerOverUI) Shoot();
+            AttackTargetPosition = _gameInput.WorldPointerPosition;
+
+            if (Input.GetMouseButton(0) && _gameInput.CanFireWeapons) Shoot();
 
             if (Input.GetMouseButtonUp(0)) StopShooting();
         }

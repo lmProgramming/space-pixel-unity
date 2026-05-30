@@ -1,73 +1,65 @@
-﻿using JetBrains.Annotations;
+﻿using System.Collections.Generic;
+using Core.Services;
+using Events.Game;
+using Events.UI;
 using UnityEngine;
-using UnityEngine.EventSystems;
+using Zenject;
 
-namespace LMPro
+namespace Services.GameInput
 {
-    public sealed class GameInput : MonoBehaviour
+    public sealed class GameInput : MonoBehaviour, IGameInput
     {
-        public static GameInput Instance;
+        [SerializeField] private float maxTimeBetweenDoubleClicks = 0.5f;
 
-        private static Camera _mainCamera;
+        private readonly HashSet<object> _hoveredUiElements = new();
 
-        public static float PressingTime;
+        [Inject] private PointerOverUiEventChannel _pointerOverUiChannel;
+        [Inject] private PauseStateEventChannel _pauseStateChannel;
 
-        private static float _timeSinceLastLeftClick = 100f;
+        private UnityEngine.Camera _mainCamera;
 
-        public float maxTimeBetweenDoubleClicks = 0.5f;
+        private readonly float _simSpeed = 1f;
+        private float _timeSinceLastLeftClick = 100f;
+        private float _unscaledDeltaTime;
 
-        public static bool LeftDoubleClick;
-
-        public static bool PressingAfterLeftDoubleClick;
-
-        private static float _deltaTime;
-        private static float _unscaledDeltaTime;
-        public static float SimDeltaTime;
-        private static float _simSpeed = 1;
-
-        public static int AmountOfHeldUIElements;
-
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        private static void InitializeOnLoad()
+        private UnityEngine.Camera MainCamera
         {
-            Instance = null;
-            _mainCamera = null;
-            PressingTime = 0;
-            _timeSinceLastLeftClick = 0;
-            LeftDoubleClick = false;
-            PressingAfterLeftDoubleClick = false;
-            _deltaTime = 0;
-            _unscaledDeltaTime = 0;
-            SimDeltaTime = 0;
-            _simSpeed = 1;
-            AmountOfHeldUIElements = 0;
+            get
+            {
+                if (_mainCamera == null)
+                    _mainCamera = UnityEngine.Camera.main;
+                return _mainCamera;
+            }
         }
 
-        private void Awake()
+        public float PressingTime { get; private set; }
+        public bool LeftDoubleClick { get; private set; }
+        public bool PressingAfterLeftDoubleClick { get; private set; }
+        public float SimDeltaTime { get; private set; }
+        public int HeldUiElementCount { get; private set; }
+
+        public bool IsPointerOverUI => _hoveredUiElements.Count > 0;
+        public bool IsPaused { get; private set; }
+
+        public bool CanControlShip => !IsPaused;
+        public bool CanFireWeapons => !IsPaused && !IsPointerOverUI;
+
+        private void OnEnable()
         {
-            Instance = this;
-            _simSpeed = 1f;
+            _pointerOverUiChannel.Register(OnPointerOverUiChanged);
+            _pauseStateChannel.Register(OnPauseStateChanged);
         }
 
-        private void Start()
+        private void OnDisable()
         {
-            _mainCamera = Camera.main;
-        }
-
-        public static void StartHoldingUIElement()
-        {
-            AmountOfHeldUIElements++;
-        }
-
-        public static void StopHoldingUIElement()
-        {
-            AmountOfHeldUIElements--;
+            _pointerOverUiChannel.Unregister(OnPointerOverUiChanged);
+            _pauseStateChannel.Unregister(OnPauseStateChanged);
+            _hoveredUiElements.Clear();
         }
 
         private void Update()
         {
-            _deltaTime = Time.deltaTime;
-            SimDeltaTime = _deltaTime * _simSpeed;
+            SimDeltaTime = Time.deltaTime * _simSpeed;
             _unscaledDeltaTime = Time.unscaledDeltaTime;
 
             LeftDoubleClick = false;
@@ -79,7 +71,7 @@ namespace LMPro
                     LeftDoubleClick = true;
                     PressingAfterLeftDoubleClick = true;
 
-                    // after double click, we don't want our next click to also be double click
+                    // after double click, we don't want our next click to also be a double click
                     _timeSinceLastLeftClick = maxTimeBetweenDoubleClicks;
                 }
                 else
@@ -100,11 +92,39 @@ namespace LMPro
             }
         }
 
-        private static bool JustClicked => Input.GetMouseButtonDown(0) ||
-                                           (Input.touchCount == 1 && Input.GetTouch(0).phase == TouchPhase.Began);
+        public void StartHoldingUIElement()
+        {
+            HeldUiElementCount++;
+        }
 
-        public static bool JustClickedOutsideUI =>
-            (Input.GetMouseButtonDown(0) || (Input.touchCount == 1 && Input.GetTouch(0).phase == TouchPhase.Began)) &&
+        public void StopHoldingUIElement()
+        {
+            HeldUiElementCount--;
+        }
+
+        private void OnPauseStateChanged(bool paused)
+        {
+            IsPaused = paused;
+        }
+
+        private void OnPointerOverUiChanged(PointerOverUiData data)
+        {
+            if (data.Element == null)
+                return;
+
+            if (data.IsOver)
+                _hoveredUiElements.Add(data.Element);
+            else
+                _hoveredUiElements.Remove(data.Element);
+        }
+
+        private static bool JustClicked => Input.GetMouseButtonDown(0) ||
+                                           (Input.touchCount == 1 &&
+                                            Input.GetTouch(0).phase == TouchPhase.Began);
+
+        public bool JustClickedOutsideUI =>
+            (Input.GetMouseButtonDown(0) || (Input.touchCount == 1 &&
+                                             Input.GetTouch(0).phase == TouchPhase.Began)) &&
             !IsPointerOverUI;
 
         private static bool JustStoppedClicking
@@ -124,7 +144,7 @@ namespace LMPro
             }
         }
 
-        public static bool JustStoppedClickingOutsideUI
+        public bool JustStoppedClickingOutsideUI
         {
             get
             {
@@ -140,17 +160,17 @@ namespace LMPro
         }
 
         private static bool Pressing => Input.GetMouseButton(0) ||
-                                        (Input.touchCount == 1 && Input.GetTouch(0).phase != TouchPhase.Ended) ||
+                                        (Input.touchCount == 1 &&
+                                         Input.GetTouch(0).phase != TouchPhase.Ended) ||
                                         Input.touchCount > 1;
 
-        [CanBeNull]
-        public static GameObject ObjectUnderPointer
+        public GameObject ObjectUnderPointer
         {
             get
             {
                 var pointerPos = ViewportPointerPosition;
 
-                var ray = _mainCamera.ViewportPointToRay(pointerPos);
+                var ray = MainCamera.ViewportPointToRay(pointerPos);
 
                 var hit = Physics2D.Raycast(ray.origin, ray.direction);
 
@@ -158,7 +178,7 @@ namespace LMPro
             }
         }
 
-        private static Vector2 GetWorldPointerPosition(int pointerNumber = 0)
+        private Vector2 GetWorldPointerPosition(int pointerNumber = 0)
         {
             var pointerPos = Vector2.zero;
             if (Application.platform == RuntimePlatform.Android || Application.platform == RuntimePlatform.IPhonePlayer)
@@ -170,13 +190,13 @@ namespace LMPro
                 pointerPos = Input.mousePosition;
             }
 
-            pointerPos = _mainCamera.ScreenToWorldPoint(pointerPos);
+            pointerPos = MainCamera.ScreenToWorldPoint(pointerPos);
 
             return pointerPos;
         }
 
-        // warning: returns positive infinity for no touches 
-        public static Vector2 WorldPointerPosition => GetWorldPointerPosition();
+        // warning: returns positive infinity for no touches
+        public Vector2 WorldPointerPosition => GetWorldPointerPosition();
 
         // warning: returns positive infinity for no touches
         private static Vector2 ScreenPointerPosition
@@ -199,30 +219,17 @@ namespace LMPro
         }
 
         // warning: returns positive infinity for no touches
-        public static Vector2 CenteredScreenPointerPosition
-        {
-            get
-            {
-                var pointerPos = ScreenPointerPosition;
-
-                return pointerPos - new Vector2(Screen.width, Screen.height);
-            }
-        }
+        public Vector2 CenteredScreenPointerPosition =>
+            ScreenPointerPosition - new Vector2(Screen.width, Screen.height);
 
 #if UNITY_EDITOR
-        public static float TouchesAndPointersCount => Input.GetMouseButton(0) ? 1 : 0;
+        public float TouchesAndPointersCount => Input.GetMouseButton(0) ? 1 : 0;
 #else
-        public static float TouchesAndPointersCount
-        {
-            get
-            {
-                return Input.touchCount;
-            }
-        }
+        public float TouchesAndPointersCount => Input.touchCount;
 #endif
 
         // warning: returns positive infinity for more touches than one or none
-        private static Vector2 ViewportPointerPosition
+        private Vector2 ViewportPointerPosition
         {
             get
             {
@@ -237,21 +244,9 @@ namespace LMPro
                     pointerPos = Input.mousePosition;
                 }
 
-                pointerPos = _mainCamera.ScreenToViewportPoint(pointerPos);
+                pointerPos = MainCamera.ScreenToViewportPoint(pointerPos);
 
                 return pointerPos;
-            }
-        }
-
-        public static bool IsPointerOverUI
-        {
-            get
-            {
-                if (EventSystem.current.IsPointerOverGameObject()) return true;
-
-                if (Input.touchCount <= 0) return false;
-                var id = Input.GetTouch(0).fingerId;
-                return EventSystem.current.IsPointerOverGameObject(id);
             }
         }
     }

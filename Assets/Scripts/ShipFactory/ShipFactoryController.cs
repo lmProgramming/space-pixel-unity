@@ -37,6 +37,9 @@ namespace ShipFactory
         [Inject]
         private IShipSnapshotService _snapshotService;
 
+        [Inject]
+        private IGameInput _gameInput;
+
         private UIDocument _uiDocument;
 
         private void Awake()
@@ -59,7 +62,7 @@ namespace ShipFactory
             if (root == null)
                 throw new InvalidOperationException("[ShipFactoryController] UI root is missing.");
 
-            _canvasController = new ShipFactoryCanvasController(root);
+            _canvasController = new ShipFactoryCanvasController(root, _gameInput);
             _paletteController = new ModulePaletteController(root, modulePrefabLibrary);
 
             _shipNameField = root.Q<TextField>("ship-name-field");
