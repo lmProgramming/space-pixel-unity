@@ -1,4 +1,6 @@
 using System;
+using Events.Game;
+using Events.UI;
 using Ships;
 using Ships.Internal;
 using UI.Common;
@@ -17,6 +19,10 @@ namespace UI.MainGame
 
         [SerializeField] private UIDocument uiDocument;
 
+        [SerializeField] private PointerOverUiEventChannel pointerOverUiChannel;
+
+        [SerializeField] private PauseStateEventChannel pauseStateChannel;
+
         [Header("Animation Settings")]
         [SerializeField] private float barAnimationSpeed = 8f;
 
@@ -34,14 +40,16 @@ namespace UI.MainGame
         private bool _pauseUiInitialized;
 
         private VisualElement _root;
+        private VisualElement _sasCluster;
         private bool _sasHandlersRegistered;
         private bool _sasSyncing;
-        private VisualElement _sasCluster;
         private Toggle _sasToggle;
         private SettingsPanelController _settingsPanelController;
         private VisualElement _shipStatusPanel;
         private Label _speedValueLabel;
         private float _targetEnergyBarHeight;
+        private UiPointerTracker _uiPointerTracker;
+        private bool _pointerBlockersRegistered;
 
         private void Awake()
         {
@@ -57,6 +65,7 @@ namespace UI.MainGame
                 CacheUIReferences();
                 RegisterSasToggle();
                 InitializePauseUi();
+                RegisterUiPointerBlockers();
             }
 
             if (!playerShip)
@@ -107,6 +116,7 @@ namespace UI.MainGame
             CacheUIReferences();
             RegisterSasToggle();
             InitializePauseUi();
+            RegisterUiPointerBlockers();
         }
 
         private void OnDisable()
@@ -126,6 +136,42 @@ namespace UI.MainGame
             _crewCountLabel = _root.Q<Label>("crew-count-label");
             _speedValueLabel = _root.Q<Label>("speed-value-label");
             _sasToggle = _root.Q<Toggle>("sas-status-toggle");
+        }
+
+        private void RegisterUiPointerBlockers()
+        {
+            if (_pointerBlockersRegistered || _root == null)
+                return;
+
+            if (pointerOverUiChannel == null)
+                throw new InvalidOperationException(
+                    "[ShipStatusPanelController] Pointer Over UI event channel is not assigned. " +
+                    "Assign the SAME PointerOverUiEventChannel asset that is set on GameProjectInstaller.");
+
+            _uiPointerTracker = new UiPointerTracker(pointerOverUiChannel);
+
+            TrackPointerBlocker("hud-weapons-cluster");
+            TrackPointerBlocker("hud-sas-cluster");
+            TrackPointerBlocker("ship-status-panel");
+            TrackPointerBlocker("speed-readout");
+            TrackPointerBlocker("pause-overlay-host");
+            TrackPointerBlocker("settings-overlay-host");
+
+            _pointerBlockersRegistered = true;
+        }
+
+        private void TrackPointerBlocker(string elementName)
+        {
+            var element = _root.Q<VisualElement>(elementName);
+            if (element != null)
+            {
+                _uiPointerTracker.Track(element);
+            }
+            else
+            {
+                // TEMP DIAGNOSTIC: remove once pointer-over-UI gating is confirmed working.
+                Debug.LogWarning($"[ShipStatusPanelController] Pointer blocker element '{elementName}' not found in HUD.");
+            }
         }
 
         private void RegisterSasToggle()
@@ -195,6 +241,9 @@ namespace UI.MainGame
             _isPaused = paused;
             Time.timeScale = paused ? 0f : 1f;
 
+            if (pauseStateChannel != null)
+                pauseStateChannel.Raise(paused);
+
             if (_pauseOverlayHost != null)
                 _pauseOverlayHost.style.display = paused ? DisplayStyle.Flex : DisplayStyle.None;
             if (_pauseOverlay != null)
@@ -202,6 +251,14 @@ namespace UI.MainGame
 
             if (!paused && _settingsPanelController != null && _settingsPanelController.IsOpen)
                 _settingsPanelController.Hide();
+
+            // A full-screen overlay that hides under a stationary pointer never emits PointerLeave,
+            // so explicitly clear its pointer-over-UI state when leaving the paused state.
+            if (!paused && _uiPointerTracker != null)
+            {
+                _uiPointerTracker.Release(_pauseOverlayHost);
+                _uiPointerTracker.Release(_root?.Q<VisualElement>("settings-overlay-host"));
+            }
         }
 
         private static void QuitToMainMenu()

@@ -1,5 +1,6 @@
-using LMPro;
+using Core.Services;
 using UnityEngine;
+using Zenject;
 
 namespace Services.Camera
 {
@@ -21,6 +22,7 @@ namespace Services.Camera
         [SerializeField] private bool canZoomOnUI = true;
 
         public bool updateCamera = true;
+        [Inject] private IGameInput _gameInput;
 
         private UnityEngine.Camera _mainCamera;
         private Vector2 _previousMousePosition = Vector2.zero;
@@ -28,9 +30,14 @@ namespace Services.Camera
         private static bool IsMobile => Application.platform == RuntimePlatform.Android ||
                                         Application.platform == RuntimePlatform.IPhonePlayer;
 
-        private void Awake()
+        private UnityEngine.Camera MainCamera
         {
-            _mainCamera = UnityEngine.Camera.main;
+            get
+            {
+                if (_mainCamera == null)
+                    _mainCamera = UnityEngine.Camera.main;
+                return _mainCamera;
+            }
         }
 
         private void Update()
@@ -91,14 +98,14 @@ namespace Services.Camera
             var dragDelta = IsMobile ? GetMobileDragDelta() : GetDesktopDragDelta();
 
             // Translate the camera, scaled by drag speed and the current orthographic size.
-            transform.Translate(dragDelta * (dragSpeed * _mainCamera.orthographicSize), Space.World);
+            transform.Translate(dragDelta * (dragSpeed * MainCamera.orthographicSize), Space.World);
         }
 
-        private static bool ShouldProcessDrag()
+        private bool ShouldProcessDrag()
         {
-            if (IsMobile) return Input.touchCount > 0 && !GameInput.IsPointerOverUI;
+            if (IsMobile) return Input.touchCount > 0 && !_gameInput.IsPointerOverUI;
 
-            return (Input.GetMouseButton(0) && !GameInput.IsPointerOverUI) ||
+            return (Input.GetMouseButton(0) && !_gameInput.IsPointerOverUI) ||
                    Input.GetAxis("Horizontal") != 0 ||
                    Input.GetAxis("Vertical") != 0;
         }
@@ -125,13 +132,13 @@ namespace Services.Camera
 
         private void ProcessZoom()
         {
-            if (!canZoomOnUI && GameInput.IsPointerOverUI)
+            if (!canZoomOnUI && _gameInput.IsPointerOverUI)
                 return;
 
             var zoomIncrement = IsMobile ? GetMobileZoomIncrement() : -Input.GetAxis("Mouse ScrollWheel");
 
-            _mainCamera.orthographicSize = Mathf.Clamp(
-                _mainCamera.orthographicSize + zoomIncrement * scrollSpeed,
+            MainCamera.orthographicSize = Mathf.Clamp(
+                MainCamera.orthographicSize + zoomIncrement * scrollSpeed,
                 minZoom,
                 maxZoom);
         }

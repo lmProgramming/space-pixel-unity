@@ -1,7 +1,7 @@
 using System;
+using Core.Services;
 using Core.Ship;
 using JetBrains.Annotations;
-using LMPro;
 using ShipFactory.LegalPositionCalculator;
 using ShipFactory.UI.Runtime;
 using ShipFactory.UI.ToolkitComponents;
@@ -16,6 +16,7 @@ namespace ShipFactory
     public class ShipFactoryCanvasController : IDisposable
     {
         private readonly DragAnimator _animator;
+        private readonly IGameInput _gameInput;
         private readonly ModuleInfoPanel _infoPanel;
 
         private readonly VisualElement _inputBlocker;
@@ -36,8 +37,9 @@ namespace ShipFactory
         private ShipModuleSOInstanceBundle _selectedModuleBundle;
         private Ship _ship;
 
-        public ShipFactoryCanvasController(VisualElement root)
+        public ShipFactoryCanvasController(VisualElement root, IGameInput gameInput)
         {
+            _gameInput = gameInput;
             var canvasContainer = root.Q<VisualElement>("canvas-container");
             _inputBlocker = root.Q<VisualElement>("ship-factory-input-blocker");
 
@@ -188,7 +190,7 @@ namespace ShipFactory
         {
             if (evt.button != 0 || IsInputLocked || IsDraggingModule) return;
 
-            var bundle = _overlayManager.FindBundleAtWorldPosition(GameInput.WorldPointerPosition);
+            var bundle = _overlayManager.FindBundleAtWorldPosition(_gameInput.WorldPointerPosition);
             if (bundle == null) return;
 
             BeginModuleDrag(bundle, false);
@@ -207,7 +209,7 @@ namespace ShipFactory
 
             if (!_isPointerOverCanvas) return;
 
-            var bundle = _overlayManager.FindBundleAtWorldPosition(GameInput.WorldPointerPosition);
+            var bundle = _overlayManager.FindBundleAtWorldPosition(_gameInput.WorldPointerPosition);
             if (bundle == _hoveredPlacedBundle) return;
 
             var oldHovered = _hoveredPlacedBundle;
@@ -238,7 +240,7 @@ namespace ShipFactory
 
             _hoveredPaletteModule = null;
 
-            var worldPos = Snapper.SnapToGrid(GameInput.WorldPointerPosition);
+            var worldPos = Snapper.SnapToGrid(_gameInput.WorldPointerPosition);
             var bundle = InstantiateModule(shipModuleSO, worldPos);
             if (bundle == null) return;
 
@@ -254,7 +256,7 @@ namespace ShipFactory
             _hoveredPaletteModule = null;
 
             _dragWorldOffset = !isNewBundle
-                ? (Vector2)bundle.Instance.transform.position - GameInput.WorldPointerPosition
+                ? (Vector2)bundle.Instance.transform.position - _gameInput.WorldPointerPosition
                 : Vector2.zero;
 
             SelectBundle(bundle);
@@ -264,7 +266,7 @@ namespace ShipFactory
 
         private void MoveGhostToPointer()
         {
-            var snapped = Snapper.SnapToGrid(GameInput.WorldPointerPosition + _dragWorldOffset);
+            var snapped = Snapper.SnapToGrid(_gameInput.WorldPointerPosition + _dragWorldOffset);
             _overlayManager.SetPosition(_draggedModuleBundle, snapped);
 
             var legality = Calculator.CalculateLegalityPosition(_draggedModuleBundle, _overlayManager.AllBundles);
