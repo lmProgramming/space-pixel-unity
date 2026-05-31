@@ -39,14 +39,16 @@ namespace Ships.Modules
             set => mainSkillType = value;
         }
 
-        protected IShip Ship { get; set; }
-
         internal IReadOnlyDictionary<Module, List<Vector2Int>> ConnectionPoints => _connectionPoints;
 
         protected float ShipModuleEfficiency => Ship.GeneralEfficiency * Efficiency;
 
         private float PixelEfficiency =>
             Mathf.Pow((float)PixelatedRigidbody.CurrentPixelCount / PixelatedRigidbody.StartPixelCount, 2);
+
+#if UNITY_INCLUDE_TESTS
+        internal IShip ShipForTesting => Ship;
+#endif
 
         protected virtual void Awake()
         {
@@ -90,6 +92,7 @@ namespace Ships.Modules
             }
         }
 
+        public IShip Ship { get; protected set; }
 
         public int AliveCrewCount => AliveCrew.Count;
 
@@ -193,6 +196,20 @@ namespace Ships.Modules
         public void Setup(IShip ship)
         {
             Ship = ship;
+        }
+
+        public void SetResources(Resources newResources)
+        {
+            Resources = newResources;
+        }
+
+        public virtual string CaptureTypePayloadJson(IGameContentCatalog contentCatalog)
+        {
+            return string.Empty;
+        }
+
+        public virtual void ApplyTypePayloadJson(string typePayloadJson, IGameContentCatalog contentCatalog)
+        {
         }
 
         private void HandleCrewMemberDeath(CrewMember member)
@@ -315,28 +332,10 @@ namespace Ships.Modules
             _crewAppropriateSkillSum = AliveCrew.AsValueEnumerable().Sum(crew => crew.GetSkillLevel(mainSkillType));
         }
 
-        public void SetResources(Resources newResources)
-        {
-            Resources = newResources;
-        }
-
-        public virtual string CaptureTypePayloadJson(IGameContentCatalog contentCatalog)
-        {
-            return string.Empty;
-        }
-
-        public virtual void ApplyTypePayloadJson(string typePayloadJson, IGameContentCatalog contentCatalog)
-        {
-        }
-
 #if UNITY_EDITOR
         internal float InternalEfficiency => Efficiency;
 
         internal Resources InternalResources => Resources;
-#endif
-
-#if UNITY_INCLUDE_TESTS
-        internal IShip ShipForTesting => Ship;
 #endif
     }
 }

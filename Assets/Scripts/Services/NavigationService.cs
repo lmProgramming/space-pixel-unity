@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Core;
+using Core.Pixelation;
 using Core.Services;
 using Core.Ship;
 using Gameplay.Navigation;
@@ -64,7 +65,7 @@ namespace Services
         }
 
         public List<Vector3> CalculatePath(Vector3 start, Vector3 end, int shipSize, IShip callerShip,
-            IShip targetShip)
+            IPixelatedRigidbody targetShip)
         {
             return _calculator.CalculatePath(start, end, shipSize, callerShip, targetShip);
         }
@@ -80,8 +81,7 @@ namespace Services
             return GetSectorResult(new Vector3(sectorPosition.x, sectorPosition.y));
         }
 
-        private SectorResult QuerySectorByPositionForShips(Vector2 sectorPosition, IShip callerShip,
-            IShip targetShip)
+        private SectorResult QuerySectorByPositionForShips(Vector2 sectorPosition, IShip callerShip)
         {
             var count = Physics2D.OverlapBox(sectorPosition, Sector, 0, _allBlockersFilter, _results);
             if (count == 0) return SectorResult.Empty;

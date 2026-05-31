@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Core.Pixelation;
 using Core.Services;
 using Core.Ship;
 using LMPro.External.FyiurAmron;
@@ -11,11 +12,11 @@ namespace Gameplay.Navigation
     public class NavigationCalculator
     {
         private readonly Func<Vector2, SectorResult> _getSectorResult;
-        private readonly Func<Vector2, IShip, IShip, SectorResult> _getSectorResultForShips;
+        private readonly Func<Vector2, IShip, SectorResult> _getSectorResultForShips;
         private readonly float _sectorSize;
 
         public NavigationCalculator(float sectorSize, Func<Vector2, SectorResult> getSectorResult,
-            Func<Vector2, IShip, IShip, SectorResult> getSectorResultForShips)
+            Func<Vector2, IShip, SectorResult> getSectorResultForShips)
         {
             _sectorSize = sectorSize;
             _getSectorResult = getSectorResult;
@@ -28,13 +29,13 @@ namespace Gameplay.Navigation
         }
 
         public List<Vector3> CalculatePath(Vector3 start, Vector3 end, int shipSize, IShip callerShip,
-            IShip targetShip)
+            IPixelatedRigidbody targetShip)
         {
             return CalculatePathInternal(start, end, shipSize, callerShip, targetShip);
         }
 
         private List<Vector3> CalculatePathInternal(Vector3 start, Vector3 end, int shipSize, IShip callerShip,
-            IShip targetShip)
+            IPixelatedRigidbody targetShip)
         {
             var startSector = NormalizePositionToSector(start);
             var endSector = NormalizePositionToSector(end);
@@ -105,7 +106,8 @@ namespace Gameplay.Navigation
             yield return new Vector2(sector.x, sector.y - _sectorSize);
         }
 
-        private bool IsSectorNavigable(Vector2 centerSector, int radius, IShip callerShip, IShip targetShip)
+        private bool IsSectorNavigable(Vector2 centerSector, int radius, IShip callerShip,
+            IPixelatedRigidbody targetShip)
         {
             var radiusNormalized = radius - 1;
             for (var x = -radiusNormalized; x <= radiusNormalized; x++)
@@ -114,7 +116,7 @@ namespace Gameplay.Navigation
                 var checkSector = new Vector2(centerSector.x + x * _sectorSize, centerSector.y + y * _sectorSize);
 
                 var result = callerShip != null
-                    ? _getSectorResultForShips(checkSector, callerShip, targetShip)
+                    ? _getSectorResultForShips(checkSector, callerShip)
                     : _getSectorResult(checkSector);
 
                 if (!IsSectorResultPassable(result, callerShip, targetShip))
@@ -124,12 +126,14 @@ namespace Gameplay.Navigation
             return true;
         }
 
-        private static bool IsSectorResultPassable(SectorResult result, IShip callerShip, IShip targetShip)
+        private static bool IsSectorResultPassable(SectorResult result, IShip callerShip,
+            IPixelatedRigidbody targetCommandModule)
         {
             if (result.HasObstacles || result.HasDebris) return false;
             return callerShip == null
                 ? result.IsEmpty
-                : result.ShipsInSector.AsValueEnumerable().All(ship => ship == callerShip || ship == targetShip);
+                : result.ShipsInSector.AsValueEnumerable().All(ship =>
+                    ship == callerShip || ship.CommandModule.PixelatedRigidbody == targetCommandModule);
         }
 
         private static float Heuristic(Vector2 current, Vector2 end, Vector2 start)

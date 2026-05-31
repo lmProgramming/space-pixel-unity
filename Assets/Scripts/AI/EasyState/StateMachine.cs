@@ -12,16 +12,13 @@ namespace AI.EasyState
         where TSelf : StateMachine<TSelf, TStateBase>
         where TStateBase : BaseState<TSelf, TStateBase>
     {
-        [SerializeField] private string currentStateNameDebug;
-        [SerializeField] private string currentStateDataDebug;
-
         private readonly Dictionary<string, BaseState<TSelf, TStateBase>> _states = new();
 
         private Dictionary<string, float> _weightedStates;
 
         protected abstract string DefaultState { get; }
 
-        private BaseState<TSelf, TStateBase> CurrentState { get; set; }
+        protected BaseState<TSelf, TStateBase> CurrentState { get; private set; }
         public IAgent Controller { get; private set; }
         public bool UseManualUpdate { get; set; }
         private TSelf Self => (TSelf)this;
@@ -176,5 +173,11 @@ namespace AI.EasyState
         {
             return _states.TryGetValue(stateName, out var state) ? state as T : null;
         }
+
+        // ReSharper disable NotAccessedField.Local
+        [SerializeField] private string currentStateNameDebug;
+
+        [SerializeField] private string currentStateDataDebug;
+        // ReSharper restore NotAccessedField.Local
     }
 }

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Core.Pixelation;
 using Core.Ship;
 using UnityEngine;
 
@@ -8,6 +9,8 @@ namespace Core.Services
     {
         SectorResult GetSectorResult(Vector3 position);
         List<Vector3> CalculatePath(Vector3 start, Vector3 end, int shipSize);
-        List<Vector3> CalculatePath(Vector3 start, Vector3 end, int shipSize, IShip callerShip, IShip targetShip);
+
+        List<Vector3> CalculatePath(Vector3 start, Vector3 end, int shipSize, IShip callerShip,
+            IPixelatedRigidbody targetShip);
     }
 }

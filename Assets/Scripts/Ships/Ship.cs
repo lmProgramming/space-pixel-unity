@@ -71,11 +71,12 @@ namespace Ships
 
         private SasTurnInputResolver _sasTurnInputResolver;
 
-        protected float PendingForwardInput;
-        protected float PendingTurnInput;
-
         [Inject]
         private ShipInitializeModulesEventChannel _shipInitializeModulesEventChannel;
+
+
+        protected float PendingForwardInput;
+        protected float PendingTurnInput;
 
         [Inject]
         protected IShipService ShipService;
@@ -123,7 +124,7 @@ namespace Ships
             UpdateResourcesLoop().Forget();
         }
 
-        private void Update()
+        protected virtual void Update()
         {
             ReadMovementInput();
             HandleWeapons();
@@ -210,7 +211,7 @@ namespace Ships
             foreach (var module in existingModules)
             {
                 module.Setup(null);
-                module.transform.SetParent(null, worldPositionStays: true);
+                module.transform.SetParent(null, true);
                 Destroy(module.gameObject);
             }
         }
@@ -436,7 +437,6 @@ namespace Ships
         {
             return CommandModule.Transform.eulerAngles.z;
         }
-
 
         protected IShip FindClosestEnemy(float maxRange = float.MaxValue)
         {

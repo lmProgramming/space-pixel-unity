@@ -16,7 +16,7 @@ namespace Gameplay.Tests.Navigation
         private static NavigationCalculator BuildCalculator(HashSet<Vector2> blockedSectors = null)
         {
             blockedSectors ??= new HashSet<Vector2>();
-            return new NavigationCalculator(SectorSize, Query, (sector, _, _) => Query(sector));
+            return new NavigationCalculator(SectorSize, Query, (sector, _) => Query(sector));
 
             SectorResult Query(Vector2 sector)
             {
@@ -34,7 +34,7 @@ namespace Gameplay.Tests.Navigation
                 return SectorResult.Empty;
             }
 
-            SectorResult ShipAwareQuery(Vector2 sector, IShip _, IShip __)
+            SectorResult ShipAwareQuery(Vector2 sector, IShip _)
             {
                 var ships = shipsPerSector.GetValueOrDefault(sector);
                 return new SectorResult(false, false, 0f, ships);
@@ -242,10 +242,10 @@ namespace Gameplay.Tests.Navigation
 
             var calculator = new NavigationCalculator(SectorSize,
                 _ => SectorResult.Empty,
-                (sector, _, _) => allNeighbors.TryGetValue(sector, out var r) ? r : SectorResult.Empty);
+                (sector, _) => allNeighbors.TryGetValue(sector, out var r) ? r : SectorResult.Empty);
 
             var path = calculator.CalculatePath(
-                new Vector3(5f, 5f), new Vector3(50f, 50f), 5, callerShip, targetShip);
+                new Vector3(5f, 5f), new Vector3(50f, 50f), 5, callerShip, targetShip.CommandModule.PixelatedRigidbody);
 
             Assert.IsNull(path, "Expected no path when all neighboring sectors have both a third ship and debris");
         }
@@ -270,7 +270,7 @@ namespace Gameplay.Tests.Navigation
             var blockedCalculator = BuildCalculatorWithShipAwareness(allNeighbors);
 
             var path = blockedCalculator.CalculatePath(
-                new Vector3(5f, 5f), new Vector3(50f, 50f), 5, callerShip, targetShip);
+                new Vector3(5f, 5f), new Vector3(50f, 50f), 5, callerShip, targetShip.CommandModule.PixelatedRigidbody);
 
             Assert.IsNull(path, "Expected no path when all neighboring sectors contain a third ship");
         }
@@ -290,7 +290,7 @@ namespace Gameplay.Tests.Navigation
             var calculator = BuildCalculatorWithShipAwareness(shipsPerSector);
 
             var path = calculator.CalculatePath(
-                new Vector3(5f, 5f), new Vector3(5f, 35f), 5, callerShip, targetShip);
+                new Vector3(5f, 5f), new Vector3(5f, 35f), 5, callerShip, targetShip.CommandModule.PixelatedRigidbody);
 
             Assert.IsNotNull(path, "Expected a path when the sector contains only caller and target ships");
         }

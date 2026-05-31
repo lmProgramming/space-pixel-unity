@@ -2,11 +2,12 @@ using System;
 using System.Collections.Generic;
 using Core.Grid;
 using Core.Ship;
+using LMPro.External.IsAlive;
 using UnityEngine;
 
 namespace Core.Pixelation
 {
-    public interface IPixelatedRigidbody : IPixelated
+    public interface IPixelatedRigidbody : IPixelated, IHasAliveCheck
     {
         float MassMultiplier { get; }
         bool HasSprite { get; }
@@ -17,12 +18,12 @@ namespace Core.Pixelation
         SpriteRenderer SpriteRenderer { get; set; }
         Transform Transform { get; }
         GameObject GameObject { get; }
+        float DefaultPixelHealthForSnapshot { get; }
+        float MaxArmorHealthForSnapshot { get; }
         Vector2 WorldToLocalPoint(Vector2 worldPosition);
         Vector2Int WorldToLocalPixel(Vector2 worldPosition);
         Vector2 LocalToWorldPoint(Vector2Int localPosition);
         Vector2 LocalToWorldPoint(Vector2 localPosition);
-        float DefaultPixelHealthForSnapshot { get; }
-        float MaxArmorHealthForSnapshot { get; }
         ArmorGridSnapshot CaptureArmorGridSnapshot();
         HealthGridSnapshot CaptureHealthGridSnapshot();
         void ApplyArmorGridSnapshot(ArmorGridSnapshot snapshot);

@@ -1,6 +1,6 @@
 using Ships;
 using Ships.Modules;
-using Ships.StateMachines.Navigation;
+using Ships.StateMachines.AIShip;
 using UnityEditor;
 using UnityEngine;
 
@@ -10,14 +10,14 @@ namespace Editor.InspectorExtensions
     public class AIShipEditor : UnityEditor.Editor
     {
         private const float DotRadius = 0.5f;
-        private ShipNavigationStateMachine _navStateMachine;
+        private AIShipStateMachine _aiShipStateMachine;
 
         private void OnSceneGUI()
         {
             var aiShip = (AIShip)target;
             if (!aiShip || !(Module)aiShip.CommandModule) return;
 
-            _navStateMachine = aiShip.GetComponent<ShipNavigationStateMachine>();
+            _aiShipStateMachine = aiShip.GetComponent<AIShipStateMachine>();
 
             DrawShipPosition(aiShip);
 
@@ -50,13 +50,13 @@ namespace Editor.InspectorExtensions
 
         private void DrawNavigationPath(AIShip aiShip)
         {
-            if (!_navStateMachine) return;
+            if (!_aiShipStateMachine) return;
 
-            var moveTowardsState = _navStateMachine.GetState<MoveTowardsEnemyState>("MoveTowardsEnemy");
-            if (moveTowardsState?.InternalPath == null || moveTowardsState.InternalPath.Count == 0) return;
+            var navigationHelper = _aiShipStateMachine.GetNavigationHelper();
+            if (navigationHelper?.InternalPath == null || navigationHelper.InternalPath.Count == 0) return;
 
-            var path = moveTowardsState.InternalPath;
-            var currentWaypointIndex = moveTowardsState.InternalCurrentWaypointIndex;
+            var path = navigationHelper.InternalPath;
+            var currentWaypointIndex = navigationHelper.InternalCurrentWaypointIndex;
 
             for (var i = 0; i < path.Count; i++)
             {
