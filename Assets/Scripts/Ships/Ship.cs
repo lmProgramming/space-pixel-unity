@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using Core;
 using Core.Gameplay.Combat;
 using Core.Gameplay.EasyTeam;
 using Core.Pixelation;
@@ -69,6 +70,9 @@ namespace Ships
 
         private SasTurnInputResolver _sasTurnInputResolver;
 
+        protected float PendingForwardInput;
+        protected float PendingTurnInput;
+
         [Inject]
         private ShipInitializeModulesEventChannel _shipInitializeModulesEventChannel;
 
@@ -120,10 +124,14 @@ namespace Ships
 
         private void Update()
         {
-            Move();
-
+            ReadMovementInput();
             HandleWeapons();
             ResourceManager.UpdateEnergy();
+        }
+
+        private void FixedUpdate()
+        {
+            ApplyMovementPhysics();
         }
 
         private void OnEnable()
@@ -199,10 +207,11 @@ namespace Ships
             var existingModules = GetComponentsInChildren<Module>();
 
             foreach (var module in existingModules)
+            {
                 module.Setup(null);
-
-            foreach (var module in existingModules)
-                DestroyImmediate(module.gameObject);
+                module.transform.SetParent(null, worldPositionStays: true);
+                Destroy(module.gameObject);
+            }
         }
 
         public void InitializeModules()
@@ -266,7 +275,7 @@ namespace Ships
             {
                 Debug.Log($"[Ship] Deparenting unreachable module: {module.Transform.name}", module.Transform);
                 module.Transform.SetParent(_mapInfo.MapTransform);
-                module.Transform.gameObject.layer = LayerMask.NameToLayer("Default");
+                module.Transform.gameObject.layer = PhysicsLayers.Default;
 
                 if (module is Module concreteModule) concreteModule.OnShipConnectionLost();
             }
@@ -291,7 +300,11 @@ namespace Ships
             ResourceManager.Recalculate(_allModulesCache);
         }
 
-        protected virtual void Move()
+        protected virtual void ReadMovementInput()
+        {
+        }
+
+        protected virtual void ApplyMovementPhysics()
         {
         }
 

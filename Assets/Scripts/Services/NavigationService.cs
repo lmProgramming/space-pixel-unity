@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using Core;
 using Core.Services;
 using Core.Ship;
 using Gameplay.Navigation;
@@ -92,13 +93,13 @@ namespace Services
             for (var i = 0; i < count; i++)
             {
                 var layer = _results[i].gameObject.layer;
-                if (layer == LayerMask.NameToLayer("Obstacles"))
+                if (layer == PhysicsLayers.Obstacles)
                 {
                     hasObstacles = true;
                     continue;
                 }
 
-                if (layer == LayerMask.NameToLayer("Debris"))
+                if (layer == PhysicsLayers.Debris)
                 {
                     hasDebris = true;
                     continue;
@@ -121,9 +122,9 @@ namespace Services
             for (var i = 0; i < count; i++)
             {
                 var layer = _results[i].gameObject.layer;
-                if (layer == LayerMask.NameToLayer("Obstacles"))
+                if (layer == PhysicsLayers.Obstacles)
                     hasObstacles = true;
-                else if (layer == LayerMask.NameToLayer("Debris"))
+                else if (layer == PhysicsLayers.Debris)
                     hasDebris = true;
             }
 

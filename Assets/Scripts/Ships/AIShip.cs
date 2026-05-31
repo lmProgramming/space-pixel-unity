@@ -21,6 +21,7 @@ namespace Ships
         [SerializeField] private int navigationSize = 1;
 
         private BehaviourStateMachine _behaviourStateMachine;
+        private bool _pendingEnginesActive;
         private ShipNavigationStateMachine _navigationStateMachine;
 
         public static float SightRange => 200f;
@@ -47,27 +48,38 @@ namespace Ships
             navigationSize = size;
         }
 
-        protected override void Move()
+        protected override void ReadMovementInput()
         {
             _navigationStateMachine.Tick(Time.deltaTime);
+            PendingForwardInput = 0f;
+            PendingTurnInput = 0f;
+            _pendingEnginesActive = false;
 
-            if (_navigationStateMachine.ShouldMove)
-                NavigateTowards(_navigationStateMachine.Target);
-            else
-                MarkEnginesActivity(ApplyMovement(Vector2.zero, CommandModule.Transform.up));
+            if (!_navigationStateMachine.ShouldMove)
+                return;
+
+            ComputeNavigationInputs(_navigationStateMachine.Target);
         }
 
-        private void NavigateTowards(Vector2 targetPosition)
+        protected override void ApplyMovementPhysics()
+        {
+            if (!_pendingEnginesActive)
+            {
+                MarkEnginesActivity(false);
+                return;
+            }
+
+            MarkEnginesActivity(ApplyEngineForces(PendingForwardInput, PendingTurnInput, Time.fixedDeltaTime, true));
+        }
+
+        private void ComputeNavigationInputs(Vector2 targetPosition)
         {
             var position = (Vector2)CommandModule.Transform.position;
             var toTarget = targetPosition - position;
             var distance = toTarget.magnitude;
 
             if (distance <= stopDistance)
-            {
-                MarkEnginesActivity(false);
                 return;
-            }
 
             var desired = distance > Mathf.Epsilon ? toTarget / distance : Vector2.zero;
             var forward = (Vector2)CommandModule.Transform.up;
@@ -84,24 +96,23 @@ namespace Ships
                 }
             }
 
-            MarkEnginesActivity(ApplyMovement(desired, forward));
+            SetMovementInputsFromDesired(desired, forward);
+            _pendingEnginesActive = true;
         }
 
-        private bool ApplyMovement(Vector2 desiredDirection, Vector2 forward)
+        private void SetMovementInputsFromDesired(Vector2 desiredDirection, Vector2 forward)
         {
-            var forwardInput = 0f;
+            PendingForwardInput = 0f;
             if (desiredDirection.sqrMagnitude > 0f)
             {
                 var alignment = Mathf.Clamp01(Vector2.Dot(forward.normalized, desiredDirection.normalized));
                 if (alignment >= minThrustAlignment)
-                    forwardInput = speedMultiplier * alignment;
+                    PendingForwardInput = speedMultiplier * alignment;
             }
 
-            var turnInput = 0f;
+            PendingTurnInput = 0f;
             if (desiredDirection.sqrMagnitude > 0f)
-                turnInput = rotationMultiplier * (-Vector2.SignedAngle(forward, desiredDirection) / 180f);
-
-            return ApplyEngineForces(forwardInput, turnInput, Time.deltaTime, true);
+                PendingTurnInput = rotationMultiplier * (-Vector2.SignedAngle(forward, desiredDirection) / 180f);
         }
 
         private void InitializeStateMachines()

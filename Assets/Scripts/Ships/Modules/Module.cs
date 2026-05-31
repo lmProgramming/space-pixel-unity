@@ -334,5 +334,9 @@ namespace Ships.Modules
 
         internal Resources InternalResources => Resources;
 #endif
+
+#if UNITY_INCLUDE_TESTS
+        internal IShip ShipForTesting => Ship;
+#endif
     }
 }

@@ -1,4 +1,5 @@
-﻿using Core.Services;
+﻿using Core;
+using Core.Services;
 using Gameplay.Combat;
 using Instantiation;
 using UnityEngine;
@@ -17,7 +18,7 @@ namespace Services
             var bulletObject =
                 instantiator.Instantiate(projectilePrefab, transformPosition, rotation, ProjectilesHolder);
 
-            bulletObject.GetComponent<Bullet>().SetLayer(LayerMask.NameToLayer("Bullets"));
+            bulletObject.GetComponent<Bullet>().SetLayer(PhysicsLayers.Bullets);
 
             IgnoreCollisionsBetweenBulletAndShooter(bulletObject, collidersToIgnore);
 

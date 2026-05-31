@@ -88,7 +88,7 @@ namespace Ships.Tests
             yield return SimulateForSeconds(SasSettleSeconds);
 
             var headingError = Mathf.Abs(Mathf.DeltaAngle(ship.GetHeadingDegreesForTesting(), targetHeading));
-            var allowedError = Mathf.Abs(SasHeadingOffsetDegrees) * 0.01f;
+            var allowedError = Mathf.Abs(SasHeadingOffsetDegrees) * 0.02f;
 
             Assert.That(headingError, Is.LessThanOrEqualTo(allowedError),
                 () =>

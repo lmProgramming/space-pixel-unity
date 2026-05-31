@@ -21,7 +21,7 @@ namespace Ships
             sasEnabled = !sasEnabled;
         }
 
-        protected override void Move()
+        protected override void ReadMovementInput()
         {
             if (!_gameInput.CanControlShip)
                 return;
@@ -29,12 +29,20 @@ namespace Ships
             if (Input.GetKeyDown(sasToggleKey))
                 ToggleSas();
 
-            var rawVertical = Input.GetAxis("Vertical");
-            var rawHorizontal = Input.GetAxis("Horizontal");
-            var forwardInput = rawVertical * speedMultiplier;
-            var turnInput = rawHorizontal * rotationMultiplier;
+            PendingForwardInput = Input.GetAxis("Vertical") * speedMultiplier;
+            PendingTurnInput = Input.GetAxis("Horizontal") * rotationMultiplier;
+        }
 
-            MarkEnginesActivity(ApplyEngineForces(forwardInput, turnInput, Time.deltaTime, sasEnabled));
+        protected override void ApplyMovementPhysics()
+        {
+            if (!_gameInput.CanControlShip)
+            {
+                MarkEnginesActivity(false);
+                return;
+            }
+
+            MarkEnginesActivity(ApplyEngineForces(PendingForwardInput, PendingTurnInput, Time.fixedDeltaTime,
+                sasEnabled));
         }
 
         protected override void HandleWeapons()

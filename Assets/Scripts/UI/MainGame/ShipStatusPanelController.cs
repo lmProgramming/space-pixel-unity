@@ -1,4 +1,5 @@
 using System;
+using Core;
 using Events.Game;
 using Events.UI;
 using Ships;
@@ -12,8 +13,6 @@ namespace UI.MainGame
 {
     public class ShipStatusPanelController : MonoBehaviour
     {
-        private const string MainMenuSceneName = "MainMenu";
-
         [Header("References")]
         [SerializeField] private Ship playerShip;
 
@@ -206,12 +205,12 @@ namespace UI.MainGame
             if (_pauseUiInitialized || _root == null)
                 return;
 
-            _pauseOverlay = _root.Q<VisualElement>("pause-overlay");
-            _pauseOverlayHost = _root.Q<VisualElement>("pause-overlay-host");
-            var title = _root.Q<Label>("pause-title");
-            var resumeButton = _root.Q<Button>("pause-resume-button");
-            var settingsButton = _root.Q<Button>("pause-settings-button");
-            var quitButton = _root.Q<Button>("pause-quit-button");
+            _pauseOverlay = _root.Q<VisualElement>(SharedUiElementNames.Pause.Overlay);
+            _pauseOverlayHost = _root.Q<VisualElement>(SharedUiElementNames.Pause.OverlayHost);
+            var title = _root.Q<Label>(SharedUiElementNames.Pause.Title);
+            var resumeButton = _root.Q<Button>(SharedUiElementNames.Pause.ResumeButton);
+            var settingsButton = _root.Q<Button>(SharedUiElementNames.Pause.SettingsButton);
+            var quitButton = _root.Q<Button>(SharedUiElementNames.Pause.QuitButton);
 
             if (title == null || resumeButton == null || settingsButton == null || quitButton == null)
                 throw new InvalidOperationException("[ShipStatusPanelController] Pause elements missing in HUD UXML.");
@@ -257,14 +256,14 @@ namespace UI.MainGame
             if (!paused && _uiPointerTracker != null)
             {
                 _uiPointerTracker.Release(_pauseOverlayHost);
-                _uiPointerTracker.Release(_root?.Q<VisualElement>("settings-overlay-host"));
+                _uiPointerTracker.Release(_root?.Q<VisualElement>(SharedUiElementNames.Settings.OverlayHost));
             }
         }
 
         private static void QuitToMainMenu()
         {
             Time.timeScale = 1f;
-            SceneManager.LoadScene(MainMenuSceneName);
+            SceneManager.LoadScene(SceneNames.MainMenu);
         }
 
         private void SetShipStatusBlockVisible(bool visible)

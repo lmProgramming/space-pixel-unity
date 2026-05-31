@@ -58,7 +58,7 @@ namespace Pixelation
             Setup();
         }
 
-        private void Update()
+        private void FixedUpdate()
         {
             if (CollisionHandler == null) return;
 

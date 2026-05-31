@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Core;
 using Core.Services;
 using ShipFactory.Serialization;
 using Ships;
@@ -16,8 +17,6 @@ namespace ShipFactory
     {
         private const string SnapshotExtension = ".json";
         private const string DefaultShipName = "Ship";
-        private const string MainMenuSceneName = "MainMenu";
-
         [SerializeField] private ModulePrefabLibrary modulePrefabLibrary;
         [SerializeField] private Ship initialShip;
 
@@ -195,12 +194,12 @@ namespace ShipFactory
             if (_pauseUiInitialized)
                 return;
 
-            _pauseOverlay = root.Q<VisualElement>("pause-overlay");
-            _pauseOverlayHost = root.Q<VisualElement>("pause-overlay-host");
-            var title = root.Q<Label>("pause-title");
-            var resumeButton = root.Q<Button>("pause-resume-button");
-            var settingsButton = root.Q<Button>("pause-settings-button");
-            var quitButton = root.Q<Button>("pause-quit-button");
+            _pauseOverlay = root.Q<VisualElement>(SharedUiElementNames.Pause.Overlay);
+            _pauseOverlayHost = root.Q<VisualElement>(SharedUiElementNames.Pause.OverlayHost);
+            var title = root.Q<Label>(SharedUiElementNames.Pause.Title);
+            var resumeButton = root.Q<Button>(SharedUiElementNames.Pause.ResumeButton);
+            var settingsButton = root.Q<Button>(SharedUiElementNames.Pause.SettingsButton);
+            var quitButton = root.Q<Button>(SharedUiElementNames.Pause.QuitButton);
 
             if (title == null || resumeButton == null || settingsButton == null || quitButton == null)
                 throw new InvalidOperationException(
@@ -254,7 +253,7 @@ namespace ShipFactory
         private void QuitToMainMenu()
         {
             Time.timeScale = 1f;
-            SceneManager.LoadScene(MainMenuSceneName);
+            SceneManager.LoadScene(SceneNames.MainMenu);
         }
     }
 }

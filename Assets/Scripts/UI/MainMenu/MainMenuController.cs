@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Core;
 using Core.State;
 using UI.Common;
 using UnityEngine;
@@ -16,9 +17,6 @@ namespace UI.MainMenu
     public class MainMenuController : MonoBehaviour
     {
         private const string SnapshotFolderName = "ShipSnapshots";
-        private const string ShipFactorySceneName = "ShipFactory";
-        private const string FallbackCombatSceneName = "MainGame";
-        private const string LegacyCombatSceneName = "Main";
         private const float DefaultAsteroidCount = 6f;
         private const float DefaultEnemyShipCount = 0f;
         private const float DefaultFriendlyShipCount = 0f;
@@ -97,7 +95,7 @@ namespace UI.MainMenu
 
         private static void OpenShipFactory()
         {
-            SceneManager.LoadScene(ShipFactorySceneName);
+            SceneManager.LoadScene(SceneNames.ShipFactory);
         }
 
         private void OpenSettings()
@@ -132,14 +130,7 @@ namespace UI.MainMenu
             SaveState.EnemyShipCount = Mathf.RoundToInt(_enemyCountSlider.value);
             SaveState.FriendlyShipCount = Mathf.RoundToInt(_friendlyCountSlider.value);
 
-            SceneManager.LoadScene(ResolveCombatSceneName());
-        }
-
-        private static string ResolveCombatSceneName()
-        {
-            return Application.CanStreamedLevelBeLoaded(LegacyCombatSceneName)
-                ? LegacyCombatSceneName
-                : FallbackCombatSceneName;
+            SceneManager.LoadScene(SceneNames.MainGame);
         }
 
         private void RefreshShipSnapshots()
