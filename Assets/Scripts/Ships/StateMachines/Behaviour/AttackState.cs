@@ -76,5 +76,15 @@ namespace Ships.StateMachines.Behaviour
             // Can always transition out of attack state
             return true;
         }
+
+        public override string DebugInfo()
+        {
+            var targetPos = _targetEnemy?.GetPosition() ?? Vector3.zero;
+            var distToTarget = Vector2.Distance(Ship.GetPosition(), targetPos);
+            var timeSinceLastAttack = Time.time - _lastAttackTime;
+            var cooldownRemaining = Mathf.Max(0, _attackCooldown - timeSinceLastAttack);
+            var targetStatus = _targetEnemy?.IsAlive() ?? false ? "Alive" : "Dead";
+            return $"Dist: {distToTarget:F1} | Range: {_attackRange:F1} | Cooldown: {cooldownRemaining:F2}s | Target: {targetStatus}";
+        }
     }
 }

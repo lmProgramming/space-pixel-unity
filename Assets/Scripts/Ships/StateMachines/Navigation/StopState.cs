@@ -16,5 +16,10 @@ namespace Ships.StateMachines.Navigation
         {
             return true;
         }
+
+        public override string DebugInfo()
+        {
+            return $"Time in state: {TimeInState:F2}s";
+        }
     }
 }

@@ -21,6 +21,7 @@ using Zenject;
 using ZLinq;
 
 [assembly: InternalsVisibleTo("Game.Ships.Tests")]
+[assembly: InternalsVisibleTo("Game.E2E")]
 
 namespace Ships
 {

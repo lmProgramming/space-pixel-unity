@@ -134,6 +134,15 @@ namespace Ships.StateMachines.Navigation
             return true;
         }
 
+        public override string DebugInfo()
+        {
+            var targetPos = _targetEnemyShip?.GetPosition() ?? Vector3.zero;
+            var distToTarget = Vector2.Distance(Ship.GetPosition(), targetPos);
+            var pathCount = _path?.Count ?? 0;
+            var timeSincePathUpdate = Time.time - _lastPathUpdateTime;
+            return $"Waypoint: {_currentWaypointIndex}/{pathCount} | Dist: {distToTarget:F1} | Threshold: {_targetDistanceThreshold:F1} | PathAge: {timeSincePathUpdate:F2}s | Target: {(_targetEnemyShip != null ? "Alive" : "Dead")}";
+        }
+
 #if UNITY_EDITOR
         internal IReadOnlyList<Vector3> InternalPath => _path;
 

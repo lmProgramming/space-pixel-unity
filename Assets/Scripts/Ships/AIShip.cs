@@ -21,8 +21,8 @@ namespace Ships
         [SerializeField] private int navigationSize = 1;
 
         private BehaviourStateMachine _behaviourStateMachine;
-        private bool _pendingEnginesActive;
         private ShipNavigationStateMachine _navigationStateMachine;
+        private bool _pendingEnginesActive;
 
         public static float SightRange => 200f;
         private ShipSensing Sensing { get; set; }
@@ -124,8 +124,7 @@ namespace Ships
             _navigationStateMachine.RegisterState(new MoveTowardsEnemyState());
             _navigationStateMachine.RegisterState(new StopState());
 
-            _navigationStateMachine.StartStateMachine("MoveTowardsEnemy",
-                new EnemyTargetStateData(ShipService.GetClosestEnemyShipOf(Team, GetPosition())));
+            _navigationStateMachine.StartStateMachine("Stop");
         }
 
         public void SetAttackTarget(Vector2 targetPosition)

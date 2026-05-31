@@ -30,5 +30,7 @@ namespace AI.EasyState.States
         {
             Debug.Log($"Exiting state: {StateName}");
         }
+
+        public abstract string DebugInfo();
     }
 }

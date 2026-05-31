@@ -11,5 +11,7 @@ namespace Ships.StateMachines.Behaviour
             base.Enter(stateMachine, data);
             Ship = stateMachine.Controller as AIShip;
         }
+
+        public override string DebugInfo() => StateName;
     }
 }

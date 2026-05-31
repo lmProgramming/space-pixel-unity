@@ -1,0 +1,261 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Reflection;
+using Core;
+using Core.Services;
+using Events.Collision;
+using Events.Ship;
+using Gameplay.Combat;
+using Gameplay.EasyTeam;
+using Instantiation;
+using NSubstitute;
+using NUnit.Framework;
+using Services;
+using Ships;
+using Ships.Modules;
+using Ships.Tests.TestHelpers;
+using UnityEngine;
+using Zenject;
+using ZLinq;
+using Module = Ships.Modules.Module;
+using Object = UnityEngine.Object;
+using Resources = Core.Ship.Resources;
+
+namespace E2E
+{
+    public abstract class E2ETestBase
+    {
+        protected readonly List<GameObject> CreatedObjects = new();
+        private NavigationService _navigationService;
+        private ProjectilesSpawner _projectilesSpawner;
+
+        private ShipService _shipService;
+        private GameObject _testRoot;
+        protected DiContainer Container;
+
+        [SetUp]
+        public virtual void SetUp()
+        {
+            _testRoot = new GameObject("TestRoot");
+            CreatedObjects.Add(_testRoot);
+
+            Container = new DiContainer();
+
+            // Add camera
+            var cameraObj = new GameObject("Camera");
+            CreatedObjects.Add(cameraObj);
+            cameraObj.transform.SetParent(_testRoot.transform);
+            var camera = cameraObj.AddComponent<Camera>();
+            camera.orthographic = true;
+
+            // Bind basic event channels
+            var collisionEventChannel = ScriptableObject.CreateInstance<CollisionEventChannelSO>();
+            Container.Bind<CollisionEventChannelSO>().FromInstance(collisionEventChannel).AsSingle();
+
+            var testDebrisSpawner = new TestDebrisSpawner();
+            Container.Bind<IDebrisSpawner>().FromInstance(testDebrisSpawner).AsSingle();
+
+            var mapInfo = new TestMapInfo(_testRoot.transform);
+            Container.Bind<IMapInfo>().FromInstance(mapInfo).AsSingle();
+
+            // Bind ShipService
+            var shipServiceGo = new GameObject("ShipService");
+            CreatedObjects.Add(shipServiceGo);
+            _shipService = shipServiceGo.AddComponent<ShipService>();
+            Container.Bind<IShipService>().FromInstance(_shipService).AsSingle();
+
+            // Bind NavigationService
+            var navigationServiceGo = new GameObject("NavigationService");
+            CreatedObjects.Add(navigationServiceGo);
+            _navigationService = navigationServiceGo.AddComponent<NavigationService>();
+            Container.Inject(_navigationService);
+            Container.Bind<INavigationService>().FromInstance(_navigationService).AsSingle();
+
+            // Bind Instantiator & ProjectilesSpawner
+            var instantiatorGo = new GameObject("UnityInstantiator");
+            CreatedObjects.Add(instantiatorGo);
+            var instantiator = instantiatorGo.AddComponent<UnityInstantiator>();
+
+            var projectilesSpawnerGo = new GameObject("ProjectilesSpawner");
+            CreatedObjects.Add(projectilesSpawnerGo);
+            _projectilesSpawner = projectilesSpawnerGo.AddComponent<ProjectilesSpawner>();
+            SetPrivateField(_projectilesSpawner, "instantiator", instantiator);
+            SetPrivateField(_projectilesSpawner, "ProjectilesHolder", _testRoot.transform);
+            Container.Bind<IProjectilesSpawner>().FromInstance(_projectilesSpawner).AsSingle();
+
+            // Mock ShipInitializeModulesEventChannel
+            var shipInitializeModulesEventChannel = Substitute.For<ShipInitializeModulesEventChannel>();
+            Container.Bind<ShipInitializeModulesEventChannel>().FromInstance(shipInitializeModulesEventChannel)
+                .AsSingle();
+        }
+
+        [TearDown]
+        public virtual void TearDown()
+        {
+            foreach (var obj in CreatedObjects.AsValueEnumerable().Where(obj => obj != null))
+                Object.DestroyImmediate(obj);
+            CreatedObjects.Clear();
+        }
+
+        protected static IEnumerator WaitForLifecycle()
+        {
+            yield return null;
+            yield return null;
+        }
+
+        protected static IEnumerator SimulateForSeconds(float seconds, Action onFixedStep = null)
+        {
+            var elapsed = 0f;
+            while (elapsed < seconds)
+            {
+                yield return new WaitForFixedUpdate();
+                elapsed += Time.fixedDeltaTime;
+                onFixedStep?.Invoke();
+            }
+        }
+
+        protected Team CreateTeam(string name)
+        {
+            var teamGo = new GameObject(name);
+            CreatedObjects.Add(teamGo);
+            var team = teamGo.AddComponent<Team>();
+            team.treatNonAlliedAsEnemy = true;
+            return team;
+        }
+
+        protected AIShip CreateAIShip(string name, Team team, Vector2 position, bool withWeapons,
+            GameObject bulletPrefab = null)
+        {
+            var shipGo = ModuleFactory.CreateGameObject(name, CreatedObjects);
+            shipGo.transform.position = position;
+
+            const int modulePixelSize = 5;
+            const float moduleSpacing = 5f;
+            const float engineMaxThrust = 800f;
+
+            // Command
+            ModuleFactory.CreateCommandModule(shipGo.transform, Vector2.zero, Container, CreatedObjects,
+                modulePixelSize, modulePixelSize);
+            // Power
+            ModuleFactory.CreatePowerModule(shipGo.transform, new Vector2(0f, moduleSpacing), Container,
+                CreatedObjects, modulePixelSize, modulePixelSize);
+            // Engines
+            ModuleFactory.CreateEngineModule(shipGo.transform, new Vector2(moduleSpacing, 0f), Container,
+                CreatedObjects, engineMaxThrust, modulePixelSize, modulePixelSize);
+            ModuleFactory.CreateEngineModule(shipGo.transform, new Vector2(-moduleSpacing, 0f), Container,
+                CreatedObjects, engineMaxThrust, modulePixelSize, modulePixelSize);
+
+            if (withWeapons && bulletPrefab != null)
+            {
+                // Weapon (Cannon)
+                var cannonGo = ModuleFactory.CreateModuleBase("Cannon", shipGo.transform,
+                    new Vector2(0f, -moduleSpacing), 0f, Container, CreatedObjects, 5, 5);
+                var cannon = cannonGo.AddComponent<Cannon>();
+                cannon.SetResources(new Resources(0, 1f, 0, 0, 0));
+                SetPrivateField(cannon, "projectilePrefab", bulletPrefab);
+                SetPrivateField(cannon, "reloadTime", 0.2f);
+                SetPrivateField(cannon, "projectileSpeed", 120f);
+                var weaponSprite = CreateTestSprite();
+                SetPrivateField(cannon, "sprite", weaponSprite);
+            }
+
+            foreach (Transform moduleChild in shipGo.transform) Container.Inject(moduleChild.GetComponent<Module>());
+
+            shipGo.AddComponent<ModuleConnectionFactory>();
+
+            shipGo.SetActive(false);
+            var ship = shipGo.AddComponent<AIShip>();
+            Container.Inject(ship);
+            shipGo.SetActive(true);
+
+            ship.SetTeam(team);
+            ship.ConfigureAllocatorForTesting(true, 14, 1f, 0.4f, 0.02f);
+            ship.InitializeModules();
+
+            // Set default AI parameters for quick target scanning and aggressive speed
+            SetPrivateField(ship, "speedMultiplier", 3.0f);
+            SetPrivateField(ship, "rotationMultiplier", 3.0f);
+            SetPrivateField(ship, "stopDistance", 4.0f);
+
+            return ship;
+        }
+
+        protected GameObject CreateBulletPrefab()
+        {
+            var bulletPrefab = new GameObject("BulletPrefab");
+            CreatedObjects.Add(bulletPrefab);
+            bulletPrefab.transform.SetParent(_testRoot.transform);
+            bulletPrefab.SetActive(false);
+
+            bulletPrefab.AddComponent<SpriteRenderer>();
+            var rb = bulletPrefab.AddComponent<Rigidbody2D>();
+            rb.bodyType = RigidbodyType2D.Dynamic;
+            rb.gravityScale = 0f;
+            bulletPrefab.AddComponent<PolygonCollider2D>();
+
+            var pixelRb = bulletPrefab.AddComponent<Bullet>();
+            Container.Inject(pixelRb);
+            pixelRb.SetTextureFromColors(ModuleFactory.CreateSolidPixelGrid(2, 2, Color.yellow));
+            bulletPrefab.SetActive(true);
+
+            return bulletPrefab;
+        }
+
+        protected GameObject CreateObstacleWall(string name, Vector2 position, Vector2 size)
+        {
+            var wall = new GameObject(name);
+            CreatedObjects.Add(wall);
+            wall.transform.position = position;
+            wall.layer = PhysicsLayers.Obstacles;
+
+            var col = wall.AddComponent<BoxCollider2D>();
+            col.size = size;
+
+            // Give it a dummy rigidbody so that collision resolver handles it as a static obstacle
+            var rb = wall.AddComponent<Rigidbody2D>();
+            rb.bodyType = RigidbodyType2D.Static;
+
+            return wall;
+        }
+
+        private static Sprite CreateTestSprite()
+        {
+            var texture = new Texture2D(2, 2);
+            return Sprite.Create(texture, new Rect(0, 0, 2, 2), new Vector2(0.5f, 0.5f));
+        }
+
+        private static void SetPrivateField<T>(object target, string fieldName, T value)
+        {
+            var field = target.GetType().GetField(fieldName,
+                BindingFlags.Instance | BindingFlags.NonPublic);
+            if (field == null)
+            {
+                var prop = target.GetType().GetProperty(fieldName,
+                    BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+                if (prop != null)
+                {
+                    prop.SetValue(target, value);
+                    return;
+                }
+
+                var baseType = target.GetType().BaseType;
+                while (baseType != null)
+                {
+                    field = baseType.GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic);
+                    if (field != null)
+                    {
+                        field.SetValue(target, value);
+                        return;
+                    }
+
+                    baseType = baseType.BaseType;
+                }
+
+                throw new UnityException($"Missing field or property '{fieldName}' on '{target.GetType().Name}'.");
+            }
+
+            field.SetValue(target, value);
+        }
+    }
+}

@@ -92,7 +92,7 @@ GameObject:
   - component: {fileID: 831293377624333536}
   - component: {fileID: 8033188784352906428}
   m_Layer: 0
-  m_Name: PlayerTeam
+  m_Name: FriendlyTeam
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

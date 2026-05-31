@@ -43,5 +43,11 @@ namespace Ships.StateMachines.Behaviour
         {
             return true;
         }
+
+        public override string DebugInfo()
+        {
+            var timeUntilChange = _statePotentialChangeTime - TimeInState;
+            return $"Time in state: {TimeInState:F2}s | Until change: {timeUntilChange:F2}s | Change prob: {StateChangeProbability * 100:F1}%";
+        }
     }
 }

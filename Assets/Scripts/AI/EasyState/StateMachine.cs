@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using AI.EasyState.States;
 using JetBrains.Annotations;
@@ -11,6 +12,9 @@ namespace AI.EasyState
         where TSelf : StateMachine<TSelf, TStateBase>
         where TStateBase : BaseState<TSelf, TStateBase>
     {
+        [SerializeField] private string currentStateNameDebug;
+        [SerializeField] private string currentStateDataDebug;
+
         private readonly Dictionary<string, BaseState<TSelf, TStateBase>> _states = new();
 
         private Dictionary<string, float> _weightedStates;
@@ -34,6 +38,24 @@ namespace AI.EasyState
             if (UseManualUpdate) return;
             Tick(Time.deltaTime);
         }
+
+        private void OnEnable()
+        {
+            OnStateChanged += HandleStateChange;
+        }
+
+        private void OnDisable()
+        {
+            OnStateChanged -= HandleStateChange;
+        }
+
+        private void HandleStateChange(BaseState<TSelf, TStateBase> state)
+        {
+            currentStateNameDebug = state.StateName;
+            currentStateDataDebug = state.DebugInfo();
+        }
+
+        public event Action<BaseState<TSelf, TStateBase>> OnStateChanged;
 
         protected virtual Dictionary<string, float> CreateWeightedStates()
         {
@@ -75,6 +97,8 @@ namespace AI.EasyState
             CurrentState = newState;
 
             CurrentState.Enter(Self, data);
+
+            OnStateChanged?.Invoke(CurrentState);
         }
 
         public void ForceTransitionToState(string stateName, IStateData data = null)
@@ -91,6 +115,8 @@ namespace AI.EasyState
             CurrentState = newState;
 
             CurrentState.Enter(Self, data);
+
+            OnStateChanged?.Invoke(CurrentState);
         }
 
         public void Tick(float deltaTime)

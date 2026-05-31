@@ -4050,7 +4050,7 @@ PrefabInstance:
     - target: {fileID: 7585502007258304629, guid: 5774789d6ded6835389754ba4211dc9a, type: 3}
       propertyPath: enemyTeam
       value: 
-      objectReference: {fileID: 654231193}
+      objectReference: {fileID: 6014652196815982520}
     - target: {fileID: 7585502007258304629, guid: 5774789d6ded6835389754ba4211dc9a, type: 3}
       propertyPath: spawnArea
       value: 
@@ -4062,7 +4062,7 @@ PrefabInstance:
     - target: {fileID: 7585502007258304629, guid: 5774789d6ded6835389754ba4211dc9a, type: 3}
       propertyPath: friendlyTeam
       value: 
-      objectReference: {fileID: 6014652196815982520}
+      objectReference: {fileID: 654231193}
     - target: {fileID: 7585502007258304629, guid: 5774789d6ded6835389754ba4211dc9a, type: 3}
       propertyPath: instantiator
       value: 
