@@ -14,6 +14,7 @@ using NUnit.Framework;
 using Services;
 using Ships;
 using Ships.Modules;
+using Ships.Sensing;
 using Ships.Tests.TestHelpers;
 using UnityEngine;
 using Zenject;
@@ -163,6 +164,7 @@ namespace E2E
             foreach (Transform moduleChild in shipGo.transform) Container.Inject(moduleChild.GetComponent<Module>());
 
             shipGo.AddComponent<ModuleConnectionFactory>();
+            shipGo.AddComponent<ShipSensing>();
 
             shipGo.SetActive(false);
             var ship = shipGo.AddComponent<AIShip>();
