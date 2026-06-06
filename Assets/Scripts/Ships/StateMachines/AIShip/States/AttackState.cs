@@ -45,7 +45,7 @@ namespace Ships.StateMachines.AIShip.States
         {
             base.Update(stateMachine, deltaTime);
             UpdateAttack(stateMachine);
-            UpdateNavigation(stateMachine, deltaTime);
+            UpdateNavigation(stateMachine);
         }
 
         private void UpdateAttack(AIShipStateMachine stateMachine)
@@ -71,7 +71,7 @@ namespace Ships.StateMachines.AIShip.States
             _lastAttackTime = Time.time;
         }
 
-        private void UpdateNavigation(AIShipStateMachine stateMachine, float deltaTime)
+        private void UpdateNavigation(AIShipStateMachine stateMachine)
         {
             if (_targetEnemy == null)
             {

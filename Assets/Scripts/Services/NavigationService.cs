@@ -28,7 +28,7 @@ namespace Services
 
         private Vector2 Sector => new(sectorSize, sectorSize);
 
-        private void Awake()
+        private void Start()
         {
             _obstaclesFilter = new ContactFilter2D
             {
@@ -84,9 +84,15 @@ namespace Services
             return GetSectorResult(new Vector3(sectorPosition.x, sectorPosition.y));
         }
 
+        private Vector2 GetSectorOverlapCenter(Vector2 sectorCorner)
+        {
+            return sectorCorner + Sector * 0.5f;
+        }
+
         private SectorResult QuerySectorByPositionForShips(Vector2 sectorPosition, IShip callerShip)
         {
-            var count = Physics2D.OverlapBox(sectorPosition, Sector, 0, _allBlockersFilter, _results);
+            var count = Physics2D.OverlapBox(GetSectorOverlapCenter(sectorPosition), Sector, 0, _allBlockersFilter,
+                _results);
             if (count == 0) return SectorResult.Empty;
 
             var shipsFound = new List<IShip>();
@@ -118,7 +124,8 @@ namespace Services
 
         private SectorResult BuildSectorResult(Vector2 sectorPosition)
         {
-            var count = Physics2D.OverlapBox(sectorPosition, Sector, 0, _obstaclesFilter, _results);
+            var count = Physics2D.OverlapBox(GetSectorOverlapCenter(sectorPosition), Sector, 0, _obstaclesFilter,
+                _results);
             var hasObstacles = false;
             var hasDebris = false;
 

@@ -1,6 +1,9 @@
 using System.Collections.Generic;
 using Core.Pixelation;
+using JetBrains.Annotations;
 using UnityEngine;
+using UnityEngine.Assertions;
+using ZLinq;
 
 namespace Ships.StateMachines.AIShip
 {
@@ -8,17 +11,17 @@ namespace Ships.StateMachines.AIShip
     {
         private const float PathUpdateInterval = 1.0f;
         private const float SectorToWaypointThresholdMultiplier = 0.7f;
+        private readonly Ship _ship;
         private readonly float _waypointThreshold;
-        public readonly Ship Ship;
         private int _currentWaypointIndex;
         private float _lastPathUpdateTime;
-        private IReadOnlyList<Vector3> _path;
+        [CanBeNull] private IReadOnlyList<Vector3> _path;
         private IPixelatedRigidbody _target;
         private float _targetDistanceThreshold;
 
         public NavigationFollower(Ship ship, float sectorSize)
         {
-            Ship = ship;
+            _ship = ship;
             _lastPathUpdateTime = Time.time - PathUpdateInterval;
             _waypointThreshold = sectorSize * SectorToWaypointThresholdMultiplier;
         }
@@ -29,9 +32,29 @@ namespace Ships.StateMachines.AIShip
 
             _lastPathUpdateTime = Time.time;
 
-            _path = stateMachine.NavigationService.CalculatePath(Ship.GetPosition(), targetPosition,
-                stateMachine.Controller.NavigationSize, Ship, _target);
-            _currentWaypointIndex = 0;
+            _path = stateMachine.NavigationService.CalculatePath(_ship.GetPosition(), targetPosition,
+                stateMachine.Controller.NavigationSize, _ship, _target);
+            _currentWaypointIndex = FindGoodFirstIndex();
+        }
+
+        private int FindGoodFirstIndex()
+        {
+            const float acceptableMultiplier = 1.5f;
+            if (_path is not { Count: > 1 }) return 0;
+
+            var result = 0;
+
+            var distanceToFirstWaypoint = Vector2.Distance(_ship.GetPosition(), _path[0]);
+            var i = 1;
+            foreach (var waypoint in _path.AsValueEnumerable().Skip(1))
+            {
+                var distanceToCurrentWaypoint = Vector2.Distance(_ship.GetPosition(), waypoint);
+                if (distanceToCurrentWaypoint < distanceToFirstWaypoint * acceptableMultiplier) result = i;
+
+                i++;
+            }
+
+            return result;
         }
 
         public void FollowPath(AIShipStateMachine stateMachine)
@@ -45,7 +68,7 @@ namespace Ships.StateMachines.AIShip
             }
 
             var waypoint = _path[_currentWaypointIndex];
-            var distanceToWaypoint = Vector2.Distance(Ship.GetPosition(), waypoint);
+            var distanceToWaypoint = Vector2.Distance(_ship.GetPosition(), waypoint);
 
             if (distanceToWaypoint < _waypointThreshold)
             {
@@ -57,17 +80,18 @@ namespace Ships.StateMachines.AIShip
             var hasMoreWaypoints = _currentWaypointIndex + 1 < _path.Count;
             var interpolatedWaypoint = waypoint;
             if (hasMoreWaypoints)
-                interpolatedWaypoint = ProcessNextWaypoint(waypoint, distanceToWaypoint);
+                interpolatedWaypoint = InterpolateNextWaypoints(waypoint, distanceToWaypoint);
 
             stateMachine.SetMovementTarget(interpolatedWaypoint);
         }
 
-        private Vector2 ProcessNextWaypoint(Vector2 waypoint,
+        private Vector2 InterpolateNextWaypoints(Vector2 waypoint,
             float distanceToWaypoint)
         {
+            Assert.IsNotNull(_path);
             var nextWaypoint = _path[_currentWaypointIndex + 1];
 
-            var distanceToNextWaypoint = Vector2.Distance(Ship.GetPosition(), nextWaypoint);
+            var distanceToNextWaypoint = Vector2.Distance(_ship.GetPosition(), nextWaypoint);
 
             if (distanceToNextWaypoint < _waypointThreshold)
             {
