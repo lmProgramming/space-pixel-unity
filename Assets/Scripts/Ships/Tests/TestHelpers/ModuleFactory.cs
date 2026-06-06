@@ -1,7 +1,8 @@
 using System.Collections.Generic;
 using Pixelation;
-using Ships.Internal;
+using Ships.ModuleConnection;
 using Ships.Modules;
+using Ships.Systems.Resources;
 using UnityEngine;
 using Zenject;
 

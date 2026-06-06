@@ -200,7 +200,7 @@ namespace Pixelation
         {
             var position = WorldToLocalPoint(worldPosition);
 
-            return new Vector2Int((int)position.x, (int)position.y);
+            return new Vector2Int(Mathf.FloorToInt(position.x), Mathf.FloorToInt(position.y));
         }
 
         public Vector2 LocalToWorldPoint(Vector2Int localPosition)

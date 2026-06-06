@@ -1,3 +1,4 @@
+using Ships.ModuleConnection;
 using Ships.Modules;
 using UnityEngine;
 using ZLinq;

@@ -3,7 +3,7 @@ using Ships.Modules;
 using UnityEngine;
 using ZLinq;
 
-namespace Ships.Internal
+namespace Ships.Systems.Gimbal
 {
     public class ControlAllocator
     {

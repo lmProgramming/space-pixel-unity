@@ -1,9 +1,9 @@
 using AI.EasyState;
 using Core.Ship;
 using JetBrains.Annotations;
-using Ships.Sensing;
 using Ships.StateMachines.AIShip;
 using Ships.StateMachines.AIShip.States;
+using Ships.Systems.Sensing;
 using UnityEngine;
 using UnityEngine.Assertions;
 

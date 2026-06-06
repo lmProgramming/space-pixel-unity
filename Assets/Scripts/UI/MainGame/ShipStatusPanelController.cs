@@ -3,7 +3,7 @@ using Core;
 using Events.Game;
 using Events.UI;
 using Ships;
-using Ships.Internal;
+using Ships.Systems.Resources;
 using UI.Common;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -37,6 +37,7 @@ namespace UI.MainGame
         private VisualElement _pauseOverlay;
         private VisualElement _pauseOverlayHost;
         private bool _pauseUiInitialized;
+        private bool _pointerBlockersRegistered;
 
         private VisualElement _root;
         private VisualElement _sasCluster;
@@ -48,7 +49,6 @@ namespace UI.MainGame
         private Label _speedValueLabel;
         private float _targetEnergyBarHeight;
         private UiPointerTracker _uiPointerTracker;
-        private bool _pointerBlockersRegistered;
 
         private void Awake()
         {
@@ -97,7 +97,7 @@ namespace UI.MainGame
             if (!Input.GetKeyDown(KeyCode.Escape))
                 return;
 
-            if (_settingsPanelController != null && _settingsPanelController.IsOpen)
+            if (_settingsPanelController is { IsOpen: true })
             {
                 _settingsPanelController.Hide();
                 return;
@@ -162,15 +162,7 @@ namespace UI.MainGame
         private void TrackPointerBlocker(string elementName)
         {
             var element = _root.Q<VisualElement>(elementName);
-            if (element != null)
-            {
-                _uiPointerTracker.Track(element);
-            }
-            else
-            {
-                // TEMP DIAGNOSTIC: remove once pointer-over-UI gating is confirmed working.
-                Debug.LogWarning($"[ShipStatusPanelController] Pointer blocker element '{elementName}' not found in HUD.");
-            }
+            _uiPointerTracker.Track(element);
         }
 
         private void RegisterSasToggle()

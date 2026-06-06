@@ -238,7 +238,7 @@ namespace Ships.Modules
 
         public void SetupConnections(Module otherModule, ref FixedJoint2D joint)
         {
-            if (PixelatedRigidbody == null || otherModule == null || otherModule.PixelatedRigidbody == null)
+            if (PixelatedRigidbody == null || !otherModule || otherModule.PixelatedRigidbody == null)
             {
                 Debug.LogError("Cannot SetupConnections: Missing PixelatedRigidbody on self or other module.", this);
                 return;
@@ -264,7 +264,7 @@ namespace Ships.Modules
             if (!joint)
             {
                 joint = gameObject.AddComponent<FixedJoint2D>();
-                if (otherPixelatedRigidbody.Rigidbody != null)
+                if (otherPixelatedRigidbody.Rigidbody)
                 {
                     joint.connectedBody = otherPixelatedRigidbody.Rigidbody;
                 }

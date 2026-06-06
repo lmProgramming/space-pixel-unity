@@ -714,6 +714,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.Services::Services.SectorService
   sectorSize: 100
   cacheDuration: 1
+  maxSectorsDistance: 100000
 --- !u!1 &6910225380903978702
 GameObject:
   m_ObjectHideFlags: 0

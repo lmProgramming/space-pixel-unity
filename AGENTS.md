@@ -17,6 +17,7 @@ Do not use "Bootstrappers" - scripts that generate scenes or load resources dyna
 
 - Ship position: use `ship.GetPosition()` (which uses `CommandModule.Transform.position`), NEVER `ship.transform.position`
 - Resources naming conflict: `Core.Ship.Resources` (crew/power) collides with `UnityEngine.Resources`. Always alias it: `using Resources = Core.Ship.Resources;`
+- You won't be able to run tests. I have the Unity Editor open.
 
 ## Third-Party Libraries
 

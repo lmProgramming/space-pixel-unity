@@ -3397,6 +3397,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Game.Gameplay::Gameplay.EasyTeam.Team
   treatNonAlliedAsEnemy: 1
+  layerName: Enemy
   allies: []
   enemies:
   - {fileID: 4324520987836842763}
@@ -3660,6 +3661,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Game.Gameplay::Gameplay.EasyTeam.Team
   treatNonAlliedAsEnemy: 1
+  layerName: Friendly
   allies: []
   enemies:
   - {fileID: 133733233019135677}

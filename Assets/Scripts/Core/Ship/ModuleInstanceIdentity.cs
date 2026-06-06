@@ -1,8 +1,7 @@
 using System;
-using Core.Ship;
 using UnityEngine;
 
-namespace Ships
+namespace Core.Ship
 {
     public class ModuleInstanceIdentity : MonoBehaviour
     {
@@ -25,7 +24,9 @@ namespace Ships
 
         public void RestoreFromSnapshot(string snapshotInstanceId, ModuleOrigin newOrigin, string newArchetypeId)
         {
-            instanceId = string.IsNullOrWhiteSpace(snapshotInstanceId) ? Guid.NewGuid().ToString("N") : snapshotInstanceId;
+            instanceId = string.IsNullOrWhiteSpace(snapshotInstanceId)
+                ? Guid.NewGuid().ToString("N")
+                : snapshotInstanceId;
             origin = newOrigin;
             archetypeId = string.IsNullOrWhiteSpace(newArchetypeId) ? string.Empty : newArchetypeId;
         }

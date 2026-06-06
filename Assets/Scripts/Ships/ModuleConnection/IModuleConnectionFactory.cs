@@ -1,4 +1,4 @@
-namespace Ships
+namespace Ships.ModuleConnection
 {
     public interface IModuleConnectionFactory
     {

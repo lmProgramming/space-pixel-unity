@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Ships.Modules;
 using UnityEngine;
 
-namespace Ships.Internal
+namespace Ships.Systems.Gimbal
 {
     public class SasTurnInputResolver
     {

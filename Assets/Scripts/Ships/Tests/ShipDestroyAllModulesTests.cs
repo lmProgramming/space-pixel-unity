@@ -1,8 +1,9 @@
 using System.Collections;
 using NUnit.Framework;
 using Services;
-using Ships.Internal;
+using Ships.ModuleConnection;
 using Ships.Modules;
+using Ships.Systems.Resources;
 using Ships.Tests.TestHelpers;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -12,14 +13,15 @@ namespace Ships.Tests
     [TestFixture]
     public class ShipDestroyAllModulesTests : ShipTestBase
     {
-        private ShipSnapshotService _snapshotService;
-
         [SetUp]
         public override void SetUp()
         {
             base.SetUp();
-            _snapshotService = new ShipSnapshotService(Container, null, new TestModuleCatalog(), new TestContentCatalog());
+            _snapshotService =
+                new ShipSnapshotService(Container, null, new TestModuleCatalog(), new TestContentCatalog());
         }
+
+        private ShipSnapshotService _snapshotService;
 
         [UnityTest]
         public IEnumerator DestroyAllModules_RemovesModulesFromShipHierarchy()

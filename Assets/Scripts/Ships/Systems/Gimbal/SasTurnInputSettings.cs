@@ -1,4 +1,4 @@
-namespace Ships.Internal
+namespace Ships.Systems.Gimbal
 {
     public readonly struct SasTurnInputSettings
     {
@@ -24,4 +24,3 @@ namespace Ships.Internal
         public float ForwardCompensationMaxTurnInput { get; }
     }
 }
-

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Core.Ship;
 using UnityEngine;
 
-namespace Ships.Internal
+namespace Ships.Systems.Resources
 {
     public class ResourceManager : MonoBehaviour
     {

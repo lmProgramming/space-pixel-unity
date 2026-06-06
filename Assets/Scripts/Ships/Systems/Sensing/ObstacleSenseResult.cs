@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Ships.Sensing
+namespace Ships.Systems.Sensing
 {
     public struct ObstacleSenseResult
     {

@@ -61,20 +61,20 @@ namespace Pixelation
 
                 if (!body1.IsPixelAssumeInBounds(localP1)) continue;
 
-                var worldPosP1 = body1.LocalToWorldPoint(localP1);
+                var worldCenterP1 = body1.LocalToWorldPoint(new Vector2(x + 0.5f, y + 0.5f));
 
-                if (!bounds2.Contains(worldPosP1)) continue;
+                if (!bounds2.Contains(worldCenterP1)) continue;
 
-                if (IsAdjacentToBody2(worldPosP1)) overlappingPoints.Add(localP1);
+                if (IsAdjacentToBody2(worldCenterP1)) overlappingPoints.Add(localP1);
             }
 
             return overlappingPoints;
 
-            bool IsAdjacentToBody2(Vector2 p1WorldPos)
+            bool IsAdjacentToBody2(Vector2 p1WorldCenter)
             {
                 foreach (var offset in NeighborOffsets)
                 {
-                    var worldNeighborPos = p1WorldPos + offset;
+                    var worldNeighborPos = p1WorldCenter + offset;
                     var p2NeighborLocal = body2.WorldToLocalPixel(worldNeighborPos);
                     if (body2.IsPixel(p2NeighborLocal)) return true;
                 }

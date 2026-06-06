@@ -1,4 +1,4 @@
-namespace Ships.Internal
+namespace Ships.Systems.Gimbal
 {
     public readonly struct ControlAllocatorSettings
     {
