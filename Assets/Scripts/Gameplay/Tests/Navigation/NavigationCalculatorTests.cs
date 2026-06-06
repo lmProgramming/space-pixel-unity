@@ -79,7 +79,7 @@ namespace Gameplay.Tests.Navigation
             var start = new Vector3(12f, 14f);
             var end = new Vector3(17f, 19f);
 
-            var path = calculator.CalculatePath(start, end, 5);
+            var path = calculator.CalculatePath(start, end, 5, int.MaxValue);
 
             Assert.IsNotNull(path);
             Assert.AreEqual(1, path.Count);
@@ -93,7 +93,7 @@ namespace Gameplay.Tests.Navigation
             var start = new Vector3(5f, 5f);
             var end = new Vector3(35f, 5f);
 
-            var path = calculator.CalculatePath(start, end, 5);
+            var path = calculator.CalculatePath(start, end, 5, int.MaxValue);
 
             Assert.IsNotNull(path);
             Assert.Greater(path.Count, 0);
@@ -111,7 +111,7 @@ namespace Gameplay.Tests.Navigation
             };
             var calculator = BuildCalculator(blocked);
 
-            var path = calculator.CalculatePath(new Vector3(5f, 5f), new Vector3(50f, 50f), 5);
+            var path = calculator.CalculatePath(new Vector3(5f, 5f), new Vector3(50f, 50f), 5, int.MaxValue);
 
             Assert.IsNull(path);
         }
@@ -134,11 +134,12 @@ namespace Gameplay.Tests.Navigation
             var calculator = BuildCalculator(blocked);
 
             var pathForSmallShip =
-                calculator.CalculatePath(new Vector3(5f, 5f), new Vector3(1000f, 1000f), (int)SectorSize);
+                calculator.CalculatePath(new Vector3(5f, 5f), new Vector3(1000f, 1000f), (int)SectorSize, int.MaxValue);
             Assert.IsNotNull(pathForSmallShip, "Expected a path for small ship since direct neighbors are clear");
 
             var pathForBigShip =
-                calculator.CalculatePath(new Vector3(5f, 5f), new Vector3(1000f, 1000f), (int)SectorSize * 2);
+                calculator.CalculatePath(new Vector3(5f, 5f), new Vector3(1000f, 1000f), (int)SectorSize * 2,
+                    int.MaxValue);
 
             Assert.IsNull(pathForBigShip,
                 "Expected no path for big ship since all neighbors are blocked for its footprint");
@@ -155,7 +156,7 @@ namespace Gameplay.Tests.Navigation
             var start = new Vector3(5f, 5f);
             var end = new Vector3(5f, 35f);
 
-            var path = calculator.CalculatePath(start, end, 5);
+            var path = calculator.CalculatePath(start, end, 5, int.MaxValue);
 
             Assert.IsNotNull(path, "Expected a path around the obstacle");
             foreach (var waypoint in path)
@@ -170,7 +171,7 @@ namespace Gameplay.Tests.Navigation
             var start = new Vector3(5f, 5f);
             var end = new Vector3(35f, 5f);
 
-            var path = calculator.CalculatePath(start, end, 5);
+            var path = calculator.CalculatePath(start, end, 5, int.MaxValue);
 
             Assert.IsNotNull(path);
             var startSectorCenter = calculator.GetSectorCenter(calculator.NormalizePositionToSector(start));
@@ -198,7 +199,7 @@ namespace Gameplay.Tests.Navigation
             var shipSize = (int)(SectorSize * 2);
 
             var path = calculator.CalculatePath(
-                new Vector3(5f, 5f), new Vector3(100f, 5f), shipSize);
+                new Vector3(5f, 5f), new Vector3(100f, 5f), shipSize, int.MaxValue);
 
             Assert.IsNotNull(path, "Large ship should find the one open corridor to the right");
         }
@@ -219,7 +220,7 @@ namespace Gameplay.Tests.Navigation
             var shipSize = (int)(SectorSize * 2);
 
             var path = calculator.CalculatePath(
-                new Vector3(5f, 5f), new Vector3(100f, 100f), shipSize);
+                new Vector3(5f, 5f), new Vector3(100f, 100f), shipSize, int.MaxValue);
 
             Assert.IsNull(path, "Large ship should find no path when all corridors are blocked");
         }
@@ -245,7 +246,8 @@ namespace Gameplay.Tests.Navigation
                 (sector, _) => allNeighbors.TryGetValue(sector, out var r) ? r : SectorResult.Empty);
 
             var path = calculator.CalculatePath(
-                new Vector3(5f, 5f), new Vector3(50f, 50f), 5, callerShip, targetShip.CommandModule.PixelatedRigidbody);
+                new Vector3(5f, 5f), new Vector3(50f, 50f), 5, callerShip, targetShip.CommandModule.PixelatedRigidbody,
+                int.MaxValue);
 
             Assert.IsNull(path, "Expected no path when all neighboring sectors have both a third ship and debris");
         }
@@ -270,7 +272,8 @@ namespace Gameplay.Tests.Navigation
             var blockedCalculator = BuildCalculatorWithShipAwareness(allNeighbors);
 
             var path = blockedCalculator.CalculatePath(
-                new Vector3(5f, 5f), new Vector3(50f, 50f), 5, callerShip, targetShip.CommandModule.PixelatedRigidbody);
+                new Vector3(5f, 5f), new Vector3(50f, 50f), 5, callerShip, targetShip.CommandModule.PixelatedRigidbody,
+                int.MaxValue);
 
             Assert.IsNull(path, "Expected no path when all neighboring sectors contain a third ship");
         }
@@ -290,7 +293,8 @@ namespace Gameplay.Tests.Navigation
             var calculator = BuildCalculatorWithShipAwareness(shipsPerSector);
 
             var path = calculator.CalculatePath(
-                new Vector3(5f, 5f), new Vector3(5f, 35f), 5, callerShip, targetShip.CommandModule.PixelatedRigidbody);
+                new Vector3(5f, 5f), new Vector3(5f, 35f), 5, callerShip, targetShip.CommandModule.PixelatedRigidbody,
+                int.MaxValue);
 
             Assert.IsNotNull(path, "Expected a path when the sector contains only caller and target ships");
         }

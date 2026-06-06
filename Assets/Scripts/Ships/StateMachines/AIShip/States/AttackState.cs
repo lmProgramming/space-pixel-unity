@@ -37,7 +37,7 @@ namespace Ships.StateMachines.AIShip.States
                 throw new ArgumentException("AttackState requires AttackStateData");
             }
 
-            NavigationHelper = new NavigationHelper(Ship)
+            NavigationFollower = new NavigationFollower(Ship, stateMachine.NavigationService.SectorSize)
                 .WithTarget(_targetEnemy);
         }
 
@@ -57,7 +57,7 @@ namespace Ships.StateMachines.AIShip.States
                 return;
             }
 
-            var distanceToTarget = Vector2.Distance(Ship.GetPosition(), _targetEnemy.WeightedCenter);
+            var distanceToTarget = Vector2.Distance(Ship.GetPosition(), _targetEnemy.WorldWeightedCenter);
 
             if (distanceToTarget > _attackRange * AttackStopBufferRangeMultiplier)
             {
@@ -73,15 +73,13 @@ namespace Ships.StateMachines.AIShip.States
 
         private void UpdateNavigation(AIShipStateMachine stateMachine, float deltaTime)
         {
-            base.Update(stateMachine, deltaTime);
-
             if (_targetEnemy == null)
             {
                 stateMachine.ClearMovementTarget();
                 return;
             }
 
-            var targetPosition = _targetEnemy.WeightedCenter;
+            var targetPosition = _targetEnemy.WorldWeightedCenter;
             var distanceToTarget = Vector2.Distance(Ship.GetPosition(), targetPosition);
 
             if (distanceToTarget <= _navigationTargetDistanceThreshold)
@@ -90,15 +88,15 @@ namespace Ships.StateMachines.AIShip.States
                 return;
             }
 
-            Debug.Assert(NavigationHelper != null, "NavigationHelper != null");
+            Debug.Assert(NavigationFollower != null, "NavigationHelper != null");
 
-            NavigationHelper.UpdatePath(stateMachine, targetPosition);
-            NavigationHelper.FollowPath(stateMachine);
+            NavigationFollower.UpdatePath(stateMachine, targetPosition);
+            NavigationFollower.FollowPath(stateMachine);
         }
 
         private void PerformAttack()
         {
-            Ship.SetAttackTarget(_targetEnemy.WeightedCenter);
+            Ship.SetAttackTarget(_targetEnemy.WorldWeightedCenter);
             Ship.Shoot();
         }
 
@@ -116,7 +114,7 @@ namespace Ships.StateMachines.AIShip.States
 
         public override string DebugInfo()
         {
-            var targetPos = _targetEnemy?.WeightedCenter ?? Vector3.zero;
+            var targetPos = _targetEnemy?.WorldWeightedCenter ?? Vector3.zero;
             var distToTarget = Vector2.Distance(Ship.GetPosition(), targetPos);
             var timeSinceLastAttack = Time.time - _lastAttackTime;
             var cooldownRemaining = Mathf.Max(0, _attackCooldown - timeSinceLastAttack);

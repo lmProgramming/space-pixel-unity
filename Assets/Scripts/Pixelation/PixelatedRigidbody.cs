@@ -81,6 +81,7 @@ namespace Pixelation
         }
 
         public Vector2 WeightedCenter { get; private set; }
+        public Vector2 WorldWeightedCenter => LocalToWorldPoint(WeightedCenter);
 
         public ITexturePixelGrid TexturePixelGrid { get; set; }
 
@@ -346,7 +347,7 @@ namespace Pixelation
 
             TexturePixelGrid = new TexturePixelGrid(SpriteRenderer);
 
-            if ((_collisionEventChannelSO != null && _debrisSpawner != null) || recalculateColliders)
+            if ((_collisionEventChannelSO && _debrisSpawner != null) || recalculateColliders)
                 CollisionHandler = new PixelCollisionHandler(TexturePixelGrid, this, GetComponent<PolygonCollider2D>(),
                     _collisionEventChannelSO, _debrisSpawner);
 

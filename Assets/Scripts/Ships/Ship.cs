@@ -174,8 +174,7 @@ namespace Ships
 
         public Vector2 GetPosition()
         {
-            var rb = CommandModule.PixelatedRigidbody;
-            return rb.LocalToWorldPoint(rb.WeightedCenter);
+            return CommandModule.PixelatedRigidbody.WorldWeightedCenter;
         }
 
         public void OnModuleDestroyed(IModule module)
@@ -245,6 +244,9 @@ namespace Ships
         public void SetTeam(ITeam newTeam)
         {
             team = newTeam as Team;
+            Assert.IsNotNull(team, "newTeam must be of type Team");
+            gameObject.layer = team.Layer;
+            transform.SetLayerAllChildren(team.Layer);
         }
 
         private void DestroyShip()

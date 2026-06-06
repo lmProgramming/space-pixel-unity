@@ -8,7 +8,7 @@ using Random = UnityEngine.Random;
 
 namespace AI.EasyState
 {
-    public abstract class StateMachine<TSelf, TStateBase> : MonoBehaviour
+    public abstract class StateMachine<TSelf, TStateBase> : MonoBehaviour, IStateMachine
         where TSelf : StateMachine<TSelf, TStateBase>
         where TStateBase : BaseState<TSelf, TStateBase>
     {
@@ -179,5 +179,9 @@ namespace AI.EasyState
 
         [SerializeField] private string currentStateDataDebug;
         // ReSharper restore NotAccessedField.Local
+    }
+
+    public interface IStateMachine
+    {
     }
 }

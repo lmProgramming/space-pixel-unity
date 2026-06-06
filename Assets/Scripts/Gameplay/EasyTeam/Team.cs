@@ -8,8 +8,11 @@ namespace Gameplay.EasyTeam
     {
         public bool treatNonAlliedAsEnemy = true;
 
+        public string layerName;
+
         [SerializeField] private List<Team> allies = new();
         [SerializeField] private List<Team> enemies = new();
+        public int Layer => LayerMask.NameToLayer(layerName);
 
         public bool IsAllied(ITeam shipTeam)
         {

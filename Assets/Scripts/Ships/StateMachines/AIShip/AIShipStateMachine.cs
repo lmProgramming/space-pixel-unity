@@ -37,9 +37,9 @@ namespace Ships.StateMachines.AIShip
         }
 
         [CanBeNull]
-        internal NavigationHelper GetNavigationHelper()
+        internal NavigationFollower GetNavigationHelper()
         {
-            return (CurrentState as AIShipState)?.NavigationHelper;
+            return (CurrentState as AIShipState)?.NavigationFollower;
         }
     }
 }

@@ -16,6 +16,7 @@ namespace Services
     {
         [SerializeField] private float sectorSize = 10f;
         [SerializeField] private float cacheDuration = 1f;
+        [SerializeField] private int maxSectorsDistance = 100;
 
         private readonly Collider2D[] _results = new Collider2D[32];
         private readonly Dictionary<Vector2, SectorResult> _sectorCache = new();
@@ -46,6 +47,8 @@ namespace Services
             _calculator = new NavigationCalculator(sectorSize, QuerySectorByPosition, QuerySectorByPositionForShips);
         }
 
+        public float SectorSize => sectorSize;
+
         public SectorResult GetSectorResult(Vector3 position)
         {
             var normalizedPosition = _calculator.NormalizePositionToSector(position);
@@ -61,13 +64,13 @@ namespace Services
 
         public List<Vector3> CalculatePath(Vector3 start, Vector3 end, int shipSize)
         {
-            return _calculator.CalculatePath(start, end, shipSize);
+            return _calculator.CalculatePath(start, end, shipSize, maxSectorsDistance);
         }
 
         public List<Vector3> CalculatePath(Vector3 start, Vector3 end, int shipSize, IShip callerShip,
             IPixelatedRigidbody targetShip)
         {
-            return _calculator.CalculatePath(start, end, shipSize, callerShip, targetShip);
+            return _calculator.CalculatePath(start, end, shipSize, callerShip, targetShip, maxSectorsDistance);
         }
 
         public void ClearCacheEntries(IEnumerable<Vector2> keys)

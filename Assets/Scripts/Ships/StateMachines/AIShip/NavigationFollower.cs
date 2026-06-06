@@ -4,10 +4,11 @@ using UnityEngine;
 
 namespace Ships.StateMachines.AIShip
 {
-    public class NavigationHelper
+    public class NavigationFollower
     {
         private const float PathUpdateInterval = 1.0f;
-        private const float WaypointThreshold = 70.0f;
+        private const float SectorToWaypointThresholdMultiplier = 0.7f;
+        private readonly float _waypointThreshold;
         public readonly Ship Ship;
         private int _currentWaypointIndex;
         private float _lastPathUpdateTime;
@@ -15,9 +16,11 @@ namespace Ships.StateMachines.AIShip
         private IPixelatedRigidbody _target;
         private float _targetDistanceThreshold;
 
-        public NavigationHelper(Ship ship)
+        public NavigationFollower(Ship ship, float sectorSize)
         {
             Ship = ship;
+            _lastPathUpdateTime = Time.time - PathUpdateInterval;
+            _waypointThreshold = sectorSize * SectorToWaypointThresholdMultiplier;
         }
 
         public void UpdatePath(AIShipStateMachine stateMachine, Vector3 targetPosition)
@@ -37,14 +40,14 @@ namespace Ships.StateMachines.AIShip
 
             if (_currentWaypointIndex >= _path.Count)
             {
-                stateMachine.SetMovementTarget(_target.WeightedCenter);
+                stateMachine.SetMovementTarget(_target.WorldWeightedCenter);
                 return;
             }
 
             var waypoint = _path[_currentWaypointIndex];
             var distanceToWaypoint = Vector2.Distance(Ship.GetPosition(), waypoint);
 
-            if (distanceToWaypoint < WaypointThreshold)
+            if (distanceToWaypoint < _waypointThreshold)
             {
                 _currentWaypointIndex++;
                 if (_currentWaypointIndex < _path.Count)
@@ -66,18 +69,18 @@ namespace Ships.StateMachines.AIShip
 
             var distanceToNextWaypoint = Vector2.Distance(Ship.GetPosition(), nextWaypoint);
 
-            if (distanceToNextWaypoint < WaypointThreshold)
+            if (distanceToNextWaypoint < _waypointThreshold)
             {
                 _currentWaypointIndex += 2;
                 return _currentWaypointIndex < _path.Count ? _path[_currentWaypointIndex] : nextWaypoint;
             }
 
-            var t = Mathf.Clamp01(WaypointThreshold / distanceToWaypoint);
+            var t = Mathf.Clamp01(_waypointThreshold / distanceToWaypoint);
 
             return Vector3.Lerp(waypoint, nextWaypoint, t);
         }
 
-        public NavigationHelper WithTarget(IPixelatedRigidbody target)
+        public NavigationFollower WithTarget(IPixelatedRigidbody target)
         {
             _target = target;
             return this;

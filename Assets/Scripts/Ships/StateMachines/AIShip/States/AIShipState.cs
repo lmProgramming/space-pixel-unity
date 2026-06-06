@@ -6,7 +6,7 @@ namespace Ships.StateMachines.AIShip.States
     public abstract class AIShipState : BaseState<AIShipStateMachine, AIShipState>
     {
         protected Ships.AIShip Ship;
-        [CanBeNull] public NavigationHelper NavigationHelper { get; protected set; }
+        [CanBeNull] public NavigationFollower NavigationFollower { get; protected set; }
 
         public override void Enter(AIShipStateMachine stateMachine, IStateData data)
         {

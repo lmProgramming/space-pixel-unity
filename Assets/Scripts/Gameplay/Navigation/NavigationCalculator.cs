@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Core.Pixelation;
 using Core.Services;
 using Core.Ship;
+using JetBrains.Annotations;
 using LMPro.External.FyiurAmron;
 using UnityEngine;
 using ZLinq;
@@ -23,22 +24,26 @@ namespace Gameplay.Navigation
             _getSectorResultForShips = getSectorResultForShips;
         }
 
-        public List<Vector3> CalculatePath(Vector3 start, Vector3 end, int shipSize)
+        public List<Vector3> CalculatePath(Vector3 start, Vector3 end, int shipSize, int maxSectorsDistance)
         {
-            return CalculatePathInternal(start, end, shipSize, null, null);
+            return CalculatePathInternal(start, end, shipSize, null, null, maxSectorsDistance);
         }
 
         public List<Vector3> CalculatePath(Vector3 start, Vector3 end, int shipSize, IShip callerShip,
-            IPixelatedRigidbody targetShip)
+            IPixelatedRigidbody targetShip, int maxSectorsDistance)
         {
-            return CalculatePathInternal(start, end, shipSize, callerShip, targetShip);
+            return CalculatePathInternal(start, end, shipSize, callerShip, targetShip, maxSectorsDistance);
         }
 
+        [CanBeNull]
         private List<Vector3> CalculatePathInternal(Vector3 start, Vector3 end, int shipSize, IShip callerShip,
-            IPixelatedRigidbody targetShip)
+            IPixelatedRigidbody targetShip, int maxSectorsDistance)
         {
             var startSector = NormalizePositionToSector(start);
             var endSector = NormalizePositionToSector(end);
+
+            var difference = endSector - startSector;
+            if (difference.sqrMagnitude > maxSectorsDistance * maxSectorsDistance) return null;
 
             if (startSector == endSector) return new List<Vector3> { GetSectorCenter(endSector) };
 

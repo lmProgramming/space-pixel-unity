@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Reflection;
 using Core;
 using Core.Services;
+using Editor.Standalone;
 using Events.Collision;
 using Events.Ship;
-using Gameplay.Combat;
 using Gameplay.EasyTeam;
 using Instantiation;
 using NSubstitute;
@@ -19,7 +19,6 @@ using Ships.Tests.TestHelpers;
 using UnityEngine;
 using Zenject;
 using ZLinq;
-using Module = Ships.Modules.Module;
 using Object = UnityEngine.Object;
 using Resources = Core.Ship.Resources;
 
@@ -48,7 +47,9 @@ namespace E2E
             CreatedObjects.Add(cameraObj);
             cameraObj.transform.SetParent(_testRoot.transform);
             var camera = cameraObj.AddComponent<Camera>();
+            camera.transform.tag = "MainCamera";
             camera.orthographic = true;
+            camera.orthographicSize = 100f;
 
             // Bind basic event channels
             var collisionEventChannel = ScriptableObject.CreateInstance<CollisionEventChannelSO>();
@@ -70,13 +71,15 @@ namespace E2E
             var navigationServiceGo = new GameObject("NavigationService");
             CreatedObjects.Add(navigationServiceGo);
             _navigationService = navigationServiceGo.AddComponent<NavigationService>();
-            Container.Inject(_navigationService);
+            SetPrivateField(_navigationService, "sectorSize", 1f);
             Container.Bind<INavigationService>().FromInstance(_navigationService).AsSingle();
+            var sectorVisualizer = navigationServiceGo.AddComponent<SectorVisualizer>();
+            SetPrivateField(sectorVisualizer, "navigationService", _navigationService);
 
             // Bind Instantiator & ProjectilesSpawner
-            var instantiatorGo = new GameObject("UnityInstantiator");
+            var instantiatorGo = new GameObject("ZenjectInstantiator");
             CreatedObjects.Add(instantiatorGo);
-            var instantiator = instantiatorGo.AddComponent<UnityInstantiator>();
+            var instantiator = instantiatorGo.AddComponent<ZenjectInstantiator>();
 
             var projectilesSpawnerGo = new GameObject("ProjectilesSpawner");
             CreatedObjects.Add(projectilesSpawnerGo);
@@ -85,10 +88,11 @@ namespace E2E
             SetPrivateField(_projectilesSpawner, "ProjectilesHolder", _testRoot.transform);
             Container.Bind<IProjectilesSpawner>().FromInstance(_projectilesSpawner).AsSingle();
 
-            // Mock ShipInitializeModulesEventChannel
             var shipInitializeModulesEventChannel = Substitute.For<ShipInitializeModulesEventChannel>();
             Container.Bind<ShipInitializeModulesEventChannel>().FromInstance(shipInitializeModulesEventChannel)
                 .AsSingle();
+
+            InjectAllObjectsInScene(Container);
         }
 
         [TearDown]
@@ -116,19 +120,21 @@ namespace E2E
             }
         }
 
-        protected Team CreateTeam(string name)
+        protected Team CreateTeam(string name, string layerName)
         {
             var teamGo = new GameObject(name);
             CreatedObjects.Add(teamGo);
             var team = teamGo.AddComponent<Team>();
             team.treatNonAlliedAsEnemy = true;
+            team.layerName = layerName;
             return team;
         }
 
         protected AIShip CreateAIShip(string name, Team team, Vector2 position, bool withWeapons,
-            GameObject bulletPrefab = null)
+            GameObject bulletPrefab = null, bool skipEngines = false)
         {
             var shipGo = ModuleFactory.CreateGameObject(name, CreatedObjects);
+            shipGo.layer = team.Layer;
             shipGo.transform.position = position;
 
             const int modulePixelSize = 5;
@@ -141,11 +147,14 @@ namespace E2E
             // Power
             ModuleFactory.CreatePowerModule(shipGo.transform, new Vector2(0f, moduleSpacing), Container,
                 CreatedObjects, modulePixelSize, modulePixelSize);
-            // Engines
-            ModuleFactory.CreateEngineModule(shipGo.transform, new Vector2(moduleSpacing, 0f), Container,
-                CreatedObjects, engineMaxThrust, modulePixelSize, modulePixelSize);
-            ModuleFactory.CreateEngineModule(shipGo.transform, new Vector2(-moduleSpacing, 0f), Container,
-                CreatedObjects, engineMaxThrust, modulePixelSize, modulePixelSize);
+            if (!skipEngines)
+            {
+                // Engines
+                ModuleFactory.CreateEngineModule(shipGo.transform, new Vector2(moduleSpacing, 0f), Container,
+                    CreatedObjects, engineMaxThrust, modulePixelSize, modulePixelSize, -180f);
+                ModuleFactory.CreateEngineModule(shipGo.transform, new Vector2(-moduleSpacing, 0f), Container,
+                    CreatedObjects, engineMaxThrust, modulePixelSize, modulePixelSize, -180f);
+            }
 
             if (withWeapons && bulletPrefab != null)
             {
@@ -161,14 +170,12 @@ namespace E2E
                 SetPrivateField(cannon, "sprite", weaponSprite);
             }
 
-            foreach (Transform moduleChild in shipGo.transform) Container.Inject(moduleChild.GetComponent<Module>());
-
             shipGo.AddComponent<ModuleConnectionFactory>();
             shipGo.AddComponent<ShipSensing>();
 
             shipGo.SetActive(false);
             var ship = shipGo.AddComponent<AIShip>();
-            Container.Inject(ship);
+            Container.InjectGameObject(shipGo);
             shipGo.SetActive(true);
 
             ship.SetTeam(team);
@@ -183,23 +190,9 @@ namespace E2E
             return ship;
         }
 
-        protected GameObject CreateBulletPrefab()
+        protected static GameObject GetBulletPrefab()
         {
-            var bulletPrefab = new GameObject("BulletPrefab");
-            CreatedObjects.Add(bulletPrefab);
-            bulletPrefab.transform.SetParent(_testRoot.transform);
-            bulletPrefab.SetActive(false);
-
-            bulletPrefab.AddComponent<SpriteRenderer>();
-            var rb = bulletPrefab.AddComponent<Rigidbody2D>();
-            rb.bodyType = RigidbodyType2D.Dynamic;
-            rb.gravityScale = 0f;
-            bulletPrefab.AddComponent<PolygonCollider2D>();
-
-            var pixelRb = bulletPrefab.AddComponent<Bullet>();
-            Container.Inject(pixelRb);
-            pixelRb.SetTextureFromColors(ModuleFactory.CreateSolidPixelGrid(2, 2, Color.yellow));
-            bulletPrefab.SetActive(true);
+            var bulletPrefab = UnityEngine.Resources.Load<GameObject>("Tests/Prefabs/Bullet");
 
             return bulletPrefab;
         }
@@ -225,6 +218,17 @@ namespace E2E
         {
             var texture = new Texture2D(2, 2);
             return Sprite.Create(texture, new Rect(0, 0, 2, 2), new Vector2(0.5f, 0.5f));
+        }
+
+        private static void InjectAllObjectsInScene(DiContainer container)
+        {
+            var allBehaviours = Object.FindObjectsByType<MonoBehaviour>();
+
+            foreach (var behaviour in allBehaviours)
+                if (behaviour != null)
+                    container.Inject(behaviour);
+
+            Debug.Log("Injected dependencies into all MonoBehaviours in the scene.");
         }
 
         private static void SetPrivateField<T>(object target, string fieldName, T value)

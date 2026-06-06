@@ -25,7 +25,7 @@ namespace Ships
         private AIShipStateMachine _aiShipStateMachine;
         private bool _pendingEnginesActive;
 
-        public static float SightRange => 200f;
+        public static float SightRange => 2000f;
         private ShipSensing Sensing { get; set; }
 
         protected override void Start()
@@ -132,9 +132,11 @@ namespace Ships
         [CanBeNull]
         public IShip GetClosestEnemyInSight()
         {
-            var result = Sensing.SenseShips(GetPosition(), CommandModule.Transform.up);
+            // var result = Sensing.SenseShips(GetPosition(), CommandModule.Transform.up);
+            //
+            // return !result.HasHit ? null : result.ClosestHit.transform.GetComponent<IModule>()?.Ship;
 
-            return !result.HasHit ? null : result.ClosestHit.transform.GetComponent<IModule>()?.Ship;
+            return FindClosestEnemy(SightRange);
         }
     }
 }
