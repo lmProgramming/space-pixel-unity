@@ -9,6 +9,7 @@ using UnityEngine;
 using Zenject;
 
 [assembly: InternalsVisibleTo("Game.Editor.Standalone")]
+[assembly: InternalsVisibleTo("Game.E2E")]
 
 namespace Services
 {
@@ -147,7 +148,12 @@ namespace Services
         }
 
 #if UNITY_EDITOR
-        internal float InternalSectorSize => sectorSize;
+        internal float InternalSectorSize
+        {
+            get => sectorSize;
+            set => sectorSize = value;
+        }
+
         internal float InternalCacheDuration => cacheDuration;
         internal IReadOnlyDictionary<Vector2, SectorResult> InternalCache => _sectorCache;
 #endif

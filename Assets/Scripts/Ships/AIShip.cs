@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using AI.EasyState;
 using Core.Ship;
 using JetBrains.Annotations;
@@ -6,6 +7,8 @@ using Ships.StateMachines.AIShip.States;
 using Ships.Systems.Sensing;
 using UnityEngine;
 using UnityEngine.Assertions;
+
+[assembly: InternalsVisibleTo("Game.E2E")]
 
 namespace Ships
 {
@@ -27,6 +30,14 @@ namespace Ships
 
         public static float SightRange => 2000f;
         private ShipSensing Sensing { get; set; }
+
+#if UNITY_INCLUDE_TESTS
+        internal float InternalStopDistance
+        {
+            get => stopDistance;
+            set => stopDistance = value;
+        }
+#endif
 
         protected override void Start()
         {

@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Reflection;
 using Core.Constants;
 using Core.Services;
 using Editor.Standalone;
@@ -73,10 +72,10 @@ namespace E2E
             var navigationServiceGo = new GameObject("NavigationService");
             CreatedObjects.Add(navigationServiceGo);
             _navigationService = navigationServiceGo.AddComponent<NavigationService>();
-            SetPrivateField(_navigationService, "sectorSize", 20f);
+            _navigationService.InternalSectorSize = 20f;
             Container.Bind<INavigationService>().FromInstance(_navigationService).AsSingle();
             var sectorVisualizer = navigationServiceGo.AddComponent<SectorVisualizer>();
-            SetPrivateField(sectorVisualizer, "navigationService", _navigationService);
+            sectorVisualizer.InternalNavigationService = _navigationService;
 
             // Bind Instantiator & ProjectilesSpawner
             var instantiatorGo = new GameObject("ZenjectInstantiator");
@@ -86,8 +85,8 @@ namespace E2E
             var projectilesSpawnerGo = new GameObject("ProjectilesSpawner");
             CreatedObjects.Add(projectilesSpawnerGo);
             _projectilesSpawner = projectilesSpawnerGo.AddComponent<ProjectilesSpawner>();
-            SetPrivateField(_projectilesSpawner, "instantiator", Instantiator);
-            SetPrivateField(_projectilesSpawner, "ProjectilesHolder", _testRoot.transform);
+            _projectilesSpawner.InternalInstantiator = Instantiator;
+            _projectilesSpawner.InternalProjectilesHolder = _testRoot.transform;
             Container.Bind<IProjectilesSpawner>().FromInstance(_projectilesSpawner).AsSingle();
 
             var shipInitializeModulesEventChannel = Substitute.For<ShipInitializeModulesEventChannel>();
@@ -141,7 +140,7 @@ namespace E2E
 
             const int modulePixelSize = 5;
             const float moduleSpacing = 5f;
-            const float engineMaxThrust = 800f;
+            const float engineMaxThrust = 1600f;
 
             // Command
             ModuleFactory.CreateCommandModule(shipGo.transform, Vector2.zero, Container, CreatedObjects,
@@ -153,9 +152,9 @@ namespace E2E
             {
                 // Engines
                 ModuleFactory.CreateEngineModule(shipGo.transform, new Vector2(moduleSpacing, 0f), Container,
-                    CreatedObjects, engineMaxThrust, modulePixelSize, modulePixelSize);
+                    CreatedObjects, engineMaxThrust, modulePixelSize, modulePixelSize, gimbalRange: 180f);
                 ModuleFactory.CreateEngineModule(shipGo.transform, new Vector2(-moduleSpacing, 0f), Container,
-                    CreatedObjects, engineMaxThrust, modulePixelSize, modulePixelSize);
+                    CreatedObjects, engineMaxThrust, modulePixelSize, modulePixelSize, gimbalRange: 180f);
             }
 
             if (withWeapons && bulletPrefab != null)
@@ -165,11 +164,11 @@ namespace E2E
                     new Vector2(0f, -moduleSpacing), 0f, Container, CreatedObjects, 5, 5);
                 var cannon = cannonGo.AddComponent<Cannon>();
                 cannon.SetResources(new Resources(0, 1f, 0, 0, 0));
-                SetPrivateField(cannon, "projectilePrefab", bulletPrefab);
-                SetPrivateField(cannon, "reloadTime", 0.2f);
-                SetPrivateField(cannon, "projectileSpeed", 1200f);
+                cannon.InternalProjectilePrefab = bulletPrefab;
+                cannon.InternalReloadTime = 0.2f;
+                cannon.InternalProjectileSpeed = 1200f;
                 var weaponSprite = CreateTestSprite();
-                SetPrivateField(cannon, "sprite", weaponSprite);
+                cannon.InternalSprite = weaponSprite;
             }
 
             shipGo.AddComponent<ModuleConnectionFactory>();
@@ -185,10 +184,7 @@ namespace E2E
             ship.ConfigureAllocatorForTesting(true, 14, 1f, 0.4f, 0.02f);
             ship.InitializeModules();
 
-            // Set default AI parameters for quick target scanning and aggressive speed
-            SetPrivateField(ship, "speedMultiplier", 3.0f);
-            SetPrivateField(ship, "rotationMultiplier", 3.0f);
-            SetPrivateField(ship, "stopDistance", 4.0f);
+            ship.InternalStopDistance = 4.0f;
 
             return ship;
         }
@@ -249,39 +245,6 @@ namespace E2E
                     container.Inject(behaviour);
 
             Debug.Log("Injected dependencies into all MonoBehaviours in the scene.");
-        }
-
-        private static void SetPrivateField<T>(object target, string fieldName, T value)
-        {
-            var field = target.GetType().GetField(fieldName,
-                BindingFlags.Instance | BindingFlags.NonPublic);
-            if (field == null)
-            {
-                var prop = target.GetType().GetProperty(fieldName,
-                    BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-                if (prop != null)
-                {
-                    prop.SetValue(target, value);
-                    return;
-                }
-
-                var baseType = target.GetType().BaseType;
-                while (baseType != null)
-                {
-                    field = baseType.GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic);
-                    if (field != null)
-                    {
-                        field.SetValue(target, value);
-                        return;
-                    }
-
-                    baseType = baseType.BaseType;
-                }
-
-                throw new UnityException($"Missing field or property '{fieldName}' on '{target.GetType().Name}'.");
-            }
-
-            field.SetValue(target, value);
         }
     }
 }

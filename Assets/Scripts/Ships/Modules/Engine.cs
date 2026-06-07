@@ -9,7 +9,7 @@ namespace Ships.Modules
     public class Engine : Module
     {
         [SerializeField] private float maxThrust;
-        [SerializeField] private float maxGimbalAngle = 35f;
+        [SerializeField] private float maxGimbalAngle = 45f;
         [SerializeField] private float gimbalSpeed = 240f;
 
         [SerializeField] private ParticleSystem exhaustParticles;
