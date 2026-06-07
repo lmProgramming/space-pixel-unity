@@ -1,5 +1,5 @@
 using System;
-using Core;
+using Core.Constants;
 using Core.Gameplay.EasyTeam;
 using Core.Pixelation;
 using Core.Services;

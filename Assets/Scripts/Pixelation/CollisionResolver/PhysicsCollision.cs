@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Core.Constants;
 using Core.Pixelation;
 using UnityEngine;
 
@@ -13,7 +14,8 @@ namespace Pixelation.CollisionResolver
 
         public override IEnumerable<Vector2Int> ResolveCollision(IPixelatedRigidbody other, Collision2D collision)
         {
-            var totalDamage = collision.relativeVelocity.magnitude * Mathf.Sqrt(other.Rigidbody.mass) * 0.01f;
+            var totalDamage = collision.relativeVelocity.magnitude * Mathf.Sqrt(other.Rigidbody.mass) *
+                              GameplayConstants.PixelDamageMultiplier;
 
             var localPoint = PixelatedRigidbody.WorldToLocalPoint(collision.GetContact(0).point);
 

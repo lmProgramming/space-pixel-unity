@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using Core;
+using Core.Constants;
 using Core.Gameplay.Combat;
 using Core.Gameplay.EasyTeam;
 using Core.Pixelation;

@@ -1,6 +1,7 @@
 using System.Collections;
+using System.Collections.Generic;
 using System.Reflection;
-using Core;
+using Core.Constants;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -11,9 +12,6 @@ namespace Services.Tests
     [TestFixture]
     public class NavigationServiceTests
     {
-        private const float SectorSize = 10f;
-        private readonly System.Collections.Generic.List<GameObject> _createdObjects = new();
-
         [TearDown]
         public void TearDown()
         {
@@ -22,6 +20,9 @@ namespace Services.Tests
                     Object.DestroyImmediate(obj);
             _createdObjects.Clear();
         }
+
+        private const float SectorSize = 10f;
+        private readonly List<GameObject> _createdObjects = new();
 
         [UnityTest]
         public IEnumerator GetSectorResult_ObstacleNearSectorFarCorner_IsBlocked()
@@ -77,7 +78,7 @@ namespace Services.Tests
             return navigationService;
         }
 
-        private GameObject CreateObstacle(Vector2 position, Vector2 size)
+        private void CreateObstacle(Vector2 position, Vector2 size)
         {
             var obstacle = new GameObject("Obstacle");
             _createdObjects.Add(obstacle);
@@ -88,7 +89,6 @@ namespace Services.Tests
             collider.size = size;
 
             obstacle.AddComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Static;
-            return obstacle;
         }
 
         private static void SetPrivateField(object target, string fieldName, object value)

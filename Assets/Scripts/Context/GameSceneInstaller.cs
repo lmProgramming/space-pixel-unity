@@ -1,4 +1,4 @@
-using Core;
+using Core.Constants;
 using Core.Gameplay.Sound;
 using Core.Services;
 using Core.Ship;

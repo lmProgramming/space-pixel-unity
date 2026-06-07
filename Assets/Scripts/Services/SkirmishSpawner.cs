@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Core;
+using Core.Constants;
 using Core.Services;
 using Core.Ship;
 using Core.State;

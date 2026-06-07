@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using Core;
+using Core.Constants;
 using Core.Pixelation;
 using Core.Services;
 using Core.Ship;
@@ -16,7 +16,7 @@ namespace Services
     {
         [SerializeField] private float sectorSize = 10f;
         [SerializeField] private float cacheDuration = 1f;
-        [SerializeField] private int maxSectorsDistance = 100;
+        [SerializeField] private int maxSectorsDistance = 1000;
 
         private readonly Collider2D[] _results = new Collider2D[32];
         private readonly Dictionary<Vector2, SectorResult> _sectorCache = new();

@@ -1,7 +1,4 @@
-﻿using Core;
-using Core.Ship;
-using UnityEngine;
-using Zenject;
+﻿using UnityEngine;
 
 namespace Background
 {
@@ -41,8 +38,6 @@ namespace Background
 
         [SerializeField] private MeshRenderer meshRenderer;
         [SerializeField] private Material starBackgroundMaterial;
-        [SerializeField] private Transform playerTransform;
-        [SerializeField] private Camera mainCamera;
 
         [Header("Parallax Settings")] [Range(0.001f, 0.1f)]
         public float parallaxStrength = 0.02f;
@@ -92,28 +87,17 @@ namespace Background
         [Range(0.1f, 10f)] public float starSharpness = 1f;
         [Range(0f, 1f)] public float ditherStrength = 0.1f;
         [Range(1, 128)] public float colorBanding = 8f;
+        private Vector3 _initialCameraPosition;
 
         private float _initialCameraSize;
-        private Vector3 _initialPlayerPosition;
-
-        [Inject(Id = Constants.PlayerShipId)]
-        private IShip _playerShip;
+        private Camera _mainCamera;
 
         private void Start()
         {
+            _mainCamera = Camera.main;
+
             meshRenderer.material = starBackgroundMaterial;
             meshRenderer.enabled = true;
-
-            if (_playerShip.CommandModule.Transform == null)
-                Debug.LogWarning("Player transform not assigned to StarBackgroundController.");
-
-            if (mainCamera == null)
-            {
-                mainCamera = Camera.main;
-
-                if (mainCamera == null)
-                    Debug.LogWarning("Main camera not found for StarBackgroundController.");
-            }
 
             if (starBackgroundMaterial == null)
             {
@@ -124,9 +108,9 @@ namespace Background
                     Debug.LogError("No star background material assigned and no renderer found.");
             }
 
-            _initialPlayerPosition = playerTransform != null ? playerTransform.position : Vector3.zero;
-            _initialCameraSize = mainCamera != null
-                ? mainCamera.orthographic ? mainCamera.orthographicSize : mainCamera.fieldOfView
+            _initialCameraPosition = _mainCamera != null ? _mainCamera.transform.position : Vector3.zero;
+            _initialCameraSize = _mainCamera != null
+                ? _mainCamera.orthographic ? _mainCamera.orthographicSize : _mainCamera.fieldOfView
                 : 5f;
 
             UpdateShaderProperties();
@@ -137,16 +121,15 @@ namespace Background
             if (!starBackgroundMaterial)
                 return;
 
-            if (playerTransform)
+            if (_mainCamera)
             {
-                var playerPos = playerTransform.position - _initialPlayerPosition;
+                var playerPos = _mainCamera.transform.position - _initialCameraPosition;
                 starBackgroundMaterial.SetVector(PlayerPosition, playerPos);
             }
 
-
-            if (mainCamera && trackCameraZoom)
+            if (_mainCamera && trackCameraZoom)
             {
-                var currentSize = mainCamera.orthographic ? mainCamera.orthographicSize : mainCamera.fieldOfView;
+                var currentSize = _mainCamera.orthographic ? _mainCamera.orthographicSize : _mainCamera.fieldOfView;
                 var zoomFactor = currentSize / _initialCameraSize;
                 starBackgroundMaterial.SetFloat(CurrentZoom, zoomFactor);
             }

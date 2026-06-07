@@ -1,5 +1,5 @@
 using System;
-using Core;
+using Core.Constants;
 using Cysharp.Threading.Tasks;
 using Pixelation;
 using UnityEngine;

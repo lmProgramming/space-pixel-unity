@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-using Core;
+using Core.Constants;
 using Core.Services;
 using ShipFactory.Serialization;
 using Ships;
@@ -23,6 +23,10 @@ namespace ShipFactory
         [SerializeField] private string snapshotFolderName = "ShipSnapshots";
 
         private ShipFactoryCanvasController _canvasController;
+
+        [Inject]
+        private IGameInput _gameInput;
+
         private bool _isPaused;
         private ModulePaletteController _paletteController;
         private VisualElement _pauseOverlay;
@@ -35,9 +39,6 @@ namespace ShipFactory
 
         [Inject]
         private IShipSnapshotService _snapshotService;
-
-        [Inject]
-        private IGameInput _gameInput;
 
         private UIDocument _uiDocument;
 

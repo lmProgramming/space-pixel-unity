@@ -114,7 +114,7 @@ namespace Ships
 
             PendingTurnInput = 0f;
             if (desiredDirection.sqrMagnitude > 0f)
-                PendingTurnInput = rotationMultiplier * (-Vector2.SignedAngle(forward, desiredDirection) / 180f);
+                PendingTurnInput = rotationMultiplier * (Vector2.SignedAngle(forward, desiredDirection) / 180f);
         }
 
         private void InitializeStateMachines()

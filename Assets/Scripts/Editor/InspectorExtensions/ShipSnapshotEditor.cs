@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-using Core;
+using Core.Constants;
 using Core.Services;
 using Ships;
 using UnityEditor;
