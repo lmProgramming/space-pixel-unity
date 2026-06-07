@@ -22,8 +22,8 @@ using UnityEngine.Assertions;
 using Zenject;
 using ZLinq;
 
-[assembly: InternalsVisibleTo("Game.Ships.Tests")]
-[assembly: InternalsVisibleTo("Game.E2E")]
+[assembly: InternalsVisibleTo("Ships.Tests")]
+[assembly: InternalsVisibleTo("E2E")]
 
 namespace Ships
 {

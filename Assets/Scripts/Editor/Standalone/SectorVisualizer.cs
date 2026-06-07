@@ -4,7 +4,7 @@ using Core.Services;
 using Services;
 using UnityEngine;
 
-[assembly: InternalsVisibleTo("Game.E2E")]
+[assembly: InternalsVisibleTo("E2E")]
 
 namespace Editor.Standalone
 {

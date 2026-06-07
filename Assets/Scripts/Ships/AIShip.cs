@@ -8,7 +8,7 @@ using Ships.Systems.Sensing;
 using UnityEngine;
 using UnityEngine.Assertions;
 
-[assembly: InternalsVisibleTo("Game.E2E")]
+[assembly: InternalsVisibleTo("E2E")]
 
 namespace Ships
 {

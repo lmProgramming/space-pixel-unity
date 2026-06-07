@@ -43,7 +43,8 @@ namespace Gameplay.Navigation
             var endSector = NormalizePositionToSector(end);
 
             var difference = endSector - startSector;
-            if (difference.sqrMagnitude > maxSectorsDistance * maxSectorsDistance) return null;
+            var differenceInSectors = difference / _sectorSize;
+            if (differenceInSectors.sqrMagnitude > maxSectorsDistance * maxSectorsDistance) return null;
 
             if (startSector == endSector) return new List<Vector3> { GetSectorCenter(endSector) };
 

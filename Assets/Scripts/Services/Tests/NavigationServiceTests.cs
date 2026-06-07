@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Reflection;
 using Core.Constants;
 using NUnit.Framework;
 using UnityEngine;
@@ -74,7 +73,7 @@ namespace Services.Tests
             var navigationServiceGo = new GameObject("NavigationService");
             _createdObjects.Add(navigationServiceGo);
             var navigationService = navigationServiceGo.AddComponent<NavigationService>();
-            SetPrivateField(navigationService, "sectorSize", SectorSize);
+            navigationService.InternalSectorSize = SectorSize;
             return navigationService;
         }
 
@@ -89,14 +88,6 @@ namespace Services.Tests
             collider.size = size;
 
             obstacle.AddComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Static;
-        }
-
-        private static void SetPrivateField(object target, string fieldName, object value)
-        {
-            var field = target.GetType().GetField(fieldName,
-                BindingFlags.Instance | BindingFlags.NonPublic);
-            Assert.IsNotNull(field, $"Missing field '{fieldName}' on '{target.GetType().Name}'.");
-            field.SetValue(target, value);
         }
     }
 }

@@ -8,8 +8,9 @@ using Gameplay.Navigation;
 using UnityEngine;
 using Zenject;
 
-[assembly: InternalsVisibleTo("Game.Editor.Standalone")]
-[assembly: InternalsVisibleTo("Game.E2E")]
+[assembly: InternalsVisibleTo("Editor.Standalone")]
+[assembly: InternalsVisibleTo("E2E")]
+[assembly: InternalsVisibleTo("Services.Tests")]
 
 namespace Services
 {

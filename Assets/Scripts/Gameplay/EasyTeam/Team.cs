@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Core.Gameplay.EasyTeam;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace Gameplay.EasyTeam
 {
@@ -8,11 +9,11 @@ namespace Gameplay.EasyTeam
     {
         public bool treatNonAlliedAsEnemy = true;
 
-        public string layerName;
-
         [SerializeField] private List<Team> allies = new();
         [SerializeField] private List<Team> enemies = new();
-        public int Layer => LayerMask.NameToLayer(layerName);
+
+        private string _layerName;
+        public int Layer { get; private set; }
 
         public bool IsAllied(ITeam shipTeam)
         {
@@ -26,6 +27,13 @@ namespace Gameplay.EasyTeam
 
             var isEnemy = enemies.Contains(shipTeam as Team);
             return isEnemy || treatNonAlliedAsEnemy;
+        }
+
+        public void SetLayerName(string layerName)
+        {
+            _layerName = layerName;
+            Layer = LayerMask.NameToLayer(_layerName);
+            Assert.IsTrue(Layer != -1, $"Layer '{_layerName}' does not exist. Please create it in the Unity editor.");
         }
     }
 }

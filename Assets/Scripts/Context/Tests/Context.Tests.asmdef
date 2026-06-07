@@ -1,5 +1,5 @@
 {
-  "name": "Game.Context.Tests",
+  "name": "Context.Tests",
   "rootNamespace": "",
   "references": [
     "GUID:bc586aa6dd445419cb112abe433a39d7",
@@ -22,4 +22,3 @@
   "versionDefines": [],
   "noEngineReferences": false
 }
-

@@ -5,7 +5,7 @@ using Gameplay.Combat;
 using Instantiation;
 using UnityEngine;
 
-[assembly: InternalsVisibleTo("Game.E2E")]
+[assembly: InternalsVisibleTo("E2E")]
 
 namespace Services
 {

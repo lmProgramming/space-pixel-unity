@@ -10,8 +10,8 @@ using UnityEngine;
 using ZLinq;
 using Resources = Core.Ship.Resources;
 
-[assembly: InternalsVisibleTo("Game.Editor.InspectorExtensions")]
-[assembly: InternalsVisibleTo("Game.Ships.Tests")]
+[assembly: InternalsVisibleTo("Editor.InspectorExtensions")]
+[assembly: InternalsVisibleTo("Ships.Tests")]
 
 namespace Ships.Modules
 {

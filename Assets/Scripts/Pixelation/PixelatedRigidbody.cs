@@ -14,8 +14,8 @@ using UnityEngine;
 using Zenject;
 using ZLinq;
 
-[assembly: InternalsVisibleTo("Game.Ships.Tests")]
-[assembly: InternalsVisibleTo("Game.Pixelation.Tests")]
+[assembly: InternalsVisibleTo("Ships.Tests")]
+[assembly: InternalsVisibleTo("Pixelation.Tests")]
 
 namespace Pixelation
 {

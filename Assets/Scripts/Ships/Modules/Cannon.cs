@@ -9,7 +9,7 @@ using LMPro;
 using UnityEngine;
 using Zenject;
 
-[assembly: InternalsVisibleTo("Game.E2E")]
+[assembly: InternalsVisibleTo("E2E")]
 
 namespace Ships.Modules
 {
@@ -177,7 +177,11 @@ namespace Ships.Modules
         internal float InternalReloadTime
         {
             get => reloadTime;
-            set => reloadTime = value;
+            set
+            {
+                reloadTime = value;
+                _reloadTimer = new ManualTimer(reloadTime);
+            }
         }
 
         internal Sprite InternalSprite

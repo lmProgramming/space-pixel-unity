@@ -127,7 +127,7 @@ namespace E2E
             CreatedObjects.Add(teamGo);
             var team = teamGo.AddComponent<Team>();
             team.treatNonAlliedAsEnemy = true;
-            team.layerName = layerName;
+            team.SetLayerName(layerName);
             return team;
         }
 
