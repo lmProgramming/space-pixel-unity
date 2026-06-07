@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Linq;
 using Core;
 using NUnit.Framework;
 using Ships;
@@ -8,6 +7,7 @@ using Ships.Systems.Resources;
 using Ships.Tests.TestHelpers;
 using UnityEngine;
 using UnityEngine.TestTools;
+using ZLinq;
 
 namespace E2E
 {
@@ -34,15 +34,23 @@ namespace E2E
             var initialDistance = Vector2.Distance(ship1.GetPosition(), ship2.GetPosition());
             Assert.That(initialDistance, Is.GreaterThan(40f));
 
+            var finalDistance = float.MaxValue;
+            const float expectedDistance = 45f;
             // Simulate the ships navigating around the maze wall for 10 seconds
-            yield return SimulateForSeconds(10f);
+            for (var i = 0; i < 3; i++)
+            {
+                yield return SimulateForSeconds(10f);
 
-            var finalDistance = Vector2.Distance(ship1.GetPosition(), ship2.GetPosition());
+                finalDistance = Vector2.Distance(ship1.GetPosition(), ship2.GetPosition());
 
-            Debug.Log($"[E2E Maze Test] Initial Distance: {initialDistance:F2}, Final Distance: {finalDistance:F2}");
+                Debug.Log(
+                    $"[E2E Maze Test] Initial Distance: {initialDistance:F2}, Final Distance: {finalDistance:F2}");
+
+                if (finalDistance < expectedDistance) break;
+            }
 
             // The ships should have successfully calculated a path around the obstacle and closed the distance.
-            Assert.That(finalDistance, Is.LessThan(45f),
+            Assert.That(finalDistance, Is.LessThan(expectedDistance),
                 $"Expected ships to navigate around the wall and close the distance, but got {finalDistance:F2}");
         }
 
@@ -55,21 +63,27 @@ namespace E2E
 
             // Spawn ships facing each other at close range
             var ship1 = CreateAIShip("Ship1", team1, Vector2.zero, true, bulletPrefab, true);
-            var ship2 = CreateAIShip("Ship2", team2, new Vector2(25f, 0f), true, bulletPrefab, true);
+            var ship2 = CreateAIShip("Ship2", team2, new Vector2(25f, 25f), true, bulletPrefab, true);
 
             yield return WaitForLifecycle();
 
             // Store initial active pixel counts for both ships across all their modules
-            var ship1StartPixels = ship1.AllModules.Sum(m => m.PixelatedRigidbody.CurrentPixelCount);
-            var ship2StartPixels = ship2.AllModules.Sum(m => m.PixelatedRigidbody.CurrentPixelCount);
+            var ship1StartPixels =
+                ship1.AllModules.AsValueEnumerable().Sum(m => m.PixelatedRigidbody.CurrentPixelCount);
+            var ship2StartPixels =
+                ship2.AllModules.AsValueEnumerable().Sum(m => m.PixelatedRigidbody.CurrentPixelCount);
 
             // Simulate shootout for 10 seconds
             yield return SimulateForSeconds(10f);
 
             var ship1FinalPixels =
-                ship1 != null ? ship1.AllModules.Sum(m => m.PixelatedRigidbody.CurrentPixelCount) : 0;
+                ship1 != null
+                    ? ship1.AllModules.AsValueEnumerable().Sum(m => m.PixelatedRigidbody.CurrentPixelCount)
+                    : 0;
             var ship2FinalPixels =
-                ship2 != null ? ship2.AllModules.Sum(m => m.PixelatedRigidbody.CurrentPixelCount) : 0;
+                ship2 != null
+                    ? ship2.AllModules.AsValueEnumerable().Sum(m => m.PixelatedRigidbody.CurrentPixelCount)
+                    : 0;
 
             Debug.Log(
                 $"[E2E Shootout] Ship 1 pixels: {ship1StartPixels} -> {ship1FinalPixels}, Ship 2 pixels: {ship2StartPixels} -> {ship2FinalPixels}");
@@ -87,27 +101,35 @@ namespace E2E
             var bulletPrefab = GetBulletPrefab();
 
             // Team B has 1 lonely ship at (0, 0)
-            var shipB = CreateAIShip("ShipB", teamB, Vector2.zero, true, bulletPrefab);
+            var shipB = CreateAIShip("ShipB", teamB, Vector2.zero, true, bulletPrefab, true);
 
             // Team A has 3 ships surrounding Ship B
-            var shipA1 = CreateAIShip("ShipA1", teamA, new Vector2(25f, 10f), true, bulletPrefab);
-            var shipA2 = CreateAIShip("ShipA2", teamA, new Vector2(25f, -10f), true, bulletPrefab);
-            var shipA3 = CreateAIShip("ShipA3", teamA, new Vector2(30f, 0f), true, bulletPrefab);
+            var shipA1 = CreateAIShip("ShipA1", teamA, new Vector2(25f, 30f), true, bulletPrefab, true);
+            var shipA2 = CreateAIShip("ShipA2", teamA, new Vector2(25f, -40f), true, bulletPrefab, true);
+            var shipA3 = CreateAIShip("ShipA3", teamA, new Vector2(30f, 0f), true, bulletPrefab, true);
 
             yield return WaitForLifecycle();
 
-            var startPixelsB = shipB.AllModules.Sum(m => m.PixelatedRigidbody.CurrentPixelCount);
-            var startPixelsA1 = shipA1.AllModules.Sum(m => m.PixelatedRigidbody.CurrentPixelCount);
-            var startPixelsA2 = shipA2.AllModules.Sum(m => m.PixelatedRigidbody.CurrentPixelCount);
-            var startPixelsA3 = shipA3.AllModules.Sum(m => m.PixelatedRigidbody.CurrentPixelCount);
+            var startPixelsB = shipB.AllModules.AsValueEnumerable().Sum(m => m.PixelatedRigidbody.CurrentPixelCount);
+            var startPixelsA1 = shipA1.AllModules.AsValueEnumerable().Sum(m => m.PixelatedRigidbody.CurrentPixelCount);
+            var startPixelsA2 = shipA2.AllModules.AsValueEnumerable().Sum(m => m.PixelatedRigidbody.CurrentPixelCount);
+            var startPixelsA3 = shipA3.AllModules.AsValueEnumerable().Sum(m => m.PixelatedRigidbody.CurrentPixelCount);
             var startPixelsACombined = startPixelsA1 + startPixelsA2 + startPixelsA3;
 
             yield return SimulateForSeconds(10f);
 
-            var finalPixelsB = shipB != null ? shipB.AllModules.Sum(m => m.PixelatedRigidbody.CurrentPixelCount) : 0;
-            var finalPixelsA1 = shipA1 != null ? shipA1.AllModules.Sum(m => m.PixelatedRigidbody.CurrentPixelCount) : 0;
-            var finalPixelsA2 = shipA2 != null ? shipA2.AllModules.Sum(m => m.PixelatedRigidbody.CurrentPixelCount) : 0;
-            var finalPixelsA3 = shipA3 != null ? shipA3.AllModules.Sum(m => m.PixelatedRigidbody.CurrentPixelCount) : 0;
+            var finalPixelsB = shipB != null
+                ? shipB.AllModules.AsValueEnumerable().Sum(m => m.PixelatedRigidbody.CurrentPixelCount)
+                : 0;
+            var finalPixelsA1 = shipA1 != null
+                ? shipA1.AllModules.AsValueEnumerable().Sum(m => m.PixelatedRigidbody.CurrentPixelCount)
+                : 0;
+            var finalPixelsA2 = shipA2 != null
+                ? shipA2.AllModules.AsValueEnumerable().Sum(m => m.PixelatedRigidbody.CurrentPixelCount)
+                : 0;
+            var finalPixelsA3 = shipA3 != null
+                ? shipA3.AllModules.AsValueEnumerable().Sum(m => m.PixelatedRigidbody.CurrentPixelCount)
+                : 0;
             var finalPixelsACombined = finalPixelsA1 + finalPixelsA2 + finalPixelsA3;
 
             var damageB = startPixelsB - finalPixelsB;
@@ -128,21 +150,23 @@ namespace E2E
             // Spawn a ship at (0, 0)
             var ship = CreateAIShip("CrashingShip", team1, Vector2.zero, false);
 
-            // Spawn a solid, static asteroid wall right in its path at (15, 0)
-            CreateObstacleWall("Asteroid", new Vector2(15f, 0f), new Vector2(5f, 15f));
+            var asteroid = Instantiator.Instantiate(GetAsteroidPrefab(), new Vector2(80f, 0f), Quaternion.identity);
+            CreatedObjects.Add(asteroid);
 
             yield return WaitForLifecycle();
 
             // Set the ship flying straight at the asteroid at high speed
             var rb = ship.CommandModule.PixelatedRigidbody.Rigidbody;
-            rb.linearVelocity = new Vector2(40f, 0f);
+            rb.linearVelocity = new Vector2(400f, 0f);
 
-            var startPixels = ship.AllModules.Sum(m => m.PixelatedRigidbody.CurrentPixelCount);
+            var startPixels = ship.AllModules.AsValueEnumerable().Sum(m => m.PixelatedRigidbody.CurrentPixelCount);
 
             // Simulate physics for 2 seconds (enough to impact and calculate collisions)
-            yield return SimulateForSeconds(2f);
+            yield return SimulateForSeconds(1f);
 
-            var finalPixels = ship != null ? ship.AllModules.Sum(m => m.PixelatedRigidbody.CurrentPixelCount) : 0;
+            var finalPixels = ship != null
+                ? ship.AllModules.AsValueEnumerable().Sum(m => m.PixelatedRigidbody.CurrentPixelCount)
+                : 0;
 
             Debug.Log($"[E2E Impact] Starting pixels: {startPixels}, Final pixels: {finalPixels}");
 

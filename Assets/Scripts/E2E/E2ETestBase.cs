@@ -34,6 +34,7 @@ namespace E2E
         private ShipService _shipService;
         private GameObject _testRoot;
         protected DiContainer Container;
+        protected Instantiator Instantiator;
 
         [SetUp]
         public virtual void SetUp()
@@ -72,7 +73,7 @@ namespace E2E
             var navigationServiceGo = new GameObject("NavigationService");
             CreatedObjects.Add(navigationServiceGo);
             _navigationService = navigationServiceGo.AddComponent<NavigationService>();
-            SetPrivateField(_navigationService, "sectorSize", 10f);
+            SetPrivateField(_navigationService, "sectorSize", 20f);
             Container.Bind<INavigationService>().FromInstance(_navigationService).AsSingle();
             var sectorVisualizer = navigationServiceGo.AddComponent<SectorVisualizer>();
             SetPrivateField(sectorVisualizer, "navigationService", _navigationService);
@@ -80,12 +81,12 @@ namespace E2E
             // Bind Instantiator & ProjectilesSpawner
             var instantiatorGo = new GameObject("ZenjectInstantiator");
             CreatedObjects.Add(instantiatorGo);
-            var instantiator = instantiatorGo.AddComponent<ZenjectInstantiator>();
+            Instantiator = instantiatorGo.AddComponent<ZenjectInstantiator>();
 
             var projectilesSpawnerGo = new GameObject("ProjectilesSpawner");
             CreatedObjects.Add(projectilesSpawnerGo);
             _projectilesSpawner = projectilesSpawnerGo.AddComponent<ProjectilesSpawner>();
-            SetPrivateField(_projectilesSpawner, "instantiator", instantiator);
+            SetPrivateField(_projectilesSpawner, "instantiator", Instantiator);
             SetPrivateField(_projectilesSpawner, "ProjectilesHolder", _testRoot.transform);
             Container.Bind<IProjectilesSpawner>().FromInstance(_projectilesSpawner).AsSingle();
 
@@ -131,8 +132,8 @@ namespace E2E
             return team;
         }
 
-        protected AIShip CreateAIShip(string name, Team team, Vector2 position, bool withWeapons,
-            GameObject bulletPrefab = null, bool skipEngines = false)
+        protected AIShip CreateAIShip(string name, Team team, Vector2 position, bool withWeapons = true,
+            GameObject bulletPrefab = null, bool withEngines = false)
         {
             var shipGo = ModuleFactory.CreateGameObject(name, CreatedObjects);
             shipGo.layer = team.Layer;
@@ -148,13 +149,13 @@ namespace E2E
             // Power
             ModuleFactory.CreatePowerModule(shipGo.transform, new Vector2(0f, moduleSpacing), Container,
                 CreatedObjects, modulePixelSize, modulePixelSize);
-            if (!skipEngines)
+            if (!withEngines)
             {
                 // Engines
                 ModuleFactory.CreateEngineModule(shipGo.transform, new Vector2(moduleSpacing, 0f), Container,
-                    CreatedObjects, engineMaxThrust, modulePixelSize, modulePixelSize, -180f);
+                    CreatedObjects, engineMaxThrust, modulePixelSize, modulePixelSize);
                 ModuleFactory.CreateEngineModule(shipGo.transform, new Vector2(-moduleSpacing, 0f), Container,
-                    CreatedObjects, engineMaxThrust, modulePixelSize, modulePixelSize, -180f);
+                    CreatedObjects, engineMaxThrust, modulePixelSize, modulePixelSize);
             }
 
             if (withWeapons && bulletPrefab != null)
@@ -166,7 +167,7 @@ namespace E2E
                 cannon.SetResources(new Resources(0, 1f, 0, 0, 0));
                 SetPrivateField(cannon, "projectilePrefab", bulletPrefab);
                 SetPrivateField(cannon, "reloadTime", 0.2f);
-                SetPrivateField(cannon, "projectileSpeed", 120f);
+                SetPrivateField(cannon, "projectileSpeed", 1200f);
                 var weaponSprite = CreateTestSprite();
                 SetPrivateField(cannon, "sprite", weaponSprite);
             }
@@ -180,6 +181,7 @@ namespace E2E
             shipGo.SetActive(true);
 
             ship.SetTeam(team);
+            ship.SetNavigationSize(15);
             ship.ConfigureAllocatorForTesting(true, 14, 1f, 0.4f, 0.02f);
             ship.InitializeModules();
 
@@ -196,6 +198,13 @@ namespace E2E
             var bulletPrefab = UnityEngine.Resources.Load<GameObject>("Tests/Prefabs/Bullet");
 
             return bulletPrefab;
+        }
+
+        protected static GameObject GetAsteroidPrefab()
+        {
+            var asteroidPrefab = UnityEngine.Resources.Load<GameObject>("Tests/Prefabs/Asteroid");
+
+            return asteroidPrefab;
         }
 
         protected GameObject CreateObstacleWall(string name, Vector2 position, Vector2 size)
