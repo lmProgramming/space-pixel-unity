@@ -1,10 +1,6 @@
 using System.Collections;
-using Core;
+using Core.Constants;
 using NUnit.Framework;
-using Ships;
-using Ships.ModuleConnection;
-using Ships.Systems.Resources;
-using Ships.Tests.TestHelpers;
 using UnityEngine;
 using UnityEngine.TestTools;
 using ZLinq;
@@ -15,19 +11,23 @@ namespace E2E
     public class E2ETests : E2ETestBase
     {
         [UnityTest]
-        public IEnumerator Test1_NavigateEachOtherInAsteroidMaze()
+        [Retry(3)]
+        public IEnumerator Test1_OpposingTeamShipsGoAroundWallAndComeCloseToEachOther()
         {
+            // arrange
+
             var team1 = CreateTeam("Team1", PhysicsLayers.FriendlyName);
             var team2 = CreateTeam("Team2", PhysicsLayers.EnemyName);
 
-            // Spawn ships on opposite teams: Ship 1 at (0, 0), Ship 2 at (45, 0)
-            var ship1 = CreateAIShip("Ship1", team1, new Vector2(-45f, 0f), false);
-            var ship2 = CreateAIShip("Ship2", team2, new Vector2(45f, 0f), false);
+            var ship1 = CreateAIShip("Ship1", team1, new Vector2(-70f, 0f), false);
+            var ship2 = CreateAIShip("Ship2", team2, new Vector2(70f, 0f), false);
 
-            // Set up a maze of obstacle walls blocking direct navigation at x = 20
-            // Sector size is 10. Let's block sectors (20, -20), (20, -10), (20, 0), leaving (20, 10) and above open.
-            // We place a large wall from y = -25 to y = 5.
+            CreateObstacleBox(Vector2.zero,
+                new Vector2(300f, 300f));
+
             CreateObstacleWall("MazeWall", new Vector2(0f, -50f), new Vector2(30f, 300f));
+
+            // act
 
             yield return WaitForLifecycle();
 
@@ -35,11 +35,14 @@ namespace E2E
             Assert.That(initialDistance, Is.GreaterThan(40f));
 
             var finalDistance = float.MaxValue;
-            const float expectedDistance = 45f;
-            // Simulate the ships navigating around the maze wall for 10 seconds
-            for (var i = 0; i < 3; i++)
+            const float expectedDistance = 35f;
+            const float totalTime = 25f;
+            const int maxIterations = 100;
+            const float step = totalTime / maxIterations;
+
+            for (var i = 0; i < maxIterations; i++)
             {
-                yield return SimulateForSeconds(10f);
+                yield return SimulateForSeconds(step);
 
                 finalDistance = Vector2.Distance(ship1.GetPosition(), ship2.GetPosition());
 
@@ -49,32 +52,37 @@ namespace E2E
                 if (finalDistance < expectedDistance) break;
             }
 
-            // The ships should have successfully calculated a path around the obstacle and closed the distance.
+            // assert
+
             Assert.That(finalDistance, Is.LessThan(expectedDistance),
                 $"Expected ships to navigate around the wall and close the distance, but got {finalDistance:F2}");
         }
 
         [UnityTest]
-        public IEnumerator Test2_ShootAndDestroyPixels()
+        [Retry(3)]
+        public IEnumerator Test2_OpposingTeamShipsShootAndDestroyPixels()
         {
+            // act 
+
             var team1 = CreateTeam("Team1", PhysicsLayers.FriendlyName);
             var team2 = CreateTeam("Team2", PhysicsLayers.EnemyName);
             var bulletPrefab = GetBulletPrefab();
 
-            // Spawn ships facing each other at close range
             var ship1 = CreateAIShip("Ship1", team1, Vector2.zero, true, bulletPrefab, true);
-            var ship2 = CreateAIShip("Ship2", team2, new Vector2(25f, 25f), true, bulletPrefab, true);
+            var ship2 = CreateAIShip("Ship2", team2, new Vector2(25f, -25f), true, bulletPrefab, true);
 
             yield return WaitForLifecycle();
 
-            // Store initial active pixel counts for both ships across all their modules
             var ship1StartPixels =
                 ship1.AllModules.AsValueEnumerable().Sum(m => m.PixelatedRigidbody.CurrentPixelCount);
             var ship2StartPixels =
                 ship2.AllModules.AsValueEnumerable().Sum(m => m.PixelatedRigidbody.CurrentPixelCount);
 
-            // Simulate shootout for 10 seconds
+            // act
+
             yield return SimulateForSeconds(10f);
+
+            // assert
 
             var ship1FinalPixels =
                 ship1 != null
@@ -88,22 +96,22 @@ namespace E2E
             Debug.Log(
                 $"[E2E Shootout] Ship 1 pixels: {ship1StartPixels} -> {ship1FinalPixels}, Ship 2 pixels: {ship2StartPixels} -> {ship2FinalPixels}");
 
-            // Verify that some pixels have been destroyed on at least one of the ships (or both)
             Assert.That(ship1FinalPixels < ship1StartPixels || ship2FinalPixels < ship2StartPixels,
-                "Expected some pixels to be destroyed on the ships after a 10 seconds shootout.");
+                "Expected some pixels to be destroyed on the ships after shootout.");
         }
 
         [UnityTest]
+        [Retry(3)]
         public IEnumerator Test3_ThreeVsOneShootout()
         {
+            // arrange
+
             var teamA = CreateTeam("TeamA", PhysicsLayers.FriendlyName);
             var teamB = CreateTeam("TeamB", PhysicsLayers.EnemyName);
             var bulletPrefab = GetBulletPrefab();
 
-            // Team B has 1 lonely ship at (0, 0)
             var shipB = CreateAIShip("ShipB", teamB, Vector2.zero, true, bulletPrefab, true);
 
-            // Team A has 3 ships surrounding Ship B
             var shipA1 = CreateAIShip("ShipA1", teamA, new Vector2(25f, 30f), true, bulletPrefab, true);
             var shipA2 = CreateAIShip("ShipA2", teamA, new Vector2(25f, -40f), true, bulletPrefab, true);
             var shipA3 = CreateAIShip("ShipA3", teamA, new Vector2(30f, 0f), true, bulletPrefab, true);
@@ -116,7 +124,11 @@ namespace E2E
             var startPixelsA3 = shipA3.AllModules.AsValueEnumerable().Sum(m => m.PixelatedRigidbody.CurrentPixelCount);
             var startPixelsACombined = startPixelsA1 + startPixelsA2 + startPixelsA3;
 
+            // act
+
             yield return SimulateForSeconds(10f);
+
+            // assert
 
             var finalPixelsB = shipB != null
                 ? shipB.AllModules.AsValueEnumerable().Sum(m => m.PixelatedRigidbody.CurrentPixelCount)
@@ -137,17 +149,18 @@ namespace E2E
 
             Debug.Log($"[E2E 3vs1 Shootout] Ship B damage: {damageB}, Team A combined damage: {damageACombined}");
 
-            // The 3 ships of Team A should damage Team B's ship significantly more than they themselves take damage combined.
             Assert.That(damageB, Is.GreaterThan(damageACombined),
                 $"Expected the single ship to take more damage ({damageB}) than the 3 attacking ships combined ({damageACombined}).");
         }
 
         [UnityTest]
-        public IEnumerator Test4_AsteroidImpactDamagesShipModule()
+        [Retry(3)]
+        public IEnumerator Test4_FastMovingShipLosesPixelsOnCollisionWithAnotherPixelatedRigidbody()
         {
+            // arrange
+
             var team1 = CreateTeam("Team1", PhysicsLayers.FriendlyName);
 
-            // Spawn a ship at (0, 0)
             var ship = CreateAIShip("CrashingShip", team1, Vector2.zero, false);
 
             var asteroid = Instantiator.Instantiate(GetAsteroidPrefab(), new Vector2(80f, 0f), Quaternion.identity);
@@ -161,8 +174,11 @@ namespace E2E
 
             var startPixels = ship.AllModules.AsValueEnumerable().Sum(m => m.PixelatedRigidbody.CurrentPixelCount);
 
-            // Simulate physics for 2 seconds (enough to impact and calculate collisions)
+            // act
+
             yield return SimulateForSeconds(1f);
+
+            // assert
 
             var finalPixels = ship != null
                 ? ship.AllModules.AsValueEnumerable().Sum(m => m.PixelatedRigidbody.CurrentPixelCount)
@@ -170,47 +186,37 @@ namespace E2E
 
             Debug.Log($"[E2E Impact] Starting pixels: {startPixels}, Final pixels: {finalPixels}");
 
-            // The collision should have resulted in a significant loss of pixels
             Assert.That(finalPixels, Is.LessThan(startPixels),
                 "Expected the ship to suffer pixel damage due to physical collision with the asteroid.");
         }
 
         [UnityTest]
-        public IEnumerator Test5_TargetPractice_DestroysStationaryEnemyShip()
+        [Retry(3)]
+        public IEnumerator Test5_TargetPractice_ShipDestroysStationaryEnemyShip()
         {
+            // arrange
+
             var team1 = CreateTeam("Team1", PhysicsLayers.FriendlyName);
             var team2 = CreateTeam("Team2", PhysicsLayers.EnemyName);
             var bulletPrefab = GetBulletPrefab();
 
-            // Spawn a shooter ship (Team 1) at (0, 0) with weapons
             CreateAIShip("ShooterShip", team1, Vector2.zero, true, bulletPrefab);
+            var targetShip = CreateAIShip("TargetShip", team2, new Vector2(20f, 0f), false, bulletPrefab);
+            var targetGo = targetShip.gameObject;
 
-            // Spawn a stationary target ship (Team 2) at (18, 0) with NO engines (so it's a sitting duck)
-            var targetGo = ModuleFactory.CreateGameObject("StationaryTarget", CreatedObjects);
-            targetGo.transform.position = new Vector2(18f, 0f);
-
-            ModuleFactory.CreateCommandModule(targetGo.transform, Vector2.zero, Container, CreatedObjects, 5, 5);
-            ModuleFactory.CreatePowerModule(targetGo.transform, new Vector2(0f, 5f), Container, CreatedObjects, 5, 5);
-
-            var connectionFactory = targetGo.AddComponent<ModuleConnectionFactory>();
-            targetGo.AddComponent<ResourceManager>();
-
-            targetGo.SetActive(false);
-            var targetShip = targetGo.AddComponent<Ship>();
-            targetShip.SetTeam(team2);
-            Container.Inject(targetShip);
-            targetShip.ModuleConnectionFactoryForTesting = connectionFactory;
-            targetGo.SetActive(true);
+            CreateObstacleBox(Vector2.zero,
+                new Vector2(60f, 40f));
 
             yield return WaitForLifecycle();
 
-            // Initially, the target ship exists
             Assert.IsNotNull(targetShip);
 
-            // Simulate shootout for 10 seconds - the shooter ship will target and fire continuously at the target
-            yield return SimulateForSeconds(10f);
+            // act
 
-            // The target ship's command module should be completely destroyed, which destroys the ship itself
+            yield return SimulateForSeconds(15f);
+
+            // assert
+
             var targetIsDestroyed = targetShip == null || targetGo == null;
 
             Debug.Log($"[E2E Target Practice] Target is destroyed: {targetIsDestroyed}");

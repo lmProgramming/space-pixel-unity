@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
-using Core;
+using Core.Constants;
 using Core.Services;
 using Editor.Standalone;
 using Events.Collision;
@@ -205,6 +205,16 @@ namespace E2E
             var asteroidPrefab = UnityEngine.Resources.Load<GameObject>("Tests/Prefabs/Asteroid");
 
             return asteroidPrefab;
+        }
+
+        protected void CreateObstacleBox(Vector3 position, Vector2 size)
+        {
+            var sizeHalf = size / 2f;
+
+            CreateObstacleWall("ObstacleTop", position + new Vector3(0f, sizeHalf.y, 0f), new Vector2(size.x, 5f));
+            CreateObstacleWall("ObstacleBottom", position - new Vector3(0f, sizeHalf.y, 0f), new Vector2(size.x, 5f));
+            CreateObstacleWall("ObstacleLeft", position - new Vector3(sizeHalf.x, 0f, 0f), new Vector2(5f, size.y));
+            CreateObstacleWall("ObstacleRight", position + new Vector3(sizeHalf.x, 0f, 0f), new Vector2(5f, size.y));
         }
 
         protected GameObject CreateObstacleWall(string name, Vector2 position, Vector2 size)
