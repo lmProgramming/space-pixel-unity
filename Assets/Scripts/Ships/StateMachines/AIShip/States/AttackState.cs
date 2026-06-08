@@ -31,6 +31,7 @@ namespace Ships.StateMachines.AIShip.States
                 _attackRange = attackData.AttackRange;
                 _attackCooldown = attackData.AttackCooldown;
                 _lastAttackTime = 0f;
+                _navigationTargetDistanceThreshold = attackData.StopRange;
             }
             else
             {
