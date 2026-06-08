@@ -1,7 +1,10 @@
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Core.Services;
 using Services;
 using UnityEngine;
+
+[assembly: InternalsVisibleTo("E2E")]
 
 namespace Editor.Standalone
 {
@@ -102,6 +105,12 @@ namespace Editor.Standalone
                 navigationService.GetSectorResult(new Vector3(key.x + sectorSize * 0.5f, key.y + sectorSize * 0.5f));
 
             showSectorOverlay = true;
+        }
+
+        internal NavigationService InternalNavigationService
+        {
+            get => navigationService;
+            set => navigationService = value;
         }
 #endif
     }

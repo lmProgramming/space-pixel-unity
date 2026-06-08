@@ -1,5 +1,6 @@
 using System.Collections.Generic;
-using Ships.Internal;
+using Ships.ModuleConnection;
+using Ships.Systems.Resources;
 using UnityEngine;
 using Zenject;
 

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using Core;
+using Core.Constants;
 using Core.Gameplay.Combat;
 using Core.Gameplay.EasyTeam;
 using Core.Pixelation;
@@ -13,14 +13,17 @@ using Gameplay.EasyTeam;
 using LMPro;
 using LMPro.DataStructures;
 using LMPro.DataStructures.Graph;
-using Ships.Internal;
+using Ships.ModuleConnection;
 using Ships.Modules;
+using Ships.Systems.Gimbal;
+using Ships.Systems.Resources;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Zenject;
 using ZLinq;
 
-[assembly: InternalsVisibleTo("Game.Ships.Tests")]
+[assembly: InternalsVisibleTo("Ships.Tests")]
+[assembly: InternalsVisibleTo("E2E")]
 
 namespace Ships
 {
@@ -70,11 +73,12 @@ namespace Ships
 
         private SasTurnInputResolver _sasTurnInputResolver;
 
-        protected float PendingForwardInput;
-        protected float PendingTurnInput;
-
         [Inject]
         private ShipInitializeModulesEventChannel _shipInitializeModulesEventChannel;
+
+
+        protected float PendingForwardInput;
+        protected float PendingTurnInput;
 
         [Inject]
         protected IShipService ShipService;
@@ -122,7 +126,7 @@ namespace Ships
             UpdateResourcesLoop().Forget();
         }
 
-        private void Update()
+        protected virtual void Update()
         {
             ReadMovementInput();
             HandleWeapons();
@@ -172,8 +176,7 @@ namespace Ships
 
         public Vector2 GetPosition()
         {
-            var rb = CommandModule.PixelatedRigidbody;
-            return rb.LocalToWorldPoint(rb.WeightedCenter);
+            return CommandModule.PixelatedRigidbody.WorldWeightedCenter;
         }
 
         public void OnModuleDestroyed(IModule module)
@@ -209,7 +212,7 @@ namespace Ships
             foreach (var module in existingModules)
             {
                 module.Setup(null);
-                module.transform.SetParent(null, worldPositionStays: true);
+                module.transform.SetParent(null, true);
                 Destroy(module.gameObject);
             }
         }
@@ -243,6 +246,9 @@ namespace Ships
         public void SetTeam(ITeam newTeam)
         {
             team = newTeam as Team;
+            Assert.IsNotNull(team, "newTeam must be of type Team");
+            gameObject.layer = team.Layer;
+            transform.SetLayerAllChildren(team.Layer);
         }
 
         private void DestroyShip()
@@ -435,7 +441,6 @@ namespace Ships
         {
             return CommandModule.Transform.eulerAngles.z;
         }
-
 
         protected IShip FindClosestEnemy(float maxRange = float.MaxValue)
         {

@@ -1,13 +1,16 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using Core;
+using Core.Constants;
+using Core.Pixelation;
 using Core.Services;
 using Core.Ship;
 using Gameplay.Navigation;
 using UnityEngine;
 using Zenject;
 
-[assembly: InternalsVisibleTo("Game.Editor.Standalone")]
+[assembly: InternalsVisibleTo("Editor.Standalone")]
+[assembly: InternalsVisibleTo("E2E")]
+[assembly: InternalsVisibleTo("Services.Tests")]
 
 namespace Services
 {
@@ -15,6 +18,7 @@ namespace Services
     {
         [SerializeField] private float sectorSize = 10f;
         [SerializeField] private float cacheDuration = 1f;
+        [SerializeField] private int maxSectorsDistance = 1000;
 
         private readonly Collider2D[] _results = new Collider2D[32];
         private readonly Dictionary<Vector2, SectorResult> _sectorCache = new();
@@ -26,7 +30,7 @@ namespace Services
 
         private Vector2 Sector => new(sectorSize, sectorSize);
 
-        private void Awake()
+        private void Start()
         {
             _obstaclesFilter = new ContactFilter2D
             {
@@ -45,6 +49,8 @@ namespace Services
             _calculator = new NavigationCalculator(sectorSize, QuerySectorByPosition, QuerySectorByPositionForShips);
         }
 
+        public float SectorSize => sectorSize;
+
         public SectorResult GetSectorResult(Vector3 position)
         {
             var normalizedPosition = _calculator.NormalizePositionToSector(position);
@@ -60,13 +66,13 @@ namespace Services
 
         public List<Vector3> CalculatePath(Vector3 start, Vector3 end, int shipSize)
         {
-            return _calculator.CalculatePath(start, end, shipSize);
+            return _calculator.CalculatePath(start, end, shipSize, maxSectorsDistance);
         }
 
         public List<Vector3> CalculatePath(Vector3 start, Vector3 end, int shipSize, IShip callerShip,
-            IShip targetShip)
+            IPixelatedRigidbody targetShip)
         {
-            return _calculator.CalculatePath(start, end, shipSize, callerShip, targetShip);
+            return _calculator.CalculatePath(start, end, shipSize, callerShip, targetShip, maxSectorsDistance);
         }
 
         public void ClearCacheEntries(IEnumerable<Vector2> keys)
@@ -80,10 +86,15 @@ namespace Services
             return GetSectorResult(new Vector3(sectorPosition.x, sectorPosition.y));
         }
 
-        private SectorResult QuerySectorByPositionForShips(Vector2 sectorPosition, IShip callerShip,
-            IShip targetShip)
+        private Vector2 GetSectorOverlapCenter(Vector2 sectorCorner)
         {
-            var count = Physics2D.OverlapBox(sectorPosition, Sector, 0, _allBlockersFilter, _results);
+            return sectorCorner + Sector * 0.5f;
+        }
+
+        private SectorResult QuerySectorByPositionForShips(Vector2 sectorPosition, IShip callerShip)
+        {
+            var count = Physics2D.OverlapBox(GetSectorOverlapCenter(sectorPosition), Sector, 0, _allBlockersFilter,
+                _results);
             if (count == 0) return SectorResult.Empty;
 
             var shipsFound = new List<IShip>();
@@ -115,7 +126,8 @@ namespace Services
 
         private SectorResult BuildSectorResult(Vector2 sectorPosition)
         {
-            var count = Physics2D.OverlapBox(sectorPosition, Sector, 0, _obstaclesFilter, _results);
+            var count = Physics2D.OverlapBox(GetSectorOverlapCenter(sectorPosition), Sector, 0, _obstaclesFilter,
+                _results);
             var hasObstacles = false;
             var hasDebris = false;
 
@@ -137,7 +149,12 @@ namespace Services
         }
 
 #if UNITY_EDITOR
-        internal float InternalSectorSize => sectorSize;
+        internal float InternalSectorSize
+        {
+            get => sectorSize;
+            set => sectorSize = value;
+        }
+
         internal float InternalCacheDuration => cacheDuration;
         internal IReadOnlyDictionary<Vector2, SectorResult> InternalCache => _sectorCache;
 #endif

@@ -124,7 +124,7 @@ Rigidbody2D:
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
   m_Mass: 377
-  m_LinearDamping: 0
+  m_LinearDamping: 0.1
   m_AngularDamping: 0.05
   m_GravityScale: 0
   m_Material: {fileID: 0}
@@ -237,5 +237,13 @@ MonoBehaviour:
     energyProduction: 0
     crewNeeded: 0
     crewQuarters: 0
-  thrust: 0
   maxThrust: 0
+  maxGimbalAngle: 35
+  gimbalSpeed: 240
+  exhaustParticles: {fileID: 0}
+  currentThrustRatioForDebug: 0
+  currentGimbalAngle: 0
+  desiredGimbalAngleForDebug: 0
+  drawGimbalGizmos: 1
+  gizmoArcRadius: 1.5
+  gizmoThrustUnitsPerNewton: 0.0025

@@ -30,7 +30,7 @@ namespace Ships
                 ToggleSas();
 
             PendingForwardInput = Input.GetAxis("Vertical") * speedMultiplier;
-            PendingTurnInput = Input.GetAxis("Horizontal") * rotationMultiplier;
+            PendingTurnInput = -Input.GetAxis("Horizontal") * rotationMultiplier;
         }
 
         protected override void ApplyMovementPhysics()

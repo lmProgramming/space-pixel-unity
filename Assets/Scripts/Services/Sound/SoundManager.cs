@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Core;
+using Core.Constants;
 using Core.Gameplay.Sound;
 using EasyPool;
 using Instantiation;
@@ -21,6 +21,7 @@ namespace Services.Sound
         [SerializeField] private Instantiator unityInstantiator;
 
         [SerializeField] private int maxPoolSize = 50;
+        private readonly Dictionary<SoundIdentifier, List<AudioSource>> _activePooledSources = new();
 
         private EasyPool<AudioSource> _audioSourcePool;
         private float _effectsVolume = 1f;
@@ -29,7 +30,6 @@ namespace Services.Sound
         private float _musicVolume = 1f;
 
         private Dictionary<SoundIdentifier, Sound> _soundsDictionary;
-        private readonly Dictionary<SoundIdentifier, List<AudioSource>> _activePooledSources = new();
 
         private void Awake()
         {
@@ -226,7 +226,8 @@ namespace Services.Sound
                 return;
 
             foreach (var source in sources)
-                if (source) source.Pause();
+                if (source)
+                    source.Pause();
         }
 
         public void UnPause(SoundIdentifier identifier)
@@ -248,7 +249,8 @@ namespace Services.Sound
                 return;
 
             foreach (var source in sources)
-                if (source) source.UnPause();
+                if (source)
+                    source.UnPause();
         }
 
         public bool IsPlaying(SoundIdentifier identifier)

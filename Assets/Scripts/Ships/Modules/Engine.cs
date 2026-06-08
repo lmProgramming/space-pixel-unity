@@ -9,15 +9,25 @@ namespace Ships.Modules
     public class Engine : Module
     {
         [SerializeField] private float maxThrust;
-        [SerializeField] private float maxGimbalAngle = 35f;
+        [SerializeField] private float maxGimbalAngle = 45f;
         [SerializeField] private float gimbalSpeed = 240f;
 
         [SerializeField] private ParticleSystem exhaustParticles;
         [SerializeField] internal float currentThrustRatioForDebug;
         [SerializeField] internal float currentGimbalAngle;
+        [SerializeField] internal float desiredGimbalAngleForDebug;
+
+#if UNITY_EDITOR
+        [Header("Gimbal Gizmos")]
+        [SerializeField] internal bool drawGimbalGizmos = true;
+
+        [SerializeField] internal float gizmoArcRadius = 1.5f;
+        [SerializeField] internal float gizmoThrustUnitsPerNewton = 0.0025f;
+#endif
 
         private bool _active;
         private float _currentThrustRatio;
+        private float _desiredGimbalAngleForDebug;
         private Quaternion _exhaustBaseLocalRotation;
         private float _exhaustBaseRateOverDistanceMultiplier;
         private float _exhaustBaseRateOverTimeMultiplier;
@@ -26,6 +36,8 @@ namespace Ships.Modules
 
         internal float CurrentThrustRatioForTesting => _currentThrustRatio;
         internal float CurrentThrusterAngleForDebug => CurrentThrusterAngle;
+        internal float DesiredGimbalAngleForDebug => _desiredGimbalAngleForDebug;
+        internal float MaxGimbalAngleForDebug => maxGimbalAngle;
         internal bool IsActiveForDebug => _active;
         internal float MaxThrustBaseForDebug => maxThrust;
         internal float ShipModuleEfficiencyForDebug => ShipModuleEfficiency;
@@ -64,6 +76,7 @@ namespace Ships.Modules
         {
             currentThrustRatioForDebug = _currentThrustRatio;
             currentGimbalAngle = CurrentThrusterAngle;
+            desiredGimbalAngleForDebug = _desiredGimbalAngleForDebug;
         }
 #endif
 
@@ -105,6 +118,8 @@ namespace Ships.Modules
 
         public void RotateThrusterTowards(float targetAngle, float deltaTime)
         {
+            _desiredGimbalAngleForDebug = targetAngle;
+
             var clampedTarget = Mathf.Clamp(targetAngle, -maxGimbalAngle, maxGimbalAngle);
             var maxStep = Mathf.Max(0f, gimbalSpeed) * Mathf.Max(0f, deltaTime);
             CurrentThrusterAngle = Mathf.MoveTowards(CurrentThrusterAngle, clampedTarget, maxStep);

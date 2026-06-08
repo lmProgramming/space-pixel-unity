@@ -1,7 +1,8 @@
 using System.Collections.Generic;
 using Pixelation;
-using Ships.Internal;
+using Ships.ModuleConnection;
 using Ships.Modules;
+using Ships.Systems.Resources;
 using UnityEngine;
 using Zenject;
 
@@ -29,7 +30,7 @@ namespace Ships.Tests.TestHelpers
 
         public static void CreateEngineModule(Transform parent, Vector2 localPosition, DiContainer container,
             ICollection<GameObject> createdObjects, float engineMaxThrust,
-            int modulePixelWidth, int modulePixelHeight, float localRotationZ = 0f)
+            int modulePixelWidth, int modulePixelHeight, float localRotationZ = 0f, float gimbalRange = 45f)
         {
             var engineGo = CreateModuleBase("Engine", parent, localPosition, localRotationZ, container, createdObjects,
                 modulePixelWidth, modulePixelHeight);
@@ -39,7 +40,7 @@ namespace Ships.Tests.TestHelpers
             particleRoot.AddComponent<ParticleSystem>();
 
             var engine = engineGo.AddComponent<Engine>();
-            engine.ConfigureForTesting(engineMaxThrust);
+            engine.ConfigureForTesting(engineMaxThrust, gimbalRange);
         }
 
         public static GameObject CreateModuleBase(string name, Transform parent, Vector2 localPosition,

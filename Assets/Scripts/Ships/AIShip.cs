@@ -1,14 +1,19 @@
+using System.Runtime.CompilerServices;
 using AI.EasyState;
 using Core.Ship;
-using Ships.StateMachines.Behaviour;
-using Ships.StateMachines.Navigation;
+using JetBrains.Annotations;
+using Ships.StateMachines.AIShip;
+using Ships.StateMachines.AIShip.States;
+using Ships.Systems.Sensing;
 using UnityEngine;
+using UnityEngine.Assertions;
+
+[assembly: InternalsVisibleTo("E2E")]
 
 namespace Ships
 {
     [RequireComponent(typeof(ShipSensing))]
-    [RequireComponent(typeof(ShipNavigationStateMachine))]
-    [RequireComponent(typeof(BehaviourStateMachine))]
+    [RequireComponent(typeof(AIShipStateMachine))]
     public class AIShip : Ship, IAgent
     {
         [Header("Navigation")]
@@ -20,21 +25,28 @@ namespace Ships
         [SerializeField] private float avoidanceWeight = 1.2f;
         [SerializeField] private int navigationSize = 1;
 
-        private BehaviourStateMachine _behaviourStateMachine;
+        private AIShipStateMachine _aiShipStateMachine;
         private bool _pendingEnginesActive;
-        private ShipNavigationStateMachine _navigationStateMachine;
 
-        public static float SightRange => 200f;
+        public static float SightRange => 2000f;
         private ShipSensing Sensing { get; set; }
+
+#if UNITY_INCLUDE_TESTS
+        internal float InternalStopDistance
+        {
+            get => stopDistance;
+            set => stopDistance = value;
+        }
+#endif
 
         protected override void Start()
         {
             base.Start();
-            _behaviourStateMachine = GetComponent<BehaviourStateMachine>();
-            _navigationStateMachine = GetComponent<ShipNavigationStateMachine>();
+            _aiShipStateMachine = GetComponent<AIShipStateMachine>();
             Sensing = GetComponent<ShipSensing>();
 
-            _navigationStateMachine.UseManualUpdate = true;
+            Assert.IsNotNull(Sensing, "Sensing != null");
+            Assert.IsNotNull(_aiShipStateMachine, "_aiShipStateMachine != null");
 
             InitializeStateMachines();
         }
@@ -50,15 +62,16 @@ namespace Ships
 
         protected override void ReadMovementInput()
         {
-            _navigationStateMachine.Tick(Time.deltaTime);
+            _aiShipStateMachine.Tick(Time.deltaTime);
             PendingForwardInput = 0f;
             PendingTurnInput = 0f;
             _pendingEnginesActive = false;
 
-            if (!_navigationStateMachine.ShouldMove)
+            if (!_aiShipStateMachine.ShouldMove)
                 return;
 
-            ComputeNavigationInputs(_navigationStateMachine.Target);
+            Debug.Assert(_aiShipStateMachine.Target.HasValue);
+            ComputeNavigationInputs(_aiShipStateMachine.Target.Value);
         }
 
         protected override void ApplyMovementPhysics()
@@ -112,20 +125,14 @@ namespace Ships
 
             PendingTurnInput = 0f;
             if (desiredDirection.sqrMagnitude > 0f)
-                PendingTurnInput = rotationMultiplier * (-Vector2.SignedAngle(forward, desiredDirection) / 180f);
+                PendingTurnInput = rotationMultiplier * (Vector2.SignedAngle(forward, desiredDirection) / 180f);
         }
 
         private void InitializeStateMachines()
         {
-            _behaviourStateMachine.RegisterState(new LookoutState());
-            _behaviourStateMachine.RegisterState(new AttackState());
-            _behaviourStateMachine.StartStateMachine();
-
-            _navigationStateMachine.RegisterState(new MoveTowardsEnemyState());
-            _navigationStateMachine.RegisterState(new StopState());
-
-            _navigationStateMachine.StartStateMachine("MoveTowardsEnemy",
-                new EnemyTargetStateData(ShipService.GetClosestEnemyShipOf(Team, GetPosition())));
+            _aiShipStateMachine.RegisterState(new LookoutState());
+            _aiShipStateMachine.RegisterState(new AttackState());
+            _aiShipStateMachine.StartStateMachine();
         }
 
         public void SetAttackTarget(Vector2 targetPosition)
@@ -133,8 +140,13 @@ namespace Ships
             AttackTargetPosition = targetPosition;
         }
 
+        [CanBeNull]
         public IShip GetClosestEnemyInSight()
         {
+            // var result = Sensing.SenseShips(GetPosition(), CommandModule.Transform.up);
+            //
+            // return !result.HasHit ? null : result.ClosestHit.transform.GetComponent<IModule>()?.Ship;
+
             return FindClosestEnemy(SightRange);
         }
     }

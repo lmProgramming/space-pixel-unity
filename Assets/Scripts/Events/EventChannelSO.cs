@@ -4,7 +4,7 @@ using UnityEngine.Events;
 
 namespace Events
 {
-    public class EventChannelSO : ScriptableObject
+    public class EventChannelSO : ScriptableObject, IEventChannel
     {
         [SerializeField] private UnityEvent unityEvent;
         private readonly EventChannelCore _core = new();

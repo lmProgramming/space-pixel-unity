@@ -1,8 +1,11 @@
-﻿using Core;
+﻿using System.Runtime.CompilerServices;
+using Core.Constants;
 using Core.Services;
 using Gameplay.Combat;
 using Instantiation;
 using UnityEngine;
+
+[assembly: InternalsVisibleTo("E2E")]
 
 namespace Services
 {
@@ -33,5 +36,19 @@ namespace Services
             foreach (var shooterCollider in shooterColliders)
                 Physics2D.IgnoreCollision(bulletCollider, shooterCollider, true);
         }
+
+#if UNITY_INCLUDE_TESTS
+        internal Transform InternalProjectilesHolder
+        {
+            get => ProjectilesHolder;
+            set => ProjectilesHolder = value;
+        }
+
+        internal Instantiator InternalInstantiator
+        {
+            get => instantiator;
+            set => instantiator = value;
+        }
+#endif
     }
 }

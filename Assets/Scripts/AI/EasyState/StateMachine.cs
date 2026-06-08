@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using AI.EasyState.States;
 using JetBrains.Annotations;
@@ -7,7 +8,7 @@ using Random = UnityEngine.Random;
 
 namespace AI.EasyState
 {
-    public abstract class StateMachine<TSelf, TStateBase> : MonoBehaviour
+    public abstract class StateMachine<TSelf, TStateBase> : MonoBehaviour, IStateMachine
         where TSelf : StateMachine<TSelf, TStateBase>
         where TStateBase : BaseState<TSelf, TStateBase>
     {
@@ -17,7 +18,7 @@ namespace AI.EasyState
 
         protected abstract string DefaultState { get; }
 
-        private BaseState<TSelf, TStateBase> CurrentState { get; set; }
+        protected BaseState<TSelf, TStateBase> CurrentState { get; private set; }
         public IAgent Controller { get; private set; }
         public bool UseManualUpdate { get; set; }
         private TSelf Self => (TSelf)this;
@@ -34,6 +35,24 @@ namespace AI.EasyState
             if (UseManualUpdate) return;
             Tick(Time.deltaTime);
         }
+
+        private void OnEnable()
+        {
+            OnStateChanged += HandleStateChange;
+        }
+
+        private void OnDisable()
+        {
+            OnStateChanged -= HandleStateChange;
+        }
+
+        private void HandleStateChange(BaseState<TSelf, TStateBase> state)
+        {
+            currentStateNameDebug = state.StateName;
+            currentStateDataDebug = state.DebugInfo();
+        }
+
+        public event Action<BaseState<TSelf, TStateBase>> OnStateChanged;
 
         protected virtual Dictionary<string, float> CreateWeightedStates()
         {
@@ -75,6 +94,8 @@ namespace AI.EasyState
             CurrentState = newState;
 
             CurrentState.Enter(Self, data);
+
+            OnStateChanged?.Invoke(CurrentState);
         }
 
         public void ForceTransitionToState(string stateName, IStateData data = null)
@@ -91,6 +112,8 @@ namespace AI.EasyState
             CurrentState = newState;
 
             CurrentState.Enter(Self, data);
+
+            OnStateChanged?.Invoke(CurrentState);
         }
 
         public void Tick(float deltaTime)
@@ -150,5 +173,15 @@ namespace AI.EasyState
         {
             return _states.TryGetValue(stateName, out var state) ? state as T : null;
         }
+
+        // ReSharper disable NotAccessedField.Local
+        [SerializeField] private string currentStateNameDebug;
+
+        [SerializeField] private string currentStateDataDebug;
+        // ReSharper restore NotAccessedField.Local
+    }
+
+    public interface IStateMachine
+    {
     }
 }

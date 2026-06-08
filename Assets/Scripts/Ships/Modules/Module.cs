@@ -10,8 +10,8 @@ using UnityEngine;
 using ZLinq;
 using Resources = Core.Ship.Resources;
 
-[assembly: InternalsVisibleTo("Game.Editor.InspectorExtensions")]
-[assembly: InternalsVisibleTo("Game.Ships.Tests")]
+[assembly: InternalsVisibleTo("Editor.InspectorExtensions")]
+[assembly: InternalsVisibleTo("Ships.Tests")]
 
 namespace Ships.Modules
 {
@@ -39,14 +39,16 @@ namespace Ships.Modules
             set => mainSkillType = value;
         }
 
-        protected IShip Ship { get; set; }
-
         internal IReadOnlyDictionary<Module, List<Vector2Int>> ConnectionPoints => _connectionPoints;
 
         protected float ShipModuleEfficiency => Ship.GeneralEfficiency * Efficiency;
 
         private float PixelEfficiency =>
             Mathf.Pow((float)PixelatedRigidbody.CurrentPixelCount / PixelatedRigidbody.StartPixelCount, 2);
+
+#if UNITY_INCLUDE_TESTS
+        internal IShip ShipForTesting => Ship;
+#endif
 
         protected virtual void Awake()
         {
@@ -90,6 +92,7 @@ namespace Ships.Modules
             }
         }
 
+        public IShip Ship { get; protected set; }
 
         public int AliveCrewCount => AliveCrew.Count;
 
@@ -195,6 +198,20 @@ namespace Ships.Modules
             Ship = ship;
         }
 
+        public void SetResources(Resources newResources)
+        {
+            Resources = newResources;
+        }
+
+        public virtual string CaptureTypePayloadJson(IGameContentCatalog contentCatalog)
+        {
+            return string.Empty;
+        }
+
+        public virtual void ApplyTypePayloadJson(string typePayloadJson, IGameContentCatalog contentCatalog)
+        {
+        }
+
         private void HandleCrewMemberDeath(CrewMember member)
         {
             UnsubscribeCrew(member);
@@ -221,7 +238,7 @@ namespace Ships.Modules
 
         public void SetupConnections(Module otherModule, ref FixedJoint2D joint)
         {
-            if (PixelatedRigidbody == null || otherModule == null || otherModule.PixelatedRigidbody == null)
+            if (PixelatedRigidbody == null || !otherModule || otherModule.PixelatedRigidbody == null)
             {
                 Debug.LogError("Cannot SetupConnections: Missing PixelatedRigidbody on self or other module.", this);
                 return;
@@ -247,7 +264,7 @@ namespace Ships.Modules
             if (!joint)
             {
                 joint = gameObject.AddComponent<FixedJoint2D>();
-                if (otherPixelatedRigidbody.Rigidbody != null)
+                if (otherPixelatedRigidbody.Rigidbody)
                 {
                     joint.connectedBody = otherPixelatedRigidbody.Rigidbody;
                 }
@@ -315,28 +332,10 @@ namespace Ships.Modules
             _crewAppropriateSkillSum = AliveCrew.AsValueEnumerable().Sum(crew => crew.GetSkillLevel(mainSkillType));
         }
 
-        public void SetResources(Resources newResources)
-        {
-            Resources = newResources;
-        }
-
-        public virtual string CaptureTypePayloadJson(IGameContentCatalog contentCatalog)
-        {
-            return string.Empty;
-        }
-
-        public virtual void ApplyTypePayloadJson(string typePayloadJson, IGameContentCatalog contentCatalog)
-        {
-        }
-
 #if UNITY_EDITOR
         internal float InternalEfficiency => Efficiency;
 
         internal Resources InternalResources => Resources;
-#endif
-
-#if UNITY_INCLUDE_TESTS
-        internal IShip ShipForTesting => Ship;
 #endif
     }
 }

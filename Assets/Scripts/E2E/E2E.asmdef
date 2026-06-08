@@ -1,0 +1,36 @@
+{
+  "name": "E2E",
+  "rootNamespace": "",
+  "references": [
+    "GUID:24173525d8afb24ad9153261c706727e",
+    "GUID:29d64bc27fa1be0118de1c30cf841f13",
+    "GUID:3453562d1089a90fc973630db854c59c",
+    "GUID:06792acb7c5af21edb53be64c5595512",
+    "GUID:27619889b8ba8c24980f49ee34dbb44a",
+    "GUID:b588e3e7a964822d3a9d587848dfd885",
+    "GUID:4d277b042cf7c0655ad4c5179de9f659",
+    "GUID:aabd71ea39897b2ae8140353eda4f03e",
+    "GUID:6d323db75722c7d57873e2593dd897ee",
+    "GUID:6cf2dc15e3e78c31392a86636df9a412",
+    "GUID:714d0c92b67330b6f964bc28ee4a69c4",
+    "GUID:34bdced8957d5654aa357c6c421984d1",
+    "GUID:4369e8c3ba826540aa585f492422e269",
+    "GUID:2e6b3daac871ce600a624bfc8b07b038",
+    "GUID:9faedef42030494289033ae820bca490"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": true,
+  "precompiledReferences": [
+    "nunit.framework.dll",
+    "ZLinq.dll",
+    "NSubstitute.dll"
+  ],
+  "autoReferenced": false,
+  "defineConstraints": [
+    "UNITY_INCLUDE_TESTS"
+  ],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

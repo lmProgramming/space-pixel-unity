@@ -1,5 +1,5 @@
 using System;
-using Core;
+using Core.Constants;
 using UnityEngine;
 using UnityEngine.UIElements;
 

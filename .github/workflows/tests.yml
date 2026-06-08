@@ -44,6 +44,11 @@ jobs:
             Library-${{ steps.unity.outputs.version }}-
             Library-
 
+      - name: Increase file descriptor limit
+        run: |
+          ulimit -n 4096
+          ulimit -a
+
       - name: Run tests
         id: tests
         uses: game-ci/unity-test-runner@v4

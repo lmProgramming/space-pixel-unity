@@ -199,7 +199,7 @@ MonoBehaviour:
   allocatorTorqueWeight: 0.4
   allocatorRegularization: 0.02
   speedMultiplier: 1
-  rotationMultiplier: -1
+  rotationMultiplier: 1
   stopDistance: 1.5
   minThrustAlignment: 0.1
   avoidanceWeight: 1.2

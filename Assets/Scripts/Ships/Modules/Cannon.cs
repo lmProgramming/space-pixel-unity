@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using Core.Gameplay.Combat;
 using Core.Services;
@@ -7,6 +8,8 @@ using Core.Ship.ModuleSnapshotPayloads;
 using LMPro;
 using UnityEngine;
 using Zenject;
+
+[assembly: InternalsVisibleTo("E2E")]
 
 namespace Ships.Modules
 {
@@ -157,5 +160,35 @@ namespace Ships.Modules
         {
             OnNotReady?.Invoke();
         }
+
+#if UNITY_INCLUDE_TESTS
+        internal GameObject InternalProjectilePrefab
+        {
+            get => projectilePrefab;
+            set => projectilePrefab = value;
+        }
+
+        internal float InternalProjectileSpeed
+        {
+            get => projectileSpeed;
+            set => projectileSpeed = value;
+        }
+
+        internal float InternalReloadTime
+        {
+            get => reloadTime;
+            set
+            {
+                reloadTime = value;
+                _reloadTimer = new ManualTimer(reloadTime);
+            }
+        }
+
+        internal Sprite InternalSprite
+        {
+            get => sprite;
+            set => sprite = value;
+        }
+#endif
     }
 }

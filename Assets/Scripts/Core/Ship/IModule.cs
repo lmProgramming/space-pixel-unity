@@ -17,6 +17,7 @@ namespace Core.Ship
         int CrewMissingCount { get; }
         IPixelatedRigidbody PixelatedRigidbody { get; }
         int AliveCrewCount { get; }
+        IShip Ship { get; }
         void FillCrewBySkill(List<CrewMember> crew, out List<CrewMember> remainingCrew);
         bool AssignCrew(CrewMember member);
         bool RemoveCrew(CrewMember member);
