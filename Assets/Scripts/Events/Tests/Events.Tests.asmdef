@@ -1,5 +1,5 @@
 {
-  "name": "Game.Events.Tests",
+  "name": "Events.Tests",
   "rootNamespace": "",
   "references": [
     "GUID:4369e8c3ba826540aa585f492422e269",

@@ -230,7 +230,7 @@ MonoBehaviour:
     crewNeeded: 0
     crewQuarters: 0
   maxThrust: 0
-  maxGimbalAngle: 35
+  maxGimbalAngle: 180
   gimbalSpeed: 240
   exhaustParticles: {fileID: 0}
   currentThrustRatioForDebug: 0

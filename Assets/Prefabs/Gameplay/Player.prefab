@@ -79,7 +79,7 @@ MonoBehaviour:
   allocatorTorqueWeight: 0.4
   allocatorRegularization: 0.02
   speedMultiplier: 1
-  rotationMultiplier: -1
+  rotationMultiplier: 1
   sasEnabled: 1
   sasToggleKey: 116
 --- !u!114 &712382724887335959

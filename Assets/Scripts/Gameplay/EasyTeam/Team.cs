@@ -1,7 +1,8 @@
+using System;
 using System.Collections.Generic;
 using Core.Gameplay.EasyTeam;
+using LMPro.LayerHelpers;
 using UnityEngine;
-using UnityEngine.Assertions;
 
 namespace Gameplay.EasyTeam
 {
@@ -12,8 +13,8 @@ namespace Gameplay.EasyTeam
         [SerializeField] private List<Team> allies = new();
         [SerializeField] private List<Team> enemies = new();
 
-        private string _layerName;
-        public int Layer { get; private set; }
+        [field: SerializeField]
+        public SingleLayer Layer { get; private set; }
 
         public bool IsAllied(ITeam shipTeam)
         {
@@ -29,11 +30,10 @@ namespace Gameplay.EasyTeam
             return isEnemy || treatNonAlliedAsEnemy;
         }
 
-        public void SetLayerName(string layerName)
+        public void SetLayerName(int newLayer)
         {
-            _layerName = layerName;
-            Layer = LayerMask.NameToLayer(_layerName);
-            Assert.IsTrue(Layer != -1, $"Layer '{_layerName}' does not exist. Please create it in the Unity editor.");
+            if (newLayer == -1) throw new Exception("Invalid layer name - was \"-1\"");
+            Layer = newLayer;
         }
     }
 }

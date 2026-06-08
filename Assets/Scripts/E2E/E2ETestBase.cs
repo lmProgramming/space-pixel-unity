@@ -121,13 +121,13 @@ namespace E2E
             }
         }
 
-        protected Team CreateTeam(string name, string layerName)
+        protected Team CreateTeam(string name, int layer)
         {
             var teamGo = new GameObject(name);
             CreatedObjects.Add(teamGo);
             var team = teamGo.AddComponent<Team>();
             team.treatNonAlliedAsEnemy = true;
-            team.SetLayerName(layerName);
+            team.SetLayerName(layer);
             return team;
         }
 

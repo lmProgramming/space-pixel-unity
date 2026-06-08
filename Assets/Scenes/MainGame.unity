@@ -3127,10 +3127,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Game.Gameplay::Gameplay.EasyTeam.Team
   treatNonAlliedAsEnemy: 1
-  layerName: Enemy
   allies: []
   enemies:
   - {fileID: 4324520987836842763}
+  <Layer>k__BackingField:
+    layerIndex: 7
 --- !u!1 &375382050961298073 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4673717031829467301, guid: ae55b639e695d2a22bab2adebe34c205, type: 3}
@@ -3391,10 +3392,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Game.Gameplay::Gameplay.EasyTeam.Team
   treatNonAlliedAsEnemy: 1
-  layerName: Friendly
   allies: []
   enemies:
   - {fileID: 133733233019135677}
+  <Layer>k__BackingField:
+    layerIndex: 6
 --- !u!114 &4397565590323097006 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 4609121225305850912, guid: cf3e414adef6859f2af6ac1a62b52293, type: 3}

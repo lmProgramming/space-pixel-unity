@@ -68,7 +68,7 @@ MonoBehaviour:
   moduleConnectionFactory: {fileID: 5844180460587419976}
   team: {fileID: 0}
   speedMultiplier: 48000
-  rotationMultiplier: -3200000
+  rotationMultiplier: 3200000
 --- !u!114 &6877504573814395543
 MonoBehaviour:
   m_ObjectHideFlags: 0

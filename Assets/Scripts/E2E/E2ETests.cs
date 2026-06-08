@@ -16,8 +16,8 @@ namespace E2E
         {
             // arrange
 
-            var team1 = CreateTeam("Team1", PhysicsLayers.FriendlyName);
-            var team2 = CreateTeam("Team2", PhysicsLayers.EnemyName);
+            var team1 = CreateTeam("Team1", PhysicsLayers.Friendly);
+            var team2 = CreateTeam("Team2", PhysicsLayers.Enemy);
 
             var ship1 = CreateAIShip("Ship1", team1, new Vector2(-70f, 0f), false);
             var ship2 = CreateAIShip("Ship2", team2, new Vector2(70f, 0f), false);
@@ -64,8 +64,8 @@ namespace E2E
         {
             // act 
 
-            var team1 = CreateTeam("Team1", PhysicsLayers.FriendlyName);
-            var team2 = CreateTeam("Team2", PhysicsLayers.EnemyName);
+            var team1 = CreateTeam("Team1", PhysicsLayers.Friendly);
+            var team2 = CreateTeam("Team2", PhysicsLayers.Enemy);
             var bulletPrefab = GetBulletPrefab();
 
             var ship1 = CreateAIShip("Ship1", team1, Vector2.zero, true, bulletPrefab, true);
@@ -106,8 +106,8 @@ namespace E2E
         {
             // arrange
 
-            var teamA = CreateTeam("TeamA", PhysicsLayers.FriendlyName);
-            var teamB = CreateTeam("TeamB", PhysicsLayers.EnemyName);
+            var teamA = CreateTeam("TeamA", PhysicsLayers.Friendly);
+            var teamB = CreateTeam("TeamB", PhysicsLayers.Enemy);
             var bulletPrefab = GetBulletPrefab();
 
             var shipB = CreateAIShip("ShipB", teamB, Vector2.zero, true, bulletPrefab, true);
@@ -159,7 +159,7 @@ namespace E2E
         {
             // arrange
 
-            var team1 = CreateTeam("Team1", PhysicsLayers.FriendlyName);
+            var team1 = CreateTeam("Team1", PhysicsLayers.Friendly);
 
             var ship = CreateAIShip("CrashingShip", team1, Vector2.zero, false);
 
@@ -196,8 +196,8 @@ namespace E2E
         {
             // arrange
 
-            var team1 = CreateTeam("Team1", PhysicsLayers.FriendlyName);
-            var team2 = CreateTeam("Team2", PhysicsLayers.EnemyName);
+            var team1 = CreateTeam("Team1", PhysicsLayers.Friendly);
+            var team2 = CreateTeam("Team2", PhysicsLayers.Enemy);
             var bulletPrefab = GetBulletPrefab();
 
             CreateAIShip("ShooterShip", team1, Vector2.zero, true, bulletPrefab);
