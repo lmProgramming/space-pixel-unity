@@ -74,6 +74,7 @@ namespace Ships.Modules
         {
             if (PixelatedRigidbody != null) PixelatedRigidbody.OnPixelsLost -= CheckCohesion;
 
+            DetachAllConnections();
             KillAllCrew();
 
             Ship?.OnModuleDestroyed(this);
@@ -268,6 +269,10 @@ namespace Ships.Modules
             if (!_connectionPoints.ContainsKey(otherModule)) _connectionPoints[otherModule] = new List<Vector2Int>();
             _connectionPoints[otherModule] = overlappingPoints;
 
+            // Reuse the joint from a previous InitializeModules pass. Creating a new one would leave
+            // the old joint orphaned and untracked, so it could never be destroyed on detach.
+            if (!joint) joint = FindExistingJointWith(otherModule);
+
             if (!joint)
             {
                 joint = gameObject.AddComponent<FixedJoint2D>();
@@ -326,10 +331,8 @@ namespace Ships.Modules
             if (!this || !otherModule) return;
             Debug.Log($"[Module] DetachConnections: {name} detaching from {otherModule.name}", this);
 
-            if (_connections.TryGetValue(otherModule, out var jointToDestroy) && jointToDestroy)
-                Destroy(jointToDestroy);
-            _connections.Remove(otherModule);
-            _connectionPoints.Remove(otherModule);
+            RemoveConnectionTo(otherModule);
+            otherModule.RemoveConnectionTo(this);
 
             if (Ship == null)
             {
@@ -339,6 +342,40 @@ namespace Ships.Modules
 
             Debug.Log($"[Module] Calling RemoveEdge({name}, {otherModule.name})", this);
             Ship.ModuleGraph.RemoveEdge(this, otherModule);
+        }
+
+        /// <summary>
+        ///     Destroys every joint between this module and its neighbors, on both sides of each pair.
+        ///     Must run when the module dies or leaves the ship: a FixedJoint2D whose connectedBody
+        ///     gets destroyed re-anchors to the static world body at the origin, violently yanking and
+        ///     spinning whatever it is attached to.
+        /// </summary>
+        public void DetachAllConnections()
+        {
+            foreach (var otherModule in new List<Module>(_connections.Keys))
+            {
+                RemoveConnectionTo(otherModule);
+                if (otherModule) otherModule.RemoveConnectionTo(this);
+            }
+
+            _connectionPoints.Clear();
+        }
+
+        private void RemoveConnectionTo(Module otherModule)
+        {
+            if (_connections.TryGetValue(otherModule, out var jointToDestroy) && jointToDestroy)
+                Destroy(jointToDestroy);
+            _connections.Remove(otherModule);
+            _connectionPoints.Remove(otherModule);
+        }
+
+        private FixedJoint2D FindExistingJointWith(Module otherModule)
+        {
+            if (_connections.TryGetValue(otherModule, out var existingJoint) && existingJoint)
+                return existingJoint;
+            if (otherModule._connections.TryGetValue(this, out var reverseJoint) && reverseJoint)
+                return reverseJoint;
+            return null;
         }
 
         private void OnCrewChange()

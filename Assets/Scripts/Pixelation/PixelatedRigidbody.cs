@@ -70,7 +70,7 @@ namespace Pixelation
                     : CollisionDetectionMode2D.Discrete;
         }
 
-        private void OnDestroy()
+        protected virtual void OnDestroy()
         {
             _isSetup = false;
         }

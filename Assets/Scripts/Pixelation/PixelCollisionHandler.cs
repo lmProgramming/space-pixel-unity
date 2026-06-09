@@ -220,9 +220,11 @@ namespace Pixelation
             {
                 if (region.Count >= MinPixelsForDebrisCreation) CreateNewDebris(region);
 
-                _body.PixelLostByDivision(region);
-
+                // PixelLostByDivision assumes the region is already gone from the grid
+                // (its weighted-center math uses the post-removal pixel count).
                 _grid.RemovePixels(region);
+
+                _body.PixelLostByDivision(region);
             }
         }
 

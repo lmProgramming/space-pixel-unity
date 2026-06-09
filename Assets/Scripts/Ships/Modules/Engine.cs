@@ -17,28 +17,20 @@ namespace Ships.Modules
         [SerializeField] internal float currentGimbalAngle;
         [SerializeField] internal float desiredGimbalAngleForDebug;
 
-#if UNITY_EDITOR
-        [Header("Gimbal Gizmos")]
-        [SerializeField] internal bool drawGimbalGizmos = true;
-
-        [SerializeField] internal float gizmoArcRadius = 1.5f;
-        [SerializeField] internal float gizmoThrustUnitsPerNewton = 0.0025f;
-#endif
-
-        private bool _active;
-        private float _currentThrustRatio;
-        private float _desiredGimbalAngleForDebug;
         private Quaternion _exhaustBaseLocalRotation;
         private float _exhaustBaseRateOverDistanceMultiplier;
         private float _exhaustBaseRateOverTimeMultiplier;
         private float _exhaustBaseStartSpeedMultiplier;
         public override ModuleType Type => ModuleType.Engine;
 
-        internal float CurrentThrustRatioForTesting => _currentThrustRatio;
+        internal float CurrentThrustRatioForTesting { get; private set; }
+
         internal float CurrentThrusterAngleForDebug => CurrentThrusterAngle;
-        internal float DesiredGimbalAngleForDebug => _desiredGimbalAngleForDebug;
+        internal float DesiredGimbalAngleForDebug { get; private set; }
+
         internal float MaxGimbalAngleForDebug => maxGimbalAngle;
-        internal bool IsActiveForDebug => _active;
+        internal bool IsActiveForDebug { get; private set; }
+
         internal float MaxThrustBaseForDebug => maxThrust;
         internal float ShipModuleEfficiencyForDebug => ShipModuleEfficiency;
         private Vector2 ThrustPoint => exhaustParticles.transform.localPosition;
@@ -74,11 +66,16 @@ namespace Ships.Modules
 #if UNITY_EDITOR
         private void Update()
         {
-            currentThrustRatioForDebug = _currentThrustRatio;
+            currentThrustRatioForDebug = CurrentThrustRatioForTesting;
             currentGimbalAngle = CurrentThrusterAngle;
-            desiredGimbalAngleForDebug = _desiredGimbalAngleForDebug;
+            desiredGimbalAngleForDebug = DesiredGimbalAngleForDebug;
         }
 #endif
+
+        private void OnDestroy()
+        {
+            SetActive(false);
+        }
 
 #if UNITY_INCLUDE_TESTS
         internal void ConfigureForTesting(float maxThrustValue,
@@ -94,12 +91,12 @@ namespace Ships.Modules
         public override float GetEnergyDraw()
         {
             return base.GetEnergyDraw() *
-                   (0.25f + (_active ? 0.75f * _currentThrustRatio : 0));
+                   (0.25f + (IsActiveForDebug ? 0.75f * CurrentThrustRatioForTesting : 0));
         }
 
         public void SetActive(bool active)
         {
-            _active = active;
+            IsActiveForDebug = active;
             ApplyExhaustVisuals();
         }
 
@@ -107,18 +104,18 @@ namespace Ships.Modules
         {
             if (MaxThrust <= Mathf.Epsilon)
             {
-                _currentThrustRatio = 0f;
+                CurrentThrustRatioForTesting = 0f;
                 ApplyExhaustVisuals();
                 return;
             }
 
-            _currentThrustRatio = Mathf.Clamp01(currentThrust / MaxThrust);
+            CurrentThrustRatioForTesting = Mathf.Clamp01(currentThrust / MaxThrust);
             ApplyExhaustVisuals();
         }
 
         public void RotateThrusterTowards(float targetAngle, float deltaTime)
         {
-            _desiredGimbalAngleForDebug = targetAngle;
+            DesiredGimbalAngleForDebug = targetAngle;
 
             var clampedTarget = Mathf.Clamp(targetAngle, -maxGimbalAngle, maxGimbalAngle);
             var maxStep = Mathf.Max(0f, gimbalSpeed) * Mathf.Max(0f, deltaTime);
@@ -131,10 +128,10 @@ namespace Ships.Modules
             exhaustParticles.transform.localRotation =
                 _exhaustBaseLocalRotation * Quaternion.Euler(0f, 0f, CurrentThrusterAngle);
 
-            var thrustRatio = Mathf.Pow(_active ? _currentThrustRatio : 0f, 2);
+            var thrustRatio = Mathf.Pow(IsActiveForDebug ? CurrentThrustRatioForTesting : 0f, 2);
 
             var emission = exhaustParticles.emission;
-            emission.enabled = _active;
+            emission.enabled = IsActiveForDebug;
             emission.rateOverTimeMultiplier = _exhaustBaseRateOverTimeMultiplier * thrustRatio;
             emission.rateOverDistanceMultiplier = _exhaustBaseRateOverDistanceMultiplier * thrustRatio;
 
@@ -182,5 +179,13 @@ namespace Ships.Modules
                     throw new UnityException("[Engine] Exhaust template must contain ParticleSystem.");
             }
         }
+
+#if UNITY_EDITOR
+        [Header("Gimbal Gizmos")]
+        [SerializeField] internal bool drawGimbalGizmos = true;
+
+        [SerializeField] internal float gizmoArcRadius = 1.5f;
+        [SerializeField] internal float gizmoThrustUnitsPerNewton = 0.0025f;
+#endif
     }
 }

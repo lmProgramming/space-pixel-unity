@@ -13,6 +13,7 @@ using Gameplay.EasyTeam;
 using LMPro;
 using LMPro.DataStructures;
 using LMPro.DataStructures.Graph;
+using LMPro.External.IsAlive;
 using Ships.ModuleConnection;
 using Ships.Modules;
 using Ships.Systems.Gimbal;
@@ -62,6 +63,8 @@ namespace Ships
 
         private ControlAllocator _controlAllocator;
 
+        private bool _destroyRequested;
+
         private EngineDirectionSolver _engineDirectionSolver;
 
         [Inject]
@@ -105,7 +108,7 @@ namespace Ships
             _moduleConnectionFactory = GetComponent<IModuleConnectionFactory>();
             _engineDirectionSolver = new EngineDirectionSolver();
             _controlAllocator = new ControlAllocator();
-            _sasTurnInputResolver = new SasTurnInputResolver(_engineDirectionSolver);
+            _sasTurnInputResolver = new SasTurnInputResolver();
 
             Assert.IsNotNull(ResourceManager, "ResourceManager != null");
             Assert.IsNotNull(_moduleConnectionFactory, "_moduleConnectionFactory != null");
@@ -185,7 +188,7 @@ namespace Ships
 
             if (module == CommandModule) DestroyShip();
 
-            Debug.Log($"[Ship] Module destroyed: {module.Transform.name}", module.Transform);
+            Debug.Log($"[Ship] Module destroyed: {module.Transform?.name}", module.Transform);
 
             _biCohesionGraph.RemoveNode(module);
             RecacheModulesDictionary();
@@ -193,14 +196,28 @@ namespace Ships
 
         public void ManualAddModule(IModule module)
         {
-            if (module == null) throw new ArgumentNullException(nameof(module));
+            if (module == null || !module.Transform) throw new ArgumentNullException(nameof(module));
             module.Transform.SetParent(transform);
             InitializeModules();
         }
 
         public void ManualRemoveModule(IModule module)
         {
-            if (module == null) throw new ArgumentNullException(nameof(module));
+            switch (module)
+            {
+                case null:
+                    throw new ArgumentNullException(nameof(module));
+                case Module concreteModule:
+                    concreteModule.DetachAllConnections();
+                    break;
+            }
+
+            if (!module.Transform)
+            {
+                Debug.LogError($"[Ship] ManualRemoveModule: module.Transform is null for module {module}", this);
+                return;
+            }
+
             module.Transform.SetParent(null);
             InitializeModules();
         }
@@ -232,7 +249,7 @@ namespace Ships
             _biCohesionGraph = new BiCohesionGraph<IModule>(CommandModule);
             _biCohesionGraph.OnNodesRemovedDueToUnreachability += HandleUnreachableModules;
 
-            _onCommandModuleNoPixelsLeft = _ => Destroy(gameObject);
+            _onCommandModuleNoPixelsLeft = _ => DestroyShip();
             CommandModule.PixelatedRigidbody.OnNoPixelsLeft += _onCommandModuleNoPixelsLeft;
 
             _moduleConnectionFactory.ConnectModules(this);
@@ -253,8 +270,42 @@ namespace Ships
 
         private void DestroyShip()
         {
+            if (_destroyRequested) return;
+            _destroyRequested = true;
+
             Debug.Log($"[Ship] Command module destroyed. Destroying ship: {gameObject.name}", gameObject);
+
+            // Unity's Destroy disables every component in the hierarchy immediately, so any module
+            // still parented at that point would be reparented out later (HandleUnreachableModules)
+            // with its components permanently disabled. Release survivors while they are still enabled.
+            ReleaseSurvivingModulesAsJunk();
+
             Destroy(gameObject);
+        }
+
+        private void ReleaseSurvivingModulesAsJunk()
+        {
+            var survivors = ModuleGraph.GetAllNodes().AsValueEnumerable()
+                .Where(module => module != CommandModule)
+                .ToList();
+
+            foreach (var module in survivors) ReleaseModuleAsJunk(module);
+        }
+
+        private void ReleaseModuleAsJunk(IModule module)
+        {
+            // If the ship hierarchy is already being torn down, its components are disabled;
+            // rescuing modules out of it would leave zombie junk with disabled components.
+            if (!isActiveAndEnabled) return;
+
+            if (!module.IsAliveEnabled() || module?.Transform == null ||
+                module.Transform.parent == _mapInfo.MapTransform) return;
+
+            Debug.Log($"[Ship] Releasing module as junk: {module.Transform.name}", module.Transform);
+            module.Transform.SetParent(_mapInfo.MapTransform);
+            module.Transform.gameObject.layer = PhysicsLayers.Default;
+
+            if (module is Module concreteModule) concreteModule.OnShipConnectionLost();
         }
 
         private async UniTaskVoid UpdateResourcesLoop()
@@ -275,16 +326,7 @@ namespace Ships
             Debug.Log(
                 $"[Ship] HandleUnreachableModules called with {unreachableModules.Count} modules: [{string.Join(", ", unreachableModules.AsValueEnumerable().Select(m => m?.Transform?.name ?? "null"))}]");
 
-            foreach (var module in unreachableModules.AsValueEnumerable().Where(module =>
-                         module?.Transform != null &&
-                         module.Transform.parent != _mapInfo.MapTransform))
-            {
-                Debug.Log($"[Ship] Deparenting unreachable module: {module.Transform.name}", module.Transform);
-                module.Transform.SetParent(_mapInfo.MapTransform);
-                module.Transform.gameObject.layer = PhysicsLayers.Default;
-
-                if (module is Module concreteModule) concreteModule.OnShipConnectionLost();
-            }
+            foreach (var module in unreachableModules) ReleaseModuleAsJunk(module);
 
             RecacheModulesDictionary();
         }
@@ -355,13 +397,14 @@ namespace Ships
 
             var selfRigidbody = CommandModule.PixelatedRigidbody?.Rigidbody;
             Assert.IsNotNull(selfRigidbody, "CommandModule.PixelatedRigidbody.Rigidbody != null");
+            Assert.IsNotNull(CommandModule.Transform, "CommandModule.Transform != null");
 
             var engines = Engines;
             if (engines.Count == 0) return false;
 
             var forward = CommandModule.Transform.up;
             var centerOfMass = selfRigidbody.worldCenterOfMass;
-            var maxLeverArm = _engineDirectionSolver.GetMaxLeverArmLength(engines, centerOfMass);
+            var maxLeverArm = EngineDirectionSolver.GetMaxLeverArmLength(engines, centerOfMass);
             var finalTurnInput = sasEnabled
                 ? _sasTurnInputResolver.ResolveTurnInput(turnInput, forwardInput, selfRigidbody,
                     GetCurrentHeadingDegrees(), engines, forward, centerOfMass, maxLeverArm, GetSasSettings())
@@ -387,6 +430,13 @@ namespace Ships
                 {
                     engine.RotateThrusterTowards(0f, deltaTime);
                     engine.SetCurrentThrust(0f);
+                    continue;
+                }
+
+                if (!engine.Transform)
+                {
+                    Debug.LogWarning($"[Ship] Engine {engine.name} has null Transform. Skipping thruster rotation.",
+                        this);
                     continue;
                 }
 
@@ -439,6 +489,12 @@ namespace Ships
 
         private float GetCurrentHeadingDegrees()
         {
+            if (!CommandModule.Transform)
+            {
+                Debug.LogWarning("[Ship] GetCurrentHeadingDegrees: CommandModule.Transform is null");
+                return 0f;
+            }
+
             return CommandModule.Transform.eulerAngles.z;
         }
 
@@ -473,7 +529,7 @@ namespace Ships
 
         internal Vector2 GetForwardForTesting()
         {
-            return CommandModule.Transform.up;
+            return CommandModule.Transform!.up;
         }
 
         internal void ApplyEngineForcesForTesting(float forwardInput, float turnInput, float deltaTime,

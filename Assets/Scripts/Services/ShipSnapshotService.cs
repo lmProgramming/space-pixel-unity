@@ -94,8 +94,14 @@ namespace Services
 
         private ModuleSnapshot CaptureModuleSnapshot(IModule module)
         {
+            if (!module.Transform)
+            {
+                Debug.LogError("[ShipSnapshotService] Cannot capture snapshot: module transform is null");
+                return null;
+            }
+
             var identity = module.Transform.GetComponent<ModuleInstanceIdentity>();
-            if (identity == null)
+            if (!identity)
             {
                 identity = module.Transform.gameObject.AddComponent<ModuleInstanceIdentity>();
                 identity.EnsureAssigned(ModuleOrigin.Custom);
