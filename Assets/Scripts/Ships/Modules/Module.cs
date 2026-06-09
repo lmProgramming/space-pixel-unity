@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using Core.Constants;
 using Core.Pixelation;
 using Core.Services;
 using Core.Ship;
@@ -49,6 +50,11 @@ namespace Ships.Modules
 #if UNITY_INCLUDE_TESTS
         internal IShip ShipForTesting => Ship;
 #endif
+
+        private bool IsBelowDestructionThreshold =>
+            PixelatedRigidbody.CurrentPixelCount > 0 &&
+            PixelatedRigidbody.CurrentPixelCount <
+            PixelatedRigidbody.StartPixelCount * GameplayConstants.ModuleDestroyedBelowPixelRatio;
 
         protected virtual void Awake()
         {
@@ -109,6 +115,7 @@ namespace Ships.Modules
         public IPixelatedRigidbody PixelatedRigidbody { get; private set; }
 
         public Transform Transform => transform;
+
         public virtual ModuleType Type { get; protected set; } = ModuleType.Resources;
 
         public virtual int CrewNeededCount => Mathf.CeilToInt(Resources.crewNeeded);
@@ -284,6 +291,14 @@ namespace Ships.Modules
 
         private void CheckCohesion(List<Vector2Int> points, PixelLoseReason reason)
         {
+            if (IsBelowDestructionThreshold)
+            {
+                // NoPixelsLeft (not a plain Destroy) so OnNoPixelsLeft subscribers
+                // (ship destruction on command module death, mission defeat) still fire.
+                PixelatedRigidbody.NoPixelsLeft();
+                return;
+            }
+
             var connectedModulesToCheck = new List<Module>(_connectionPoints.Keys);
             var modulesToDetach = new HashSet<Module>();
 
