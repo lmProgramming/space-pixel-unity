@@ -1,4 +1,4 @@
-namespace Ships.Tests.TestHelpers
+namespace Ships.Tests.TestHelpers.Proxies
 {
     public sealed class ShipTestProxy : Ship
     {

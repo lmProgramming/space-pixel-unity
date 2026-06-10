@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using LMPro.DataStructures;
 using UnityEngine;
+
+[assembly: InternalsVisibleTo("Ships.Tests")]
 
 namespace Core.Ship
 {
@@ -49,5 +52,10 @@ namespace Core.Ship
             IsAlive = false;
             OnDied?.Invoke(this);
         }
+
+#if UNITY_INCLUDE_TESTS
+        internal int OnDiedSubscriberCountForTesting =>
+            OnDied?.GetInvocationList().Length ?? 0;
+#endif
     }
 }

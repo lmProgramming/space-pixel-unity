@@ -50,7 +50,7 @@ namespace UI.MainGame
         private void OnEnable()
         {
             if (uiDocument == null || uiDocument.rootVisualElement == null)
-                return;
+                throw new UnityException("[PauseMenuController] UI Document not set.");
 
             _root = uiDocument.rootVisualElement;
             InitializePauseUi();

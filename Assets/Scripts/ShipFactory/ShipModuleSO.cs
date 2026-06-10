@@ -1,4 +1,7 @@
+using System.Runtime.CompilerServices;
 using UnityEngine;
+
+[assembly: InternalsVisibleTo("ShipFactory.Tests")]
 
 namespace ShipFactory
 {
@@ -16,5 +19,16 @@ namespace ShipFactory
         public Vector2Int Dimensions => dimensions;
         public string Name => partName;
         public string Description => description;
+
+#if UNITY_INCLUDE_TESTS
+        internal void ConfigureForTesting(string newPartName, string moduleDescription, Vector2Int moduleDimensions,
+            GameObject modulePrefab)
+        {
+            partName = newPartName;
+            description = moduleDescription;
+            dimensions = moduleDimensions;
+            prefab = modulePrefab;
+        }
+#endif
     }
 }

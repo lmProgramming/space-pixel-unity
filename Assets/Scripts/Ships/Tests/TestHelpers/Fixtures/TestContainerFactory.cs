@@ -2,10 +2,11 @@ using Core.Services;
 using Events.Collision;
 using Events.Ship;
 using NSubstitute;
+using Ships.Tests.TestHelpers.Mocks;
 using UnityEngine;
 using Zenject;
 
-namespace Ships.Tests.TestHelpers
+namespace Ships.Tests.TestHelpers.Fixtures
 {
     public static class TestContainerFactory
     {

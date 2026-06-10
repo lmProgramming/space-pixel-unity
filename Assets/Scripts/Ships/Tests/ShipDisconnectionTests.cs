@@ -1,10 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using Core.Pixelation;
-using Core.Ship;
 using NUnit.Framework;
-using Ships.Modules;
-using Ships.Tests.TestHelpers;
+using Ships.Tests.TestHelpers.Factories;
+using Ships.Tests.TestHelpers.Fixtures;
 using UnityEngine;
 using UnityEngine.TestTools;
 using ZLinq;
@@ -21,134 +20,6 @@ namespace Ships.Tests
     public class ShipDisconnectionTests : ShipTestBase
     {
         /// <summary>
-        ///     Creates a simple two-module ship where modules are adjacent on the X axis.
-        ///     Command module on the left, other module on the right, touching at their edges.
-        /// </summary>
-        private TestShipComponents CreateTwoModuleShip(int moduleWidth = 5, int moduleHeight = 5)
-        {
-            var shipGo = ModuleFactory.CreateGameObject("TestShip", CreatedObjects);
-
-            // Create command module (left side)
-            var commandModule = CreateModule("Command", shipGo.transform,
-                new Vector2(0, 0), moduleWidth, moduleHeight, true);
-
-            // Create second module (right side, adjacent to command)
-            // Position it so the left edge of module2 touches the right edge of command
-            var module2 = CreateModule("Module2", shipGo.transform,
-                new Vector2(moduleWidth, 0), moduleWidth, moduleHeight, false);
-
-            var ship = ModuleFactory.WireShip<Ship>(shipGo, Container);
-
-            Container.InjectGameObject(shipGo);
-
-            return new TestShipComponents(ship, commandModule, new List<Module> { module2 });
-        }
-
-        /// <summary>
-        ///     Creates a three-module linear ship: Command -- Module2 -- Module3
-        /// </summary>
-        private TestShipComponents CreateThreeModuleLinearShip(int moduleWidth = 5, int moduleHeight = 5)
-        {
-            var shipGo = ModuleFactory.CreateGameObject("TestShip", CreatedObjects);
-
-            var commandModule = CreateModule("Command", shipGo.transform,
-                new Vector2(0, 0), moduleWidth, moduleHeight, true);
-
-            var module2 = CreateModule("Module2", shipGo.transform,
-                new Vector2(moduleWidth, 0), moduleWidth, moduleHeight, false);
-
-            var module3 = CreateModule("Module3", shipGo.transform,
-                new Vector2(moduleWidth * 2, 0), moduleWidth, moduleHeight, false);
-
-            var ship = ModuleFactory.WireShip<Ship>(shipGo, Container);
-
-            Container.InjectGameObject(shipGo);
-
-            return new TestShipComponents(ship, commandModule, new List<Module> { module2, module3 });
-        }
-
-        /// <summary>
-        ///     Creates a ship with alternate paths: Command connects to both A and B, and A connects to B.
-        /// </summary>
-        private TestShipComponents CreateShipWithAlternatePaths()
-        {
-            var shipGo = ModuleFactory.CreateGameObject("TestShip", CreatedObjects);
-            var moduleSize = 5;
-
-            // Command module at origin
-            var commandModule = CreateModule("Command", shipGo.transform,
-                new Vector2(0, 0), moduleSize, moduleSize, true);
-
-            // Module A to the right of command
-            var moduleA = CreateModule("ModuleA", shipGo.transform,
-                new Vector2(moduleSize, 0), moduleSize, moduleSize, false);
-
-            // Module B above command (and also adjacent to A via diagonal positioning)
-            var moduleB = CreateModule("ModuleB", shipGo.transform,
-                new Vector2(0, moduleSize), moduleSize, moduleSize, false);
-
-            // Module C that connects A and B (creates alternate path)
-            var moduleC = CreateModule("ModuleC", shipGo.transform,
-                new Vector2(moduleSize, moduleSize), moduleSize, moduleSize, false);
-
-            var ship = ModuleFactory.WireShip<Ship>(shipGo, Container);
-
-            Container.InjectGameObject(shipGo);
-
-            return new TestShipComponents(ship, commandModule, new List<Module> { moduleA, moduleB, moduleC });
-        }
-
-        /// <summary>
-        ///     Creates a vertical ship: A (top) -- B (central/command) -- C (bottom)
-        ///     Modules are stacked vertically, B is the command module in the middle.
-        /// </summary>
-        private TestShipComponents CreateVerticalThreeModuleShip(int moduleWidth = 5, int moduleHeight = 10)
-        {
-            var shipGo = ModuleFactory.CreateGameObject("TestShip", CreatedObjects);
-
-            // Module B (command) in the center
-            var commandModule = CreateModule("CommandB", shipGo.transform,
-                new Vector2(0, 0), moduleWidth, moduleHeight, true);
-
-            // Module A above B (touching B's top edge)
-            var moduleA = CreateModule("ModuleA", shipGo.transform,
-                new Vector2(0, moduleHeight), moduleWidth, moduleHeight, false);
-
-            // Module C below B (touching B's bottom edge)
-            var moduleC = CreateModule("ModuleC", shipGo.transform,
-                new Vector2(0, -moduleHeight), moduleWidth, moduleHeight, false);
-
-            var ship = ModuleFactory.WireShip<Ship>(shipGo, Container);
-
-            Container.InjectGameObject(shipGo);
-
-            return new TestShipComponents(ship, commandModule, new List<Module> { moduleA, moduleC });
-        }
-
-        private Module CreateModule(string name, Transform parent, Vector2 localPosition,
-            int width, int height, bool isCommand)
-        {
-            var moduleGo = ModuleFactory.CreateModuleBase(name, parent, localPosition, 0f, Container, CreatedObjects,
-                width, height);
-
-            // Add module component
-            Module module;
-            if (isCommand)
-            {
-                module = moduleGo.AddComponent<Command>();
-            }
-            else
-            {
-                var testModule = moduleGo.AddComponent<TestModule>();
-                testModule.SetModuleType(ModuleType.Resources);
-                module = testModule;
-            }
-
-            return module;
-        }
-
-
-        /// <summary>
         ///     Gets the connection points between two modules.
         /// </summary>
         private static List<Vector2Int> GetConnectionPoints(Module from, Module to)
@@ -163,12 +34,12 @@ namespace Ships.Tests
         public IEnumerator DestroyAllConnectionPoints_ModuleDisconnects()
         {
             // Arrange: Create a two-module ship
-            var components = CreateTwoModuleShip();
+            var components = ShipTestFactory.CreateTwoModuleShip(Container, CreatedObjects);
             yield return WaitForLifecycle();
 
             var ship = components.Ship;
-            var commandModule = components.CommandModule;
-            var otherModule = components.OtherModules[0];
+            var commandModule = components.Command;
+            var otherModule = components.Other;
 
             // Verify initial state - both modules should be in the graph
             Assert.IsTrue(ship.ModuleGraph.ContainsNode(commandModule), "Command module should be in graph");
@@ -194,7 +65,13 @@ namespace Ships.Tests
         public IEnumerator DestroyMiddleModule_DownstreamModulesDisconnect()
         {
             // Arrange: Create Command -- Module2 -- Module3
-            var components = CreateThreeModuleLinearShip();
+            const int moduleWidth = 5;
+            const int moduleHeight = 5;
+            var components = ShipTestBuilder.CreateShip(Container, CreatedObjects)
+                .WithCommand("Command", Vector2.zero, moduleWidth, moduleHeight)
+                .WithModule("Module2", new Vector2(moduleWidth, 0), moduleWidth, moduleHeight)
+                .WithModule("Module3", new Vector2(moduleWidth * 2, 0), moduleWidth, moduleHeight)
+                .BuildLayoutResult();
             yield return WaitForLifecycle();
 
             var ship = components.Ship;
@@ -224,7 +101,13 @@ namespace Ships.Tests
         public IEnumerator AlternatePath_ModuleStaysConnected()
         {
             // Arrange: Create ship with alternate paths
-            var components = CreateShipWithAlternatePaths();
+            const int moduleSize = 5;
+            var components = ShipTestBuilder.CreateShip(Container, CreatedObjects)
+                .WithCommand("Command", Vector2.zero, moduleSize, moduleSize)
+                .WithModule("ModuleA", new Vector2(moduleSize, 0), moduleSize, moduleSize)
+                .WithModule("ModuleB", new Vector2(0, moduleSize), moduleSize, moduleSize)
+                .WithModule("ModuleC", new Vector2(moduleSize, moduleSize), moduleSize, moduleSize)
+                .BuildLayoutResult();
             yield return WaitForLifecycle();
 
             var ship = components.Ship;
@@ -267,11 +150,11 @@ namespace Ships.Tests
         public IEnumerator DestroyCommandModulePixels_ShipDestroyed()
         {
             // Arrange: Create a simple ship
-            var components = CreateTwoModuleShip(3, 3);
+            var components = ShipTestFactory.CreateTwoModuleShip(Container, CreatedObjects, 3, 3);
             yield return WaitForLifecycle();
 
             var ship = components.Ship;
-            var commandModule = components.CommandModule;
+            var commandModule = components.Command;
             var shipGo = ship.gameObject;
 
             // Act: Destroy all pixels in the command module
@@ -294,12 +177,12 @@ namespace Ships.Tests
         public IEnumerator PartialConnectionPointDestruction_ModuleStaysConnected()
         {
             // Arrange: Create a two-module ship with larger modules (more connection points)
-            var components = CreateTwoModuleShip(10, 10);
+            var components = ShipTestFactory.CreateTwoModuleShip(Container, CreatedObjects, 10, 10);
             yield return WaitForLifecycle();
 
             var ship = components.Ship;
-            var commandModule = components.CommandModule;
-            var otherModule = components.OtherModules[0];
+            var commandModule = components.Command;
+            var otherModule = components.Other;
 
             var connectionPoints = GetConnectionPoints(commandModule, otherModule);
 
@@ -323,13 +206,19 @@ namespace Ships.Tests
         public IEnumerator SliceCentralModuleNearTop_TopModuleDisconnects()
         {
             // Arrange: Create vertical ship A (top) -- B (central/command) -- C (bottom)
-            var components = CreateVerticalThreeModuleShip();
+            const int moduleWidth = 5;
+            const int moduleHeight = 10;
+            var components = ShipTestBuilder.CreateShip(Container, CreatedObjects)
+                .WithCommand("CommandB", Vector2.zero, moduleWidth, moduleHeight)
+                .WithModule("ModuleA", new Vector2(0, moduleHeight), moduleWidth, moduleHeight)
+                .WithModule("ModuleC", new Vector2(0, -moduleHeight), moduleWidth, moduleHeight)
+                .BuildLayoutResult();
             yield return WaitForLifecycle();
 
             var ship = components.Ship;
-            var commandModule = components.CommandModule; // B - central
-            var moduleA = components.OtherModules[0]; // Top
-            var moduleC = components.OtherModules[1]; // Bottom
+            var commandModule = components.CommandModule;
+            var moduleA = components.OtherModules[0];
+            var moduleC = components.OtherModules[1];
 
             // Verify initial state
             Assert.IsTrue(ship.ModuleGraph.ContainsNode(moduleA), "Module A should be in graph initially");
@@ -369,13 +258,19 @@ namespace Ships.Tests
         public IEnumerator SliceCentralModuleNearBottom_BottomModuleDisconnects()
         {
             // Arrange: Create vertical ship A (top) -- B (central/command) -- C (bottom)
-            var components = CreateVerticalThreeModuleShip();
+            const int moduleWidth = 5;
+            const int moduleHeight = 10;
+            var components = ShipTestBuilder.CreateShip(Container, CreatedObjects)
+                .WithCommand("CommandB", Vector2.zero, moduleWidth, moduleHeight)
+                .WithModule("ModuleA", new Vector2(0, moduleHeight), moduleWidth, moduleHeight)
+                .WithModule("ModuleC", new Vector2(0, -moduleHeight), moduleWidth, moduleHeight)
+                .BuildLayoutResult();
             yield return WaitForLifecycle();
 
             var ship = components.Ship;
-            var commandModule = components.CommandModule; // B - central
-            var moduleA = components.OtherModules[0]; // Top
-            var moduleC = components.OtherModules[1]; // Bottom
+            var commandModule = components.CommandModule;
+            var moduleA = components.OtherModules[0];
+            var moduleC = components.OtherModules[1];
 
             // Verify initial state
             Assert.IsTrue(ship.ModuleGraph.ContainsNode(moduleA), "Module A should be in graph initially");
@@ -410,13 +305,19 @@ namespace Ships.Tests
         public IEnumerator SliceCentralModuleInMiddle_SmallerHalfDisconnects()
         {
             // Arrange: Create vertical ship A (top) -- B (central/command) -- C (bottom)
-            var components = CreateVerticalThreeModuleShip();
+            const int moduleWidth = 5;
+            const int moduleHeight = 10;
+            var components = ShipTestBuilder.CreateShip(Container, CreatedObjects)
+                .WithCommand("CommandB", Vector2.zero, moduleWidth, moduleHeight)
+                .WithModule("ModuleA", new Vector2(0, moduleHeight), moduleWidth, moduleHeight)
+                .WithModule("ModuleC", new Vector2(0, -moduleHeight), moduleWidth, moduleHeight)
+                .BuildLayoutResult();
             yield return WaitForLifecycle();
 
             var ship = components.Ship;
-            var commandModule = components.CommandModule; // B - central
-            var moduleA = components.OtherModules[0]; // Top
-            var moduleC = components.OtherModules[1]; // Bottom
+            var commandModule = components.CommandModule;
+            var moduleA = components.OtherModules[0];
+            var moduleC = components.OtherModules[1];
 
             // Verify initial state
             Assert.IsTrue(ship.ModuleGraph.ContainsNode(moduleA), "Module A should be in graph initially");
@@ -468,15 +369,14 @@ namespace Ships.Tests
             const int commandWidth = 6;
             const int commandHeight = 10;
 
-            var shipGo = ModuleFactory.CreateGameObject("TestShip", CreatedObjects);
-
-            var commandModule = CreateModule("Command", shipGo.transform,
-                new Vector2((cannonWidth + commandWidth) / 2f, 0), commandWidth, commandHeight, true);
-
-            var cannonModule = CreateModule("Cannon", shipGo.transform,
-                new Vector2(0, 0), cannonWidth, cannonHeight, false);
-
-            var ship = ModuleFactory.WireShip<Ship>(shipGo, Container);
+            var layout = ShipTestBuilder.CreateShip(Container, CreatedObjects)
+                .WithoutGameObjectInjection()
+                .WithCommand("Command", new Vector2((cannonWidth + commandWidth) / 2f, 0), commandWidth, commandHeight)
+                .WithModule("Cannon", Vector2.zero, cannonWidth, cannonHeight)
+                .BuildLayoutResult();
+            var ship = layout.Ship;
+            var commandModule = layout.CommandModule;
+            var cannonModule = layout.OtherModules[0];
 
             yield return WaitForLifecycle();
 
@@ -661,15 +561,14 @@ namespace Ships.Tests
             const int commandWidth = 6;
             const int commandHeight = 10;
 
-            var shipGo = ModuleFactory.CreateGameObject("TestShip", CreatedObjects);
-
-            var commandModule = CreateModule("Command", shipGo.transform,
-                new Vector2((cannonWidth + commandWidth) / 2f, 0), commandWidth, commandHeight, true);
-
-            var cannonModule = CreateModule("Cannon", shipGo.transform,
-                new Vector2(0, 0), cannonWidth, cannonHeight, false);
-
-            var ship = ModuleFactory.WireShip<Ship>(shipGo, Container);
+            var layout = ShipTestBuilder.CreateShip(Container, CreatedObjects)
+                .WithoutGameObjectInjection()
+                .WithCommand("Command", new Vector2((cannonWidth + commandWidth) / 2f, 0), commandWidth, commandHeight)
+                .WithModule("Cannon", Vector2.zero, cannonWidth, cannonHeight)
+                .BuildLayoutResult();
+            var ship = layout.Ship;
+            var commandModule = layout.CommandModule;
+            var cannonModule = layout.OtherModules[0];
 
             yield return WaitForLifecycle();
 
@@ -785,20 +684,6 @@ namespace Ships.Tests
             Assert.IsFalse(cannonInGraph,
                 "Cannon should be disconnected after multi-frame slice separated its connection edge. " +
                 $"Remaining connection points: {finalRemaining.Count}");
-        }
-
-        private class TestShipComponents
-        {
-            public TestShipComponents(Ship ship, Module commandModule, List<Module> otherModules)
-            {
-                Ship = ship;
-                CommandModule = commandModule;
-                OtherModules = otherModules;
-            }
-
-            public Ship Ship { get; }
-            public Module CommandModule { get; }
-            public List<Module> OtherModules { get; }
         }
     }
 }

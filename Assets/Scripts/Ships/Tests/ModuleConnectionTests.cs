@@ -1,8 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using NUnit.Framework;
+using Ships;
 using Ships.Modules;
-using Ships.Tests.TestHelpers;
+using Ships.Tests.TestHelpers.Factories;
+using Ships.Tests.TestHelpers.Fixtures;
 using UnityEngine;
 using UnityEngine.TestTools;
 using ZLinq;
@@ -34,22 +36,13 @@ namespace Ships.Tests
             AssertModulesConnected(ship, command, engine);
         }
 
-        private (Ship ship, Command command, Engine engine) CreateCommandWithEngineOnRight(float engineRotationZ)
+        private CommandWithEngineResult CreateCommandWithEngineOnRight(float engineRotationZ)
         {
-            var shipGo = ModuleFactory.CreateGameObject("TestShip", CreatedObjects);
-
-            ModuleFactory.CreateCommandModule(shipGo.transform, Vector2.zero, Container, CreatedObjects,
-                ModulePixelSize, ModulePixelSize);
-            ModuleFactory.CreateEngineModule(shipGo.transform, new Vector2(ModuleSpacing, 0f), Container,
-                CreatedObjects, EngineMaxThrust, ModulePixelSize, ModulePixelSize, engineRotationZ);
-
-            var ship = ModuleFactory.WireShip<Ship>(shipGo, Container);
-            var command = shipGo.GetComponentInChildren<Command>();
-            var engine = shipGo.GetComponentInChildren<Engine>();
-
-            Container.InjectGameObject(shipGo);
-
-            return (ship, command, engine);
+            return ShipTestBuilder.CreateShip(Container, CreatedObjects)
+                .WithCommand("Command", Vector2.zero, ModulePixelSize, ModulePixelSize)
+                .WithEngineModule(new Vector2(ModuleSpacing, 0f), EngineMaxThrust, ModulePixelSize, ModulePixelSize,
+                    engineRotationZ)
+                .BuildCommandWithEngineResult();
         }
 
         private static void AssertModulesConnected(Ship ship, Command command, Engine engine)

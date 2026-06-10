@@ -1,13 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using Core.Constants;
-using Core.Ship;
 using NUnit.Framework;
-using Ships.Modules;
-using Ships.Tests.TestHelpers;
+using Ships.Tests.TestHelpers.Factories;
+using Ships.Tests.TestHelpers.Fixtures;
 using UnityEngine;
 using UnityEngine.TestTools;
-using Module = Ships.Modules.Module;
 
 namespace Ships.Tests
 {
@@ -26,26 +24,6 @@ namespace Ships.Tests
 
         private static int PixelsToKeepAtOrAboveThreshold =>
             Mathf.CeilToInt(TotalPixels * GameplayConstants.ModuleDestroyedBelowPixelRatio);
-
-        private (Ship ship, Module command, Module other) CreateTwoModuleShip()
-        {
-            var shipGo = ModuleFactory.CreateGameObject("TestShip", CreatedObjects);
-
-            var commandGo = ModuleFactory.CreateModuleBase("Command", shipGo.transform, Vector2.zero, 0f,
-                Container, CreatedObjects, ModuleSize, ModuleSize);
-            var command = commandGo.AddComponent<Command>();
-
-            var otherGo = ModuleFactory.CreateModuleBase("Module2", shipGo.transform, new Vector2(ModuleSize, 0), 0f,
-                Container, CreatedObjects, ModuleSize, ModuleSize);
-            var other = otherGo.AddComponent<TestModule>();
-            other.SetModuleType(ModuleType.Resources);
-
-            var ship = ModuleFactory.WireShip<Ship>(shipGo, Container);
-
-            Container.InjectGameObject(shipGo);
-
-            return (ship, command, other);
-        }
 
         /// <summary>
         ///     Removes pixels in row-major order so the kept pixels stay one contiguous region
@@ -68,7 +46,8 @@ namespace Ships.Tests
         [UnityTest]
         public IEnumerator ModuleBelowPixelThreshold_IsDestroyed()
         {
-            var (ship, _, other) = CreateTwoModuleShip();
+            var (ship, _, other) =
+                ShipTestFactory.CreateTwoModuleShip(Container, CreatedObjects);
             yield return WaitForLifecycle();
 
             other.PixelatedRigidbody.RemovePixels(PixelsToRemoveKeeping(PixelsToKeepJustBelowThreshold));
@@ -82,7 +61,8 @@ namespace Ships.Tests
         [UnityTest]
         public IEnumerator ModuleAtPixelThreshold_Survives()
         {
-            var (ship, _, other) = CreateTwoModuleShip();
+            var (ship, _, other) =
+                ShipTestFactory.CreateTwoModuleShip(Container, CreatedObjects);
             yield return WaitForLifecycle();
 
             other.PixelatedRigidbody.RemovePixels(PixelsToRemoveKeeping(PixelsToKeepAtOrAboveThreshold));
@@ -95,7 +75,8 @@ namespace Ships.Tests
         [UnityTest]
         public IEnumerator CommandModuleBelowPixelThreshold_DestroysShip()
         {
-            var (ship, command, _) = CreateTwoModuleShip();
+            var (ship, command, _) =
+                ShipTestFactory.CreateTwoModuleShip(Container, CreatedObjects);
             yield return WaitForLifecycle();
 
             var shipGo = ship.gameObject;

@@ -1,12 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
-using Core.Ship;
 using NUnit.Framework;
-using Ships.Modules;
-using Ships.Tests.TestHelpers;
+using Ships.Tests.TestHelpers.Factories;
+using Ships.Tests.TestHelpers.Fixtures;
 using UnityEngine;
 using UnityEngine.TestTools;
-using Module = Ships.Modules.Module;
 using Object = UnityEngine.Object;
 
 namespace Ships.Tests
@@ -20,32 +18,11 @@ namespace Ships.Tests
     [TestFixture]
     public class ModuleJointLifecycleTests : ShipTestBase
     {
-        private const int ModuleSize = 5;
-
-        private (Ship ship, Module command, Module other) CreateTwoModuleShip()
-        {
-            var shipGo = ModuleFactory.CreateGameObject("TestShip", CreatedObjects);
-
-            var commandGo = ModuleFactory.CreateModuleBase("Command", shipGo.transform, Vector2.zero, 0f,
-                Container, CreatedObjects, ModuleSize, ModuleSize);
-            var command = commandGo.AddComponent<Command>();
-
-            var otherGo = ModuleFactory.CreateModuleBase("Module2", shipGo.transform, new Vector2(ModuleSize, 0), 0f,
-                Container, CreatedObjects, ModuleSize, ModuleSize);
-            var other = otherGo.AddComponent<TestModule>();
-            other.SetModuleType(ModuleType.Resources);
-
-            var ship = ModuleFactory.WireShip<Ship>(shipGo, Container);
-
-            Container.InjectGameObject(shipGo);
-
-            return (ship, command, other);
-        }
-
         [UnityTest]
         public IEnumerator InitializeModules_CalledRepeatedly_DoesNotDuplicateJoints()
         {
-            var (ship, _, _) = CreateTwoModuleShip();
+            var (ship, _, _) =
+                ShipTestFactory.CreateTwoModuleShip(Container, CreatedObjects);
             yield return WaitForLifecycle();
 
             Assert.AreEqual(1, ship.GetComponentsInChildren<FixedJoint2D>(true).Length,
@@ -64,7 +41,8 @@ namespace Ships.Tests
         [UnityTest]
         public IEnumerator DestroyedModule_LeavesNoJointsOnRemainingModules()
         {
-            var (_, command, other) = CreateTwoModuleShip();
+            var (_, command, other) =
+                ShipTestFactory.CreateTwoModuleShip(Container, CreatedObjects);
             yield return WaitForLifecycle();
 
             Debug.Log("mkay0");
@@ -81,7 +59,8 @@ namespace Ships.Tests
         [UnityTest]
         public IEnumerator DisconnectedModule_LeavesNoJointsOnEitherBody()
         {
-            var (_, command, other) = CreateTwoModuleShip();
+            var (_, command, other) =
+                ShipTestFactory.CreateTwoModuleShip(Container, CreatedObjects);
             yield return WaitForLifecycle();
 
             var commandGo = command.gameObject;

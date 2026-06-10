@@ -1,12 +1,14 @@
 using System.Collections.Generic;
+using Core.Ship;
 using Pixelation;
 using Ships.ModuleConnection;
 using Ships.Modules;
 using Ships.Systems.Resources;
+using Ships.Tests.TestHelpers.Modules;
 using UnityEngine;
 using Zenject;
 
-namespace Ships.Tests.TestHelpers
+namespace Ships.Tests.TestHelpers.Factories
 {
     public static class ModuleFactory
     {
@@ -102,6 +104,18 @@ namespace Ships.Tests.TestHelpers
             var go = new GameObject(name);
             createdObjects.Add(go);
             return go;
+        }
+
+        public static Command AddCommandModuleComponent(GameObject moduleGo)
+        {
+            return moduleGo.AddComponent<Command>();
+        }
+
+        public static TestModule AddTestModuleComponent(GameObject moduleGo, ModuleType type = ModuleType.Resources)
+        {
+            var testModule = moduleGo.AddComponent<TestModule>();
+            testModule.SetModuleType(type);
+            return testModule;
         }
     }
 }

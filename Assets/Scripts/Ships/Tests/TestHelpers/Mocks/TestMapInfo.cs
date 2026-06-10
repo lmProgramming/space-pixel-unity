@@ -1,7 +1,7 @@
 using Core.Services;
 using UnityEngine;
 
-namespace Ships.Tests.TestHelpers
+namespace Ships.Tests.TestHelpers.Mocks
 {
     public class TestMapInfo : IMapInfo
     {

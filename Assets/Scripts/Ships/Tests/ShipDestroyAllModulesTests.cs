@@ -1,10 +1,10 @@
 using System.Collections;
 using NUnit.Framework;
 using Services;
-using Ships.ModuleConnection;
 using Ships.Modules;
-using Ships.Systems.Resources;
-using Ships.Tests.TestHelpers;
+using Ships.Tests.TestHelpers.Factories;
+using Ships.Tests.TestHelpers.Fixtures;
+using Ships.Tests.TestHelpers.Mocks;
 using UnityEngine;
 using UnityEngine.TestTools;
 
@@ -26,7 +26,7 @@ namespace Ships.Tests
         [UnityTest]
         public IEnumerator DestroyAllModules_RemovesModulesFromShipHierarchy()
         {
-            var ship = CreateShipWithCommandAndEngine();
+            var ship = ShipTestFactory.CreateShipWithCommandAndEngine(Container, CreatedObjects, TestRoot.transform);
             yield return WaitForLifecycle();
 
             Assert.That(ship.GetComponentsInChildren<Module>().Length, Is.EqualTo(2));
@@ -40,7 +40,7 @@ namespace Ships.Tests
         [UnityTest]
         public IEnumerator DestroyAllModules_DetachesModulesFromShipTransform()
         {
-            var ship = CreateShipWithCommandAndEngine();
+            var ship = ShipTestFactory.CreateShipWithCommandAndEngine(Container, CreatedObjects, TestRoot.transform);
             yield return WaitForLifecycle();
 
             var modulesBeforeDestroy = ship.GetComponentsInChildren<Module>();
@@ -59,7 +59,7 @@ namespace Ships.Tests
         [UnityTest]
         public IEnumerator DestroyAllModules_ClearsModuleShipReference()
         {
-            var ship = CreateShipWithCommandAndEngine();
+            var ship = ShipTestFactory.CreateShipWithCommandAndEngine(Container, CreatedObjects, TestRoot.transform);
             yield return WaitForLifecycle();
 
             var engine = (Engine)ship.AllModules[1];
@@ -72,7 +72,7 @@ namespace Ships.Tests
         [UnityTest]
         public IEnumerator DestroyAllModules_ThenAddCommand_InitializeModules_RebuildsShip()
         {
-            var ship = CreateShipWithCommandAndEngine();
+            var ship = ShipTestFactory.CreateShipWithCommandAndEngine(Container, CreatedObjects, TestRoot.transform);
             yield return WaitForLifecycle();
 
             ship.DestroyAllModules();
@@ -88,7 +88,7 @@ namespace Ships.Tests
         [UnityTest]
         public IEnumerator DestroyAllModules_OnEmptyShip_DoesNotThrow()
         {
-            var ship = CreateShipWithCommandAndEngine();
+            var ship = ShipTestFactory.CreateShipWithCommandAndEngine(Container, CreatedObjects, TestRoot.transform);
             yield return WaitForLifecycle();
 
             ship.DestroyAllModules();
@@ -101,7 +101,7 @@ namespace Ships.Tests
         [UnityTest]
         public IEnumerator ApplySnapshot_AfterDestroyAllModules_ReplacesModulesCorrectly()
         {
-            var ship = CreateShipWithCommandAndEngine();
+            var ship = ShipTestFactory.CreateShipWithCommandAndEngine(Container, CreatedObjects, TestRoot.transform);
             yield return WaitForLifecycle();
 
             var snapshot = _snapshotService.CaptureSnapshot(ship);
@@ -122,7 +122,7 @@ namespace Ships.Tests
         [UnityTest]
         public IEnumerator ApplySnapshot_WithDamagedPixels_PreservesDamageAfterDestroyAllModules()
         {
-            var ship = CreateShipWithCommandAndEngine();
+            var ship = ShipTestFactory.CreateShipWithCommandAndEngine(Container, CreatedObjects, TestRoot.transform);
             yield return WaitForLifecycle();
 
             var engine = (Engine)ship.AllModules[1];
@@ -138,27 +138,6 @@ namespace Ships.Tests
 
             var restoredEngine = (Engine)ship.AllModules[1];
             Assert.IsFalse(restoredEngine.PixelatedRigidbody.IsPixel(new Vector2Int(2, 2)));
-        }
-
-        private Ship CreateShipWithCommandAndEngine()
-        {
-            var shipGo = ModuleFactory.CreateGameObject("Ship", CreatedObjects);
-            shipGo.transform.SetParent(TestRoot.transform);
-            shipGo.SetActive(false);
-
-            ModuleFactory.CreateCommandModule(shipGo.transform, Vector2.zero, Container, CreatedObjects, 5, 5);
-            ModuleFactory.CreateEngineModule(shipGo.transform, new Vector2(5f, 0f), Container, CreatedObjects, 100f,
-                5, 5);
-
-            shipGo.AddComponent<ModuleConnectionFactory>();
-            shipGo.AddComponent<ResourceManager>();
-
-            var ship = ModuleFactory.WireShip<Ship>(shipGo, Container);
-            ship.InitializeModules();
-
-            Container.InjectGameObject(shipGo);
-
-            return ship;
         }
     }
 }

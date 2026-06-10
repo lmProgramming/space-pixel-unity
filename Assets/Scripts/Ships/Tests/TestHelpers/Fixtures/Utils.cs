@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-namespace Ships.Tests.TestHelpers
+namespace Ships.Tests.TestHelpers.Fixtures
 {
     public static class Utils
     {
