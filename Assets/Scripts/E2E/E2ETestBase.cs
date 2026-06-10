@@ -139,8 +139,8 @@ namespace E2E
             return team;
         }
 
-        protected AIShip CreateAIShip(string name, Team team, Vector2 position, bool withWeapons = true,
-            bool withEngines = false)
+        protected AIShip CreateAIShip(string name, Team team, Vector2 position, bool withWeapons,
+            bool withEngines)
         {
             var shipGo = ModuleFactory.CreateGameObject(name, CreatedObjects);
             shipGo.layer = team.Layer;
@@ -156,7 +156,7 @@ namespace E2E
             // Power
             ModuleFactory.CreatePowerModule(shipGo.transform, new Vector2(0f, moduleSpacing), Container,
                 CreatedObjects, modulePixelSize, modulePixelSize);
-            if (!withEngines)
+            if (withEngines)
             {
                 // Engines
                 ModuleFactory.CreateEngineModule(shipGo.transform, new Vector2(moduleSpacing, 0f), Container,

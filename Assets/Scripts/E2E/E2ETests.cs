@@ -19,8 +19,8 @@ namespace E2E
             var team1 = CreateTeam("Team1", PhysicsLayers.Friendly);
             var team2 = CreateTeam("Team2", PhysicsLayers.Enemy);
 
-            var ship1 = CreateAIShip("Ship1", team1, new Vector2(-70f, 0f), false);
-            var ship2 = CreateAIShip("Ship2", team2, new Vector2(70f, 0f), false);
+            var ship1 = CreateAIShip("Ship1", team1, new Vector2(-70f, 0f), false, true);
+            var ship2 = CreateAIShip("Ship2", team2, new Vector2(70f, 0f), false, true);
 
             CreateObstacleBox(Vector2.zero,
                 new Vector2(300f, 300f));
@@ -67,8 +67,8 @@ namespace E2E
             var team1 = CreateTeam("Team1", PhysicsLayers.Friendly);
             var team2 = CreateTeam("Team2", PhysicsLayers.Enemy);
 
-            var ship1 = CreateAIShip("Ship1", team1, Vector2.zero, true, true);
-            var ship2 = CreateAIShip("Ship2", team2, new Vector2(25f, -25f), true, true);
+            var ship1 = CreateAIShip("Ship1", team1, Vector2.zero, true, false);
+            var ship2 = CreateAIShip("Ship2", team2, new Vector2(25f, -25f), true, false);
 
             yield return WaitForLifecycle();
 
@@ -108,11 +108,11 @@ namespace E2E
             var teamA = CreateTeam("TeamA", PhysicsLayers.Friendly);
             var teamB = CreateTeam("TeamB", PhysicsLayers.Enemy);
 
-            var shipB = CreateAIShip("ShipB", teamB, Vector2.zero, true, true);
+            var shipB = CreateAIShip("ShipB", teamB, Vector2.zero, true, false);
 
-            var shipA1 = CreateAIShip("ShipA1", teamA, new Vector2(25f, 30f), true, true);
-            var shipA2 = CreateAIShip("ShipA2", teamA, new Vector2(25f, -40f), true, true);
-            var shipA3 = CreateAIShip("ShipA3", teamA, new Vector2(30f, 0f), true, true);
+            var shipA1 = CreateAIShip("ShipA1", teamA, new Vector2(25f, 30f), true, false);
+            var shipA2 = CreateAIShip("ShipA2", teamA, new Vector2(25f, -40f), true, false);
+            var shipA3 = CreateAIShip("ShipA3", teamA, new Vector2(30f, 0f), true, false);
 
             yield return WaitForLifecycle();
 
@@ -159,7 +159,7 @@ namespace E2E
 
             var team1 = CreateTeam("Team1", PhysicsLayers.Friendly);
 
-            var ship = CreateAIShip("CrashingShip", team1, Vector2.zero, false);
+            var ship = CreateAIShip("CrashingShip", team1, Vector2.zero, false, false);
 
             var asteroid = Instantiator.Instantiate(GetAsteroidPrefab(), new Vector2(80f, 0f), Quaternion.identity);
             CreatedObjects.Add(asteroid);
@@ -197,8 +197,8 @@ namespace E2E
             var team1 = CreateTeam("Team1", PhysicsLayers.Friendly);
             var team2 = CreateTeam("Team2", PhysicsLayers.Enemy);
 
-            CreateAIShip("ShooterShip", team1, Vector2.zero);
-            var targetShip = CreateAIShip("TargetShip", team2, new Vector2(20f, 0f), false);
+            CreateAIShip("ShooterShip", team1, Vector2.zero, true, false);
+            var targetShip = CreateAIShip("TargetShip", team2, new Vector2(20f, 0f), false, false);
             var targetGo = targetShip.gameObject;
 
             CreateObstacleBox(Vector2.zero,
