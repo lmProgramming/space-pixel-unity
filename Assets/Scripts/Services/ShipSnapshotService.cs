@@ -94,8 +94,13 @@ namespace Services
 
         private ModuleSnapshot CaptureModuleSnapshot(IModule module)
         {
+            if (!module.Transform)
+                throw new UnityException(
+                    $"[ShipSnapshotService] Cannot capture snapshot for module '{module}' because its transform is null. " +
+                    "Ensure that all modules have valid transforms before capturing snapshots.");
+
             var identity = module.Transform.GetComponent<ModuleInstanceIdentity>();
-            if (identity == null)
+            if (!identity)
             {
                 identity = module.Transform.gameObject.AddComponent<ModuleInstanceIdentity>();
                 identity.EnsureAssigned(ModuleOrigin.Custom);

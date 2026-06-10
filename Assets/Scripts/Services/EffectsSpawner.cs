@@ -1,7 +1,10 @@
+using System.Runtime.CompilerServices;
 using Core.Services;
 using EasyPool;
 using Instantiation;
 using UnityEngine;
+
+[assembly: InternalsVisibleTo("E2E")]
 
 namespace Services
 {
@@ -26,5 +29,15 @@ namespace Services
             explosion.transform.position = position3;
             explosion.Play();
         }
+
+#if UNITY_INCLUDE_TESTS
+        internal void SetupForTesting(GameObject newExplosionPrefab, Transform newEffectsHolder,
+            Instantiator newInstantiator)
+        {
+            explosionPrefab = newExplosionPrefab;
+            effectsHolder = newEffectsHolder;
+            instantiator = newInstantiator;
+        }
+#endif
     }
 }

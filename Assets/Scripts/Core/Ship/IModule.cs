@@ -1,14 +1,19 @@
 using System.Collections.Generic;
 using Core.Pixelation;
 using Core.Services;
+using JetBrains.Annotations;
+using LMPro.External.IsAlive;
 using UnityEngine;
 
 namespace Core.Ship
 {
-    public interface IModule
+    public interface IModule : IHasAliveCheck
     {
         ModuleType Type { get; }
+
+        [CanBeNull]
         Transform Transform { get; }
+
         Resources Resources { get; }
         float Efficiency { get; }
         int CrewNeededCount { get; }

@@ -6,16 +6,9 @@ namespace Ships.Systems.Gimbal
 {
     public class SasTurnInputResolver
     {
-        private readonly EngineDirectionSolver _engineDirectionSolver;
-
         private float _desiredHeadingDegrees;
         private bool _hasDesiredHeading;
         private bool _wasTurning;
-
-        public SasTurnInputResolver(EngineDirectionSolver engineDirectionSolver)
-        {
-            _engineDirectionSolver = engineDirectionSolver;
-        }
 
         public void CaptureDesiredHeading(float currentHeadingDegrees)
         {
@@ -81,14 +74,14 @@ namespace Ships.Systems.Gimbal
 
             const float sampleTurnInput = 0.2f;
 
-            var baselineTorque = _engineDirectionSolver.EstimateNetTorqueForTurnInput(engines, shipForward,
+            var baselineTorque = EngineDirectionSolver.EstimateNetTorqueForTurnInput(engines, shipForward,
                 centerOfMass, maxLeverArm, forwardInput, 0f);
             if (Mathf.Abs(baselineTorque) <= 0.0001f)
                 return 0f;
 
-            var positiveSampleTorque = _engineDirectionSolver.EstimateNetTorqueForTurnInput(engines, shipForward,
+            var positiveSampleTorque = EngineDirectionSolver.EstimateNetTorqueForTurnInput(engines, shipForward,
                 centerOfMass, maxLeverArm, forwardInput, sampleTurnInput);
-            var negativeSampleTorque = _engineDirectionSolver.EstimateNetTorqueForTurnInput(engines, shipForward,
+            var negativeSampleTorque = EngineDirectionSolver.EstimateNetTorqueForTurnInput(engines, shipForward,
                 centerOfMass, maxLeverArm, forwardInput, -sampleTurnInput);
 
             var torqueSlope = (positiveSampleTorque - negativeSampleTorque) / (sampleTurnInput * 2f);

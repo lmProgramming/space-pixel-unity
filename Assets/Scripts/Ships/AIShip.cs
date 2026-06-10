@@ -87,6 +87,12 @@ namespace Ships
 
         private void ComputeNavigationInputs(Vector2 targetPosition)
         {
+            if (!CommandModule.Transform)
+            {
+                Debug.LogWarning("[AIShip] Cannot compute navigation inputs when transform is null");
+                return;
+            }
+
             var position = (Vector2)CommandModule.Transform.position;
             var toTarget = targetPosition - position;
             var distance = toTarget.magnitude;

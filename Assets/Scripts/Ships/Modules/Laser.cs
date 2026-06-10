@@ -1,6 +1,5 @@
 using System;
 using System.Threading;
-using Core.Gameplay.Combat;
 using Core.Services;
 using Core.Ship;
 using Core.Ship.ModuleSnapshotPayloads;
@@ -13,7 +12,7 @@ using ZLinq;
 namespace Ships.Modules
 {
     [RequireComponent(typeof(LineRenderer))]
-    public class LaserBeam : Module, IWeapon
+    public class LaserBeam : WeaponBase
     {
         private const float ReloadEnergyMultiplier = 0.5f;
         private const float FiringEnergyMultiplier = 2f;
@@ -75,34 +74,33 @@ namespace Ships.Modules
             _reloadTimer.Progress(Time.deltaTime * ShipModuleEfficiency);
         }
 
-        private void OnDestroy()
+        protected override void OnDestroy()
         {
             StopFiringCleanup();
 
             if (_reloadTimer == null) return;
             _reloadTimer.OnReady -= HandleReady;
             _reloadTimer.OnNotReady -= HandleNotReady;
+
+            base.OnDestroy();
         }
 
-        public event Action OnReady;
-        public event Action OnNotReady;
-
-        public void Shoot()
+        public override void Shoot()
         {
             StartShooting();
         }
 
-        public bool IsReady()
+        public override bool IsReady()
         {
             return !_isFiring && _reloadTimer is { IsReady: true };
         }
 
-        public Sprite GetSprite()
+        public override Sprite GetSprite()
         {
             return sprite;
         }
 
-        public void StopShooting()
+        public override void StopShooting()
         {
             _isFiring = false;
 
@@ -248,14 +246,9 @@ namespace Ships.Modules
             }
         }
 
-        private void HandleReady()
+        protected override void HandleReady()
         {
-            if (!_isFiring) OnReady?.Invoke();
-        }
-
-        private void HandleNotReady()
-        {
-            OnNotReady?.Invoke();
+            if (!_isFiring) base.HandleReady();
         }
     }
 }

@@ -34,7 +34,8 @@ namespace Services
             var bulletColliders = bulletObject.GetComponentsInChildren<Collider2D>();
             foreach (var bulletCollider in bulletColliders)
             foreach (var shooterCollider in shooterColliders)
-                Physics2D.IgnoreCollision(bulletCollider, shooterCollider, true);
+                if (shooterCollider)
+                    Physics2D.IgnoreCollision(bulletCollider, shooterCollider, true);
         }
 
 #if UNITY_INCLUDE_TESTS

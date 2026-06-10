@@ -7,7 +7,7 @@ namespace Ships.Systems.Gimbal
 {
     public class EngineDirectionSolver
     {
-        public float GetMaxLeverArmLength(IEnumerable<Engine> engines, Vector2 centerOfMass)
+        public static float GetMaxLeverArmLength(IEnumerable<Engine> engines, Vector2 centerOfMass)
         {
             var maxLeverArm = engines.AsValueEnumerable().Select(engine => engine.WorldThrustPoint - centerOfMass)
                 .Aggregate(0f, (current, lever) => Mathf.Max(current, lever.magnitude));
@@ -23,7 +23,7 @@ namespace Ships.Systems.Gimbal
             return shipForward * forwardInput + rotationalDirection * turnInput;
         }
 
-        public float EstimateNetTorqueForTurnInput(IReadOnlyList<Engine> engines, Vector2 shipForward,
+        public static float EstimateNetTorqueForTurnInput(IReadOnlyList<Engine> engines, Vector2 shipForward,
             Vector2 centerOfMass, float maxLeverArm, float forwardInput, float turnInput)
         {
             return (from engine in engines.AsValueEnumerable()

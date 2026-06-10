@@ -32,6 +32,9 @@ namespace Ships.Tests.TestHelpers
             container.Bind<ShipInitializeModulesEventChannel>().FromInstance(shipInitializeModulesEventChannel)
                 .AsSingle();
 
+            var effectsSpawner = Substitute.For<IEffectsSpawner>();
+            container.Bind<IEffectsSpawner>().FromInstance(effectsSpawner).AsSingle();
+
             return container;
         }
     }

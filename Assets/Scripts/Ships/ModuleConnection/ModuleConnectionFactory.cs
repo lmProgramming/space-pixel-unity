@@ -53,10 +53,9 @@ namespace Ships.ModuleConnection
                     module);
         }
 
-        private List<Module> GetModules(Transform parent)
+        private static List<Module> GetModules(Transform parent)
         {
-            var modules = GetComponentsInChildren<Module>(parent).AsValueEnumerable().ToList();
-            return modules;
+            return parent.GetComponentsInChildren<Module>().AsValueEnumerable().ToList();
         }
     }
 }

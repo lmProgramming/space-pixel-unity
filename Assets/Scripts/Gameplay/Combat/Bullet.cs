@@ -23,8 +23,10 @@ namespace Gameplay.Combat
             OnPixelsLost += (_, _) => SetLayer(PhysicsLayers.Default);
         }
 
-        private void OnDestroy()
+        protected override void OnDestroy()
         {
+            base.OnDestroy();
+
             var results = new Collider2D[5];
             Physics2D.OverlapCircle(transform.position, PushAwayRadius, ContactFilter2D.noFilter, results);
 

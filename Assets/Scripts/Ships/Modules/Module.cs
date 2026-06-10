@@ -1,13 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using Core.Constants;
 using Core.Pixelation;
 using Core.Services;
 using Core.Ship;
 using LMPro;
 using Pixelation;
 using UnityEngine;
+using Zenject;
 using ZLinq;
+using Random = UnityEngine.Random;
 using Resources = Core.Ship.Resources;
 
 [assembly: InternalsVisibleTo("Editor.InspectorExtensions")]
@@ -32,6 +35,9 @@ namespace Ships.Modules
 
         private float _crewAppropriateSkillSum;
 
+        [Inject]
+        private IEffectsSpawner _effectsSpawner;
+
         protected List<CrewMember> AliveCrew { get; private set; }
 
         internal CrewSkillType MainSkillTypeForTesting
@@ -50,6 +56,11 @@ namespace Ships.Modules
         internal IShip ShipForTesting => Ship;
 #endif
 
+        private bool IsBelowDestructionThreshold =>
+            PixelatedRigidbody.CurrentPixelCount > 0 &&
+            PixelatedRigidbody.CurrentPixelCount <
+            PixelatedRigidbody.StartPixelCount * GameplayConstants.ModuleDestroyedBelowPixelRatio;
+
         protected virtual void Awake()
         {
             PixelatedRigidbody = GetComponent<PixelatedRigidbody>();
@@ -64,10 +75,11 @@ namespace Ships.Modules
                 Debug.LogError("PixelatedRigidbody not found on Module!", this);
         }
 
-        private void OnDestroy()
+        protected virtual void OnDestroy()
         {
             if (PixelatedRigidbody != null) PixelatedRigidbody.OnPixelsLost -= CheckCohesion;
 
+            DetachAllConnections();
             KillAllCrew();
 
             Ship?.OnModuleDestroyed(this);
@@ -109,6 +121,7 @@ namespace Ships.Modules
         public IPixelatedRigidbody PixelatedRigidbody { get; private set; }
 
         public Transform Transform => transform;
+
         public virtual ModuleType Type { get; protected set; } = ModuleType.Resources;
 
         public virtual int CrewNeededCount => Mathf.CeilToInt(Resources.crewNeeded);
@@ -261,6 +274,10 @@ namespace Ships.Modules
             if (!_connectionPoints.ContainsKey(otherModule)) _connectionPoints[otherModule] = new List<Vector2Int>();
             _connectionPoints[otherModule] = overlappingPoints;
 
+            // Reuse the joint from a previous InitializeModules pass. Creating a new one would leave
+            // the old joint orphaned and untracked, so it could never be destroyed on detach.
+            if (!joint) joint = FindExistingJointWith(otherModule);
+
             if (!joint)
             {
                 joint = gameObject.AddComponent<FixedJoint2D>();
@@ -284,6 +301,14 @@ namespace Ships.Modules
 
         private void CheckCohesion(List<Vector2Int> points, PixelLoseReason reason)
         {
+            if (IsBelowDestructionThreshold)
+            {
+                // NoPixelsLeft (not a plain Destroy) so OnNoPixelsLeft subscribers
+                // (ship destruction on command module death, mission defeat) still fire.
+                PixelatedRigidbody.NoPixelsLeft();
+                return;
+            }
+
             var connectedModulesToCheck = new List<Module>(_connectionPoints.Keys);
             var modulesToDetach = new HashSet<Module>();
 
@@ -311,10 +336,8 @@ namespace Ships.Modules
             if (!this || !otherModule) return;
             Debug.Log($"[Module] DetachConnections: {name} detaching from {otherModule.name}", this);
 
-            if (_connections.TryGetValue(otherModule, out var jointToDestroy) && jointToDestroy)
-                Destroy(jointToDestroy);
-            _connections.Remove(otherModule);
-            _connectionPoints.Remove(otherModule);
+            RemoveConnectionTo(otherModule);
+            otherModule.RemoveConnectionTo(this);
 
             if (Ship == null)
             {
@@ -324,6 +347,50 @@ namespace Ships.Modules
 
             Debug.Log($"[Module] Calling RemoveEdge({name}, {otherModule.name})", this);
             Ship.ModuleGraph.RemoveEdge(this, otherModule);
+        }
+
+        /// <summary>
+        ///     Destroys every joint between this module and its neighbors, on both sides of each pair.
+        ///     Must run when the module dies or leaves the ship: a FixedJoint2D whose connectedBody
+        ///     gets destroyed re-anchors to the static world body at the origin, violently yanking and
+        ///     spinning whatever it is attached to.
+        /// </summary>
+        public void DetachAllConnections()
+        {
+            foreach (var otherModule in new List<Module>(_connections.Keys))
+            {
+                RemoveConnectionTo(otherModule);
+                if (otherModule) otherModule.RemoveConnectionTo(this);
+            }
+
+            SpawnExplosionsOnDetachment(_connectionPoints);
+
+            _connectionPoints.Clear();
+        }
+
+        private void SpawnExplosionsOnDetachment(Dictionary<Module, List<Vector2Int>> connectionPoints)
+        {
+            foreach (var worldPos in from connectionPoint in connectionPoints.AsValueEnumerable()
+                     where Random.value < GameplayConstants.ChanceOfSpawningExplosionOnDetachingConnectionPoint
+                     select PixelatedRigidbody.LocalToWorldPoint(connectionPoint.Value[0]))
+                _effectsSpawner.SpawnExplosion(worldPos);
+        }
+
+        private void RemoveConnectionTo(Module otherModule)
+        {
+            if (_connections.TryGetValue(otherModule, out var jointToDestroy) && jointToDestroy)
+                Destroy(jointToDestroy);
+            _connections.Remove(otherModule);
+            _connectionPoints.Remove(otherModule);
+        }
+
+        private FixedJoint2D FindExistingJointWith(Module otherModule)
+        {
+            if (_connections.TryGetValue(otherModule, out var existingJoint) && existingJoint)
+                return existingJoint;
+            if (otherModule._connections.TryGetValue(this, out var reverseJoint) && reverseJoint)
+                return reverseJoint;
+            return null;
         }
 
         private void OnCrewChange()

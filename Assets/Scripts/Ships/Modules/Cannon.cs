@@ -1,7 +1,5 @@
-using System;
 using System.Runtime.CompilerServices;
 using System.Threading;
-using Core.Gameplay.Combat;
 using Core.Services;
 using Core.Ship;
 using Core.Ship.ModuleSnapshotPayloads;
@@ -13,7 +11,7 @@ using Zenject;
 
 namespace Ships.Modules
 {
-    public class Cannon : Module, IWeapon
+    public class Cannon : WeaponBase
     {
         [SerializeField] private GameObject projectilePrefab;
 
@@ -50,7 +48,7 @@ namespace Ships.Modules
             _reloadTimer.Progress(Time.deltaTime * ShipModuleEfficiency);
         }
 
-        private void OnDestroy()
+        protected override void OnDestroy()
         {
             _cts?.Cancel();
             _cts?.Dispose();
@@ -58,9 +56,11 @@ namespace Ships.Modules
             if (_reloadTimer == null) return;
             _reloadTimer.OnReady -= HandleReady;
             _reloadTimer.OnNotReady -= HandleNotReady;
+
+            base.OnDestroy();
         }
 
-        public void Shoot()
+        public override void Shoot()
         {
             if (!_reloadTimer.IsReady) return;
             if (Ship == null) return;
@@ -86,22 +86,19 @@ namespace Ships.Modules
             _reloadTimer.Reset();
         }
 
-        public void StopShooting()
+        public override void StopShooting()
         {
         }
 
-        public bool IsReady()
+        public override bool IsReady()
         {
             return _reloadTimer.IsReady;
         }
 
-        public Sprite GetSprite()
+        public override Sprite GetSprite()
         {
             return sprite;
         }
-
-        public event Action OnReady;
-        public event Action OnNotReady;
 
         public override string CaptureTypePayloadJson(IGameContentCatalog contentCatalog)
         {
@@ -149,16 +146,6 @@ namespace Ships.Modules
             return base.GetEnergyDraw() * (IsReady()
                 ? 0.25f
                 : 1f);
-        }
-
-        private void HandleReady()
-        {
-            OnReady?.Invoke();
-        }
-
-        private void HandleNotReady()
-        {
-            OnNotReady?.Invoke();
         }
 
 #if UNITY_INCLUDE_TESTS

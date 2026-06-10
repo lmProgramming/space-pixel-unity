@@ -29,6 +29,7 @@ namespace Core.Pixelation
         HealthGridSnapshot CaptureHealthGridSnapshot();
         void ApplyArmorGridSnapshot(ArmorGridSnapshot snapshot);
         void ApplyHealthGridSnapshot(HealthGridSnapshot snapshot);
+        void NoPixelsLeft();
         event Action<IPixelated> OnNoPixelsLeft;
         event Action<List<Vector2Int>, PixelLoseReason> OnPixelsLost;
     }
