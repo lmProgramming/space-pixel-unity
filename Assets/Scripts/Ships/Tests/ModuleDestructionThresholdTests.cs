@@ -42,6 +42,8 @@ namespace Ships.Tests
 
             var ship = ModuleFactory.WireShip<Ship>(shipGo, Container);
 
+            Container.InjectGameObject(shipGo);
+
             return (ship, command, other);
         }
 

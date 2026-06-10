@@ -20,7 +20,7 @@ namespace Ships.Tests.TestHelpers
         {
             TestRoot = new GameObject("TestRoot");
             CreatedObjects.Add(TestRoot);
-            Container = TestContainerFactory.CreateTestContainer(TestRoot.transform);
+            Container = TestContainerFactory.CreateTestContainer();
         }
 
         [TearDown]

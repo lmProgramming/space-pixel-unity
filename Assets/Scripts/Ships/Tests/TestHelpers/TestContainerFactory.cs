@@ -9,7 +9,7 @@ namespace Ships.Tests.TestHelpers
 {
     public static class TestContainerFactory
     {
-        public static DiContainer CreateTestContainer(Transform mapTransform)
+        public static DiContainer CreateTestContainer()
         {
             var container = new DiContainer();
 

@@ -10,6 +10,6 @@ namespace Core.Constants
         /// </summary>
         public const float ModuleDestroyedBelowPixelRatio = 0.15f;
 
-        public const float ChanceOfSpawningExplosionOnDetachingConnectionPoint = 0.1f;
+        public const float ChanceOfSpawningExplosionOnDetachingConnectionPoint = 0.3f;
     }
 }

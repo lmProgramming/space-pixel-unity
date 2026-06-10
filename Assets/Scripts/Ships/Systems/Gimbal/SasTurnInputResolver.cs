@@ -16,19 +16,21 @@ namespace Ships.Systems.Gimbal
             _hasDesiredHeading = true;
         }
 
-        public float ResolveTurnInput(float requestedTurnInput, float forwardInput, Rigidbody2D selfRigidbody,
+        public float ResolveTurnInput(float requestedTurnInput, float forwardInput, float horizontalInput,
+            Rigidbody2D selfRigidbody,
             float currentHeadingDegrees, IReadOnlyList<Engine> engines, Vector2 shipForward, Vector2 centerOfMass,
-            float maxLeverArm, in SasTurnInputSettings settings)
+            float maxLeverArm, SasTurnInputSettings settings)
         {
             UpdateDesiredHeadingOnTurnRelease(requestedTurnInput, currentHeadingDegrees, settings);
 
             var headingHoldTurnInput = GetHeadingHoldTurnInput(requestedTurnInput, selfRigidbody, currentHeadingDegrees,
                 settings);
             if (Mathf.Abs(requestedTurnInput) > settings.TurnReleaseThreshold ||
-                Mathf.Abs(forwardInput) <= Mathf.Epsilon)
+                (Mathf.Abs(forwardInput) <= Mathf.Epsilon && Mathf.Abs(horizontalInput) <= Mathf.Epsilon))
                 return headingHoldTurnInput;
 
-            var forwardCompensation = CalculateForwardThrustCompensationTurnInput(forwardInput, engines, shipForward,
+            var forwardCompensation = CalculateThrustCompensationTurnInput(forwardInput, horizontalInput, engines,
+                shipForward,
                 centerOfMass, maxLeverArm, settings);
             var withForwardCompensation = headingHoldTurnInput +
                                           forwardCompensation * settings.ForwardCompensationStrength;
@@ -37,7 +39,7 @@ namespace Ships.Systems.Gimbal
         }
 
         private void UpdateDesiredHeadingOnTurnRelease(float requestedTurnInput, float currentHeadingDegrees,
-            in SasTurnInputSettings settings)
+            SasTurnInputSettings settings)
         {
             CaptureCurrentHeadingIfNeeded(currentHeadingDegrees);
 
@@ -49,7 +51,7 @@ namespace Ships.Systems.Gimbal
         }
 
         private float GetHeadingHoldTurnInput(float requestedTurnInput, Rigidbody2D selfRigidbody,
-            float currentHeadingDegrees, in SasTurnInputSettings settings)
+            float currentHeadingDegrees, SasTurnInputSettings settings)
         {
             if (Mathf.Abs(requestedTurnInput) > settings.TurnReleaseThreshold)
                 return requestedTurnInput;
@@ -66,8 +68,9 @@ namespace Ships.Systems.Gimbal
             return Mathf.Clamp(turnCorrection, -settings.MaxTurnInput, settings.MaxTurnInput);
         }
 
-        private float CalculateForwardThrustCompensationTurnInput(float forwardInput, IReadOnlyList<Engine> engines,
-            Vector2 shipForward, Vector2 centerOfMass, float maxLeverArm, in SasTurnInputSettings settings)
+        private static float CalculateThrustCompensationTurnInput(float forwardInput, float horizontalInput,
+            IReadOnlyList<Engine> engines,
+            Vector2 shipForward, Vector2 centerOfMass, float maxLeverArm, SasTurnInputSettings settings)
         {
             if (engines.Count == 0)
                 return 0f;
@@ -75,14 +78,14 @@ namespace Ships.Systems.Gimbal
             const float sampleTurnInput = 0.2f;
 
             var baselineTorque = EngineDirectionSolver.EstimateNetTorqueForTurnInput(engines, shipForward,
-                centerOfMass, maxLeverArm, forwardInput, 0f);
+                centerOfMass, maxLeverArm, forwardInput, horizontalInput, 0f);
             if (Mathf.Abs(baselineTorque) <= 0.0001f)
                 return 0f;
 
             var positiveSampleTorque = EngineDirectionSolver.EstimateNetTorqueForTurnInput(engines, shipForward,
-                centerOfMass, maxLeverArm, forwardInput, sampleTurnInput);
+                centerOfMass, maxLeverArm, forwardInput, horizontalInput, sampleTurnInput);
             var negativeSampleTorque = EngineDirectionSolver.EstimateNetTorqueForTurnInput(engines, shipForward,
-                centerOfMass, maxLeverArm, forwardInput, -sampleTurnInput);
+                centerOfMass, maxLeverArm, forwardInput, horizontalInput, -sampleTurnInput);
 
             var torqueSlope = (positiveSampleTorque - negativeSampleTorque) / (sampleTurnInput * 2f);
             if (Mathf.Abs(torqueSlope) <= 0.0001f)

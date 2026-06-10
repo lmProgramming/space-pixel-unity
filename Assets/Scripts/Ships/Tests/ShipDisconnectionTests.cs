@@ -39,6 +39,8 @@ namespace Ships.Tests
 
             var ship = ModuleFactory.WireShip<Ship>(shipGo, Container);
 
+            Container.InjectGameObject(shipGo);
+
             return new TestShipComponents(ship, commandModule, new List<Module> { module2 });
         }
 
@@ -59,6 +61,8 @@ namespace Ships.Tests
                 new Vector2(moduleWidth * 2, 0), moduleWidth, moduleHeight, false);
 
             var ship = ModuleFactory.WireShip<Ship>(shipGo, Container);
+
+            Container.InjectGameObject(shipGo);
 
             return new TestShipComponents(ship, commandModule, new List<Module> { module2, module3 });
         }
@@ -89,6 +93,8 @@ namespace Ships.Tests
 
             var ship = ModuleFactory.WireShip<Ship>(shipGo, Container);
 
+            Container.InjectGameObject(shipGo);
+
             return new TestShipComponents(ship, commandModule, new List<Module> { moduleA, moduleB, moduleC });
         }
 
@@ -113,6 +119,8 @@ namespace Ships.Tests
                 new Vector2(0, -moduleHeight), moduleWidth, moduleHeight, false);
 
             var ship = ModuleFactory.WireShip<Ship>(shipGo, Container);
+
+            Container.InjectGameObject(shipGo);
 
             return new TestShipComponents(ship, commandModule, new List<Module> { moduleA, moduleC });
         }

@@ -155,6 +155,9 @@ namespace Ships.Tests
 
             var ship = ModuleFactory.WireShip<Ship>(shipGo, Container);
             ship.InitializeModules();
+
+            Container.InjectGameObject(shipGo);
+
             return ship;
         }
     }

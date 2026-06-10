@@ -80,6 +80,7 @@ namespace Ships
 
 
         protected float PendingForwardInput;
+        protected float PendingHorizontalInput;
         protected float PendingTurnInput;
 
         [Inject]
@@ -390,10 +391,11 @@ namespace Ships
                 engine.SetActive(active);
         }
 
-        protected bool ApplyEngineForces(float forwardInput, float turnInput, float deltaTime,
+        protected bool ApplyEngineForces(float forwardInput, float horizontalInput, float turnInput, float deltaTime,
             bool sasEnabled = false)
         {
             forwardInput = Mathf.Clamp(forwardInput, -1f, 1f);
+            horizontalInput = Mathf.Clamp(horizontalInput, -1f, 1f);
             turnInput = Mathf.Clamp(turnInput, -1f, 1f);
 
             var selfRigidbody = CommandModule.PixelatedRigidbody?.Rigidbody;
@@ -407,7 +409,7 @@ namespace Ships
             var centerOfMass = selfRigidbody.worldCenterOfMass;
             var maxLeverArm = EngineDirectionSolver.GetMaxLeverArmLength(engines, centerOfMass);
             var finalTurnInput = sasEnabled
-                ? _sasTurnInputResolver.ResolveTurnInput(turnInput, forwardInput, selfRigidbody,
+                ? _sasTurnInputResolver.ResolveTurnInput(turnInput, forwardInput, horizontalInput, selfRigidbody,
                     GetCurrentHeadingDegrees(), engines, forward, centerOfMass, maxLeverArm, GetSasSettings())
                 : turnInput;
             var desiredDirectionPerEngine = new Vector2[engines.Count];
@@ -424,7 +426,7 @@ namespace Ships
                 }
 
                 var desiredDirection = EngineDirectionSolver.GetDesiredEngineDirection(
-                    forward, centerOfMass, maxLeverArm, engine, forwardInput, finalTurnInput);
+                    forward, centerOfMass, maxLeverArm, engine, forwardInput, horizontalInput, finalTurnInput);
                 desiredDirectionPerEngine[i] = desiredDirection;
 
                 if (desiredDirection.sqrMagnitude <= Mathf.Epsilon)
@@ -449,7 +451,7 @@ namespace Ships
 
             var thrustRatios = ControlAllocator.AllocateControlInputs(engines, desiredDirectionPerEngine, centerOfMass,
                 forward,
-                forwardInput, finalTurnInput, maxLeverArm, GetControlAllocatorSettings());
+                forwardInput, horizontalInput, finalTurnInput, maxLeverArm, GetControlAllocatorSettings());
 
             var anyForceApplied = false;
 
@@ -535,10 +537,11 @@ namespace Ships
             return CommandModule.Transform!.up;
         }
 
-        internal void ApplyEngineForcesForTesting(float forwardInput, float turnInput, float deltaTime,
+        internal void ApplyEngineForcesForTesting(float forwardInput, float horizontalInput, float turnInput,
+            float deltaTime,
             bool sasEnabled = false)
         {
-            ApplyEngineForces(forwardInput, turnInput, deltaTime, sasEnabled);
+            ApplyEngineForces(forwardInput, horizontalInput, turnInput, deltaTime, sasEnabled);
         }
 
         internal void ConfigureAllocatorForTesting(bool isEnabled, int iterations = 24, float forceWeight = 1f,

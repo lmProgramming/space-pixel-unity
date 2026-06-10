@@ -9,12 +9,13 @@ namespace Ships.Systems.Gimbal
     {
         public static float[] AllocateControlInputs(IReadOnlyList<Engine> engines,
             IReadOnlyList<Vector2> desiredDirections,
-            Vector2 centerOfMass, Vector2 forward, float forwardInput, float turnInput, float maxLeverArm,
+            Vector2 centerOfMass, Vector2 forward, float forwardInput, float horizontalInput, float turnInput,
+            float maxLeverArm,
             ControlAllocatorSettings settings)
         {
             var thrustRatios = new float[engines.Count];
-            var requestedForceDirection = forwardInput >= 0f ? forward : -forward;
-            var requestedForceMagnitude = Mathf.Abs(forwardInput);
+            var shipRight = EngineDirectionSolver.GetShipRight(forward);
+            var requestedForce = forward * forwardInput + shipRight * horizontalInput;
 
             var columns = new Vector3[engines.Count];
             var hasAnyEffectiveColumn = false;
@@ -48,9 +49,9 @@ namespace Ships.Systems.Gimbal
 
             if (!hasAnyEffectiveColumn) return thrustRatios;
 
-            var targetForceMagnitude = requestedForceMagnitude * totalThrustCapacity * settings.ForceWeight;
-            var targetX = requestedForceDirection.x * targetForceMagnitude;
-            var targetY = requestedForceDirection.y * targetForceMagnitude;
+            var targetForceMagnitude = totalThrustCapacity * settings.ForceWeight;
+            var targetX = requestedForce.x * targetForceMagnitude;
+            var targetY = requestedForce.y * targetForceMagnitude;
 
             var torqueScale = Mathf.Max(totalTorqueCapacity, Mathf.Max(1f, maxLeverArm));
             var targetTorque = turnInput * torqueScale * settings.TorqueWeight;

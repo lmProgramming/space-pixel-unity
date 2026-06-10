@@ -36,6 +36,8 @@ namespace Ships.Tests.TestHelpers
                 0.02f);
             shipGo.SetActive(true);
 
+            container.InjectGameObject(shipGo);
+
             return ship;
         }
     }
