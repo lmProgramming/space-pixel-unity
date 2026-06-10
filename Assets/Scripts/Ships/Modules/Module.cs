@@ -357,22 +357,23 @@ namespace Ships.Modules
         /// </summary>
         public void DetachAllConnections()
         {
+            SpawnExplosionsOnDetachment(_connectionPoints);
+
             foreach (var otherModule in new List<Module>(_connections.Keys))
             {
                 RemoveConnectionTo(otherModule);
                 if (otherModule) otherModule.RemoveConnectionTo(this);
             }
 
-            SpawnExplosionsOnDetachment(_connectionPoints);
-
             _connectionPoints.Clear();
         }
 
         private void SpawnExplosionsOnDetachment(Dictionary<Module, List<Vector2Int>> connectionPoints)
         {
-            foreach (var worldPos in from connectionPoint in connectionPoints.AsValueEnumerable()
+            foreach (var worldPos in from allConnectionsPoints in connectionPoints.Values.AsValueEnumerable()
+                     from worldPoint in allConnectionsPoints
                      where Random.value < GameplayConstants.ChanceOfSpawningExplosionOnDetachingConnectionPoint
-                     select PixelatedRigidbody.LocalToWorldPoint(connectionPoint.Value[0]))
+                     select PixelatedRigidbody.LocalToWorldPoint(worldPoint))
                 _effectsSpawner.SpawnExplosion(worldPos);
         }
 
