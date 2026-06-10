@@ -47,6 +47,8 @@ namespace Ships.Tests
             var command = shipGo.GetComponentInChildren<Command>();
             var engine = shipGo.GetComponentInChildren<Engine>();
 
+            Container.InjectGameObject(shipGo);
+
             return (ship, command, engine);
         }
 

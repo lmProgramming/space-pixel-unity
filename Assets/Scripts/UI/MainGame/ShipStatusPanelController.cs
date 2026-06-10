@@ -1,12 +1,9 @@
 using System;
-using Core.Constants;
-using Events.Game;
 using Events.UI;
 using Ships;
 using Ships.Systems.Resources;
 using UI.Common;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 
 namespace UI.MainGame
@@ -20,8 +17,6 @@ namespace UI.MainGame
 
         [SerializeField] private PointerOverUiEventChannel pointerOverUiChannel;
 
-        [SerializeField] private PauseStateEventChannel pauseStateChannel;
-
         [Header("Animation Settings")]
         [SerializeField] private float barAnimationSpeed = 8f;
 
@@ -32,11 +27,7 @@ namespace UI.MainGame
         private VisualElement _energyBarFill;
         private VisualElement _energyBarGlow;
         private Label _energyFlowLabel;
-        private bool _isPaused;
         private VisualElement _mainHudRoot;
-        private VisualElement _pauseOverlay;
-        private VisualElement _pauseOverlayHost;
-        private bool _pauseUiInitialized;
         private bool _pointerBlockersRegistered;
 
         private VisualElement _root;
@@ -44,7 +35,6 @@ namespace UI.MainGame
         private bool _sasHandlersRegistered;
         private bool _sasSyncing;
         private Toggle _sasToggle;
-        private SettingsPanelController _settingsPanelController;
         private VisualElement _shipStatusPanel;
         private Label _speedValueLabel;
         private float _targetEnergyBarHeight;
@@ -63,7 +53,6 @@ namespace UI.MainGame
                 _root = uiDocument.rootVisualElement;
                 CacheUIReferences();
                 RegisterSasToggle();
-                InitializePauseUi();
                 RegisterUiPointerBlockers();
             }
 
@@ -92,20 +81,6 @@ namespace UI.MainGame
             AnimateBars();
         }
 
-        private void LateUpdate()
-        {
-            if (!Input.GetKeyDown(KeyCode.Escape))
-                return;
-
-            if (_settingsPanelController is { IsOpen: true })
-            {
-                _settingsPanelController.Hide();
-                return;
-            }
-
-            SetPaused(!_isPaused);
-        }
-
         private void OnEnable()
         {
             if (uiDocument == null || uiDocument.rootVisualElement == null)
@@ -114,14 +89,12 @@ namespace UI.MainGame
             _root = uiDocument.rootVisualElement;
             CacheUIReferences();
             RegisterSasToggle();
-            InitializePauseUi();
             RegisterUiPointerBlockers();
         }
 
         private void OnDisable()
         {
             UnregisterSasToggle();
-            SetPaused(false);
         }
 
         private void CacheUIReferences()
@@ -153,8 +126,6 @@ namespace UI.MainGame
             TrackPointerBlocker("hud-sas-cluster");
             TrackPointerBlocker("ship-status-panel");
             TrackPointerBlocker("speed-readout");
-            TrackPointerBlocker("pause-overlay-host");
-            TrackPointerBlocker("settings-overlay-host");
 
             _pointerBlockersRegistered = true;
         }
@@ -192,70 +163,10 @@ namespace UI.MainGame
             playerShipTyped.ToggleSas();
         }
 
-        private void InitializePauseUi()
-        {
-            if (_pauseUiInitialized || _root == null)
-                return;
-
-            _pauseOverlay = _root.Q<VisualElement>(SharedUiElementNames.Pause.Overlay);
-            _pauseOverlayHost = _root.Q<VisualElement>(SharedUiElementNames.Pause.OverlayHost);
-            var title = _root.Q<Label>(SharedUiElementNames.Pause.Title);
-            var resumeButton = _root.Q<Button>(SharedUiElementNames.Pause.ResumeButton);
-            var settingsButton = _root.Q<Button>(SharedUiElementNames.Pause.SettingsButton);
-            var quitButton = _root.Q<Button>(SharedUiElementNames.Pause.QuitButton);
-
-            if (title == null || resumeButton == null || settingsButton == null || quitButton == null)
-                throw new InvalidOperationException("[ShipStatusPanelController] Pause elements missing in HUD UXML.");
-
-            title.text = "Paused";
-            if (_pauseOverlayHost != null)
-                _pauseOverlayHost.style.display = DisplayStyle.None;
-            _pauseOverlay.style.display = DisplayStyle.None;
-            resumeButton.clicked += () => { SetPaused(false); };
-            settingsButton.clicked += () => { _settingsPanelController.Toggle(); };
-            quitButton.clicked += QuitToMainMenu;
-            _settingsPanelController = new SettingsPanelController(_root, false);
-            _pauseUiInitialized = true;
-        }
-
         private void SetMainHudVisible(bool visible)
         {
             if (_mainHudRoot != null)
                 _mainHudRoot.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
-        }
-
-        private void SetPaused(bool paused)
-        {
-            if (_isPaused == paused)
-                return;
-
-            _isPaused = paused;
-            Time.timeScale = paused ? 0f : 1f;
-
-            if (pauseStateChannel != null)
-                pauseStateChannel.Raise(paused);
-
-            if (_pauseOverlayHost != null)
-                _pauseOverlayHost.style.display = paused ? DisplayStyle.Flex : DisplayStyle.None;
-            if (_pauseOverlay != null)
-                _pauseOverlay.style.display = paused ? DisplayStyle.Flex : DisplayStyle.None;
-
-            if (!paused && _settingsPanelController != null && _settingsPanelController.IsOpen)
-                _settingsPanelController.Hide();
-
-            // A full-screen overlay that hides under a stationary pointer never emits PointerLeave,
-            // so explicitly clear its pointer-over-UI state when leaving the paused state.
-            if (!paused && _uiPointerTracker != null)
-            {
-                _uiPointerTracker.Release(_pauseOverlayHost);
-                _uiPointerTracker.Release(_root?.Q<VisualElement>(SharedUiElementNames.Settings.OverlayHost));
-            }
-        }
-
-        private static void QuitToMainMenu()
-        {
-            Time.timeScale = 1f;
-            SceneManager.LoadScene(SceneNames.MainMenu);
         }
 
         private void SetShipStatusBlockVisible(bool visible)

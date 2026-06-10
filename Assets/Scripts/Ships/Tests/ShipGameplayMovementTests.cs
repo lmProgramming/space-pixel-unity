@@ -28,7 +28,7 @@ namespace Ships.Tests
             ship.TurnInput = 0f;
             ship.SasEnabled = false;
 
-            yield return SimulateForSeconds(MovementSimulationSeconds);
+            yield return Utils.SimulateForSeconds(MovementSimulationSeconds);
 
             var forwardTravel = Vector2.Dot(ship.GetPosition() - startPosition, forward);
             Assert.That(forwardTravel, Is.GreaterThan(MinForwardDistance),
@@ -46,7 +46,7 @@ namespace Ships.Tests
             ship.SasEnabled = false;
 
             var heading = new HeadingChangeAccumulator(ship);
-            yield return SimulateForSeconds(MovementSimulationSeconds, heading.Sample);
+            yield return Utils.SimulateForSeconds(MovementSimulationSeconds, heading.Sample);
 
             Assert.That(heading.TotalDegrees, Is.LessThan(-MinTurnDegrees),
                 () => $"Expected right turn > {MinTurnDegrees}°, got {heading.TotalDegrees:F2}°.");
@@ -63,7 +63,7 @@ namespace Ships.Tests
             ship.SasEnabled = false;
 
             var heading = new HeadingChangeAccumulator(ship);
-            yield return SimulateForSeconds(MovementSimulationSeconds, heading.Sample);
+            yield return Utils.SimulateForSeconds(MovementSimulationSeconds, heading.Sample);
 
             Assert.That(heading.TotalDegrees, Is.GreaterThan(MinTurnDegrees),
                 () => $"Expected left turn > {MinTurnDegrees}°, got {heading.TotalDegrees:F2}°.");
@@ -79,13 +79,13 @@ namespace Ships.Tests
             ship.TurnInput = 0f;
             ship.SasEnabled = true;
 
-            yield return SimulateForSeconds(SasSettleSeconds);
+            yield return Utils.SimulateForSeconds(SasSettleSeconds);
 
             var headingBeforeTargetChange = ship.GetHeadingDegreesForTesting();
             var targetHeading = headingBeforeTargetChange + SasHeadingOffsetDegrees;
             ship.SetSasDesiredHeadingForTesting(targetHeading);
 
-            yield return SimulateForSeconds(SasSettleSeconds);
+            yield return Utils.SimulateForSeconds(SasSettleSeconds);
 
             var headingError = Mathf.Abs(Mathf.DeltaAngle(ship.GetHeadingDegreesForTesting(), targetHeading));
             var allowedError = Mathf.Abs(SasHeadingOffsetDegrees) * 0.02f;
@@ -98,17 +98,6 @@ namespace Ships.Tests
         private MovableShipTestProxy CreateReadyShip()
         {
             return SmallMovableShipTestFactory.Create(Container, CreatedObjects);
-        }
-
-        private static IEnumerator SimulateForSeconds(float seconds, System.Action onFixedStep = null)
-        {
-            var elapsed = 0f;
-            while (elapsed < seconds)
-            {
-                yield return new WaitForFixedUpdate();
-                elapsed += Time.fixedDeltaTime;
-                onFixedStep?.Invoke();
-            }
         }
 
         private sealed class HeadingChangeAccumulator

@@ -3,8 +3,7 @@
          noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/DesignSystem/Resources/UI/Styles/DesignSystem/DesignSystem.uss"/>
     <Style src="ShipStatusPanel.uss"/>
-    <ui:Template name="pauseOverlayTemplate" src="project://database/Assets/Scripts/UI/Common/PauseOverlay.uxml"/>
-    <ui:Template name="settingsOverlayTemplate" src="project://database/Assets/Scripts/UI/Common/SettingsOverlay.uxml"/>
+
     <ui:VisualElement name="main-hud-root" class="main-hud-root">
         <ui:VisualElement class="hud-top-bar">
             <uic:ChildAnnotator name="hud-weapons-cluster" class="hud-weapons-cluster">
@@ -35,18 +34,6 @@
         <ui:VisualElement name="speed-readout" class="hud-speed-readout">
             <ui:Label text="SPEED" class="ds-caption hud-speed-caption"/>
             <ui:Label name="speed-value-label" text="0.0" class="ds-h3 hud-speed-value"/>
-        </ui:VisualElement>
-
-        <ui:VisualElement name="pause-overlay-host"
-                          style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; display: none;">
-            <ui:Instance template="pauseOverlayTemplate"
-                         style="position: absolute; left: 0; right: 0; top: 0; bottom: 0;"/>
-        </ui:VisualElement>
-
-        <ui:VisualElement name="settings-overlay-host"
-                          style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; display: none;">
-            <ui:Instance template="settingsOverlayTemplate"
-                         style="position: absolute; left: 0; right: 0; top: 0; bottom: 0;"/>
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

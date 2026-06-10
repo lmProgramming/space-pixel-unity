@@ -28,6 +28,8 @@ namespace Ships.Tests
                     config.crewNeeded, config.mainSkill);
             }
 
+            Container.InjectGameObject(shipGo);
+
             return ModuleFactory.WireShip<Ship>(shipGo, Container);
         }
 

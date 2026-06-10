@@ -93,6 +93,12 @@ namespace Ships.Tests
                     LocalPosition = new Vector2(0f, -5f),
                     LocalRotationZ = 0f,
                     MaxThrust = 10f
+                },
+                new EngineSpec
+                {
+                    LocalPosition = new Vector2(0f, 5f),
+                    LocalRotationZ = 0f,
+                    MaxThrust = 10f
                 });
 
             yield return WaitForLifecycle();
@@ -142,6 +148,8 @@ namespace Ships.Tests
             }).ToList();
 
             var ship = ModuleFactory.WireShip<ShipTestProxy>(shipGo, Container);
+
+            Container.InjectGameObject(shipGo);
 
             return (ship, engines);
         }
