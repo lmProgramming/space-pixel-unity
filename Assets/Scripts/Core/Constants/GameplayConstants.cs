@@ -9,5 +9,7 @@ namespace Core.Constants
         ///     of its starting pixel count.
         /// </summary>
         public const float ModuleDestroyedBelowPixelRatio = 0.15f;
+
+        public const float ChanceOfSpawningExplosionOnDetachingConnectionPoint = 0.1f;
     }
 }

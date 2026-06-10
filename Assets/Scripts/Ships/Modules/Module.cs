@@ -8,7 +8,9 @@ using Core.Ship;
 using LMPro;
 using Pixelation;
 using UnityEngine;
+using Zenject;
 using ZLinq;
+using Random = UnityEngine.Random;
 using Resources = Core.Ship.Resources;
 
 [assembly: InternalsVisibleTo("Editor.InspectorExtensions")]
@@ -32,6 +34,9 @@ namespace Ships.Modules
         private readonly Dictionary<Module, FixedJoint2D> _connections = new();
 
         private float _crewAppropriateSkillSum;
+
+        [Inject]
+        private IEffectsSpawner _effectsSpawner;
 
         protected List<CrewMember> AliveCrew { get; private set; }
 
@@ -358,7 +363,17 @@ namespace Ships.Modules
                 if (otherModule) otherModule.RemoveConnectionTo(this);
             }
 
+            SpawnExplosionsOnDetachment(_connectionPoints);
+
             _connectionPoints.Clear();
+        }
+
+        private void SpawnExplosionsOnDetachment(Dictionary<Module, List<Vector2Int>> connectionPoints)
+        {
+            foreach (var worldPos in from connectionPoint in connectionPoints.AsValueEnumerable()
+                     where Random.value < GameplayConstants.ChanceOfSpawningExplosionOnDetachingConnectionPoint
+                     select PixelatedRigidbody.LocalToWorldPoint(connectionPoint.Value[0]))
+                _effectsSpawner.SpawnExplosion(worldPos);
         }
 
         private void RemoveConnectionTo(Module otherModule)

@@ -93,6 +93,14 @@ namespace E2E
             Container.Bind<ShipInitializeModulesEventChannel>().FromInstance(shipInitializeModulesEventChannel)
                 .AsSingle();
 
+            var effectsSpawnerGo = new GameObject("EffectsSpawner");
+            CreatedObjects.Add(effectsSpawnerGo);
+            effectsSpawnerGo.SetActive(false);
+            var effectsSpawner = effectsSpawnerGo.AddComponent<EffectsSpawner>();
+            effectsSpawner.SetupForTesting(GetExplosionPrefab(), _testRoot.transform, Instantiator);
+            effectsSpawnerGo.SetActive(true);
+            Container.Bind<IEffectsSpawner>().FromInstance(effectsSpawner).AsSingle();
+
             InjectAllObjectsInScene(Container);
         }
 
@@ -132,7 +140,7 @@ namespace E2E
         }
 
         protected AIShip CreateAIShip(string name, Team team, Vector2 position, bool withWeapons = true,
-            GameObject bulletPrefab = null, bool withEngines = false)
+            bool withEngines = false)
         {
             var shipGo = ModuleFactory.CreateGameObject(name, CreatedObjects);
             shipGo.layer = team.Layer;
@@ -157,7 +165,9 @@ namespace E2E
                     CreatedObjects, engineMaxThrust, modulePixelSize, modulePixelSize, gimbalRange: 180f);
             }
 
-            if (withWeapons && bulletPrefab != null)
+            var bulletPrefab = GetBulletPrefab();
+
+            if (withWeapons)
             {
                 // Weapon (Cannon)
                 var cannonGo = ModuleFactory.CreateModuleBase("Cannon", shipGo.transform,
@@ -201,6 +211,13 @@ namespace E2E
             var asteroidPrefab = UnityEngine.Resources.Load<GameObject>("Tests/Prefabs/Asteroid");
 
             return asteroidPrefab;
+        }
+
+        private static GameObject GetExplosionPrefab()
+        {
+            var explosionPrefab = UnityEngine.Resources.Load<GameObject>("Tests/Prefabs/Explosion");
+
+            return explosionPrefab;
         }
 
         protected void CreateObstacleBox(Vector3 position, Vector2 size)

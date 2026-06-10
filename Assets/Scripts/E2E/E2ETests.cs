@@ -66,10 +66,9 @@ namespace E2E
 
             var team1 = CreateTeam("Team1", PhysicsLayers.Friendly);
             var team2 = CreateTeam("Team2", PhysicsLayers.Enemy);
-            var bulletPrefab = GetBulletPrefab();
 
-            var ship1 = CreateAIShip("Ship1", team1, Vector2.zero, true, bulletPrefab, true);
-            var ship2 = CreateAIShip("Ship2", team2, new Vector2(25f, -25f), true, bulletPrefab, true);
+            var ship1 = CreateAIShip("Ship1", team1, Vector2.zero, true, true);
+            var ship2 = CreateAIShip("Ship2", team2, new Vector2(25f, -25f), true, true);
 
             yield return WaitForLifecycle();
 
@@ -108,13 +107,12 @@ namespace E2E
 
             var teamA = CreateTeam("TeamA", PhysicsLayers.Friendly);
             var teamB = CreateTeam("TeamB", PhysicsLayers.Enemy);
-            var bulletPrefab = GetBulletPrefab();
 
-            var shipB = CreateAIShip("ShipB", teamB, Vector2.zero, true, bulletPrefab, true);
+            var shipB = CreateAIShip("ShipB", teamB, Vector2.zero, true, true);
 
-            var shipA1 = CreateAIShip("ShipA1", teamA, new Vector2(25f, 30f), true, bulletPrefab, true);
-            var shipA2 = CreateAIShip("ShipA2", teamA, new Vector2(25f, -40f), true, bulletPrefab, true);
-            var shipA3 = CreateAIShip("ShipA3", teamA, new Vector2(30f, 0f), true, bulletPrefab, true);
+            var shipA1 = CreateAIShip("ShipA1", teamA, new Vector2(25f, 30f), true, true);
+            var shipA2 = CreateAIShip("ShipA2", teamA, new Vector2(25f, -40f), true, true);
+            var shipA3 = CreateAIShip("ShipA3", teamA, new Vector2(30f, 0f), true, true);
 
             yield return WaitForLifecycle();
 
@@ -198,10 +196,9 @@ namespace E2E
 
             var team1 = CreateTeam("Team1", PhysicsLayers.Friendly);
             var team2 = CreateTeam("Team2", PhysicsLayers.Enemy);
-            var bulletPrefab = GetBulletPrefab();
 
-            CreateAIShip("ShooterShip", team1, Vector2.zero, true, bulletPrefab);
-            var targetShip = CreateAIShip("TargetShip", team2, new Vector2(20f, 0f), false, bulletPrefab);
+            CreateAIShip("ShooterShip", team1, Vector2.zero);
+            var targetShip = CreateAIShip("TargetShip", team2, new Vector2(20f, 0f), false);
             var targetGo = targetShip.gameObject;
 
             CreateObstacleBox(Vector2.zero,
