@@ -2,7 +2,7 @@ namespace Core.Constants
 {
     public static class GameplayConstants
     {
-        public const float PixelDamageMultiplier = 0.91f;
+        public const float PixelDamageMultiplier = 0.15f;
 
         /// <summary>
         ///     A module is destroyed outright once its remaining pixels drop below this fraction

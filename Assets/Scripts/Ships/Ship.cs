@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Core.Constants;
-using Core.Gameplay.Combat;
 using Core.Gameplay.EasyTeam;
 using Core.Pixelation;
 using Core.Services;
@@ -91,11 +90,13 @@ namespace Ships
             set => _moduleConnectionFactory = value;
         }
 
-        public List<IWeapon> Weapons =>
-            _modulesDictionary[ModuleType.Weapon].AsValueEnumerable().Cast<IWeapon>().ToList();
+        public List<WeaponBase> Weapons =>
+            _modulesDictionary[ModuleType.Weapon].AsValueEnumerable().Cast<WeaponBase>().Where(e => e.IsAliveEnabled())
+                .ToList();
 
         public List<Engine> Engines =>
-            _modulesDictionary[ModuleType.Engine].AsValueEnumerable().Cast<Engine>().ToList();
+            _modulesDictionary[ModuleType.Engine].AsValueEnumerable().Cast<Engine>().Where(e => e.IsAliveEnabled())
+                .ToList();
 
         public ResourceManager ResourceManager { get; private set; }
 

@@ -98,8 +98,6 @@ MonoBehaviour:
   testInScene: 0
   meshRenderer: {fileID: 3119385306897686704}
   starBackgroundMaterial: {fileID: 2100000, guid: 00532ff5d5cd1034a9b271e25a528b19, type: 2}
-  playerTransform: {fileID: 0}
-  mainCamera: {fileID: 519242347640311945}
   parallaxStrength: 0.01
   backgroundColor: {r: 0, g: 0, b: 0, a: 1}
   gradientColor1: {r: 0.5, g: 0, b: 1, a: 1}
@@ -162,7 +160,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3701483033304711277}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -1.5, y: -1.2, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -236,12 +234,13 @@ MonoBehaviour:
   objectToFollow: {fileID: 0}
   forcedToFollowCurrentObject: 1
   followRotation: 0
-  dragSpeed: 1
-  keySpeed: 1
-  scrollSpeed: 80
+  dragSpeed: 0.002
+  keySpeed: 10
+  scrollSpeed: 160
   mobileScrollSpeed: 1
-  maxZoom: 400
-  minZoom: 30
+  maxZoom: 800
+  minZoom: 60
+  canZoomOnUI: 1
   updateCamera: 1
 --- !u!114 &5011457546750079670
 MonoBehaviour:
