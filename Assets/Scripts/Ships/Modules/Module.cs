@@ -75,7 +75,7 @@ namespace Ships.Modules
                 Debug.LogError("PixelatedRigidbody not found on Module!", this);
         }
 
-        private void OnDestroy()
+        protected virtual void OnDestroy()
         {
             if (PixelatedRigidbody != null) PixelatedRigidbody.OnPixelsLost -= CheckCohesion;
 

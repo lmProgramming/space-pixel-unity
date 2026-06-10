@@ -72,9 +72,11 @@ namespace Ships.Modules
         }
 #endif
 
-        private void OnDestroy()
+        protected override void OnDestroy()
         {
             SetActive(false);
+
+            base.OnDestroy();
         }
 
 #if UNITY_INCLUDE_TESTS

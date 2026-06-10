@@ -438,6 +438,8 @@ namespace Ships
                 {
                     Debug.LogWarning($"[Ship] Engine {engine.name} has null Transform. Skipping thruster rotation.",
                         this);
+                    desiredDirectionPerEngine[i] = Vector2.zero;
+                    engine.SetCurrentThrust(0f);
                     continue;
                 }
 
@@ -455,7 +457,7 @@ namespace Ships
             {
                 var engine = engines[i];
 
-                if (engine.MaxThrust <= 0f)
+                if (!engine.IsAliveEnabled() || engine.MaxThrust <= 0f)
                 {
                     engine.SetCurrentThrust(0f);
                     continue;

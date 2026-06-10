@@ -89,7 +89,7 @@ namespace Ships
         {
             if (!CommandModule.Transform)
             {
-                Debug.LogWarning("[ShipSnapshotService] Cannot compute navigation inputs when transform is null");
+                Debug.LogWarning("[AIShip] Cannot compute navigation inputs when transform is null");
                 return;
             }
 

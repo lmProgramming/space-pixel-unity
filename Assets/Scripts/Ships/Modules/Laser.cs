@@ -74,13 +74,15 @@ namespace Ships.Modules
             _reloadTimer.Progress(Time.deltaTime * ShipModuleEfficiency);
         }
 
-        private void OnDestroy()
+        protected override void OnDestroy()
         {
             StopFiringCleanup();
 
             if (_reloadTimer == null) return;
             _reloadTimer.OnReady -= HandleReady;
             _reloadTimer.OnNotReady -= HandleNotReady;
+
+            base.OnDestroy();
         }
 
         public override void Shoot()

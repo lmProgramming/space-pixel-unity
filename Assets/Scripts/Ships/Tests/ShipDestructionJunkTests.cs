@@ -63,6 +63,7 @@ namespace Ships.Tests
 
             Assert.IsTrue(shipGo == null, "Ship should be destroyed with its command module");
             Assert.IsTrue(otherGo != null, "Surviving module should be released as junk, not destroyed");
+            // comparing to null because map parent is null
             Assert.IsTrue(otherGo.transform.parent == null,
                 "Junk module must be deparented to the map before the ship is destroyed");
 
