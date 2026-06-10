@@ -64,6 +64,7 @@ namespace Ships
         {
             _aiShipStateMachine.Tick(Time.deltaTime);
             PendingForwardInput = 0f;
+            PendingHorizontalInput = 0f;
             PendingTurnInput = 0f;
             _pendingEnginesActive = false;
 
@@ -82,7 +83,7 @@ namespace Ships
                 return;
             }
 
-            MarkEnginesActivity(ApplyEngineForces(PendingForwardInput, PendingTurnInput, Time.fixedDeltaTime, true));
+            MarkEnginesActivity(ApplyEngineForces(PendingForwardInput, 0, PendingTurnInput, Time.fixedDeltaTime, true));
         }
 
         private void ComputeNavigationInputs(Vector2 targetPosition)

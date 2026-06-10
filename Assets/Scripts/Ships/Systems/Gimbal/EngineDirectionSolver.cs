@@ -15,21 +15,28 @@ namespace Ships.Systems.Gimbal
             return Mathf.Max(maxLeverArm, 0.01f);
         }
 
+        public static Vector2 GetShipRight(Vector2 shipForward)
+        {
+            return new Vector2(shipForward.y, -shipForward.x);
+        }
+
         public static Vector2 GetDesiredEngineDirection(Vector2 shipForward, Vector2 centerOfMass, float maxLeverArm,
-            Engine engine, float forwardInput, float turnInput)
+            Engine engine, float forwardInput, float horizontalInput, float turnInput)
         {
             var lever = engine.WorldThrustPoint - centerOfMass;
             var rotationalDirection = new Vector2(-lever.y, lever.x) / maxLeverArm;
-            return shipForward * forwardInput + rotationalDirection * turnInput;
+            return shipForward * forwardInput + GetShipRight(shipForward) * horizontalInput +
+                   rotationalDirection * turnInput;
         }
 
         public static float EstimateNetTorqueForTurnInput(IReadOnlyList<Engine> engines, Vector2 shipForward,
-            Vector2 centerOfMass, float maxLeverArm, float forwardInput, float turnInput)
+            Vector2 centerOfMass, float maxLeverArm, float forwardInput, float horizontalInput, float turnInput)
         {
             return (from engine in engines.AsValueEnumerable()
                 where !(engine.MaxThrust <= 0f)
                 let desiredDirection =
-                    GetDesiredEngineDirection(shipForward, centerOfMass, maxLeverArm, engine, forwardInput, turnInput)
+                    GetDesiredEngineDirection(shipForward, centerOfMass, maxLeverArm, engine, forwardInput,
+                        horizontalInput, turnInput)
                 where !(desiredDirection.sqrMagnitude <= Mathf.Epsilon)
                 let thrust = Mathf.Clamp01(desiredDirection.magnitude) * engine.MaxThrust
                 let force = desiredDirection.normalized * thrust

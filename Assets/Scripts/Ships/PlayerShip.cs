@@ -30,7 +30,8 @@ namespace Ships
                 ToggleSas();
 
             PendingForwardInput = Input.GetAxis("Vertical") * speedMultiplier;
-            PendingTurnInput = -Input.GetAxis("Horizontal") * rotationMultiplier;
+            PendingHorizontalInput = Input.GetAxis("Horizontal") * speedMultiplier;
+            PendingTurnInput = -Input.GetAxis("Roll") * rotationMultiplier;
         }
 
         protected override void ApplyMovementPhysics()
@@ -41,7 +42,8 @@ namespace Ships
                 return;
             }
 
-            MarkEnginesActivity(ApplyEngineForces(PendingForwardInput, PendingTurnInput, Time.fixedDeltaTime,
+            MarkEnginesActivity(ApplyEngineForces(PendingForwardInput, PendingHorizontalInput, PendingTurnInput,
+                Time.fixedDeltaTime,
                 sasEnabled));
         }
 
