@@ -118,7 +118,7 @@ Rigidbody2D:
   m_Mass: 358
   m_LinearDamping: 0.1
   m_AngularDamping: 0.05
-  m_GravityScale: 1
+  m_GravityScale: 0
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -224,8 +224,8 @@ MonoBehaviour:
   mainSkillType: 0
   assignedCrew: []
   <Resources>k__BackingField:
-    energyCapacity: 0
-    energyDraw: 0
+    energyCapacity: 480
+    energyDraw: 120
     energyProduction: 0
-    crewNeeded: 0
+    crewNeeded: 7
     crewQuarters: 0

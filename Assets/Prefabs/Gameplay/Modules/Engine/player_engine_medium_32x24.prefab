@@ -33,7 +33,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 4813688881374398587}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!60 &4638710162475984368
@@ -118,7 +119,7 @@ Rigidbody2D:
   m_Mass: 627
   m_LinearDamping: 0.1
   m_AngularDamping: 0.05
-  m_GravityScale: 1
+  m_GravityScale: 0
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -225,12 +226,84 @@ MonoBehaviour:
   assignedCrew: []
   <Resources>k__BackingField:
     energyCapacity: 0
-    energyDraw: 0
+    energyDraw: 500
     energyProduction: 0
     crewNeeded: 0
     crewQuarters: 0
-  maxThrust: 0
+  maxThrust: 5
   maxGimbalAngle: 180
   gimbalSpeed: 240
-  exhaustParticles: {fileID: 0}
+  exhaustParticles: {fileID: 2342312639184178140}
   currentThrustRatioForDebug: 0
+  currentGimbalAngle: 0
+  desiredGimbalAngleForDebug: 0
+  drawGimbalGizmos: 1
+  gizmoArcRadius: 1.5
+  gizmoThrustUnitsPerNewton: 0.0025
+--- !u!1001 &7158473369063096505
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1803603195947370616}
+    m_Modifications:
+    - target: {fileID: 2420026271712413890, guid: f4f8a9b261b845c9191125c9572d5247, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.6
+      objectReference: {fileID: 0}
+    - target: {fileID: 2420026271712413890, guid: f4f8a9b261b845c9191125c9572d5247, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -9
+      objectReference: {fileID: 0}
+    - target: {fileID: 2420026271712413890, guid: f4f8a9b261b845c9191125c9572d5247, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2420026271712413890, guid: f4f8a9b261b845c9191125c9572d5247, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2420026271712413890, guid: f4f8a9b261b845c9191125c9572d5247, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2420026271712413890, guid: f4f8a9b261b845c9191125c9572d5247, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2420026271712413890, guid: f4f8a9b261b845c9191125c9572d5247, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2420026271712413890, guid: f4f8a9b261b845c9191125c9572d5247, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2420026271712413890, guid: f4f8a9b261b845c9191125c9572d5247, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2420026271712413890, guid: f4f8a9b261b845c9191125c9572d5247, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3462669467172030845, guid: f4f8a9b261b845c9191125c9572d5247, type: 3}
+      propertyPath: m_Name
+      value: EngineExhaustParticleSystem
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: f4f8a9b261b845c9191125c9572d5247, type: 3}
+--- !u!198 &2342312639184178140 stripped
+ParticleSystem:
+  m_CorrespondingSourceObject: {fileID: 4889098804103646053, guid: f4f8a9b261b845c9191125c9572d5247, type: 3}
+  m_PrefabInstance: {fileID: 7158473369063096505}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &4813688881374398587 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2420026271712413890, guid: f4f8a9b261b845c9191125c9572d5247, type: 3}
+  m_PrefabInstance: {fileID: 7158473369063096505}
+  m_PrefabAsset: {fileID: 0}

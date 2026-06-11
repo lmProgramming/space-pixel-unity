@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 
 namespace Core.Ship
 {
@@ -9,7 +10,9 @@ namespace Core.Ship
         public float energyDraw;
         public float energyProduction;
 
+        [Range(0, 30)]
         public int crewNeeded;
+
         public int crewQuarters;
 
         public Resources(float energyCapacity, float energyDraw, int crewNeeded, float energyProduction,
