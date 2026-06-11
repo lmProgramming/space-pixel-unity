@@ -17,10 +17,6 @@ namespace Ships.Modules
         private const float ReloadEnergyMultiplier = 0.5f;
         private const float FiringEnergyMultiplier = 2f;
 
-        [Header("Laser Settings")]
-        [SerializeField]
-        private LineRenderer lineRenderer;
-
         [SerializeField] private float beamRange = 20f;
 
         [SerializeField] private float maxFireDuration = 1.5f;
@@ -43,6 +39,9 @@ namespace Ships.Modules
         private CancellationTokenSource _fireCts;
         private bool _isFiring;
 
+        [Header("Laser Settings")]
+        private LineRenderer _lineRenderer;
+
         private ManualTimer _reloadTimer;
         public override ModuleType Type => ModuleType.Weapon;
 
@@ -52,17 +51,17 @@ namespace Ships.Modules
 
             Type = ModuleType.Weapon;
 
-            if (lineRenderer == null) lineRenderer = GetComponent<LineRenderer>();
-            if (lineRenderer == null)
+            _lineRenderer = GetComponent<LineRenderer>();
+            if (_lineRenderer == null)
             {
                 Debug.LogError($"LaserBeam on {gameObject.name} requires a LineRenderer component.", this);
                 enabled = false;
                 return;
             }
 
-            lineRenderer.positionCount = 2;
-            lineRenderer.useWorldSpace = true;
-            lineRenderer.enabled = false;
+            _lineRenderer.positionCount = 2;
+            _lineRenderer.useWorldSpace = true;
+            _lineRenderer.enabled = false;
 
             _reloadTimer = new ManualTimer(reloadTime);
             _reloadTimer.OnReady += HandleReady;
@@ -153,10 +152,10 @@ namespace Ships.Modules
         private void StartShooting()
         {
             if (!IsReady()) return;
-            if (!lineRenderer) return;
+            if (!_lineRenderer) return;
 
             _isFiring = true;
-            lineRenderer.enabled = true;
+            _lineRenderer.enabled = true;
             HandleNotReady();
 
             _fireCts?.Cancel();
@@ -170,8 +169,8 @@ namespace Ships.Modules
         {
             _isFiring = false;
 
-            if (lineRenderer)
-                lineRenderer.enabled = false;
+            if (_lineRenderer)
+                _lineRenderer.enabled = false;
 
             _fireCts?.Cancel();
             _fireCts?.Dispose();
@@ -212,13 +211,13 @@ namespace Ships.Modules
                     var direction = (attackPosition - origin).normalized;
                     var endPoint = origin + direction * beamRange;
 
-                    lineRenderer.SetPosition(0, origin);
+                    _lineRenderer.SetPosition(0, origin);
 
                     var hit = RaycastIgnoringOwnColliders(origin, direction);
 
                     if (hit.collider)
                     {
-                        lineRenderer.SetPosition(1, hit.point);
+                        _lineRenderer.SetPosition(1, hit.point);
 
                         var pixelatedRigidbody = hit.collider.GetComponent<PixelatedRigidbody>();
 
@@ -231,7 +230,7 @@ namespace Ships.Modules
                     }
                     else
                     {
-                        lineRenderer.SetPosition(1, endPoint);
+                        _lineRenderer.SetPosition(1, endPoint);
                     }
 
                     await UniTask.Yield(PlayerLoopTiming.Update, token);
