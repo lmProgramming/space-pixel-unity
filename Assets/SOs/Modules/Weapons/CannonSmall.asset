@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5bc99cc63f8d46b09bca4c524b363a17, type: 3}
   m_Name: CannonSmall
   m_EditorClassIdentifier: ShipFactory::ShipFactory.ShipModuleSO
-  prefab: {fileID: 6490113426591430972, guid: df9e11043fe6e86e0b26fc5dbb972a26, type: 3}
-  archetypeId: small_cannon_16
-  dimensions: {x: 16, y: 16}
+  prefab: {fileID: 198685744111549510, guid: f563a399ee2481b108fad90eec2c0ee0, type: 3}
+  archetypeId: medium_cannon
+  dimensions: {x: 24, y: 24}
   partName: Small cannon
   description: Sturdy engine

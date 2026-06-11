@@ -16,14 +16,24 @@ MonoBehaviour:
   - moduleType: 0
     prefabs:
     - {fileID: 11400000, guid: 52a35855919b54b6ebba328fbd66afea, type: 2}
-    - {fileID: 11400000, guid: 52a35855919b54b6ebba328fbd66afea, type: 2}
+    - {fileID: 11400000, guid: 32b8dffb9ec15d1ea974e36cb645ef2d, type: 2}
   - moduleType: 3
     prefabs:
     - {fileID: 11400000, guid: c67b1840233bb621b94521f12654d026, type: 2}
+    - {fileID: 11400000, guid: 67cdcd7c26a1fddf9b30ab954fb20076, type: 2}
+    - {fileID: 11400000, guid: 91d6fe31099eacf419ce262b88a6a0cc, type: 2}
+    - {fileID: 11400000, guid: 42d00eb1495e2b7429ab3a6be3b44af7, type: 2}
   - moduleType: 1
     prefabs:
+    - {fileID: 11400000, guid: 4ce54f2d0713a43fea17d5098190edc1, type: 2}
+    - {fileID: 11400000, guid: 174d280cbb26840c084adc8f9c7d1835, type: 2}
     - {fileID: 11400000, guid: c3a3a47eac934d71bb106f314739c1f8, type: 2}
+    - {fileID: 11400000, guid: 6d31f39b4f0ba0922a85986faefc3485, type: 2}
+    - {fileID: 11400000, guid: d68ef6ed398c00e88b15f8da2af35c28, type: 2}
   - moduleType: 2
     prefabs:
     - {fileID: 11400000, guid: 6b7ca647b20a011f58fb83f990925d7f, type: 2}
     - {fileID: 11400000, guid: fbac253c3da8ebf898b99b5a0dc95e51, type: 2}
+    - {fileID: 11400000, guid: 9b8fc6ba909176791865840701e2a2fd, type: 2}
+    - {fileID: 11400000, guid: 79d36055b7c3f4ff5a997b8d060ba9d2, type: 2}
+    - {fileID: 11400000, guid: b926d1c8443568f3384778e93db1530f, type: 2}

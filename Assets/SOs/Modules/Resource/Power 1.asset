@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5bc99cc63f8d46b09bca4c524b363a17, type: 3}
-  m_Name: Power
+  m_Name: Power 1
   m_EditorClassIdentifier: ShipFactory::ShipFactory.ShipModuleSO
-  prefab: {fileID: 5524322175022426819, guid: 6d9d2e8683e3c5bfdbd61384d631c549, type: 3}
-  archetypeId: small_power
-  dimensions: {x: 16, y: 16}
-  partName: Power
+  prefab: {fileID: 9215442048897650428, guid: e0456dcf4377807dea42c25981f3c3ff, type: 3}
+  archetypeId: medium_power
+  dimensions: {x: 24, y: 16}
+  partName: Power mk2
   description: Sturdy power
