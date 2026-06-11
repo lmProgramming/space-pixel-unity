@@ -1,7 +1,7 @@
 using Core.Ship;
 using Ships.Modules;
 
-namespace Ships.Tests.TestHelpers
+namespace Ships.Tests.TestHelpers.Modules
 {
     public class TestModule : Module
     {

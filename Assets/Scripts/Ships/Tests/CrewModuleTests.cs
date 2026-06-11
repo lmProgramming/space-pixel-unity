@@ -1,11 +1,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Reflection;
 using Core.Ship;
 using NSubstitute;
 using NUnit.Framework;
-using Ships.Tests.TestHelpers;
+using Ships.Tests.TestHelpers.Factories;
+using Ships.Tests.TestHelpers.Fixtures;
+using Ships.Tests.TestHelpers.Modules;
 using UnityEngine;
 using UnityEngine.TestTools;
 using Object = UnityEngine.Object;
@@ -35,12 +36,6 @@ namespace Ships.Tests
             module.SetShip(ship);
 
             return module;
-        }
-
-        private static Delegate GetOnDiedDelegate(CrewMember crew)
-        {
-            var field = typeof(CrewMember).GetField("OnDied", BindingFlags.Instance | BindingFlags.NonPublic);
-            return field?.GetValue(crew) as Delegate;
         }
 
         [Test]
@@ -536,7 +531,7 @@ namespace Ships.Tests
 
             module.KillAllCrew();
 
-            Assert.IsNull(GetOnDiedDelegate(crew),
+            Assert.AreEqual(0, crew.OnDiedSubscriberCountForTesting,
                 "Module should have unsubscribed from OnDied after KillAllCrew");
         }
 
@@ -577,7 +572,7 @@ namespace Ships.Tests
 
             module.RemoveCrew(crew);
 
-            Assert.IsNull(GetOnDiedDelegate(crew),
+            Assert.AreEqual(0, crew.OnDiedSubscriberCountForTesting,
                 "Module should have unsubscribed from OnDied after RemoveCrew");
         }
 
@@ -594,9 +589,9 @@ namespace Ships.Tests
 
             module.KillRandomCrew(3);
 
-            Assert.IsNull(GetOnDiedDelegate(crew1), "crew1 OnDied should have no subscribers");
-            Assert.IsNull(GetOnDiedDelegate(crew2), "crew2 OnDied should have no subscribers");
-            Assert.IsNull(GetOnDiedDelegate(crew3), "crew3 OnDied should have no subscribers");
+            Assert.AreEqual(0, crew1.OnDiedSubscriberCountForTesting, "crew1 OnDied should have no subscribers");
+            Assert.AreEqual(0, crew2.OnDiedSubscriberCountForTesting, "crew2 OnDied should have no subscribers");
+            Assert.AreEqual(0, crew3.OnDiedSubscriberCountForTesting, "crew3 OnDied should have no subscribers");
         }
     }
 }

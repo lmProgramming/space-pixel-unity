@@ -15,7 +15,8 @@ using Ships;
 using Ships.ModuleConnection;
 using Ships.Modules;
 using Ships.Systems.Sensing;
-using Ships.Tests.TestHelpers;
+using Ships.Tests.TestHelpers.Factories;
+using Ships.Tests.TestHelpers.Mocks;
 using UnityEngine;
 using Zenject;
 using ZLinq;
@@ -142,7 +143,7 @@ namespace E2E
         protected AIShip CreateAIShip(string name, Team team, Vector2 position, bool withWeapons,
             bool withEngines)
         {
-            var shipGo = ModuleFactory.CreateGameObject(name, CreatedObjects);
+            var shipGo = ModuleFactory.CreateGameObject(name, CreatedObjects, Container);
             shipGo.layer = team.Layer;
             shipGo.transform.position = position;
 

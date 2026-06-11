@@ -1,13 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
-using Core.Ship;
 using NUnit.Framework;
 using Pixelation;
-using Ships.Modules;
-using Ships.Tests.TestHelpers;
+using Ships.Tests.TestHelpers.Factories;
+using Ships.Tests.TestHelpers.Fixtures;
 using UnityEngine;
 using UnityEngine.TestTools;
-using Module = Ships.Modules.Module;
 
 namespace Ships.Tests
 {
@@ -22,26 +20,6 @@ namespace Ships.Tests
     {
         private const int ModuleSize = 5;
 
-        private (Ship ship, Module command, Module other) CreateTwoModuleShip()
-        {
-            var shipGo = ModuleFactory.CreateGameObject("TestShip", CreatedObjects);
-
-            var commandGo = ModuleFactory.CreateModuleBase("Command", shipGo.transform, Vector2.zero, 0f,
-                Container, CreatedObjects, ModuleSize, ModuleSize);
-            var command = commandGo.AddComponent<Command>();
-
-            var otherGo = ModuleFactory.CreateModuleBase("Module2", shipGo.transform, new Vector2(ModuleSize, 0), 0f,
-                Container, CreatedObjects, ModuleSize, ModuleSize);
-            var other = otherGo.AddComponent<TestModule>();
-            other.SetModuleType(ModuleType.Resources);
-
-            var ship = ModuleFactory.WireShip<Ship>(shipGo, Container);
-
-            Container.InjectGameObject(shipGo);
-
-            return (ship, command, other);
-        }
-
         private static List<Vector2Int> AllPixels()
         {
             var pixels = new List<Vector2Int>();
@@ -54,7 +32,8 @@ namespace Ships.Tests
         [UnityTest]
         public IEnumerator CommandModuleDestroyed_SurvivingModuleBecomesEnabledJunk()
         {
-            var (ship, command, other) = CreateTwoModuleShip();
+            var (ship, command, other) =
+                ShipTestFactory.CreateTwoModuleShip(Container, CreatedObjects);
             yield return WaitForLifecycle();
 
             var shipGo = ship.gameObject;

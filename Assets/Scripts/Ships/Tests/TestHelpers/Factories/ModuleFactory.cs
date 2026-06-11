@@ -1,12 +1,14 @@
 using System.Collections.Generic;
+using Core.Ship;
 using Pixelation;
 using Ships.ModuleConnection;
 using Ships.Modules;
 using Ships.Systems.Resources;
+using Ships.Tests.TestHelpers.Modules;
 using UnityEngine;
 using Zenject;
 
-namespace Ships.Tests.TestHelpers
+namespace Ships.Tests.TestHelpers.Factories
 {
     public static class ModuleFactory
     {
@@ -35,7 +37,7 @@ namespace Ships.Tests.TestHelpers
             var engineGo = CreateModuleBase("Engine", parent, localPosition, localRotationZ, container, createdObjects,
                 modulePixelWidth, modulePixelHeight);
 
-            var particleRoot = CreateGameObject("EngineExhaust", createdObjects);
+            var particleRoot = CreateGameObject("EngineExhaust", createdObjects, container);
             particleRoot.transform.SetParent(engineGo.transform, false);
             particleRoot.AddComponent<ParticleSystem>();
 
@@ -47,7 +49,7 @@ namespace Ships.Tests.TestHelpers
             float localRotationZ, DiContainer container, ICollection<GameObject> createdObjects,
             int modulePixelWidth, int modulePixelHeight)
         {
-            var moduleGo = CreateGameObject(name, createdObjects);
+            var moduleGo = CreateGameObject(name, createdObjects, container);
             moduleGo.transform.SetParent(parent);
             moduleGo.transform.localPosition = localPosition;
             moduleGo.transform.localRotation = Quaternion.Euler(0f, 0f, localRotationZ);
@@ -97,11 +99,25 @@ namespace Ships.Tests.TestHelpers
             return ship;
         }
 
-        public static GameObject CreateGameObject(string name, ICollection<GameObject> createdObjects)
+        public static GameObject CreateGameObject(string name, ICollection<GameObject> createdObjects,
+            DiContainer container)
         {
             var go = new GameObject(name);
             createdObjects.Add(go);
+            container.Inject(go);
             return go;
+        }
+
+        public static Command AddCommandModuleComponent(GameObject moduleGo)
+        {
+            return moduleGo.AddComponent<Command>();
+        }
+
+        public static TestModule AddTestModuleComponent(GameObject moduleGo, ModuleType type = ModuleType.Resources)
+        {
+            var testModule = moduleGo.AddComponent<TestModule>();
+            testModule.SetModuleType(type);
+            return testModule;
         }
     }
 }

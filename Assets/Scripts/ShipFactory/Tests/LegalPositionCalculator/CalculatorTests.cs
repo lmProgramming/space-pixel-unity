@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Reflection;
 using Core.Ship;
 using NSubstitute;
 using NUnit.Framework;
@@ -81,24 +79,12 @@ namespace ShipFactory.Tests.LegalPositionCalculator
             var moduleSO = ScriptableObject.CreateInstance<ShipModuleSO>();
             _createdObjects.Add(moduleSO);
 
-            SetPrivateField(moduleSO, "partName", name);
-            SetPrivateField(moduleSO, "description", $"{name} description");
-            SetPrivateField(moduleSO, "dimensions", dimensions);
-            SetPrivateField(moduleSO, "prefab", go);
+            moduleSO.ConfigureForTesting(name, $"{name} description", dimensions, go);
 
             var module = Substitute.For<IModule>();
             module.Type.Returns(moduleType);
 
             return new ShipModuleSOInstanceBundle(go, moduleSO, module);
-        }
-
-        private static void SetPrivateField(object target, string fieldName, object value)
-        {
-            var field = target.GetType().GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic);
-            if (field == null)
-                throw new InvalidOperationException($"Field '{fieldName}' not found on {target.GetType().Name}.");
-
-            field.SetValue(target, value);
         }
     }
 }

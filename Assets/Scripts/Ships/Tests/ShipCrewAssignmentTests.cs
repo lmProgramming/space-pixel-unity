@@ -2,63 +2,38 @@ using System.Collections;
 using System.Collections.Generic;
 using Core.Ship;
 using NUnit.Framework;
-using Ships.Modules;
-using Ships.Tests.TestHelpers;
+using Ships.Tests.TestHelpers.Factories;
+using Ships.Tests.TestHelpers.Fixtures;
 using UnityEngine;
 using UnityEngine.TestTools;
+using Zenject;
 using ZLinq;
-using Resources = Core.Ship.Resources;
 
 namespace Ships.Tests
 {
     [TestFixture]
     public class ShipCrewAssignmentTests : ShipTestBase
     {
-        private Ship CreateShipWithModules(params (int crewNeeded, CrewSkillType mainSkill)[] moduleConfigs)
+        private static Ship BuildShipWithCrewModules(DiContainer container, ICollection<GameObject> createdObjects,
+            params (int crewNeeded, CrewSkillType mainSkill)[] moduleConfigs)
         {
-            var shipGo = ModuleFactory.CreateGameObject("TestShip", CreatedObjects);
-
-            CreateModule("Command", shipGo.transform, Vector2.zero, 5, 5, true, 0, CrewSkillType.Navigation);
+            var builder = ShipTestBuilder.CreateShip(container, createdObjects)
+                .WithCommand("Command", Vector2.zero, 5, 5);
 
             for (var i = 0; i < moduleConfigs.Length; i++)
             {
                 var config = moduleConfigs[i];
-                CreateModule($"Module{i}", shipGo.transform,
-                    new Vector2(5 * (i + 1), 0), 5, 5, false,
-                    config.crewNeeded, config.mainSkill);
+                builder.WithCrewModule($"Module{i}", new Vector2(5 * (i + 1), 0), 5, 5, config.crewNeeded,
+                    config.mainSkill);
             }
 
-            Container.InjectGameObject(shipGo);
-
-            return ModuleFactory.WireShip<Ship>(shipGo, Container);
-        }
-
-        private void CreateModule(string name, Transform parent, Vector2 localPosition,
-            int width, int height, bool isCommand, int crewNeeded, CrewSkillType mainSkill)
-        {
-            var moduleGo = ModuleFactory.CreateModuleBase(name, parent, localPosition, 0f, Container, CreatedObjects,
-                width, height);
-
-            Module module;
-            if (isCommand)
-            {
-                module = moduleGo.AddComponent<Command>();
-            }
-            else
-            {
-                var testModule = moduleGo.AddComponent<TestModule>();
-                testModule.SetModuleType(ModuleType.Resources);
-                testModule.SetMainSkillType(mainSkill);
-                module = testModule;
-            }
-
-            module.SetResources(new Resources(0, 0, crewNeeded, 0, 0));
+            return builder.Build();
         }
 
         [UnityTest]
         public IEnumerator AssignCrewRandomly_DistributesCrewAcrossModules()
         {
-            var ship = CreateShipWithModules(
+            var ship = BuildShipWithCrewModules(Container, CreatedObjects,
                 (crewNeeded: 2, mainSkill: CrewSkillType.Navigation),
                 (crewNeeded: 2, mainSkill: CrewSkillType.Mechanics));
             yield return WaitForLifecycle();
@@ -77,7 +52,7 @@ namespace Ships.Tests
         [UnityTest]
         public IEnumerator AssignCrewRandomly_EmptyCrew_NoAssignment()
         {
-            var ship = CreateShipWithModules(
+            var ship = BuildShipWithCrewModules(Container, CreatedObjects,
                 (crewNeeded: 3, mainSkill: CrewSkillType.Navigation));
             yield return WaitForLifecycle();
 
@@ -91,7 +66,7 @@ namespace Ships.Tests
         [UnityTest]
         public IEnumerator AssignCrewRandomly_ExcessCrew_OnlyAssignsNeeded()
         {
-            var ship = CreateShipWithModules(
+            var ship = BuildShipWithCrewModules(Container, CreatedObjects,
                 (crewNeeded: 1, mainSkill: CrewSkillType.Navigation),
                 (crewNeeded: 1, mainSkill: CrewSkillType.Mechanics));
             yield return WaitForLifecycle();
@@ -112,7 +87,7 @@ namespace Ships.Tests
         [UnityTest]
         public IEnumerator AssignCrewRandomly_AssignsBestSkilledToMatchingModules()
         {
-            var ship = CreateShipWithModules(
+            var ship = BuildShipWithCrewModules(Container, CreatedObjects,
                 (crewNeeded: 1, mainSkill: CrewSkillType.Navigation));
             yield return WaitForLifecycle();
 
@@ -132,7 +107,7 @@ namespace Ships.Tests
         [UnityTest]
         public IEnumerator CrewMissingCount_SumsAcrossAllModules()
         {
-            var ship = CreateShipWithModules(
+            var ship = BuildShipWithCrewModules(Container, CreatedObjects,
                 (crewNeeded: 3, mainSkill: CrewSkillType.Navigation),
                 (crewNeeded: 5, mainSkill: CrewSkillType.Mechanics));
             yield return WaitForLifecycle();
@@ -144,7 +119,7 @@ namespace Ships.Tests
         [UnityTest]
         public IEnumerator CrewMissingCount_AfterAssignment_ReflectsRemaining()
         {
-            var ship = CreateShipWithModules(
+            var ship = BuildShipWithCrewModules(Container, CreatedObjects,
                 (crewNeeded: 3, mainSkill: CrewSkillType.Navigation),
                 (crewNeeded: 2, mainSkill: CrewSkillType.Mechanics));
             yield return WaitForLifecycle();
@@ -162,7 +137,7 @@ namespace Ships.Tests
         [UnityTest]
         public IEnumerator CrewMissingCount_FullyStaffed_ReturnsZero()
         {
-            var ship = CreateShipWithModules(
+            var ship = BuildShipWithCrewModules(Container, CreatedObjects,
                 (crewNeeded: 2, mainSkill: CrewSkillType.Navigation),
                 (crewNeeded: 1, mainSkill: CrewSkillType.Mechanics));
             yield return WaitForLifecycle();
@@ -179,7 +154,7 @@ namespace Ships.Tests
         [UnityTest]
         public IEnumerator AssignCrewRandomly_InsufficientCrew_PartiallyFills()
         {
-            var ship = CreateShipWithModules(
+            var ship = BuildShipWithCrewModules(Container, CreatedObjects,
                 (crewNeeded: 5, mainSkill: CrewSkillType.Navigation),
                 (crewNeeded: 5, mainSkill: CrewSkillType.Mechanics));
             yield return WaitForLifecycle();

@@ -7,7 +7,7 @@ using Zenject;
 using ZLinq;
 using Object = UnityEngine.Object;
 
-namespace Ships.Tests.TestHelpers
+namespace Ships.Tests.TestHelpers.Fixtures
 {
     public abstract class ShipTestBase
     {

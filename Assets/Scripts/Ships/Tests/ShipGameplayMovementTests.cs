@@ -1,6 +1,8 @@
 using System.Collections;
 using NUnit.Framework;
-using Ships.Tests.TestHelpers;
+using Ships.Tests.TestHelpers.Factories;
+using Ships.Tests.TestHelpers.Fixtures;
+using Ships.Tests.TestHelpers.Proxies;
 using UnityEngine;
 using UnityEngine.TestTools;
 
@@ -97,7 +99,19 @@ namespace Ships.Tests
 
         private MovableShipTestProxy CreateReadyShip()
         {
-            return SmallMovableShipTestFactory.Create(Container, CreatedObjects);
+            const int modulePixelSize = 5;
+            const float moduleSpacing = 5f;
+            const float engineMaxThrust = 800f;
+
+            var ship = ShipTestBuilder.CreateShip(Container, CreatedObjects, "GameplayTestShip")
+                .WithCommand("Command", Vector2.zero, modulePixelSize, modulePixelSize)
+                .WithPowerModule(new Vector2(0f, moduleSpacing), modulePixelSize, modulePixelSize)
+                .WithEngineModule(new Vector2(moduleSpacing, 0f), engineMaxThrust, modulePixelSize, modulePixelSize)
+                .WithEngineModule(new Vector2(-moduleSpacing, 0f), engineMaxThrust, modulePixelSize, modulePixelSize)
+                .Build<MovableShipTestProxy>();
+
+            ship.ConfigureAllocatorForTesting(true, 14, 1f, 0.4f, 0.02f);
+            return ship;
         }
 
         private sealed class HeadingChangeAccumulator

@@ -8,6 +8,7 @@ using UnityEngine;
 using Zenject;
 
 [assembly: InternalsVisibleTo("E2E")]
+[assembly: InternalsVisibleTo("Ships.Tests")]
 
 namespace Ships.Modules
 {
