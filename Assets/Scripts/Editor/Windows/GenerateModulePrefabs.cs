@@ -98,6 +98,9 @@ namespace Editor.Windows
                 var sr = go.GetComponent<SpriteRenderer>();
                 sr.sprite = visualSprite;
 
+                var rb = go.GetComponent<Rigidbody2D>();
+                rb.gravityScale = 0;
+
                 PrefabUtility.SaveAsPrefabAsset(go, prefabPath);
 
                 DestroyImmediate(go);
