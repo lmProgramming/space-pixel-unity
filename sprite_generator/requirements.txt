@@ -1,2 +1,2 @@
-pillow==12.1.1
-types-Pillow==12.1.1
+pillow
+types-Pillow

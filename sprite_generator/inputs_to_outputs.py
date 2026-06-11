@@ -3,7 +3,7 @@ import glob
 import random
 from PIL import Image  # type: ignore[import-untyped]
 
-SAVE_DIR = "Assets/Sprites/Generated"
+SAVE_DIR = "Assets/Sprites/Generated/New"
 READ_DIR = "sprite_generator/inputs"
 NOISE_VARIANCE = 12
 
@@ -59,48 +59,48 @@ def apply_noise(color_tuple):
         a,
     )
 
+def generate_pngs():
+    # Find all text files in the directory
+    txt_files = glob.glob(os.path.join(READ_DIR, "*.txt"))
 
-# Find all text files in the directory
-txt_files = glob.glob(os.path.join(READ_DIR, "*.txt"))
+    if not txt_files:
+        print(f"No .txt files found in {READ_DIR}. Run the parser script first!")
+        exit()
 
-if not txt_files:
-    print(f"No .txt files found in {READ_DIR}. Run the parser script first!")
-    exit()
+    for filepath in txt_files:
+        filename = os.path.basename(filepath)
+        base_name = filename.replace(".txt", "")
 
-for filepath in txt_files:
-    filename = os.path.basename(filepath)
-    base_name = filename.replace(".txt", "")
+        with open(filepath, "r") as f:
+            matrix = [line.strip() for line in f.readlines() if line.strip()]
 
-    with open(filepath, "r") as f:
-        matrix = [line.strip() for line in f.readlines() if line.strip()]
+        if not matrix:
+            continue
 
-    if not matrix:
-        continue
+        width = len(matrix[0])
+        height = len(matrix)
 
-    width = len(matrix[0])
-    height = len(matrix)
+        img = Image.new("RGBA", (width, height))
+        pixels = []
 
-    img = Image.new("RGBA", (width, height))
-    pixels = []
+        # Generate Armor Map
+        if "_armor" in base_name:
+            for row in matrix:
+                for char in row:
+                    pixels.append(ARMOR_PALETTE.get(char, (0, 0, 0, 0)))
 
-    # Generate Armor Map
-    if "_armor" in base_name:
-        for row in matrix:
-            for char in row:
-                pixels.append(ARMOR_PALETTE.get(char, (0, 0, 0, 0)))
+        # Generate Visual Map
+        else:
+            faction = "enemy" if "enemy" in base_name else "player"
+            palette = VISUAL_PALETTES[faction]
+            for row in matrix:
+                for char in row:
+                    pixels.append(apply_noise(palette.get(char, (255, 0, 255, 255))))
 
-    # Generate Visual Map
-    else:
-        faction = "enemy" if "enemy" in base_name else "player"
-        palette = VISUAL_PALETTES[faction]
-        for row in matrix:
-            for char in row:
-                pixels.append(apply_noise(palette.get(char, (255, 0, 255, 255))))
+        img.putdata(pixels)
+        png_path = os.path.join(SAVE_DIR, f"{base_name}.png")
+        img.save(png_path)
 
-    img.putdata(pixels)
-    png_path = os.path.join(SAVE_DIR, f"{base_name}.png")
-    img.save(png_path)
+        print(f"Generated PNG: {png_path} ({width}x{height})")
 
-    print(f"Generated PNG: {png_path} ({width}x{height})")
-
-print("All PNGs generated successfully!")
+    print("All PNGs generated successfully!")
