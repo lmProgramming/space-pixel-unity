@@ -2,7 +2,6 @@ using System.Collections;
 using Core.Ship;
 using NUnit.Framework;
 using Services;
-using Ships;
 using Ships.Modules;
 using Ships.Tests.TestHelpers.Factories;
 using Ships.Tests.TestHelpers.Fixtures;

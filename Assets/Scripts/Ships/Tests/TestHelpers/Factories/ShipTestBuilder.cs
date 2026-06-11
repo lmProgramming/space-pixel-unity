@@ -27,13 +27,12 @@ namespace Ships.Tests.TestHelpers.Factories
         private Module _commandModule;
         private bool _deactivateBeforeWire;
         private bool _injectGameObject = true;
-        private Transform _parent;
 
         private ShipTestBuilder(DiContainer container, ICollection<GameObject> createdObjects, string shipName)
         {
             _container = container;
             _createdObjects = createdObjects;
-            _shipGo = ModuleFactory.CreateGameObject(shipName, createdObjects);
+            _shipGo = ModuleFactory.CreateGameObject(shipName, createdObjects, container);
         }
 
         public static ShipTestBuilder CreateShip(DiContainer container, ICollection<GameObject> createdObjects,
@@ -44,7 +43,6 @@ namespace Ships.Tests.TestHelpers.Factories
 
         public ShipTestBuilder ParentedTo(Transform parent, bool deactivateBeforeWire = true)
         {
-            _parent = parent;
             _shipGo.transform.SetParent(parent);
             if (deactivateBeforeWire)
                 _shipGo.SetActive(false);
@@ -121,7 +119,7 @@ namespace Ships.Tests.TestHelpers.Factories
         {
             var engineGo = ModuleFactory.CreateModuleBase("Engine", _shipGo.transform, localPosition, 0f, _container,
                 _createdObjects, width, height);
-            var exhaustRoot = ModuleFactory.CreateGameObject("Exhaust", _createdObjects);
+            var exhaustRoot = ModuleFactory.CreateGameObject("Exhaust", _createdObjects, _container);
             exhaustRoot.transform.SetParent(engineGo.transform, false);
             exhaustRoot.AddComponent<ParticleSystem>();
             var engine = engineGo.AddComponent<Engine>();
@@ -209,9 +207,6 @@ namespace Ships.Tests.TestHelpers.Factories
 
         private T WireShip<T>(bool initializeModules) where T : Ship
         {
-            if (_parent != null && _deactivateBeforeWire && !_shipGo.activeSelf)
-                _shipGo.SetActive(false);
-
             var ship = ModuleFactory.WireShip<T>(_shipGo, _container);
             if (initializeModules)
                 ship.InitializeModules();

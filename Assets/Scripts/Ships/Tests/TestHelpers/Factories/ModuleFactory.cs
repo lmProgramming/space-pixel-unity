@@ -37,7 +37,7 @@ namespace Ships.Tests.TestHelpers.Factories
             var engineGo = CreateModuleBase("Engine", parent, localPosition, localRotationZ, container, createdObjects,
                 modulePixelWidth, modulePixelHeight);
 
-            var particleRoot = CreateGameObject("EngineExhaust", createdObjects);
+            var particleRoot = CreateGameObject("EngineExhaust", createdObjects, container);
             particleRoot.transform.SetParent(engineGo.transform, false);
             particleRoot.AddComponent<ParticleSystem>();
 
@@ -49,7 +49,7 @@ namespace Ships.Tests.TestHelpers.Factories
             float localRotationZ, DiContainer container, ICollection<GameObject> createdObjects,
             int modulePixelWidth, int modulePixelHeight)
         {
-            var moduleGo = CreateGameObject(name, createdObjects);
+            var moduleGo = CreateGameObject(name, createdObjects, container);
             moduleGo.transform.SetParent(parent);
             moduleGo.transform.localPosition = localPosition;
             moduleGo.transform.localRotation = Quaternion.Euler(0f, 0f, localRotationZ);
@@ -99,10 +99,12 @@ namespace Ships.Tests.TestHelpers.Factories
             return ship;
         }
 
-        public static GameObject CreateGameObject(string name, ICollection<GameObject> createdObjects)
+        public static GameObject CreateGameObject(string name, ICollection<GameObject> createdObjects,
+            DiContainer container)
         {
             var go = new GameObject(name);
             createdObjects.Add(go);
+            container.Inject(go);
             return go;
         }
 

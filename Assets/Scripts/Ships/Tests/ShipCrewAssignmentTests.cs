@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using Core.Ship;
 using NUnit.Framework;
-using Ships;
 using Ships.Tests.TestHelpers.Factories;
 using Ships.Tests.TestHelpers.Fixtures;
 using UnityEngine;

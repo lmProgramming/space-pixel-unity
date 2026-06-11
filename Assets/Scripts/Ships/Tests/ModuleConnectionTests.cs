@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using NUnit.Framework;
-using Ships;
 using Ships.Modules;
 using Ships.Tests.TestHelpers.Factories;
 using Ships.Tests.TestHelpers.Fixtures;
