@@ -101,7 +101,7 @@ namespace Ships.Tests
         {
             const int modulePixelSize = 5;
             const float moduleSpacing = 5f;
-            const float engineMaxThrust = 800f;
+            const float engineMaxThrust = 0.8f;
 
             var ship = ShipTestBuilder.CreateShip(Container, CreatedObjects, "GameplayTestShip")
                 .WithCommand("Command", Vector2.zero, modulePixelSize, modulePixelSize)

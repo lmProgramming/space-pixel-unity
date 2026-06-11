@@ -31,8 +31,8 @@ namespace Ships.Tests
         {
             var shipWithEngines = ShipTestBuilder.CreateShip(Container, CreatedObjects, "AllocatorTestShip")
                 .WithCommand("Command", Vector2.zero, 5, 5)
-                .WithEngineModule(new Vector2(0f, -5f), 10f, 5, 5, 180f)
-                .WithEngineModule(new Vector2(0f, 5f), 10f, 5, 5)
+                .WithEngineModule(new Vector2(0f, -5f), 1f, 5, 5, 180f)
+                .WithEngineModule(new Vector2(0f, 5f), 1f, 5, 5)
                 .BuildWithEnginesResult();
 
             yield return WaitForLifecycle();
@@ -71,8 +71,8 @@ namespace Ships.Tests
         {
             var shipWithEngines = ShipTestBuilder.CreateShip(Container, CreatedObjects, "AllocatorTestShip")
                 .WithCommand("Command", Vector2.zero, 5, 5)
-                .WithEngineModule(new Vector2(0f, -5f), 10f, 5, 5)
-                .WithEngineModule(new Vector2(0f, 5f), 10f, 5, 5)
+                .WithEngineModule(new Vector2(0f, -5f), 1f, 5, 5)
+                .WithEngineModule(new Vector2(0f, 5f), 1f, 5, 5)
                 .BuildWithEnginesResult();
 
             yield return WaitForLifecycle();
@@ -88,8 +88,8 @@ namespace Ships.Tests
         {
             var shipWithEngines = ShipTestBuilder.CreateShip(Container, CreatedObjects, "AllocatorTestShip")
                 .WithCommand("Command", Vector2.zero, 5, 5)
-                .WithEngineModule(new Vector2(0f, -5f), 10f, 5, 5, 180f)
-                .WithEngineModule(new Vector2(0f, 5f), 10f, 5, 5)
+                .WithEngineModule(new Vector2(0f, -5f), 1f, 5, 5, 180f)
+                .WithEngineModule(new Vector2(0f, 5f), 1f, 5, 5)
                 .BuildWithEnginesResult();
 
             yield return WaitForLifecycle();
