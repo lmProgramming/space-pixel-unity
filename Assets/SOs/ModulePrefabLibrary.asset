@@ -16,6 +16,7 @@ MonoBehaviour:
   - moduleType: 0
     prefabs:
     - {fileID: 11400000, guid: 52a35855919b54b6ebba328fbd66afea, type: 2}
+    - {fileID: 11400000, guid: 52a35855919b54b6ebba328fbd66afea, type: 2}
   - moduleType: 3
     prefabs:
     - {fileID: 11400000, guid: c67b1840233bb621b94521f12654d026, type: 2}

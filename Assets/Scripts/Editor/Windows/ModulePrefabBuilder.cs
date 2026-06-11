@@ -12,7 +12,7 @@ namespace Editor.Windows
         public static void BuildPrefabs()
         {
             const string spriteDir = "Assets/Sprites/Generated";
-            const string prefabDir = "Assets/Prefabs/Modules";
+            const string prefabDir = "Assets/Prefabs/Gameplay/Modules";
 
             if (!Directory.Exists(spriteDir))
             {
