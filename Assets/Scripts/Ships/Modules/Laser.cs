@@ -1,7 +1,6 @@
 using System;
 using System.Threading;
 using Core.Services;
-using Core.Ship;
 using Core.Ship.ModuleSnapshotPayloads;
 using Cysharp.Threading.Tasks;
 using LMPro;
@@ -43,13 +42,10 @@ namespace Ships.Modules
         private LineRenderer _lineRenderer;
 
         private ManualTimer _reloadTimer;
-        public override ModuleType Type => ModuleType.Weapon;
 
         protected override void Awake()
         {
             base.Awake();
-
-            Type = ModuleType.Weapon;
 
             _lineRenderer = GetComponent<LineRenderer>();
             if (_lineRenderer == null)
@@ -116,7 +112,7 @@ namespace Ships.Modules
                 beamRange = beamRange
             };
 
-            if (contentCatalog != null && sprite != null &&
+            if (contentCatalog != null && sprite &&
                 contentCatalog.TryGetSpriteContentId(sprite, out var contentId))
                 data.spriteContentId = contentId;
 
@@ -152,7 +148,6 @@ namespace Ships.Modules
         private void StartShooting()
         {
             if (!IsReady()) return;
-            if (!_lineRenderer) return;
 
             _isFiring = true;
             _lineRenderer.enabled = true;
@@ -169,8 +164,7 @@ namespace Ships.Modules
         {
             _isFiring = false;
 
-            if (_lineRenderer)
-                _lineRenderer.enabled = false;
+            _lineRenderer.enabled = false;
 
             _fireCts?.Cancel();
             _fireCts?.Dispose();

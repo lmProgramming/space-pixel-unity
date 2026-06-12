@@ -59,7 +59,10 @@ def apply_noise(color_tuple):
         a,
     )
 
+
 def generate_pngs():
+    os.makedirs(SAVE_DIR, exist_ok=True)
+
     # Find all text files in the directory
     txt_files = glob.glob(os.path.join(READ_DIR, "*.txt"))
 
