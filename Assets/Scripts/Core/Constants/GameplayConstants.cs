@@ -11,5 +11,6 @@ namespace Core.Constants
         public const float ModuleDestroyedBelowPixelRatio = 0.15f;
 
         public const float ChanceOfSpawningExplosionOnDetachingConnectionPoint = 0.3f;
+        public const float EngineThrustEfficiencyMultiplier = 1000f;
     }
 }

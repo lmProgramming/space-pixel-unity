@@ -24,6 +24,7 @@ namespace Services
 
         public void SpawnExplosion(Vector2 position)
         {
+            if (effectsHolder && !effectsHolder.gameObject.activeInHierarchy) return;
             var explosion = _explosionPool.Get();
             var position3 = new Vector3(position.x, position.y, explosion.transform.position.z);
             explosion.transform.position = position3;

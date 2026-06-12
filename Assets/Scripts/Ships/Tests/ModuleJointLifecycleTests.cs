@@ -45,11 +45,8 @@ namespace Ships.Tests
                 ShipTestFactory.CreateTwoModuleShip(Container, CreatedObjects);
             yield return WaitForLifecycle();
 
-            Debug.Log("mkay0");
             Object.Destroy(other.gameObject);
-            Debug.Log("mkay");
             yield return WaitForLifecycle();
-            Debug.Log("mkay2");
 
             Assert.That(command.GetComponents<FixedJoint2D>(), Is.Empty,
                 "Joints to a destroyed module must be destroyed with it, " +

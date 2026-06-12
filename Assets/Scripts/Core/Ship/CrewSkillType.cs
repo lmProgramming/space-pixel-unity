@@ -6,6 +6,7 @@ namespace Core.Ship
         WeaponHandling,
         Mechanics,
         PowerEngineering,
-        Captain
+        Captain,
+        Janitor
     }
 }

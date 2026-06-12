@@ -1,3 +1,4 @@
+using Core.Constants;
 using Core.Services;
 using Core.Ship;
 using Core.Ship.ModuleSnapshotPayloads;
@@ -35,7 +36,7 @@ namespace Ships.Modules
         internal float ShipModuleEfficiencyForDebug => ShipModuleEfficiency;
         private Vector2 ThrustPoint => exhaustParticles.transform.localPosition;
 
-        public float MaxThrust => maxThrust * ShipModuleEfficiency;
+        public float MaxThrust => maxThrust * ShipModuleEfficiency * GameplayConstants.EngineThrustEfficiencyMultiplier;
         private float CurrentThrusterAngle { get; set; }
 
         public Vector2 WorldThrustPoint => transform.TransformPoint(ThrustPoint);

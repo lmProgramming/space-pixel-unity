@@ -1,7 +1,6 @@
 using System.Runtime.CompilerServices;
 using System.Threading;
 using Core.Services;
-using Core.Ship;
 using Core.Ship.ModuleSnapshotPayloads;
 using LMPro;
 using UnityEngine;
@@ -26,8 +25,6 @@ namespace Ships.Modules
         [Inject] private IProjectilesSpawner _projectilesSpawner;
 
         private ManualTimer _reloadTimer;
-
-        public override ModuleType Type => ModuleType.Weapon;
 
         protected override void Awake()
         {

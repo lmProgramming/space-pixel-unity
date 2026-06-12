@@ -149,7 +149,7 @@ namespace E2E
 
             const int modulePixelSize = 5;
             const float moduleSpacing = 5f;
-            const float engineMaxThrust = 1600f;
+            const float engineMaxThrust = 1.6f;
 
             // Command
             ModuleFactory.CreateCommandModule(shipGo.transform, Vector2.zero, Container, CreatedObjects,
