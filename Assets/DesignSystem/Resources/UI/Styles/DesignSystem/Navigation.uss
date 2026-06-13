@@ -20,18 +20,35 @@
 .ds-nav-item {
     flex-direction: row;
     align-items: center;
-    height: 40px;
+    min-height: 40px;
+    height: auto;
     padding-left: var(--space-3);
     padding-right: var(--space-3);
+    padding-top: 0;
+    padding-bottom: 0;
+    margin: 0;
+    margin-bottom: var(--space-1);
+    border-width: 0;
     border-radius: var(--radius-md);
     background-color: rgba(0, 0, 0, 0);
-    margin-bottom: var(--space-1);
+    color: var(--color-text-secondary);
+    -unity-font-style: normal;
+    -unity-text-align: middle-left;
     transition-property: background-color, color;
     transition-duration: var(--transition-fast);
 }
 
+.ds-side-nav > .ds-nav-item {
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
 .ds-nav-item:hover {
     background-color: var(--color-surface-elev);
+}
+
+.ds-nav-item:active {
+    scale: 1 1;
 }
 
 .ds-nav-item.is-active {
@@ -45,6 +62,14 @@
     -unity-font-style: bold;
 }
 
+.ds-nav-item:focus {
+    background-color: var(--color-surface-hover);
+}
+
+.ds-nav-item.is-active:focus {
+    background-color: var(--color-primary-soft);
+}
+
 .ds-nav-item__icon {
     width: 18px;
     height: 18px;
@@ -56,6 +81,15 @@
     flex-grow: 1;
     color: var(--color-text-secondary);
     font-size: var(--font-size-body-1);
+    margin: 0;
+    padding: 0;
+    -unity-text-align: middle-left;
+}
+
+/* Unity Button children — zero default label box offset */
+.ds-nav-item > .unity-label {
+    margin: 0;
+    padding: 0;
 }
 
 /* ---------- Side rail (icon only) ---------- */

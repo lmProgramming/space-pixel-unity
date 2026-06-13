@@ -1,14 +1,23 @@
 using System;
 using Core.Ship;
+using UnityEngine;
 using UnityEngine.UIElements;
+using Resources = Core.Ship.Resources;
 
 namespace ShipFactory.UI.ToolkitComponents
 {
     public class ModuleInfoPanel
     {
+        private const string CollapseIconDownClassName = "ds-icon--chevron-down";
+        private const string CollapseIconUpClassName = "ds-icon--chevron-up";
+        private const string HiddenClassName = "hidden";
         private const string RemoveButtonHiddenClassName = "remove-module-button--hidden";
         private const string RotationButtonsHiddenClassName = "module-rotation-buttons--hidden";
+        private readonly Button _collapseButton;
+        private readonly VisualElement _collapseIcon;
         private readonly Label _moduleDescriptionLabel;
+        private readonly ScrollView _moduleDescriptionScroll;
+        private readonly VisualElement _moduleInfoBody;
 
         private readonly Label _moduleNameLabel;
         private readonly Label _moduleSizeValueLabel;
@@ -23,12 +32,18 @@ namespace ShipFactory.UI.ToolkitComponents
         private readonly Button _rotateCounterButton;
         private readonly VisualElement _rotationButtonsContainer;
 
+        private bool _isCollapsed;
+
         public ModuleInfoPanel(VisualElement root)
         {
+            _moduleInfoBody = root.Q<VisualElement>("module-info-body");
+            _collapseButton = root.Q<Button>("module-info-collapse-button");
+            _collapseIcon = root.Q<VisualElement>("module-info-collapse-icon");
             _moduleNameLabel = root.Q<Label>("module-info-name");
             _moduleTypeValueLabel = root.Q<Label>("module-info-type-value");
             _moduleSizeValueLabel = root.Q<Label>("module-info-size-value");
             _moduleDescriptionLabel = root.Q<Label>("module-info-description");
+            _moduleDescriptionScroll = root.Q<ScrollView>("module-info-description-scroll");
             _resourceEnergyProductionValueLabel = root.Q<Label>("module-info-resource-energy-production-value");
             _resourceEnergyDrawValueLabel = root.Q<Label>("module-info-resource-energy-draw-value");
             _resourceEnergyCapacityValueLabel = root.Q<Label>("module-info-resource-energy-capacity-value");
@@ -39,8 +54,10 @@ namespace ShipFactory.UI.ToolkitComponents
             _rotateCounterButton = root.Q<Button>("rotate-counter-button");
             _rotateClockwiseButton = root.Q<Button>("rotate-clockwise-button");
 
-            if (_moduleNameLabel == null || _moduleTypeValueLabel == null || _moduleSizeValueLabel == null ||
-                _moduleDescriptionLabel == null || _resourceEnergyProductionValueLabel == null ||
+            if (_moduleInfoBody == null || _collapseButton == null || _collapseIcon == null ||
+                _moduleNameLabel == null || _moduleTypeValueLabel == null || _moduleSizeValueLabel == null ||
+                _moduleDescriptionLabel == null || _moduleDescriptionScroll == null ||
+                _resourceEnergyProductionValueLabel == null ||
                 _resourceEnergyDrawValueLabel == null || _resourceEnergyCapacityValueLabel == null ||
                 _resourceCrewNeededValueLabel == null || _resourceCrewQuartersValueLabel == null ||
                 _removeModuleButton == null ||
@@ -48,6 +65,7 @@ namespace ShipFactory.UI.ToolkitComponents
                 throw new InvalidOperationException(
                     "[ShipFactoryModuleInfoPanel] Required details panel elements are missing in UXML!");
 
+            _collapseButton.clicked += ToggleCollapsed;
             _removeModuleButton.clicked += () => OnRemoveModuleClicked?.Invoke();
             _rotateClockwiseButton.clicked += () => OnRotateClockwiseClicked?.Invoke();
             _rotateCounterButton.clicked += () => OnRotateCounterClockwiseClicked?.Invoke();
@@ -71,10 +89,12 @@ namespace ShipFactory.UI.ToolkitComponents
             _moduleDescriptionLabel.text = string.IsNullOrWhiteSpace(moduleSO.Description)
                 ? "No description."
                 : moduleSO.Description;
+            _moduleDescriptionScroll.scrollOffset = Vector2.zero;
 
             ApplyResources(module.Resources);
             UpdateRemoveButton(isNewModuleContext, isInputLocked, isDraggingModule);
             UpdateRotationButtons(isNewModuleContext, isInputLocked, isDraggingModule);
+            ApplyCollapsedVisualState();
         }
 
         public void ApplyEmptyInfo()
@@ -83,6 +103,7 @@ namespace ShipFactory.UI.ToolkitComponents
             _moduleTypeValueLabel.text = "-";
             _moduleSizeValueLabel.text = "-";
             _moduleDescriptionLabel.text = "Hover or drag a module to inspect it.";
+            _moduleDescriptionScroll.scrollOffset = Vector2.zero;
 
             _resourceEnergyProductionValueLabel.text = "-";
             _resourceEnergyDrawValueLabel.text = "-";
@@ -96,6 +117,7 @@ namespace ShipFactory.UI.ToolkitComponents
             _rotateClockwiseButton.SetEnabled(false);
             _rotateCounterButton.SetEnabled(false);
             _rotationButtonsContainer.AddToClassList(RotationButtonsHiddenClassName);
+            ApplyCollapsedVisualState();
         }
 
         private void ApplyResources(Resources resources)
@@ -105,6 +127,19 @@ namespace ShipFactory.UI.ToolkitComponents
             _resourceEnergyCapacityValueLabel.text = $"{resources.energyCapacity:0.##}";
             _resourceCrewNeededValueLabel.text = $"{resources.crewNeeded}";
             _resourceCrewQuartersValueLabel.text = $"{resources.crewQuarters}";
+        }
+
+        private void ToggleCollapsed()
+        {
+            _isCollapsed = !_isCollapsed;
+            ApplyCollapsedVisualState();
+        }
+
+        private void ApplyCollapsedVisualState()
+        {
+            _moduleInfoBody.EnableInClassList(HiddenClassName, _isCollapsed);
+            _collapseIcon.EnableInClassList(CollapseIconDownClassName, !_isCollapsed);
+            _collapseIcon.EnableInClassList(CollapseIconUpClassName, _isCollapsed);
         }
 
         private void UpdateRemoveButton(bool isNewModuleContext, bool isInputLocked, bool isDraggingModule)

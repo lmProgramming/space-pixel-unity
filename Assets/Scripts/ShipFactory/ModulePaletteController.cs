@@ -14,6 +14,9 @@ namespace ShipFactory
         private const string AnimalCardImageClass = "ds-animal-card__image";
         private const string AnimalCardTitleRowClass = "ds-animal-card__title-row";
         private const string AnimalCardTitleClass = "ds-body-2";
+        private const string AnimalCardDimensionsClass = "palette-card__dimensions";
+        private const string AnimalCardDimensionsTextClass = "ds-body-2";
+        private const string AnimalCardLabelsClass = "palette-card__labels";
         private const string AnimalCardSpriteClass = "ds-animal-card__sprite";
         private readonly ModulePrefabLibrary _library;
 
@@ -33,12 +36,10 @@ namespace ShipFactory
 
             _library = library;
 
-            var paletteScroll = root.Q<ScrollView>("palette-scroll");
-            if (paletteScroll == null)
+            _paletteContent = root.Q<VisualElement>("palette-content");
+            if (_paletteContent == null)
                 throw new InvalidOperationException(
-                    "[ModulePaletteController] 'palette-scroll' ScrollView not found in UXML!");
-
-            _paletteContent = paletteScroll.contentContainer;
+                    "[ModulePaletteController] 'palette-content' container not found in UXML!");
 
             BindTabButtons(root);
             SelectTab(ModuleType.Command, root.Q<Button>("tab-Command"));
@@ -101,6 +102,10 @@ namespace ShipFactory
             var card = new VisualElement();
             card.AddToClassList(AnimalCardClass);
             card.tooltip = moduleSO.Description;
+            card.style.width = 132;
+            card.style.flexShrink = 0;
+            card.style.alignSelf = Align.Stretch;
+            card.style.flexDirection = FlexDirection.Column;
 
             var image = new VisualElement();
             image.AddToClassList(AnimalCardImageClass);
@@ -116,13 +121,29 @@ namespace ShipFactory
 
             var titleRow = new VisualElement();
             titleRow.AddToClassList(AnimalCardTitleRowClass);
+            titleRow.style.width = Length.Percent(100);
+
+            var titleClip = new VisualElement();
+            titleClip.style.width = Length.Percent(100);
 
             var title = new Label(moduleSO.Name);
             title.AddToClassList(AnimalCardTitleClass);
 
-            titleRow.Add(title);
+            titleClip.Add(title);
+            titleRow.Add(titleClip);
+
+            var dimensions = new Label($"{moduleSO.Dimensions.x}x{moduleSO.Dimensions.y}");
+            dimensions.AddToClassList(AnimalCardDimensionsClass);
+            dimensions.AddToClassList(AnimalCardDimensionsTextClass);
+
+            var labels = new VisualElement();
+            labels.AddToClassList(AnimalCardLabelsClass);
+            labels.Add(titleRow);
+            labels.Add(dimensions);
+
             card.Add(image);
-            card.Add(titleRow);
+            card.Add(labels);
+            _ = new HoverMarqueeLabel(card, titleClip, title);
 
             RegisterCardDragEvents(card, moduleSO);
             return card;

@@ -8,7 +8,7 @@
 /* ---------- Generic card ---------- */
 .ds-card {
     background-color: var(--color-surface);
-    border-width: var(--border-thin);
+    border-width: var(--border-regular);
     border-color: var(--color-border);
     border-radius: var(--radius-lg);
     padding: var(--space-4);
@@ -25,7 +25,7 @@
 .ds-animal-card {
     width: 200px;
     background-color: var(--color-surface);
-    border-width: var(--border-regular);
+    border-width: var(--border-thin);
     border-color: var(--color-border);
     border-radius: var(--radius-lg);
     padding: var(--space-3);

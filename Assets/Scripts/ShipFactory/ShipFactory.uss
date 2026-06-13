@@ -1,4 +1,4 @@
-/* Ship Factory — layout & behaviour only; visuals come from DesignSystem.uss */
+/* Ship Factory — layout & behaviour only; visuals from DesignSystem.uss */
 
 :root {
     flex-direction: column;
@@ -10,7 +10,6 @@
     flex-grow: 1;
 }
 
-/* Canvas fills space between top bar and palette */
 .canvas-container {
     flex-grow: 1;
 }
@@ -22,7 +21,6 @@
     height: 100%;
 }
 
-/* Top bar & palette — shell geometry */
 .top-bar {
     flex-direction: row;
     align-items: center;
@@ -35,83 +33,32 @@
 }
 
 .palette-panel {
-    flex-direction: column;
+    flex-direction: row;
     flex-shrink: 0;
-    height: 180px;
+    height: 220px;
     background-color: var(--color-surface);
     border-top-width: 1px;
     border-top-color: var(--color-border);
 }
 
-.palette-tabs {
-    margin: var(--space-3);
-    margin-bottom: var(--space-2);
-    align-self: flex-start;
-}
-
-.palette-scroll {
-    flex-grow: 1;
-    padding: var(--space-3);
-}
-
-.palette-content {
-    align-items: center;
-    height: 100%;
-}
-
-/* Floating panels — position only; .ds-card supplies surface styling */
-.module-info-panel {
+.module-info-panel,
+.ship-resources-panel {
     position: absolute;
-    left: 16px;
-    bottom: 200px;
-    width: 320px;
     flex-direction: column;
+    bottom: 236px;
+    width: 300px;
 }
 
-.module-info-panel .ds-info-row__label,
-.module-info-panel .ds-info-row__value {
-    white-space: nowrap;
+.module-info-panel {
+    left: 16px;
+    margin-bottom: 0;
+    padding-bottom: 0;
 }
 
 .ship-resources-panel {
-    position: absolute;
     right: 16px;
-    bottom: 200px;
-    width: 280px;
-    flex-direction: column;
 }
 
-.ship-resources-panel .ds-info-row__label,
-.ship-resources-panel .ds-info-row__value {
-    white-space: nowrap;
-}
-
-/* Palette cards — wider/lower than showcase default; DS supplies surface + hover */
-.palette-content .ds-animal-card {
-    width: 176px;
-    flex-shrink: 0;
-}
-
-.palette-content .ds-animal-card__image {
-    height: 52px;
-    margin-bottom: var(--space-2);
-}
-
-.palette-content .ds-animal-card__title-row {
-    margin-bottom: 0;
-}
-
-.palette-content .ds-animal-card__title-row .ds-body-2 {
-    margin-right: 0;
-    -unity-text-align: middle-center;
-    white-space: normal;
-}
-
-.palette-card--dragging {
-    opacity: 0.3;
-}
-
-/* Segmented resource bars — fill colours set in C# */
 .ship-resource-bar-track {
     position: relative;
     height: 8px;
@@ -129,15 +76,12 @@
     width: 0;
 }
 
-/* Toggles & overlays */
 .hidden,
 .module-rotation-buttons--hidden,
-.remove-module-button--hidden {
+.remove-module-button--hidden,
+.ship-factory-input-blocker,
+.action-popup {
     display: none;
-}
-
-.module-rotation-button {
-    flex-grow: 1;
 }
 
 .module-rotation-icon--counter {
@@ -145,7 +89,6 @@
 }
 
 .ship-factory-input-blocker {
-    display: none;
     position: absolute;
     left: 0;
     top: 0;
@@ -155,10 +98,22 @@
 }
 
 .action-popup {
-    display: none;
     position: absolute;
     left: 50%;
     top: 80px;
     translate: -50% 0;
     max-width: 600px;
+}
+
+.palette-card--dragging {
+    opacity: 0.3;
+}
+
+.module-info-description-scroll {
+    flex-shrink: 0;
+    max-height: 48px;
+}
+
+.module-info-description {
+    white-space: normal;
 }
