@@ -1,243 +1,170 @@
-/* ===== Ship Factory UI ===== */
+/* Ship Factory — layout & behaviour only; visuals come from DesignSystem.uss */
 
-/* ---------- Global Layout ---------- */
 :root {
     flex-direction: column;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0);
-}
-
-/* ---------- Top bar ---------- */
-.top-bar {
-    flex-direction: row;
-    align-items: center;
-    height: 56px;
-    padding: 8px 16px;
-    background-color: var(--color-surface-elev);
-    border-bottom-width: 1px;
-    border-bottom-color: var(--color-border);
-    flex-shrink: 0;
-}
-
-.top-bar-label {
-    margin-right: 16px;
 }
 
 .spacer {
     flex-grow: 1;
 }
 
-.ship-name-field {
-    min-width: 260px;
-    margin-right: 12px;
-}
-
-.save-ship-button {
-    margin-left: 8px;
-}
-
-/* ---------- Canvas Area ---------- */
+/* Canvas fills space between top bar and palette */
 .canvas-container {
     flex-grow: 1;
-    background-color: rgba(0, 0, 0, 0);
 }
 
-.canvas-viewport, .canvas-area {
+.canvas-viewport,
+.canvas-area {
+    position: absolute;
     width: 100%;
     height: 100%;
-    position: absolute;
-    background-color: rgba(0, 0, 0, 0);
 }
 
-/* ---------- Bottom Palette Panel ---------- */
+/* Top bar & palette — shell geometry */
+.top-bar {
+    flex-direction: row;
+    align-items: center;
+    height: 56px;
+    padding: 8px 16px;
+    flex-shrink: 0;
+    background-color: var(--color-surface-elev);
+    border-bottom-width: 1px;
+    border-bottom-color: var(--color-border);
+}
+
 .palette-panel {
-    height: 180px;
     flex-direction: column;
+    flex-shrink: 0;
+    height: 180px;
     background-color: var(--color-surface-elev);
     border-top-width: 1px;
     border-top-color: var(--color-border);
-    flex-shrink: 0;
-}
-
-.palette-tabs {
-    flex-direction: row;
 }
 
 .palette-scroll {
     flex-grow: 1;
-    padding: 12px;
+    padding: var(--space-3);
 }
 
 .palette-content {
-    flex-direction: row;
     align-items: center;
     height: 100%;
 }
 
-/* Individual module card */
-.module-card {
-    width: 100px;
-    height: 110px;
-    margin-right: 12px;
-    background-color: rgba(24, 32, 48, 0.8);
-    border-color: rgba(138, 180, 248, 0.2);
-    border-width: 1px;
-    border-radius: 6px;
-    align-items: center;
-    justify-content: center;
-    padding: 8px;
-    flex-shrink: 0;
-    transition-duration: 0.2s;
-}
-
-.module-card:hover {
-    background-color: rgba(36, 48, 72, 0.9);
-    border-color: #00e5ff;
-}
-
-.module-card--dragging {
-    opacity: 0.3;
-}
-
-.module-card-icon {
-    width: 50px;
-    height: 50px;
-    margin-bottom: 8px;
-    flex-shrink: 0;
-}
-
-.module-card-label {
-    color: #e8f0fe;
-    font-size: 12px;
-    -unity-text-align: middle-center;
-    white-space: normal;
-    overflow: hidden;
-    width: 100%;
-}
-
-/* ---------- Left Panel: Module Info ---------- */
+/* Floating panels — position only; .ds-card supplies surface styling */
 .module-info-panel {
     position: absolute;
     left: 16px;
     bottom: 200px;
     width: 320px;
-    min-height: 150px;
-    padding: 16px;
-    background-color: var(--color-surface);
-    border-width: 1px;
-    border-color: var(--color-border);
-    border-radius: var(--radius-lg);
+    flex-direction: column;
 }
 
-.module-info-name {
-    margin-bottom: 4px;
+.module-info-panel .ds-info-row__label,
+.module-info-panel .ds-info-row__value {
+    white-space: nowrap;
 }
 
-.module-info-title {
-    margin-bottom: 2px;
+.ship-resources-panel {
+    position: absolute;
+    right: 16px;
+    bottom: 200px;
+    width: 280px;
+    flex-direction: column;
 }
 
-.module-info-description {
-    margin-top: 8px;
-    margin-bottom: 12px;
+.ship-resources-panel .ds-info-row {
+    height: auto;
+    min-height: 24px;
+}
+
+.ship-resources-panel .ds-info-row__label,
+.ship-resources-panel .ds-info-row__value {
+    white-space: nowrap;
+}
+
+/* Palette cards — compact .ds-animal-card; hover transition comes from Cards.uss */
+.palette-content .ds-animal-card {
+    width: 128px;
+    flex-shrink: 0;
+}
+
+.palette-content .ds-animal-card__image {
+    height: 72px;
+    align-items: center;
+    justify-content: center;
+}
+
+.palette-card__sprite {
+    width: 64px;
+    height: 64px;
+    flex-shrink: 0;
+}
+
+.palette-content .ds-animal-card__title-row {
+    margin-bottom: 0;
+}
+
+.palette-content .ds-animal-card__title-row .ds-body-2 {
+    margin-right: 0;
+    -unity-text-align: middle-center;
     white-space: normal;
 }
 
-.module-info-foldout {
-    margin-bottom: 8px;
-    padding-top: 4px;
+.palette-card--dragging {
+    opacity: 0.3;
+}
+
+/* Segmented resource bars — fill colours set in C# */
+.ship-resource-bar-track {
+    position: relative;
+    height: 8px;
+    overflow: hidden;
+    background-color: var(--color-surface-elev);
+    border-width: var(--border-thin);
+    border-color: var(--color-border);
+    border-radius: var(--radius-sm);
+}
+
+.ship-resource-bar-fill {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 0;
+}
+
+/* Toggles & overlays */
+.hidden,
+.module-rotation-buttons--hidden,
+.remove-module-button--hidden {
+    display: none;
+}
+
+.module-rotation-button {
+    flex-grow: 1;
 }
 
 .module-rotation-icon--counter {
     scale: -1 1;
 }
 
-.module-rotation-buttons--hidden {
-    display: none;
-}
-
-.remove-module-button {
-    margin-top: 24px;
-}
-
-.remove-module-button--hidden {
-    display: none;
-}
-
-/* ---------- Right Panel: Ship Resources ---------- */
-.ship-resources-panel {
-    position: absolute;
-    right: 16px;
-    bottom: 200px;
-    width: 280px;
-    padding: 16px;
-    background-color: var(--color-surface);
-    border-width: 1px;
-    border-color: var(--color-border);
-    border-radius: var(--radius-lg);
-}
-
-.ship-resources-title {
-    margin-bottom: 12px;
-}
-
-.ship-resource-row {
-    margin-bottom: 12px;
-}
-
-.ship-resource-label {
-    margin-bottom: 4px;
-}
-
-.ship-resource-bar-track {
-    position: relative;
-    height: 8px;
-    background-color: var(--color-surface);
-    border-width: 1px;
-    border-color: var(--color-border);
-    border-radius: var(--radius-sm);
-    overflow: hidden;
-}
-
-.ship-resource-bar-fill {
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 0;
-}
-
-.ship-resource-bar-fill--usage {
-    background-color: #00e5ff;
-}
-
-.ship-resource-bar-fill--buffer {
-    background-color: #00ff66;
-}
-
-/* ---------- Input Blocker & Popups ---------- */
 .ship-factory-input-blocker {
+    display: none;
     position: absolute;
     left: 0;
     top: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.3);
-    display: none;
+    background-color: var(--color-overlay);
 }
 
 .action-popup {
+    display: none;
     position: absolute;
     left: 50%;
     top: 80px;
     translate: -50% 0;
-    display: none;
-    min-width: 0;
     max-width: 600px;
-}
-
-.action-popup-label {
-    -unity-text-align: middle-center;
-    white-space: normal;
 }

@@ -11,14 +11,14 @@ namespace ShipFactory.UI.ToolkitComponents
         private readonly Label _moduleDescriptionLabel;
 
         private readonly Label _moduleNameLabel;
-        private readonly Label _moduleSizeLabel;
-        private readonly Label _moduleTypeLabel;
+        private readonly Label _moduleSizeValueLabel;
+        private readonly Label _moduleTypeValueLabel;
         private readonly Button _removeModuleButton;
-        private readonly Label _resourceCrewNeededLabel;
-        private readonly Label _resourceCrewQuartersLabel;
-        private readonly Label _resourceEnergyCapacityLabel;
-        private readonly Label _resourceEnergyDrawLabel;
-        private readonly Label _resourceEnergyProductionLabel;
+        private readonly Label _resourceCrewNeededValueLabel;
+        private readonly Label _resourceCrewQuartersValueLabel;
+        private readonly Label _resourceEnergyCapacityValueLabel;
+        private readonly Label _resourceEnergyDrawValueLabel;
+        private readonly Label _resourceEnergyProductionValueLabel;
         private readonly Button _rotateClockwiseButton;
         private readonly Button _rotateCounterButton;
         private readonly VisualElement _rotationButtonsContainer;
@@ -26,23 +26,24 @@ namespace ShipFactory.UI.ToolkitComponents
         public ModuleInfoPanel(VisualElement root)
         {
             _moduleNameLabel = root.Q<Label>("module-info-name");
-            _moduleTypeLabel = root.Q<Label>("module-info-type");
-            _moduleSizeLabel = root.Q<Label>("module-info-size");
+            _moduleTypeValueLabel = root.Q<Label>("module-info-type-value");
+            _moduleSizeValueLabel = root.Q<Label>("module-info-size-value");
             _moduleDescriptionLabel = root.Q<Label>("module-info-description");
-            _resourceEnergyProductionLabel = root.Q<Label>("module-info-resource-energy-production");
-            _resourceEnergyDrawLabel = root.Q<Label>("module-info-resource-energy-draw");
-            _resourceEnergyCapacityLabel = root.Q<Label>("module-info-resource-energy-capacity");
-            _resourceCrewNeededLabel = root.Q<Label>("module-info-resource-crew-needed");
-            _resourceCrewQuartersLabel = root.Q<Label>("module-info-resource-crew-quarters");
+            _resourceEnergyProductionValueLabel = root.Q<Label>("module-info-resource-energy-production-value");
+            _resourceEnergyDrawValueLabel = root.Q<Label>("module-info-resource-energy-draw-value");
+            _resourceEnergyCapacityValueLabel = root.Q<Label>("module-info-resource-energy-capacity-value");
+            _resourceCrewNeededValueLabel = root.Q<Label>("module-info-resource-crew-needed-value");
+            _resourceCrewQuartersValueLabel = root.Q<Label>("module-info-resource-crew-quarters-value");
             _removeModuleButton = root.Q<Button>("remove-module-button");
             _rotationButtonsContainer = root.Q<VisualElement>("module-rotation-buttons");
             _rotateCounterButton = root.Q<Button>("rotate-counter-button");
             _rotateClockwiseButton = root.Q<Button>("rotate-clockwise-button");
 
-            if (_moduleNameLabel == null || _moduleTypeLabel == null || _moduleSizeLabel == null ||
-                _moduleDescriptionLabel == null || _resourceEnergyProductionLabel == null ||
-                _resourceEnergyDrawLabel == null || _resourceEnergyCapacityLabel == null ||
-                _resourceCrewNeededLabel == null || _resourceCrewQuartersLabel == null || _removeModuleButton == null ||
+            if (_moduleNameLabel == null || _moduleTypeValueLabel == null || _moduleSizeValueLabel == null ||
+                _moduleDescriptionLabel == null || _resourceEnergyProductionValueLabel == null ||
+                _resourceEnergyDrawValueLabel == null || _resourceEnergyCapacityValueLabel == null ||
+                _resourceCrewNeededValueLabel == null || _resourceCrewQuartersValueLabel == null ||
+                _removeModuleButton == null ||
                 _rotationButtonsContainer == null || _rotateCounterButton == null || _rotateClockwiseButton == null)
                 throw new InvalidOperationException(
                     "[ShipFactoryModuleInfoPanel] Required details panel elements are missing in UXML!");
@@ -65,8 +66,8 @@ namespace ShipFactory.UI.ToolkitComponents
                     $"[ShipFactoryModuleInfoPanel] Prefab '{moduleSO.Prefab.name}' is missing IModule component.");
 
             _moduleNameLabel.text = moduleSO.Name;
-            _moduleTypeLabel.text = $"Type: {module.Type}";
-            _moduleSizeLabel.text = $"Dimensions: {moduleSO.Dimensions.x}x{moduleSO.Dimensions.y}";
+            _moduleTypeValueLabel.text = module.Type.ToString();
+            _moduleSizeValueLabel.text = $"{moduleSO.Dimensions.x}x{moduleSO.Dimensions.y}";
             _moduleDescriptionLabel.text = string.IsNullOrWhiteSpace(moduleSO.Description)
                 ? "No description."
                 : moduleSO.Description;
@@ -79,15 +80,15 @@ namespace ShipFactory.UI.ToolkitComponents
         public void ApplyEmptyInfo()
         {
             _moduleNameLabel.text = "No module selected";
-            _moduleTypeLabel.text = "Type: -";
-            _moduleSizeLabel.text = "Dimensions: -";
+            _moduleTypeValueLabel.text = "-";
+            _moduleSizeValueLabel.text = "-";
             _moduleDescriptionLabel.text = "Hover or drag a module to inspect it.";
 
-            _resourceEnergyProductionLabel.text = "Energy Production: -";
-            _resourceEnergyDrawLabel.text = "Energy Draw: -";
-            _resourceEnergyCapacityLabel.text = "Energy Capacity: -";
-            _resourceCrewNeededLabel.text = "Crew Needed: -";
-            _resourceCrewQuartersLabel.text = "Crew Quarters: -";
+            _resourceEnergyProductionValueLabel.text = "-";
+            _resourceEnergyDrawValueLabel.text = "-";
+            _resourceEnergyCapacityValueLabel.text = "-";
+            _resourceCrewNeededValueLabel.text = "-";
+            _resourceCrewQuartersValueLabel.text = "-";
 
             _removeModuleButton.SetEnabled(false);
             _removeModuleButton.AddToClassList(RemoveButtonHiddenClassName);
@@ -99,11 +100,11 @@ namespace ShipFactory.UI.ToolkitComponents
 
         private void ApplyResources(Resources resources)
         {
-            _resourceEnergyProductionLabel.text = $"Energy Production: {resources.energyProduction:0.##}";
-            _resourceEnergyDrawLabel.text = $"Energy Draw: {resources.energyDraw:0.##}";
-            _resourceEnergyCapacityLabel.text = $"Energy Capacity: {resources.energyCapacity:0.##}";
-            _resourceCrewNeededLabel.text = $"Crew Needed: {resources.crewNeeded}";
-            _resourceCrewQuartersLabel.text = $"Crew Quarters: {resources.crewQuarters}";
+            _resourceEnergyProductionValueLabel.text = $"{resources.energyProduction:0.##}";
+            _resourceEnergyDrawValueLabel.text = $"{resources.energyDraw:0.##}";
+            _resourceEnergyCapacityValueLabel.text = $"{resources.energyCapacity:0.##}";
+            _resourceCrewNeededValueLabel.text = $"{resources.crewNeeded}";
+            _resourceCrewQuartersValueLabel.text = $"{resources.crewQuarters}";
         }
 
         private void UpdateRemoveButton(bool isNewModuleContext, bool isInputLocked, bool isDraggingModule)

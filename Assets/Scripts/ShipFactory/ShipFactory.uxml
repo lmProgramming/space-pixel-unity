@@ -7,12 +7,11 @@
 
     <!-- Top bar -->
     <ui:VisualElement name="top-bar" class="top-bar">
-        <ui:Label name="ship-label" text="Ship Factory  —  drag a module onto the ship"
-                  class="top-bar-label ds-body-1"/>
+        <ui:Label name="ship-label" text="Ship Factory  —  drag a module onto the ship" class="ds-body-1"/>
         <ui:VisualElement class="spacer"/>
-        <ui:TextField name="ship-name-field" label="Name" value="Ship" class="ds-input ship-name-field"
-                      max-length="64"/>
-        <ui:Button name="save-ship-button" text="Save Snapshot" class="ds-btn ds-btn--primary save-ship-button"/>
+        <ui:TextField name="ship-name-field" label="Name" value="Ship" class="ds-input" max-length="64"
+                      style="min-width: 260px; margin-right: 12px;"/>
+        <ui:Button name="save-ship-button" text="Save Snapshot" class="ds-btn ds-btn--primary"/>
     </ui:VisualElement>
 
     <!-- Canvas area: drag-and-drop surface -->
@@ -23,61 +22,79 @@
     </ui:VisualElement>
 
     <!-- Bottom-left details panel for dragged/selected modules -->
-    <ui:VisualElement name="module-info-panel" class="module-info-panel">
-        <ui:Label text="Module Details" class="module-info-title ds-h3"/>
-        <ui:Label name="module-info-name" text="No module selected" class="module-info-name ds-body-1"/>
-        <ui:Label name="module-info-type" text="Type: -" class="module-info-field ds-body-2"/>
-        <ui:Label name="module-info-size" text="Size: -" class="module-info-field ds-body-2"/>
-        <ui:Label name="module-info-description" text="Hover or drag a module to inspect it."
-                  class="module-info-description ds-body-2"/>
-        <ui:Label name="module-info-resource-energy-production" text="Energy Production: -"
-                  class="module-info-field ds-body-2"/>
-        <ui:Label name="module-info-resource-energy-draw" text="Energy Draw: -"
-                  class="module-info-field ds-body-2"/>
-        <ui:Label name="module-info-resource-energy-capacity" text="Energy Capacity: -"
-                  class="module-info-field ds-body-2"/>
-        <ui:Label name="module-info-resource-crew-needed" text="Crew Needed: -"
-                  class="module-info-field ds-body-2"/>
-        <ui:Label name="module-info-resource-crew-quarters" text="Crew Quarters: -"
-                  class="module-info-field ds-body-2"/>
+    <ui:VisualElement name="module-info-panel" class="ds-card module-info-panel ds-col-gap">
+        <ui:Label text="Module Details" class="ds-h3"/>
+        <ui:Label name="module-info-name" text="No module selected" class="ds-body-2 ds-text-primary"/>
+        <ui:VisualElement class="ds-info-row">
+            <ui:Label text="Type" class="ds-info-row__label"/>
+            <ui:Label name="module-info-type-value" text="-" class="ds-info-row__value"/>
+        </ui:VisualElement>
+        <ui:VisualElement class="ds-info-row">
+            <ui:Label text="Dimensions" class="ds-info-row__label"/>
+            <ui:Label name="module-info-size-value" text="-" class="ds-info-row__value"/>
+        </ui:VisualElement>
+        <ui:Label name="module-info-description" text="Hover or drag a module to inspect it." class="ds-body-2"
+                  style="white-space: normal;"/>
+        <ui:VisualElement class="ds-info-row">
+            <ui:Label text="Energy Production" class="ds-info-row__label"/>
+            <ui:Label name="module-info-resource-energy-production-value" text="-"
+                      class="ds-info-row__value"/>
+        </ui:VisualElement>
+        <ui:VisualElement class="ds-info-row">
+            <ui:Label text="Energy Draw" class="ds-info-row__label"/>
+            <ui:Label name="module-info-resource-energy-draw-value" text="-" class="ds-info-row__value"/>
+        </ui:VisualElement>
+        <ui:VisualElement class="ds-info-row">
+            <ui:Label text="Energy Capacity" class="ds-info-row__label"/>
+            <ui:Label name="module-info-resource-energy-capacity-value" text="-" class="ds-info-row__value"/>
+        </ui:VisualElement>
+        <ui:VisualElement class="ds-info-row">
+            <ui:Label text="Crew Needed" class="ds-info-row__label"/>
+            <ui:Label name="module-info-resource-crew-needed-value" text="-" class="ds-info-row__value"/>
+        </ui:VisualElement>
+        <ui:VisualElement class="ds-info-row">
+            <ui:Label text="Crew Quarters" class="ds-info-row__label"/>
+            <ui:Label name="module-info-resource-crew-quarters-value" text="-" class="ds-info-row__value"/>
+        </ui:VisualElement>
         <ui:VisualElement name="module-rotation-buttons"
                           class="ds-row module-rotation-buttons--hidden ds-row__gap">
             <ui:Button name="rotate-counter-button"
-                       class="ds-btn ds-btn--secondary module-rotation-button">
-                <ui:VisualElement class="ds-icon ds-icon--refresh module-rotation-icon--counter"/>
+                       class="ds-btn ds-btn--secondary ds-btn--with-icon module-rotation-button">
+                <ui:VisualElement class="ds-icon ds-icon--refresh ds-btn__icon module-rotation-icon--counter"/>
                 <ui:Label text="Rotate"/>
             </ui:Button>
             <ui:Button name="rotate-clockwise-button"
-                       class="ds-btn ds-btn--secondary module-rotation-button"
-                       style="margin-right: 0px;">
-                <ui:VisualElement class="ds-icon ds-icon--refresh"/>
+                       class="ds-btn ds-btn--secondary ds-btn--with-icon module-rotation-button"
+                       style="margin-right: 0px">
+                <ui:VisualElement class="ds-icon ds-icon--refresh ds-btn__icon"/>
                 <ui:Label text="Rotate"/>
             </ui:Button>
         </ui:VisualElement>
         <ui:Button name="remove-module-button" text="Remove Module"
-                   class="remove-module-button remove-module-button--hidden ds-btn ds-btn--danger"
-                   style="margin-top: 18px;"/>
+                   class="remove-module-button--hidden ds-btn ds-btn--danger ds-btn--block"/>
     </ui:VisualElement>
 
     <!-- Bottom-right resources panel -->
-    <ui:VisualElement name="ship-resources-panel" class="ship-resources-panel">
-        <ui:Label text="Ship Resources" class="ship-resources-title ds-h3"/>
-        <ui:VisualElement class="ship-resource-row">
-            <ui:Label name="ship-resource-energy-label" text="Energy: -" class="ship-resource-label ds-body-2"/>
+    <ui:VisualElement name="ship-resources-panel" class="ds-card ship-resources-panel ds-col-gap">
+        <ui:Label text="Ship Resources" class="ds-h3"/>
+        <ui:VisualElement class="ds-progress-row">
+            <ui:VisualElement class="ds-info-row">
+                <ui:Label text="Energy" class="ds-info-row__label"/>
+                <ui:Label name="ship-resource-energy-value" text="-" class="ds-info-row__value"/>
+            </ui:VisualElement>
             <ui:VisualElement class="ship-resource-bar-track">
-                <ui:VisualElement name="ship-resource-energy-fill"
-                                  class="ship-resource-bar-fill ship-resource-bar-fill--usage"/>
-                <ui:VisualElement name="ship-resource-energy-buffer-fill"
-                                  class="ship-resource-bar-fill ship-resource-bar-fill--buffer"/>
+                <ui:VisualElement name="ship-resource-energy-fill" class="ship-resource-bar-fill"/>
+                <ui:VisualElement name="ship-resource-energy-buffer-fill" class="ship-resource-bar-fill"/>
             </ui:VisualElement>
         </ui:VisualElement>
-        <ui:VisualElement class="ship-resource-row">
-            <ui:Label name="ship-resource-crew-label" text="Crew: -" class="ship-resource-label ds-body-2"/>
+        <ui:VisualElement class="ds-progress-row">
+            <ui:VisualElement class="ds-info-row">
+                <ui:Label text="Crew" class="ds-info-row__label"/>
+                <ui:Label name="ship-resource-crew-value" text="-" class="ds-info-row__value"/>
+            </ui:VisualElement>
             <ui:VisualElement class="ship-resource-bar-track">
-                <ui:VisualElement name="ship-resource-crew-fill"
-                                  class="ship-resource-bar-fill ship-resource-bar-fill--usage"/>
-                <ui:VisualElement name="ship-resource-crew-buffer-fill"
-                                  class="ship-resource-bar-fill ship-resource-bar-fill--buffer"/>
+                <ui:VisualElement name="ship-resource-crew-fill" class="ship-resource-bar-fill"/>
+                <ui:VisualElement name="ship-resource-crew-buffer-fill" class="ship-resource-bar-fill"/>
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
@@ -85,17 +102,17 @@
     <!-- Bottom palette panel -->
     <ui:VisualElement name="palette-panel" class="palette-panel">
         <!-- Module type tab buttons -->
-        <ui:VisualElement name="palette-tabs" class="palette-tabs ds-tabs">
-            <ui:Button name="tab-Command" text="Command" class="palette-tab ds-tab is-active"/>
-            <ui:Button name="tab-Resources" text="Resources" class="palette-tab ds-tab"/>
-            <ui:Button name="tab-Weapon" text="Weapon" class="palette-tab ds-tab"/>
-            <ui:Button name="tab-Engine" text="Engine" class="palette-tab ds-tab"/>
+        <ui:VisualElement name="palette-tabs" class="ds-tabs">
+            <ui:Button name="tab-Command" text="Command" class="ds-tab is-active"/>
+            <ui:Button name="tab-Resources" text="Resources" class="ds-tab"/>
+            <ui:Button name="tab-Weapon" text="Weapon" class="ds-tab"/>
+            <ui:Button name="tab-Engine" text="Engine" class="ds-tab"/>
         </ui:VisualElement>
 
         <!-- Module list for the selected type -->
         <ui:ScrollView name="palette-scroll" class="palette-scroll" horizontal-scroller-visibility="Hidden"
                        vertical-scroller-visibility="Hidden" mode="Horizontal">
-            <ui:VisualElement name="palette-content" class="palette-content"/>
+            <ui:VisualElement name="palette-content" class="palette-content ds-row ds-row__gap"/>
         </ui:ScrollView>
     </ui:VisualElement>
 
@@ -106,9 +123,9 @@
     <ui:VisualElement name="drag-ghost" class="drag-ghost hidden" picking-mode="Ignore"/>
 
     <!-- Popup feedback for actions like blocked delete attempts -->
-    <ui:VisualElement name="action-popup" class="action-popup ds-toast ds-toast--warning">
-        <ui:VisualElement class="ds-icon ds-icon--sm ds-icon--warning ds-toast__icon"/>
-        <ui:Label text="LOOOL" name="action-popup-label" class="ds-toast__message"/>
+    <ui:VisualElement name="action-popup" class="action-popup ds-toast">
+        <ui:VisualElement name="action-popup-icon" class="ds-icon ds-icon--sm ds-toast__icon"/>
+        <ui:Label text="" name="action-popup-label" class="ds-toast__message"/>
     </ui:VisualElement>
 
     <ui:VisualElement name="pause-overlay-host"

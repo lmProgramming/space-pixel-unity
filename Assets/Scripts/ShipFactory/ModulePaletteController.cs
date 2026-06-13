@@ -9,7 +9,12 @@ namespace ShipFactory
     public class ModulePaletteController
     {
         private const string ActiveTabClass = "is-active";
-        private const string DraggingCardClass = "module-card--dragging";
+        private const string DraggingCardClass = "palette-card--dragging";
+        private const string AnimalCardClass = "ds-animal-card";
+        private const string AnimalCardImageClass = "ds-animal-card__image";
+        private const string AnimalCardTitleRowClass = "ds-animal-card__title-row";
+        private const string AnimalCardTitleClass = "ds-body-2";
+        private const string PaletteCardSpriteClass = "palette-card__sprite";
         private readonly ModulePrefabLibrary _library;
 
         private readonly VisualElement _paletteContent;
@@ -94,24 +99,30 @@ namespace ShipFactory
         private VisualElement BuildModuleCard(ShipModuleSO moduleSO)
         {
             var card = new VisualElement();
-            card.AddToClassList("module-card");
+            card.AddToClassList(AnimalCardClass);
             card.tooltip = moduleSO.Description;
 
-            var prefab = moduleSO.Prefab;
+            var image = new VisualElement();
+            image.AddToClassList(AnimalCardImageClass);
 
-            var icon = new VisualElement();
-            icon.AddToClassList("module-card-icon");
-
-            var pixelatedRigidbody = prefab.GetComponent<IPixelatedSprite>();
+            var pixelatedRigidbody = moduleSO.Prefab.GetComponent<IPixelatedSprite>();
             var sprite = pixelatedRigidbody?.GetSprite();
             if (sprite != null)
-                icon.style.backgroundImage = Background.FromSprite(sprite);
+            {
+                var spriteImage = new Image { sprite = sprite, scaleMode = ScaleMode.ScaleToFit };
+                spriteImage.AddToClassList(PaletteCardSpriteClass);
+                image.Add(spriteImage);
+            }
 
-            var label = new Label(moduleSO.Name);
-            label.AddToClassList("module-card-label");
+            var titleRow = new VisualElement();
+            titleRow.AddToClassList(AnimalCardTitleRowClass);
 
-            card.Add(icon);
-            card.Add(label);
+            var title = new Label(moduleSO.Name);
+            title.AddToClassList(AnimalCardTitleClass);
+
+            titleRow.Add(title);
+            card.Add(image);
+            card.Add(titleRow);
 
             RegisterCardDragEvents(card, moduleSO);
             return card;
