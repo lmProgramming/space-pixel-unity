@@ -13,6 +13,8 @@ namespace ShipFactory.LegalPositionCalculator
 
     public static class Calculator
     {
+        private const float EdgeEpsilon = 0.001f;
+
         public static PositionLegality CalculateLegalityPosition(ShipModuleSOInstanceBundle bundleToCheck,
             IEnumerable<ShipModuleSOInstanceBundle> placedElements)
         {
@@ -45,34 +47,33 @@ namespace ShipFactory.LegalPositionCalculator
         private static (Vector2, Vector2) GetBottomLeftAndTopRightPositions(
             ShipModuleSOInstanceBundle bundleToCheck)
         {
-            var dimensions = bundleToCheck.ModuleSO.Dimensions;
-            var position = (Vector2)bundleToCheck.Instance.transform.position;
-
-            var bottomLeft = position - (Vector2)dimensions / 2;
-            var topRight = position + (Vector2)dimensions / 2;
-
-            return (bottomLeft, topRight);
+            return ModuleRotationUtility.GetAxisAlignedBounds(bundleToCheck);
         }
 
         private static bool Overlap(Vector2 aMin, Vector2 aMax, Vector2 bMin, Vector2 bMax)
         {
-            return aMin.x < bMax.x &&
-                   aMax.x > bMin.x &&
-                   aMin.y < bMax.y &&
-                   aMax.y > bMin.y;
+            return aMin.x < bMax.x - EdgeEpsilon &&
+                   aMax.x > bMin.x + EdgeEpsilon &&
+                   aMin.y < bMax.y - EdgeEpsilon &&
+                   aMax.y > bMin.y + EdgeEpsilon;
         }
 
         private static bool TouchSides(Vector2 aMin, Vector2 aMax, Vector2 bMin, Vector2 bMax)
         {
             var touchVertical =
                 (Mathf.Approximately(aMax.x, bMin.x) || Mathf.Approximately(aMin.x, bMax.x)) &&
-                aMax.y > bMin.y && aMin.y < bMax.y;
+                GetSharedSpan(aMin.y, aMax.y, bMin.y, bMax.y) >= EdgeEpsilon;
 
             var touchHorizontal =
                 (Mathf.Approximately(aMax.y, bMin.y) || Mathf.Approximately(aMin.y, bMax.y)) &&
-                aMax.x > bMin.x && aMin.x < bMax.x;
+                GetSharedSpan(aMin.x, aMax.x, bMin.x, bMax.x) >= EdgeEpsilon;
 
             return touchVertical || touchHorizontal;
+        }
+
+        private static float GetSharedSpan(float aMin, float aMax, float bMin, float bMax)
+        {
+            return Mathf.Max(0f, Mathf.Min(aMax, bMax) - Mathf.Max(aMin, bMin));
         }
 
         private static bool KeepsSingleConnectedShip(List<ShipModuleSOInstanceBundle> bundles)

@@ -170,6 +170,18 @@ Set placeholders via `field.textEdition.placeholder = "..."` in C#. Unity 6's AP
 | `.ds-stepper` | Quantity selector container. |
 | `.ds-stepper__btn` | − / + button. |
 | `.ds-stepper__value` | Value display. |
+| `.ds-row` | Horizontal flex row with centred children; adds bottom margin for stacked showcase rows. |
+| `.ds-row__gap` | Margin-based horizontal spacing between direct children (`--space-2`). Use instead of CSS `gap`, which UI Toolkit does not support. Pair with `.ds-row` or any `flex-direction: row` container. |
+| `.ds-col-gap` | Margin-based vertical spacing between direct children (`--space-2`). Use on column-flex containers. |
+
+DOM (row gap):
+
+```xml
+<ui:VisualElement class="ds-row ds-row__gap">
+    <ui:Button class="ds-btn ds-btn--secondary" />
+    <ui:Button class="ds-btn ds-btn--secondary" />
+</ui:VisualElement>
+```
 
 ## Icons
 

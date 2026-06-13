@@ -54,6 +54,7 @@ namespace ShipFactory
         {
             _canvasController?.RefreshShipResourcesPanel();
             HandlePauseInput();
+            HandleRotationInput();
         }
 
         private void OnEnable()
@@ -215,6 +216,16 @@ namespace ShipFactory
             quitButton.clicked += QuitToMainMenu;
             _settingsPanelController = new SettingsPanelController(root, false);
             _pauseUiInitialized = true;
+        }
+
+        private void HandleRotationInput()
+        {
+            if (_isPaused || _canvasController == null) return;
+            if (_shipNameField.focusController?.focusedElement == _shipNameField) return;
+            if (!Input.GetKeyDown(KeyCode.R)) return;
+
+            var counterClockwise = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+            _canvasController.RotateActiveModule(counterClockwise ? -90 : 90);
         }
 
         private void HandlePauseInput()

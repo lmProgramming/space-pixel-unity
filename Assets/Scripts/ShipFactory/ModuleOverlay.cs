@@ -17,7 +17,7 @@ namespace ShipFactory
         {
             var go = new GameObject($"Overlay_{bundle.ModuleSO.Name}");
             go.transform.SetParent(parent, false);
-            go.transform.position = bundle.Instance.transform.position;
+            SyncTransformFromBundle(go.transform, bundle);
 
             var overlay = go.AddComponent<ModuleOverlay>();
             overlay._renderer = go.AddComponent<SpriteRenderer>();
@@ -34,6 +34,12 @@ namespace ShipFactory
         public void SetColor(Color color)
         {
             _renderer.color = color;
+        }
+
+        public static void SyncTransformFromBundle(Transform overlayTransform, ShipModuleSOInstanceBundle bundle)
+        {
+            overlayTransform.position = bundle.Instance.transform.position;
+            overlayTransform.rotation = bundle.Instance.transform.rotation;
         }
 
         private static Sprite GetOrCreateSprite()

@@ -66,7 +66,16 @@ namespace ShipFactory.UI.Runtime
         public void SetPosition(ShipModuleSOInstanceBundle bundle, Vector2 worldPos)
         {
             bundle.Instance.transform.position = worldPos;
-            if (_bundleToOverlay.TryGetValue(bundle, out var overlay)) overlay.transform.position = worldPos;
+            SyncTransformFromBundle(bundle);
+        }
+
+        public void SyncTransformFromBundle(ShipModuleSOInstanceBundle bundle)
+        {
+            if (!_bundleToOverlay.TryGetValue(bundle, out var overlay)) return;
+
+            ModuleOverlay.SyncTransformFromBundle(overlay.transform, bundle);
+            var dims = bundle.ModuleSO.Dimensions;
+            overlay.transform.localScale = new Vector3(dims.x, dims.y, 1f);
         }
 
         public void SetColor(ShipModuleSOInstanceBundle bundle, Color color)
@@ -77,14 +86,8 @@ namespace ShipFactory.UI.Runtime
         public ShipModuleSOInstanceBundle FindBundleAtWorldPosition(Vector2 worldPos)
         {
             foreach (var (bundle, _) in _bundleToOverlay)
-            {
-                var pos = (Vector2)bundle.Instance.transform.position;
-                var halfDims = (Vector2)bundle.ModuleSO.Dimensions / 2f;
-
-                if (worldPos.x >= pos.x - halfDims.x && worldPos.x <= pos.x + halfDims.x &&
-                    worldPos.y >= pos.y - halfDims.y && worldPos.y <= pos.y + halfDims.y)
+                if (ModuleRotationUtility.ContainsWorldPoint(bundle, worldPos))
                     return bundle;
-            }
 
             return null;
         }

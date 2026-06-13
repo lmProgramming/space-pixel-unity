@@ -7,6 +7,7 @@ namespace ShipFactory.UI.ToolkitComponents
     public class ModuleInfoPanel
     {
         private const string RemoveButtonHiddenClassName = "remove-module-button--hidden";
+        private const string RotationButtonsHiddenClassName = "module-rotation-buttons--hidden";
         private readonly Label _moduleDescriptionLabel;
 
         private readonly Label _moduleNameLabel;
@@ -18,6 +19,9 @@ namespace ShipFactory.UI.ToolkitComponents
         private readonly Label _resourceEnergyCapacityLabel;
         private readonly Label _resourceEnergyDrawLabel;
         private readonly Label _resourceEnergyProductionLabel;
+        private readonly Button _rotateClockwiseButton;
+        private readonly Button _rotateCounterButton;
+        private readonly VisualElement _rotationButtonsContainer;
 
         public ModuleInfoPanel(VisualElement root)
         {
@@ -31,18 +35,26 @@ namespace ShipFactory.UI.ToolkitComponents
             _resourceCrewNeededLabel = root.Q<Label>("module-info-resource-crew-needed");
             _resourceCrewQuartersLabel = root.Q<Label>("module-info-resource-crew-quarters");
             _removeModuleButton = root.Q<Button>("remove-module-button");
+            _rotationButtonsContainer = root.Q<VisualElement>("module-rotation-buttons");
+            _rotateCounterButton = root.Q<Button>("rotate-counter-button");
+            _rotateClockwiseButton = root.Q<Button>("rotate-clockwise-button");
 
             if (_moduleNameLabel == null || _moduleTypeLabel == null || _moduleSizeLabel == null ||
                 _moduleDescriptionLabel == null || _resourceEnergyProductionLabel == null ||
                 _resourceEnergyDrawLabel == null || _resourceEnergyCapacityLabel == null ||
-                _resourceCrewNeededLabel == null || _resourceCrewQuartersLabel == null || _removeModuleButton == null)
+                _resourceCrewNeededLabel == null || _resourceCrewQuartersLabel == null || _removeModuleButton == null ||
+                _rotationButtonsContainer == null || _rotateCounterButton == null || _rotateClockwiseButton == null)
                 throw new InvalidOperationException(
                     "[ShipFactoryModuleInfoPanel] Required details panel elements are missing in UXML!");
 
             _removeModuleButton.clicked += () => OnRemoveModuleClicked?.Invoke();
+            _rotateClockwiseButton.clicked += () => OnRotateClockwiseClicked?.Invoke();
+            _rotateCounterButton.clicked += () => OnRotateCounterClockwiseClicked?.Invoke();
         }
 
         public event Action OnRemoveModuleClicked;
+        public event Action OnRotateClockwiseClicked;
+        public event Action OnRotateCounterClockwiseClicked;
 
         public void ApplyPaletteInfo(ShipModuleSO moduleSO, bool isNewModuleContext, bool isInputLocked,
             bool isDraggingModule)
@@ -61,6 +73,7 @@ namespace ShipFactory.UI.ToolkitComponents
 
             ApplyResources(module.Resources);
             UpdateRemoveButton(isNewModuleContext, isInputLocked, isDraggingModule);
+            UpdateRotationButtons(isNewModuleContext, isInputLocked, isDraggingModule);
         }
 
         public void ApplyEmptyInfo()
@@ -78,6 +91,10 @@ namespace ShipFactory.UI.ToolkitComponents
 
             _removeModuleButton.SetEnabled(false);
             _removeModuleButton.AddToClassList(RemoveButtonHiddenClassName);
+
+            _rotateClockwiseButton.SetEnabled(false);
+            _rotateCounterButton.SetEnabled(false);
+            _rotationButtonsContainer.AddToClassList(RotationButtonsHiddenClassName);
         }
 
         private void ApplyResources(Resources resources)
@@ -100,6 +117,23 @@ namespace ShipFactory.UI.ToolkitComponents
 
             _removeModuleButton.RemoveFromClassList(RemoveButtonHiddenClassName);
             _removeModuleButton.SetEnabled(!isInputLocked && !isDraggingModule);
+        }
+
+        private void UpdateRotationButtons(bool isNewModuleContext, bool isInputLocked, bool isDraggingModule)
+        {
+            var showRotationButtons = isDraggingModule || !isNewModuleContext;
+            if (!showRotationButtons)
+            {
+                _rotateClockwiseButton.SetEnabled(false);
+                _rotateCounterButton.SetEnabled(false);
+                _rotationButtonsContainer.AddToClassList(RotationButtonsHiddenClassName);
+                return;
+            }
+
+            _rotationButtonsContainer.RemoveFromClassList(RotationButtonsHiddenClassName);
+            var isEnabled = !isInputLocked;
+            _rotateClockwiseButton.SetEnabled(isEnabled);
+            _rotateCounterButton.SetEnabled(isEnabled);
         }
     }
 }

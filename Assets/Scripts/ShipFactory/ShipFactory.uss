@@ -149,6 +149,14 @@
     padding-top: 4px;
 }
 
+.module-rotation-icon--counter {
+    scale: -1 1;
+}
+
+.module-rotation-buttons--hidden {
+    display: none;
+}
+
 .remove-module-button {
     margin-top: 24px;
 }

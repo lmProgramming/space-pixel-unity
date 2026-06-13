@@ -40,6 +40,20 @@
                   class="module-info-field ds-body-2"/>
         <ui:Label name="module-info-resource-crew-quarters" text="Crew Quarters: -"
                   class="module-info-field ds-body-2"/>
+        <ui:VisualElement name="module-rotation-buttons"
+                          class="ds-row module-rotation-buttons--hidden ds-row__gap">
+            <ui:Button name="rotate-counter-button"
+                       class="ds-btn ds-btn--secondary module-rotation-button">
+                <ui:VisualElement class="ds-icon ds-icon--refresh module-rotation-icon--counter"/>
+                <ui:Label text="Rotate"/>
+            </ui:Button>
+            <ui:Button name="rotate-clockwise-button"
+                       class="ds-btn ds-btn--secondary module-rotation-button"
+                       style="margin-right: 0px;">
+                <ui:VisualElement class="ds-icon ds-icon--refresh"/>
+                <ui:Label text="Rotate"/>
+            </ui:Button>
+        </ui:VisualElement>
         <ui:Button name="remove-module-button" text="Remove Module"
                    class="remove-module-button remove-module-button--hidden ds-btn ds-btn--danger"
                    style="margin-top: 18px;"/>
