@@ -78,7 +78,8 @@ Set placeholders via `field.textEdition.placeholder = "..."` in C#. Unity 6's AP
 | Class | Use |
 | --- | --- |
 | `.ds-animal-card` | Example product card; demonstrates layered children + `.is-selected` / `.is-epic` modifiers + check pin. |
-| `.ds-animal-card__image` | Top image area. |
+| `.ds-animal-card__image` | Top image area; clip child sprites with `overflow: hidden`. |
+| `.ds-animal-card__sprite` | Child `<Image scaleMode="ScaleToFit">` filling the image well. |
 | `.ds-animal-card__rarity` | Top-right rarity badge slot. |
 | `.ds-animal-card__title-row` | Title + accessory icon row. |
 | `.ds-animal-card__check` | The selected-state check pin (rendered last so it z-orders on top). |

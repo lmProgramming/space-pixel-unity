@@ -14,7 +14,7 @@ namespace ShipFactory
         private const string AnimalCardImageClass = "ds-animal-card__image";
         private const string AnimalCardTitleRowClass = "ds-animal-card__title-row";
         private const string AnimalCardTitleClass = "ds-body-2";
-        private const string PaletteCardSpriteClass = "palette-card__sprite";
+        private const string AnimalCardSpriteClass = "ds-animal-card__sprite";
         private readonly ModulePrefabLibrary _library;
 
         private readonly VisualElement _paletteContent;
@@ -110,7 +110,7 @@ namespace ShipFactory
             if (sprite != null)
             {
                 var spriteImage = new Image { sprite = sprite, scaleMode = ScaleMode.ScaleToFit };
-                spriteImage.AddToClassList(PaletteCardSpriteClass);
+                spriteImage.AddToClassList(AnimalCardSpriteClass);
                 image.Add(spriteImage);
             }
 

@@ -33,8 +33,7 @@
             <ui:Label text="Dimensions" class="ds-info-row__label"/>
             <ui:Label name="module-info-size-value" text="-" class="ds-info-row__value"/>
         </ui:VisualElement>
-        <ui:Label name="module-info-description" text="Hover or drag a module to inspect it." class="ds-body-2"
-                  style="white-space: normal;"/>
+        <ui:Label name="module-info-description" text="Hover or drag a module to inspect it." class="ds-body-2"/>
         <ui:VisualElement class="ds-info-row">
             <ui:Label text="Energy Production" class="ds-info-row__label"/>
             <ui:Label name="module-info-resource-energy-production-value" text="-"
@@ -102,7 +101,7 @@
     <!-- Bottom palette panel -->
     <ui:VisualElement name="palette-panel" class="palette-panel">
         <!-- Module type tab buttons -->
-        <ui:VisualElement name="palette-tabs" class="ds-tabs">
+        <ui:VisualElement name="palette-tabs" class="palette-tabs ds-tabs">
             <ui:Button name="tab-Command" text="Command" class="ds-tab is-active"/>
             <ui:Button name="tab-Resources" text="Resources" class="ds-tab"/>
             <ui:Button name="tab-Weapon" text="Weapon" class="ds-tab"/>

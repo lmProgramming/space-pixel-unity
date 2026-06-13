@@ -38,9 +38,15 @@
     flex-direction: column;
     flex-shrink: 0;
     height: 180px;
-    background-color: var(--color-surface-elev);
+    background-color: var(--color-surface);
     border-top-width: 1px;
     border-top-color: var(--color-border);
+}
+
+.palette-tabs {
+    margin: var(--space-3);
+    margin-bottom: var(--space-2);
+    align-self: flex-start;
 }
 
 .palette-scroll {
@@ -75,32 +81,20 @@
     flex-direction: column;
 }
 
-.ship-resources-panel .ds-info-row {
-    height: auto;
-    min-height: 24px;
-}
-
 .ship-resources-panel .ds-info-row__label,
 .ship-resources-panel .ds-info-row__value {
     white-space: nowrap;
 }
 
-/* Palette cards — compact .ds-animal-card; hover transition comes from Cards.uss */
+/* Palette cards — wider/lower than showcase default; DS supplies surface + hover */
 .palette-content .ds-animal-card {
-    width: 128px;
+    width: 176px;
     flex-shrink: 0;
 }
 
 .palette-content .ds-animal-card__image {
-    height: 72px;
-    align-items: center;
-    justify-content: center;
-}
-
-.palette-card__sprite {
-    width: 64px;
-    height: 64px;
-    flex-shrink: 0;
+    height: 52px;
+    margin-bottom: var(--space-2);
 }
 
 .palette-content .ds-animal-card__title-row {
