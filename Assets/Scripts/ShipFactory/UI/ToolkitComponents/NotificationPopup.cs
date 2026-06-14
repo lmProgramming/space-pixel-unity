@@ -19,6 +19,7 @@ namespace ShipFactory.UI.ToolkitComponents
         private readonly VisualElement _actionPopup;
         private readonly VisualElement _actionPopupIcon;
         private readonly Label _actionPopupLabel;
+        private IVisualElementScheduledItem _hideJob;
 
         public NotificationPopup(VisualElement root)
         {
@@ -33,6 +34,8 @@ namespace ShipFactory.UI.ToolkitComponents
 
         public void Show(string message, PopupLevel level = PopupLevel.Info)
         {
+            _hideJob?.Pause();
+
             _actionPopup.RemoveFromClassList(ToastInfoClassName);
             _actionPopup.RemoveFromClassList(ToastWarningClassName);
             _actionPopup.RemoveFromClassList(ToastDangerClassName);
@@ -61,7 +64,11 @@ namespace ShipFactory.UI.ToolkitComponents
             _actionPopupLabel.text = message;
             _actionPopup.style.display = DisplayStyle.Flex;
 
-            _actionPopup.schedule.Execute(() => { _actionPopup.style.display = DisplayStyle.None; }).StartingIn(1600);
+            _hideJob = _actionPopup.schedule.Execute(() =>
+            {
+                _actionPopup.style.display = DisplayStyle.None;
+                _hideJob = null;
+            }).StartingIn(1600);
         }
     }
 }

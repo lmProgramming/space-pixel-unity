@@ -115,10 +115,8 @@
 
 .action-popup {
     position: absolute;
-    left: 50%;
     top: 80px;
-    translate: -50% 0;
-    max-width: 600px;
+    align-self: center;
 }
 
 .palette-card--dragging {

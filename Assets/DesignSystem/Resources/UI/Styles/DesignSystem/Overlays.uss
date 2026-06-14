@@ -10,7 +10,10 @@
 /* ---------- Backdrop (used to dim the screen behind modals) ---------- */
 .ds-backdrop {
     position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     background-color: var(--color-overlay);
     align-items: center;
     justify-content: center;
@@ -32,24 +35,28 @@
     justify-content: space-between;
     margin-bottom: var(--space-3);
 }
+
 .ds-modal__title {
     font-size: var(--font-size-h3);
     -unity-font-style: bold;
     color: var(--color-text-primary);
 }
+
 .ds-modal__close {
     width: 24px;
     height: 24px;
     border-width: 0;
-    background-color: rgba(0,0,0,0);
+    background-color: rgba(0, 0, 0, 0);
     align-items: center;
     justify-content: center;
     padding: 0;
     margin: 0;
 }
+
 .ds-modal__close .ds-icon {
     -unity-background-image-tint-color: var(--color-text-secondary);
 }
+
 .ds-modal__close:hover .ds-icon {
     -unity-background-image-tint-color: var(--color-text-primary);
 }
@@ -57,6 +64,7 @@
 .ds-modal__body {
     margin-bottom: var(--space-4);
 }
+
 .ds-modal__body-text {
     color: var(--color-text-secondary);
     white-space: normal;
@@ -65,11 +73,13 @@
 .ds-modal__actions {
     flex-direction: row;
 }
+
 .ds-modal__actions > .ds-btn {
     flex-grow: 1;
     margin-left: var(--space-2);
     margin-right: var(--space-2);
 }
+
 /* :first-child / :last-child not supported in Unity USS — handle in UXML if needed. */
 
 /* List-style modal (e.g., Sort by, Filter) */
@@ -81,6 +91,7 @@
     padding-left: var(--space-1);
     padding-right: var(--space-1);
 }
+
 .ds-modal__list-row .ds-modal__list-label {
     color: var(--color-text-primary);
 }
@@ -106,6 +117,7 @@
     width: 280px;
     align-items: center;
 }
+
 .ds-dialog__title {
     font-size: var(--font-size-h3);
     -unity-font-style: bold;
@@ -113,21 +125,24 @@
     margin-bottom: var(--space-2);
     -unity-text-align: middle-center;
 }
+
 .ds-dialog__message {
     color: var(--color-text-secondary);
     -unity-text-align: middle-center;
-    white-space: normal;
     margin-bottom: var(--space-4);
 }
+
 .ds-dialog__actions {
     flex-direction: row;
     width: 100%;
 }
+
 .ds-dialog__actions > .ds-btn {
     flex-grow: 1;
     margin-left: var(--space-2);
     margin-right: var(--space-2);
 }
+
 /* :first-child / :last-child not supported in Unity USS — handle in UXML if needed. */
 
 /* ---------- Toasts ----------
@@ -147,6 +162,7 @@
     margin-bottom: var(--space-2);
     background-color: var(--color-surface-elev);
 }
+
 .ds-toast__icon {
     width: 18px;
     height: 18px;
@@ -154,18 +170,20 @@
     flex-shrink: 0;
     flex-grow: 0;
 }
+
 .ds-toast__message {
     flex-grow: 1;
     flex-shrink: 1;
     color: var(--color-text-primary);
     font-size: var(--font-size-body-2);
-    white-space: normal;
+    white-space: nowrap;
 }
+
 .ds-toast__close {
     width: 18px;
     height: 18px;
     border-width: 0;
-    background-color: rgba(0,0,0,0);
+    background-color: rgba(0, 0, 0, 0);
     padding: 0;
     margin-left: var(--space-2);
     flex-shrink: 0;
@@ -173,9 +191,11 @@
     align-items: center;
     justify-content: center;
 }
+
 .ds-toast__close .ds-icon {
     -unity-background-image-tint-color: var(--color-text-secondary);
 }
+
 .ds-toast__close:hover .ds-icon {
     -unity-background-image-tint-color: var(--color-text-primary);
 }
@@ -184,25 +204,37 @@
     background-color: var(--color-primary-soft);
     border-color: var(--color-primary);
 }
-.ds-toast--success .ds-toast__icon { -unity-background-image-tint-color: var(--color-primary); }
+
+.ds-toast--success .ds-toast__icon {
+    -unity-background-image-tint-color: var(--color-primary);
+}
 
 .ds-toast--info {
     background-color: var(--color-secondary-soft);
     border-color: var(--color-secondary);
 }
-.ds-toast--info .ds-toast__icon { -unity-background-image-tint-color: var(--color-secondary); }
+
+.ds-toast--info .ds-toast__icon {
+    -unity-background-image-tint-color: var(--color-secondary);
+}
 
 .ds-toast--warning {
     background-color: var(--color-tertiary-soft);
     border-color: var(--color-tertiary);
 }
-.ds-toast--warning .ds-toast__icon { -unity-background-image-tint-color: var(--color-tertiary); }
+
+.ds-toast--warning .ds-toast__icon {
+    -unity-background-image-tint-color: var(--color-tertiary);
+}
 
 .ds-toast--danger {
     background-color: var(--color-danger-soft);
     border-color: var(--color-danger);
 }
-.ds-toast--danger .ds-toast__icon { -unity-background-image-tint-color: var(--color-danger); }
+
+.ds-toast--danger .ds-toast__icon {
+    -unity-background-image-tint-color: var(--color-danger);
+}
 
 /* ---------- Bottom sheet (mobile drawer) ---------- */
 .ds-sheet {
@@ -214,6 +246,7 @@
     padding: var(--space-3);
     padding-top: var(--space-2);
 }
+
 .ds-sheet__handle {
     width: 36px;
     height: 4px;
@@ -223,6 +256,7 @@
     margin-top: 4px;
     margin-bottom: var(--space-3);
 }
+
 .ds-sheet__row {
     flex-direction: row;
     align-items: center;
@@ -230,21 +264,32 @@
     padding-left: var(--space-3);
     padding-right: var(--space-3);
     border-radius: var(--radius-md);
-    background-color: rgba(0,0,0,0);
+    background-color: rgba(0, 0, 0, 0);
 }
-.ds-sheet__row:hover { background-color: var(--color-surface-elev); }
+
+.ds-sheet__row:hover {
+    background-color: var(--color-surface-elev);
+}
+
 .ds-sheet__row-icon {
     width: 18px;
     height: 18px;
     margin-right: var(--space-3);
     -unity-background-image-tint-color: var(--color-text-secondary);
 }
+
 .ds-sheet__row-label {
     flex-grow: 1;
     color: var(--color-text-primary);
 }
-.ds-sheet__row--danger .ds-sheet__row-icon { -unity-background-image-tint-color: var(--color-danger); }
-.ds-sheet__row--danger .ds-sheet__row-label { color: var(--color-danger); }
+
+.ds-sheet__row--danger .ds-sheet__row-icon {
+    -unity-background-image-tint-color: var(--color-danger);
+}
+
+.ds-sheet__row--danger .ds-sheet__row-label {
+    color: var(--color-danger);
+}
 
 .ds-sheet__row-trail {
     /* slot for trailing toggle, chevron, etc. */
@@ -261,6 +306,7 @@
     max-width: 320px;
     align-self: center;
 }
+
 .ds-empty__icon-bg {
     width: 64px;
     height: 64px;
@@ -269,14 +315,16 @@
     align-items: center;
     justify-content: center;
     margin-bottom: var(--space-3);
-    flex-shrink: 0;   /* never get squeezed by a long title underneath */
+    flex-shrink: 0; /* never get squeezed by a long title underneath */
     flex-grow: 0;
 }
+
 .ds-empty__icon {
     width: 28px;
     height: 28px;
     -unity-background-image-tint-color: var(--color-text-secondary);
 }
+
 .ds-empty__title {
     font-size: var(--font-size-h3);
     -unity-font-style: bold;
@@ -286,6 +334,7 @@
     white-space: normal;
     -unity-text-align: middle-center;
 }
+
 .ds-empty__message {
     color: var(--color-text-secondary);
     -unity-text-align: middle-center;
