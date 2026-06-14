@@ -43,10 +43,10 @@
             <ui:Button name="module-info-collapse-button" class="ds-btn ds-btn-secondary ds-btn--icon ds-btn--ghost"
                        tooltip="Collapse panel">
                 <ui:VisualElement name="module-info-collapse-icon"
-                                  class="ds-icon ds-icon--sm ds-icon--chevron-down"/>
+                                  class="module-info-collapse-icon ds-icon ds-icon--sm ds-icon--chevron-down"/>
             </ui:Button>
         </ui:VisualElement>
-        <ui:VisualElement name="module-info-body" class="ds-col-gap" style="margin-top: 8px;">
+        <ui:VisualElement name="module-info-body" class="module-info-body ds-col-gap">
             <ui:Label name="module-info-name" text="No module selected" class="ds-caption ds-text-primary"/>
             <ui:ScrollView name="module-info-description-scroll"
                            class="module-info-description-scroll ds-scroll"
@@ -109,6 +109,12 @@
     <!-- Bottom-right resources panel -->
     <ui:VisualElement name="ship-resources-panel" class="ds-card ship-resources-panel ds-col-gap">
         <ui:Label text="Ship Resources" class="ds-body-1"/>
+        <ui:VisualElement class="ds-progress-row">
+            <ui:VisualElement class="ds-info-row">
+                <ui:Label text="Energy storage" class="ds-info-row__label"/>
+                <ui:Label name="ship-resource-energy-storage" text="-" class="ds-info-row__value"/>
+            </ui:VisualElement>
+        </ui:VisualElement>
         <ui:VisualElement class="ds-progress-row">
             <ui:VisualElement class="ds-info-row">
                 <ui:Label text="Energy" class="ds-info-row__label"/>

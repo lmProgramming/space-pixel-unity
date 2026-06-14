@@ -102,6 +102,41 @@
     display: none;
 }
 
+.module-info-body {
+    margin-top: var(--space-2);
+    overflow: hidden;
+    transition-property: max-height, opacity, margin-top;
+    transition-duration: var(--transition-medium);
+    transition-timing-function: ease-out;
+    max-height: 600px;
+    opacity: 1;
+}
+
+.module-info-body--collapsed {
+    max-height: 0;
+    opacity: 0;
+    margin-top: 0;
+}
+
+.module-info-body--collapsed > * {
+    margin-bottom: 0;
+}
+
+.module-info-body--no-transition,
+.module-info-collapse-icon--no-transition {
+    transition-duration: 0s;
+}
+
+.module-info-collapse-icon {
+    transition-property: rotate;
+    transition-duration: var(--transition-medium);
+    transition-timing-function: ease-out;
+}
+
+.module-info-collapse-icon--collapsed {
+    rotate: 180deg;
+}
+
 .ship-factory-input-blocker {
     position: absolute;
     left: 0;

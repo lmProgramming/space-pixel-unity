@@ -13,11 +13,13 @@ namespace ShipFactory.UI.ToolkitComponents
         private readonly VisualElement _shipResourceEnergyBufferFill;
         private readonly VisualElement _shipResourceEnergyFill;
         private readonly Label _shipResourceEnergyValueLabel;
+        private readonly Label _shipResourcesEnergyStorageLabel;
         private readonly VisualElement _shipResourcesPanel;
 
         public ResourcesPanel(VisualElement root)
         {
             _shipResourcesPanel = root.Q<VisualElement>("ship-resources-panel");
+            _shipResourcesEnergyStorageLabel = root.Q<Label>("ship-resource-energy-storage");
             _shipResourceEnergyValueLabel = root.Q<Label>("ship-resource-energy-value");
             _shipResourceCrewValueLabel = root.Q<Label>("ship-resource-crew-value");
             _shipResourceEnergyFill = root.Q<VisualElement>("ship-resource-energy-fill");
@@ -25,8 +27,8 @@ namespace ShipFactory.UI.ToolkitComponents
             _shipResourceCrewFill = root.Q<VisualElement>("ship-resource-crew-fill");
             _shipResourceCrewBufferFill = root.Q<VisualElement>("ship-resource-crew-buffer-fill");
 
-            if (_shipResourcesPanel == null || _shipResourceEnergyValueLabel == null ||
-                _shipResourceCrewValueLabel == null ||
+            if (_shipResourcesPanel == null || _shipResourcesEnergyStorageLabel == null ||
+                _shipResourceEnergyValueLabel == null || _shipResourceCrewValueLabel == null ||
                 _shipResourceEnergyFill == null || _shipResourceEnergyBufferFill == null ||
                 _shipResourceCrewFill == null || _shipResourceCrewBufferFill == null)
                 throw new InvalidOperationException(
@@ -48,8 +50,10 @@ namespace ShipFactory.UI.ToolkitComponents
             var netEnergy = rm.EnergyProduction - rm.EnergyDraw;
             var netEnergyFormatted = netEnergy >= 0 ? $"+{netEnergy:0.#}" : $"{netEnergy:0.#}";
 
+            _shipResourcesEnergyStorageLabel.text = $"{rm.EnergyCapacity:0.#} cap";
+
             _shipResourceEnergyValueLabel.text =
-                $"{rm.EnergyCapacity:0.#} cap · {netEnergyFormatted} net";
+                $"{netEnergyFormatted} net";
             _shipResourceCrewValueLabel.text = $"{rm.Crew}/{rm.CrewCapacity}";
 
             ApplySegmentedResourceBar(

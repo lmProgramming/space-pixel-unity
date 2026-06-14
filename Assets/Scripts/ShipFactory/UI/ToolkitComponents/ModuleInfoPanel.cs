@@ -8,9 +8,10 @@ namespace ShipFactory.UI.ToolkitComponents
 {
     public class ModuleInfoPanel
     {
-        private const string CollapseIconDownClassName = "ds-icon--chevron-down";
-        private const string CollapseIconUpClassName = "ds-icon--chevron-up";
-        private const string HiddenClassName = "hidden";
+        private const string CollapsedBodyClassName = "module-info-body--collapsed";
+        private const string CollapsedIconClassName = "module-info-collapse-icon--collapsed";
+        private const string NoTransitionBodyClassName = "module-info-body--no-transition";
+        private const string NoTransitionIconClassName = "module-info-collapse-icon--no-transition";
         private const string RemoveButtonHiddenClassName = "remove-module-button--hidden";
         private const string RotationButtonsHiddenClassName = "module-rotation-buttons--hidden";
         private readonly Button _collapseButton;
@@ -132,14 +133,28 @@ namespace ShipFactory.UI.ToolkitComponents
         private void ToggleCollapsed()
         {
             _isCollapsed = !_isCollapsed;
-            ApplyCollapsedVisualState();
+            ApplyCollapsedVisualState(animate: true);
         }
 
-        private void ApplyCollapsedVisualState()
+        private void ApplyCollapsedVisualState(bool animate = false)
         {
-            _moduleInfoBody.EnableInClassList(HiddenClassName, _isCollapsed);
-            _collapseIcon.EnableInClassList(CollapseIconDownClassName, !_isCollapsed);
-            _collapseIcon.EnableInClassList(CollapseIconUpClassName, _isCollapsed);
+            if (!animate)
+            {
+                _moduleInfoBody.AddToClassList(NoTransitionBodyClassName);
+                _collapseIcon.AddToClassList(NoTransitionIconClassName);
+            }
+
+            _moduleInfoBody.EnableInClassList(CollapsedBodyClassName, _isCollapsed);
+            _collapseIcon.EnableInClassList(CollapsedIconClassName, _isCollapsed);
+
+            if (!animate)
+                _moduleInfoBody.schedule.Execute(RemoveNoTransitionClasses).StartingIn(0);
+        }
+
+        private void RemoveNoTransitionClasses()
+        {
+            _moduleInfoBody.RemoveFromClassList(NoTransitionBodyClassName);
+            _collapseIcon.RemoveFromClassList(NoTransitionIconClassName);
         }
 
         private void UpdateRemoveButton(bool isNewModuleContext, bool isInputLocked, bool isDraggingModule)
