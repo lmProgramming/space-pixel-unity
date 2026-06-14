@@ -31,8 +31,8 @@ What you get on day one:
 Open `Assets/DesignSystem/Resources/UI/Styles/DesignSystem/DesignSystemShowcase.uxml` in the UI Builder or attach it to a `UIDocument`. Every component, every state, every icon — one screen, scrollable.
 
 ```txt
-COLORS         BUTTONS         INPUTS         TABS & FILTERS    ANIMAL CARD
-TYPOGRAPHY     ICONS           BADGES & LABELS  TOGGLES & CHECKS  ANIMAL DETAIL
+COLORS         BUTTONS         INPUTS         TABS & FILTERS    CARD
+TYPOGRAPHY     ICONS           BADGES & LABELS  TOGGLES & CHECKS  DETAIL
 NAVIGATION     SLIDERS         MODALS / PANELS  TOASTS            EMPTY STATES
 BOTTOM SHEET   CONFIRM DIALOG  QUANTITY        PAGINATION        LOADING STATES
 NOTIFICATION BADGE             AVATAR
@@ -166,7 +166,7 @@ DesignSystem.uss                  ← master, @imports the rest in order
 ├── Buttons.uss                   ← .ds-btn + variants + sizes + icon button
 ├── Inputs.uss                    ← .ds-input / .ds-search / .ds-dropdown / .ds-textarea
 ├── TabsAndFilters.uss            ← .ds-tabs / .ds-tab / .ds-view-toggle
-├── Cards.uss                     ← animal card, info row, swatch row
+├── Cards.uss                     ← card, info row, swatch row
 ├── Navigation.uss                ← .ds-side-nav / .ds-side-rail / .ds-bottom-nav / profile
 ├── Badges.uss                    ← .ds-badge / .ds-tag / .ds-chip / .ds-avatar / notif dot
 ├── Controls.uss                  ← .ds-toggle / .ds-check / .ds-radio / .ds-slider / .ds-range

@@ -96,7 +96,7 @@
     color: var(--color-text-primary);
 }
 
-/* "Animal Limit" warning illustration slot */
+/* "Limit" warning illustration slot */
 .ds-modal__illustration {
     width: 100%;
     height: 96px;

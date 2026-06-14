@@ -1,8 +1,8 @@
 /* ============================================================================
    CARDS
    - Generic surface (.ds-card)
-   - Animal card (collection grid item) with rarity-aware border + selection
-   - Animal detail page (full panel)
+   - item card (collection grid item) with rarity-aware border + selection
+   - item detail page (full panel)
    ============================================================================ */
 
 /* ---------- Generic card ---------- */
@@ -21,8 +21,8 @@
 .ds-card--padded { padding: var(--space-5); }
 .ds-card--flush  { padding: 0; }
 
-/* ---------- Animal card (grid item) ---------- */
-.ds-animal-card {
+/* ---------- item card (grid item) ---------- */
+.ds-item-card {
     width: 200px;
     background-color: var(--color-surface);
     border-width: var(--border-thin);
@@ -33,17 +33,17 @@
     transition-duration: var(--transition-fast);
 }
 
-.ds-animal-card:hover { border-color: var(--color-border-strong); }
-.ds-animal-card.is-selected { border-color: var(--color-primary); }
+.ds-item-card:hover { border-color: var(--color-border-strong); }
+.ds-item-card.is-selected { border-color: var(--color-primary); }
 
-/* Rarity-aware border (apply alongside .ds-animal-card) */
-.ds-animal-card.is-rare       { border-color: var(--color-rarity-rare); }
-.ds-animal-card.is-epic       { border-color: var(--color-rarity-epic); }
-.ds-animal-card.is-legendary  { border-color: var(--color-rarity-legendary); }
-.ds-animal-card.is-common     { border-color: var(--color-rarity-common); }
+/* Rarity-aware border (apply alongside .ds-item-card) */
+.ds-item-card.is-rare       { border-color: var(--color-rarity-rare); }
+.ds-item-card.is-epic       { border-color: var(--color-rarity-epic); }
+.ds-item-card.is-legendary  { border-color: var(--color-rarity-legendary); }
+.ds-item-card.is-common     { border-color: var(--color-rarity-common); }
 
 /* Selection check pill in upper-right */
-.ds-animal-card__check {
+.ds-item-card__check {
     position: absolute;
     top: 8px;
     right: 8px;
@@ -54,14 +54,14 @@
     align-items: center;
     justify-content: center;
 }
-.ds-animal-card__check-icon {
+.ds-item-card__check-icon {
     width: 14px;
     height: 14px;
     -unity-background-image-tint-color: var(--color-text-on-accent);
 }
 
 /* Image area */
-.ds-animal-card__image {
+.ds-item-card__image {
     width: 100%;
     height: 110px;
     border-radius: var(--radius-md);
@@ -74,7 +74,7 @@
 }
 
 /* Child Image — scale-to-fit inside the grey image well */
-.ds-animal-card__sprite {
+.ds-item-card__sprite {
     width: 100%;
     height: 100%;
     flex-shrink: 1;
@@ -83,37 +83,37 @@
 }
 
 /* Rarity chip pinned over the bottom of the image */
-.ds-animal-card__rarity {
+.ds-item-card__rarity {
     align-self: center;
     margin-bottom: var(--space-2);
 }
 
 /* Title row + star */
-.ds-animal-card__title-row {
+.ds-item-card__title-row {
     flex-direction: row;
     align-items: center;
     justify-content: center;
     margin-bottom: var(--space-3);
 }
-.ds-animal-card__title {
+.ds-item-card__title {
     font-size: var(--font-size-h3);
     -unity-font-style: bold;
     color: var(--color-text-primary);
     margin-right: var(--space-1);
 }
-.ds-animal-card__star {
+.ds-item-card__star {
     width: 14px;
     height: 14px;
     -unity-background-image-tint-color: var(--color-warning);
 }
 
 /* "Equipped" / "Equip" footer slot — pair with .ds-text-success or a button */
-.ds-animal-card__footer {
+.ds-item-card__footer {
     align-items: center;
 }
 
-/* ---------- Animal detail page ---------- */
-.ds-animal-detail {
+/* ---------- item detail page ---------- */
+.ds-item-detail {
     background-color: var(--color-surface);
     border-width: var(--border-thin);
     border-color: var(--color-border);
@@ -123,7 +123,7 @@
     width: 360px;
 }
 
-.ds-animal-detail__hero {
+.ds-item-detail__hero {
     width: 100%;
     height: 220px;
     background-color: var(--color-surface-elev);
@@ -132,12 +132,12 @@
 }
 
 /* Top-left back / top-right more buttons floating over hero */
-.ds-animal-detail__hero-back {
+.ds-item-detail__hero-back {
     position: absolute;
     top: 12px;
     left: 12px;
 }
-.ds-animal-detail__hero-more {
+.ds-item-detail__hero-more {
     position: absolute;
     top: 12px;
     right: 12px;
@@ -164,23 +164,23 @@
 }
 
 /* Body */
-.ds-animal-detail__body {
+.ds-item-detail__body {
     padding: var(--space-4);
 }
 
-.ds-animal-detail__header-row {
+.ds-item-detail__header-row {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
     margin-bottom: var(--space-2);
 }
 
-.ds-animal-detail__title-block {
+.ds-item-detail__title-block {
     flex-direction: row;
     align-items: center;
 }
 
-.ds-animal-detail__description {
+.ds-item-detail__description {
     color: var(--color-text-secondary);
     margin-top: var(--space-2);
     margin-bottom: var(--space-4);
@@ -215,11 +215,11 @@
 }
 
 /* Footer action row — Unequip + View Skins */
-.ds-animal-detail__actions {
+.ds-item-detail__actions {
     flex-direction: row;
     margin-top: var(--space-4);
 }
-.ds-animal-detail__actions > .ds-btn {
+.ds-item-detail__actions > .ds-btn {
     flex-grow: 1;
     margin-left: var(--space-2);
     margin-right: var(--space-2);

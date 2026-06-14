@@ -186,18 +186,18 @@
 /* ── Cards ──
    Mobile cards live in tighter grids; shrink overall footprint and image
    area so multiple cards fit on a 360-wide canvas. */
-.mobile .ds-animal-card {
+.mobile .ds-card {
     width: 140px;
     padding: var(--space-2);
 }
-.mobile .ds-animal-card__image {
+.mobile .ds-card__image {
     height: 80px;
     margin-bottom: var(--space-2);
 }
-.mobile .ds-animal-card__title {
+.mobile .ds-card__title {
     font-size: 13px;
 }
-.mobile .ds-animal-card__check {
+.mobile .ds-card__check {
     width: 22px;
     height: 22px;
     border-radius: 11px;

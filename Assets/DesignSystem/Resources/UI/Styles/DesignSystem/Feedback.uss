@@ -123,13 +123,13 @@
     border-radius: var(--radius-md);
     overflow: hidden;
 }
-/* Skeleton card is sized to match a real .ds-animal-card so the loading
+/* Skeleton card is sized to match a real .ds-card so the loading
    layout doesn't jump when content arrives. Tweak together if you change
    the card width in Cards.uss. */
 .ds-skeleton--card {
     width: 200px;
     height: 220px;
-    border-radius: var(--radius-lg); /* matches .ds-animal-card */
+    border-radius: var(--radius-lg); /* matches .ds-card */
 }
 .ds-skeleton--line {
     height: 12px;

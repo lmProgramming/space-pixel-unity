@@ -11,14 +11,14 @@ namespace ShipFactory
     {
         private const string ActiveTabClass = "is-active";
         private const string DraggingCardClass = "palette-card--dragging";
-        private const string AnimalCardClass = "ds-animal-card";
-        private const string AnimalCardImageClass = "ds-animal-card__image";
-        private const string AnimalCardTitleRowClass = "ds-animal-card__title-row";
-        private const string AnimalCardTitleClass = "ds-body-2";
-        private const string AnimalCardDimensionsClass = "palette-card__dimensions";
-        private const string AnimalCardDimensionsTextClass = "ds-body-2";
-        private const string AnimalCardLabelsClass = "palette-card__labels";
-        private const string AnimalCardSpriteClass = "ds-animal-card__sprite";
+        private const string CardClass = "ds-card";
+        private const string CardImageClass = "ds-card__image";
+        private const string CardTitleRowClass = "ds-card__title-row";
+        private const string CardTitleClass = "ds-body-2";
+        private const string CardDimensionsClass = "palette-card__dimensions";
+        private const string CardDimensionsTextClass = "ds-body-2";
+        private const string CardLabelsClass = "palette-card__labels";
+        private const string CardSpriteClass = "ds-card__sprite";
         private readonly ModulePrefabLibrary _library;
 
         private readonly VisualElement _paletteContent;
@@ -101,7 +101,7 @@ namespace ShipFactory
         private VisualElement BuildModuleCard(ShipModuleSO moduleSO)
         {
             var card = new VisualElement();
-            card.AddToClassList(AnimalCardClass);
+            card.AddToClassList(CardClass);
             card.tooltip = moduleSO.Description;
             card.style.width = 132;
             card.style.flexShrink = 0;
@@ -109,36 +109,41 @@ namespace ShipFactory
             card.style.flexDirection = FlexDirection.Column;
 
             var image = new VisualElement();
-            image.AddToClassList(AnimalCardImageClass);
+            image.AddToClassList(CardImageClass);
 
             var pixelatedRigidbody = moduleSO.Prefab.GetComponent<IPixelatedSprite>();
             var sprite = pixelatedRigidbody?.GetSprite();
             if (sprite != null)
             {
                 var spriteImage = new Image { sprite = sprite, scaleMode = ScaleMode.ScaleToFit };
-                spriteImage.AddToClassList(AnimalCardSpriteClass);
+                spriteImage.AddToClassList(CardSpriteClass);
                 image.Add(spriteImage);
             }
 
             var titleRow = new VisualElement();
-            titleRow.AddToClassList(AnimalCardTitleRowClass);
+            titleRow.AddToClassList(CardTitleRowClass);
             titleRow.style.width = Length.Percent(100);
 
-            var titleClip = new VisualElement();
-            titleClip.style.width = Length.Percent(100);
+            var titleClip = new VisualElement
+            {
+                style =
+                {
+                    width = Length.Percent(100)
+                }
+            };
 
             var title = new Label(moduleSO.Name);
-            title.AddToClassList(AnimalCardTitleClass);
+            title.AddToClassList(CardTitleClass);
 
             titleClip.Add(title);
             titleRow.Add(titleClip);
 
             var dimensions = new Label($"{moduleSO.Dimensions.x}x{moduleSO.Dimensions.y}");
-            dimensions.AddToClassList(AnimalCardDimensionsClass);
-            dimensions.AddToClassList(AnimalCardDimensionsTextClass);
+            dimensions.AddToClassList(CardDimensionsClass);
+            dimensions.AddToClassList(CardDimensionsTextClass);
 
             var labels = new VisualElement();
-            labels.AddToClassList(AnimalCardLabelsClass);
+            labels.AddToClassList(CardLabelsClass);
             labels.Add(titleRow);
             labels.Add(dimensions);
 

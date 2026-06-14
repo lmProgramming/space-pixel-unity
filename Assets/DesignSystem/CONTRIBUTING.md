@@ -4,7 +4,7 @@ Thanks for considering a contribution. The design system is small (~1700 lines U
 
 ## Ground rules
 
-1. **One style for one job.** A new component should not duplicate an existing one with a different prefix. If you need a "card with a price tag", extend `.ds-animal-card` with a `__price-tag` slot, don't fork it.
+1. **One style for one job.** A new component should not duplicate an existing one with a different prefix. If you need a "card with a price tag", extend `.ds-card` with a `__price-tag` slot, don't fork it.
 2. **Tokens, never hex.** Every colour, radius, spacing, motion timing must reference a `var(--…)` from `DesignTokens.uss`. If your design needs a value that doesn't exist as a token, add the token first (one PR), then the rule (next PR).
 3. **Comments answer "why", not "what".** A reader can see a `width: 18px;` declaration. The comment should explain *why 18px and not 16 or 20* — for example "= half of the 36 px button so the icon centres without `align-items: center` on every consumer."
 4. **The showcase is the test suite.** Every new component must appear in `DesignSystemShowcase.uxml` in at least one state. If your rule has hover / pressed / active / disabled / `--variant` modifiers, render each one. PRs that don't update the showcase get bounced.
@@ -74,9 +74,11 @@ If your new rule doesn't fit any file cleanly, you've probably invented a new co
 2. **Make sure the SVG fills are `white`** — `fill="white"` and `stroke="white"`. Black-fill SVGs render black regardless of tint because `-unity-background-image-tint-color` is multiplicative (`black × any_colour = black`). The bulk-conversion script in our 2026-05-01 commit converted 63 source icons; new contributions must arrive white-filled.
 3. After Unity reimports, set the importer's `SVG Type` to **Texture** (not Sprite, not VectorImage). The asset pipeline flag is `svgType: 3` in the `.svg.meta` file.
 4. Add one line to `Icons.uss`:
+
     ```css
     .ds-icon--newglyph        { background-image: resource("Textures/Icons/newglyph"); }
     ```
+
 5. Render it in `DesignSystemShowcase.uxml` under the ICONS section.
 6. Open a PR with a screenshot of the showcase row.
 
