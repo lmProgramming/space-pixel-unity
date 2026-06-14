@@ -11,6 +11,7 @@ namespace ShipFactory.UI.Runtime
     public class OverlayManager : IDisposable
     {
         private const int OverlaySortingOrder = 100;
+        private const int DraggedOverlaySortingOrder = OverlaySortingOrder + 1;
         private readonly Dictionary<ShipModuleSOInstanceBundle, ModuleOverlay> _bundleToOverlay = new();
         private readonly Transform _overlayRoot = new GameObject("ModuleOverlays").transform;
 
@@ -65,8 +66,24 @@ namespace ShipFactory.UI.Runtime
 
         public void SetPosition(ShipModuleSOInstanceBundle bundle, Vector2 worldPos)
         {
-            bundle.Instance.transform.position = worldPos;
+            var transform = bundle.Instance.transform;
+            var position = transform.position;
+            position.x = worldPos.x;
+            position.y = worldPos.y;
+            transform.position = position;
             SyncTransformFromBundle(bundle);
+        }
+
+        public void BringOverlayToFront(ShipModuleSOInstanceBundle bundle)
+        {
+            if (_bundleToOverlay.TryGetValue(bundle, out var overlay))
+                overlay.SetSortingOrder(DraggedOverlaySortingOrder);
+        }
+
+        public void ResetOverlaySortingOrder(ShipModuleSOInstanceBundle bundle)
+        {
+            if (_bundleToOverlay.TryGetValue(bundle, out var overlay))
+                overlay.SetSortingOrder(OverlaySortingOrder);
         }
 
         public void SyncTransformFromBundle(ShipModuleSOInstanceBundle bundle)

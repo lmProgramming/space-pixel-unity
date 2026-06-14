@@ -36,6 +36,11 @@ namespace ShipFactory
             _renderer.color = color;
         }
 
+        public void SetSortingOrder(int sortingOrder)
+        {
+            _renderer.sortingOrder = sortingOrder;
+        }
+
         public static void SyncTransformFromBundle(Transform overlayTransform, ShipModuleSOInstanceBundle bundle)
         {
             overlayTransform.position = bundle.Instance.transform.position;

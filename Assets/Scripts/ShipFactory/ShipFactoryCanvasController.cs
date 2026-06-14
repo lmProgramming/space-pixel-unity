@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Core.Services;
 using Core.Ship;
 using Events.Camera;
@@ -30,6 +31,7 @@ namespace ShipFactory
         private ShipModuleSOInstanceBundle _draggedModuleBundle;
         private bool _draggedModuleWasNew;
         private Quaternion _dragStartLocalRotation;
+        private float _dragStartLocalZ;
         private Vector2 _dragStartWorldPos;
         private Vector2 _dragWorldOffset;
 
@@ -76,7 +78,7 @@ namespace ShipFactory
         }
 
         public bool IsInputLocked { get; private set; }
-        private bool IsDraggingModule => _draggedModuleBundle != null;
+        public bool IsDraggingModule => _draggedModuleBundle != null;
 
         public void Dispose()
         {
@@ -273,6 +275,14 @@ namespace ShipFactory
                 ? (Vector2)bundle.Instance.transform.position - _gameInput.WorldPointerPosition
                 : Vector2.zero;
 
+            _dragStartLocalZ = bundle.Instance.transform.localPosition.z;
+            var localPosition = bundle.Instance.transform.localPosition;
+            localPosition.z = GetMaxModuleLocalZ(bundle) - 1f;
+            bundle.Instance.transform.localPosition = localPosition;
+
+            _overlayManager.BringOverlayToFront(bundle);
+            _overlayManager.SyncTransformFromBundle(bundle);
+
             SelectBundle(bundle);
             RefreshInfoPanelFromCurrentContext();
             MoveGhostToPointer();
@@ -340,7 +350,14 @@ namespace ShipFactory
             _draggedModuleWasNew = false;
 
             if (finishedBundle != null)
+            {
+                var localPosition = finishedBundle.Instance.transform.localPosition;
+                localPosition.z = _dragStartLocalZ;
+                finishedBundle.Instance.transform.localPosition = localPosition;
+                _overlayManager.ResetOverlaySortingOrder(finishedBundle);
+                _overlayManager.SyncTransformFromBundle(finishedBundle);
                 RefreshOverlayColor(finishedBundle);
+            }
 
             RefreshInfoPanelFromCurrentContext();
             _resourcesPanel.Refresh(_ship);
@@ -432,7 +449,7 @@ namespace ShipFactory
             if (bundle == null) return;
 
             var previousRotation = bundle.Instance.transform.localRotation;
-            var deltaSteps = degrees / 90;
+            var deltaSteps = -degrees / 90;
             ModuleRotationUtility.ApplyQuarterTurn(bundle, deltaSteps);
 
             if (IsDraggingModule)
@@ -480,6 +497,13 @@ namespace ShipFactory
         {
             bundle.Instance.transform.localRotation = _dragStartLocalRotation;
             _overlayManager.SyncTransformFromBundle(bundle);
+        }
+
+        private float GetMaxModuleLocalZ(ShipModuleSOInstanceBundle exclude = null)
+        {
+            return _ship.transform.Cast<Transform>().AsValueEnumerable()
+                .Where(child => exclude == null || child.gameObject != exclude.Instance).Aggregate(0f,
+                    (current, child) => Mathf.Max(current, child.localPosition.z));
         }
 
         private void RefreshDraggedModuleLegalityOverlay()

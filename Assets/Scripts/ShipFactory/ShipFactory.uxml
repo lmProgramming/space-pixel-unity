@@ -27,11 +27,11 @@
 
     <!-- Top right camera info -->
     <ui:VisualElement name="camera-info" class="camera-info ds-card ds-row ds-row__gap">
-        <ui:VisualElement class="ds-icon ds-icon--camera"/>
+        <ui:VisualElement class="ds-icon ds-icon--camera ds-icon--sm"/>
         <ui:Label name="camera-info-position" text="(0, 0)" class="ds-caption"/>
-        <ui:Button name="camera-reset-button" class="ds-btn ds-btn--secondary ds-btn--icon"
+        <ui:Button name="camera-reset-button" class="ds-btn ds-btn--secondary ds-btn--icon ds-btn--sm"
                    tooltip="Reset camera position and zoom">
-            <ui:VisualElement class="ds-icon ds-icon--refresh"/>
+            <ui:VisualElement class="ds-icon ds-icon--refresh ds-icon--sm"/>
         </ui:Button>
     </ui:VisualElement>
 

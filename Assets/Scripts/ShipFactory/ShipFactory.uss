@@ -26,12 +26,8 @@
 
 .top-bar {
     position: absolute;
+    align-self: center;
     top: 0;
-    left: var(--ship-factory-panel-inset);
-    right: var(--ship-factory-panel-inset);
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
 }
 
 .camera-info {

@@ -3,6 +3,7 @@ using System.IO;
 using Core.Constants;
 using Core.Services;
 using Events.Camera;
+using Events.UI;
 using ShipFactory.Serialization;
 using Ships;
 using UI.Common;
@@ -16,25 +17,36 @@ namespace ShipFactory
     [RequireComponent(typeof(UIDocument))]
     public class ShipFactoryController : MonoBehaviour
     {
+        private const string CanvasContainerName = "canvas-container";
         private const string SnapshotExtension = ".json";
         private const string DefaultShipName = "Ship";
+        private static readonly object ModuleDragPointerBlocker = new();
+        private static readonly object UiPointerDownBlocker = new();
         [SerializeField] private ModulePrefabLibrary modulePrefabLibrary;
         [SerializeField] private Ship initialShip;
 
         [SerializeField] private string snapshotFolderName = "ShipSnapshots";
         [SerializeField] private CameraResetRequestEventChannel cameraResetRequestEventChannel;
         private Camera _camera;
+        private VisualElement _canvasContainer;
 
         private ShipFactoryCanvasController _canvasController;
 
         [Inject]
         private IGameInput _gameInput;
 
+        private GameObject _gameObjectUnderPointer;
+        private bool _isModuleDragBlockingCamera;
         private bool _isPaused;
+        private bool _isUiPointerDownBlockingCamera;
         private ModulePaletteController _paletteController;
         private VisualElement _pauseOverlay;
         private VisualElement _pauseOverlayHost;
         private bool _pauseUiInitialized;
+
+        [Inject]
+        private PointerOverUiEventChannel _pointerOverUiChannel;
+
         private Button _saveShipButton;
         private SettingsPanelController _settingsPanelController;
 
@@ -44,6 +56,7 @@ namespace ShipFactory
         private IShipSnapshotService _snapshotService;
 
         private UIDocument _uiDocument;
+        private VisualElement _uiRoot;
 
         private void Awake()
         {
@@ -56,6 +69,7 @@ namespace ShipFactory
 
         private void Update()
         {
+            SetModuleDragPointerBlock(_canvasController?.IsDraggingModule == true);
             _canvasController?.RefreshShipResourcesPanel();
             _canvasController?.RefreshCameraInfoPanel(_camera);
             HandlePauseInput();
@@ -64,19 +78,19 @@ namespace ShipFactory
 
         private void OnEnable()
         {
-            var root = _uiDocument.rootVisualElement;
-            if (root == null)
+            _uiRoot = _uiDocument.rootVisualElement;
+            if (_uiRoot == null)
                 throw new InvalidOperationException("[ShipFactoryController] UI root is missing.");
 
             if (cameraResetRequestEventChannel == null)
                 throw new InvalidOperationException(
                     "[ShipFactoryController] CameraResetRequestEventChannel is not assigned!");
 
-            _canvasController = new ShipFactoryCanvasController(root, _gameInput, cameraResetRequestEventChannel);
-            _paletteController = new ModulePaletteController(root, modulePrefabLibrary);
+            _canvasController = new ShipFactoryCanvasController(_uiRoot, _gameInput, cameraResetRequestEventChannel);
+            _paletteController = new ModulePaletteController(_uiRoot, modulePrefabLibrary);
 
-            _shipNameField = root.Q<TextField>("ship-name-field");
-            _saveShipButton = root.Q<Button>("save-ship-button");
+            _shipNameField = _uiRoot.Q<TextField>("ship-name-field");
+            _saveShipButton = _uiRoot.Q<Button>("save-ship-button");
 
             if (_shipNameField == null || _saveShipButton == null)
                 throw new InvalidOperationException("[ShipFactoryController] Save controls are missing in UXML.");
@@ -95,11 +109,17 @@ namespace ShipFactory
             if (initialShip != null)
                 _canvasController.SetShip(initialShip);
 
-            InitializePauseUi(root);
+            InitializePauseUi(_uiRoot);
+            RegisterCameraDragPointerBlockers(_uiRoot);
         }
 
         private void OnDisable()
         {
+            SetModuleDragPointerBlock(false);
+            SetUiPointerDownBlock(false);
+            ReleaseGameObjectPointerBlocking();
+            UnregisterCameraDragPointerBlockers();
+
             if (_saveShipButton != null)
                 _saveShipButton.clicked -= SaveSnapshot;
 
@@ -275,6 +295,97 @@ namespace ShipFactory
         {
             Time.timeScale = 1f;
             SceneManager.LoadScene(SceneNames.MainMenu);
+        }
+
+        private void RegisterCameraDragPointerBlockers(VisualElement root)
+        {
+            _canvasContainer = root.Q<VisualElement>(CanvasContainerName);
+            if (_canvasContainer == null)
+                throw new InvalidOperationException(
+                    "[ShipFactoryController] canvas-container not found in UXML.");
+
+            root.RegisterCallback<PointerDownEvent>(OnPointerDownForCameraBlock, TrickleDown.TrickleDown);
+            root.RegisterCallback<PointerUpEvent>(OnPointerUpForCameraBlock, TrickleDown.TrickleDown);
+        }
+
+        private void UnregisterCameraDragPointerBlockers()
+        {
+            if (_uiRoot == null)
+                return;
+
+            _uiRoot.UnregisterCallback<PointerDownEvent>(OnPointerDownForCameraBlock);
+            _uiRoot.UnregisterCallback<PointerUpEvent>(OnPointerUpForCameraBlock);
+        }
+
+        private void OnPointerDownForCameraBlock(PointerDownEvent evt)
+        {
+            if (evt.button != 0)
+                return;
+
+            if (evt.target is not VisualElement target)
+                return;
+
+            if (!IsUnderCanvasContainer(target))
+            {
+                SetUiPointerDownBlock(true);
+                return;
+            }
+
+            var objectUnderPointer = _gameInput.ObjectUnderPointer;
+            if (objectUnderPointer == null)
+                return;
+
+            _gameObjectUnderPointer = objectUnderPointer;
+            _pointerOverUiChannel.Raise(new PointerOverUiData(_gameObjectUnderPointer, true));
+        }
+
+        private void OnPointerUpForCameraBlock(PointerUpEvent evt)
+        {
+            if (evt.button != 0)
+                return;
+
+            SetUiPointerDownBlock(false);
+            ReleaseGameObjectPointerBlocking();
+        }
+
+        private bool IsUnderCanvasContainer(VisualElement element)
+        {
+            while (element != null)
+            {
+                if (element == _canvasContainer)
+                    return true;
+
+                element = element.parent;
+            }
+
+            return false;
+        }
+
+        private void SetUiPointerDownBlock(bool isBlocking)
+        {
+            if (_isUiPointerDownBlockingCamera == isBlocking)
+                return;
+
+            _isUiPointerDownBlockingCamera = isBlocking;
+            _pointerOverUiChannel.Raise(new PointerOverUiData(UiPointerDownBlocker, isBlocking));
+        }
+
+        private void ReleaseGameObjectPointerBlocking()
+        {
+            if (_gameObjectUnderPointer == null)
+                return;
+
+            _pointerOverUiChannel.Raise(new PointerOverUiData(_gameObjectUnderPointer, false));
+            _gameObjectUnderPointer = null;
+        }
+
+        private void SetModuleDragPointerBlock(bool isBlocking)
+        {
+            if (_isModuleDragBlockingCamera == isBlocking)
+                return;
+
+            _isModuleDragBlockingCamera = isBlocking;
+            _pointerOverUiChannel.Raise(new PointerOverUiData(ModuleDragPointerBlocker, isBlocking));
         }
     }
 }
