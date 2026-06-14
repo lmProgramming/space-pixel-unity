@@ -34,27 +34,88 @@
 }
 
 /* ---------- Sizes ---------- */
-.ds-icon--xs { width: 12px; height: 12px; }
-.ds-icon--sm { width: 16px; height: 16px; }
-.ds-icon--md { width: 20px; height: 20px; }
-.ds-icon--lg { width: 24px; height: 24px; }
-.ds-icon--xl { width: 32px; height: 32px; }
-.ds-icon--xxl { width: 48px; height: 48px; }
+.ds-icon--xs {
+    width: 12px;
+    height: 12px;
+}
+
+.ds-icon--sm {
+    width: 16px;
+    height: 16px;
+}
+
+.ds-icon--md {
+    width: 20px;
+    height: 20px;
+}
+
+.ds-icon--lg {
+    width: 24px;
+    height: 24px;
+}
+
+.ds-icon--xl {
+    width: 32px;
+    height: 32px;
+}
+
+.ds-icon--xxl {
+    width: 48px;
+    height: 48px;
+}
 
 /* ---------- Tint variants (explicit) ---------- */
-.ds-icon--primary    { -unity-background-image-tint-color: var(--color-text-primary); }
-.ds-icon--secondary  { -unity-background-image-tint-color: var(--color-text-secondary); }
-.ds-icon--disabled   { -unity-background-image-tint-color: var(--color-text-disabled); }
-.ds-icon--accent     { -unity-background-image-tint-color: var(--color-primary); }
-.ds-icon--gold       { -unity-background-image-tint-color: var(--color-rarity-legendary); }
-.ds-icon--danger     { -unity-background-image-tint-color: var(--color-danger); }
-.ds-icon--warning    { -unity-background-image-tint-color: var(--color-warning); }
-.ds-icon--info       { -unity-background-image-tint-color: var(--color-secondary); }
-.ds-icon--on-accent  { -unity-background-image-tint-color: var(--color-text-on-accent); }
-.ds-icon--rarity-common    { -unity-background-image-tint-color: var(--color-rarity-common); }
-.ds-icon--rarity-rare      { -unity-background-image-tint-color: var(--color-rarity-rare); }
-.ds-icon--rarity-epic      { -unity-background-image-tint-color: var(--color-rarity-epic); }
-.ds-icon--rarity-legendary { -unity-background-image-tint-color: var(--color-rarity-legendary); }
+.ds-icon--primary {
+    -unity-background-image-tint-color: var(--color-text-primary);
+}
+
+.ds-icon--secondary {
+    -unity-background-image-tint-color: var(--color-text-secondary);
+}
+
+.ds-icon--disabled {
+    -unity-background-image-tint-color: var(--color-text-disabled);
+}
+
+.ds-icon--accent {
+    -unity-background-image-tint-color: var(--color-primary);
+}
+
+.ds-icon--gold {
+    -unity-background-image-tint-color: var(--color-rarity-legendary);
+}
+
+.ds-icon--danger {
+    -unity-background-image-tint-color: var(--color-danger);
+}
+
+.ds-icon--warning {
+    -unity-background-image-tint-color: var(--color-warning);
+}
+
+.ds-icon--info {
+    -unity-background-image-tint-color: var(--color-secondary);
+}
+
+.ds-icon--on-accent {
+    -unity-background-image-tint-color: var(--color-text-on-accent);
+}
+
+.ds-icon--rarity-common {
+    -unity-background-image-tint-color: var(--color-rarity-common);
+}
+
+.ds-icon--rarity-rare {
+    -unity-background-image-tint-color: var(--color-rarity-rare);
+}
+
+.ds-icon--rarity-epic {
+    -unity-background-image-tint-color: var(--color-rarity-epic);
+}
+
+.ds-icon--rarity-legendary {
+    -unity-background-image-tint-color: var(--color-rarity-legendary);
+}
 
 /* ---------- Parent-driven state inheritance ----------
    When an icon sits inside a control (button / tab / nav-item) that exposes
@@ -172,9 +233,11 @@
 .ds-btn--icon .ds-icon {
     -unity-background-image-tint-color: var(--color-text-primary);
 }
+
 .ds-btn--icon:hover .ds-icon {
     -unity-background-image-tint-color: var(--color-primary);
 }
+
 .ds-btn--icon.ds-btn--icon-danger .ds-icon {
     -unity-background-image-tint-color: var(--color-danger);
 }
@@ -185,78 +248,875 @@
    Resources/, no extension. SVGs import as Texture2D (svgType: 3). */
 
 /* Arrows */
-.ds-icon--arrow-up        { background-image: resource("Textures/Icons/arrow_up"); }
-.ds-icon--arrow-down      { background-image: resource("Textures/Icons/arrow_down"); }
-.ds-icon--arrow-left      { background-image: resource("Textures/Icons/arrow_left"); }
-.ds-icon--arrow-right     { background-image: resource("Textures/Icons/arrow_right"); }
-.ds-icon--chevron-up      { background-image: resource("Textures/Icons/chevron_up"); }
-.ds-icon--chevron-down    { background-image: resource("Textures/Icons/chevron_down"); }
-.ds-icon--chevron-left    { background-image: resource("Textures/Icons/chevron_left"); }
-.ds-icon--chevron-right   { background-image: resource("Textures/Icons/chevron_right"); }
-.ds-icon--sort-asc        { background-image: resource("Textures/Icons/sort_asc"); }
-.ds-icon--sort-desc       { background-image: resource("Textures/Icons/sort_desc"); }
+.ds-icon--arrow-up {
+    background-image: resource("Textures/Icons/arrow_up");
+}
+
+.ds-icon--arrow-down {
+    background-image: resource("Textures/Icons/arrow_down");
+}
+
+.ds-icon--arrow-left {
+    background-image: resource("Textures/Icons/arrow_left");
+}
+
+.ds-icon--arrow-right {
+    background-image: resource("Textures/Icons/arrow_right");
+}
+
+.ds-icon--chevron-up {
+    background-image: resource("Textures/Icons/chevron_up");
+}
+
+.ds-icon--chevron-down {
+    background-image: resource("Textures/Icons/chevron_down");
+}
+
+.ds-icon--chevron-left {
+    background-image: resource("Textures/Icons/chevron_left");
+}
+
+.ds-icon--chevron-right {
+    background-image: resource("Textures/Icons/chevron_right");
+}
+
+.ds-icon--sort-asc {
+    background-image: resource("Textures/Icons/sort_asc");
+}
+
+.ds-icon--sort-desc {
+    background-image: resource("Textures/Icons/sort_desc");
+}
 
 /* Status / feedback */
-.ds-icon--check           { background-image: resource("Textures/Icons/check"); }
-.ds-icon--close           { background-image: resource("Textures/Icons/close"); }
-.ds-icon--info            { background-image: resource("Textures/Icons/info"); }
-.ds-icon--error           { background-image: resource("Textures/Icons/error"); }
-.ds-icon--warning         { background-image: resource("Textures/Icons/warning"); }
-.ds-icon--help            { background-image: resource("Textures/Icons/help"); }
-.ds-icon--smile           { background-image: resource("Textures/Icons/smile"); }
-.ds-icon--frown           { background-image: resource("Textures/Icons/frown"); }
+.ds-icon--check {
+    background-image: resource("Textures/Icons/check");
+}
+
+.ds-icon--close {
+    background-image: resource("Textures/Icons/close");
+}
+
+.ds-icon--info {
+    background-image: resource("Textures/Icons/info");
+}
+
+.ds-icon--error {
+    background-image: resource("Textures/Icons/error");
+}
+
+.ds-icon--warning {
+    background-image: resource("Textures/Icons/warning");
+}
+
+.ds-icon--help {
+    background-image: resource("Textures/Icons/help");
+}
+
+.ds-icon--smile {
+    background-image: resource("Textures/Icons/smile");
+}
+
+.ds-icon--frown {
+    background-image: resource("Textures/Icons/frown");
+}
 
 /* Actions */
-.ds-icon--plus            { background-image: resource("Textures/Icons/plus"); }
-.ds-icon--edit            { background-image: resource("Textures/Icons/edit"); }
-.ds-icon--trash           { background-image: resource("Textures/Icons/trash"); }
-.ds-icon--share           { background-image: resource("Textures/Icons/share"); }
-.ds-icon--refresh         { background-image: resource("Textures/Icons/refresh"); }
-.ds-icon--sync            { background-image: resource("Textures/Icons/sync"); }
-.ds-icon--search          { background-image: resource("Textures/Icons/search"); }
-.ds-icon--filter          { background-image: resource("Textures/Icons/filter"); }
-.ds-icon--more-horizontal { background-image: resource("Textures/Icons/more_horizontal"); }
-.ds-icon--more-vertical   { background-image: resource("Textures/Icons/more_vertical"); }
-.ds-icon--menu            { background-image: resource("Textures/Icons/menu"); }
-.ds-icon--list            { background-image: resource("Textures/Icons/list"); }
-.ds-icon--lock            { background-image: resource("Textures/Icons/lock"); }
-.ds-icon--unlock          { background-image: resource("Textures/Icons/unlock"); }
-.ds-icon--eye             { background-image: resource("Textures/Icons/eye"); }
-.ds-icon--settings        { background-image: resource("Textures/Icons/settings"); }
-.ds-icon--bell            { background-image: resource("Textures/Icons/bell"); }
-.ds-icon--clock           { background-image: resource("Textures/Icons/clock"); }
-.ds-icon--calendar        { background-image: resource("Textures/Icons/calendar"); }
-.ds-icon--user            { background-image: resource("Textures/Icons/user"); }
-.ds-icon--home            { background-image: resource("Textures/Icons/home"); }
-.ds-icon--target          { background-image: resource("Textures/Icons/target"); }
+.ds-icon--plus {
+    background-image: resource("Textures/Icons/plus");
+}
+
+.ds-icon--edit {
+    background-image: resource("Textures/Icons/edit");
+}
+
+.ds-icon--trash {
+    background-image: resource("Textures/Icons/trash");
+}
+
+.ds-icon--share {
+    background-image: resource("Textures/Icons/share");
+}
+
+.ds-icon--refresh {
+    background-image: resource("Textures/Icons/refresh");
+}
+
+.ds-icon--sync {
+    background-image: resource("Textures/Icons/sync");
+}
+
+.ds-icon--search {
+    background-image: resource("Textures/Icons/search");
+}
+
+.ds-icon--filter {
+    background-image: resource("Textures/Icons/filter");
+}
+
+.ds-icon--more-horizontal {
+    background-image: resource("Textures/Icons/more_horizontal");
+}
+
+.ds-icon--more-vertical {
+    background-image: resource("Textures/Icons/more_vertical");
+}
+
+.ds-icon--menu {
+    background-image: resource("Textures/Icons/menu");
+}
+
+.ds-icon--list {
+    background-image: resource("Textures/Icons/list");
+}
+
+.ds-icon--lock {
+    background-image: resource("Textures/Icons/lock");
+}
+
+.ds-icon--unlock {
+    background-image: resource("Textures/Icons/unlock");
+}
+
+.ds-icon--eye {
+    background-image: resource("Textures/Icons/eye");
+}
+
+.ds-icon--settings {
+    background-image: resource("Textures/Icons/settings");
+}
+
+.ds-icon--bell {
+    background-image: resource("Textures/Icons/bell");
+}
+
+.ds-icon--clock {
+    background-image: resource("Textures/Icons/clock");
+}
+
+.ds-icon--calendar {
+    background-image: resource("Textures/Icons/calendar");
+}
+
+.ds-icon--user {
+    background-image: resource("Textures/Icons/user");
+}
+
+.ds-icon--home {
+    background-image: resource("Textures/Icons/home");
+}
+
+.ds-icon--target {
+    background-image: resource("Textures/Icons/target");
+}
 
 /* Game / cosmetics */
-.ds-icon--paw             { background-image: resource("Textures/Icons/paw"); }
-.ds-icon--shirt           { background-image: resource("Textures/Icons/shirt"); }
-.ds-icon--hats            { background-image: resource("Textures/Icons/hats"); }
-.ds-icon--store           { background-image: resource("Textures/Icons/store"); }
-.ds-icon--cart            { background-image: resource("Textures/Icons/cart"); }
-.ds-icon--bag             { background-image: resource("Textures/Icons/bag"); }
-.ds-icon--gift            { background-image: resource("Textures/Icons/gift"); }
-.ds-icon--heart           { background-image: resource("Textures/Icons/heart"); }
-.ds-icon--shield          { background-image: resource("Textures/Icons/shield"); }
-.ds-icon--sword           { background-image: resource("Textures/Icons/sword"); }
-.ds-icon--bolt            { background-image: resource("Textures/Icons/bolt"); }
-.ds-icon--fire            { background-image: resource("Textures/Icons/fire"); }
-.ds-icon--flame           { background-image: resource("Textures/Icons/flame"); }
-.ds-icon--sparkle         { background-image: resource("Textures/Icons/sparkle"); }
-.ds-icon--sun             { background-image: resource("Textures/Icons/sun"); }
+.ds-icon--paw {
+    background-image: resource("Textures/Icons/paw");
+}
+
+.ds-icon--shirt {
+    background-image: resource("Textures/Icons/shirt");
+}
+
+.ds-icon--hats {
+    background-image: resource("Textures/Icons/hats");
+}
+
+.ds-icon--store {
+    background-image: resource("Textures/Icons/store");
+}
+
+.ds-icon--cart {
+    background-image: resource("Textures/Icons/cart");
+}
+
+.ds-icon--bag {
+    background-image: resource("Textures/Icons/bag");
+}
+
+.ds-icon--gift {
+    background-image: resource("Textures/Icons/gift");
+}
+
+.ds-icon--heart {
+    background-image: resource("Textures/Icons/heart");
+}
+
+.ds-icon--shield {
+    background-image: resource("Textures/Icons/shield");
+}
+
+.ds-icon--sword {
+    background-image: resource("Textures/Icons/sword");
+}
+
+.ds-icon--bolt {
+    background-image: resource("Textures/Icons/bolt");
+}
+
+.ds-icon--fire {
+    background-image: resource("Textures/Icons/fire");
+}
+
+.ds-icon--flame {
+    background-image: resource("Textures/Icons/flame");
+}
+
+.ds-icon--sparkle {
+    background-image: resource("Textures/Icons/sparkle");
+}
+
+.ds-icon--sun {
+    background-image: resource("Textures/Icons/sun");
+}
 
 /* Nature / habitat */
-.ds-icon--leaf            { background-image: resource("Textures/Icons/leaf"); }
-.ds-icon--tree            { background-image: resource("Textures/Icons/tree"); }
-.ds-icon--mountain        { background-image: resource("Textures/Icons/mountain"); }
-.ds-icon--droplet         { background-image: resource("Textures/Icons/droplet"); }
+.ds-icon--leaf {
+    background-image: resource("Textures/Icons/leaf");
+}
+
+.ds-icon--tree {
+    background-image: resource("Textures/Icons/tree");
+}
+
+.ds-icon--mountain {
+    background-image: resource("Textures/Icons/mountain");
+}
+
+.ds-icon--droplet {
+    background-image: resource("Textures/Icons/droplet");
+}
 
 /* Voice / audio (SVG replacements for the legacy mic-icon / sound-icon /
    speak-icon / nametag-icon PNGs — same callsites, new artwork tied to
    the design system token palette). */
-.ds-icon--mic             { background-image: resource("Textures/Icons/mic"); }
-.ds-icon--sound           { background-image: resource("Textures/Icons/sound"); }
-.ds-icon--speak           { background-image: resource("Textures/Icons/speak"); }
-.ds-icon--nametag         { background-image: resource("Textures/Icons/nametag"); }
+.ds-icon--mic {
+    background-image: resource("Textures/Icons/mic");
+}
+
+.ds-icon--sound {
+    background-image: resource("Textures/Icons/sound");
+}
+
+.ds-icon--speak {
+    background-image: resource("Textures/Icons/speak");
+}
+
+.ds-icon--nametag {
+    background-image: resource("Textures/Icons/nametag");
+}
+
+/* Material Symbols (rounded, filled) */
+.ds-icon--home {
+    background-image: resource("Textures/Icons/MaterialSymbolsHomeRoundedFilled");
+}
+
+.ds-icon--menu {
+    background-image: resource("Textures/Icons/MaterialSymbolsMenuRoundedFilled");
+}
+
+.ds-icon--close {
+    background-image: resource("Textures/Icons/MaterialSymbolsCloseRoundedFilled");
+}
+
+.ds-icon--check {
+    background-image: resource("Textures/Icons/MaterialSymbolsCheckRoundedFilled");
+}
+
+.ds-icon--add {
+    background-image: resource("Textures/Icons/MaterialSymbolsAddRoundedFilled");
+}
+
+.ds-icon--remove {
+    background-image: resource("Textures/Icons/MaterialSymbolsRemoveRoundedFilled");
+}
+
+.ds-icon--delete {
+    background-image: resource("Textures/Icons/MaterialSymbolsDeleteRoundedFilled");
+}
+
+.ds-icon--edit {
+    background-image: resource("Textures/Icons/MaterialSymbolsEditRoundedFilled");
+}
+
+.ds-icon--save {
+    background-image: resource("Textures/Icons/MaterialSymbolsSaveRoundedFilled");
+}
+
+.ds-icon--refresh {
+    background-image: resource("Textures/Icons/MaterialSymbolsRefreshRoundedFilled");
+}
+
+.ds-icon--sync {
+    background-image: resource("Textures/Icons/MaterialSymbolsSyncRoundedFilled");
+}
+
+.ds-icon--search {
+    background-image: resource("Textures/Icons/MaterialSymbolsSearchRoundedFilled");
+}
+
+.ds-icon--settings {
+    background-image: resource("Textures/Icons/MaterialSymbolsSettingsRoundedFilled");
+}
+
+.ds-icon--tune {
+    background-image: resource("Textures/Icons/MaterialSymbolsTuneRoundedFilled");
+}
+
+.ds-icon--build {
+    background-image: resource("Textures/Icons/MaterialSymbolsBuildRoundedFilled");
+}
+
+.ds-icon--construction {
+    background-image: resource("Textures/Icons/MaterialSymbolsConstructionRoundedFilled");
+}
+
+.ds-icon--bug-report {
+    background-image: resource("Textures/Icons/MaterialSymbolsBugReportRoundedFilled");
+}
+
+.ds-icon--code {
+    background-image: resource("Textures/Icons/MaterialSymbolsCodeRoundedFilled");
+}
+
+.ds-icon--terminal {
+    background-image: resource("Textures/Icons/MaterialSymbolsTerminalRoundedFilled");
+}
+
+.ds-icon--dashboard {
+    background-image: resource("Textures/Icons/MaterialSymbolsDashboardRoundedFilled");
+}
+
+.ds-icon--insights {
+    background-image: resource("Textures/Icons/MaterialSymbolsInsightsRoundedFilled");
+}
+
+.ds-icon--analytics {
+    background-image: resource("Textures/Icons/MaterialSymbolsAnalyticsRoundedFilled");
+}
+
+.ds-icon--timeline {
+    background-image: resource("Textures/Icons/MaterialSymbolsTimelineRoundedFilled");
+}
+
+.ds-icon--visibility {
+    background-image: resource("Textures/Icons/MaterialSymbolsVisibilityRoundedFilled");
+}
+
+.ds-icon--visibility-off {
+    background-image: resource("Textures/Icons/MaterialSymbolsVisibilityOffRoundedFilled");
+}
+
+.ds-icon--warning {
+    background-image: resource("Textures/Icons/MaterialSymbolsWarningRoundedFilled");
+}
+
+.ds-icon--error {
+    background-image: resource("Textures/Icons/MaterialSymbolsErrorRoundedFilled");
+}
+
+.ds-icon--info {
+    background-image: resource("Textures/Icons/MaterialSymbolsInfoRoundedFilled");
+}
+
+.ds-icon--help {
+    background-image: resource("Textures/Icons/MaterialSymbolsHelpRoundedFilled");
+}
+
+.ds-icon--notifications {
+    background-image: resource("Textures/Icons/MaterialSymbolsNotificationsRoundedFilled");
+}
+
+.ds-icon--flag {
+    background-image: resource("Textures/Icons/MaterialSymbolsFlagRoundedFilled");
+}
+
+.ds-icon--bookmark {
+    background-image: resource("Textures/Icons/MaterialSymbolsBookmarkRoundedFilled");
+}
+
+.ds-icon--star {
+    background-image: resource("Textures/Icons/MaterialSymbolsStarRoundedFilled");
+}
+
+.ds-icon--favorite {
+    background-image: resource("Textures/Icons/MaterialSymbolsFavoriteRoundedFilled");
+}
+
+.ds-icon--grade {
+    background-image: resource("Textures/Icons/MaterialSymbolsGradeRoundedFilled");
+}
+
+.ds-icon--leaderboard {
+    background-image: resource("Textures/Icons/MaterialSymbolsLeaderboardRoundedFilled");
+}
+
+.ds-icon--sports-esports {
+    background-image: resource("Textures/Icons/MaterialSymbolsSportsEsportsRoundedFilled");
+}
+
+.ds-icon--gamepad {
+    background-image: resource("Textures/Icons/MaterialSymbolsGamepadRoundedFilled");
+}
+
+.ds-icon--extension {
+    background-image: resource("Textures/Icons/MaterialSymbolsExtensionRoundedFilled");
+}
+
+.ds-icon--widgets {
+    background-image: resource("Textures/Icons/MaterialSymbolsWidgetsRoundedFilled");
+}
+
+.ds-icon--layers {
+    background-image: resource("Textures/Icons/MaterialSymbolsLayersRoundedFilled");
+}
+
+.ds-icon--public {
+    background-image: resource("Textures/Icons/MaterialSymbolsPublicRoundedFilled");
+}
+
+.ds-icon--map {
+    background-image: resource("Textures/Icons/MaterialSymbolsMapRoundedFilled");
+}
+
+.ds-icon--explore {
+    background-image: resource("Textures/Icons/MaterialSymbolsExploreRoundedFilled");
+}
+
+.ds-icon--navigation {
+    background-image: resource("Textures/Icons/MaterialSymbolsNavigationRoundedFilled");
+}
+
+.ds-icon--explore {
+    background-image: resource("Textures/Icons/MaterialSymbolsExploreRoundedFilled");
+}
+
+.ds-icon--radar {
+    background-image: resource("Textures/Icons/MaterialSymbolsRadarRoundedFilled");
+}
+
+.ds-icon--route {
+    background-image: resource("Textures/Icons/MaterialSymbolsRouteRoundedFilled");
+}
+
+.ds-icon--schedule {
+    background-image: resource("Textures/Icons/MaterialSymbolsScheduleRoundedFilled");
+}
+
+.ds-icon--event {
+    background-image: resource("Textures/Icons/MaterialSymbolsEventRoundedFilled");
+}
+
+.ds-icon--event-available {
+    background-image: resource("Textures/Icons/MaterialSymbolsEventAvailableRoundedFilled");
+}
+
+.ds-icon--event-busy {
+    background-image: resource("Textures/Icons/MaterialSymbolsEventBusyRoundedFilled");
+}
+
+.ds-icon--timer {
+    background-image: resource("Textures/Icons/MaterialSymbolsTimerRoundedFilled");
+}
+
+.ds-icon--speed {
+    background-image: resource("Textures/Icons/MaterialSymbolsSpeedRoundedFilled");
+}
+
+.ds-icon--bolt {
+    background-image: resource("Textures/Icons/MaterialSymbolsBoltRoundedFilled");
+}
+
+.ds-icon--electric-bolt {
+    background-image: resource("Textures/Icons/MaterialSymbolsElectricBoltRoundedFilled");
+}
+
+.ds-icon--whatshot {
+    background-image: resource("Textures/Icons/MaterialSymbolsWhatshotRoundedFilled");
+}
+
+.ds-icon--flare {
+    background-image: resource("Textures/Icons/MaterialSymbolsFlareRoundedFilled");
+}
+
+.ds-icon--power {
+    background-image: resource("Textures/Icons/MaterialSymbolsPowerRoundedFilled");
+}
+
+.ds-icon--wifi {
+    background-image: resource("Textures/Icons/MaterialSymbolsWifiRoundedFilled");
+}
+
+.ds-icon--signal-cellular-alt {
+    background-image: resource("Textures/Icons/MaterialSymbolsSignalCellularAltRoundedFilled");
+}
+
+.ds-icon--signal-wifi-4-bar {
+    background-image: resource("Textures/Icons/MaterialSymbolsSignalWifi4BarRoundedFilled");
+}
+
+.ds-icon--cloud {
+    background-image: resource("Textures/Icons/MaterialSymbolsCloudRoundedFilled");
+}
+
+.ds-icon--sync-alt {
+    background-image: resource("Textures/Icons/MaterialSymbolsSyncAltRoundedFilled");
+}
+
+.ds-icon--autorenew {
+    background-image: resource("Textures/Icons/MaterialSymbolsAutorenewRoundedFilled");
+}
+
+.ds-icon--restart-alt {
+    background-image: resource("Textures/Icons/MaterialSymbolsRestartAltRoundedFilled");
+}
+
+.ds-icon--history {
+    background-image: resource("Textures/Icons/MaterialSymbolsHistoryRoundedFilled");
+}
+
+.ds-icon--schedule {
+    background-image: resource("Textures/Icons/MaterialSymbolsScheduleRoundedFilled");
+}
+
+.ds-icon--inventory {
+    background-image: resource("Textures/Icons/MaterialSymbolsInventoryRoundedFilled");
+}
+
+.ds-icon--store {
+    background-image: resource("Textures/Icons/MaterialSymbolsStoreRoundedFilled");
+}
+
+.ds-icon--redeem {
+    background-image: resource("Textures/Icons/MaterialSymbolsRedeemRoundedFilled");
+}
+
+.ds-icon--paid {
+    background-image: resource("Textures/Icons/MaterialSymbolsPaidRoundedFilled");
+}
+
+.ds-icon--percent {
+    background-image: resource("Textures/Icons/MaterialSymbolsPercentRoundedFilled");
+}
+
+.ds-icon--sell {
+    background-image: resource("Textures/Icons/MaterialSymbolsSellRoundedFilled");
+}
+
+.ds-icon--category {
+    background-image: resource("Textures/Icons/MaterialSymbolsCategoryRoundedFilled");
+}
+
+.ds-icon--backpack {
+    background-image: resource("Textures/Icons/MaterialSymbolsBackpackRoundedFilled");
+}
+
+.ds-icon--psychology {
+    background-image: resource("Textures/Icons/MaterialSymbolsPsychologyRoundedFilled");
+}
+
+.ds-icon--groups {
+    background-image: resource("Textures/Icons/MaterialSymbolsGroupsRoundedFilled");
+}
+
+.ds-icon--person {
+    background-image: resource("Textures/Icons/MaterialSymbolsPersonRoundedFilled");
+}
+
+.ds-icon--face {
+    background-image: resource("Textures/Icons/MaterialSymbolsFaceRoundedFilled");
+}
+
+.ds-icon--badge {
+    background-image: resource("Textures/Icons/MaterialSymbolsBadgeRoundedFilled");
+}
+
+.ds-icon--pets {
+    background-image: resource("Textures/Icons/MaterialSymbolsPetsRoundedFilled");
+}
+
+.ds-icon--park {
+    background-image: resource("Textures/Icons/MaterialSymbolsParkRoundedFilled");
+}
+
+.ds-icon--forest {
+    background-image: resource("Textures/Icons/MaterialSymbolsForestRoundedFilled");
+}
+
+.ds-icon--water {
+    background-image: resource("Textures/Icons/MaterialSymbolsWaterRoundedFilled");
+}
+
+.ds-icon--waves {
+    background-image: resource("Textures/Icons/MaterialSymbolsWavesRoundedFilled");
+}
+
+.ds-icon--science {
+    background-image: resource("Textures/Icons/MaterialSymbolsScienceRoundedFilled");
+}
+
+.ds-icon--biotech {
+    background-image: resource("Textures/Icons/MaterialSymbolsBiotechRoundedFilled");
+}
+
+.ds-icon--hardware {
+    background-image: resource("Textures/Icons/MaterialSymbolsHardwareRoundedFilled");
+}
+
+.ds-icon--memory {
+    background-image: resource("Textures/Icons/MaterialSymbolsMemoryRoundedFilled");
+}
+
+.ds-icon--memory-alt {
+    background-image: resource("Textures/Icons/MaterialSymbolsMemoryAltRoundedFilled");
+}
+
+.ds-icon--storage {
+    background-image: resource("Textures/Icons/MaterialSymbolsStorageRoundedFilled");
+}
+
+.ds-icon--dns {
+    background-image: resource("Textures/Icons/MaterialSymbolsDnsRoundedFilled");
+}
+
+.ds-icon--dataset {
+    background-image: resource("Textures/Icons/MaterialSymbolsDatasetRoundedFilled");
+}
+
+.ds-icon--database {
+    background-image: resource("Textures/Icons/MaterialSymbolsDatabaseRoundedFilled");
+}
+
+.ds-icon--data-object {
+    background-image: resource("Textures/Icons/MaterialSymbolsDataObjectRoundedFilled");
+}
+
+.ds-icon--network-node {
+    background-image: resource("Textures/Icons/MaterialSymbolsNetworkNodeRoundedFilled");
+}
+
+.ds-icon--device-hub {
+    background-image: resource("Textures/Icons/MaterialSymbolsDeviceHubRoundedFilled");
+}
+
+.ds-icon--hub {
+    background-image: resource("Textures/Icons/MaterialSymbolsHubRoundedFilled");
+}
+
+.ds-icon--developer-board {
+    background-image: resource("Textures/Icons/MaterialSymbolsDeveloperBoardRoundedFilled");
+}
+
+.ds-icon--settings-input-component {
+    background-image: resource("Textures/Icons/MaterialSymbolsSettingsInputComponentRoundedFilled");
+}
+
+.ds-icon--engineering {
+    background-image: resource("Textures/Icons/MaterialSymbolsEngineeringRoundedFilled");
+}
+
+.ds-icon--play-arrow {
+    background-image: resource("Textures/Icons/MaterialSymbolsPlayArrowRoundedFilled");
+}
+
+.ds-icon--pause {
+    background-image: resource("Textures/Icons/MaterialSymbolsPauseRoundedFilled");
+}
+
+.ds-icon--stop {
+    background-image: resource("Textures/Icons/MaterialSymbolsStopRoundedFilled");
+}
+
+.ds-icon--replay {
+    background-image: resource("Textures/Icons/MaterialSymbolsReplayRoundedFilled");
+}
+
+.ds-icon--skip-next {
+    background-image: resource("Textures/Icons/MaterialSymbolsSkipNextRoundedFilled");
+}
+
+.ds-icon--skip-previous {
+    background-image: resource("Textures/Icons/MaterialSymbolsSkipPreviousRoundedFilled");
+}
+
+.ds-icon--fast-forward {
+    background-image: resource("Textures/Icons/MaterialSymbolsFastForwardRoundedFilled");
+}
+
+.ds-icon--fast-rewind {
+    background-image: resource("Textures/Icons/MaterialSymbolsFastRewindRoundedFilled");
+}
+
+.ds-icon--zoom-in {
+    background-image: resource("Textures/Icons/MaterialSymbolsZoomInRoundedFilled");
+}
+
+.ds-icon--zoom-out {
+    background-image: resource("Textures/Icons/MaterialSymbolsZoomOutRoundedFilled");
+}
+
+.ds-icon--rotate-left {
+    background-image: resource("Textures/Icons/MaterialSymbolsRotateLeftRoundedFilled");
+}
+
+.ds-icon--rotate-right {
+    background-image: resource("Textures/Icons/MaterialSymbolsRotateRightRoundedFilled");
+}
+
+.ds-icon--fullscreen {
+    background-image: resource("Textures/Icons/MaterialSymbolsFullscreenRoundedFilled");
+}
+
+.ds-icon--rocket-launch {
+    background-image: resource("Textures/Icons/MaterialSymbolsRocketLaunchRoundedFilled");
+}
+
+.ds-icon--rocket {
+    background-image: resource("Textures/Icons/MaterialSymbolsRocketRoundedFilled");
+}
+
+.ds-icon--satellite {
+    background-image: resource("Textures/Icons/MaterialSymbolsSatelliteRoundedFilled");
+}
+
+.ds-icon--satellite-alt {
+    background-image: resource("Textures/Icons/MaterialSymbolsSatelliteAltRoundedFilled");
+}
+
+.ds-icon--airplanemode-active {
+    background-image: resource("Textures/Icons/MaterialSymbolsAirplanemodeActiveRoundedFilled");
+}
+
+.ds-icon--flight-takeoff {
+    background-image: resource("Textures/Icons/MaterialSymbolsFlightTakeoffRoundedFilled");
+}
+
+.ds-icon--flight-land {
+    background-image: resource("Textures/Icons/MaterialSymbolsFlightLandRoundedFilled");
+}
+
+.ds-icon--airplane-ticket {
+    background-image: resource("Textures/Icons/MaterialSymbolsAirplaneTicketRoundedFilled");
+}
+
+.ds-icon--local-fire-department {
+    background-image: resource("Textures/Icons/MaterialSymbolsLocalFireDepartmentRoundedFilled");
+}
+
+.ds-icon--fireplace {
+    background-image: resource("Textures/Icons/MaterialSymbolsFireplaceRoundedFilled");
+}
+
+.ds-icon--my-location {
+    background-image: resource("Textures/Icons/MaterialSymbolsMyLocationRoundedFilled");
+}
+
+.ds-icon--location-on {
+    background-image: resource("Textures/Icons/MaterialSymbolsLocationOnRoundedFilled");
+}
+
+.ds-icon--location-searching {
+    background-image: resource("Textures/Icons/MaterialSymbolsLocationSearchingRoundedFilled");
+}
+
+.ds-icon--adjust {
+    background-image: resource("Textures/Icons/MaterialSymbolsAdjustRoundedFilled");
+}
+
+.ds-icon--center-focus-strong {
+    background-image: resource("Textures/Icons/MaterialSymbolsCenterFocusStrongRoundedFilled");
+}
+
+.ds-icon--center-focus-strong {
+    background-image: resource("Textures/Icons/MaterialSymbolsCenterFocusStrongRoundedFilled");
+}
+
+.ds-icon--lock {
+    background-image: resource("Textures/Icons/MaterialSymbolsLockRoundedFilled");
+}
+
+.ds-icon--lock-open {
+    background-image: resource("Textures/Icons/MaterialSymbolsLockOpenRoundedFilled");
+}
+
+.ds-icon--lock-reset {
+    background-image: resource("Textures/Icons/MaterialSymbolsLockResetRoundedFilled");
+}
+
+.ds-icon--vpn-key {
+    background-image: resource("Textures/Icons/MaterialSymbolsVpnKeyRoundedFilled");
+}
+
+.ds-icon--shield {
+    background-image: resource("Textures/Icons/MaterialSymbolsShieldRoundedFilled");
+}
+
+.ds-icon--shield-moon {
+    background-image: resource("Textures/Icons/MaterialSymbolsShieldMoonRoundedFilled");
+}
+
+.ds-icon--shield-person {
+    background-image: resource("Textures/Icons/MaterialSymbolsShieldPersonRoundedFilled");
+}
+
+.ds-icon--admin-panel-settings {
+    background-image: resource("Textures/Icons/MaterialSymbolsAdminPanelSettingsRoundedFilled");
+}
+
+.ds-icon--sell {
+    background-image: resource("Textures/Icons/MaterialSymbolsSellRoundedFilled");
+}
+
+.ds-icon--paid {
+    background-image: resource("Textures/Icons/MaterialSymbolsPaidRoundedFilled");
+}
+
+.ds-icon--percent {
+    background-image: resource("Textures/Icons/MaterialSymbolsPercentRoundedFilled");
+}
+
+.ds-icon--sensors {
+    background-image: resource("Textures/Icons/MaterialSymbolsSensorsRoundedFilled");
+}
+
+.ds-icon--sensors-off {
+    background-image: resource("Textures/Icons/MaterialSymbolsSensorsOffRoundedFilled");
+}
+
+.ds-icon--precision-manufacturing {
+    background-image: resource("Textures/Icons/MaterialSymbolsPrecisionManufacturingRoundedFilled");
+}
+
+.ds-icon--military-tech {
+    background-image: resource("Textures/Icons/MaterialSymbolsMilitaryTechRoundedFilled");
+}
+
+.ds-icon--swords {
+    background-image: resource("Textures/Icons/MaterialSymbolsSwordsRoundedFilled");
+}
+
+.ds-icon--battery-full {
+    background-image: resource("Textures/Icons/MaterialSymbolsBatteryFullRoundedFilled");
+}
+
+.ds-icon--battery-charging-full {
+    background-image: resource("Textures/Icons/MaterialSymbolsBatteryChargingFullRoundedFilled");
+}
+
+.ds-icon--battery-alert {
+    background-image: resource("Textures/Icons/MaterialSymbolsBatteryAlertRoundedFilled");
+}
+
+.ds-icon--energy-savings-leaf {
+    background-image: resource("Textures/Icons/MaterialSymbolsEnergySavingsLeafRoundedFilled");
+}
+
+.ds-icon--rotate-90-degrees-ccw {
+    background-image: resource("Textures/Icons/MaterialSymbolsRotate90DegreesCcwRoundedFilled");
+}
+
+.ds-icon--rotate-90-degrees-cw {
+    background-image: resource("Textures/Icons/MaterialSymbolsRotate90DegreesCwRoundedFilled");
+}
+            
