@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace ShipFactory
+namespace ShipFactory.UI.Runtime
 {
     internal sealed class HoverMarqueeLabel
     {

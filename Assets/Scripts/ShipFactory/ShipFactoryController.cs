@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Core.Constants;
 using Core.Services;
+using Events.Camera;
 using ShipFactory.Serialization;
 using Ships;
 using UI.Common;
@@ -21,6 +22,8 @@ namespace ShipFactory
         [SerializeField] private Ship initialShip;
 
         [SerializeField] private string snapshotFolderName = "ShipSnapshots";
+        [SerializeField] private CameraResetRequestEventChannel cameraResetRequestEventChannel;
+        private Camera _camera;
 
         private ShipFactoryCanvasController _canvasController;
 
@@ -45,6 +48,7 @@ namespace ShipFactory
         private void Awake()
         {
             _uiDocument = GetComponent<UIDocument>();
+            _camera = Camera.main;
 
             if (modulePrefabLibrary == null)
                 Debug.LogError("[ShipFactoryController] ModulePrefabLibrary is not assigned!", this);
@@ -53,6 +57,7 @@ namespace ShipFactory
         private void Update()
         {
             _canvasController?.RefreshShipResourcesPanel();
+            _canvasController?.RefreshCameraInfoPanel(_camera);
             HandlePauseInput();
             HandleRotationInput();
         }
@@ -63,7 +68,11 @@ namespace ShipFactory
             if (root == null)
                 throw new InvalidOperationException("[ShipFactoryController] UI root is missing.");
 
-            _canvasController = new ShipFactoryCanvasController(root, _gameInput);
+            if (cameraResetRequestEventChannel == null)
+                throw new InvalidOperationException(
+                    "[ShipFactoryController] CameraResetRequestEventChannel is not assigned!");
+
+            _canvasController = new ShipFactoryCanvasController(root, _gameInput, cameraResetRequestEventChannel);
             _paletteController = new ModulePaletteController(root, modulePrefabLibrary);
 
             _shipNameField = root.Q<TextField>("ship-name-field");

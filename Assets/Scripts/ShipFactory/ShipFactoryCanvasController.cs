@@ -1,6 +1,7 @@
 using System;
 using Core.Services;
 using Core.Ship;
+using Events.Camera;
 using JetBrains.Annotations;
 using ShipFactory.LegalPositionCalculator;
 using ShipFactory.UI.Runtime;
@@ -16,6 +17,7 @@ namespace ShipFactory
     public class ShipFactoryCanvasController : IDisposable
     {
         private readonly DragAnimator _animator;
+        private readonly CameraInfoPanel _cameraInfoPanel;
         private readonly IGameInput _gameInput;
         private readonly ModuleInfoPanel _infoPanel;
 
@@ -38,7 +40,10 @@ namespace ShipFactory
         private ShipModuleSOInstanceBundle _selectedModuleBundle;
         private Ship _ship;
 
-        public ShipFactoryCanvasController(VisualElement root, IGameInput gameInput)
+        public ShipFactoryCanvasController(
+            VisualElement root,
+            IGameInput gameInput,
+            CameraResetRequestEventChannel cameraResetRequestEventChannel)
         {
             _gameInput = gameInput;
             var canvasContainer = root.Q<VisualElement>("canvas-container");
@@ -52,6 +57,8 @@ namespace ShipFactory
             _notificationPopup = new NotificationPopup(root);
             _resourcesPanel = new ResourcesPanel(root);
             _infoPanel = new ModuleInfoPanel(root);
+            _cameraInfoPanel = new CameraInfoPanel(root, cameraResetRequestEventChannel);
+
             _infoPanel.OnRemoveModuleClicked += RemoveSelectedModule;
             _infoPanel.OnRotateClockwiseClicked += () => RotateActiveModule(90);
             _infoPanel.OnRotateCounterClockwiseClicked += () => RotateActiveModule(-90);
@@ -486,6 +493,11 @@ namespace ShipFactory
             };
 
             _overlayManager.SetColor(_draggedModuleBundle, color);
+        }
+
+        public void RefreshCameraInfoPanel(Camera camera)
+        {
+            _cameraInfoPanel.Update(camera);
         }
     }
 }

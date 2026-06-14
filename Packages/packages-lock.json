@@ -21,6 +21,13 @@
       "dependencies": {},
       "hash": "c2af83c9d4f8cdaada9d4a0e94de2f195d8e1d01"
     },
+    "com.kyrylokuzyk.primetween": {
+      "version": "1.4.6",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://registry.npmjs.org"
+    },
     "com.mathijsbakker.extenject": {
       "version": "file:Com.Mathijsbakker.Extenject",
       "depth": 0,

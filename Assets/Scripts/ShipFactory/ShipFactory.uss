@@ -34,6 +34,12 @@
     justify-content: center;
 }
 
+.camera-info {
+    position: absolute;
+    top: var(--ship-factory-panel-inset);
+    right: var(--ship-factory-panel-inset);
+}
+
 .top-bar__cluster {
     margin-bottom: 0;
     padding: var(--space-2) var(--space-3);
@@ -63,7 +69,7 @@
 .ship-resources-panel {
     position: absolute;
     flex-direction: column;
-    bottom: 228px; /*calc(var(--ship-factory-palette-height) + var(--ship-factory-panel-inset));*/
+    bottom: 230px; /*calc(var(--ship-factory-palette-height) + var(--ship-factory-panel-inset));*/
     width: 300px;
 }
 
@@ -98,10 +104,6 @@
 .ship-factory-input-blocker,
 .action-popup {
     display: none;
-}
-
-.module-rotation-icon--counter {
-    scale: -1 1;
 }
 
 .ship-factory-input-blocker {

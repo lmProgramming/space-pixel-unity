@@ -25,12 +25,22 @@
         </ui:VisualElement>
     </ui:VisualElement>
 
+    <!-- Top right camera info -->
+    <ui:VisualElement name="camera-info" class="camera-info ds-card ds-row ds-row__gap">
+        <ui:VisualElement class="ds-icon ds-icon--camera"/>
+        <ui:Label name="camera-info-position" text="(0, 0)" class="ds-caption"/>
+        <ui:Button name="camera-reset-button" class="ds-btn ds-btn--secondary ds-btn--icon"
+                   tooltip="Reset camera position and zoom">
+            <ui:VisualElement class="ds-icon ds-icon--refresh"/>
+        </ui:Button>
+    </ui:VisualElement>
+
     <!-- Bottom-left details panel for dragged/selected modules -->
     <ui:VisualElement name="module-info-panel" class="ds-card module-info-panel">
         <ui:VisualElement class="ds-row" style="margin-bottom: 0px;">
             <ui:Label text="Module Details" class="ds-body-1"/>
             <ui:VisualElement class="spacer"/>
-            <ui:Button name="module-info-collapse-button" class="ds-btn ds-btn--icon ds-btn--ghost"
+            <ui:Button name="module-info-collapse-button" class="ds-btn ds-btn-secondary ds-btn--icon ds-btn--ghost"
                        tooltip="Collapse panel">
                 <ui:VisualElement name="module-info-collapse-icon"
                                   class="ds-icon ds-icon--sm ds-icon--chevron-down"/>
@@ -80,12 +90,12 @@
                 <ui:Button name="rotate-counter-button"
                            class="ds-btn ds-btn--secondary ds-btn--icon"
                            style="flex-grow: 1;">
-                    <ui:VisualElement class="ds-icon ds-icon--refresh module-rotation-icon--counter"/>
+                    <ui:VisualElement class="ds-icon ds-icon--rotate-90-degrees-ccw"/>
                 </ui:Button>
                 <ui:Button name="rotate-clockwise-button"
                            class="ds-btn ds-btn--secondary ds-btn--icon"
                            style="flex-grow: 1;">
-                    <ui:VisualElement class="ds-icon ds-icon--refresh"/>
+                    <ui:VisualElement class="ds-icon ds-icon--rotate-90-degrees-cw"/>
                 </ui:Button>
                 <ui:Button name="remove-module-button"
                            class="remove-module-button--hidden ds-btn ds-btn--icon-danger ds-btn--icon"

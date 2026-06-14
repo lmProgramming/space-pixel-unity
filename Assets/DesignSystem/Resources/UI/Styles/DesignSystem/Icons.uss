@@ -509,614 +509,617 @@
 
 /* Material Symbols (rounded, filled) */
 .ds-icon--home {
-    background-image: resource("Textures/Icons/MaterialSymbolsHomeRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsHomeRoundedFilled");
 }
 
 .ds-icon--menu {
-    background-image: resource("Textures/Icons/MaterialSymbolsMenuRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsMenuRoundedFilled");
 }
 
 .ds-icon--close {
-    background-image: resource("Textures/Icons/MaterialSymbolsCloseRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsCloseRoundedFilled");
 }
 
 .ds-icon--check {
-    background-image: resource("Textures/Icons/MaterialSymbolsCheckRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsCheckRoundedFilled");
 }
 
 .ds-icon--add {
-    background-image: resource("Textures/Icons/MaterialSymbolsAddRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsAddRoundedFilled");
 }
 
 .ds-icon--remove {
-    background-image: resource("Textures/Icons/MaterialSymbolsRemoveRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsRemoveRoundedFilled");
 }
 
 .ds-icon--delete {
-    background-image: resource("Textures/Icons/MaterialSymbolsDeleteRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsDeleteRoundedFilled");
 }
 
 .ds-icon--edit {
-    background-image: resource("Textures/Icons/MaterialSymbolsEditRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsEditRoundedFilled");
 }
 
 .ds-icon--save {
-    background-image: resource("Textures/Icons/MaterialSymbolsSaveRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsSaveRoundedFilled");
 }
 
 .ds-icon--refresh {
-    background-image: resource("Textures/Icons/MaterialSymbolsRefreshRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsRefreshRoundedFilled");
 }
 
 .ds-icon--sync {
-    background-image: resource("Textures/Icons/MaterialSymbolsSyncRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsSyncRoundedFilled");
 }
 
 .ds-icon--search {
-    background-image: resource("Textures/Icons/MaterialSymbolsSearchRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsSearchRoundedFilled");
 }
 
 .ds-icon--settings {
-    background-image: resource("Textures/Icons/MaterialSymbolsSettingsRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsSettingsRoundedFilled");
 }
 
 .ds-icon--tune {
-    background-image: resource("Textures/Icons/MaterialSymbolsTuneRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsTuneRoundedFilled");
 }
 
 .ds-icon--build {
-    background-image: resource("Textures/Icons/MaterialSymbolsBuildRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsBuildRoundedFilled");
 }
 
 .ds-icon--construction {
-    background-image: resource("Textures/Icons/MaterialSymbolsConstructionRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsConstructionRoundedFilled");
 }
 
 .ds-icon--bug-report {
-    background-image: resource("Textures/Icons/MaterialSymbolsBugReportRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsBugReportRoundedFilled");
 }
 
 .ds-icon--code {
-    background-image: resource("Textures/Icons/MaterialSymbolsCodeRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsCodeRoundedFilled");
 }
 
 .ds-icon--terminal {
-    background-image: resource("Textures/Icons/MaterialSymbolsTerminalRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsTerminalRoundedFilled");
 }
 
 .ds-icon--dashboard {
-    background-image: resource("Textures/Icons/MaterialSymbolsDashboardRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsDashboardRoundedFilled");
 }
 
 .ds-icon--insights {
-    background-image: resource("Textures/Icons/MaterialSymbolsInsightsRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsInsightsRoundedFilled");
 }
 
 .ds-icon--analytics {
-    background-image: resource("Textures/Icons/MaterialSymbolsAnalyticsRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsAnalyticsRoundedFilled");
 }
 
 .ds-icon--timeline {
-    background-image: resource("Textures/Icons/MaterialSymbolsTimelineRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsTimelineRoundedFilled");
 }
 
 .ds-icon--visibility {
-    background-image: resource("Textures/Icons/MaterialSymbolsVisibilityRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsVisibilityRoundedFilled");
 }
 
 .ds-icon--visibility-off {
-    background-image: resource("Textures/Icons/MaterialSymbolsVisibilityOffRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsVisibilityOffRoundedFilled");
 }
 
 .ds-icon--warning {
-    background-image: resource("Textures/Icons/MaterialSymbolsWarningRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsWarningRoundedFilled");
 }
 
 .ds-icon--error {
-    background-image: resource("Textures/Icons/MaterialSymbolsErrorRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsErrorRoundedFilled");
 }
 
 .ds-icon--info {
-    background-image: resource("Textures/Icons/MaterialSymbolsInfoRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsInfoRoundedFilled");
 }
 
 .ds-icon--help {
-    background-image: resource("Textures/Icons/MaterialSymbolsHelpRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsHelpRoundedFilled");
 }
 
 .ds-icon--notifications {
-    background-image: resource("Textures/Icons/MaterialSymbolsNotificationsRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsNotificationsRoundedFilled");
 }
 
 .ds-icon--flag {
-    background-image: resource("Textures/Icons/MaterialSymbolsFlagRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsFlagRoundedFilled");
 }
 
 .ds-icon--bookmark {
-    background-image: resource("Textures/Icons/MaterialSymbolsBookmarkRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsBookmarkRoundedFilled");
 }
 
 .ds-icon--star {
-    background-image: resource("Textures/Icons/MaterialSymbolsStarRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsStarRoundedFilled");
 }
 
 .ds-icon--favorite {
-    background-image: resource("Textures/Icons/MaterialSymbolsFavoriteRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsFavoriteRoundedFilled");
 }
 
 .ds-icon--grade {
-    background-image: resource("Textures/Icons/MaterialSymbolsGradeRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsGradeRoundedFilled");
 }
 
 .ds-icon--leaderboard {
-    background-image: resource("Textures/Icons/MaterialSymbolsLeaderboardRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsLeaderboardRoundedFilled");
 }
 
 .ds-icon--sports-esports {
-    background-image: resource("Textures/Icons/MaterialSymbolsSportsEsportsRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsSportsEsportsRoundedFilled");
 }
 
 .ds-icon--gamepad {
-    background-image: resource("Textures/Icons/MaterialSymbolsGamepadRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsGamepadRoundedFilled");
 }
 
 .ds-icon--extension {
-    background-image: resource("Textures/Icons/MaterialSymbolsExtensionRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsExtensionRoundedFilled");
 }
 
 .ds-icon--widgets {
-    background-image: resource("Textures/Icons/MaterialSymbolsWidgetsRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsWidgetsRoundedFilled");
 }
 
 .ds-icon--layers {
-    background-image: resource("Textures/Icons/MaterialSymbolsLayersRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsLayersRoundedFilled");
 }
 
 .ds-icon--public {
-    background-image: resource("Textures/Icons/MaterialSymbolsPublicRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsPublicRoundedFilled");
 }
 
 .ds-icon--map {
-    background-image: resource("Textures/Icons/MaterialSymbolsMapRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsMapRoundedFilled");
 }
 
 .ds-icon--explore {
-    background-image: resource("Textures/Icons/MaterialSymbolsExploreRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsExploreRoundedFilled");
 }
 
 .ds-icon--navigation {
-    background-image: resource("Textures/Icons/MaterialSymbolsNavigationRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsNavigationRoundedFilled");
 }
 
 .ds-icon--explore {
-    background-image: resource("Textures/Icons/MaterialSymbolsExploreRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsExploreRoundedFilled");
 }
 
 .ds-icon--radar {
-    background-image: resource("Textures/Icons/MaterialSymbolsRadarRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsRadarRoundedFilled");
 }
 
 .ds-icon--route {
-    background-image: resource("Textures/Icons/MaterialSymbolsRouteRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsRouteRoundedFilled");
 }
 
 .ds-icon--schedule {
-    background-image: resource("Textures/Icons/MaterialSymbolsScheduleRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsScheduleRoundedFilled");
 }
 
 .ds-icon--event {
-    background-image: resource("Textures/Icons/MaterialSymbolsEventRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsEventRoundedFilled");
 }
 
 .ds-icon--event-available {
-    background-image: resource("Textures/Icons/MaterialSymbolsEventAvailableRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsEventAvailableRoundedFilled");
 }
 
 .ds-icon--event-busy {
-    background-image: resource("Textures/Icons/MaterialSymbolsEventBusyRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsEventBusyRoundedFilled");
 }
 
 .ds-icon--timer {
-    background-image: resource("Textures/Icons/MaterialSymbolsTimerRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsTimerRoundedFilled");
 }
 
 .ds-icon--speed {
-    background-image: resource("Textures/Icons/MaterialSymbolsSpeedRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsSpeedRoundedFilled");
 }
 
 .ds-icon--bolt {
-    background-image: resource("Textures/Icons/MaterialSymbolsBoltRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsBoltRoundedFilled");
 }
 
 .ds-icon--electric-bolt {
-    background-image: resource("Textures/Icons/MaterialSymbolsElectricBoltRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsElectricBoltRoundedFilled");
 }
 
 .ds-icon--whatshot {
-    background-image: resource("Textures/Icons/MaterialSymbolsWhatshotRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsWhatshotRoundedFilled");
 }
 
 .ds-icon--flare {
-    background-image: resource("Textures/Icons/MaterialSymbolsFlareRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsFlareRoundedFilled");
 }
 
 .ds-icon--power {
-    background-image: resource("Textures/Icons/MaterialSymbolsPowerRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsPowerRoundedFilled");
 }
 
 .ds-icon--wifi {
-    background-image: resource("Textures/Icons/MaterialSymbolsWifiRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsWifiRoundedFilled");
 }
 
 .ds-icon--signal-cellular-alt {
-    background-image: resource("Textures/Icons/MaterialSymbolsSignalCellularAltRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsSignalCellularAltRoundedFilled");
 }
 
 .ds-icon--signal-wifi-4-bar {
-    background-image: resource("Textures/Icons/MaterialSymbolsSignalWifi4BarRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsSignalWifi4BarRoundedFilled");
 }
 
 .ds-icon--cloud {
-    background-image: resource("Textures/Icons/MaterialSymbolsCloudRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsCloudRoundedFilled");
 }
 
 .ds-icon--sync-alt {
-    background-image: resource("Textures/Icons/MaterialSymbolsSyncAltRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsSyncAltRoundedFilled");
 }
 
 .ds-icon--autorenew {
-    background-image: resource("Textures/Icons/MaterialSymbolsAutorenewRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsAutorenewRoundedFilled");
 }
 
 .ds-icon--restart-alt {
-    background-image: resource("Textures/Icons/MaterialSymbolsRestartAltRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsRestartAltRoundedFilled");
 }
 
 .ds-icon--history {
-    background-image: resource("Textures/Icons/MaterialSymbolsHistoryRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsHistoryRoundedFilled");
 }
 
 .ds-icon--schedule {
-    background-image: resource("Textures/Icons/MaterialSymbolsScheduleRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsScheduleRoundedFilled");
 }
 
 .ds-icon--inventory {
-    background-image: resource("Textures/Icons/MaterialSymbolsInventoryRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsInventoryRoundedFilled");
 }
 
 .ds-icon--store {
-    background-image: resource("Textures/Icons/MaterialSymbolsStoreRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsStoreRoundedFilled");
 }
 
 .ds-icon--redeem {
-    background-image: resource("Textures/Icons/MaterialSymbolsRedeemRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsRedeemRoundedFilled");
 }
 
 .ds-icon--paid {
-    background-image: resource("Textures/Icons/MaterialSymbolsPaidRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsPaidRoundedFilled");
 }
 
 .ds-icon--percent {
-    background-image: resource("Textures/Icons/MaterialSymbolsPercentRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsPercentRoundedFilled");
 }
 
 .ds-icon--sell {
-    background-image: resource("Textures/Icons/MaterialSymbolsSellRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsSellRoundedFilled");
 }
 
 .ds-icon--category {
-    background-image: resource("Textures/Icons/MaterialSymbolsCategoryRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsCategoryRoundedFilled");
 }
 
 .ds-icon--backpack {
-    background-image: resource("Textures/Icons/MaterialSymbolsBackpackRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsBackpackRoundedFilled");
 }
 
 .ds-icon--psychology {
-    background-image: resource("Textures/Icons/MaterialSymbolsPsychologyRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsPsychologyRoundedFilled");
 }
 
 .ds-icon--groups {
-    background-image: resource("Textures/Icons/MaterialSymbolsGroupsRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsGroupsRoundedFilled");
 }
 
 .ds-icon--person {
-    background-image: resource("Textures/Icons/MaterialSymbolsPersonRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsPersonRoundedFilled");
 }
 
 .ds-icon--face {
-    background-image: resource("Textures/Icons/MaterialSymbolsFaceRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsFaceRoundedFilled");
 }
 
 .ds-icon--badge {
-    background-image: resource("Textures/Icons/MaterialSymbolsBadgeRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsBadgeRoundedFilled");
 }
 
 .ds-icon--pets {
-    background-image: resource("Textures/Icons/MaterialSymbolsPetsRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsPetsRoundedFilled");
 }
 
 .ds-icon--park {
-    background-image: resource("Textures/Icons/MaterialSymbolsParkRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsParkRoundedFilled");
 }
 
 .ds-icon--forest {
-    background-image: resource("Textures/Icons/MaterialSymbolsForestRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsForestRoundedFilled");
 }
 
 .ds-icon--water {
-    background-image: resource("Textures/Icons/MaterialSymbolsWaterRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsWaterRoundedFilled");
 }
 
 .ds-icon--waves {
-    background-image: resource("Textures/Icons/MaterialSymbolsWavesRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsWavesRoundedFilled");
 }
 
 .ds-icon--science {
-    background-image: resource("Textures/Icons/MaterialSymbolsScienceRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsScienceRoundedFilled");
 }
 
 .ds-icon--biotech {
-    background-image: resource("Textures/Icons/MaterialSymbolsBiotechRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsBiotechRoundedFilled");
 }
 
 .ds-icon--hardware {
-    background-image: resource("Textures/Icons/MaterialSymbolsHardwareRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsHardwareRoundedFilled");
 }
 
 .ds-icon--memory {
-    background-image: resource("Textures/Icons/MaterialSymbolsMemoryRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsMemoryRoundedFilled");
 }
 
 .ds-icon--memory-alt {
-    background-image: resource("Textures/Icons/MaterialSymbolsMemoryAltRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsMemoryAltRoundedFilled");
 }
 
 .ds-icon--storage {
-    background-image: resource("Textures/Icons/MaterialSymbolsStorageRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsStorageRoundedFilled");
 }
 
 .ds-icon--dns {
-    background-image: resource("Textures/Icons/MaterialSymbolsDnsRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsDnsRoundedFilled");
 }
 
 .ds-icon--dataset {
-    background-image: resource("Textures/Icons/MaterialSymbolsDatasetRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsDatasetRoundedFilled");
 }
 
 .ds-icon--database {
-    background-image: resource("Textures/Icons/MaterialSymbolsDatabaseRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsDatabaseRoundedFilled");
 }
 
 .ds-icon--data-object {
-    background-image: resource("Textures/Icons/MaterialSymbolsDataObjectRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsDataObjectRoundedFilled");
 }
 
 .ds-icon--network-node {
-    background-image: resource("Textures/Icons/MaterialSymbolsNetworkNodeRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsNetworkNodeRoundedFilled");
 }
 
 .ds-icon--device-hub {
-    background-image: resource("Textures/Icons/MaterialSymbolsDeviceHubRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsDeviceHubRoundedFilled");
 }
 
 .ds-icon--hub {
-    background-image: resource("Textures/Icons/MaterialSymbolsHubRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsHubRoundedFilled");
 }
 
 .ds-icon--developer-board {
-    background-image: resource("Textures/Icons/MaterialSymbolsDeveloperBoardRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsDeveloperBoardRoundedFilled");
 }
 
 .ds-icon--settings-input-component {
-    background-image: resource("Textures/Icons/MaterialSymbolsSettingsInputComponentRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsSettingsInputComponentRoundedFilled");
 }
 
 .ds-icon--engineering {
-    background-image: resource("Textures/Icons/MaterialSymbolsEngineeringRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsEngineeringRoundedFilled");
 }
 
 .ds-icon--play-arrow {
-    background-image: resource("Textures/Icons/MaterialSymbolsPlayArrowRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsPlayArrowRoundedFilled");
 }
 
 .ds-icon--pause {
-    background-image: resource("Textures/Icons/MaterialSymbolsPauseRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsPauseRoundedFilled");
 }
 
 .ds-icon--stop {
-    background-image: resource("Textures/Icons/MaterialSymbolsStopRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsStopRoundedFilled");
 }
 
 .ds-icon--replay {
-    background-image: resource("Textures/Icons/MaterialSymbolsReplayRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsReplayRoundedFilled");
 }
 
 .ds-icon--skip-next {
-    background-image: resource("Textures/Icons/MaterialSymbolsSkipNextRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsSkipNextRoundedFilled");
 }
 
 .ds-icon--skip-previous {
-    background-image: resource("Textures/Icons/MaterialSymbolsSkipPreviousRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsSkipPreviousRoundedFilled");
 }
 
 .ds-icon--fast-forward {
-    background-image: resource("Textures/Icons/MaterialSymbolsFastForwardRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsFastForwardRoundedFilled");
 }
 
 .ds-icon--fast-rewind {
-    background-image: resource("Textures/Icons/MaterialSymbolsFastRewindRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsFastRewindRoundedFilled");
 }
 
 .ds-icon--zoom-in {
-    background-image: resource("Textures/Icons/MaterialSymbolsZoomInRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsZoomInRoundedFilled");
 }
 
 .ds-icon--zoom-out {
-    background-image: resource("Textures/Icons/MaterialSymbolsZoomOutRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsZoomOutRoundedFilled");
 }
 
 .ds-icon--rotate-left {
-    background-image: resource("Textures/Icons/MaterialSymbolsRotateLeftRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsRotateLeftRoundedFilled");
 }
 
 .ds-icon--rotate-right {
-    background-image: resource("Textures/Icons/MaterialSymbolsRotateRightRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsRotateRightRoundedFilled");
 }
 
 .ds-icon--fullscreen {
-    background-image: resource("Textures/Icons/MaterialSymbolsFullscreenRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsFullscreenRoundedFilled");
 }
 
 .ds-icon--rocket-launch {
-    background-image: resource("Textures/Icons/MaterialSymbolsRocketLaunchRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsRocketLaunchRoundedFilled");
 }
 
 .ds-icon--rocket {
-    background-image: resource("Textures/Icons/MaterialSymbolsRocketRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsRocketRoundedFilled");
 }
 
 .ds-icon--satellite {
-    background-image: resource("Textures/Icons/MaterialSymbolsSatelliteRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsSatelliteRoundedFilled");
 }
 
 .ds-icon--satellite-alt {
-    background-image: resource("Textures/Icons/MaterialSymbolsSatelliteAltRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsSatelliteAltRoundedFilled");
 }
 
 .ds-icon--airplanemode-active {
-    background-image: resource("Textures/Icons/MaterialSymbolsAirplanemodeActiveRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsAirplanemodeActiveRoundedFilled");
 }
 
 .ds-icon--flight-takeoff {
-    background-image: resource("Textures/Icons/MaterialSymbolsFlightTakeoffRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsFlightTakeoffRoundedFilled");
 }
 
 .ds-icon--flight-land {
-    background-image: resource("Textures/Icons/MaterialSymbolsFlightLandRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsFlightLandRoundedFilled");
 }
 
 .ds-icon--airplane-ticket {
-    background-image: resource("Textures/Icons/MaterialSymbolsAirplaneTicketRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsAirplaneTicketRoundedFilled");
 }
 
 .ds-icon--local-fire-department {
-    background-image: resource("Textures/Icons/MaterialSymbolsLocalFireDepartmentRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsLocalFireDepartmentRoundedFilled");
 }
 
 .ds-icon--fireplace {
-    background-image: resource("Textures/Icons/MaterialSymbolsFireplaceRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsFireplaceRoundedFilled");
 }
 
 .ds-icon--my-location {
-    background-image: resource("Textures/Icons/MaterialSymbolsMyLocationRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsMyLocationRoundedFilled");
 }
 
 .ds-icon--location-on {
-    background-image: resource("Textures/Icons/MaterialSymbolsLocationOnRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsLocationOnRoundedFilled");
 }
 
 .ds-icon--location-searching {
-    background-image: resource("Textures/Icons/MaterialSymbolsLocationSearchingRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsLocationSearchingRoundedFilled");
 }
 
 .ds-icon--adjust {
-    background-image: resource("Textures/Icons/MaterialSymbolsAdjustRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsAdjustRoundedFilled");
 }
 
 .ds-icon--center-focus-strong {
-    background-image: resource("Textures/Icons/MaterialSymbolsCenterFocusStrongRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsCenterFocusStrongRoundedFilled");
 }
 
 .ds-icon--center-focus-strong {
-    background-image: resource("Textures/Icons/MaterialSymbolsCenterFocusStrongRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsCenterFocusStrongRoundedFilled");
 }
 
 .ds-icon--lock {
-    background-image: resource("Textures/Icons/MaterialSymbolsLockRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsLockRoundedFilled");
 }
 
 .ds-icon--lock-open {
-    background-image: resource("Textures/Icons/MaterialSymbolsLockOpenRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsLockOpenRoundedFilled");
 }
 
 .ds-icon--lock-reset {
-    background-image: resource("Textures/Icons/MaterialSymbolsLockResetRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsLockResetRoundedFilled");
 }
 
 .ds-icon--vpn-key {
-    background-image: resource("Textures/Icons/MaterialSymbolsVpnKeyRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsVpnKeyRoundedFilled");
 }
 
 .ds-icon--shield {
-    background-image: resource("Textures/Icons/MaterialSymbolsShieldRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsShieldRoundedFilled");
 }
 
 .ds-icon--shield-moon {
-    background-image: resource("Textures/Icons/MaterialSymbolsShieldMoonRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsShieldMoonRoundedFilled");
 }
 
 .ds-icon--shield-person {
-    background-image: resource("Textures/Icons/MaterialSymbolsShieldPersonRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsShieldPersonRoundedFilled");
 }
 
 .ds-icon--admin-panel-settings {
-    background-image: resource("Textures/Icons/MaterialSymbolsAdminPanelSettingsRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsAdminPanelSettingsRoundedFilled");
 }
 
 .ds-icon--sell {
-    background-image: resource("Textures/Icons/MaterialSymbolsSellRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsSellRoundedFilled");
 }
 
 .ds-icon--paid {
-    background-image: resource("Textures/Icons/MaterialSymbolsPaidRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsPaidRoundedFilled");
 }
 
 .ds-icon--percent {
-    background-image: resource("Textures/Icons/MaterialSymbolsPercentRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsPercentRoundedFilled");
 }
 
 .ds-icon--sensors {
-    background-image: resource("Textures/Icons/MaterialSymbolsSensorsRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsSensorsRoundedFilled");
 }
 
 .ds-icon--sensors-off {
-    background-image: resource("Textures/Icons/MaterialSymbolsSensorsOffRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsSensorsOffRoundedFilled");
 }
 
 .ds-icon--precision-manufacturing {
-    background-image: resource("Textures/Icons/MaterialSymbolsPrecisionManufacturingRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsPrecisionManufacturingRoundedFilled");
 }
 
 .ds-icon--military-tech {
-    background-image: resource("Textures/Icons/MaterialSymbolsMilitaryTechRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsMilitaryTechRoundedFilled");
 }
 
 .ds-icon--swords {
-    background-image: resource("Textures/Icons/MaterialSymbolsSwordsRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsSwordsRoundedFilled");
 }
 
 .ds-icon--battery-full {
-    background-image: resource("Textures/Icons/MaterialSymbolsBatteryFullRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsBatteryFullRoundedFilled");
 }
 
 .ds-icon--battery-charging-full {
-    background-image: resource("Textures/Icons/MaterialSymbolsBatteryChargingFullRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsBatteryChargingFullRoundedFilled");
 }
 
 .ds-icon--battery-alert {
-    background-image: resource("Textures/Icons/MaterialSymbolsBatteryAlertRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsBatteryAlertRoundedFilled");
 }
 
 .ds-icon--energy-savings-leaf {
-    background-image: resource("Textures/Icons/MaterialSymbolsEnergySavingsLeafRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsEnergySavingsLeafRoundedFilled");
 }
 
 .ds-icon--rotate-90-degrees-ccw {
-    background-image: resource("Textures/Icons/MaterialSymbolsRotate90DegreesCcwRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsRotate90DegreesCcwRoundedFilled");
 }
 
 .ds-icon--rotate-90-degrees-cw {
-    background-image: resource("Textures/Icons/MaterialSymbolsRotate90DegreesCwRoundedFilled");
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsRotate90DegreesCwRoundedFilled");
 }
-            
+
+.ds-icon--camera {
+    background-image: resource("Textures/Icons/Material/MaterialSymbolsAndroidCamera");
+}
