@@ -11,6 +11,7 @@ namespace ShipFactory.UI.Runtime
     public class OverlayManager : IDisposable
     {
         private const int OverlaySortingOrder = 100;
+        private const int DraggedOverlaySortingOrder = OverlaySortingOrder + 1;
         private readonly Dictionary<ShipModuleSOInstanceBundle, ModuleOverlay> _bundleToOverlay = new();
         private readonly Transform _overlayRoot = new GameObject("ModuleOverlays").transform;
 
@@ -65,8 +66,34 @@ namespace ShipFactory.UI.Runtime
 
         public void SetPosition(ShipModuleSOInstanceBundle bundle, Vector2 worldPos)
         {
-            bundle.Instance.transform.position = worldPos;
-            if (_bundleToOverlay.TryGetValue(bundle, out var overlay)) overlay.transform.position = worldPos;
+            var transform = bundle.Instance.transform;
+            var position = transform.position;
+            position.x = worldPos.x;
+            position.y = worldPos.y;
+            transform.position = position;
+            SyncTransformFromBundle(bundle);
+        }
+
+        public void BringOverlayToFront(ShipModuleSOInstanceBundle bundle)
+        {
+            if (_bundleToOverlay.TryGetValue(bundle, out var overlay))
+                overlay.SetSortingOrder(DraggedOverlaySortingOrder);
+        }
+
+        public void ResetOverlaySortingOrder(ShipModuleSOInstanceBundle bundle)
+        {
+            if (_bundleToOverlay.TryGetValue(bundle, out var overlay))
+                overlay.SetSortingOrder(OverlaySortingOrder);
+        }
+
+        public void SyncTransformFromBundle(ShipModuleSOInstanceBundle bundle)
+        {
+            if (!_bundleToOverlay.TryGetValue(bundle, out var overlay) || !overlay)
+                return;
+
+            ModuleOverlay.SyncTransformFromBundle(overlay.transform, bundle);
+            var dims = bundle.ModuleSO.Dimensions;
+            overlay.transform.localScale = new Vector3(dims.x, dims.y, 1f);
         }
 
         public void SetColor(ShipModuleSOInstanceBundle bundle, Color color)
@@ -77,14 +104,8 @@ namespace ShipFactory.UI.Runtime
         public ShipModuleSOInstanceBundle FindBundleAtWorldPosition(Vector2 worldPos)
         {
             foreach (var (bundle, _) in _bundleToOverlay)
-            {
-                var pos = (Vector2)bundle.Instance.transform.position;
-                var halfDims = (Vector2)bundle.ModuleSO.Dimensions / 2f;
-
-                if (worldPos.x >= pos.x - halfDims.x && worldPos.x <= pos.x + halfDims.x &&
-                    worldPos.y >= pos.y - halfDims.y && worldPos.y <= pos.y + halfDims.y)
+                if (ModuleRotationUtility.ContainsWorldPoint(bundle, worldPos))
                     return bundle;
-            }
 
             return null;
         }

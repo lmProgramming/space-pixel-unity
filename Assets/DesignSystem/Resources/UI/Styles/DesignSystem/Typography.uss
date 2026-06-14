@@ -42,10 +42,12 @@
     letter-spacing: 0.5px;
 }
 
-/* Color modifiers */
 * {
     -unity-font-definition: url("project://database/Assets/Fonts/PixeloidSans.asset");
+    white-space: nowrap;
 }
+
+/* Color modifiers */
 
 .ds-text-primary {
     color: var(--color-text-primary);

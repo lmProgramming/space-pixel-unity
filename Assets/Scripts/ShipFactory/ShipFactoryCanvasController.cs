@@ -1,6 +1,8 @@
 using System;
+using System.Linq;
 using Core.Services;
 using Core.Ship;
+using Events.Camera;
 using JetBrains.Annotations;
 using ShipFactory.LegalPositionCalculator;
 using ShipFactory.UI.Runtime;
@@ -16,6 +18,7 @@ namespace ShipFactory
     public class ShipFactoryCanvasController : IDisposable
     {
         private readonly DragAnimator _animator;
+        private readonly CameraInfoPanel _cameraInfoPanel;
         private readonly IGameInput _gameInput;
         private readonly ModuleInfoPanel _infoPanel;
 
@@ -27,6 +30,8 @@ namespace ShipFactory
 
         private ShipModuleSOInstanceBundle _draggedModuleBundle;
         private bool _draggedModuleWasNew;
+        private Quaternion _dragStartLocalRotation;
+        private float _dragStartLocalZ;
         private Vector2 _dragStartWorldPos;
         private Vector2 _dragWorldOffset;
 
@@ -37,7 +42,10 @@ namespace ShipFactory
         private ShipModuleSOInstanceBundle _selectedModuleBundle;
         private Ship _ship;
 
-        public ShipFactoryCanvasController(VisualElement root, IGameInput gameInput)
+        public ShipFactoryCanvasController(
+            VisualElement root,
+            IGameInput gameInput,
+            CameraResetRequestEventChannel cameraResetRequestEventChannel)
         {
             _gameInput = gameInput;
             var canvasContainer = root.Q<VisualElement>("canvas-container");
@@ -51,7 +59,11 @@ namespace ShipFactory
             _notificationPopup = new NotificationPopup(root);
             _resourcesPanel = new ResourcesPanel(root);
             _infoPanel = new ModuleInfoPanel(root);
+            _cameraInfoPanel = new CameraInfoPanel(root, cameraResetRequestEventChannel);
+
             _infoPanel.OnRemoveModuleClicked += RemoveSelectedModule;
+            _infoPanel.OnRotateClockwiseClicked += () => RotateActiveModule(90);
+            _infoPanel.OnRotateCounterClockwiseClicked += () => RotateActiveModule(-90);
 
             // 2. Initialize Managers
             _overlayManager = new OverlayManager();
@@ -66,7 +78,7 @@ namespace ShipFactory
         }
 
         public bool IsInputLocked { get; private set; }
-        private bool IsDraggingModule => _draggedModuleBundle != null;
+        public bool IsDraggingModule => _draggedModuleBundle != null;
 
         public void Dispose()
         {
@@ -240,7 +252,10 @@ namespace ShipFactory
 
             _hoveredPaletteModule = null;
 
-            var worldPos = Snapper.SnapToGrid(_gameInput.WorldPointerPosition);
+            var localSnapped = Snapper.SnapModuleLocalCenter(
+                _ship.transform.InverseTransformPoint(_gameInput.WorldPointerPosition),
+                shipModuleSO.Dimensions);
+            var worldPos = (Vector2)_ship.transform.TransformPoint(localSnapped);
             var bundle = InstantiateModule(shipModuleSO, worldPos);
             if (bundle == null) return;
 
@@ -253,11 +268,20 @@ namespace ShipFactory
             _draggedModuleBundle = bundle;
             _draggedModuleWasNew = isNewBundle;
             _dragStartWorldPos = bundle.Instance.transform.position;
+            _dragStartLocalRotation = bundle.Instance.transform.localRotation;
             _hoveredPaletteModule = null;
 
             _dragWorldOffset = !isNewBundle
                 ? (Vector2)bundle.Instance.transform.position - _gameInput.WorldPointerPosition
                 : Vector2.zero;
+
+            _dragStartLocalZ = bundle.Instance.transform.localPosition.z;
+            var localPosition = bundle.Instance.transform.localPosition;
+            localPosition.z = GetMaxModuleLocalZ(bundle) - 1f;
+            bundle.Instance.transform.localPosition = localPosition;
+
+            _overlayManager.BringOverlayToFront(bundle);
+            _overlayManager.SyncTransformFromBundle(bundle);
 
             SelectBundle(bundle);
             RefreshInfoPanelFromCurrentContext();
@@ -266,18 +290,14 @@ namespace ShipFactory
 
         private void MoveGhostToPointer()
         {
-            var snapped = Snapper.SnapToGrid(_gameInput.WorldPointerPosition + _dragWorldOffset);
-            _overlayManager.SetPosition(_draggedModuleBundle, snapped);
-
-            var legality = Calculator.CalculateLegalityPosition(_draggedModuleBundle, _overlayManager.AllBundles);
-            var color = legality switch
-            {
-                PositionLegality.InsideOther => ModuleOverlay.InsideOtherColor,
-                PositionLegality.OutsideShip or PositionLegality.DisconnectsShip => ModuleOverlay.OutsideShipColor,
-                _ => ModuleOverlay.SelectedColor
-            };
-
-            _overlayManager.SetColor(_draggedModuleBundle, color);
+            var draggedTransform = _draggedModuleBundle.Instance.transform;
+            var localSnapped = Snapper.SnapModuleLocalCenter(
+                _ship.transform.InverseTransformPoint(_gameInput.WorldPointerPosition + _dragWorldOffset),
+                _draggedModuleBundle.ModuleSO.Dimensions,
+                draggedTransform.localRotation);
+            var worldPos = (Vector2)_ship.transform.TransformPoint(localSnapped);
+            _overlayManager.SetPosition(_draggedModuleBundle, worldPos);
+            RefreshDraggedModuleLegalityOverlay();
         }
 
         private void HandleDragRelease()
@@ -313,8 +333,11 @@ namespace ShipFactory
                 return;
             }
 
+            RestoreDragStartRotation(activeBundle);
+
             _animator.AnimateBundleMovement(activeBundle, currentWorldPos, _dragStartWorldPos, () =>
             {
+                RestoreDragStartRotation(activeBundle);
                 FinishActiveDrag();
                 SetInputLocked(false);
             });
@@ -327,7 +350,14 @@ namespace ShipFactory
             _draggedModuleWasNew = false;
 
             if (finishedBundle != null)
+            {
+                var localPosition = finishedBundle.Instance.transform.localPosition;
+                localPosition.z = _dragStartLocalZ;
+                finishedBundle.Instance.transform.localPosition = localPosition;
+                _overlayManager.ResetOverlaySortingOrder(finishedBundle);
+                _overlayManager.SyncTransformFromBundle(finishedBundle);
                 RefreshOverlayColor(finishedBundle);
+            }
 
             RefreshInfoPanelFromCurrentContext();
             _resourcesPanel.Refresh(_ship);
@@ -409,6 +439,89 @@ namespace ShipFactory
         public void RefreshShipResourcesPanel()
         {
             _resourcesPanel.Refresh(_ship);
+        }
+
+        public void RotateActiveModule(int degrees)
+        {
+            if (degrees is not (90 or -90) || IsInputLocked) return;
+
+            var bundle = _draggedModuleBundle ?? _selectedModuleBundle;
+            if (bundle == null) return;
+
+            var previousRotation = bundle.Instance.transform.localRotation;
+            var deltaSteps = -degrees / 90;
+            ModuleRotationUtility.ApplyQuarterTurn(bundle, deltaSteps);
+
+            if (IsDraggingModule)
+                ResnapDraggedModuleToGrid();
+
+            _overlayManager.SyncTransformFromBundle(bundle);
+
+            if (IsDraggingModule)
+            {
+                RefreshDraggedModuleLegalityOverlay();
+                return;
+            }
+
+            var legality = Calculator.CalculateLegalityPosition(bundle, _overlayManager.AllBundles);
+            if (legality == PositionLegality.Correct) return;
+
+            bundle.Instance.transform.localRotation = previousRotation;
+            _overlayManager.SyncTransformFromBundle(bundle);
+
+            var message = legality switch
+            {
+                PositionLegality.InsideOther => "Cannot rotate: modules would overlap.",
+                PositionLegality.OutsideShip => "Cannot rotate: module would be outside the ship.",
+                PositionLegality.DisconnectsShip => "Cannot rotate: it would split the ship into islands.",
+                _ => "Cannot rotate module to this orientation."
+            };
+
+            if (legality == PositionLegality.DisconnectsShip)
+                ShowErrorMessage(message);
+            else
+                ShowWarningMessage(message);
+        }
+
+        private void ResnapDraggedModuleToGrid()
+        {
+            var transform = _draggedModuleBundle.Instance.transform;
+            var localSnapped = Snapper.SnapModuleLocalCenter(
+                transform.localPosition,
+                _draggedModuleBundle.ModuleSO.Dimensions,
+                transform.localRotation);
+            transform.localPosition = new Vector3(localSnapped.x, localSnapped.y, transform.localPosition.z);
+        }
+
+        private void RestoreDragStartRotation(ShipModuleSOInstanceBundle bundle)
+        {
+            bundle.Instance.transform.localRotation = _dragStartLocalRotation;
+            _overlayManager.SyncTransformFromBundle(bundle);
+        }
+
+        private float GetMaxModuleLocalZ(ShipModuleSOInstanceBundle exclude = null)
+        {
+            return _ship.transform.Cast<Transform>().AsValueEnumerable()
+                .Where(child => exclude == null || child.gameObject != exclude.Instance).Aggregate(0f,
+                    (current, child) => Mathf.Max(current, child.localPosition.z));
+        }
+
+        private void RefreshDraggedModuleLegalityOverlay()
+        {
+            var legality = Calculator.CalculateLegalityPosition(_draggedModuleBundle, _overlayManager.AllBundles);
+            var color = legality switch
+            {
+                PositionLegality.InsideOther => ModuleOverlay.InsideOtherColor,
+                PositionLegality.OutsideShip or PositionLegality.DisconnectsShip => ModuleOverlay.OutsideShipColor,
+                _ => ModuleOverlay.SelectedColor
+            };
+
+            _overlayManager.SetColor(_draggedModuleBundle, color);
+        }
+
+        public void RefreshCameraInfoPanel(Camera camera)
+        {
+            _cameraInfoPanel.Update(camera);
         }
     }
 }

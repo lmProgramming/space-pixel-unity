@@ -16,7 +16,7 @@ DesignSystem.uss                 ← master, @imports the layers below
         ├── Buttons.uss          ← .ds-btn variants, sizes, icon button
         ├── Inputs.uss           ← .ds-input, .ds-search, .ds-dropdown, .ds-textarea
         ├── TabsAndFilters.uss   ← .ds-tabs, .ds-tab, .ds-view-toggle
-        ├── Cards.uss            ← .ds-animal-card, .ds-info-row, .ds-swatch-row
+        ├── Cards.uss            ← .ds-card, .ds-info-row, .ds-swatch-row
         ├── Navigation.uss       ← .ds-side-nav, .ds-side-rail, .ds-bottom-nav, .ds-profile
         ├── Badges.uss           ← .ds-badge, .ds-tag, .ds-chip, .ds-avatar, .ds-notif-*
         ├── Controls.uss         ← .ds-toggle, .ds-check, .ds-radio, .ds-slider, .ds-range

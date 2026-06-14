@@ -279,35 +279,35 @@
             <ui:VisualElement class="ds-section" style="width: 460px;">
                 <ui:Label text="ANIMAL CARD (EXAMPLE)" class="ds-section__title"/>
                 <ui:VisualElement style="flex-direction: row;">
-                    <ui:VisualElement class="ds-animal-card is-selected" style="margin-right: 12px;">
-                        <ui:VisualElement class="ds-animal-card__image">
+                    <ui:VisualElement class="ds-item-card is-selected" style="margin-right: 12px;">
+                        <ui:VisualElement class="ds-item-card__image">
                             <ui:Label text="🐸" style="font-size: 64px;"/>
                         </ui:VisualElement>
-                        <ui:VisualElement class="ds-animal-card__rarity">
+                        <ui:VisualElement class="ds-item-card__rarity">
                             <ui:Label text="COMMON" class="ds-badge ds-badge--common"/>
                         </ui:VisualElement>
-                        <ui:VisualElement class="ds-animal-card__title-row">
-                            <ui:Label text="Frog" class="ds-animal-card__title"/>
+                        <ui:VisualElement class="ds-item-card__title-row">
+                            <ui:Label text="Frog" class="ds-item-card__title"/>
                             <ui:VisualElement class="ds-icon ds-icon--xs ds-icon--sparkle ds-icon--gold"/>
                         </ui:VisualElement>
-                        <ui:VisualElement class="ds-animal-card__footer">
+                        <ui:VisualElement class="ds-item-card__footer">
                             <ui:Label text="Equipped" class="ds-text-success"/>
                         </ui:VisualElement>
-                        <ui:VisualElement class="ds-animal-card__check">
+                        <ui:VisualElement class="ds-item-card__check">
                             <ui:VisualElement class="ds-icon ds-icon--xs ds-icon--check ds-icon--on-accent"/>
                         </ui:VisualElement>
                     </ui:VisualElement>
-                    <ui:VisualElement class="ds-animal-card is-epic">
-                        <ui:VisualElement class="ds-animal-card__image">
+                    <ui:VisualElement class="ds-item-card is-epic">
+                        <ui:VisualElement class="ds-item-card__image">
                             <ui:Label text="🐊" style="font-size: 64px;"/>
                         </ui:VisualElement>
-                        <ui:VisualElement class="ds-animal-card__rarity">
+                        <ui:VisualElement class="ds-item-card__rarity">
                             <ui:Label text="EPIC" class="ds-badge ds-badge--epic"/>
                         </ui:VisualElement>
-                        <ui:VisualElement class="ds-animal-card__title-row">
-                            <ui:Label text="Crocodile" class="ds-animal-card__title"/>
+                        <ui:VisualElement class="ds-item-card__title-row">
+                            <ui:Label text="Crocodile" class="ds-item-card__title"/>
                         </ui:VisualElement>
-                        <ui:VisualElement class="ds-animal-card__footer">
+                        <ui:VisualElement class="ds-item-card__footer">
                             <ui:Button text="Equip" class="ds-btn ds-btn--primary ds-btn--block"/>
                         </ui:VisualElement>
                     </ui:VisualElement>
@@ -315,13 +315,13 @@
             </ui:VisualElement>
             <ui:VisualElement class="ds-section" style="width: 400px;">
                 <ui:Label text="ANIMAL DETAIL PAGE (EXAMPLE)" class="ds-section__title"/>
-                <ui:VisualElement class="ds-animal-detail">
-                    <ui:VisualElement class="ds-animal-detail__hero">
+                <ui:VisualElement class="ds-item-detail">
+                    <ui:VisualElement class="ds-item-detail__hero">
                         <ui:Label text="🐸" style="font-size: 96px;"/>
-                        <ui:Button class="ds-btn ds-btn--icon ds-animal-detail__hero-back">
+                        <ui:Button class="ds-btn ds-btn--icon ds-item-detail__hero-back">
                             <ui:VisualElement class="ds-icon ds-icon--arrow-left"/>
                         </ui:Button>
-                        <ui:Button class="ds-btn ds-btn--icon ds-animal-detail__hero-more">
+                        <ui:Button class="ds-btn ds-btn--icon ds-item-detail__hero-more">
                             <ui:VisualElement class="ds-icon ds-icon--more-horizontal"/>
                         </ui:Button>
                         <ui:VisualElement class="ds-carousel-dots">
@@ -332,22 +332,22 @@
                             <ui:VisualElement class="ds-carousel-dot"/>
                         </ui:VisualElement>
                     </ui:VisualElement>
-                    <ui:VisualElement class="ds-animal-detail__body">
-                        <ui:VisualElement class="ds-animal-detail__header-row">
+                    <ui:VisualElement class="ds-item-detail__body">
+                        <ui:VisualElement class="ds-item-detail__header-row">
                             <ui:Label text="COMMON" class="ds-badge ds-badge--common"/>
                             <ui:VisualElement class="ds-chip ds-chip--equipped">
                                 <ui:VisualElement class="ds-icon ds-icon--xs ds-icon--check ds-chip__icon"/>
                                 <ui:Label text="Equipped"/>
                             </ui:VisualElement>
                         </ui:VisualElement>
-                        <ui:VisualElement class="ds-animal-detail__title-block" style="margin-top: 4px;">
+                        <ui:VisualElement class="ds-item-detail__title-block" style="margin-top: 4px;">
                             <ui:Label text="Frog" class="ds-h2" style="margin-right: 6px;"/>
                             <ui:VisualElement class="ds-icon ds-icon--sm ds-icon--sparkle ds-icon--gold"/>
                         </ui:VisualElement>
                         <ui:VisualElement style="margin-top: 8px;">
                             <ui:Label text="Amphibious" class="ds-tag ds-tag--amphibious" style="align-self: flex-start;"/>
                         </ui:VisualElement>
-                        <ui:Label text="A small amphibious creature that lives near ponds and jumps around happily." class="ds-animal-detail__description"/>
+                        <ui:Label text="A small amphibious creature that lives near ponds and jumps around happily." class="ds-item-detail__description"/>
                         <ui:VisualElement class="ds-info-row">
                             <ui:VisualElement class="ds-info-row__left">
                                 <ui:VisualElement class="ds-icon ds-icon--sm ds-icon--paw ds-info-row__icon"/>
@@ -376,7 +376,7 @@
                             </ui:VisualElement>
                             <ui:Label text="May 12, 2024" class="ds-info-row__value"/>
                         </ui:VisualElement>
-                        <ui:VisualElement class="ds-animal-detail__actions">
+                        <ui:VisualElement class="ds-item-detail__actions">
                             <ui:Button text="Unequip" class="ds-btn ds-btn--ghost"/>
                             <ui:Button text="View Skins" class="ds-btn ds-btn--primary"/>
                         </ui:VisualElement>

@@ -1,4 +1,5 @@
 using Core.Services;
+using PrimeTween;
 using UnityEngine;
 using Zenject;
 
@@ -34,7 +35,7 @@ namespace Services.Camera
         {
             get
             {
-                if (_mainCamera == null)
+                if (!_mainCamera)
                     _mainCamera = UnityEngine.Camera.main;
                 return _mainCamera;
             }
@@ -158,6 +159,11 @@ namespace Services.Camera
 
             var deltaMagnitudeDiff = prevMagnitude - currentMagnitude;
             return deltaMagnitudeDiff * mobileScrollSpeed;
+        }
+
+        public void ResetCamera()
+        {
+            Tween.Position(transform, Vector3.zero, 0.5f);
         }
     }
 }

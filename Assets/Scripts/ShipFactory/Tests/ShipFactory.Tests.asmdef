@@ -13,6 +13,7 @@
   "overrideReferences": true,
   "precompiledReferences": [
     "nunit.framework.dll",
+    "ZLinq.dll",
     "NSubstitute.dll"
   ],
   "autoReferenced": false,
@@ -22,4 +23,3 @@
   "versionDefines": [],
   "noEngineReferences": false
 }
-

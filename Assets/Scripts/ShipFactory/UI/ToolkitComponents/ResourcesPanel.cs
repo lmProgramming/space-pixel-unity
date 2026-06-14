@@ -9,23 +9,26 @@ namespace ShipFactory.UI.ToolkitComponents
     {
         private readonly VisualElement _shipResourceCrewBufferFill;
         private readonly VisualElement _shipResourceCrewFill;
-        private readonly Label _shipResourceCrewLabel;
+        private readonly Label _shipResourceCrewValueLabel;
         private readonly VisualElement _shipResourceEnergyBufferFill;
         private readonly VisualElement _shipResourceEnergyFill;
-        private readonly Label _shipResourceEnergyLabel;
+        private readonly Label _shipResourceEnergyValueLabel;
+        private readonly Label _shipResourcesEnergyStorageLabel;
         private readonly VisualElement _shipResourcesPanel;
 
         public ResourcesPanel(VisualElement root)
         {
             _shipResourcesPanel = root.Q<VisualElement>("ship-resources-panel");
-            _shipResourceEnergyLabel = root.Q<Label>("ship-resource-energy-label");
-            _shipResourceCrewLabel = root.Q<Label>("ship-resource-crew-label");
+            _shipResourcesEnergyStorageLabel = root.Q<Label>("ship-resource-energy-storage");
+            _shipResourceEnergyValueLabel = root.Q<Label>("ship-resource-energy-value");
+            _shipResourceCrewValueLabel = root.Q<Label>("ship-resource-crew-value");
             _shipResourceEnergyFill = root.Q<VisualElement>("ship-resource-energy-fill");
             _shipResourceEnergyBufferFill = root.Q<VisualElement>("ship-resource-energy-buffer-fill");
             _shipResourceCrewFill = root.Q<VisualElement>("ship-resource-crew-fill");
             _shipResourceCrewBufferFill = root.Q<VisualElement>("ship-resource-crew-buffer-fill");
 
-            if (_shipResourcesPanel == null || _shipResourceEnergyLabel == null || _shipResourceCrewLabel == null ||
+            if (_shipResourcesPanel == null || _shipResourcesEnergyStorageLabel == null ||
+                _shipResourceEnergyValueLabel == null || _shipResourceCrewValueLabel == null ||
                 _shipResourceEnergyFill == null || _shipResourceEnergyBufferFill == null ||
                 _shipResourceCrewFill == null || _shipResourceCrewBufferFill == null)
                 throw new InvalidOperationException(
@@ -47,9 +50,11 @@ namespace ShipFactory.UI.ToolkitComponents
             var netEnergy = rm.EnergyProduction - rm.EnergyDraw;
             var netEnergyFormatted = netEnergy >= 0 ? $"+{netEnergy:0.#}" : $"{netEnergy:0.#}";
 
-            _shipResourceEnergyLabel.text =
-                $"Energy capacity: {rm.EnergyCapacity:0.#}. Net energy: {netEnergyFormatted}";
-            _shipResourceCrewLabel.text = $"Crew: {rm.Crew}/{rm.CrewCapacity}";
+            _shipResourcesEnergyStorageLabel.text = $"{rm.EnergyCapacity:0.#} cap";
+
+            _shipResourceEnergyValueLabel.text =
+                $"{netEnergyFormatted} net";
+            _shipResourceCrewValueLabel.text = $"{rm.Crew}/{rm.CrewCapacity}";
 
             ApplySegmentedResourceBar(
                 _shipResourceEnergyFill,

@@ -1,0 +1,66 @@
+# Space Pixel Unity — Source Available License
+
+Copyright (c) 2026 Mikołaj Kubś
+
+All rights reserved.
+
+This repository is publicly available on GitHub for viewing, learning, and
+non-commercial collaboration. By accessing or using this software, you agree to
+the terms below.
+
+1. Ownership
+
+   Except for third-party components that carry their own license files (see
+   section 4), all source code, assets, and documentation in this repository
+   are owned by the copyright holder.
+
+2. Permitted use
+
+   You may:
+
+   - view and study the source code;
+   - fork the repository and experiment locally;
+   - submit modifications via pull requests;
+   - share links to this repository.
+
+3. Restrictions
+
+   You may not, without prior written permission from the copyright holder:
+
+   - sell, sublicense, or otherwise distribute this software or derivative
+     works for monetary compensation;
+   - incorporate this software (in whole or in part) into a commercial product
+     or service, including but not limited to games, assets packs, templates,
+     libraries, or SaaS offerings offered for sale or as part of a paid
+     commercial offering.
+
+   "Commercial" means any use primarily intended for or directed toward
+   commercial advantage or monetary compensation.
+
+4. Third-party components
+
+   Some files in this repository are licensed separately by their original
+   authors. Those components remain under their original licenses and are not
+   covered by the restrictions in section 3. Examples include:
+
+   - Google Material Symbols icons (Apache License 2.0) — see
+     Assets/DesignSystem/Resources/Textures/Icons/Material/LICENSE
+   - Other dependencies and vendored libraries — see the LICENSE files bundled
+     with each component.
+
+5. Contributions
+
+   Pull requests and other contributions are welcome. By submitting a
+   contribution, you grant the copyright holder a perpetual, worldwide,
+   non-exclusive, royalty-free license to use, modify, and distribute your
+   contribution as part of this project under the terms of this license.
+
+6. Disclaimer
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+   COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY,
+   WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF
+   OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+   SOFTWARE.

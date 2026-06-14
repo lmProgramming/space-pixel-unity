@@ -77,11 +77,12 @@ Set placeholders via `field.textEdition.placeholder = "..."` in C#. Unity 6's AP
 
 | Class | Use |
 | --- | --- |
-| `.ds-animal-card` | Example product card; demonstrates layered children + `.is-selected` / `.is-epic` modifiers + check pin. |
-| `.ds-animal-card__image` | Top image area. |
-| `.ds-animal-card__rarity` | Top-right rarity badge slot. |
-| `.ds-animal-card__title-row` | Title + accessory icon row. |
-| `.ds-animal-card__check` | The selected-state check pin (rendered last so it z-orders on top). |
+| `.ds-card` | Example product card; demonstrates layered children + `.is-selected` / `.is-epic` modifiers + check pin. |
+| `.ds-card__image` | Top image area; clip child sprites with `overflow: hidden`. |
+| `.ds-card__sprite` | Child `<Image scaleMode="ScaleToFit">` filling the image well. |
+| `.ds-card__rarity` | Top-right rarity badge slot. |
+| `.ds-card__title-row` | Title + accessory icon row. |
+| `.ds-card__check` | The selected-state check pin (rendered last so it z-orders on top). |
 | `.ds-info-row` | Two-column attribute row (icon+label on left, value on right). |
 | `.ds-info-row__left` | The flex-row wrapper for the icon + label. |
 | `.ds-info-row__icon` | 16 × 16 leading icon. |
@@ -170,6 +171,18 @@ Set placeholders via `field.textEdition.placeholder = "..."` in C#. Unity 6's AP
 | `.ds-stepper` | Quantity selector container. |
 | `.ds-stepper__btn` | − / + button. |
 | `.ds-stepper__value` | Value display. |
+| `.ds-row` | Horizontal flex row with centred children; adds bottom margin for stacked showcase rows. |
+| `.ds-row__gap` | Margin-based horizontal spacing between direct children (`--space-2`). Use instead of CSS `gap`, which UI Toolkit does not support. Pair with `.ds-row` or any `flex-direction: row` container. |
+| `.ds-col-gap` | Margin-based vertical spacing between direct children (`--space-2`). Use on column-flex containers. |
+
+DOM (row gap):
+
+```xml
+<ui:VisualElement class="ds-row ds-row__gap">
+    <ui:Button class="ds-btn ds-btn--secondary" />
+    <ui:Button class="ds-btn ds-btn--secondary" />
+</ui:VisualElement>
+```
 
 ## Icons
 

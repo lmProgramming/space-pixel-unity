@@ -6,6 +6,7 @@
    - Slider           (<ui:Slider> + .ds-slider)
    - Range / MinMax   (<ui:MinMaxSlider> + .ds-range)
    - Progress bar     (<ui:ProgressBar> + .ds-progress)
+   - ScrollView       (<ui:ScrollView> + .ds-scroll)
    ============================================================================ */
 
 /* ---------- Toggle switch ---------- */
@@ -320,4 +321,100 @@
     flex-direction: row;
     justify-content: space-between;
     margin-bottom: var(--space-2);
+}
+
+/* ---------- ScrollView ----------
+   Apply .ds-scroll to a <ScrollView>. Descendant selectors reach the
+   runtime-injected Scroller sub-controls (not visible in UXML). Pair with
+   .ds-scroll--auto-hide for fade-in on :hover / .is-scrolling — wire touch
+   via DesignSystemRuntime.WireScrollAutoHide(). */
+.ds-scroll .unity-scroller--vertical {
+    width: 10px;
+    background-color: transparent;
+    border-width: 0;
+    margin-left: var(--space-1);
+}
+
+.ds-scroll .unity-scroller--horizontal {
+    height: 10px;
+    background-color: transparent;
+    border-width: 0;
+    margin-top: var(--space-1);
+}
+
+.ds-scroll .unity-scroller__low-button,
+.ds-scroll .unity-scroller__high-button {
+    display: none;
+    height: 0;
+    min-height: 0;
+    width: 0;
+    min-width: 0;
+}
+
+.ds-scroll .unity-scroller__slider {
+    flex-grow: 1;
+    margin: 0;
+    border-width: 0;
+    background-color: transparent;
+}
+
+.ds-scroll .unity-scroller--vertical .unity-scroller__slider {
+    width: 10px;
+}
+
+.ds-scroll .unity-scroller--horizontal .unity-scroller__slider {
+    height: 10px;
+}
+
+.ds-scroll .unity-scroller__slider .unity-base-slider__tracker {
+    background-color: var(--color-surface-elev);
+    border-width: 0;
+    border-radius: var(--radius-pill-4);
+}
+
+.ds-scroll .unity-scroller--vertical .unity-base-slider__tracker {
+    width: 6px;
+    left: 2px;
+}
+
+.ds-scroll .unity-scroller--horizontal .unity-base-slider__tracker {
+    height: 6px;
+    top: 2px;
+}
+
+.ds-scroll .unity-scroller__slider .unity-base-slider__dragger {
+    background-color: var(--color-border-strong);
+    border-width: 0;
+    border-radius: var(--radius-pill-4);
+}
+
+.ds-scroll .unity-scroller--vertical .unity-base-slider__dragger {
+    width: 6px;
+    min-width: 6px;
+    left: 2px;
+}
+
+.ds-scroll .unity-scroller--horizontal .unity-base-slider__dragger {
+    height: 6px;
+    min-height: 6px;
+    top: 2px;
+}
+
+.ds-scroll:hover .unity-scroller__slider .unity-base-slider__dragger,
+.ds-scroll .unity-scroller__slider .unity-base-slider__dragger:hover {
+    background-color: var(--color-text-secondary);
+}
+
+.ds-scroll--auto-hide .unity-scroller--vertical,
+.ds-scroll--auto-hide .unity-scroller--horizontal {
+    opacity: 0;
+    transition-property: opacity;
+    transition-duration: var(--transition-fast);
+}
+
+.ds-scroll--auto-hide:hover .unity-scroller--vertical,
+.ds-scroll--auto-hide:hover .unity-scroller--horizontal,
+.ds-scroll--auto-hide.is-scrolling .unity-scroller--vertical,
+.ds-scroll--auto-hide.is-scrolling .unity-scroller--horizontal {
+    opacity: 1;
 }

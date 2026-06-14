@@ -1,6 +1,7 @@
 using System;
 using Core.Pixelation;
 using Core.Ship;
+using ShipFactory.UI.Runtime;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -9,7 +10,15 @@ namespace ShipFactory
     public class ModulePaletteController
     {
         private const string ActiveTabClass = "is-active";
-        private const string DraggingCardClass = "module-card--dragging";
+        private const string DraggingCardClass = "palette-card--dragging";
+        private const string CardClass = "ds-card";
+        private const string CardImageClass = "ds-card__image";
+        private const string CardTitleRowClass = "ds-card__title-row";
+        private const string CardTitleClass = "ds-body-2";
+        private const string CardDimensionsClass = "palette-card__dimensions";
+        private const string CardDimensionsTextClass = "ds-body-2";
+        private const string CardLabelsClass = "palette-card__labels";
+        private const string CardSpriteClass = "ds-card__sprite";
         private readonly ModulePrefabLibrary _library;
 
         private readonly VisualElement _paletteContent;
@@ -28,12 +37,10 @@ namespace ShipFactory
 
             _library = library;
 
-            var paletteScroll = root.Q<ScrollView>("palette-scroll");
-            if (paletteScroll == null)
+            _paletteContent = root.Q<VisualElement>("palette-content");
+            if (_paletteContent == null)
                 throw new InvalidOperationException(
-                    "[ModulePaletteController] 'palette-scroll' ScrollView not found in UXML!");
-
-            _paletteContent = paletteScroll.contentContainer;
+                    "[ModulePaletteController] 'palette-content' container not found in UXML!");
 
             BindTabButtons(root);
             SelectTab(ModuleType.Command, root.Q<Button>("tab-Command"));
@@ -94,24 +101,55 @@ namespace ShipFactory
         private VisualElement BuildModuleCard(ShipModuleSO moduleSO)
         {
             var card = new VisualElement();
-            card.AddToClassList("module-card");
+            card.AddToClassList(CardClass);
             card.tooltip = moduleSO.Description;
+            card.style.width = 132;
+            card.style.flexShrink = 0;
+            card.style.alignSelf = Align.Stretch;
+            card.style.flexDirection = FlexDirection.Column;
 
-            var prefab = moduleSO.Prefab;
+            var image = new VisualElement();
+            image.AddToClassList(CardImageClass);
 
-            var icon = new VisualElement();
-            icon.AddToClassList("module-card-icon");
-
-            var pixelatedRigidbody = prefab.GetComponent<IPixelatedSprite>();
+            var pixelatedRigidbody = moduleSO.Prefab.GetComponent<IPixelatedSprite>();
             var sprite = pixelatedRigidbody?.GetSprite();
             if (sprite != null)
-                icon.style.backgroundImage = Background.FromSprite(sprite);
+            {
+                var spriteImage = new Image { sprite = sprite, scaleMode = ScaleMode.ScaleToFit };
+                spriteImage.AddToClassList(CardSpriteClass);
+                image.Add(spriteImage);
+            }
 
-            var label = new Label(moduleSO.Name);
-            label.AddToClassList("module-card-label");
+            var titleRow = new VisualElement();
+            titleRow.AddToClassList(CardTitleRowClass);
+            titleRow.style.width = Length.Percent(100);
 
-            card.Add(icon);
-            card.Add(label);
+            var titleClip = new VisualElement
+            {
+                style =
+                {
+                    width = Length.Percent(100)
+                }
+            };
+
+            var title = new Label(moduleSO.Name);
+            title.AddToClassList(CardTitleClass);
+
+            titleClip.Add(title);
+            titleRow.Add(titleClip);
+
+            var dimensions = new Label($"{moduleSO.Dimensions.x}x{moduleSO.Dimensions.y}");
+            dimensions.AddToClassList(CardDimensionsClass);
+            dimensions.AddToClassList(CardDimensionsTextClass);
+
+            var labels = new VisualElement();
+            labels.AddToClassList(CardLabelsClass);
+            labels.Add(titleRow);
+            labels.Add(dimensions);
+
+            card.Add(image);
+            card.Add(labels);
+            _ = new HoverMarqueeLabel(card, titleClip, title);
 
             RegisterCardDragEvents(card, moduleSO);
             return card;
