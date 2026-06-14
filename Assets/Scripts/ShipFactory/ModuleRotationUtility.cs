@@ -54,7 +54,7 @@ namespace ShipFactory
             if (deltaSteps == 0) return;
 
             var currentQuarterTurns = CalculateQuarterTurns(bundle.Instance.transform);
-            var newQuarterTurns = (currentQuarterTurns + deltaSteps + 4) % 4;
+            var newQuarterTurns = ((currentQuarterTurns + deltaSteps) % 4 + 4) % 4;
             bundle.Instance.transform.localRotation = Quaternion.Euler(0f, 0f, newQuarterTurns * 90f);
         }
     }

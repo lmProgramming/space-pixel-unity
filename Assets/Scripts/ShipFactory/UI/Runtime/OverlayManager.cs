@@ -71,7 +71,8 @@ namespace ShipFactory.UI.Runtime
 
         public void SyncTransformFromBundle(ShipModuleSOInstanceBundle bundle)
         {
-            if (!_bundleToOverlay.TryGetValue(bundle, out var overlay)) return;
+            if (!_bundleToOverlay.TryGetValue(bundle, out var overlay) || !overlay)
+                throw new InvalidOperationException("[ShipFactoryOverlayManager] Overlay container is missing");
 
             ModuleOverlay.SyncTransformFromBundle(overlay.transform, bundle);
             var dims = bundle.ModuleSO.Dimensions;

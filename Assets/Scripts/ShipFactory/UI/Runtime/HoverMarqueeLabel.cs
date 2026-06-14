@@ -52,7 +52,7 @@ namespace ShipFactory.UI.Runtime
 
             var textWidth = _label.MeasureTextSize(_label.text, 0, VisualElement.MeasureMode.Undefined, 0,
                 VisualElement.MeasureMode.Undefined).x;
-            if (textWidth < clipWidth - OverflowEpsilon)
+            if (textWidth - clipWidth <= OverflowEpsilon)
                 return;
 
             _maxOffset = Mathf.Max(1f, textWidth - clipWidth) + EndScrollPadding;
