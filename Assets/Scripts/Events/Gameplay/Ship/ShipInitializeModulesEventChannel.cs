@@ -1,4 +1,4 @@
-namespace Events.Ship
+namespace Events.Gameplay.Ship
 {
     public class ShipInitializeModulesEventChannel : EventChannelMB
     {

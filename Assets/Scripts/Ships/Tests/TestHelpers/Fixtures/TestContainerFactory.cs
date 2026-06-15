@@ -1,6 +1,6 @@
 using Core.Services;
-using Events.Collision;
-using Events.Ship;
+using Events.Gameplay.Collision;
+using Events.Gameplay.Ship;
 using NSubstitute;
 using Ships.Tests.TestHelpers.Mocks;
 using UnityEngine;

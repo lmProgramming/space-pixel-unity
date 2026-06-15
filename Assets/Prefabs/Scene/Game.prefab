@@ -455,6 +455,50 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d7beaaabf3f4ed0a9868210f53d5689, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &5394585194812183794
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7960200909603317851}
+  - component: {fileID: 4939461541582117245}
+  m_Layer: 0
+  m_Name: ShootingSoundPlayer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7960200909603317851
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5394585194812183794}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8994786268923723586}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4939461541582117245
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5394585194812183794}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 83a0b9a8db6d4f36b17207246b35e8e0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Gameplay::Gameplay.Shooting.ShootingSoundPlayer
 --- !u!1 &5494529849481706430
 GameObject:
   m_ObjectHideFlags: 0
@@ -530,6 +574,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6847119221857594768}
+  - {fileID: 1492172724048802581}
   m_Father: {fileID: 7174539036084802743}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &2610999791713942906
@@ -754,7 +799,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6910225380903978702}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 60de0711522444c8872a4b8b4425ba52, type: 3}
   m_Name: 
@@ -862,6 +907,50 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d4282e20c6d341309875e6d4c48a0749, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Services::Services.SkirmishSetup
+--- !u!1 &8050647773833569989
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1492172724048802581}
+  - component: {fileID: 7657356563875623738}
+  m_Layer: 0
+  m_Name: ShootingEffectSpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1492172724048802581
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8050647773833569989}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2022054291642679383}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7657356563875623738
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8050647773833569989}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f8d42db586e0482ab07536ba32c96217, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Gameplay::Gameplay.Shooting.ShootingEffectSpawner
 --- !u!1 &8604930764971119730
 GameObject:
   m_ObjectHideFlags: 0
@@ -937,6 +1026,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5152968409662516724}
+  - {fileID: 7960200909603317851}
   - {fileID: 4492569949760211672}
   m_Father: {fileID: 3958861665358511682}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -976,6 +1066,16 @@ MonoBehaviour:
     dedicatedSource: {fileID: 0}
     originalVolume: 0
     identifier: 1
+  - clips:
+    - {fileID: 8300000, guid: a5c219c6a1bcc698baf72db7da8bc039, type: 3}
+    volume: 0.2
+    pitch: 0.8
+    isLoop: 0
+    allowOverlap: 1
+    type: 0
+    dedicatedSource: {fileID: 0}
+    originalVolume: 0
+    identifier: 2
   audioSourcePrefab: {fileID: 4036958230040339655, guid: 5c53d6b9aa7fb2d488199060b79a25da, type: 3}
   audioSourceParent: {fileID: 4492569949760211672}
   unityInstantiator: {fileID: 4189757722138498232}

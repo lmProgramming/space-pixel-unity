@@ -6,6 +6,7 @@ using EasyPool;
 using Instantiation;
 using LMPro;
 using UnityEngine;
+using ZLinq;
 
 namespace Services.Sound
 {
@@ -24,6 +25,7 @@ namespace Services.Sound
         private readonly Dictionary<SoundIdentifier, List<AudioSource>> _activePooledSources = new();
 
         private EasyPool<AudioSource> _audioSourcePool;
+        private UnityEngine.Camera _camera;
         private float _effectsVolume = 1f;
 
         private float _masterVolume = 1f;
@@ -33,6 +35,7 @@ namespace Services.Sound
 
         private void Awake()
         {
+            _camera = UnityEngine.Camera.main;
             // Consider singleton pattern alternatives or DI if needed across scenes
             // DontDestroyOnLoad(gameObject);
 
@@ -115,6 +118,13 @@ namespace Services.Sound
                 return;
             }
 
+            if (position.HasValue)
+            {
+                var distanceToCamera = Vector3.Distance(position.Value, _camera.transform.position);
+                var (_, maxDistance) = GetEffectiveDistances(sound);
+                if (distanceToCamera > maxDistance) return;
+            }
+
             if (!sound.allowOverlap)
                 PlayDedicatedSource(sound, position);
             else
@@ -166,6 +176,16 @@ namespace Services.Sound
             audioSource.Play();
         }
 
+        private static (float minDistance, float maxDistance) GetEffectiveDistances(Sound sound)
+        {
+            if (Mathf.Approximately(sound.maxDistance, -1f))
+                return (1000f, 10000f);
+
+            var minDistance = sound.maxDistance / 10f;
+            var maxDistance = sound.maxDistance;
+            return (minDistance, maxDistance);
+        }
+
         private void ConfigureAudioSource(AudioSource source, Sound sound, Vector3? position)
         {
             if (!source || sound == null || sound.clips.Length == 0) return;
@@ -174,6 +194,8 @@ namespace Services.Sound
             source.volume = CalculateActualVolume(sound);
             source.pitch = sound.pitch;
             source.loop = sound.isLoop;
+
+            (source.minDistance, source.maxDistance) = GetEffectiveDistances(sound);
 
             if (position.HasValue)
             {
@@ -225,9 +247,8 @@ namespace Services.Sound
             if (!_activePooledSources.TryGetValue(identifier, out var sources))
                 return;
 
-            foreach (var source in sources)
-                if (source)
-                    source.Pause();
+            foreach (var source in sources.AsValueEnumerable().Where(source => source))
+                source.Pause();
         }
 
         public void UnPause(SoundIdentifier identifier)
@@ -263,11 +284,7 @@ namespace Services.Sound
             if (!_activePooledSources.TryGetValue(identifier, out var sources))
                 return false;
 
-            foreach (var source in sources)
-                if (source && source.isPlaying)
-                    return true;
-
-            return false;
+            return sources.AsValueEnumerable().Any(source => source && source.isPlaying);
         }
 
         private void RegisterActivePooledSource(SoundIdentifier identifier, AudioSource source)
@@ -322,9 +339,9 @@ namespace Services.Sound
 
         private void ApplyAllVolumes()
         {
-            foreach (var sound in _soundsDictionary.Values)
-                if (!sound.allowOverlap && sound.dedicatedSource != null)
-                    sound.dedicatedSource.volume = CalculateActualVolume(sound);
+            foreach (var sound in _soundsDictionary.Values.AsValueEnumerable()
+                         .Where(sound => !sound.allowOverlap && sound.dedicatedSource != null))
+                sound.dedicatedSource.volume = CalculateActualVolume(sound);
         }
 
         public void SetMasterVolume(float volume)
@@ -349,33 +366,5 @@ namespace Services.Sound
         }
 
         #endregion
-    }
-
-    [Serializable]
-    public class Sound
-    {
-        public enum Type
-        {
-            Effect,
-            Music
-        }
-
-        public AudioClip[] clips;
-
-        [Range(0f, 1f)] public float volume = 1f;
-        [Range(.1f, 3f)] public float pitch = 1f;
-
-        [Tooltip("Should this sound loop indefinitely?")]
-        public bool isLoop;
-
-        [Tooltip("Allow multiple instances of this sound to play at the same time?")]
-        public bool allowOverlap = true;
-
-        public Type type;
-
-        [HideInInspector] public AudioSource dedicatedSource;
-        [HideInInspector] public float originalVolume;
-
-        public SoundIdentifier identifier;
     }
 }

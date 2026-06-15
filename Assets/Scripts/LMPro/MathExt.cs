@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using ZLinq;
 
 namespace LMPro
 {
@@ -204,6 +205,20 @@ namespace LMPro
         public static int RandomInclusive(int x, int y)
         {
             return Random.Range(x, y + 1);
+        }
+
+        public static Vector3 AverageOfVectors(Transform[] transforms)
+        {
+            return transforms.AsValueEnumerable()
+                       .Aggregate(new Vector3(0, 0, 0), (s, v) => s + v.transform.position) /
+                   transforms.Length;
+        }
+
+        public static Vector3 AverageOfVectors(Vector3[] transforms)
+        {
+            return transforms.AsValueEnumerable()
+                       .Aggregate(new Vector3(0, 0, 0), (s, v) => s + v) /
+                   transforms.Length;
         }
     }
 }

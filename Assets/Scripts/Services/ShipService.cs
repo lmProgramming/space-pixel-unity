@@ -42,7 +42,6 @@ namespace Services
             return _ships.Where(ship => team.IsAllied(ship.Team));
         }
 
-
         public IShip GetClosestEnemyShipOf(ITeam team, Vector2 position)
         {
             IShip closest = null;

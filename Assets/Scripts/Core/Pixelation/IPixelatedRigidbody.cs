@@ -13,10 +13,11 @@ namespace Core.Pixelation
         bool HasSprite { get; }
         Vector2 WeightedCenter { get; }
         Vector2 WorldWeightedCenter { get; }
-        ITexturePixelGrid TexturePixelGrid { get; set; }
+        ITexturePixelGrid TexturePixelGrid { get; }
         IPixelCollisionHandler CollisionHandler { get; }
         Rigidbody2D Rigidbody { get; }
         SpriteRenderer SpriteRenderer { get; set; }
+        Collider2D Collider2D { get; }
         Transform Transform { get; }
         GameObject GameObject { get; }
         float DefaultPixelHealthForSnapshot { get; }

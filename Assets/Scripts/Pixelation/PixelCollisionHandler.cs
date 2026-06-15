@@ -3,7 +3,7 @@ using ContourTracer;
 using Core.Grid;
 using Core.Pixelation;
 using Core.Services;
-using Events.Collision;
+using Events.Gameplay.Collision;
 using Grid;
 using LMPro;
 using Pixelation.CollisionResolver;

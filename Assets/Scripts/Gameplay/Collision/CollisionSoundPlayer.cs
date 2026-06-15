@@ -1,5 +1,5 @@
 ﻿using Core.Gameplay.Sound;
-using Events.Collision;
+using Events.Gameplay.Collision;
 using UnityEngine;
 using Zenject;
 
@@ -23,9 +23,14 @@ namespace Gameplay.Collision
 
         private void HandleCollision(CollisionData data)
         {
-            if (data.pixelsDestroyed.Length > 0) _soundManager.Play(SoundIdentifier.Explosion);
-            if (data.SpeedDifference != null && data.SpeedDifference.Value.magnitude > minMagnitudeForClunk)
-                _soundManager.Play(SoundIdentifier.Collision);
+            if (data.pixelsDestroyed.Length > 0) _soundManager.Play(SoundIdentifier.Explosion, data.contactPoint);
+
+            if (data.SpeedDifference != null)
+            {
+                Debug.Log(data.SpeedDifference.Value.magnitude);
+                if (data.SpeedDifference.Value.magnitude > minMagnitudeForClunk)
+                    _soundManager.Play(SoundIdentifier.Collision, data.contactPoint);
+            }
         }
     }
 }

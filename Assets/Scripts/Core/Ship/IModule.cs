@@ -23,6 +23,7 @@ namespace Core.Ship
         IPixelatedRigidbody PixelatedRigidbody { get; }
         int AliveCrewCount { get; }
         IShip Ship { get; }
+        Collider2D Collider2D { get; }
         void FillCrewBySkill(List<CrewMember> crew, out List<CrewMember> remainingCrew);
         bool AssignCrew(CrewMember member);
         bool RemoveCrew(CrewMember member);
