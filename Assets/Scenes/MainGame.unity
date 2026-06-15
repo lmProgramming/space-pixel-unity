@@ -2893,6 +2893,10 @@ PrefabInstance:
       propertyPath: minMagnitudeForClunk
       value: 5
       objectReference: {fileID: 0}
+    - target: {fileID: 4648251575334767366, guid: cf3e414adef6859f2af6ac1a62b52293, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8678225184202570128, guid: cf3e414adef6859f2af6ac1a62b52293, type: 3}
       propertyPath: enemyTeam
       value: 

@@ -7,7 +7,7 @@ using Core.Pixelation;
 using Core.Services;
 using Core.Ship;
 using Cysharp.Threading.Tasks;
-using Events.Ship;
+using Events.Gameplay.Ship;
 using Gameplay.EasyTeam;
 using LMPro;
 using LMPro.DataStructures;
@@ -184,7 +184,7 @@ namespace Ships
             return CommandModule.PixelatedRigidbody.WorldWeightedCenter;
         }
 
-        public void OnModuleDestroyed(IModule module)
+        public void OnModuleConnectionLost(IModule module)
         {
             if (module == null) return;
 
@@ -194,6 +194,8 @@ namespace Ships
 
             _biCohesionGraph.RemoveNode(module);
             RecacheModulesDictionary();
+
+            DeIgnoreCollider(module.Collider2D);
         }
 
         public void ManualAddModule(IModule module)
@@ -230,7 +232,7 @@ namespace Ships
 
             foreach (var module in existingModules)
             {
-                module.Setup(null);
+                module.OnShipConnectionLost();
                 module.transform.SetParent(null, true);
                 Destroy(module.gameObject);
             }
@@ -259,6 +261,8 @@ namespace Ships
             _shipInitializeModulesEventChannel.Raise();
 
             RecacheModulesDictionary();
+
+            IgnoreModuleColliders();
         }
 
 
@@ -268,6 +272,20 @@ namespace Ships
             Assert.IsNotNull(team, "newTeam must be of type Team");
             gameObject.layer = team.Layer;
             transform.SetLayerAllChildren(team.Layer);
+        }
+
+        private void IgnoreModuleColliders()
+        {
+            var combinations = from item1 in OwnColliders.AsValueEnumerable()
+                from item2 in OwnColliders.AsValueEnumerable()
+                where item1.GetHashCode() < item2.GetHashCode()
+                select Tuple.Create(item1, item2);
+            foreach (var combination in combinations) Physics2D.IgnoreCollision(combination.Item1, combination.Item2);
+        }
+
+        private void DeIgnoreCollider(Collider2D other)
+        {
+            foreach (var item1 in OwnColliders) Physics2D.IgnoreCollision(other, item1, false);
         }
 
         private void DestroyShip()
@@ -300,7 +318,7 @@ namespace Ships
             // rescuing modules out of it would leave zombie junk with disabled components.
             if (!isActiveAndEnabled) return;
 
-            if (!module.IsAliveEnabled() || module?.Transform == null ||
+            if (!module.IsAliveEnabled() || !module.Transform ||
                 module.Transform.parent == _mapInfo.MapTransform) return;
 
             Debug.Log($"[Ship] Releasing module as junk: {module.Transform.name}", module.Transform);

@@ -16,6 +16,12 @@ namespace Ships
 
         public bool SasEnabled => sasEnabled;
 
+        protected override void Start()
+        {
+            base.Start();
+            foreach (var module in AllModules) module.Transform!.tag = "Player";
+        }
+
         public void ToggleSas()
         {
             sasEnabled = !sasEnabled;

@@ -38,8 +38,6 @@ namespace Ships.Modules
 
             _reloadTimer = new ManualTimer(reloadTime);
             _cts = new CancellationTokenSource();
-
-            Assert.IsTrue(projectileSpawnPoints.Length > 0, "Projectile spawn points must be assigned.");
         }
 
         protected override void Start()
@@ -47,6 +45,8 @@ namespace Ships.Modules
             base.Start();
             _reloadTimer.OnReady += HandleReady;
             _reloadTimer.OnNotReady += HandleNotReady;
+
+            Assert.IsTrue(projectileSpawnPoints.Length > 0, "Projectile spawn points must be assigned.");
         }
 
         public void Update()
