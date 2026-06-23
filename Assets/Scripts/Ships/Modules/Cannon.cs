@@ -1,9 +1,13 @@
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using Core.Constants;
 using Core.Services;
 using Core.Ship.ModuleSnapshotPayloads;
+using Events.Gameplay.Shooting;
 using LMPro;
 using UnityEngine;
+using UnityEngine.Assertions;
 using Zenject;
 
 [assembly: InternalsVisibleTo("E2E")]
@@ -17,6 +21,8 @@ namespace Ships.Modules
 
         [SerializeField] private float projectileSpeed;
 
+        [SerializeField] private Transform[] projectileSpawnPoints;
+
         [SerializeField] private float reloadTime;
 
         [SerializeField] private Sprite sprite;
@@ -25,6 +31,7 @@ namespace Ships.Modules
         [Inject] private IProjectilesSpawner _projectilesSpawner;
 
         private ManualTimer _reloadTimer;
+        [Inject] private ShootingEventChannel _shootingEventChannel;
 
         protected override void Awake()
         {
@@ -39,6 +46,8 @@ namespace Ships.Modules
             base.Start();
             _reloadTimer.OnReady += HandleReady;
             _reloadTimer.OnNotReady += HandleNotReady;
+
+            Assert.IsTrue(projectileSpawnPoints.Length > 0, "Projectile spawn points must be assigned.");
         }
 
         public void Update()
@@ -65,21 +74,41 @@ namespace Ships.Modules
 
             var targetPosition = Ship.AttackTargetPosition;
 
-            if (!transform) return;
-            var direction = (targetPosition - (Vector2)transform.position).normalized;
+            var cannonOriginPosition = MathExt.AverageOfVectors(projectileSpawnPoints);
 
-            var angle = MathExt.AngleBetweenTwoPoints(targetPosition, transform.position);
+            if (!transform) return;
+            var direction = (targetPosition - (Vector2)cannonOriginPosition).normalized;
+
+            var angle = MathExt.AngleBetweenTwoPoints(targetPosition, cannonOriginPosition);
 
             var rotation = Quaternion.Euler(0, 0, angle - 90);
 
             var shooterColliders = Ship.OwnColliders;
-            var newBullet =
-                _projectilesSpawner.Spawn(projectilePrefab, transform.position, rotation, shooterColliders);
+            var bulletColliders = new List<Collider2D>();
+            foreach (var projectileSpawnPoint in projectileSpawnPoints)
+            {
+                var newBullet =
+                    _projectilesSpawner.Spawn(projectilePrefab, projectileSpawnPoint.position, rotation,
+                        shooterColliders);
 
-            var bulletRigidbody = newBullet.GetComponent<Rigidbody2D>();
-            bulletRigidbody.linearVelocity = PixelatedRigidbody.Rigidbody.linearVelocity;
-            bulletRigidbody.AddForce(PixelatedRigidbody.Rigidbody.linearVelocity + direction * projectileSpeed,
-                ForceMode2D.Impulse);
+                var bulletCollider = newBullet.GetComponent<Collider2D>();
+                foreach (var otherBulletCollider in bulletColliders)
+                    Physics2D.IgnoreCollision(bulletCollider, otherBulletCollider);
+                bulletColliders.Add(bulletCollider);
+
+                var bulletRigidbody = newBullet.GetComponent<Rigidbody2D>();
+                bulletRigidbody.linearVelocity = PixelatedRigidbody.Rigidbody.linearVelocity;
+                bulletRigidbody.AddForce(
+                    direction * (projectileSpeed * GameplayConstants.CannonProjectileSpeedMultiplier),
+                    ForceMode2D.Impulse);
+
+                _shootingEventChannel?.Raise(new BulletShootingData(
+                    Ship,
+                    projectileSpawnPoint.position,
+                    direction,
+                    bulletRigidbody.mass * bulletRigidbody.linearVelocity.magnitude
+                ));
+            }
 
             _reloadTimer.Reset();
         }
@@ -147,6 +176,19 @@ namespace Ships.Modules
         }
 
 #if UNITY_INCLUDE_TESTS
+        internal void SetupForTesting(GameObject newProjectilePrefab,
+            float newProjectileSpeed,
+            float newReloadTime,
+            Sprite newSprite,
+            Transform[] newProjectileSpawnPoints)
+        {
+            projectilePrefab = newProjectilePrefab;
+            projectileSpeed = newProjectileSpeed;
+            reloadTime = newReloadTime;
+            sprite = newSprite;
+            projectileSpawnPoints = newProjectileSpawnPoints;
+        }
+
         internal GameObject InternalProjectilePrefab
         {
             get => projectilePrefab;

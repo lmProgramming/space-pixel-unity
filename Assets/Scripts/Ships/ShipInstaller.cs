@@ -1,4 +1,4 @@
-using Events.Ship;
+using Events.Gameplay.Ship;
 using UnityEngine;
 using Zenject;
 

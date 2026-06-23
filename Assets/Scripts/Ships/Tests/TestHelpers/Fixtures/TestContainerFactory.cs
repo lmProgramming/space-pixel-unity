@@ -1,6 +1,7 @@
 using Core.Services;
-using Events.Collision;
-using Events.Ship;
+using Events.Gameplay.Collision;
+using Events.Gameplay.Ship;
+using Events.Gameplay.Shooting;
 using NSubstitute;
 using Ships.Tests.TestHelpers.Mocks;
 using UnityEngine;
@@ -32,6 +33,9 @@ namespace Ships.Tests.TestHelpers.Fixtures
             var shipInitializeModulesEventChannel = Substitute.For<ShipInitializeModulesEventChannel>();
             container.Bind<ShipInitializeModulesEventChannel>().FromInstance(shipInitializeModulesEventChannel)
                 .AsSingle();
+
+            var shootingEventChannel = Substitute.For<ShootingEventChannel>();
+            container.Bind<ShootingEventChannel>().FromInstance(shootingEventChannel).AsSingle();
 
             var effectsSpawner = Substitute.For<IEffectsSpawner>();
             container.Bind<IEffectsSpawner>().FromInstance(effectsSpawner).AsSingle();

@@ -1,4 +1,5 @@
 using System.Collections;
+using LMPro.External.IsAlive;
 using NUnit.Framework;
 using Services;
 using Ships.Modules;
@@ -24,7 +25,7 @@ namespace Ships.Tests
         private ShipSnapshotService _snapshotService;
 
         [UnityTest]
-        public IEnumerator DestroyAllModules_RemovesModulesFromShipHierarchy()
+        public IEnumerator DestroyAllModules_DestroysShipAndModules()
         {
             var ship = ShipTestFactory.CreateShipWithCommandAndEngine(Container, CreatedObjects, TestRoot.transform);
             yield return WaitForLifecycle();
@@ -34,78 +35,21 @@ namespace Ships.Tests
             ship.DestroyAllModules();
             yield return null;
 
-            Assert.That(ship.GetComponentsInChildren<Module>(), Is.Empty);
+            Assert.That(!ship.IsAliveEnabled());
+
+            var modules = Object.FindObjectsByType<Module>();
+
+            Assert.IsEmpty(modules);
         }
 
         [UnityTest]
-        public IEnumerator DestroyAllModules_DetachesModulesFromShipTransform()
-        {
-            var ship = ShipTestFactory.CreateShipWithCommandAndEngine(Container, CreatedObjects, TestRoot.transform);
-            yield return WaitForLifecycle();
-
-            var modulesBeforeDestroy = ship.GetComponentsInChildren<Module>();
-            ship.DestroyAllModules();
-
-            foreach (var module in modulesBeforeDestroy)
-                Assert.IsNull(module.transform.parent, "Modules should be detached before deferred destroy.");
-
-            yield return null;
-
-            foreach (var module in modulesBeforeDestroy)
-                Assert.IsTrue(module == null || module.gameObject == null,
-                    "Detached module objects should be destroyed after a frame.");
-        }
-
-        [UnityTest]
-        public IEnumerator DestroyAllModules_ClearsModuleShipReference()
-        {
-            var ship = ShipTestFactory.CreateShipWithCommandAndEngine(Container, CreatedObjects, TestRoot.transform);
-            yield return WaitForLifecycle();
-
-            var engine = (Engine)ship.AllModules[1];
-            ship.DestroyAllModules();
-
-            Assert.IsNull(engine.ShipForTesting);
-            yield return null;
-        }
-
-        [UnityTest]
-        public IEnumerator DestroyAllModules_ThenAddCommand_InitializeModules_RebuildsShip()
-        {
-            var ship = ShipTestFactory.CreateShipWithCommandAndEngine(Container, CreatedObjects, TestRoot.transform);
-            yield return WaitForLifecycle();
-
-            ship.DestroyAllModules();
-            yield return null;
-
-            ModuleFactory.CreateCommandModule(ship.transform, Vector2.zero, Container, CreatedObjects, 5, 5);
-            ship.InitializeModules();
-
-            Assert.IsNotNull(ship.CommandModule);
-            Assert.That(ship.AllModules.Count, Is.EqualTo(1));
-        }
-
-        [UnityTest]
-        public IEnumerator DestroyAllModules_OnEmptyShip_DoesNotThrow()
-        {
-            var ship = ShipTestFactory.CreateShipWithCommandAndEngine(Container, CreatedObjects, TestRoot.transform);
-            yield return WaitForLifecycle();
-
-            ship.DestroyAllModules();
-            yield return null;
-
-            Assert.DoesNotThrow(ship.DestroyAllModules);
-            yield return null;
-        }
-
-        [UnityTest]
-        public IEnumerator ApplySnapshot_AfterDestroyAllModules_ReplacesModulesCorrectly()
+        public IEnumerator ApplySnapshot_AfterDestroyAllModulesSilently_ReplacesModulesCorrectly()
         {
             var ship = ShipTestFactory.CreateShipWithCommandAndEngine(Container, CreatedObjects, TestRoot.transform);
             yield return WaitForLifecycle();
 
             var snapshot = _snapshotService.CaptureSnapshot(ship);
-            ship.DestroyAllModules();
+            ship.DestroyAllModulesSilently();
             yield return null;
 
             Assert.That(ship.GetComponentsInChildren<Module>(), Is.Empty);
@@ -120,7 +64,7 @@ namespace Ships.Tests
         }
 
         [UnityTest]
-        public IEnumerator ApplySnapshot_WithDamagedPixels_PreservesDamageAfterDestroyAllModules()
+        public IEnumerator ApplySnapshot_WithDamagedPixels_PreservesDamageAfterDestroyAllModulesSilently()
         {
             var ship = ShipTestFactory.CreateShipWithCommandAndEngine(Container, CreatedObjects, TestRoot.transform);
             yield return WaitForLifecycle();
@@ -129,7 +73,7 @@ namespace Ships.Tests
             engine.PixelatedRigidbody.RemovePixelAt(new Vector2Int(2, 2));
 
             var snapshot = _snapshotService.CaptureSnapshot(ship);
-            ship.DestroyAllModules();
+            ship.DestroyAllModulesSilently();
             yield return null;
 
             _snapshotService.ApplySnapshot(ship, snapshot);

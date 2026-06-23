@@ -4,8 +4,9 @@ using System.Collections.Generic;
 using Core.Constants;
 using Core.Services;
 using Editor.Standalone;
-using Events.Collision;
-using Events.Ship;
+using Events.Gameplay.Collision;
+using Events.Gameplay.Ship;
+using Events.Gameplay.Shooting;
 using Gameplay.EasyTeam;
 using Instantiation;
 using NSubstitute;
@@ -19,7 +20,6 @@ using Ships.Tests.TestHelpers.Factories;
 using Ships.Tests.TestHelpers.Mocks;
 using UnityEngine;
 using Zenject;
-using ZLinq;
 using Object = UnityEngine.Object;
 using Resources = Core.Ship.Resources;
 
@@ -56,6 +56,9 @@ namespace E2E
             // Bind basic event channels
             var collisionEventChannel = ScriptableObject.CreateInstance<CollisionEventChannelSO>();
             Container.Bind<CollisionEventChannelSO>().FromInstance(collisionEventChannel).AsSingle();
+
+            var shootingEventChannel = ScriptableObject.CreateInstance<ShootingEventChannel>();
+            Container.Bind<ShootingEventChannel>().FromInstance(shootingEventChannel).AsSingle();
 
             var testDebrisSpawner = new TestDebrisSpawner();
             Container.Bind<IDebrisSpawner>().FromInstance(testDebrisSpawner).AsSingle();
@@ -108,7 +111,7 @@ namespace E2E
         [TearDown]
         public virtual void TearDown()
         {
-            foreach (var obj in CreatedObjects.AsValueEnumerable().Where(obj => obj != null))
+            foreach (var obj in CreatedObjects)
                 Object.DestroyImmediate(obj);
             CreatedObjects.Clear();
         }
@@ -175,11 +178,12 @@ namespace E2E
                     new Vector2(0f, -moduleSpacing), 0f, Container, CreatedObjects, 5, 5);
                 var cannon = cannonGo.AddComponent<Cannon>();
                 cannon.SetResources(new Resources(0, 1f, 0, 0, 0));
-                cannon.InternalProjectilePrefab = bulletPrefab;
-                cannon.InternalReloadTime = 0.2f;
-                cannon.InternalProjectileSpeed = 1200f;
                 var weaponSprite = CreateTestSprite();
-                cannon.InternalSprite = weaponSprite;
+                var projectileSpawnGo = new GameObject("ProjectileSpawn");
+                projectileSpawnGo.transform.SetParent(shipGo.transform);
+                projectileSpawnGo.transform.position = cannonGo.transform.position;
+                cannon.SetupForTesting(bulletPrefab, 1.2f, 0.2f, weaponSprite,
+                    new[] { projectileSpawnGo.transform });
             }
 
             shipGo.AddComponent<ModuleConnectionFactory>();

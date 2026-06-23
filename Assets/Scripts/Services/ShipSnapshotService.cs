@@ -67,7 +67,7 @@ namespace Services
                 return;
             }
 
-            ship.DestroyAllModules();
+            ship.DestroyAllModulesSilently();
             CreateModulesFromSnapshot(ship, snapshot);
 
             Debug.Log(
@@ -168,7 +168,7 @@ namespace Services
                     throw new UnityException(
                         $"[ShipSnapshotService] Failed to add a Module component for '{ms.moduleName}' (typeName: '{ms.moduleTypeName}', moduleType: {ms.moduleType}).");
 
-                module.Setup(ship);
+                module.SetShip(ship);
                 module.SetResources(ms.resources);
                 module.ApplyTypePayloadJson(ms.typePayloadJson, _gameContentCatalog);
                 createdModules.Add((moduleGo, ms, module));

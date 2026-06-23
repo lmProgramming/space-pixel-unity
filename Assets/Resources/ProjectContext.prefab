@@ -79,3 +79,4 @@ MonoBehaviour:
   skirmishSnapshotCatalog: {fileID: 11400000, guid: 40f1c37d4651cf7898dcc2b40a007491, type: 2}
   pointerOverUiChannel: {fileID: 11400000, guid: fe59adb565b6e2758b87bd8eda75cff1, type: 2}
   pauseStateChannel: {fileID: 11400000, guid: 74f53e084322486ddb6ba9576741f3e3, type: 2}
+  shootingEventChannel: {fileID: 11400000, guid: 17adcbea821a7aa3bb4aafc76131348b, type: 2}

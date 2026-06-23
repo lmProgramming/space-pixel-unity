@@ -21,6 +21,7 @@ namespace ShipFactory
         private const string SnapshotExtension = ".json";
         private const string DefaultShipName = "Ship";
         private static readonly object ModuleDragPointerBlocker = new();
+        private static readonly object UiHoverBlocker = new();
         private static readonly object UiPointerDownBlocker = new();
         [SerializeField] private ModulePrefabLibrary modulePrefabLibrary;
         [SerializeField] private Ship initialShip;
@@ -38,6 +39,7 @@ namespace ShipFactory
         private GameObject _gameObjectUnderPointer;
         private bool _isModuleDragBlockingCamera;
         private bool _isPaused;
+        private bool _isUiHoverBlockingCamera;
         private bool _isUiPointerDownBlockingCamera;
         private ModulePaletteController _paletteController;
         private VisualElement _pauseOverlay;
@@ -116,6 +118,7 @@ namespace ShipFactory
         private void OnDisable()
         {
             SetModuleDragPointerBlock(false);
+            SetUiHoverBlock(false);
             SetUiPointerDownBlock(false);
             ReleaseGameObjectPointerBlocking();
             UnregisterCameraDragPointerBlockers();
@@ -306,6 +309,8 @@ namespace ShipFactory
 
             root.RegisterCallback<PointerDownEvent>(OnPointerDownForCameraBlock, TrickleDown.TrickleDown);
             root.RegisterCallback<PointerUpEvent>(OnPointerUpForCameraBlock, TrickleDown.TrickleDown);
+            root.RegisterCallback<PointerMoveEvent>(OnPointerMoveForUiHoverBlock, TrickleDown.TrickleDown);
+            root.RegisterCallback<PointerLeaveEvent>(OnPointerLeaveForUiHoverBlock, TrickleDown.TrickleDown);
         }
 
         private void UnregisterCameraDragPointerBlockers()
@@ -315,6 +320,8 @@ namespace ShipFactory
 
             _uiRoot.UnregisterCallback<PointerDownEvent>(OnPointerDownForCameraBlock);
             _uiRoot.UnregisterCallback<PointerUpEvent>(OnPointerUpForCameraBlock);
+            _uiRoot.UnregisterCallback<PointerMoveEvent>(OnPointerMoveForUiHoverBlock);
+            _uiRoot.UnregisterCallback<PointerLeaveEvent>(OnPointerLeaveForUiHoverBlock);
         }
 
         private void OnPointerDownForCameraBlock(PointerDownEvent evt)
@@ -359,6 +366,31 @@ namespace ShipFactory
             }
 
             return false;
+        }
+
+        private void OnPointerMoveForUiHoverBlock(PointerMoveEvent evt)
+        {
+            if (evt.target is not VisualElement target)
+                return;
+
+            SetUiHoverBlock(!IsUnderCanvasContainer(target));
+        }
+
+        private void OnPointerLeaveForUiHoverBlock(PointerLeaveEvent evt)
+        {
+            if (evt.target != _uiRoot)
+                return;
+
+            SetUiHoverBlock(false);
+        }
+
+        private void SetUiHoverBlock(bool isBlocking)
+        {
+            if (_isUiHoverBlockingCamera == isBlocking)
+                return;
+
+            _isUiHoverBlockingCamera = isBlocking;
+            _pointerOverUiChannel.Raise(new PointerOverUiData(UiHoverBlocker, isBlocking));
         }
 
         private void SetUiPointerDownBlock(bool isBlocking)

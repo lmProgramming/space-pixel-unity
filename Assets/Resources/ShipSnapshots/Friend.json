@@ -419,7 +419,7 @@
         "crewNeeded": 5,
         "crewQuarters": 0
       },
-      "typePayloadJson": "{\"reloadTime\":1.0,\"projectileSpeed\":1000.0,\"projectileContentId\":\"bullet_small\",\"spriteContentId\":\"\"}"
+      "typePayloadJson": "{\"reloadTime\":1.0,\"projectileSpeed\":1.0,\"projectileContentId\":\"bullet_small\",\"spriteContentId\":\"\"}"
     },
     {
       "instanceId": "6c4eae88d48a42048e6085a9f2d5e626",
@@ -457,7 +457,7 @@
         "crewNeeded": 5,
         "crewQuarters": 0
       },
-      "typePayloadJson": "{\"reloadTime\":1.0,\"projectileSpeed\":1000.0,\"projectileContentId\":\"bullet_small\",\"spriteContentId\":\"\"}"
+      "typePayloadJson": "{\"reloadTime\":1.0,\"projectileSpeed\":1.0,\"projectileContentId\":\"bullet_small\",\"spriteContentId\":\"\"}"
     }
   ],
   "references": {

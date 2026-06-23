@@ -82,7 +82,7 @@ namespace Ships.Modules
             DetachAllConnections();
             KillAllCrew();
 
-            Ship?.OnModuleDestroyed(this);
+            OnShipConnectionLost();
         }
 
         private void OnDrawGizmosSelected()
@@ -105,6 +105,7 @@ namespace Ships.Modules
         }
 
         public IShip Ship { get; protected set; }
+        public Collider2D Collider2D => PixelatedRigidbody.Collider2D;
 
         public int AliveCrewCount => AliveCrew.Count;
 
@@ -206,7 +207,7 @@ namespace Ships.Modules
             transform.localPosition = localPosition;
         }
 
-        public void Setup(IShip ship)
+        public void SetShip(IShip ship)
         {
             Ship = ship;
         }
@@ -245,8 +246,11 @@ namespace Ships.Modules
 
         public void OnShipConnectionLost()
         {
-            Ship = null;
             Destroy(this);
+
+            if (Ship == null) return;
+            Ship?.OnModuleConnectionLost(this);
+            Ship = null;
         }
 
         public void SetupConnections(Module otherModule, ref FixedJoint2D joint)

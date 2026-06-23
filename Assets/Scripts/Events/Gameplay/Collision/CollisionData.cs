@@ -2,7 +2,7 @@ using System;
 using JetBrains.Annotations;
 using UnityEngine;
 
-namespace Events.Collision
+namespace Events.Gameplay.Collision
 {
     [Serializable]
     public struct CollisionData

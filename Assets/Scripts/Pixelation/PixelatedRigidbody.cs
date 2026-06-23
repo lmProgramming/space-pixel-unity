@@ -7,7 +7,7 @@ using Core.Pixelation;
 using Core.Services;
 using Core.Ship;
 using Cysharp.Threading.Tasks;
-using Events.Collision;
+using Events.Gameplay.Collision;
 using Grid;
 using LMPro;
 using UnityEngine;
@@ -185,6 +185,7 @@ namespace Pixelation
             return destroyed;
         }
 
+        public Collider2D Collider2D { get; private set; }
         public Transform Transform => transform;
         public GameObject GameObject => gameObject;
 
@@ -303,6 +304,12 @@ namespace Pixelation
             for (var y = 0; y < snapshot.height; y++)
             for (var x = 0; x < snapshot.width; x++)
                 HealthGrid.SetHealth(new Vector2Int(x, y), snapshot.GetValue(x, y));
+        }
+
+        public virtual void NoPixelsLeft()
+        {
+            OnNoPixelsLeft?.Invoke(this);
+            Destroy(gameObject);
         }
 
         public Sprite GetSprite()
@@ -434,12 +441,7 @@ namespace Pixelation
         {
             Rigidbody = GetComponent<Rigidbody2D>();
             SpriteRenderer = GetComponent<SpriteRenderer>();
-        }
-
-        public virtual void NoPixelsLeft()
-        {
-            OnNoPixelsLeft?.Invoke(this);
-            Destroy(gameObject);
+            Collider2D = GetComponent<Collider2D>();
         }
 
         public void CopyVelocity(IPixelatedRigidbody parentBody)

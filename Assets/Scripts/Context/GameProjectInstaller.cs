@@ -1,5 +1,6 @@
 using Core.Services;
 using Events.Game;
+using Events.Gameplay.Shooting;
 using Events.UI;
 using Services;
 using Services.GameInput;
@@ -15,6 +16,7 @@ namespace Context
         [SerializeField] private ScriptableObject skirmishSnapshotCatalog;
         [SerializeField] private PointerOverUiEventChannel pointerOverUiChannel;
         [SerializeField] private PauseStateEventChannel pauseStateChannel;
+        [SerializeField] private ShootingEventChannel shootingEventChannel;
 
         public override void InstallBindings()
         {
@@ -35,6 +37,9 @@ namespace Context
             if (skirmishSnapshotCatalog is not ISkirmishSnapshotCatalog typedSkirmishSnapshotCatalog)
                 throw new UnityException(
                     "[GameProjectInstaller] Skirmish snapshot catalog must implement ISkirmishSnapshotCatalog.");
+
+            if (shootingEventChannel == null)
+                throw new UnityException("[GameProjectInstaller] Shooting event channel must be assigned.");
 
             Container.Bind<IShipModuleCatalog>()
                 .FromInstance(typedShipModuleCatalog)
@@ -58,6 +63,10 @@ namespace Context
 
             Container.Bind<PauseStateEventChannel>()
                 .FromInstance(pauseStateChannel)
+                .AsSingle();
+
+            Container.Bind<ShootingEventChannel>()
+                .FromInstance(shootingEventChannel)
                 .AsSingle();
 
             Container.Bind<IGameInput>()

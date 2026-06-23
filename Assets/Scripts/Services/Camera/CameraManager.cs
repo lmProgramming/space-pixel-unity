@@ -20,7 +20,7 @@ namespace Services.Camera
         [SerializeField] private float maxZoom = 10f;
         [SerializeField] private float minZoom = 1f;
 
-        [SerializeField] private bool canZoomOnUI = true;
+        [SerializeField] private bool canZoomOnUI;
 
         public bool updateCamera = true;
         [Inject] private IGameInput _gameInput;
@@ -93,10 +93,11 @@ namespace Services.Camera
 
         private void ProcessDrag()
         {
-            if (!ShouldProcessDrag())
-                return;
+            if (!ShouldProcessDrag()) return;
 
             var dragDelta = IsMobile ? GetMobileDragDelta() : GetDesktopDragDelta();
+
+            if (dragDelta == Vector2.zero) return;
 
             // Translate the camera, scaled by drag speed and the current orthographic size.
             transform.Translate(dragDelta * (dragSpeed * MainCamera.orthographicSize), Space.World);
@@ -137,6 +138,8 @@ namespace Services.Camera
                 return;
 
             var zoomIncrement = IsMobile ? GetMobileZoomIncrement() : -Input.GetAxis("Mouse ScrollWheel");
+
+            if (zoomIncrement == 0) return;
 
             MainCamera.orthographicSize = Mathf.Clamp(
                 MainCamera.orthographicSize + zoomIncrement * scrollSpeed,

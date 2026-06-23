@@ -23,6 +23,7 @@ namespace Core.Ship
         IPixelatedRigidbody PixelatedRigidbody { get; }
         int AliveCrewCount { get; }
         IShip Ship { get; }
+        Collider2D Collider2D { get; }
         void FillCrewBySkill(List<CrewMember> crew, out List<CrewMember> remainingCrew);
         bool AssignCrew(CrewMember member);
         bool RemoveCrew(CrewMember member);
@@ -33,7 +34,7 @@ namespace Core.Ship
         void KillRandomCrew(int count);
         void SetResources(Resources newResources);
         void SetLocalPosition(Vector2 localPosition);
-        void Setup(IShip ship);
+        void SetShip(IShip ship);
         string CaptureTypePayloadJson(IGameContentCatalog contentCatalog);
         void ApplyTypePayloadJson(string typePayloadJson, IGameContentCatalog contentCatalog);
     }

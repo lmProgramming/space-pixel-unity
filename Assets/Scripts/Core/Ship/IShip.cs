@@ -18,11 +18,12 @@ namespace Core.Ship
         string Name { get; }
         IReadOnlyList<IModule> AllModules { get; }
         Vector2 GetPosition();
-        void OnModuleDestroyed(IModule module);
+        void OnModuleConnectionLost(IModule module);
         void ManualAddModule(IModule module);
         void ManualRemoveModule(IModule module);
         void DestroyAllModules();
         void InitializeModules();
         void SetTeam(ITeam newTeam);
+        void DestroyAllModulesSilently();
     }
 }

@@ -164,7 +164,8 @@ namespace Ships.Modules
         {
             _isFiring = false;
 
-            _lineRenderer.enabled = false;
+            if (_lineRenderer)
+                _lineRenderer.enabled = false;
 
             _fireCts?.Cancel();
             _fireCts?.Dispose();

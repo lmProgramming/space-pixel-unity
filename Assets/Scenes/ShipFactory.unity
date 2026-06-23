@@ -198,6 +198,17 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &218396973 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8033188784352906428, guid: eea6e871d7dd663b985d0e73e87b5b8b, type: 3}
+  m_PrefabInstance: {fileID: 1319159258}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b87386f5e87c402da0425f97c38c8370, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Gameplay::Gameplay.EasyTeam.Team
 --- !u!1 &779531616
 GameObject:
   m_ObjectHideFlags: 0
@@ -321,7 +332,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ca2084538397de84187ef625732233bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game.Ships::Ships.Ship
-  team: {fileID: 0}
+  team: {fileID: 218396973}
   sasTurnReleaseThreshold: 0.05
   sasHeadingDeadZoneDegrees: 0.3
   sasHeadingGain: 0.04
@@ -676,10 +687,30 @@ PrefabInstance:
       propertyPath: m_Name
       value: Game
       objectReference: {fileID: 0}
+    - target: {fileID: 3649247923024009351, guid: cf3e414adef6859f2af6ac1a62b52293, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4648251575334767366, guid: cf3e414adef6859f2af6ac1a62b52293, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6145660219218113356, guid: cf3e414adef6859f2af6ac1a62b52293, type: 3}
       propertyPath: m_Enabled
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8678225184202570128, guid: cf3e414adef6859f2af6ac1a62b52293, type: 3}
+      propertyPath: enemyTeam
+      value: 
+      objectReference: {fileID: 2087266683}
+    - target: {fileID: 8678225184202570128, guid: cf3e414adef6859f2af6ac1a62b52293, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8678225184202570128, guid: cf3e414adef6859f2af6ac1a62b52293, type: 3}
+      propertyPath: friendlyTeam
+      value: 
+      objectReference: {fileID: 218396973}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1049,6 +1080,17 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &2087266683 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5954686578939422986, guid: eea6e871d7dd663b985d0e73e87b5b8b, type: 3}
+  m_PrefabInstance: {fileID: 1319159258}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b87386f5e87c402da0425f97c38c8370, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Gameplay::Gameplay.EasyTeam.Team
 --- !u!1001 &67069411893530529
 PrefabInstance:
   m_ObjectHideFlags: 0
