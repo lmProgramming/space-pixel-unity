@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using Core.Constants;
 using Core.Services;
 using Core.Ship.ModuleSnapshotPayloads;
 using Events.Gameplay.Shooting;
@@ -97,7 +98,9 @@ namespace Ships.Modules
 
                 var bulletRigidbody = newBullet.GetComponent<Rigidbody2D>();
                 bulletRigidbody.linearVelocity = PixelatedRigidbody.Rigidbody.linearVelocity;
-                bulletRigidbody.AddForce(direction * projectileSpeed, ForceMode2D.Impulse);
+                bulletRigidbody.AddForce(
+                    direction * (projectileSpeed * GameplayConstants.CannonProjectileSpeedMultiplier),
+                    ForceMode2D.Impulse);
 
                 _shootingEventChannel?.Raise(new BulletShootingData(
                     Ship,

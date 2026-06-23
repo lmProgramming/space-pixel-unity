@@ -182,7 +182,7 @@ namespace E2E
                 var projectileSpawnGo = new GameObject("ProjectileSpawn");
                 projectileSpawnGo.transform.SetParent(shipGo.transform);
                 projectileSpawnGo.transform.position = cannonGo.transform.position;
-                cannon.SetupForTesting(bulletPrefab, 1200f, 0.2f, weaponSprite,
+                cannon.SetupForTesting(bulletPrefab, 1.2f, 0.2f, weaponSprite,
                     new[] { projectileSpawnGo.transform });
             }
 

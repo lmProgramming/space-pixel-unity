@@ -203,7 +203,7 @@ namespace Ships.Tests.TestHelpers.Factories
             projectileSpawnGo.transform.SetParent(go.transform);
             projectileSpawnGo.transform.position = go.transform.position;
 
-            cannon.SetupForTesting(projectilePrefab, 20f, 1.5f, weaponSprite, new[] { projectileSpawnGo.transform });
+            cannon.SetupForTesting(projectilePrefab, 1f, 1.5f, weaponSprite, new[] { projectileSpawnGo.transform });
 
             return go;
         }

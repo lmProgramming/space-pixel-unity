@@ -46,8 +46,10 @@ namespace Gameplay.Combat
             {
                 var token = this.GetCancellationTokenOnDestroy();
 
-                await UniTask.Delay(TimeSpan.FromSeconds(LifeTime), cancellationToken: token);
-                await FadeOutAndDestroy(FadeOutTime);
+                await UniTask.Delay(
+                    TimeSpan.FromSeconds(LifeTime * GameplayConstants.CannonProjectileLifetimeMultiplier),
+                    cancellationToken: token);
+                await FadeOutAndDestroy(FadeOutTime * GameplayConstants.CannonProjectileLifetimeMultiplier);
             }
             catch (OperationCanceledException)
             {
