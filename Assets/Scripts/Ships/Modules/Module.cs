@@ -248,12 +248,9 @@ namespace Ships.Modules
         {
             Destroy(this);
 
-            // ship snapshot doesn't assign modules before rewriting so they can be stale. Should be OK considering using shells
             if (Ship == null) return;
             Ship?.OnModuleConnectionLost(this);
             Ship = null;
-
-            DetachAllConnections();
         }
 
         public void SetupConnections(Module otherModule, ref FixedJoint2D joint)

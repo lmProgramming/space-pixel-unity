@@ -97,8 +97,7 @@ namespace Ships.Modules
 
                 var bulletRigidbody = newBullet.GetComponent<Rigidbody2D>();
                 bulletRigidbody.linearVelocity = PixelatedRigidbody.Rigidbody.linearVelocity;
-                bulletRigidbody.AddForce(PixelatedRigidbody.Rigidbody.linearVelocity + direction * projectileSpeed,
-                    ForceMode2D.Impulse);
+                bulletRigidbody.AddForce(direction * projectileSpeed, ForceMode2D.Impulse);
 
                 _shootingEventChannel?.Raise(new BulletShootingData(
                     Ship,

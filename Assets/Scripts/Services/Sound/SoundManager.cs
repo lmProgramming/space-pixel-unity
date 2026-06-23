@@ -12,6 +12,10 @@ namespace Services.Sound
 {
     public class SoundManager : MonoBehaviour, ISoundManager
     {
+        private const float DefaultSpatialMinDistance = 1000f;
+        private const float DefaultSpatialMaxDistance = 10000f;
+        private const float SpatialMinDistanceRatio = 10f;
+        private const float SoundMaxDistanceDefaultFlag = -1f;
         public Sound[] sounds = new Sound[1];
 
         [Header("Pooling Settings")]
@@ -36,6 +40,13 @@ namespace Services.Sound
         private void Awake()
         {
             _camera = UnityEngine.Camera.main;
+            if (_camera == null)
+            {
+                Debug.LogError(
+                    "SoundManager: Camera.main not found! A camera tagged 'MainCamera' is required for spatial audio.",
+                    this);
+                return;
+            }
             // Consider singleton pattern alternatives or DI if needed across scenes
             // DontDestroyOnLoad(gameObject);
 
@@ -176,12 +187,13 @@ namespace Services.Sound
             audioSource.Play();
         }
 
+
         private static (float minDistance, float maxDistance) GetEffectiveDistances(Sound sound)
         {
-            if (Mathf.Approximately(sound.maxDistance, -1f))
-                return (1000f, 10000f);
+            if (Mathf.Approximately(sound.maxDistance, SoundMaxDistanceDefaultFlag))
+                return (DefaultSpatialMinDistance, DefaultSpatialMaxDistance);
 
-            var minDistance = sound.maxDistance / 10f;
+            var minDistance = sound.maxDistance / SpatialMinDistanceRatio;
             var maxDistance = sound.maxDistance;
             return (minDistance, maxDistance);
         }

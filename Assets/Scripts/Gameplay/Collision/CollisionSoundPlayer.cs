@@ -26,11 +26,8 @@ namespace Gameplay.Collision
             if (data.pixelsDestroyed.Length > 0) _soundManager.Play(SoundIdentifier.Explosion, data.contactPoint);
 
             if (data.SpeedDifference != null)
-            {
-                Debug.Log(data.SpeedDifference.Value.magnitude);
                 if (data.SpeedDifference.Value.magnitude > minMagnitudeForClunk)
                     _soundManager.Play(SoundIdentifier.Collision, data.contactPoint);
-            }
         }
     }
 }

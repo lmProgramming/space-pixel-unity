@@ -20,7 +20,6 @@ using Ships.Tests.TestHelpers.Factories;
 using Ships.Tests.TestHelpers.Mocks;
 using UnityEngine;
 using Zenject;
-using ZLinq;
 using Object = UnityEngine.Object;
 using Resources = Core.Ship.Resources;
 
@@ -112,16 +111,7 @@ namespace E2E
         [TearDown]
         public virtual void TearDown()
         {
-            foreach (var obj in CreatedObjects.AsValueEnumerable().Where(obj => obj != null).OrderBy(obj =>
-                         new Comparison<GameObject>((
-                             obj1, obj2) =>
-                         {
-                             var obj1Module = obj1.GetComponent<Module>();
-                             var obj2Module = obj2.GetComponent<Module>();
-                             if (obj1Module) return obj2Module ? 0 : 1;
-
-                             return -1;
-                         })))
+            foreach (var obj in CreatedObjects)
                 Object.DestroyImmediate(obj);
             CreatedObjects.Clear();
         }

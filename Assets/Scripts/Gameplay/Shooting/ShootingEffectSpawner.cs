@@ -15,19 +15,21 @@ namespace Gameplay.Shooting
         private void Awake()
         {
             _camera = Camera.main;
+            if (_camera == null)
+                throw new UnityException("[ShootingEffectSpawner] Main camera is required but not found.");
         }
 
         private void OnEnable()
         {
-            if (_shootingEventChannel != null) _shootingEventChannel.Register(HandleCollision);
+            if (_shootingEventChannel != null) _shootingEventChannel.Register(Handle);
         }
 
         private void OnDisable()
         {
-            if (_shootingEventChannel != null) _shootingEventChannel.Unregister(HandleCollision);
+            if (_shootingEventChannel != null) _shootingEventChannel.Unregister(Handle);
         }
 
-        private void HandleCollision(ShootingData data)
+        private void Handle(ShootingData data)
         {
             if (data is BulletShootingData bulletData)
                 Tween.ShakeCamera(

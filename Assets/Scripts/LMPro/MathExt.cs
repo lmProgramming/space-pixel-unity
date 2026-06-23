@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using ZLinq;
+using Random = UnityEngine.Random;
 
 namespace LMPro
 {
@@ -209,16 +211,16 @@ namespace LMPro
 
         public static Vector3 AverageOfVectors(Transform[] transforms)
         {
-            return transforms.AsValueEnumerable()
-                       .Aggregate(new Vector3(0, 0, 0), (s, v) => s + v.transform.position) /
-                   transforms.Length;
+            return AverageOfVectors(transforms.AsValueEnumerable().Select(v => v.position).ToArray());
         }
 
-        public static Vector3 AverageOfVectors(Vector3[] transforms)
+        public static Vector3 AverageOfVectors(Vector3[] vectors)
         {
-            return transforms.AsValueEnumerable()
+            if (vectors == null || vectors.Length == 0)
+                throw new ArgumentException("Transforms array cannot be null or empty.");
+            return vectors.AsValueEnumerable()
                        .Aggregate(new Vector3(0, 0, 0), (s, v) => s + v) /
-                   transforms.Length;
+                   vectors.Length;
         }
     }
 }

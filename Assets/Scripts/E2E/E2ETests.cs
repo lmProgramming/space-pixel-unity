@@ -210,7 +210,9 @@ namespace E2E
 
             // act
 
-            yield return SimulateForSeconds(5f);
+            const float testTime = 5f;
+
+            yield return SimulateForSeconds(testTime);
 
             // assert
 
@@ -219,7 +221,7 @@ namespace E2E
             Debug.Log($"[E2E Target Practice] Target is destroyed: {targetIsDestroyed}");
 
             Assert.That(targetIsDestroyed, Is.True,
-                "Expected the stationary target ship to be completely destroyed after 10 seconds of targeted gunfire.");
+                $"Expected the stationary target ship to be completely destroyed after {testTime} seconds of targeted gunfire.");
         }
     }
 }
