@@ -32,11 +32,19 @@ namespace Gameplay.Shooting
         private void Handle(ShootingData data)
         {
             if (data is BulletShootingData bulletData)
+            {
+                var distanceToCamera = Vector2.Distance(_camera.transform.position, bulletData.point);
+
+                var strength = Mathf.Sqrt(bulletData.Momentum) / Mathf.Min(distanceToCamera, 50) / 2;
+
                 Tween.ShakeCamera(
                     _camera,
-                    duration: 0.1f,
-                    strengthFactor: Mathf.Sqrt(bulletData.Momentum) / 100
+                    duration: 0.3f,
+                    strengthFactor: strength
                 );
+
+                _effectsSpawner.SpawnExplosion(data.point);
+            }
         }
     }
 }

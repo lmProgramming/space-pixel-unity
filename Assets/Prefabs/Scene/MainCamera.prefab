@@ -240,7 +240,7 @@ MonoBehaviour:
   mobileScrollSpeed: 1
   maxZoom: 800
   minZoom: 60
-  canZoomOnUI: 1
+  canZoomOnUI: 0
   updateCamera: 1
 --- !u!114 &5011457546750079670
 MonoBehaviour:
