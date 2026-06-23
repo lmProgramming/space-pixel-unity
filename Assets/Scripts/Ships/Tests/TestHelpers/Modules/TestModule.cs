@@ -14,10 +14,5 @@ namespace Ships.Tests.TestHelpers.Modules
         {
             MainSkillTypeForTesting = skillType;
         }
-
-        public void SetShip(IShip ship)
-        {
-            Ship = ship;
-        }
     }
 }

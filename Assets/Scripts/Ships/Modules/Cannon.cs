@@ -90,15 +90,15 @@ namespace Ships.Modules
                     _projectilesSpawner.Spawn(projectilePrefab, projectileSpawnPoint.position, rotation,
                         shooterColliders);
 
-                var bulletRigidbody = newBullet.GetComponent<Rigidbody2D>();
-                bulletRigidbody.linearVelocity = PixelatedRigidbody.Rigidbody.linearVelocity;
-                bulletRigidbody.AddForce(PixelatedRigidbody.Rigidbody.linearVelocity + direction * projectileSpeed,
-                    ForceMode2D.Impulse);
-
                 var bulletCollider = newBullet.GetComponent<Collider2D>();
                 foreach (var otherBulletCollider in bulletColliders)
                     Physics2D.IgnoreCollision(bulletCollider, otherBulletCollider);
                 bulletColliders.Add(bulletCollider);
+
+                var bulletRigidbody = newBullet.GetComponent<Rigidbody2D>();
+                bulletRigidbody.linearVelocity = PixelatedRigidbody.Rigidbody.linearVelocity;
+                bulletRigidbody.AddForce(PixelatedRigidbody.Rigidbody.linearVelocity + direction * projectileSpeed,
+                    ForceMode2D.Impulse);
 
                 _shootingEventChannel?.Raise(new BulletShootingData(
                     Ship,
@@ -174,6 +174,19 @@ namespace Ships.Modules
         }
 
 #if UNITY_INCLUDE_TESTS
+        internal void SetupForTesting(GameObject newProjectilePrefab,
+            float newProjectileSpeed,
+            float newReloadTime,
+            Sprite newSprite,
+            Transform[] newProjectileSpawnPoints)
+        {
+            projectilePrefab = newProjectilePrefab;
+            projectileSpeed = newProjectileSpeed;
+            reloadTime = newReloadTime;
+            sprite = newSprite;
+            projectileSpawnPoints = newProjectileSpawnPoints;
+        }
+
         internal GameObject InternalProjectilePrefab
         {
             get => projectilePrefab;

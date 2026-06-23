@@ -26,6 +26,13 @@ namespace Services
         {
             if (effectsHolder && !effectsHolder.gameObject.activeInHierarchy) return;
             var explosion = _explosionPool.Get();
+            if (!explosion)
+            {
+                Debug.LogWarning(
+                    "[EffectsSpawner] Explosion Particle System is null - this should only be logged when scene is being destroyed");
+                return;
+            }
+
             var position3 = new Vector3(position.x, position.y, explosion.transform.position.z);
             explosion.transform.position = position3;
             explosion.Play();

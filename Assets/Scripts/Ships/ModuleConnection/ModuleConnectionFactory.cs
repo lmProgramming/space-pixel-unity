@@ -34,7 +34,7 @@ namespace Ships.ModuleConnection
                 }
             }
 
-            foreach (var module in modules) module.Setup(ship);
+            foreach (var module in modules) module.SetShip(ship);
 
             WarnAboutIsolatedModules(ship, modules);
         }

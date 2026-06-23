@@ -34,7 +34,7 @@ namespace Core.Ship
         void KillRandomCrew(int count);
         void SetResources(Resources newResources);
         void SetLocalPosition(Vector2 localPosition);
-        void Setup(IShip ship);
+        void SetShip(IShip ship);
         string CaptureTypePayloadJson(IGameContentCatalog contentCatalog);
         void ApplyTypePayloadJson(string typePayloadJson, IGameContentCatalog contentCatalog);
     }

@@ -210,7 +210,7 @@ namespace E2E
 
             // act
 
-            yield return SimulateForSeconds(15f);
+            yield return SimulateForSeconds(5f);
 
             // assert
 

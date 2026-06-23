@@ -274,6 +274,18 @@ namespace Ships
             transform.SetLayerAllChildren(team.Layer);
         }
 
+        public void DestroyAllModulesSilently()
+        {
+            var existingModules = GetComponentsInChildren<Module>();
+
+            foreach (var module in existingModules)
+            {
+                module.SetShip(null);
+                module.transform.SetParent(null, true);
+                Destroy(module.gameObject);
+            }
+        }
+
         private void IgnoreModuleColliders()
         {
             var combinations = from item1 in OwnColliders.AsValueEnumerable()

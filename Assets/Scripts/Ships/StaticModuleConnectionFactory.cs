@@ -20,7 +20,7 @@ namespace Ships
                 graph.AddEdge(commandModule, module);
 
             foreach (var module in modules)
-                module.Setup(ship);
+                module.SetShip(ship);
         }
     }
 }

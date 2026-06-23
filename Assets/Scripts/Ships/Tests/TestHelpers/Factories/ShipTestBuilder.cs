@@ -198,10 +198,13 @@ namespace Ships.Tests.TestHelpers.Factories
             go.SetActive(false);
             var cannon = go.AddComponent<Cannon>();
             cannon.SetResources(new Resources(0, 1, 0, 0, 0));
-            cannon.InternalProjectilePrefab = projectilePrefab;
-            cannon.InternalSprite = weaponSprite;
-            cannon.InternalReloadTime = 1.5f;
-            cannon.InternalProjectileSpeed = 20f;
+
+            var projectileSpawnGo = new GameObject("ProjectileSpawn");
+            projectileSpawnGo.transform.SetParent(go.transform);
+            projectileSpawnGo.transform.position = go.transform.position;
+
+            cannon.SetupForTesting(projectilePrefab, 20f, 1.5f, weaponSprite, new[] { projectileSpawnGo.transform });
+
             return go;
         }
 

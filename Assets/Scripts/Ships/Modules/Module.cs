@@ -207,7 +207,7 @@ namespace Ships.Modules
             transform.localPosition = localPosition;
         }
 
-        public void Setup(IShip ship)
+        public void SetShip(IShip ship)
         {
             Ship = ship;
         }
