@@ -25,6 +25,7 @@
     -unity-text-align: middle-center;
     transition-property: background-color, color, scale, border-color;
     transition-duration: var(--transition-fast);
+    cursor: link; /* Unity treats this as a clickable */
 }
 
 .ds-btn:disabled {
@@ -38,14 +39,17 @@
     background-color: var(--color-primary);
     color: var(--color-text-on-accent);
 }
+
 .ds-btn--primary:hover {
     background-color: var(--color-primary-hover);
 }
+
 .ds-btn--primary:active,
 .ds-btn--primary.ds-btn--pressed {
     background-color: var(--color-primary-press);
     scale: 0.97 0.97;
 }
+
 .ds-btn--primary:disabled {
     background-color: var(--color-surface-elev);
     color: var(--color-text-disabled);
@@ -56,14 +60,17 @@
     background-color: var(--color-secondary);
     color: var(--color-text-primary);
 }
+
 .ds-btn--secondary:hover {
     background-color: var(--color-secondary-hover);
 }
+
 .ds-btn--secondary:active,
 .ds-btn--secondary.ds-btn--pressed {
     background-color: var(--color-secondary-press);
     scale: 0.97 0.97;
 }
+
 .ds-btn--secondary:disabled {
     background-color: var(--color-surface-elev);
     color: var(--color-text-disabled);
@@ -74,14 +81,17 @@
     background-color: var(--color-tertiary);
     color: var(--color-text-primary);
 }
+
 .ds-btn--tertiary:hover {
     background-color: var(--color-tertiary-hover);
 }
+
 .ds-btn--tertiary:active,
 .ds-btn--tertiary.ds-btn--pressed {
     background-color: var(--color-tertiary-press);
     scale: 0.97 0.97;
 }
+
 .ds-btn--tertiary:disabled {
     background-color: var(--color-surface-elev);
     color: var(--color-text-disabled);
@@ -93,15 +103,18 @@
     color: var(--color-text-primary);
     border-color: var(--color-border);
 }
+
 .ds-btn--ghost:hover {
     background-color: var(--color-surface-elev);
     border-color: var(--color-border-strong);
 }
+
 .ds-btn--ghost:active,
 .ds-btn--ghost.ds-btn--pressed {
     background-color: var(--color-surface);
     scale: 0.97 0.97;
 }
+
 .ds-btn--ghost:disabled {
     background-color: rgba(0, 0, 0, 0);
     border-color: var(--color-border);
@@ -113,14 +126,17 @@
     background-color: var(--color-danger);
     color: var(--color-text-primary);
 }
+
 .ds-btn--danger:hover {
     background-color: var(--color-danger-hover);
 }
+
 .ds-btn--danger:active,
 .ds-btn--danger.ds-btn--pressed {
     background-color: var(--color-danger-press);
     scale: 0.97 0.97;
 }
+
 .ds-btn--danger:disabled {
     background-color: var(--color-surface-elev);
     color: var(--color-text-disabled);
@@ -141,13 +157,16 @@
     align-items: center;
     justify-content: center;
 }
+
 .ds-btn--icon:hover {
     background-color: var(--color-surface-hover);
     border-color: var(--color-border-strong);
 }
+
 .ds-btn--icon:active {
     scale: 0.95 0.95;
 }
+
 .ds-btn--icon.ds-btn--icon-danger {
     background-color: var(--color-danger-soft);
     border-color: var(--color-danger);
@@ -155,9 +174,23 @@
 }
 
 /* Sizes */
-.ds-btn--sm { height: 28px; padding-left: var(--space-3); padding-right: var(--space-3); font-size: var(--font-size-body-2); }
-.ds-btn--lg { height: 44px; padding-left: var(--space-5); padding-right: var(--space-5); font-size: var(--font-size-h3); }
-.ds-btn--block { width: 100%; }
+.ds-btn--sm {
+    height: 28px;
+    padding-left: var(--space-3);
+    padding-right: var(--space-3);
+    font-size: var(--font-size-body-2);
+}
+
+.ds-btn--lg {
+    height: 44px;
+    padding-left: var(--space-5);
+    padding-right: var(--space-5);
+    font-size: var(--font-size-h3);
+}
+
+.ds-btn--block {
+    width: 100%;
+}
 
 /* ---------- Icon-with-text helper ----------
    Pair a small leading icon with the button label by adding two children:

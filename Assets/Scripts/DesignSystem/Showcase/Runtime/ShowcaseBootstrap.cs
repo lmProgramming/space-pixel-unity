@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using DesignSystem.Runtime;
 using UnityEngine;
@@ -54,9 +55,16 @@ namespace DesignSystem.Showcase.Runtime
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void Initialize()
         {
-            var currentSceneName = SceneManager.GetActiveScene().name;
-            if (currentSceneName != SceneName)
+            // Skip when the active scene isn't the showcase — protects consumers
+            // who pull Assets/Showcase/ into a multi-scene project from getting
+            // the showcase overlaid on their first scene at app start.
+            var currentScene = SceneManager.GetActiveScene();
+            if (currentScene.name != SceneName)
+            {
+                Debug.Log($"[ShowcaseBootstrap] Active scene is '{currentScene.name}', but expected '{SceneName}'. " +
+                          "ShowcaseBootstrap will not run. Confirm the Showcase scene is added to Build Settings and set as the active scene.");
                 return;
+            }
 
             var showcaseUxml = Resources.Load<VisualTreeAsset>(ShowcaseResPath);
             if (showcaseUxml == null)
@@ -123,11 +131,26 @@ namespace DesignSystem.Showcase.Runtime
                 var root = showcaseDoc.rootVisualElement;
                 if (root == null) return;
 
-                DesignSystemRuntime.EnsureDropdownPopupStyles(root);
+                var panelRoot = root.parent;
+                if (panelRoot != null)
+                {
+                    var popupChrome = Resources.Load<StyleSheet>("ShowcaseDropdownPopup");
+                    if (popupChrome != null && !panelRoot.styleSheets.Contains(popupChrome))
+                        panelRoot.styleSheets.Add(popupChrome);
+                }
+
+                // Fresh-slate state: a previous scene visit may have left
+                // _activeOverride set to a palette whose VisualElement refs
+                // are stale. The new tree starts at the design-system
+                // defaults, so reset the cache here before wiring.
+                _activeOverride = null;
 
                 ApplyMobileClass(root);
                 WirePromoLinks(root);
                 WireThemeToggle(root);
+                WireThemeProvider(root);
+                WireCodigrateLink(root);
+                WireRandomize(root);
                 WireDrawerDemos(root);
                 WireAutoHideScroll(root);
                 SetInitialFocus(root);
@@ -284,6 +307,12 @@ namespace DesignSystem.Showcase.Runtime
                 { "hex-border", ("#263041", "#E2E8F0") }
             };
 
+        // Active third-party / generated palette, when set. While non-null the
+        // day/night toggle is suppressed (codigrate carries its own appearance
+        // signal; randomize honours the toggle's last value at generation time
+        // but doesn't re-apply on subsequent toggle flips).
+        private static CodigrateThemeApplier.ColorMap _activeOverride;
+
         // Wire the day/night toggle in the COLORS section header. Adds /
         // removes the `theme-light` class on .ds-root; ShowcaseTheme.uss
         // redefines every colour token under that class, the universal
@@ -295,6 +324,11 @@ namespace DesignSystem.Showcase.Runtime
         // under panel.visualTree. Without the class on that ancestor the
         // popup never sees the .theme-light token overrides and stays dark
         // while the rest of the showcase flips to light mode.
+        //
+        // While an override palette is active (codigrate / randomize) the
+        // toggle is `SetEnabled(false)` by WireThemeProvider, so this handler
+        // only fires for legitimate user-driven swaps between the two
+        // first-party token sets.
         private static void WireThemeToggle(VisualElement root)
         {
             if (root == null) return;
@@ -303,28 +337,246 @@ namespace DesignSystem.Showcase.Runtime
             toggle.RegisterValueChangedCallback(evt =>
             {
                 var light = evt.newValue;
-                if (light) root.AddToClassList("theme-light");
-                else root.RemoveFromClassList("theme-light");
-
-                var panelRoot = root.panel?.visualTree;
-                if (panelRoot != null && panelRoot != root)
-                {
-                    if (light) panelRoot.AddToClassList("theme-light");
-                    else panelRoot.RemoveFromClassList("theme-light");
-                }
-
+                ApplyThemeClass(root, light);
                 UpdateHexLabels(root, light);
             });
         }
 
+        private static void ApplyThemeClass(VisualElement root, bool light)
+        {
+            if (light) root.AddToClassList("theme-light");
+            else root.RemoveFromClassList("theme-light");
+
+            var panelRoot = root.panel?.visualTree;
+            if (panelRoot != null && panelRoot != root)
+            {
+                if (light) panelRoot.AddToClassList("theme-light");
+                else panelRoot.RemoveFromClassList("theme-light");
+            }
+        }
+
         private static void UpdateHexLabels(VisualElement root, bool light)
         {
+            // While an override palette is active, the swatches reflect that
+            // palette's actual values rather than the design-system Dark / Light
+            // dictionary. Once Revert runs and _activeOverride goes back to
+            // null the dictionary path takes over again.
+            if (_activeOverride != null)
+            {
+                UpdateHexLabelsFromOverride(root);
+                return;
+            }
+
             foreach (var kv in SwatchHex)
             {
                 var label = root.Q<Label>(kv.Key);
                 if (label == null) continue;
                 label.text = light ? kv.Value.Light : kv.Value.Dark;
             }
+        }
+
+        private static void UpdateHexLabelsFromOverride(VisualElement root)
+        {
+            var m = _activeOverride;
+            SetHex(root, "hex-primary", m.Primary);
+            SetHex(root, "hex-primary-hover", m.PrimaryHover);
+            SetHex(root, "hex-secondary", m.Secondary);
+            SetHex(root, "hex-tertiary", m.Tertiary);
+            SetHex(root, "hex-warning", m.Warning);
+            SetHex(root, "hex-danger", m.Danger);
+            SetHex(root, "hex-text-primary", m.TextPrimary);
+            SetHex(root, "hex-text-secondary", m.TextSecondary);
+            SetHex(root, "hex-text-disabled", m.TextDisabled);
+            SetHex(root, "hex-bg", m.Bg);
+            SetHex(root, "hex-surface", m.Surface);
+            SetHex(root, "hex-surface-elev", m.SurfaceElev);
+            SetHex(root, "hex-border", m.Border);
+        }
+
+        private static void SetHex(VisualElement root, string name, Color color)
+        {
+            var label = root.Q<Label>(name);
+            if (label != null) label.text = CodigrateThemeApplier.ToHex(color);
+        }
+
+        // Theme provider — fetches the codigrate theme list, lets the user
+        // pick one or fall back to "Design System default". Selection swaps the
+        // inline-color stamp on the showcase tree, sets the toggle to match
+        // the palette's reported appearance ("light"/"dark"), and disables the
+        // toggle so the codigrate palette stays the source of truth until the
+        // user picks "Design System default" again.
+        //
+        // "Random palette" is a permanent dropdown entry that runs the same
+        // randomize path the button uses. Two reasons: (1) Unity's
+        // DropdownField doesn't fire its change callback for re-selections of
+        // the current value, so the button is the only way to RE-ROLL — but
+        // having the entry in the dropdown gives a discoverable revert path
+        // (Random ↔ Codigrate ↔ Default) without needing extra buttons.
+        private const string DefaultOption = "Design System default";
+        private const string RandomOption = "Random palette";
+        private static List<CodigrateThemeProvider.ThemeListing> _codigrateListings;
+
+        private static void WireThemeProvider(VisualElement root)
+        {
+            if (root == null) return;
+            var dropdown = root.Q<DropdownField>("theme-provider-dropdown");
+            if (dropdown == null) return;
+            var status = root.Q<Label>("theme-provider-status");
+
+            // Default state: two stock entries until the network fetch returns.
+            // Selecting "Random palette" works immediately; the codigrate
+            // entries land in between once the list loads.
+            dropdown.choices = new List<string> { DefaultOption, RandomOption };
+            dropdown.index = 0;
+
+            if (status != null) status.text = "Loading codigrate themes…";
+
+            CodigrateThemeProvider.FetchList((list, error) =>
+            {
+                if (error != null || list == null)
+                {
+                    if (status != null) status.text = "Codigrate themes unavailable. Random palette still works.";
+                    Debug.LogWarning($"[ShowcaseBootstrap] Codigrate list fetch failed: {error}");
+                    return;
+                }
+
+                _codigrateListings = list;
+                var choices = new List<string> { DefaultOption };
+                foreach (var l in list) choices.Add(l.Name);
+                choices.Add(RandomOption);
+                dropdown.choices = choices;
+                // Preserve current value across the choices swap. If the user
+                // had Random selected at fetch time and we wiped it, the field
+                // would render empty even though _activeOverride is still set.
+                if (_activeOverride != null) dropdown.SetValueWithoutNotify(RandomOption);
+                if (status != null) status.text = $"{list.Count} themes by Codigrate available.";
+            });
+
+            dropdown.RegisterValueChangedCallback(evt =>
+            {
+                var name = evt.newValue;
+                if (name == DefaultOption)
+                {
+                    ClearOverride(root);
+                    return;
+                }
+
+                if (name == RandomOption)
+                {
+                    DoRandomize(root);
+                    return;
+                }
+
+                if (_codigrateListings == null) return;
+                var listing = _codigrateListings.Find(l => l.Name == name);
+                if (listing == null) return;
+
+                if (status != null) status.text = $"Loading {listing.Name}…";
+                CodigrateThemeProvider.FetchPalette(listing, (palette, paletteError) =>
+                {
+                    if (paletteError != null || palette == null)
+                    {
+                        if (status != null) status.text = $"Failed to load {listing.Name}.";
+                        Debug.LogWarning(
+                            $"[ShowcaseBootstrap] Codigrate palette fetch failed for {listing.Name}: {paletteError}");
+                        return;
+                    }
+
+                    ApplyCodigratePalette(root, palette);
+                    if (status != null) status.text = $"{palette.Name} · {palette.Appearance}";
+                });
+            });
+        }
+
+        private static void ApplyCodigratePalette(VisualElement root, CodigrateThemeProvider.ThemePalette palette)
+        {
+            var map = CodigrateThemeApplier.FromCodigrate(palette);
+            _activeOverride = map;
+
+            // Mirror the palette's reported appearance onto the day/night
+            // toggle so any leftover USS state (e.g. the `.theme-light`
+            // re-routes for the notification dot) is consistent — then
+            // disable the toggle while the override is active.
+            var isLight = string.Equals(palette.Appearance, "light", StringComparison.OrdinalIgnoreCase);
+            var toggle = root.Q<Toggle>("theme-toggle");
+            if (toggle != null)
+            {
+                toggle.SetValueWithoutNotify(isLight);
+                toggle.SetEnabled(false);
+            }
+
+            ApplyThemeClass(root, isLight);
+
+            CodigrateThemeApplier.Apply(root, map);
+            UpdateHexLabels(root, isLight);
+        }
+
+        private static void ClearOverride(VisualElement root)
+        {
+            _activeOverride = null;
+            CodigrateThemeApplier.Revert(root);
+
+            var toggle = root.Q<Toggle>("theme-toggle");
+            if (toggle != null) toggle.SetEnabled(true);
+
+            var isLight = toggle != null && toggle.value;
+            // Refresh hex labels back to the design-system dictionary now that
+            // _activeOverride is null.
+            UpdateHexLabels(root, isLight);
+
+            var status = root.Q<Label>("theme-provider-status");
+            if (status != null && _codigrateListings != null)
+                status.text = $"{_codigrateListings.Count} themes by Codigrate available.";
+        }
+
+        // Opens the public Codigrate theme catalogue. The link sits beside the
+        // theme dropdown so users who like a particular theme can read its
+        // story / pick up the matching JetBrains / VSCode / Ghostty version.
+        private static void WireCodigrateLink(VisualElement root)
+        {
+            if (root == null) return;
+            var btn = root.Q<Button>("theme-codigrate-link");
+            if (btn == null) return;
+            btn.clicked += () => Application.OpenURL(CodigrateThemeProvider.ShowcaseURL);
+        }
+
+        // Randomize button: shares the DoRandomize path with the "Random
+        // palette" dropdown entry. Clicking the button repeatedly RE-ROLLS
+        // (each click produces a fresh palette in the toggle's current mood);
+        // selecting "Random palette" from the dropdown is the same entrypoint
+        // for users who never noticed the button.
+        private static void WireRandomize(VisualElement root)
+        {
+            if (root == null) return;
+            var btn = root.Q<Button>("theme-randomize");
+            if (btn == null) return;
+            btn.clicked += () => DoRandomize(root);
+        }
+
+        private static void DoRandomize(VisualElement root)
+        {
+            var toggle = root.Q<Toggle>("theme-toggle");
+            var isLight = toggle != null && toggle.value;
+            var map = CodigrateThemeApplier.Randomize(isLight);
+            _activeOverride = map;
+
+            // Reflect the random state in the dropdown so the user can later
+            // pick DEFAULT_OPTION to revert via the same mechanism that
+            // reverts a codigrate palette.
+            var dropdown = root.Q<DropdownField>("theme-provider-dropdown");
+            if (dropdown != null && dropdown.value != RandomOption)
+                dropdown.SetValueWithoutNotify(RandomOption);
+
+            // Randomize keeps the toggle enabled — re-rolling in the same mood
+            // is the most natural flow, and flipping to the other mood then
+            // re-rolling builds the "try until you like it" loop.
+            if (toggle != null) toggle.SetEnabled(true);
+
+            CodigrateThemeApplier.Apply(root, map);
+            UpdateHexLabels(root, isLight);
+
+            var status = root.Q<Label>("theme-provider-status");
+            if (status != null) status.text = "Random palette · click Randomize again to roll.";
         }
 
         // Hook the burger / close buttons in the three drawer demo sections to

@@ -6,7 +6,6 @@
    - Slider           (<ui:Slider> + .ds-slider)
    - Range / MinMax   (<ui:MinMaxSlider> + .ds-range)
    - Progress bar     (<ui:ProgressBar> + .ds-progress)
-   - ScrollView       (<ui:ScrollView> + .ds-scroll)
    ============================================================================ */
 
 /* ---------- Toggle switch ---------- */
@@ -30,7 +29,7 @@
     border-width: var(--border-thin);
     border-color: var(--color-border);
     background-image: none;
-    -unity-background-image-tint-color: rgba(0,0,0,0);
+    -unity-background-image-tint-color: rgba(0, 0, 0, 0);
     transition-property: background-color, border-color;
     transition-duration: var(--transition-fast);
 }
@@ -58,6 +57,7 @@
     background-color: var(--color-primary);
     border-color: var(--color-primary);
 }
+
 .ds-toggle:checked .ds-toggle__knob {
     translate: 20px 0;
 }
@@ -73,6 +73,7 @@
     flex-direction: row;
     align-items: center;
 }
+
 .ds-check .unity-toggle__checkmark {
     width: 20px;
     height: 20px;
@@ -81,7 +82,7 @@
     border-width: var(--border-regular);
     border-color: var(--color-border);
     background-image: none;
-    -unity-background-image-tint-color: rgba(0,0,0,0);
+    -unity-background-image-tint-color: rgba(0, 0, 0, 0);
     transition-property: background-color, border-color;
     transition-duration: var(--transition-fast);
 }
@@ -125,6 +126,7 @@
     flex-direction: row;
     align-items: center;
 }
+
 .ds-radio .unity-radio-button__checkmark-background {
     width: 20px;
     height: 20px;
@@ -134,12 +136,15 @@
     border-width: var(--border-regular);
     border-color: var(--color-border);
 }
+
 .ds-radio:hover .unity-radio-button__checkmark-background {
     border-color: var(--color-border-strong);
 }
+
 .ds-radio:checked .unity-radio-button__checkmark-background {
     border-color: var(--color-primary);
 }
+
 .ds-radio .unity-radio-button__checkmark {
     position: absolute;
     /* 20px ring − 2×2 border − 8 dot = 8 px slack → 4 px each side. */
@@ -148,9 +153,9 @@
     width: 8px;
     height: 8px;
     border-radius: var(--radius-xs); /* 4px → circle for 8×8 */
-    background-color: rgba(0,0,0,0);
+    background-color: rgba(0, 0, 0, 0);
     background-image: none;
-    -unity-background-image-tint-color: rgba(0,0,0,0);
+    -unity-background-image-tint-color: rgba(0, 0, 0, 0);
     margin: 0;
     padding: 0;
     flex-shrink: 0;
@@ -158,9 +163,11 @@
     transition-property: background-color;
     transition-duration: var(--transition-fast);
 }
+
 .ds-radio:checked .unity-radio-button__checkmark {
     background-color: var(--color-primary);
 }
+
 .ds-radio__label {
     margin-left: var(--space-2);
     color: var(--color-text-primary);
@@ -172,20 +179,27 @@
     height: 24px;
     margin: 0;
 }
+
 .ds-slider .unity-base-slider__tracker {
     background-color: var(--color-surface-elev);
     border-radius: var(--radius-pill-3); /* track is 6px tall → 3px */
     height: 6px;
     border-width: 0;
 }
+
 .ds-slider .unity-base-slider__dragger {
-    background-color: #FFFFFF;
+    /* Thumb uses a token instead of literal #FFFFFF so the dragger inverts
+       cleanly between themes — invisible-on-white was the previous failure
+       mode. text-primary is dark on light backgrounds, off-white on dark,
+       which gives consistent contrast against the surface-elev track. */
+    background-color: var(--color-text-primary);
     border-radius: var(--radius-pill-9); /* 18×18 thumb → circle */
     width: 18px;
     height: 18px;
     border-width: 0;
     margin-top: -9px;
 }
+
 .ds-slider .unity-base-slider__dragger:hover {
     scale: 1.1 1.1;
 }
@@ -216,10 +230,12 @@
     align-self: center;
     height: 40px;
 }
+
 .ds-slider > .unity-base-field__input {
     align-self: center;
     flex-shrink: 0;
 }
+
 .ds-slider .unity-base-slider__drag-container {
     align-self: center;
     flex-grow: 1;
@@ -248,26 +264,32 @@
     height: 24px;
     margin: 0;
 }
+
 .ds-range .unity-min-max-slider__tracker {
     background-color: var(--color-surface-elev);
-    border-radius: var(--radius-pill-3);   /* track is 6px tall → 3px */
+    border-radius: var(--radius-pill-3); /* track is 6px tall → 3px */
     height: 6px;
     border-width: 0;
     top: 50%;
-    margin-top: -3px;                      /* -height/2, pulls onto centerline */
+    margin-top: -3px; /* -height/2, pulls onto centerline */
 }
+
 .ds-range .unity-min-max-slider__dragger {
     background-color: var(--color-primary);
-    border-radius: var(--radius-pill-3);   /* same 6px track-fill pill */
+    border-radius: var(--radius-pill-3); /* same 6px track-fill pill */
     height: 6px;
     border-width: 0;
     top: 50%;
     margin-top: -3px;
 }
+
 .ds-range .unity-min-max-slider__min-thumb,
 .ds-range .unity-min-max-slider__max-thumb {
-    background-color: #FFFFFF;
-    border-radius: var(--radius-pill-9);   /* 18×18 → circle */
+    /* See `.ds-slider .unity-base-slider__dragger` above — token rather than
+       literal #FFFFFF so both thumbs stay visible against the track in light
+       and dark themes. */
+    background-color: var(--color-text-primary);
+    border-radius: var(--radius-pill-9); /* 18×18 → circle */
     width: 18px;
     height: 18px;
     min-width: 18px;
@@ -276,7 +298,7 @@
     max-height: 18px;
     border-width: 0;
     top: 50%;
-    margin-top: -9px;                      /* -height/2 → cross-centered */
+    margin-top: -9px; /* -height/2 → cross-centered */
 }
 
 /* ---------- Progress bar ----------
@@ -286,29 +308,47 @@
    account for that margin. The net effect is asymmetric ~3px gaps on
    each side of the track. We zero margin/padding on every layer so the
    pill fills the parent's full content width. */
+/* Unity's stock `.unity-progress-bar` ships with `min-height: 21px`, so the
+   layout reserves 21px of vertical space even when we set `height: 8px` —
+   the bar renders at 8px but its parent row reserves ~13px more, pushing
+   content below further than expected. Setting `min-height: 0` plus a
+   hard `max-height` on every layer of the compound element collapses the
+   reserved space to match the visible bar. `__container` and
+   `__background` inherit the same Unity defaults and need the same fix. */
 .ds-progress {
     height: 8px;
+    min-height: 0;
+    max-height: 8px;
     margin: 0;
     padding: 0;
 }
+
 .ds-progress .unity-progress-bar__container {
     margin: 0;
     padding: 0;
     flex-grow: 1;
+    height: 8px;
+    min-height: 0;
+    max-height: 8px;
 }
+
 .ds-progress .unity-progress-bar__background {
     background-color: var(--color-surface-elev);
     border-radius: var(--radius-pill-4); /* 8px tall → 4px */
     border-width: 0;
     height: 8px;
+    min-height: 0;
+    max-height: 8px;
     margin: 0;
     padding: 0;
 }
+
 .ds-progress .unity-progress-bar__progress {
     background-color: var(--color-primary);
     border-radius: var(--radius-pill-4); /* same as track to keep a clean pill at any fill % */
     margin: 0;
 }
+
 .ds-progress .unity-progress-bar__title {
     display: none;
 }
@@ -317,104 +357,398 @@
 .ds-progress-row {
     flex-direction: column;
 }
+
 .ds-progress-row__head {
     flex-direction: row;
     justify-content: space-between;
     margin-bottom: var(--space-2);
 }
 
-/* ---------- ScrollView ----------
-   Apply .ds-scroll to a <ScrollView>. Descendant selectors reach the
-   runtime-injected Scroller sub-controls (not visible in UXML). Pair with
-   .ds-scroll--auto-hide for fade-in on :hover / .is-scrolling — wire touch
-   via DesignSystemRuntime.WireScrollAutoHide(). */
-.ds-scroll .unity-scroller--vertical {
-    width: 10px;
-    background-color: transparent;
-    border-width: 0;
-    margin-left: var(--space-1);
-}
+/* ---------- Scrollbars ----------
+   Slim 8px scrollbar with a pill thumb, no arrow buttons. Scoped to
+   `.ds-root` so the rules don't leak into editor tools or other UI
+   Toolkit panels in the project. The thumb uses `--color-border-strong`
+   so it auto-themes — visible on both dark and light surfaces — and
+   brightens to `--color-text-secondary` on hover. */
 
-.ds-scroll .unity-scroller--horizontal {
-    height: 10px;
-    background-color: transparent;
-    border-width: 0;
-    margin-top: var(--space-1);
-}
-
-.ds-scroll .unity-scroller__low-button,
-.ds-scroll .unity-scroller__high-button {
+.ds-root .unity-scroller__low-button,
+.ds-root .unity-scroller__high-button {
     display: none;
-    height: 0;
-    min-height: 0;
-    width: 0;
-    min-width: 0;
 }
 
-.ds-scroll .unity-scroller__slider {
-    flex-grow: 1;
+.ds-root .unity-scroll-view__vertical-scroller {
+    width: 8px;
+    margin-left: 2px;
+}
+
+.ds-root .unity-scroll-view__horizontal-scroller {
+    height: 8px;
+    margin-top: 2px;
+}
+
+.ds-root .unity-scroll-view__vertical-scroller .unity-base-slider {
+    width: 8px;
     margin: 0;
-    border-width: 0;
+}
+
+.ds-root .unity-scroll-view__horizontal-scroller .unity-base-slider {
+    height: 8px;
+    margin: 0;
+}
+
+/* Track — invisible. The thumb floats on the page surface itself.
+   Selectors are scoped to `.ds-root .unity-scroll-view__*-scroller` rather
+   than the looser `.ds-root .unity-base-slider__tracker` so the rule only
+   matches sliders that are CHILDREN of a ScrollView's scroller. The looser
+   form bled into `.ds-slider` and `.ds-range`, painting their tracks
+   transparent and making them invisible. */
+.ds-root .unity-scroll-view__vertical-scroller .unity-base-slider__tracker,
+.ds-root .unity-scroll-view__horizontal-scroller .unity-base-slider__tracker {
     background-color: transparent;
-}
-
-.ds-scroll .unity-scroller--vertical .unity-scroller__slider {
-    width: 10px;
-}
-
-.ds-scroll .unity-scroller--horizontal .unity-scroller__slider {
-    height: 10px;
-}
-
-.ds-scroll .unity-scroller__slider .unity-base-slider__tracker {
-    background-color: var(--color-surface-elev);
     border-width: 0;
-    border-radius: var(--radius-pill-4);
 }
 
-.ds-scroll .unity-scroller--vertical .unity-base-slider__tracker {
-    width: 6px;
-    left: 2px;
-}
-
-.ds-scroll .unity-scroller--horizontal .unity-base-slider__tracker {
-    height: 6px;
-    top: 2px;
-}
-
-.ds-scroll .unity-scroller__slider .unity-base-slider__dragger {
+/* Thumb — pill-shaped, themed via tokens so light/dark both look right.
+   Same scoping fix: the dragger styling for scrollbars must NOT match the
+   regular .ds-slider's dragger (which has its own white-pill thumb). */
+.ds-root .unity-scroll-view__vertical-scroller .unity-base-slider__dragger,
+.ds-root .unity-scroll-view__horizontal-scroller .unity-base-slider__dragger {
     background-color: var(--color-border-strong);
     border-width: 0;
-    border-radius: var(--radius-pill-4);
-}
-
-.ds-scroll .unity-scroller--vertical .unity-base-slider__dragger {
-    width: 6px;
-    min-width: 6px;
-    left: 2px;
-}
-
-.ds-scroll .unity-scroller--horizontal .unity-base-slider__dragger {
-    height: 6px;
-    min-height: 6px;
-    top: 2px;
-}
-
-.ds-scroll:hover .unity-scroller__slider .unity-base-slider__dragger,
-.ds-scroll .unity-scroller__slider .unity-base-slider__dragger:hover {
-    background-color: var(--color-text-secondary);
-}
-
-.ds-scroll--auto-hide .unity-scroller--vertical,
-.ds-scroll--auto-hide .unity-scroller--horizontal {
-    opacity: 0;
-    transition-property: opacity;
+    border-radius: 4px;
+    margin: 0;
+    transition-property: background-color;
     transition-duration: var(--transition-fast);
 }
 
-.ds-scroll--auto-hide:hover .unity-scroller--vertical,
-.ds-scroll--auto-hide:hover .unity-scroller--horizontal,
-.ds-scroll--auto-hide.is-scrolling .unity-scroller--vertical,
-.ds-scroll--auto-hide.is-scrolling .unity-scroller--horizontal {
+.ds-root .unity-scroll-view__vertical-scroller .unity-base-slider__dragger {
+    width: 8px;
+    left: 0;
+}
+
+.ds-root .unity-scroll-view__horizontal-scroller .unity-base-slider__dragger {
+    height: 8px;
+    top: 0;
+}
+
+.ds-root .unity-scroll-view__vertical-scroller .unity-base-slider__dragger:hover,
+.ds-root .unity-scroll-view__horizontal-scroller .unity-base-slider__dragger:hover {
+    background-color: var(--color-text-secondary);
+}
+
+/* ---------- Auto-hiding scrollbar variant ----------
+   Add `.ds-scroll--auto-hide` to a `<ScrollView>` and the scrollbars fade
+   in only when the pointer hovers the viewport (and stays visible while a
+   thumb is being dragged via :active). Implementation is pure USS —
+   transitions on opacity from 0 to 1 — so it's free at runtime and works
+   identically in both themes.
+
+   Touch devices: there's no `:hover` on touch, so for mobile usage call
+   `DesignSystemRuntime.WireScrollAutoHide(scrollView)` from C#; the helper
+   adds an `is-scrolling` class for ~700 ms after each WheelEvent /
+   PointerDownEvent, which the rule below also responds to. Desktop users
+   don't need that helper. */
+.ds-scroll--auto-hide .unity-scroll-view__vertical-scroller,
+.ds-scroll--auto-hide .unity-scroll-view__horizontal-scroller {
+    opacity: 0;
+    transition-property: opacity;
+    transition-duration: var(--transition-medium);
+    transition-timing-function: ease-in-out;
+}
+
+.ds-scroll--auto-hide:hover .unity-scroll-view__vertical-scroller,
+.ds-scroll--auto-hide:hover .unity-scroll-view__horizontal-scroller,
+.ds-scroll--auto-hide.is-scrolling .unity-scroll-view__vertical-scroller,
+.ds-scroll--auto-hide.is-scrolling .unity-scroll-view__horizontal-scroller {
     opacity: 1;
+}
+
+/* ============================================================================
+   DRAWERS / SLIDE-OUT PANELS
+   The drawer matrix is direction × mode:
+       Direction modifiers : .ds-drawer--top  .ds-drawer--right
+                             .ds-drawer--bottom  .ds-drawer--left
+       Mode modifiers      : (default = overlay) | .ds-drawer--push
+
+   OVERLAY mode (default):
+     Drawer floats above siblings via position:absolute and slides in via
+     `translate`. Cheap (no layout reflow). Pair with `.ds-drawer__backdrop`
+     to dim the rest of the page.
+
+   PUSH mode (`.ds-drawer--push`):
+     Drawer is in the flex flow; its width (left/right) or height (top/bottom)
+     animates from 0 to the authored size via `max-width` / `max-height`. Flex
+     siblings shrink to make room. The wrapper must be a flex container in
+     the matching direction.
+
+   State: toggle `is-open` on a `.ds-drawer-wrap` ancestor (recommended;
+     drawer + backdrop respond to one class flip) OR `ds-drawer--open` on
+     the drawer itself (freestanding usage). Both selectors are wired below.
+
+   Anatomy (all optional):
+       .ds-drawer-wrap                      → positioning + clip context
+         .ds-drawer__backdrop               → dim layer (overlay drawers)
+         .ds-drawer .ds-drawer--<dir>       → the drawer surface
+           .ds-drawer__header
+             .ds-drawer__title
+             .ds-drawer__close              → close Button
+           .ds-drawer__body                 → content slot
+
+   Compound selectors (e.g. `.ds-drawer.ds-drawer--top`) are used throughout
+   so per-component transition-property declarations win against the
+   universal `.ds-root *` rule that ShowcaseTheme.uss ships for theme swap
+   (specificity 0,2,0 vs 0,1,0). These rules live in Controls.uss instead
+   of a separate Drawers.uss file because Unity's USS asset importer caches
+   the parent stylesheet's @import resolution; new-file additions can fail
+   to load until a -ClearCache rebuild.
+   ============================================================================ */
+
+.ds-drawer-wrap {
+    position: relative;
+    overflow: hidden;
+}
+
+.ds-drawer {
+    background-color: var(--color-surface);
+    border-color: var(--color-border);
+    border-width: 1px;
+    flex-direction: column;
+    overflow: hidden;
+    transition-timing-function: ease-in-out;
+    transition-duration: 200ms;
+}
+
+/* ---------- Overlay mode (default) ---------- */
+.ds-drawer.ds-drawer--top,
+.ds-drawer.ds-drawer--right,
+.ds-drawer.ds-drawer--bottom,
+.ds-drawer.ds-drawer--left {
+    position: absolute;
+    /* `translate` first so the slide animation runs with the rule's
+       authored 200ms duration. The color list keeps the drawer in step
+       with the universal theme-swap transition declared in
+       ShowcaseTheme.uss — without it the surface + borders snap-cut
+       while the rest of the page eases between dark/light. */
+    transition-property: translate, background-color, color, border-color, border-top-color, border-right-color, border-bottom-color, border-left-color, -unity-background-image-tint-color;
+}
+
+.ds-drawer.ds-drawer--top {
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 200px;
+    translate: 0 -100%;
+    border-top-width: 0;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+}
+
+.ds-drawer.ds-drawer--right {
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 280px;
+    translate: 100% 0;
+    border-right-width: 0;
+    border-top-left-radius: 12px;
+    border-bottom-left-radius: 12px;
+}
+
+.ds-drawer.ds-drawer--bottom {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 200px;
+    translate: 0 100%;
+    border-bottom-width: 0;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+}
+
+.ds-drawer.ds-drawer--left {
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 280px;
+    translate: -100% 0;
+    border-left-width: 0;
+    border-top-right-radius: 12px;
+    border-bottom-right-radius: 12px;
+}
+
+/* Open state — toggle `is-open` on the wrapper or `ds-drawer--open` on
+   the drawer itself. Both selectors apply. */
+.ds-drawer.ds-drawer--open,
+.ds-drawer-wrap.is-open .ds-drawer {
+    translate: 0 0;
+}
+
+/* ---------- Push mode ----------
+   Animates `max-width` / `max-height` while the intrinsic `width` /
+   `height` stays at the authored open size. Inner chrome keeps its shape
+   while the clip animates down to zero — no 0-px-wide layout flash of
+   the inner header / body during the transition. */
+.ds-drawer.ds-drawer--push {
+    position: relative;
+    translate: 0 0;
+    overflow: hidden;
+}
+
+.ds-drawer.ds-drawer--push.ds-drawer--left,
+.ds-drawer.ds-drawer--push.ds-drawer--right {
+    width: 280px;
+    max-width: 0;
+    flex-shrink: 0;
+    transition-property: max-width, background-color, color, border-color, border-top-color, border-right-color, border-bottom-color, border-left-color, -unity-background-image-tint-color;
+}
+
+.ds-drawer.ds-drawer--push.ds-drawer--top,
+.ds-drawer.ds-drawer--push.ds-drawer--bottom {
+    height: 200px;
+    max-height: 0;
+    flex-shrink: 0;
+    transition-property: max-height, background-color, color, border-color, border-top-color, border-right-color, border-bottom-color, border-left-color, -unity-background-image-tint-color;
+}
+
+.ds-drawer.ds-drawer--push.ds-drawer--left.ds-drawer--open,
+.ds-drawer.ds-drawer--push.ds-drawer--right.ds-drawer--open,
+.ds-drawer-wrap.is-open .ds-drawer.ds-drawer--push.ds-drawer--left,
+.ds-drawer-wrap.is-open .ds-drawer.ds-drawer--push.ds-drawer--right {
+    max-width: 280px;
+}
+
+.ds-drawer.ds-drawer--push.ds-drawer--top.ds-drawer--open,
+.ds-drawer.ds-drawer--push.ds-drawer--bottom.ds-drawer--open,
+.ds-drawer-wrap.is-open .ds-drawer.ds-drawer--push.ds-drawer--top,
+.ds-drawer-wrap.is-open .ds-drawer.ds-drawer--push.ds-drawer--bottom {
+    max-height: 200px;
+}
+
+/* ---------- Drawer chrome ---------- */
+.ds-drawer__header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding-left: 16px;
+    padding-right: 8px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    border-bottom-width: 1px;
+    border-bottom-color: var(--color-border);
+    flex-shrink: 0;
+}
+
+.ds-drawer__title {
+    font-size: 15px;
+    -unity-font-style: bold;
+    color: var(--color-text-primary);
+    flex-grow: 1;
+}
+
+.ds-drawer__close {
+    width: 28px;
+    height: 28px;
+    border-width: 0;
+    background-color: rgba(0, 0, 0, 0);
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    margin: 0;
+    border-radius: 6px;
+    transition-property: background-color;
+    transition-duration: 120ms;
+}
+
+.ds-drawer__close:hover {
+    background-color: var(--color-surface-hover);
+}
+
+.ds-drawer__close .ds-icon {
+    -unity-background-image-tint-color: var(--color-text-secondary);
+}
+
+.ds-drawer__close:hover .ds-icon {
+    -unity-background-image-tint-color: var(--color-text-primary);
+}
+
+.ds-drawer__body {
+    padding: 16px;
+    flex-grow: 1;
+}
+
+/* ---------- Backdrop ----------
+   Sibling of the drawer inside `.ds-drawer-wrap`. Dim layer that fades in
+   when the drawer opens. The runtime helper toggles `pickingMode` in
+   lockstep with the open class because UI Toolkit's `opacity: 0` does NOT
+   disable pointer picking — an invisible-but-rendered backdrop would
+   shadow the burger button beneath it. */
+.ds-drawer__backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--color-overlay);
+    opacity: 0;
+    transition-property: opacity;
+    transition-duration: 200ms;
+    transition-timing-function: ease-in-out;
+}
+
+.ds-drawer__backdrop.ds-drawer--open,
+.ds-drawer-wrap.is-open .ds-drawer__backdrop {
+    opacity: 1;
+}
+
+/* ============================================================================
+   DRAG & DROP
+   - .ds-draggable  : mark an element draggable (the runtime auto-wires it)
+   - .ds-drop-zone  : a container that accepts a dropped .ds-draggable
+   - .is-drag-over  : added to a drop zone while a drag hovers it
+   - .ds-drag-ghost : the element that follows the pointer during a drag
+   The runtime (DesignSystemRuntime.EnsureDraggables) wires `.ds-draggable` for the
+   simple "move element between zones" case (reparents on drop). Game inventories with
+   custom split / merge / transfer logic drive their own pointer handling and reuse just
+   the `.ds-drag-ghost` / `.is-drag-over` visual classes for a consistent look.
+   ============================================================================ */
+.ds-drop-zone {
+    background-color: var(--color-surface);
+    border-width: var(--border-thin);
+    border-color: var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-3);
+    transition-property: background-color, border-color;
+    transition-duration: 120ms;
+}
+
+.ds-drop-zone.is-drag-over {
+    border-color: var(--color-primary);
+    background-color: var(--color-primary-soft);
+}
+
+.ds-draggable {
+    /* Visual styling stays on whatever component class the item already carries; this
+       just adds the lift affordance + a transition so the runtime's drag feels alive. */
+    transition-property: scale, opacity;
+    transition-duration: 120ms;
+}
+
+.ds-draggable:hover {
+    scale: 1.03 1.03;
+}
+
+/* Floating preview that follows the pointer. Positioned by the runtime (or by a consumer's
+   own drag code). Reused by game inventories that keep their own drag mechanics. */
+.ds-drag-ghost {
+    position: absolute;
+    width: 56px;
+    height: 56px;
+    background-color: var(--color-surface-elev);
+    border-width: var(--border-regular);
+    border-color: var(--color-primary);
+    border-radius: var(--radius-md);
+    opacity: 0.9;
+    align-items: center;
+    justify-content: center;
+    -unity-text-align: middle-center;
 }

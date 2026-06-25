@@ -9,17 +9,9 @@ namespace DesignSystem.Runtime
     ///     Runtime helpers for the ds-* design system. Auto-attaches to every
     ///     UIDocument in the scene at load. Provides:
     ///     - Looping spinner rotation (USS transitions can't loop natively)
-    ///     - Toggle-knob auto-injection: every
-    ///     <Toggle class="ds-toggle" />
-    ///     gets a
-    ///     child
-    ///     <VisualElement class="ds-toggle__knob" />
-    ///     if one is missing
+    ///     - Toggle-knob auto-injection: every <Toggle class="ds-toggle" /> gets a
+    ///     child <VisualElement class="ds-toggle__knob" /> if one is missing
     ///     - Skeleton shimmer translation (sliding overlay)
-    ///     - Dropdown popup chrome: Unity's GenericDropdownMenu renders under
-    ///     panel.visualTree (a sibling of rootVisualElement), so UXML-imported
-    ///     DesignSystem.uss never reaches the open list — this runtime loads
-    ///     DesignSystemDropdownPopup.uss onto the panel root once per panel.
     ///     Authoring tip: hand-author the toggle knob in UXML when you can — it
     ///     avoids a one-frame "no knob" flash during template clone. The runtime
     ///     is the safety net for screens that didn't.
@@ -27,25 +19,17 @@ namespace DesignSystem.Runtime
     [DisallowMultipleComponent]
     public class DesignSystemRuntime : MonoBehaviour
     {
-        // ReSharper disable once UnusedMember.Local
         private const string SpinnerClass = "ds-spinner";
         private const string SpinnerActiveClass = "is-spinning";
         private const string ToggleClass = "ds-toggle";
         private const string ToggleKnobClass = "ds-toggle__knob";
-        private const string SliderClass = "ds-slider";
-        private const string InputClass = "ds-input";
         private const string SkeletonClass = "ds-skeleton";
         private const string ShimmerClass = "ds-skeleton__shimmer";
-        private const string DropdownPopupStyleResource = "DesignSystemDropdownPopup";
-        private const string RuntimeCursorTextureResource = "UI/Cursors/bibata-modern-classic-cursor-arrow";
-        private const int RuntimeCursorMaxSizePx = 32;
-
-        private static readonly Vector2 RuntimeCursorHotspot = new(2f, 2f);
-
-        private static StyleSheet _dropdownPopupStylesheet;
-        private static Texture2D _runtimeCursorTexture;
-        private static Texture2D _runtimeCursorTexturePrepared;
-        private static bool _runtimeCursorMissingWarningLogged;
+        private const string DraggableClass = "ds-draggable";
+        private const string DragWiredClass = "ds-drag--wired"; // internal: marks an already-wired draggable
+        private const string DropZoneClass = "ds-drop-zone";
+        private const string DragOverClass = "is-drag-over";
+        private const string DragGhostClass = "ds-drag-ghost";
 
         private UIDocument _doc;
         private float _spinAngle;
@@ -58,7 +42,7 @@ namespace DesignSystem.Runtime
             var root = _doc.rootVisualElement;
             if (root == null)
             {
-                // The visual tree hasn't materialized yet (common when this
+                // The visual tree hasn't materialised yet (common when this
                 // component is added in Awake). Defer one frame.
                 _doc.rootVisualElement?.schedule.Execute(() => InitFor(_doc.rootVisualElement)).StartingIn(0);
                 // Fallback: poll briefly until the root exists.
@@ -100,11 +84,9 @@ namespace DesignSystem.Runtime
         private void InitFor(VisualElement root)
         {
             if (root == null) return;
-            EnsureDropdownPopupStyles(root);
-            EnsureInteractiveCursorTexture(root);
             EnsureToggleKnobs(root);
-            EnsureSliderInputFields(root);
             EnsureSkeletonShimmers(root);
+            EnsureDraggables(root);
             StartSpinners(root);
 
             // Periodic re-scan: ScreenBase and similar consumers clone screen
@@ -119,10 +101,9 @@ namespace DesignSystem.Runtime
             // helpers no-op if the children already exist.
             root.schedule.Execute(() =>
             {
-                EnsureInteractiveCursorTexture(root);
                 EnsureToggleKnobs(root);
-                EnsureSliderInputFields(root);
                 EnsureSkeletonShimmers(root);
+                EnsureDraggables(root);
             }).Every(250);
         }
 
@@ -165,118 +146,7 @@ namespace DesignSystem.Runtime
         }
 
         /// <summary>
-        ///     Attach dropdown-popup USS to <c>panel.visualTree</c>. Unity's
-        ///     GenericDropdownMenu is a sibling of <c>rootVisualElement</c>, so
-        ///     stylesheets imported via UXML never reach the open list.
-        /// </summary>
-        public static void EnsureDropdownPopupStyles(VisualElement root)
-        {
-            if (root == null) return;
-
-            root.schedule.Execute(() =>
-            {
-                var panelRoot = root.parent;
-                if (panelRoot == null) return;
-
-                _dropdownPopupStylesheet ??=
-                    Resources.Load<StyleSheet>(DropdownPopupStyleResource);
-                if (_dropdownPopupStylesheet == null) return;
-                if (panelRoot.styleSheets.Contains(_dropdownPopupStylesheet)) return;
-                panelRoot.styleSheets.Add(_dropdownPopupStylesheet);
-            }).StartingIn(0);
-        }
-
-        /// <summary>
-        ///     Runtime UI Toolkit only supports non-default cursors via texture.
-        ///     Assign one shared cursor texture for the whole document.
-        /// </summary>
-        public static void EnsureInteractiveCursorTexture(VisualElement root)
-        {
-            if (root == null) return;
-
-            _runtimeCursorTexture ??= Resources.Load<Texture2D>(RuntimeCursorTextureResource);
-            if (_runtimeCursorTexture == null)
-            {
-                if (!_runtimeCursorMissingWarningLogged)
-                {
-                    _runtimeCursorMissingWarningLogged = true;
-                    Debug.LogWarning(
-                        $"[DesignSystemRuntime] Could not load cursor texture at Resources/{RuntimeCursorTextureResource}.png");
-                }
-
-                return;
-            }
-
-            var cursorTexture = GetPreparedRuntimeCursorTexture(_runtimeCursorTexture);
-            var cursor = new UnityEngine.UIElements.Cursor
-            {
-                texture = cursorTexture,
-                hotspot = RuntimeCursorHotspot
-            };
-
-            var styleCursor = new StyleCursor(cursor);
-            root.style.cursor = styleCursor;
-        }
-
-        private static Texture2D GetPreparedRuntimeCursorTexture(Texture2D source)
-        {
-            if (source == null) return null;
-            if (_runtimeCursorTexturePrepared != null)
-                return _runtimeCursorTexturePrepared;
-
-            var sizeScale = Mathf.Min(
-                RuntimeCursorMaxSizePx / (float)source.width,
-                RuntimeCursorMaxSizePx / (float)source.height);
-            var useScale = source.width > RuntimeCursorMaxSizePx || source.height > RuntimeCursorMaxSizePx;
-            if (!useScale) sizeScale = 1f;
-
-            var targetWidth = Mathf.Max(1, Mathf.RoundToInt(source.width * sizeScale));
-            var targetHeight = Mathf.Max(1, Mathf.RoundToInt(source.height * sizeScale));
-
-            var rt = RenderTexture.GetTemporary(targetWidth, targetHeight, 0, RenderTextureFormat.ARGB32);
-            var previousActive = RenderTexture.active;
-            Graphics.Blit(source, rt);
-            RenderTexture.active = rt;
-
-            _runtimeCursorTexturePrepared = new Texture2D(targetWidth, targetHeight, TextureFormat.RGBA32, false)
-            {
-                name = $"{source.name}_runtimeCursorScaled"
-            };
-            _runtimeCursorTexturePrepared.ReadPixels(new Rect(0, 0, targetWidth, targetHeight), 0, 0);
-            // Cursor validation requires a readable RGBA32 texture with no mip chain.
-            _runtimeCursorTexturePrepared.Apply(false, false);
-
-            RenderTexture.active = previousActive;
-            RenderTexture.ReleaseTemporary(rt);
-            return _runtimeCursorTexturePrepared;
-        }
-
-        /// <summary>
-        ///     Apply <c>ds-input</c> to the generated <c>TextField</c> inside
-        ///     <c>.ds-slider</c> when <c>show-input-field</c> is enabled. Unity
-        ///     nests it under <c>.unity-base-field__input</c> and tags it
-        ///     <c>unity-base-slider__text-field</c> (not authorable in UXML).
-        /// </summary>
-        public static void EnsureSliderInputFields(VisualElement root)
-        {
-            if (root == null) return;
-            const string sliderTextFieldClass = "unity-base-slider__text-field";
-            root.Query(className: SliderClass).ForEach(slider =>
-            {
-                slider.Query(className: sliderTextFieldClass).ForEach(ApplySliderInputClass);
-            });
-        }
-
-        private static void ApplySliderInputClass(VisualElement field)
-        {
-            if (!field.ClassListContains(InputClass))
-                field.AddToClassList(InputClass);
-        }
-
-        /// <summary>
-        ///     Inject `
-        ///     <VisualElement class="ds-toggle__knob" />
-        ///     ` into every
+        ///     Inject `<VisualElement class="ds-toggle__knob" />` into every
         ///     `.ds-toggle` whose unity-toggle__input wrapper doesn't already
         ///     have one. Idempotent. Call this from screen bootstrap right
         ///     after a template clones so the knob is present on the first
@@ -428,6 +298,104 @@ namespace DesignSystem.Runtime
             });
         }
 
+        /// <summary>
+        ///     Wire pointer-drag behavior onto every `.ds-draggable` not yet wired. Dragging spawns a
+        ///     `.ds-drag-ghost` that follows the pointer, highlights the `.ds-drop-zone` under it with
+        ///     `is-drag-over`, and on release moves the dragged element into that zone (the common
+        ///     "move item between containers" case — reparents on drop). Idempotent.
+        ///     This is the drop-in, no-code pattern: mark items `.ds-draggable`, mark containers
+        ///     `.ds-drop-zone`, done. For CUSTOM drop logic (split/merge/transfer like a game inventory),
+        ///     don't mark elements `.ds-draggable` — drive your own pointer handling and simply reuse the
+        ///     `.ds-drag-ghost` / `.ds-drop-zone` / `is-drag-over` visual classes for a consistent look.
+        /// </summary>
+        public static void EnsureDraggables(VisualElement root)
+        {
+            if (root == null) return;
+            root.Query(className: DraggableClass).ForEach(item =>
+            {
+                if (item.ClassListContains(DragWiredClass)) return;
+                item.AddToClassList(DragWiredClass);
+                WireDraggable(item);
+            });
+        }
+
+        private static void WireDraggable(VisualElement item)
+        {
+            VisualElement ghost = null;
+            VisualElement currentZone = null;
+
+            VisualElement Root()
+            {
+                return item.panel != null ? item.panel.visualTree : null;
+            }
+
+            void PositionGhost(Vector2 pos)
+            {
+                if (ghost == null) return;
+                ghost.style.left = pos.x - ghost.resolvedStyle.width / 2f;
+                ghost.style.top = pos.y - ghost.resolvedStyle.height / 2f;
+            }
+
+            VisualElement ZoneUnder(Vector2 pos)
+            {
+                var root = Root();
+                if (root == null) return null;
+                VisualElement found = null;
+                root.Query(className: DropZoneClass).ForEach(z =>
+                {
+                    if (z.worldBound.Contains(pos)) found = z;
+                });
+                return found;
+            }
+
+            void SetZone(VisualElement zone)
+            {
+                if (currentZone == zone) return;
+                currentZone?.RemoveFromClassList(DragOverClass);
+                currentZone = zone;
+                currentZone?.AddToClassList(DragOverClass);
+            }
+
+            item.RegisterCallback<PointerDownEvent>(e =>
+            {
+                if (e.button != 0) return;
+                var root = Root();
+                if (root == null) return;
+
+                ghost = new VisualElement();
+                ghost.AddToClassList(DragGhostClass);
+                ghost.pickingMode = PickingMode.Ignore;
+                var label = item.Q<Label>();
+                ghost.Add(new Label(label != null ? label.text : "•"));
+                root.Add(ghost);
+
+                item.CapturePointer(e.pointerId);
+                PositionGhost(e.position);
+                e.StopPropagation();
+            });
+
+            item.RegisterCallback<PointerMoveEvent>(e =>
+            {
+                if (!item.HasPointerCapture(e.pointerId)) return;
+                PositionGhost(e.position);
+                SetZone(ZoneUnder(e.position));
+            });
+
+            item.RegisterCallback<PointerUpEvent>(e =>
+            {
+                if (!item.HasPointerCapture(e.pointerId)) return;
+                item.ReleasePointer(e.pointerId);
+
+                var zone = ZoneUnder(e.position);
+                if (zone != null && zone != item.parent)
+                    zone.Add(item); // move into the drop zone
+
+                SetZone(null);
+                ghost?.RemoveFromHierarchy();
+                ghost = null;
+            });
+        }
+
         // ──────────────────────────────────────────────────────────────────
         // Auto-attach: every UIDocument in the project gets the runtime
         // without per-prefab inspector wiring. Re-scan on every scene load
@@ -439,17 +407,6 @@ namespace DesignSystem.Runtime
         {
             SceneManager.sceneLoaded -= OnSceneLoaded;
             SceneManager.sceneLoaded += OnSceneLoaded;
-        }
-
-        // Fires on every Play-mode entry, including when Project Settings →
-        // Enter Play Mode Options has "Reload Scene" disabled. sceneLoaded does
-        // NOT fire in that case, which is why sceneLoaded alone left game scenes
-        // without a runtime helper while the showcase (AfterSceneLoad bootstrap)
-        // still worked.
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-        private static void AttachOnPlayModeStart()
-        {
-            AttachToAllUIDocuments();
         }
 
         private static void OnSceneLoaded(Scene scene, LoadSceneMode mode)

@@ -1,8 +1,39 @@
 # Unity UI Toolkit Design System
 
-A drop-in **design system for Unity 6 UI Toolkit** (UIDocument + UXML + USS). Tokens, components, icons, mobile responsiveness, and a runtime helper — all themed dark, all keyboard-and-touch-ready, all editable from one stylesheet.
+A drop-in **design system for Unity 6 UI Toolkit** (UIDocument + UXML + USS). Tokens, components, icons, mobile responsiveness, and a runtime helper — all themed dark, all keyboard-and-touch-ready, all editable from one stylesheet. Open-sourced as part of a small giving-back set of Unity tools — alongside the [Voronoi mesh fracturer](https://github.com/sinanata/unity-mesh-fracture), the [3D-to-sprite baker](https://github.com/sinanata/unity-3d-to-sprite-baker), the [prefab-thumbnail renderer](https://github.com/sinanata/unity-prefab-thumbnail-renderer), and the [cross-platform build orchestrator](https://github.com/sinanata/unity-cross-platform-local-build-orchestrator).
 
-```txt
+<blockquote>
+<a href="https://store.steampowered.com/app/2269500/"><img src="docs/leap-of-legends-icon.png" align="left" width="70" height="70" alt="Leap of Legends"></a>
+Built for and battle-tested in <strong><a href="https://leapoflegends.com">Leap of Legends</a></strong> — a cross-platform multiplayer game in active development on Steam, Google Play (internal testing), TestFlight, and macOS. Every menu, HUD, lobby, and store screen in the game is built on this design system. <a href="https://store.steampowered.com/app/2269500/">Wishlist on Steam</a> — public mobile store pages coming soon.
+</blockquote>
+
+---
+
+## Live showcase
+
+[![UI Toolkit Design System — interactive web showcase. Hover or tap to inspect, toggle day/night, click classes to copy.](docs/screenshots/design_system_showcase.gif)](https://sinanata.github.io/unity-ui-document-design-system/)
+
+**[Open the interactive web demo →](https://sinanata.github.io/unity-ui-document-design-system/)** (click the gif, too)
+
+Hover (desktop) or tap (mobile) any component to surface its **selector chain** — every parent class on the way down to the leaf, plus the leaf's class list ready to copy. Click the classes line to copy to clipboard. Toggle day / night in the COLORS section header and the whole tree retheme over 240 ms via the var() cascade. Slim themed scrollbar throughout, mobile flip below 768 px.
+
+**External theme provider.** The COLORS section also ships a dropdown of 12 [Codigrate](https://codigrate.com) IDE themes (Sequoia, Sakura, Tokyo, Paris, …) plus a `Randomize colors` button. Picking a codigrate theme fetches the palette at runtime (bundled fallback on WebGL since codigrate.com sends no CORS headers), maps its `tokens.interface` block to the DS palette, and stamps the result onto every component via inline styles — the DS USS stays the single source of truth for spacing, radii, transitions, and layout; only the colours flow from the external source. The day / night toggle is suppressed while a third-party palette is active (codigrate carries its own `appearance` field) and re-enabled when you select `Design System default`. `Randomize` generates an HSV-driven palette in the toggle's current mood for try-until-you-like-it exploration. See [CHANGELOG `[1.4.0]`](CHANGELOG.md#140--2026-05-16) for the full coverage matrix.
+
+Build the demo locally any time:
+
+```powershell
+git clone --recurse-submodules https://github.com/sinanata/unity-ui-document-design-system
+# or, after a plain clone: git submodule update --init --recursive
+.\Tools\Build\Build-Showcase.ps1 -Serve
+```
+
+Serves at `http://localhost:3000`. The build flow lives in a shared [cross-platform orchestrator](https://github.com/sinanata/unity-cross-platform-local-build-orchestrator) vendored as a submodule at `Tools/.orchestrator/`. See [`Tools/Build/README.md`](Tools/Build/README.md) for daily usage — no cloud builds, no Unity license secret, entirely local.
+
+The showcase covers 23 sections: colors, typography, buttons, icons, inputs, tabs & filters, animal card, animal detail, navigation, badges & labels, toggles & checks, sliders, progress, modals / panels, toasts, empty states, bottom sheet, confirm dialog, quantity stepper, pagination, loading states, notification badge, avatar, scrollbars.
+
+---
+
+```
 .ds-btn ds-btn--primary       →  rounded green CTA, hover/press/disabled built in
 .ds-input    .ds-search       →  text fields with leading-icon slot + placeholder
 .ds-tab      .ds-tabs         →  segmented strip with .is-active state
@@ -10,6 +41,7 @@ A drop-in **design system for Unity 6 UI Toolkit** (UIDocument + UXML + USS). To
 .ds-modal    .ds-toast        →  overlays with header / body / actions slots
 .ds-icon ds-icon--paw         →  60+ SVG icons, parent-state-driven tints
 .mobile .ds-…                 →  one-class layout flip for touch targets
+.theme-light                  →  add to .ds-root — every var(--color-*) re-paints, animated
 ```
 
 ## Why this exists
@@ -18,25 +50,12 @@ UI Toolkit ships great primitives but no design language. Every project re-inven
 
 What you get on day one:
 
-- **A dark-themed token palette** — primary / secondary / tertiary / warning / danger / surface stack, all referenced via `var(--color-...)`. Swap one token, the whole UI follows.
+- **A dark-themed token palette** — primary / secondary / tertiary / warning / danger / surface stack, all referenced via `var(--color-...)`. Swap one token, the whole UI follows. The showcase ships a `.theme-light` override under `Assets/Showcase/Resources/ShowcaseTheme.uss` so you can see the cascade animate to a light palette in real time.
 - **24 ready components** — buttons (5 variants × 4 states + icon + sizes), inputs (text / textarea / search / dropdown), tabs, toggles, checkboxes, radios, sliders + range, progress, modals, dialogs, drawers, toasts, badges, chips, tags, navigation (side / rail / bottom), avatars, notification dots, pagination, steppers, empty states, skeleton loaders, spinners.
 - **63 SVG icons** — paw, shirt, hats, store, cart, plus arrows, chevrons, status glyphs, action icons. White-fill SVGs that tint via `-unity-background-image-tint-color` so the same artwork serves passive / hover / active / muted states.
 - **One `.mobile` class** — add it to your screen root to flip every spacing token, tap target, and dropdown to touch-friendly sizes. Same UXML, same USS, two layouts.
 - **A runtime helper** — `DesignSystemRuntime.cs` auto-attaches to every `UIDocument` in a scene, injects toggle knobs (Unity's `Toggle` doesn't render the iOS-style sliding pill on its own), drives spinner rotation (USS transitions can't loop), and animates skeleton shimmer.
-
-## Live showcase
-
-![Design system showcase — every component, state, and icon on one scrollable screen](docs/screenshots/showcase.png)
-
-Open `Assets/DesignSystem/Resources/UI/Styles/DesignSystem/DesignSystemShowcase.uxml` in the UI Builder or attach it to a `UIDocument`. Every component, every state, every icon — one screen, scrollable.
-
-```txt
-COLORS         BUTTONS         INPUTS         TABS & FILTERS    CARD
-TYPOGRAPHY     ICONS           BADGES & LABELS  TOGGLES & CHECKS  DETAIL
-NAVIGATION     SLIDERS         MODALS / PANELS  TOASTS            EMPTY STATES
-BOTTOM SHEET   CONFIRM DIALOG  QUANTITY        PAGINATION        LOADING STATES
-NOTIFICATION BADGE             AVATAR
-```
+- **Slim themed scrollbars** — 8 px-wide pill thumb in `var(--color-border-strong)` that brightens on hover, scoped to `.ds-root` so it doesn't leak into editor windows. Auto-themes with the rest of the system.
 
 ## Requirements
 
@@ -44,7 +63,7 @@ NOTIFICATION BADGE             AVATAR
 | --- | --- |
 | **Unity 6** (6000.x or newer) | Uses Unity 6 USS additions (`@import`, `background-size`, `-unity-background-image-tint-color`, parent-state cascades). Earlier versions partially work but components like the checkbox icon shrink rule rely on Unity 6 `background-size`. |
 | `com.unity.ui` (UI Toolkit) | Built-in module — already enabled by default in Unity 6. |
-| `com.unity.vectorgraphics` | Required to import SVG icons as `Texture2D` (`svgType: 3`). Add via Package Manager → Add package by name → `com.unity.vectorgraphics`. |
+| `com.unity.modules.vectorgraphics` | Built-in module in Unity 6 — already enabled by default. The standalone `com.unity.vectorgraphics` *package* is not required; Unity 6's engine ships the SVG ScriptedImporter (`fileID: 12408`) directly. The repo ships `.meta` files for every icon preset to `svgType: 3` (Texture) so they import correctly on first open. |
 
 No other external dependencies. No NuGet, no asmdef requirements, no editor scripts.
 
@@ -52,7 +71,7 @@ No other external dependencies. No NuGet, no asmdef requirements, no editor scri
 
 The design system is a single folder you drop into your project's `Assets/`:
 
-```txt
+```
 your-unity-project/
 └── Assets/
     └── DesignSystem/                  ← drop the whole folder
@@ -71,13 +90,36 @@ git clone https://github.com/sinanata/unity-ui-document-design-system ../design-
 cp -r ../design-system-src/Assets/DesignSystem Assets/DesignSystem
 ```
 
-**Option B — git submodule:**
+**Option B — git submodule (recommended for keeping the system updated):**
+
+The submodule must live **outside** `Assets/` and the drop-in folder gets linked into `Assets/DesignSystem`. Putting the submodule directly under `Assets/` would make Unity import this repo's host project (`Assets/Showcase/`, `Assets/Editor/`, `Assets/WebGLTemplates/`) into the consuming project — and a symlink alongside that would produce duplicate-GUID errors.
 
 ```bash
 cd your-unity-project
-git submodule add https://github.com/sinanata/unity-ui-document-design-system Assets/DesignSystem-src
-# Symlink or copy Assets/DesignSystem-src/Assets/DesignSystem → Assets/DesignSystem
+git submodule add https://github.com/sinanata/unity-ui-document-design-system Vendor/unity-ui-document-design-system
 ```
+
+Then create an OS-level link from `Assets/DesignSystem` to the vendored copy:
+
+```powershell
+# Windows — directory junction (no admin / Developer Mode required)
+cmd /c mklink /J Assets\DesignSystem Vendor\unity-ui-document-design-system\Assets\DesignSystem
+```
+
+```bash
+# macOS / Linux — symbolic link
+ln -s ../Vendor/unity-ui-document-design-system/Assets/DesignSystem Assets/DesignSystem
+```
+
+Add the link itself to your `.gitignore` so each contributor re-creates it after their first clone (the link path is per-OS and per-clone state — junctions can't roundtrip through git, and symlinks don't roundtrip cleanly across Windows / *nix):
+
+```gitignore
+# Per-clone link to the vendored design system
+Assets/DesignSystem
+Assets/DesignSystem.meta
+```
+
+> **Working example:** [unity-mesh-fracture](https://github.com/sinanata/unity-mesh-fracture) consumes the design system this way — see the "Cloning this demo project" section of its README for the end-to-end recipe.
 
 After Unity reimports, every screen with a UIDocument can opt into the system by attaching the master stylesheet:
 
@@ -158,26 +200,62 @@ Adding a new icon: drop the SVG into `Resources/Textures/Icons/`, set `svgType: 
 
 ## Architecture
 
-```txt
-DesignSystem.uss                  ← master, @imports the rest in order
-├── DesignTokens.uss              ← :root variables (colors, radii, spacing, motion)
-├── Typography.uss                ← .ds-h1 / .ds-h2 / .ds-h3 / .ds-body-1 / .ds-caption
-├── Icons.uss                     ← .ds-icon + 63 .ds-icon--<name> + state cascade
-├── Buttons.uss                   ← .ds-btn + variants + sizes + icon button
-├── Inputs.uss                    ← .ds-input / .ds-search / .ds-dropdown / .ds-textarea
-├── TabsAndFilters.uss            ← .ds-tabs / .ds-tab / .ds-view-toggle
-├── Cards.uss                     ← card, info row, swatch row
-├── Navigation.uss                ← .ds-side-nav / .ds-side-rail / .ds-bottom-nav / profile
-├── Badges.uss                    ← .ds-badge / .ds-tag / .ds-chip / .ds-avatar / notif dot
-├── Controls.uss                  ← .ds-toggle / .ds-check / .ds-radio / .ds-slider / .ds-range
-├── Overlays.uss                  ← .ds-modal / .ds-dialog / .ds-toast / .ds-sheet / empty
-├── Feedback.uss                  ← .ds-progress / .ds-spinner / .ds-skeleton / .ds-pagination
-└── Mobile.uss                    ← every .mobile-prefixed responsive override
+```
+Assets/
+├── DesignSystem/                       ← the drop-in design system
+│   ├── Resources/UI/Styles/DesignSystem/
+│   │   ├── DesignSystem.uss            ← master, @imports the rest in order
+│   │   ├── DesignTokens.uss            ← :root variables (colors, radii, spacing, motion)
+│   │   ├── Typography.uss              ← .ds-h1 / .ds-h2 / .ds-h3 / .ds-body-1 / .ds-caption
+│   │   ├── Icons.uss                   ← .ds-icon + 63 .ds-icon--<name> + state cascade
+│   │   ├── Buttons.uss                 ← .ds-btn + variants + sizes + icon button
+│   │   ├── Inputs.uss                  ← .ds-input / .ds-search / .ds-dropdown / .ds-textarea
+│   │   ├── TabsAndFilters.uss          ← .ds-tabs / .ds-tab / .ds-view-toggle
+│   │   ├── Cards.uss                   ← animal card, info row
+│   │   ├── Navigation.uss              ← .ds-side-nav / .ds-side-rail / .ds-bottom-nav / profile
+│   │   ├── Badges.uss                  ← .ds-badge / .ds-tag / .ds-chip / .ds-avatar / notif dot
+│   │   ├── Controls.uss                ← .ds-toggle / .ds-check / .ds-radio / .ds-slider / .ds-range / scrollbars
+│   │   ├── Overlays.uss                ← .ds-modal / .ds-dialog / .ds-toast / .ds-sheet / empty
+│   │   ├── Feedback.uss                ← .ds-progress / .ds-spinner / .ds-skeleton / .ds-pagination
+│   │   ├── Mobile.uss                  ← every .mobile-prefixed responsive override (loaded LAST)
+│   │   └── DesignSystemShowcase.uxml   ← living style guide
+│   └── Runtime/DesignSystemRuntime.cs  ← auto-attaches to every UIDocument
+│
+├── Showcase/                           ← showcase host project (only if cloning the repo)
+│   ├── Showcase.unity                  ← minimal scene; bootstrap creates UIDocuments at runtime
+│   ├── Resources/
+│   │   ├── ShowcaseTheme.uss           ← .theme-light override + universal opacity transition + drawer-frame helpers
+│   │   ├── ShowcaseDropdownPopup.uss   ← popup chrome at panel.visualTree scope (sibling of root)
+│   │   ├── ShowcaseFocusRing.uss       ← :focus rules for keyboard / gamepad navigation
+│   │   ├── UnityDefaultRuntimeTheme.tss
+│   │   ├── sinanata.jpg                ← avatar texture (Showcase only)
+│   │   └── CodigrateThemes/            ← 13 bundled JSONs (list + 12 palettes), WebGL fallback
+│   └── Runtime/
+│       ├── ShowcaseBootstrap.cs        ← spawns docs, wires toggle, theme dropdown, promo links
+│       ├── ShowcaseDocOverlay.cs       ← selector-chain hover overlay
+│       ├── CodigrateThemeProvider.cs   ← UnityWebRequest fetch + bundled fallback
+│       ├── CodigrateThemeApplier.cs    ← maps codigrate colours onto every .ds-* class via inline styles
+│       └── WebGLDevicePixelRatio.jslib ← exposes window.devicePixelRatio for HiDPI panel scale
+│
+├── Editor/BuildCli.cs                  ← Unity batchmode entry for WebGL builds
+└── WebGLTemplates/ShowcaseTemplate/    ← custom WebGL template (mobile-friendly)
+
+Tools/Build/
+├── Build-Showcase.ps1                  ← shim: forwards to orchestrator submodule with our title + method + URL
+├── config.example.json                 ← copy to config.local.json (gitignored)
+└── README.md                           ← orchestrator docs
+
+Tools/.orchestrator/                    ← submodule: unity-cross-platform-local-build-orchestrator
+└── Tools/Build/
+    ├── Build-WebGL.ps1                 ← parameter-driven WebGL flow (lockfile cleanup, Burst retry, ...)
+    └── Deploy-GhPages.ps1              ← single-commit force-push via git worktree
 ```
 
 Import order is load-bearing — Inputs.uss specialises selectors that Icons.uss generalises; Mobile.uss intentionally loads last so its specificity always wins. Don't reorder unless you read the comments first.
 
-Full architectural reasoning in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+The `Assets/Showcase/`, `Assets/Editor/`, `Assets/WebGLTemplates/`, and `Tools/Build/` folders are the **host project** that runs the live demo. They're not part of the drop-in design system — if you copy `Assets/DesignSystem/` into your own project, leave them behind. Use them when you clone this repo to iterate on the design system itself.
+
+Full architectural reasoning in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). Build pipeline docs in [Tools/Build/README.md](Tools/Build/README.md).
 
 ## Components reference
 
@@ -192,6 +270,9 @@ One-line summary per component lives in [docs/COMPONENTS.md](docs/COMPONENTS.md)
 - **No `Resources.Load<Texture2D>` in C#.** Icons resolve via USS `resource(...)` so they survive Sprite-vs-Texture import differences. The runtime never touches a backgroundImage.
 - **MinMaxSlider thumbs cross-centred via `top: 50% + margin-top: -<half>px`** — Unity's stock slider positions thumbs at `top: 0` which floats them above the track. Same trick for the single slider.
 - **Checkbox tick shrunk via `background-size: 12px 12px`** — the `check.svg` viewBox runs path-edge to viewBox-edge; default `stretch-to-fill` made the tick overflow the box's 2 px border. Constraining the rendered size leaves a clean inner margin.
+- **Day / night theme via single class.** Adding `.theme-light` to `.ds-root` redefines every colour token under that scope; the var() cascade re-paints the whole tree. A universal `transition-property` in `ShowcaseTheme.uss` animates the swap over 240 ms. Same pattern works for any custom theme — just author the token block.
+- **Progress-bar `min-height: 0` overrides.** Unity's stock `.unity-progress-bar` ships with `min-height: 21px`. `.ds-progress` resets it to 0 across container, background, and progress layers so an 8 px bar reserves exactly 8 px of vertical space (not the 21 px Unity defaults to).
+- **Spinner rotation is C#-driven, no USS transition.** `DesignSystemRuntime.StartSpinners` writes `style.rotate` every 16 ms. We deliberately omit `transition-property: rotate` from `.ds-spinner` — a transition would try to ease between consecutive per-frame writes and the spinner visibly jiggles instead of spinning.
 
 Every "why is this ugly?" complaint we hit while shipping the game lives as a comment on the rule that fixed it. Read the USS files — half of them are documentation.
 

@@ -81,3 +81,26 @@
 .showcase-chrome .ds-h1 {
     color: rgb(242, 244, 247);
 }
+
+/* Drawer-demo chrome — the small framed boxes that contain each drawer
+   example. These used to be inline `background-color: rgb(11, 15, 23)` +
+   `border-color: rgb(38, 48, 65)` on the wrapper, which baked the dark-
+   theme values into the UXML and meant the boxes ignored the day/night
+   toggle (and any future theme provider). Routing through tokens fixes
+   the swap end-to-end. */
+.showcase-drawer-frame {
+    background-color: var(--color-bg);
+    border-color: var(--color-border);
+    border-width: 1px;
+    border-radius: 12px;
+}
+.showcase-drawer-strip {
+    border-bottom-width: 1px;
+    border-bottom-color: var(--color-border);
+}
+.showcase-placeholder-text {
+    color: var(--color-text-disabled);
+}
+.showcase-placeholder-icon {
+    -unity-background-image-tint-color: var(--color-text-disabled);
+}
