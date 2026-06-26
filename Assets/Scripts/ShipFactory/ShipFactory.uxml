@@ -1,9 +1,13 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance"
          noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="ShipFactory.uss"/>
+    <Style src="project://database/Assets/Scripts/UI/Common/GameUi.uss"/>
     <Style src="project://database/Assets/DesignSystem/Resources/UI/Styles/DesignSystem/DesignSystem.uss"/>
     <ui:Template name="pauseOverlayTemplate" src="project://database/Assets/Scripts/UI/Common/PauseOverlay.uxml"/>
     <ui:Template name="settingsOverlayTemplate" src="project://database/Assets/Scripts/UI/Common/SettingsOverlay.uxml"/>
+
+    <ui:VisualElement name="ship-factory-root" class="ds-root ds-root--transparent"
+                      style="position: absolute; left: 0; right: 0; top: 0; bottom: 0;">
 
     <!-- Canvas area: drag-and-drop surface -->
     <ui:VisualElement name="canvas-container" class="canvas-container">
@@ -184,6 +188,8 @@
                       style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; display: none;">
         <ui:Instance template="settingsOverlayTemplate"
                      style="position: absolute; left: 0; right: 0; top: 0; bottom: 0;"/>
+    </ui:VisualElement>
+
     </ui:VisualElement>
 </ui:UXML>
 

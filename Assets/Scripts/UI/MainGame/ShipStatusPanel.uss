@@ -71,6 +71,8 @@
 }
 
 .hud-weapon-slot.is-reloading {
+    border-color: var(--color-secondary);
+    border-width: var(--border-regular);
     opacity: 0.42;
 }
 

@@ -1,6 +1,5 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
-    <ui:VisualElement name="settings-overlay"
-                      style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; align-items: center; justify-content: center; background-color: rgba(0,0,0,179); display: none;">
+    <ui:VisualElement name="settings-overlay" class="ds-backdrop" style="display: none;">
         <ui:VisualElement name="settings-dialog" class="ds-dialog" style="width: 680px; max-width: 85%;">
             <ui:Label name="settings-title" text="Settings" class="ds-dialog__title" style="margin-bottom: 16px;"/>
 
@@ -24,7 +23,9 @@
                                       class="ds-dropdown" style="flex-grow: 1;"/>
                     <ui:VisualElement class="ds-icon ds-icon--xs ds-icon--sun"
                                       style="margin-left: 12px; margin-right: 6px;"/>
-                    <ui:Toggle name="theme-toggle" class="ds-toggle"/>
+                    <ui:Toggle name="theme-toggle" class="ds-toggle">
+                        <ui:VisualElement class="ds-toggle__knob"/>
+                    </ui:Toggle>
                 </ui:VisualElement>
             </ui:VisualElement>
             <ui:VisualElement class="ds-dialog__actions" style="margin-top: 16px;">

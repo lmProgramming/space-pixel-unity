@@ -4,6 +4,7 @@ using System.IO;
 using Core.Constants;
 using Core.State;
 using UI.Common;
+using UI.Tools;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
@@ -92,6 +93,7 @@ namespace UI.MainMenu
             ConfigureCountSlider(_enemyCountSlider, DefaultEnemyShipCount);
             ConfigureCountSlider(_friendlyCountSlider, DefaultFriendlyShipCount);
 
+            DesignSystemThemeService.RegisterVisualTree(root);
             _settingsPanelController = new SettingsPanelController(root, true);
         }
 

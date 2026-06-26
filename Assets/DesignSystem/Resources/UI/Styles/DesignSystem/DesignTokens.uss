@@ -128,3 +128,7 @@
     -unity-font-style: normal;
     flex-grow: 1;
 }
+
+.ds-root--transparent {
+    background-color: rgba(0, 0, 0, 0);
+}

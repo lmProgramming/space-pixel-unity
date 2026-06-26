@@ -1,114 +1,33 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Networking;
 
 namespace DesignSystem.Showcase.Runtime
 {
-    // Fetches Codigrate theme metadata + palette JSONs over HTTPS, with a
-    // bundled mirror in Resources/CodigrateThemes/ as a CORS-friendly fallback.
-    //
-    // Why the fallback exists:
-    //   codigrate.com (Cloudflare-fronted on Heroku) does not set
-    //   `Access-Control-Allow-Origin`, so any browser-context fetch — i.e.
-    //   every WebGL build — fails the preflight and never receives the
-    //   palette JSON. UnityWebRequest cannot bypass the browser's CORS
-    //   enforcement. We therefore bundle a frozen copy of list.json plus the
-    //   12 palette JSONs as TextAsset resources; the runtime resolves to
-    //   bundled by default on WebGL, and falls back to bundled on network
-    //   failure for the Editor and Standalone builds (where the live fetch
-    //   normally succeeds and lets the showcase pick up upstream tweaks).
-    //
-    // Why UnityWebRequest's `completed` event (not a coroutine):
-    //   The static-class lifecycle has no MonoBehaviour to host StartCoroutine,
-    //   and `UnityWebRequestAsyncOperation.completed` is the documented
-    //   non-coroutine completion hook on every platform Unity 6 ships, web
-    //   included.
+    // Loads Codigrate theme metadata + palette JSON from bundled Resources only.
     public static class CodigrateThemeProvider
     {
-        // Public roots for the asset bundle. Tracking the path layout here so a
-        // future move to a sibling bucket only needs editing in one place.
-        private const string RootURL = "https://codigrate.com";
-
-        private const string ListURL = RootURL + "/assets/themes/list.json";
-
-        // Codigrate's catalog of theme variants (JetBrains plugins, Chrome
-        // theme, Ghostty, etc.) is fronted on plugins.jetbrains.com rather
-        // than the codigrate.com root — but the user-facing brand link should
-        // point at codigrate.com itself per their instructions, so people
-        // landing there can browse the maker's own site.
-        public const string ShowcaseURL = RootURL;
+        public const string ShowcaseURL = "https://codigrate.com";
 
         private const string BundledListRes = "CodigrateThemes/list";
         private const string BundledThemeDir = "CodigrateThemes/";
 
-        // Cached after the first successful list fetch so repeat opens of the
-        // theme dropdown don't re-hit the network. Cleared only on domain
-        // reload, which matches the lifetime of the showcase scene.
         private static readonly Dictionary<string, ThemePalette> CachedPalettes = new();
-
-        // WebGL deterministically fails the live fetch (CORS), so we skip the
-        // network round-trip there. Editor / Standalone go live so an upstream
-        // edit on codigrate.com lands without rebuilding the project.
-        private static bool PreferBundled =>
-#if UNITY_WEBGL && !UNITY_EDITOR
-            true;
-#else
-            false;
-#endif
 
         public static List<ThemeListing> CachedList { get; private set; }
 
         public static void FetchList(Action<List<ThemeListing>, string> done)
         {
-            if (CachedList != null)
+            try
             {
+                if (CachedList == null)
+                    CachedList = LoadBundledList();
                 done?.Invoke(CachedList, null);
-                return;
             }
-
-            if (PreferBundled)
+            catch (Exception e)
             {
-                done?.Invoke(LoadBundledList(), null);
-                return;
+                done?.Invoke(null, e.Message);
             }
-
-            var req = UnityWebRequest.Get(ListURL);
-            var op = req.SendWebRequest();
-            op.completed += _ =>
-            {
-                try
-                {
-                    if (req.result != UnityWebRequest.Result.Success)
-                    {
-                        // Live fetch failed (typically CORS in a WebGL editor
-                        // preview, or transient network on Standalone). Use
-                        // the bundled mirror if we can — it's a frozen-in-
-                        // time snapshot, but every theme in it is functional.
-                        var bundled = LoadBundledList();
-                        if (bundled != null && bundled.Count > 0)
-                        {
-                            done?.Invoke(bundled, null);
-                            return;
-                        }
-
-                        done?.Invoke(null, req.error);
-                        return;
-                    }
-
-                    var list = ParseList(req.downloadHandler.text);
-                    CachedList = list;
-                    done?.Invoke(list, null);
-                }
-                catch (Exception e)
-                {
-                    done?.Invoke(null, e.Message);
-                }
-                finally
-                {
-                    req.Dispose();
-                }
-            };
         }
 
         public static void FetchPalette(ThemeListing listing, Action<ThemePalette, string> done)
@@ -119,63 +38,32 @@ namespace DesignSystem.Showcase.Runtime
                 return;
             }
 
-            var cacheKey = listing.PaletteUrl ?? listing.PaletteResource;
-            if (cacheKey != null && CachedPalettes.TryGetValue(cacheKey, out var hit))
+            try
             {
-                done?.Invoke(hit, null);
-                return;
-            }
-
-            if (PreferBundled)
-            {
-                var bundled = LoadBundledPalette(listing);
-                if (bundled != null)
+                var cacheKey = listing.PaletteResource ?? listing.Name;
+                if (cacheKey != null && CachedPalettes.TryGetValue(cacheKey, out var hit))
                 {
-                    CachedPalettes[cacheKey!] = bundled;
-                    done?.Invoke(bundled, null);
+                    done?.Invoke(hit, null);
                     return;
                 }
 
-                done?.Invoke(null, "bundled palette missing: " + listing.PaletteResource);
-                return;
+                var bundled = LoadBundledPalette(listing);
+                if (bundled == null)
+                {
+                    done?.Invoke(null, "bundled palette missing: " + listing.PaletteResource);
+                    return;
+                }
+
+                if (cacheKey != null)
+                    CachedPalettes[cacheKey] = bundled;
+                done?.Invoke(bundled, null);
             }
-
-            var req = UnityWebRequest.Get(listing.PaletteUrl);
-            var op = req.SendWebRequest();
-            op.completed += _ =>
+            catch (Exception e)
             {
-                try
-                {
-                    if (req.result != UnityWebRequest.Result.Success)
-                    {
-                        var bundled = LoadBundledPalette(listing);
-                        if (bundled != null)
-                        {
-                            CachedPalettes[cacheKey!] = bundled;
-                            done?.Invoke(bundled, null);
-                            return;
-                        }
-
-                        done?.Invoke(null, req.error);
-                        return;
-                    }
-
-                    var palette = ParsePalette(req.downloadHandler.text);
-                    CachedPalettes[cacheKey!] = palette;
-                    done?.Invoke(palette, null);
-                }
-                catch (Exception e)
-                {
-                    done?.Invoke(null, e.Message);
-                }
-                finally
-                {
-                    req.Dispose();
-                }
-            };
+                done?.Invoke(null, e.Message);
+            }
         }
 
-        // --- Bundled fallback -------------------------------------------------
         private static List<ThemeListing> LoadBundledList()
         {
             var ta = Resources.Load<TextAsset>(BundledListRes);
@@ -185,37 +73,37 @@ namespace DesignSystem.Showcase.Runtime
                 return new List<ThemeListing>();
             }
 
-            var list = ParseList(ta.text);
-            CachedList = list;
-            return list;
+            return ParseList(ta.text);
         }
 
         private static ThemePalette LoadBundledPalette(ThemeListing listing)
         {
-            if (string.IsNullOrEmpty(listing.PaletteResource)) return null;
+            if (string.IsNullOrEmpty(listing.PaletteResource))
+                return null;
+
             var ta = Resources.Load<TextAsset>(listing.PaletteResource);
-            if (ta == null) return null;
+            if (ta == null)
+                return null;
+
             return ParsePalette(ta.text);
         }
 
-        // --- JSON parsing ------------------------------------------------------
-        // The list endpoint returns a top-level array, which JsonUtility refuses
-        // to parse. Wrapping it in `{"items":[…]}` keeps us on the built-in
-        // serializer (no Newtonsoft dependency in the OSS demo).
         private static List<ThemeListing> ParseList(string raw)
         {
             var wrapped = "{\"items\":" + raw + "}";
             var dto = JsonUtility.FromJson<ListWrapper>(wrapped);
             var result = new List<ThemeListing>();
-            if (dto?.items == null) return result;
+            if (dto?.items == null)
+                return result;
+
             foreach (var item in dto.items)
             {
-                if (string.IsNullOrEmpty(item?.name) || string.IsNullOrEmpty(item.json)) continue;
+                if (string.IsNullOrEmpty(item?.name) || string.IsNullOrEmpty(item.json))
+                    continue;
+
                 result.Add(new ThemeListing
                 {
                     Name = item.name,
-                    IconUrl = JoinUrl(RootURL, item.icon),
-                    PaletteUrl = JoinUrl(RootURL, item.json),
                     PaletteResource = BundledResourceFor(item.json)
                 });
             }
@@ -223,17 +111,11 @@ namespace DesignSystem.Showcase.Runtime
             return result;
         }
 
-        // Maps the upstream `json` field
-        //   "assets/themes/nature/sequoia-theme/sequoia.palette.json"
-        // onto the bundled-resource path
-        //   "CodigrateThemes/sequoia"
-        // by lifting the basename and stripping `.palette.json`. The naming
-        // convention is uniform across all 12 themes; if Codigrate ever ships
-        // a theme whose JSON filename diverges, the bundled mirror just
-        // misses that one entry and the live fetch handles it.
         private static string BundledResourceFor(string upstreamJsonPath)
         {
-            if (string.IsNullOrEmpty(upstreamJsonPath)) return null;
+            if (string.IsNullOrEmpty(upstreamJsonPath))
+                return null;
+
             var lastSlash = upstreamJsonPath.LastIndexOf('/');
             var file = lastSlash >= 0 ? upstreamJsonPath.Substring(lastSlash + 1) : upstreamJsonPath;
             const string suffix = ".palette.json";
@@ -245,7 +127,9 @@ namespace DesignSystem.Showcase.Runtime
         private static ThemePalette ParsePalette(string raw)
         {
             var dto = JsonUtility.FromJson<PaletteDto>(raw);
-            if (dto?.tokens?.@interface == null) throw new Exception("palette JSON missing tokens.interface");
+            if (dto?.tokens?.@interface == null)
+                throw new Exception("palette JSON missing tokens.interface");
+
             var t = dto.tokens.@interface;
             return new ThemePalette
             {
@@ -272,36 +156,23 @@ namespace DesignSystem.Showcase.Runtime
 
         private static Color ToColor(string hex)
         {
-            if (string.IsNullOrEmpty(hex)) return Color.magenta;
-            return ColorUtility.TryParseHtmlString(hex, out var c) ? c : Color.magenta;
-        }
+            if (string.IsNullOrEmpty(hex))
+                return Color.magenta;
 
-        private static string JoinUrl(string root, string relative)
-        {
-            if (string.IsNullOrEmpty(relative)) return null;
-            if (relative.StartsWith("http", StringComparison.OrdinalIgnoreCase)) return relative;
-            if (relative.StartsWith("/")) return root + relative;
-            return root + "/" + relative;
+            return ColorUtility.TryParseHtmlString(hex, out var c) ? c : Color.magenta;
         }
 
         public sealed class ThemeListing
         {
-            public string IconUrl;
-
             public string Name;
-
-            // Bundled fallback path under Resources/. Set when the slug is
-            // derivable from the upstream `json` path. Null entries simply
-            // skip the fallback — live fetch is still attempted.
             public string PaletteResource;
-            public string PaletteUrl;
         }
 
         public sealed class ThemePalette
         {
-            public string Appearance; // "light" | "dark"
+            public string Appearance;
             public InterfaceTokens Interface;
-            public string Key; // sequoia, tokyo, etc.
+            public string Key;
             public string Name;
         }
 
@@ -321,11 +192,6 @@ namespace DesignSystem.Showcase.Runtime
             public Color WindowBackground;
         }
 
-        // --- DTOs that mirror the codigrate JSON shape -------------------------
-        // JsonUtility can't see properties, only public fields. The shape below
-        // matches the keys in the upstream files verbatim — sequoia.palette.json
-        // and tokyo.palette.json are the reference points (kept in lockstep so a
-        // future field addition surfaces in both).
         [Serializable]
         private class ListWrapper
         {
@@ -362,8 +228,6 @@ namespace DesignSystem.Showcase.Runtime
         [Serializable]
         private class TokensDto
         {
-            // `interface` is a C# keyword — JsonUtility maps onto a verbatim
-            // field, so we escape it with @.
             public InterfaceDto @interface;
         }
 

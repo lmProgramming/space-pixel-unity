@@ -64,9 +64,226 @@ namespace DesignSystem.Showcase.Runtime
 
         public static void Apply(VisualElement root, ColorMap map)
         {
-            if (root == null || map == null) return;
-            Revert(root);
+            if (!IsAttached(root) || map == null)
+                return;
 
+            RevertTree(root);
+            ApplyInternal(root, map);
+        }
+
+        public static void ApplyToAll(IReadOnlyList<VisualElement> roots, ColorMap map)
+        {
+            if (roots == null || map == null)
+                return;
+
+            RevertAll();
+            foreach (var root in roots)
+            {
+                if (IsAttached(root))
+                    ApplyInternal(root, map);
+            }
+        }
+
+        public static void ApplyWithoutRevert(VisualElement root, ColorMap map)
+        {
+            if (!IsAttached(root) || map == null)
+                return;
+
+            ApplyInternal(root, map);
+        }
+
+        public static void Revert(VisualElement root)
+        {
+            if (!IsAttached(root))
+                return;
+
+            RevertTree(root);
+        }
+
+        /// <summary>
+        ///     Drops all tracking without touching visual elements. Use when a
+        ///     scene unloads and previous <see cref="VisualElement" /> refs are stale.
+        /// </summary>
+        public static void DiscardAllTracking()
+        {
+            Touched.Clear();
+            EnterHandlers.Clear();
+            LeaveHandlers.Clear();
+            ToggleHandlers.Clear();
+            RadioHandlers.Clear();
+        }
+
+        public static void RevertAll()
+        {
+            PruneStaleTracking();
+
+            foreach (var kv in Touched)
+            {
+                var el = kv.Key;
+                if (!IsAttached(el))
+                    continue;
+
+                RevertElementProperties(el, kv.Value);
+            }
+
+            Touched.Clear();
+
+            foreach (var kv in EnterHandlers)
+            {
+                if (IsAttached(kv.Key))
+                    kv.Key.UnregisterCallback(kv.Value);
+            }
+
+            EnterHandlers.Clear();
+
+            foreach (var kv in LeaveHandlers)
+            {
+                if (IsAttached(kv.Key))
+                    kv.Key.UnregisterCallback(kv.Value);
+            }
+
+            LeaveHandlers.Clear();
+
+            foreach (var kv in ToggleHandlers)
+            {
+                if (IsAttached(kv.Key))
+                    kv.Key.UnregisterValueChangedCallback(kv.Value);
+            }
+
+            ToggleHandlers.Clear();
+
+            foreach (var kv in RadioHandlers)
+            {
+                if (IsAttached(kv.Key))
+                    kv.Key.UnregisterValueChangedCallback(kv.Value);
+            }
+
+            RadioHandlers.Clear();
+        }
+
+        private static void RevertTree(VisualElement root)
+        {
+            if (!IsAttached(root))
+                return;
+
+            PruneStaleTracking();
+
+            var toRemove = new List<VisualElement>();
+            foreach (var kv in Touched)
+            {
+                var el = kv.Key;
+                if (!IsAttached(el) || !IsDescendantOf(el, root))
+                    continue;
+
+                RevertElementProperties(el, kv.Value);
+                toRemove.Add(el);
+            }
+
+            foreach (var el in toRemove)
+                Touched.Remove(el);
+        }
+
+        private static void PruneStaleTracking()
+        {
+            var deadElements = new List<VisualElement>();
+            foreach (var el in Touched.Keys)
+            {
+                if (!IsAttached(el))
+                    deadElements.Add(el);
+            }
+
+            foreach (var el in deadElements)
+                Touched.Remove(el);
+
+            PruneHandlerDictionary(EnterHandlers);
+            PruneHandlerDictionary(LeaveHandlers);
+            PruneToggleHandlers();
+            PruneRadioHandlers();
+        }
+
+        private static void PruneHandlerDictionary<TEvent>(
+            Dictionary<VisualElement, EventCallback<TEvent>> handlers) where TEvent : EventBase<TEvent>, new()
+        {
+            var dead = new List<VisualElement>();
+            foreach (var el in handlers.Keys)
+            {
+                if (!IsAttached(el))
+                    dead.Add(el);
+            }
+
+            foreach (var el in dead)
+                handlers.Remove(el);
+        }
+
+        private static void PruneToggleHandlers()
+        {
+            var dead = new List<Toggle>();
+            foreach (var toggle in ToggleHandlers.Keys)
+            {
+                if (!IsAttached(toggle))
+                    dead.Add(toggle);
+            }
+
+            foreach (var toggle in dead)
+                ToggleHandlers.Remove(toggle);
+        }
+
+        private static void PruneRadioHandlers()
+        {
+            var dead = new List<RadioButton>();
+            foreach (var radio in RadioHandlers.Keys)
+            {
+                if (!IsAttached(radio))
+                    dead.Add(radio);
+            }
+
+            foreach (var radio in dead)
+                RadioHandlers.Remove(radio);
+        }
+
+        private static void RevertElementProperties(VisualElement el, HashSet<TouchedProperty> properties)
+        {
+            foreach (var p in properties)
+            {
+                switch (p)
+                {
+                    case TouchedProperty.Background:
+                        el.style.backgroundColor = new StyleColor(StyleKeyword.Null);
+                        break;
+                    case TouchedProperty.BorderColor:
+                        el.style.borderTopColor = new StyleColor(StyleKeyword.Null);
+                        el.style.borderRightColor = new StyleColor(StyleKeyword.Null);
+                        el.style.borderBottomColor = new StyleColor(StyleKeyword.Null);
+                        el.style.borderLeftColor = new StyleColor(StyleKeyword.Null);
+                        break;
+                    case TouchedProperty.BorderBottomColor:
+                        el.style.borderBottomColor = new StyleColor(StyleKeyword.Null);
+                        break;
+                    case TouchedProperty.Color:
+                        el.style.color = new StyleColor(StyleKeyword.Null);
+                        break;
+                    case TouchedProperty.UnityBgTint:
+                        el.style.unityBackgroundImageTintColor = new StyleColor(StyleKeyword.Null);
+                        break;
+                }
+            }
+        }
+
+        private static bool IsAttached(VisualElement el) => el != null && el.panel != null;
+
+        private static bool IsDescendantOf(VisualElement element, VisualElement ancestor)
+        {
+            for (var current = element; current != null; current = current.parent)
+            {
+                if (current == ancestor)
+                    return true;
+            }
+
+            return false;
+        }
+
+        private static void ApplyInternal(VisualElement root, ColorMap map)
+        {
             // Root: bg + cascading text. `color` is inherited so every Label
             // descendant picks up the new primary text colour for free —
             // except where a more-specific rule (or our own pass below) sets
@@ -519,51 +736,6 @@ namespace DesignSystem.Showcase.Runtime
             // themes where the surface is white.
             ApplyClass(root, "ds-swatch__name", el => Stamp(el, TouchedProperty.Color, map.TextPrimary));
             ApplyClass(root, "ds-swatch__hex", el => Stamp(el, TouchedProperty.Color, map.TextSecondary));
-        }
-
-        public static void Revert(VisualElement root)
-        {
-            if (root == null) return;
-
-            foreach (var kv in Touched)
-            {
-                var el = kv.Key;
-                if (el == null) continue;
-                foreach (var p in kv.Value)
-                    switch (p)
-                    {
-                        case TouchedProperty.Background:
-                            el.style.backgroundColor = new StyleColor(StyleKeyword.Null); break;
-                        case TouchedProperty.BorderColor:
-                            el.style.borderTopColor = new StyleColor(StyleKeyword.Null);
-                            el.style.borderRightColor = new StyleColor(StyleKeyword.Null);
-                            el.style.borderBottomColor = new StyleColor(StyleKeyword.Null);
-                            el.style.borderLeftColor = new StyleColor(StyleKeyword.Null);
-                            break;
-                        case TouchedProperty.BorderBottomColor:
-                            el.style.borderBottomColor = new StyleColor(StyleKeyword.Null); break;
-                        case TouchedProperty.Color:
-                            el.style.color = new StyleColor(StyleKeyword.Null); break;
-                        case TouchedProperty.UnityBgTint:
-                            el.style.unityBackgroundImageTintColor = new StyleColor(StyleKeyword.Null); break;
-                    }
-            }
-
-            Touched.Clear();
-
-            foreach (var kv in EnterHandlers) kv.Key?.UnregisterCallback(kv.Value);
-            foreach (var kv in LeaveHandlers) kv.Key?.UnregisterCallback(kv.Value);
-            EnterHandlers.Clear();
-            LeaveHandlers.Clear();
-
-            // Toggle / radio value-change callbacks installed by WireToggleTrack
-            // / WireRadio. UnregisterValueChangedCallback wants the exact
-            // delegate we registered earlier, which is what the dictionary
-            // stores keyed by the control.
-            foreach (var kv in ToggleHandlers) kv.Key?.UnregisterValueChangedCallback(kv.Value);
-            foreach (var kv in RadioHandlers) kv.Key?.UnregisterValueChangedCallback(kv.Value);
-            ToggleHandlers.Clear();
-            RadioHandlers.Clear();
         }
 
         // ─── BUTTON HELPERS ─────────────────────────────────────────────────
