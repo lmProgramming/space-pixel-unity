@@ -13,12 +13,14 @@ MonoBehaviour:
   m_Name: UITK Text Settings
   m_EditorClassIdentifier: UnityEngine.dll::UnityEngine.UIElements.PanelTextSettings
   m_Version: 
+  m_ShowObsoleteProperties: 0
   m_DefaultFontAsset: {fileID: 11400000, guid: 73d51a448c323b65b973223fc28ca414, type: 2}
   m_DefaultFontAssetPath: Fonts & Materials/
-  m_FallbackFontAssets: []
-  m_FallbackOSFontAssets: []
+  m_FallbackFontAssets:
+  - {fileID: 11400000, guid: ac093e8b19909594c9e3bcecf0b1c834, type: 2}
   m_MatchMaterialPreset: 0
   m_MissingCharacterUnicode: 0
+  m_FallbackOSFontAssets: []
   m_ClearDynamicDataOnBuild: 1
   m_EnableEmojiSupport: 0
   m_EmojiFallbackTextAssets: []
@@ -34,4 +36,48 @@ MonoBehaviour:
     m_FollowingCharacters: {fileID: 4900000, guid: fade42e8bc714b018fac513c043d323b, type: 3}
     m_UseModernHangulLineBreakingRules: 0
   m_DisplayWarnings: 0
-  m_FontReferences: []
+  m_FontReferences:
+  - font: {fileID: 12800000, guid: 6213c758a041f9b3b90faf336d89653a, type: 3}
+    fontAsset: {fileID: 0}
+  - font: {fileID: 12800000, guid: 7dcceef4c252e56088ee5d6c8806d296, type: 3}
+    fontAsset: {fileID: 0}
+  - font: {fileID: 12800000, guid: 40080678cb574e4b89f16f6a28b6d0a0, type: 3}
+    fontAsset: {fileID: 0}
+  - font: {fileID: 12800000, guid: b977c8009a1ab2775b5fd3135a8cfafb, type: 3}
+    fontAsset: {fileID: 0}
+  - font: {fileID: 12800000, guid: 85878f451ced97529815775b07bbc347, type: 3}
+    fontAsset: {fileID: 0}
+  - font: {fileID: 12800000, guid: ebad20229cec3a70398bdb999290706a, type: 3}
+    fontAsset: {fileID: 0}
+  - font: {fileID: 12800000, guid: e955b52d058b1e44cb79a43aac5eab68, type: 3}
+    fontAsset: {fileID: 0}
+  - font: {fileID: 12800000, guid: b7f7609954d8c05489970489062c93bd, type: 3}
+    fontAsset: {fileID: 0}
+  - font: {fileID: 12800000, guid: a48c1d1dacb7cd9e68c1d0d3ea218765, type: 3}
+    fontAsset: {fileID: 0}
+  - font: {fileID: 12800000, guid: e3265ab4bf004d28a9537516768c1c75, type: 3}
+    fontAsset: {fileID: 0}
+  - font: {fileID: 12800000, guid: e4118dd12a010bb1381dcd0317fc0944, type: 3}
+    fontAsset: {fileID: 0}
+  - font: {fileID: 12800000, guid: cc4ff199d42d1b201994534d1affc161, type: 3}
+    fontAsset: {fileID: 0}
+  - font: {fileID: 12800000, guid: 57bf2ce4426272760aec8680dc685e1b, type: 3}
+    fontAsset: {fileID: 0}
+  - font: {fileID: 12800000, guid: 3f0bac64190984d64a4e5004d159c9d5, type: 3}
+    fontAsset: {fileID: 0}
+  - font: {fileID: 12800000, guid: 7041ec287bf7d628496dbfd63c154169, type: 3}
+    fontAsset: {fileID: 0}
+  - font: {fileID: 12800000, guid: 60bc78e413052221ea0bafa36be2162f, type: 3}
+    fontAsset: {fileID: 0}
+  - font: {fileID: 12800000, guid: 75dc6ebc00785e281bfd1146f462fbe1, type: 3}
+    fontAsset: {fileID: 0}
+  - font: {fileID: 12800000, guid: 3129b8b3239830557b2e309fdd9ca9ca, type: 3}
+    fontAsset: {fileID: 0}
+  - font: {fileID: 12800000, guid: 1b90cae7fb97ba5bf8ac431a6c1a5fb8, type: 3}
+    fontAsset: {fileID: 0}
+  - font: {fileID: 12800000, guid: 1f2e739b863f7547ba67837db3c4a887, type: 3}
+    fontAsset: {fileID: 0}
+  - font: {fileID: 12800000, guid: 8fd0069a8c14fd5048e84f1e429ff92e, type: 3}
+    fontAsset: {fileID: 0}
+  - font: {fileID: 12800000, guid: 8bb52bfa65af1c3a7b8be019d5be2349, type: 3}
+    fontAsset: {fileID: 0}
