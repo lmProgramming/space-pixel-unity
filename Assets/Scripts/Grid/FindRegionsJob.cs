@@ -14,10 +14,10 @@ namespace Grid
     [BurstCompile(FloatPrecision.Standard, FloatMode.Fast, CompileSynchronously = true)]
     public struct FindAllRegionsJob : IJob
     {
-        [ReadOnly] public Vector2Int StartPoint;
-        [ReadOnly] public int Width;
-        [ReadOnly] public int Height;
-        [ReadOnly] public NativeArray<Color32> Pixels;
+        [LMPro.External.ReadOnly.ReadOnly] public Vector2Int StartPoint;
+        [LMPro.External.ReadOnly.ReadOnly] public int Width;
+        [LMPro.External.ReadOnly.ReadOnly] public int Height;
+        [LMPro.External.ReadOnly.ReadOnly] public NativeArray<Color32> Pixels;
 
         public NativeArray<bool> Visited;
 

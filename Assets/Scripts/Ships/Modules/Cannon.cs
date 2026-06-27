@@ -97,7 +97,9 @@ namespace Ships.Modules
                 bulletColliders.Add(bulletCollider);
 
                 var bulletRigidbody = newBullet.GetComponent<Rigidbody2D>();
-                bulletRigidbody.linearVelocity = PixelatedRigidbody.Rigidbody.linearVelocity;
+                // will be used in the future when proper cannon sprites will rotate 
+                // bulletRigidbody.linearVelocity = PixelatedRigidbody.Rigidbody.linearVelocity;
+
                 bulletRigidbody.AddForce(
                     direction * (projectileSpeed * GameplayConstants.CannonProjectileSpeedMultiplier),
                     ForceMode2D.Impulse);

@@ -1,9 +1,12 @@
+using System.Collections.Generic;
 using Core.Constants;
 using Core.Services;
 using Core.Ship;
 using Core.Ship.ModuleSnapshotPayloads;
+using LMPro.External.ReadOnly;
+using Ships.Systems.Gimbal;
 using UnityEngine;
-using UnityEngine.Assertions;
+using ZLinq;
 
 namespace Ships.Modules
 {
@@ -13,28 +16,26 @@ namespace Ships.Modules
         [SerializeField] private float maxGimbalAngle = 45f;
         [SerializeField] private float gimbalSpeed = 240f;
 
-        [SerializeField] private ParticleSystem exhaustParticles;
-        [SerializeField] internal float currentThrustRatioForDebug;
-        [SerializeField] internal float currentGimbalAngle;
-        [SerializeField] internal float desiredGimbalAngleForDebug;
+        [ReadOnly] [SerializeField] private float currentThrustRatio;
+        [ReadOnly] [SerializeField] internal float currentGimbalAngle;
+        [ReadOnly] [SerializeField] internal float desiredGimbalAngleForDebug;
 
-        private Quaternion _exhaustBaseLocalRotation;
-        private float _exhaustBaseRateOverDistanceMultiplier;
-        private float _exhaustBaseRateOverTimeMultiplier;
-        private float _exhaustBaseStartSpeedMultiplier;
+        private List<Nozzle> _nozzles;
+
         public override ModuleType Type => ModuleType.Engine;
 
-        internal float CurrentThrustRatioForTesting { get; private set; }
+        internal float CurrentThrustRatioForTesting => currentThrustRatio;
 
         internal float CurrentThrusterAngleForDebug => CurrentThrusterAngle;
         internal float DesiredGimbalAngleForDebug { get; private set; }
 
         internal float MaxGimbalAngleForDebug => maxGimbalAngle;
-        internal bool IsActiveForDebug { get; private set; }
+        private bool IsActive { get; set; }
 
         internal float MaxThrustBaseForDebug => maxThrust;
         internal float ShipModuleEfficiencyForDebug => ShipModuleEfficiency;
-        private Vector2 ThrustPoint => exhaustParticles.transform.localPosition;
+
+        private Vector2 ThrustPoint => CalculateAverageThrustPoint();
 
         public float MaxThrust => maxThrust * ShipModuleEfficiency * GameplayConstants.EngineThrustEfficiencyMultiplier;
         private float CurrentThrusterAngle { get; set; }
@@ -49,17 +50,10 @@ namespace Ships.Modules
             base.Awake();
             Type = ModuleType.Engine;
 
-            exhaustParticles ??= GetComponentInChildren<ParticleSystem>();
+            _nozzles = GetComponentsInChildren<Nozzle>().AsValueEnumerable().ToList();
 
-            Assert.IsNotNull(exhaustParticles, "Engine requires an exhaustParticles ParticleSystem reference");
-            _exhaustBaseLocalRotation = exhaustParticles.transform.localRotation;
-
-            var emission = exhaustParticles.emission;
-            _exhaustBaseRateOverTimeMultiplier = emission.rateOverTimeMultiplier;
-            _exhaustBaseRateOverDistanceMultiplier = emission.rateOverDistanceMultiplier;
-
-            var main = exhaustParticles.main;
-            _exhaustBaseStartSpeedMultiplier = main.startSpeedMultiplier;
+            if (_nozzles.Count == 0)
+                throw new UnityException("[Engine] No Nozzles found");
 
             ApplyExhaustVisuals();
         }
@@ -67,7 +61,7 @@ namespace Ships.Modules
 #if UNITY_EDITOR
         private void Update()
         {
-            currentThrustRatioForDebug = CurrentThrustRatioForTesting;
+            currentThrustRatio = CurrentThrustRatioForTesting;
             currentGimbalAngle = CurrentThrusterAngle;
             desiredGimbalAngleForDebug = DesiredGimbalAngleForDebug;
         }
@@ -78,6 +72,19 @@ namespace Ships.Modules
             SetActive(false);
 
             base.OnDestroy();
+        }
+
+        private Vector2 CalculateAverageThrustPoint()
+        {
+            var averageThrustPoint = Vector3.zero;
+            if (_nozzles.Count == 0) return averageThrustPoint;
+
+            averageThrustPoint = _nozzles.AsValueEnumerable().Aggregate(averageThrustPoint,
+                (current, nozzle) => current + nozzle.Transform.localPosition);
+
+            averageThrustPoint /= _nozzles.Count;
+
+            return averageThrustPoint;
         }
 
 #if UNITY_INCLUDE_TESTS
@@ -94,25 +101,31 @@ namespace Ships.Modules
         public override float GetEnergyDraw()
         {
             return base.GetEnergyDraw() *
-                   (0.25f + (IsActiveForDebug ? 0.75f * CurrentThrustRatioForTesting : 0));
+                   (0.25f + (IsActive ? 0.75f * CurrentThrustRatioForTesting : 0));
         }
 
         public void SetActive(bool active)
         {
-            IsActiveForDebug = active;
+            IsActive = active;
             ApplyExhaustVisuals();
+        }
+
+        private void ApplyExhaustVisuals()
+        {
+            foreach (var nozzle in _nozzles)
+                nozzle.ApplyExhaustVisuals(CurrentThrusterAngle, currentThrustRatio, IsActive);
         }
 
         public void SetCurrentThrust(float currentThrust)
         {
             if (MaxThrust <= Mathf.Epsilon)
             {
-                CurrentThrustRatioForTesting = 0f;
+                currentThrustRatio = 0f;
                 ApplyExhaustVisuals();
                 return;
             }
 
-            CurrentThrustRatioForTesting = Mathf.Clamp01(currentThrust / MaxThrust);
+            currentThrustRatio = Mathf.Clamp01(currentThrust / MaxThrust);
             ApplyExhaustVisuals();
         }
 
@@ -126,22 +139,6 @@ namespace Ships.Modules
             ApplyExhaustVisuals();
         }
 
-        private void ApplyExhaustVisuals()
-        {
-            exhaustParticles.transform.localRotation =
-                _exhaustBaseLocalRotation * Quaternion.Euler(0f, 0f, CurrentThrusterAngle);
-
-            var thrustRatio = Mathf.Pow(IsActiveForDebug ? CurrentThrustRatioForTesting : 0f, 2);
-
-            var emission = exhaustParticles.emission;
-            emission.enabled = IsActiveForDebug;
-            emission.rateOverTimeMultiplier = _exhaustBaseRateOverTimeMultiplier * thrustRatio;
-            emission.rateOverDistanceMultiplier = _exhaustBaseRateOverDistanceMultiplier * thrustRatio;
-
-            var main = exhaustParticles.main;
-            main.startSpeedMultiplier = _exhaustBaseStartSpeedMultiplier * thrustRatio;
-        }
-
         public override string CaptureTypePayloadJson(IGameContentCatalog contentCatalog)
         {
             var data = new EngineModuleData
@@ -151,9 +148,9 @@ namespace Ships.Modules
                 gimbalSpeed = gimbalSpeed
             };
 
-            if (contentCatalog != null && exhaustParticles != null &&
-                contentCatalog.TryGetContentId(exhaustParticles.gameObject, out var exhaustContentId))
-                data.exhaustTemplateContentId = exhaustContentId;
+            // if (contentCatalog != null && exhaustParticles != null &&
+            //     contentCatalog.TryGetContentId(exhaustParticles.gameObject, out var exhaustContentId))
+            //     data.exhaustTemplateContentId = exhaustContentId;
 
             return JsonUtility.ToJson(data);
         }
@@ -170,17 +167,17 @@ namespace Ships.Modules
             maxThrust = data.maxThrust;
             maxGimbalAngle = data.maxGimbalAngle;
             gimbalSpeed = data.gimbalSpeed;
-
-            if (contentCatalog != null &&
-                contentCatalog.TryGetPrefab(data.exhaustTemplateContentId, out var exhaustTemplate))
-            {
-                if (exhaustParticles != null)
-                    Destroy(exhaustParticles.gameObject);
-                var exhaustObject = Instantiate(exhaustTemplate, transform);
-                exhaustParticles = exhaustObject.GetComponent<ParticleSystem>();
-                if (exhaustParticles == null)
-                    throw new UnityException("[Engine] Exhaust template must contain ParticleSystem.");
-            }
+            //
+            // if (contentCatalog != null &&
+            //     contentCatalog.TryGetPrefab(data.exhaustTemplateContentId, out var exhaustTemplate))
+            // {
+            //     if (exhaustParticles != null)
+            //         Destroy(exhaustParticles.gameObject);
+            //     var exhaustObject = Instantiate(exhaustTemplate, transform);
+            //     exhaustParticles = exhaustObject.GetComponent<ParticleSystem>();
+            //     if (exhaustParticles == null)
+            //         throw new UnityException("[Engine] Exhaust template must contain ParticleSystem.");
+            // }
         }
 
 #if UNITY_EDITOR

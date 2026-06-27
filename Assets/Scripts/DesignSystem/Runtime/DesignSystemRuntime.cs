@@ -19,6 +19,7 @@ namespace DesignSystem.Runtime
     [DisallowMultipleComponent]
     public class DesignSystemRuntime : MonoBehaviour
     {
+        // ReSharper disable once UnusedMember.Local
         private const string SpinnerClass = "ds-spinner";
         private const string SpinnerActiveClass = "is-spinning";
         private const string ToggleClass = "ds-toggle";

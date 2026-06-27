@@ -44,8 +44,12 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: FrontModules
+    uniqueID: 1531473159
+    locked: 0
   - name: Effects
     uniqueID: 2151466139
     locked: 0
   m_RenderingLayers:
   - Default
+  m_MigratedRenderPipelines: []
