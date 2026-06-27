@@ -2,7 +2,6 @@
          engine="UnityEngine.UIElements" editor="UnityEditor.UIElements"
          noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/DesignSystem/Resources/UI/Styles/DesignSystem/DesignSystem.uss"/>
-    <Style src="project://database/Assets/Scripts/UI/Common/GameUi.uss"/>
     <Style src="ShipStatusPanel.uss"/>
 
     <ui:VisualElement name="main-hud-root" class="ds-root ds-root--transparent main-hud-root">
