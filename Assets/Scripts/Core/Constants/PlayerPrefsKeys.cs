@@ -5,5 +5,7 @@ namespace Core.Constants
         public const string MasterVolume = "masterVolume";
         public const string MusicVolume = "musicVolume";
         public const string EffectsVolume = "effectVolume";
+        public const string ThemeLight = "themeLight";
+        public const string ThemeProvider = "themeProvider";
     }
 }

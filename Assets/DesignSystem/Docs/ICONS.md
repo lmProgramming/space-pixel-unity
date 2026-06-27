@@ -12,7 +12,7 @@ This produces a 20 × 20 element with the paw SVG painted via `background-image`
 
 ## Sizes
 
-```txt
+```
 .ds-icon              → 20 × 20  (default)
 .ds-icon--xs          → 12 × 12
 .ds-icon--sm          → 16 × 16
@@ -34,7 +34,7 @@ When a glyph needs a colour that doesn't follow the parent state — e.g. a spar
 
 Available tint variants:
 
-```txt
+```
 --primary            text-primary (near-white)
 --secondary          text-secondary (default — usually omit)
 --disabled           text-disabled (gray)
@@ -92,11 +92,9 @@ Some interactive containers — `.ds-nav-item.is-active`, `.ds-rail-item.is-acti
 3. **Drop into `Assets/DesignSystem/Resources/Textures/Icons/`.**
 4. **Set the importer to "Texture".** After Unity reimports the SVG, select it in the Project window. In the Inspector, find **SVG Type** and set it to **Texture** (not Sprite, not VectorImage). The `.svg.meta` file should record `svgType: 3`.
 5. **Add a class to `Icons.uss`.** Append one line under the relevant section:
-
     ```css
     .ds-icon--myglyph     { background-image: resource("Textures/Icons/myglyph"); }
     ```
-
 6. **Render it in the showcase** (`DesignSystemShowcase.uxml`) under the ICONS section, so the new glyph is visible in the live style guide.
 7. **Open a PR** with a screenshot of the showcase row.
 
@@ -108,13 +106,13 @@ This is the single non-obvious thing about the icon system, and the source of ev
 
 `-unity-background-image-tint-color` in UI Toolkit is **multiplicative**:
 
-```txt
+```
 result_pixel = source_pixel × tint_color
 ```
 
 If your source SVG renders to black pixels (RGB 0, 0, 0):
 
-```txt
+```
 black × any_tint = black
 ```
 
@@ -122,7 +120,7 @@ The tint has zero effect. The icon renders as the original SVG fill colour regar
 
 For the tint to multiply onto an arbitrary target colour, the source pixels must be **white** (RGB 1, 1, 1):
 
-```txt
+```
 white × tint_color = tint_color
 ```
 
@@ -156,7 +154,7 @@ Re-import in Unity and the entire design system's tint cascade starts working. (
 
 After Unity imports an SVG, the Inspector's importer should look like:
 
-```txt
+```
 SVG Type: Texture (3)
 Texture Size: 256 (square)
 Filter Mode: Bilinear
@@ -164,13 +162,15 @@ Sample Count: 4 (anti-aliasing)
 Keep Texture Aspect Ratio: ✓
 ```
 
-These are the defaults for Unity's `com.unity.vectorgraphics` package when you select **Texture**. If your icon renders blocky or corner-clipped, double-check:
+These are the defaults applied by Unity 6's **built-in** SVG `ScriptedImporter` (`fileID: 12408` inside the engine itself). The standalone `com.unity.vectorgraphics` *package* is **not** required — the built-in `com.unity.modules.vectorgraphics: 1.0.0` module ships with every Unity 6 install and includes the importer.
+
+If your icon renders blocky or corner-clipped, double-check:
 
 - `keepTextureAspectRatio: 1`
 - `textureSize: 256`
 - `sampleCount: 4`
 
-The `.svg.meta` files shipped in this repo already carry these; if you import a fresh SVG, the importer copies its defaults.
+The repo ships pre-built `.svg.meta` files for every icon with the right settings, so they import correctly on first project open. If you import a fresh SVG, Unity uses its own defaults — verify the importer settings in the Inspector match the table above.
 
 ## Why not VectorImage / Sprite?
 

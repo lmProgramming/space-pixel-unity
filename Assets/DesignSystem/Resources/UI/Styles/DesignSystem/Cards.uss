@@ -18,8 +18,13 @@
     background-color: var(--color-surface-elev);
 }
 
-.ds-card--padded { padding: var(--space-5); }
-.ds-card--flush  { padding: 0; }
+.ds-card--padded {
+    padding: var(--space-5);
+}
+
+.ds-card--flush {
+    padding: 0;
+}
 
 /* ---------- item card (grid item) ---------- */
 .ds-item-card {
@@ -33,14 +38,30 @@
     transition-duration: var(--transition-fast);
 }
 
-.ds-item-card:hover { border-color: var(--color-border-strong); }
-.ds-item-card.is-selected { border-color: var(--color-primary); }
+.ds-item-card:hover {
+    border-color: var(--color-border-strong);
+}
+
+.ds-item-card.is-selected {
+    border-color: var(--color-primary);
+}
 
 /* Rarity-aware border (apply alongside .ds-item-card) */
-.ds-item-card.is-rare       { border-color: var(--color-rarity-rare); }
-.ds-item-card.is-epic       { border-color: var(--color-rarity-epic); }
-.ds-item-card.is-legendary  { border-color: var(--color-rarity-legendary); }
-.ds-item-card.is-common     { border-color: var(--color-rarity-common); }
+.ds-item-card.is-rare {
+    border-color: var(--color-rarity-rare);
+}
+
+.ds-item-card.is-epic {
+    border-color: var(--color-rarity-epic);
+}
+
+.ds-item-card.is-legendary {
+    border-color: var(--color-rarity-legendary);
+}
+
+.ds-item-card.is-common {
+    border-color: var(--color-rarity-common);
+}
 
 /* Selection check pill in upper-right */
 .ds-item-card__check {
@@ -54,6 +75,7 @@
     align-items: center;
     justify-content: center;
 }
+
 .ds-item-card__check-icon {
     width: 14px;
     height: 14px;
@@ -69,17 +91,6 @@
     margin-bottom: var(--space-3);
     align-items: center;
     justify-content: center;
-    overflow: hidden;
-    padding: var(--space-2);
-}
-
-/* Child Image — scale-to-fit inside the grey image well */
-.ds-item-card__sprite {
-    width: 100%;
-    height: 100%;
-    flex-shrink: 1;
-    min-width: 0;
-    min-height: 0;
 }
 
 /* Rarity chip pinned over the bottom of the image */
@@ -95,12 +106,14 @@
     justify-content: center;
     margin-bottom: var(--space-3);
 }
+
 .ds-item-card__title {
     font-size: var(--font-size-h3);
     -unity-font-style: bold;
     color: var(--color-text-primary);
     margin-right: var(--space-1);
 }
+
 .ds-item-card__star {
     width: 14px;
     height: 14px;
@@ -137,6 +150,7 @@
     top: 12px;
     left: 12px;
 }
+
 .ds-item-detail__hero-more {
     position: absolute;
     top: 12px;
@@ -150,6 +164,7 @@
     flex-direction: row;
     align-self: center;
 }
+
 .ds-carousel-dot {
     width: 6px;
     height: 6px;
@@ -158,6 +173,7 @@
     margin-left: 3px;
     margin-right: 3px;
 }
+
 .ds-carousel-dot.is-active {
     background-color: #FFFFFF;
     width: 18px;
@@ -184,7 +200,7 @@
     color: var(--color-text-secondary);
     margin-top: var(--space-2);
     margin-bottom: var(--space-4);
-    white-space: normal;
+    white-space: wrap;
 }
 
 /* Info rows (Rarity / Habitat / Energy / Discovered) */
@@ -192,25 +208,29 @@
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    min-height: 24px;
+    height: 32px;
 }
+
 .ds-info-row__left {
     flex-direction: row;
     align-items: center;
 }
+
 .ds-info-row__icon {
     width: 16px;
     height: 16px;
     margin-right: var(--space-2);
     -unity-background-image-tint-color: var(--color-text-secondary);
 }
+
 .ds-info-row__label {
     color: var(--color-text-secondary);
-    font-size: var(--font-size-body-2);
+    font-size: var(--font-size-body-1);
 }
+
 .ds-info-row__value {
     color: var(--color-text-primary);
-    font-size: var(--font-size-body-2);
+    font-size: var(--font-size-body-1);
     -unity-font-style: bold;
 }
 
@@ -219,11 +239,13 @@
     flex-direction: row;
     margin-top: var(--space-4);
 }
+
 .ds-item-detail__actions > .ds-btn {
     flex-grow: 1;
     margin-left: var(--space-2);
     margin-right: var(--space-2);
 }
+
 /* :first-child / :last-child are not supported in Unity USS.
    Use a negative outer margin on the actions row, or apply a utility class in
    UXML to zero out the edge margin on the first/last button if needed. */

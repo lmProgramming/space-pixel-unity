@@ -17,16 +17,52 @@
     flex-grow: 1;
 }
 
+/* ── Section gutters ──
+   Desktop margin is 8px per side; on a 390px-wide iPhone that pushes a
+   `max-width: 100%` section past the parent's inner content area by 16px.
+   Halve to 4px so each section + margins fits the viewport. */
+.mobile .ds-section {
+    margin: var(--space-1);
+}
+
+/* ── Row reflow ──
+   .ds-row defaults to a single non-wrapping row. On mobile, button rows can
+   exceed the section's narrowed content width; let them wrap to a new line
+   instead of overflowing horizontally. */
+.mobile .ds-row {
+    flex-wrap: wrap;
+}
+
 /* ── Typography ──
    Bump body sizes one step on mobile so the small reference resolution
    still gives readable text. */
-.mobile .ds-h1            { font-size: 22px; }
-.mobile .ds-h2            { font-size: 18px; }
-.mobile .ds-h3            { font-size: 15px; }
-.mobile .ds-body-1        { font-size: 13px; }
-.mobile .ds-body-2        { font-size: 12px; }
-.mobile .ds-caption       { font-size: 11px; }
-.mobile .ds-section-label { font-size: 11px; }
+.mobile .ds-h1 {
+    font-size: 22px;
+}
+
+.mobile .ds-h2 {
+    font-size: 18px;
+}
+
+.mobile .ds-h3 {
+    font-size: 15px;
+}
+
+.mobile .ds-body-1 {
+    font-size: 13px;
+}
+
+.mobile .ds-body-2 {
+    font-size: 12px;
+}
+
+.mobile .ds-caption {
+    font-size: 11px;
+}
+
+.mobile .ds-section-label {
+    font-size: 11px;
+}
 
 /* ── Buttons ──
    Touch-friendly 48px min-height plus chunkier padding. ds-btn declares
@@ -69,6 +105,7 @@
 .mobile .ds-dropdown {
     height: 48px;
 }
+
 .mobile .ds-input .unity-text-input,
 .mobile .ds-input .unity-text-field__input,
 .mobile .ds-input .unity-base-text-field__input,
@@ -102,12 +139,14 @@
 .mobile .ds-tabs {
     padding: 4px;
 }
+
 .mobile .ds-tab {
     height: 40px;
     font-size: 12px;
     padding-left: var(--space-2);
     padding-right: var(--space-2);
 }
+
 .mobile .ds-view-toggle__btn {
     width: 44px;
     height: 40px;
@@ -121,6 +160,7 @@
     height: 30px;
     border-radius: 15px; /* half-height pill */
 }
+
 .mobile .ds-toggle__knob {
     width: 24px;
     height: 24px;
@@ -128,6 +168,7 @@
     left: 3px;
     border-radius: 12px;
 }
+
 .mobile .ds-toggle:checked .ds-toggle__knob {
     translate: 22px 0;
 }
@@ -143,6 +184,7 @@
     height: 28px;
     border-radius: 14px;
 }
+
 .mobile .ds-radio .unity-radio-button__checkmark {
     width: 12px;
     height: 12px;
@@ -156,6 +198,7 @@
 .mobile .ds-range {
     height: 32px;
 }
+
 .mobile .ds-slider .unity-base-slider__dragger,
 .mobile .ds-range .unity-min-max-slider__min-thumb,
 .mobile .ds-range .unity-min-max-slider__max-thumb {
@@ -171,14 +214,29 @@
     margin-top: -12px;
 }
 
-/* ── Progress ── */
+/* ── Progress ──
+   Same `min-height: 0` story as the desktop rule in Controls.uss — the
+   compound progress-bar element reserves Unity's default 21px until every
+   layer is collapsed. Mobile bumps the visible height to 10px. */
 .mobile .ds-progress {
     height: 10px;
+    min-height: 0;
+    max-height: 10px;
 }
+
+.mobile .ds-progress .unity-progress-bar__container {
+    height: 10px;
+    min-height: 0;
+    max-height: 10px;
+}
+
 .mobile .ds-progress .unity-progress-bar__background {
     height: 10px;
+    min-height: 0;
+    max-height: 10px;
     border-radius: 5px;
 }
+
 .mobile .ds-progress .unity-progress-bar__progress {
     border-radius: 5px;
 }
@@ -186,18 +244,21 @@
 /* ── Cards ──
    Mobile cards live in tighter grids; shrink overall footprint and image
    area so multiple cards fit on a 360-wide canvas. */
-.mobile .ds-card {
+.mobile .ds-animal-card {
     width: 140px;
     padding: var(--space-2);
 }
-.mobile .ds-card__image {
+
+.mobile .ds-animal-card__image {
     height: 80px;
     margin-bottom: var(--space-2);
 }
-.mobile .ds-card__title {
+
+.mobile .ds-animal-card__title {
     font-size: 13px;
 }
-.mobile .ds-card__check {
+
+.mobile .ds-animal-card__check {
     width: 22px;
     height: 22px;
     border-radius: 11px;
@@ -207,6 +268,7 @@
 .mobile .ds-card {
     padding: var(--space-3);
 }
+
 .mobile .ds-card--padded {
     padding: var(--space-4);
 }
@@ -226,8 +288,17 @@
 }
 
 /* ── Avatars (kept) ── */
-.mobile .ds-avatar--xl { width: 64px; height: 64px; border-radius: 32px; }
-.mobile .ds-avatar--lg { width: 48px; height: 48px; border-radius: 24px; }
+.mobile .ds-avatar--xl {
+    width: 64px;
+    height: 64px;
+    border-radius: 32px;
+}
+
+.mobile .ds-avatar--lg {
+    width: 48px;
+    height: 48px;
+    border-radius: 24px;
+}
 
 /* ── Modals & dialogs ──
    Mobile is height-starved in landscape (360 ref); shrink padding and pin
@@ -237,11 +308,20 @@
     max-width: 360px;
     padding: var(--space-3);
 }
+
 .mobile .ds-dialog {
     width: 88%;
     max-width: 320px;
     padding: var(--space-4);
 }
+
+/* Animal detail card defaults to width: 360px from Cards.uss; on mobile let
+   it shrink to its parent (clamped at 360px so it doesn't grow on tablet). */
+.mobile .ds-animal-detail {
+    width: 100%;
+    max-width: 360px;
+}
+
 .mobile .ds-modal__title,
 .mobile .ds-dialog__title {
     font-size: 16px;
@@ -254,6 +334,7 @@
     padding-left: var(--space-3);
     padding-right: var(--space-3);
 }
+
 .mobile .ds-toast__message {
     font-size: 12px;
 }
@@ -262,14 +343,17 @@
 .mobile .ds-empty {
     padding: var(--space-3);
 }
+
 .mobile .ds-empty__icon-bg {
     width: 56px;
     height: 56px;
     border-radius: 28px;
 }
+
 .mobile .ds-empty__title {
     font-size: 14px;
 }
+
 .mobile .ds-empty__message {
     font-size: 12px;
 }
@@ -286,9 +370,11 @@
     height: 60px;
     padding: var(--space-1);
 }
+
 .mobile .ds-bottom-nav__item {
     height: 52px;
 }
+
 .mobile .ds-bottom-nav__icon {
     width: 22px;
     height: 22px;
@@ -301,11 +387,13 @@
     width: 140px;
     padding: var(--space-1);
 }
+
 .mobile .ds-nav-item {
     height: 36px;
     padding-left: var(--space-2);
     padding-right: var(--space-2);
 }
+
 .mobile .ds-nav-item__label {
     font-size: 12px;
 }
@@ -314,6 +402,7 @@
     width: 48px;
     padding: var(--space-1);
 }
+
 .mobile .ds-rail-item {
     width: 36px;
     height: 36px;
@@ -324,6 +413,7 @@
     height: 44px;
     padding: var(--space-2);
 }
+
 .mobile .ds-profile__avatar {
     width: 28px;
     height: 28px;
@@ -336,6 +426,7 @@
     width: 36px;
     height: 36px;
 }
+
 .mobile .ds-stepper__value,
 .mobile .ds-pagination__ellipsis {
     min-width: 44px;
@@ -346,7 +437,50 @@
     width: 44px;
     height: 44px;
 }
+
 .mobile .ds-notif-icon {
     width: 26px;
     height: 26px;
+}
+
+/* ── Drawers / Burger panels ──
+   On a 360-wide reference, a 280-px side drawer eats most of the viewport
+   and leaves ~80 px for the underlying content. Cap left/right drawers at
+   88% of the viewport so the user keeps a peek of the page behind, and
+   shrink the default top/bottom drawer height a bit so it doesn't crowd
+   the action button below. Author-supplied inline widths still win — these
+   are defaults for unsized drawers. */
+.mobile .ds-drawer--left,
+.mobile .ds-drawer--right {
+    width: 88%;
+    max-width: 320px;
+}
+
+.mobile .ds-drawer--top,
+.mobile .ds-drawer--bottom {
+    height: 60%;
+    max-height: 280px;
+}
+
+/* Push drawers on mobile keep their max-width animation but the open size
+   tracks 88% of the wrapper instead of 280 px so a long drawer still leaves
+   the user a visible sliver of the underlying content. */
+.mobile .ds-drawer--push.ds-drawer--left.ds-drawer--open,
+.mobile .ds-drawer--push.ds-drawer--right.ds-drawer--open,
+.mobile .ds-drawer-wrap.is-open .ds-drawer--push.ds-drawer--left,
+.mobile .ds-drawer-wrap.is-open .ds-drawer--push.ds-drawer--right {
+    max-width: 88%;
+}
+
+.mobile .ds-drawer__header {
+    padding-top: var(--space-2);
+    padding-bottom: var(--space-2);
+}
+
+.mobile .ds-drawer__title {
+    font-size: 15px;
+}
+
+.mobile .ds-drawer__body {
+    padding: var(--space-3);
 }

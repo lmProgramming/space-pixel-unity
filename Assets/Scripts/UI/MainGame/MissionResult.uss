@@ -1,12 +1,4 @@
 .mission-result-overlay {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    align-items: center;
-    justify-content: center;
-    background-color: rgba(0, 0, 0, 0.6);
     transition-property: opacity;
     transition-duration: 0.4s;
     transition-timing-function: ease-in;
@@ -20,7 +12,7 @@
     font-size: 72px;
     -unity-font-style: bold;
     -unity-text-align: middle-center;
-    color: rgb(255, 255, 255);
+    color: var(--color-text-primary);
     letter-spacing: 12px;
 }
 
@@ -31,4 +23,3 @@
 .result-label.defeat {
     color: rgb(255, 80, 80);
 }
-

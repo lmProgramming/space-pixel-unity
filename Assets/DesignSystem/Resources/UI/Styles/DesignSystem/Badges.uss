@@ -26,14 +26,17 @@
     background-color: var(--color-primary-soft);
     color: var(--color-rarity-common);
 }
+
 .ds-badge--rare {
     background-color: var(--color-secondary-soft);
     color: var(--color-rarity-rare);
 }
+
 .ds-badge--epic {
     background-color: var(--color-tertiary-soft);
     color: var(--color-rarity-epic);
 }
+
 .ds-badge--legendary {
     background-color: var(--color-warning-soft);
     color: var(--color-rarity-legendary);
@@ -51,16 +54,19 @@
     align-items: center;
     justify-content: center;
 }
+
 .ds-tag--amphibious {
     background-color: var(--color-warning);
     color: var(--color-text-on-accent);
 }
+
 .ds-tag--aquatic {
     background-color: var(--color-secondary-soft);
     color: var(--color-secondary);
     border-width: var(--border-thin);
     border-color: var(--color-secondary);
 }
+
 .ds-tag--nocturnal {
     background-color: var(--color-tertiary-soft);
     color: var(--color-tertiary);
@@ -80,11 +86,13 @@
     font-size: var(--font-size-caption);
     -unity-font-style: bold;
 }
+
 .ds-chip__icon {
     width: 14px;
     height: 14px;
-    margin-right: var(--space-2); /* 8px — bumped from 4px so the icon
-                                      doesn't collide with bold chip text */
+    margin-right: var(--space-2);
+    /* 8px — bumped from 4px so the icon
+                                         doesn't collide with bold chip text */
     flex-shrink: 0;
     flex-grow: 0;
     -unity-background-scale-mode: scale-to-fit;
@@ -108,42 +116,60 @@
     border-color: var(--color-primary);
     color: var(--color-primary);
 }
-.ds-chip--equipped .ds-chip__icon { -unity-background-image-tint-color: var(--color-primary); }
+
+.ds-chip--equipped .ds-chip__icon {
+    -unity-background-image-tint-color: var(--color-primary);
+}
 
 .ds-chip--new {
     background-color: var(--color-primary-soft);
     border-color: var(--color-primary);
     color: var(--color-primary);
 }
-.ds-chip--new .ds-chip__icon { -unity-background-image-tint-color: var(--color-primary); }
+
+.ds-chip--new .ds-chip__icon {
+    -unity-background-image-tint-color: var(--color-primary);
+}
 
 .ds-chip--owned {
-    background-color: rgba(0,0,0,0);
+    background-color: rgba(0, 0, 0, 0);
     border-color: var(--color-border-strong);
     color: var(--color-text-secondary);
 }
-.ds-chip--owned .ds-chip__icon { -unity-background-image-tint-color: var(--color-text-secondary); }
+
+.ds-chip--owned .ds-chip__icon {
+    -unity-background-image-tint-color: var(--color-text-secondary);
+}
 
 .ds-chip--limited {
     background-color: var(--color-danger-soft);
     border-color: var(--color-danger);
     color: var(--color-danger);
 }
-.ds-chip--limited .ds-chip__icon { -unity-background-image-tint-color: var(--color-danger); }
+
+.ds-chip--limited .ds-chip__icon {
+    -unity-background-image-tint-color: var(--color-danger);
+}
 
 .ds-chip--event {
     background-color: var(--color-secondary-soft);
     border-color: var(--color-secondary);
     color: var(--color-secondary);
 }
-.ds-chip--event .ds-chip__icon { -unity-background-image-tint-color: var(--color-secondary); }
+
+.ds-chip--event .ds-chip__icon {
+    -unity-background-image-tint-color: var(--color-secondary);
+}
 
 .ds-chip--sale {
     background-color: var(--color-warning-soft);
     border-color: var(--color-warning);
     color: var(--color-warning);
 }
-.ds-chip--sale .ds-chip__icon { -unity-background-image-tint-color: var(--color-warning); }
+
+.ds-chip--sale .ds-chip__icon {
+    -unity-background-image-tint-color: var(--color-warning);
+}
 
 /* ---------- Notification badge (red dot with count) ----------
    Default state is a fixed 18×18 CIRCLE — that's what looks right for a
@@ -158,11 +184,13 @@
     align-items: center;
     justify-content: center;
 }
+
 .ds-notif-icon {
     width: 24px;
     height: 24px;
     -unity-background-image-tint-color: var(--color-text-primary);
 }
+
 .ds-notif-dot {
     position: absolute;
     top: 2px;
@@ -177,6 +205,7 @@
     border-width: var(--border-regular);
     border-color: var(--color-bg);
 }
+
 /* Multi-digit variant — grows horizontally into a pill. */
 .ds-notif-dot--multi {
     width: auto;
@@ -184,7 +213,21 @@
     padding-left: 5px;
     padding-right: 5px;
 }
+
+/* Unity's <Label> wraps its text in a measured line-box that's taller than
+   the glyph and ships with a 1px default margin. Both push the count off
+   the dot's optical centre — visually ~2px low + ~2px left at this size.
+   Same fix pattern as `.ds-chip > .unity-label`: target the inner label
+   class directly and zero its box, then re-apply text-centering. */
+.ds-notif-dot > .unity-label {
+    margin: 0;
+    padding: 0;
+    -unity-text-align: middle-center;
+}
+
 .ds-notif-dot__count {
+    margin: 0;
+    padding: 0;
     font-size: 10px;
     -unity-font-style: bold;
     color: var(--color-text-primary);
@@ -198,13 +241,33 @@
     align-items: center;
     justify-content: center;
 }
+
 /* Per-size radius MUST equal half the side length to render a circle.
    Don't fall back to a single huge value — Unity 6 clamps per-axis
    and would otherwise render an ellipse if the element ever stretched. */
-.ds-avatar--sm { width: 24px; height: 24px; border-radius: var(--radius-pill-12); }
-.ds-avatar--md { width: 40px; height: 40px; border-radius: var(--radius-pill-20); }
-.ds-avatar--lg { width: 56px; height: 56px; border-radius: var(--radius-pill-28); }
-.ds-avatar--xl { width: 72px; height: 72px; border-radius: var(--radius-pill-36); }
+.ds-avatar--sm {
+    width: 24px;
+    height: 24px;
+    border-radius: var(--radius-pill-12);
+}
+
+.ds-avatar--md {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-pill-20);
+}
+
+.ds-avatar--lg {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius-pill-28);
+}
+
+.ds-avatar--xl {
+    width: 72px;
+    height: 72px;
+    border-radius: var(--radius-pill-36);
+}
 
 .ds-avatar__image {
     width: 100%;

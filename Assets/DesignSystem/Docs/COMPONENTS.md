@@ -67,7 +67,6 @@ Set placeholders via `field.textEdition.placeholder = "..."` in C#. Unity 6's AP
 | Class | Use |
 | --- | --- |
 | `.ds-slider` | Single-value `<Slider>`; thumb cross-centred via `margin-top: -9px`. |
-| `.ds-slider` + `show-input-field="true"` | Nested `TextField` (`.unity-base-slider__text-field`); layout in `Controls.uss`, input box in `Inputs.uss`; runtime adds `ds-input`. |
 | `.ds-slider--filled` | Variant that highlights the filled portion. |
 | `.ds-range` | `<MinMaxSlider>`; tracker, dragger, and both thumbs cross-centred via `top: 50%; margin-top: -<half>px;`. |
 | `.ds-progress` | `<ProgressBar>`; 8 px tall by default. |
@@ -77,12 +76,11 @@ Set placeholders via `field.textEdition.placeholder = "..."` in C#. Unity 6's AP
 
 | Class | Use |
 | --- | --- |
-| `.ds-card` | Example product card; demonstrates layered children + `.is-selected` / `.is-epic` modifiers + check pin. |
-| `.ds-card__image` | Top image area; clip child sprites with `overflow: hidden`. |
-| `.ds-card__sprite` | Child `<Image scaleMode="ScaleToFit">` filling the image well. |
-| `.ds-card__rarity` | Top-right rarity badge slot. |
-| `.ds-card__title-row` | Title + accessory icon row. |
-| `.ds-card__check` | The selected-state check pin (rendered last so it z-orders on top). |
+| `.ds-animal-card` | Example product card; demonstrates layered children + `.is-selected` / `.is-epic` modifiers + check pin. |
+| `.ds-animal-card__image` | Top image area. |
+| `.ds-animal-card__rarity` | Top-right rarity badge slot. |
+| `.ds-animal-card__title-row` | Title + accessory icon row. |
+| `.ds-animal-card__check` | The selected-state check pin (rendered last so it z-orders on top). |
 | `.ds-info-row` | Two-column attribute row (icon+label on left, value on right). |
 | `.ds-info-row__left` | The flex-row wrapper for the icon + label. |
 | `.ds-info-row__icon` | 16 × 16 leading icon. |
@@ -155,12 +153,16 @@ Set placeholders via `field.textEdition.placeholder = "..."` in C#. Unity 6's AP
 | `.ds-empty` | Empty-state block (icon-bg + title + message + CTA). |
 | `.ds-empty__icon-bg` | 64 × 64 surface-elev circle behind the icon. |
 | `.ds-empty__title` / `__message` | Stack of centred labels. |
+| `.ds-tooltip` | Floating info surface; the consumer positions it (mouse-follow / edge-flip). Elevated tier + strong border. |
+| `.ds-tooltip__title` / `__subtitle` / `__body` | Title (body-1 bold), subtitle (caption), body (body-2, wraps). |
+| `.ds-tooltip__divider` | Hairline separator between sections. |
+| `.ds-tooltip__row` | Flex-row stat line; `.ds-tooltip__row-label` (left) + `.ds-tooltip__row-value` (right, bold). |
 
 ## Feedback
 
 | Class | Use |
 | --- | --- |
-| `.ds-spinner` | Loader; pair with `.is-spinning` to start the rotation. |
+| `.ds-spinner` | Loader; pair with `.is-spinning` to start the rotation. The runtime drives the rotation in C#; do **not** add `transition-property: rotate` — it would compound across per-frame writes and make the spinner jiggle. |
 | `.ds-spinner--lg` | 48 × 48 variant. |
 | `.ds-skeleton` | Placeholder shape. |
 | `.ds-skeleton--card` | Card-shaped variant. |
@@ -171,24 +173,45 @@ Set placeholders via `field.textEdition.placeholder = "..."` in C#. Unity 6's AP
 | `.ds-stepper` | Quantity selector container. |
 | `.ds-stepper__btn` | − / + button. |
 | `.ds-stepper__value` | Value display. |
-| `.ds-row` | Horizontal flex row with centred children; adds bottom margin for stacked showcase rows. |
-| `.ds-row__gap` | Margin-based horizontal spacing between direct children (`--space-2`). Use instead of CSS `gap`, which UI Toolkit does not support. Pair with `.ds-row` or any `flex-direction: row` container. |
-| `.ds-col-gap` | Margin-based vertical spacing between direct children (`--space-2`). Use on column-flex containers. |
 
-DOM (row gap):
+## Scrollbars
+
+The system styles UI Toolkit's internal scroll classes, **scoped to `.ds-root`** so the rules don't bleed into editor windows or other UI Toolkit panels. You don't write a class — any `<ui:ScrollView>` inside a `.ds-root`-rooted hierarchy gets the slim themed scrollbar automatically.
+
+| Class | Use |
+| --- | --- |
+| `.unity-scroller__low-button`, `.unity-scroller__high-button` | Hidden via `display: none` — no arrow buttons. |
+| `.unity-scroll-view__vertical-scroller` | 8 px wide. |
+| `.unity-scroll-view__horizontal-scroller` | 8 px tall. |
+| `.unity-base-slider__tracker` | Transparent — thumb floats on the page surface. |
+| `.unity-base-slider__dragger` | The visible thumb. 4 px radius pill, `var(--color-border-strong)` background, brightens to `var(--color-text-secondary)` on hover. Auto-themes through tokens. |
+
+To render a framed scroll-view demo (used in the showcase's SCROLLBARS section):
 
 ```xml
-<ui:VisualElement class="ds-row ds-row__gap">
-    <ui:Button class="ds-btn ds-btn--secondary" />
-    <ui:Button class="ds-btn ds-btn--secondary" />
-</ui:VisualElement>
+<ui:ScrollView mode="Vertical" class="ds-scrollbar-demo" style="height: 120px; flex-grow: 1;">
+    <ui:Label text="..." class="ds-body-2" />
+</ui:ScrollView>
 ```
+
+The `.ds-scrollbar-demo` class adds a `var(--color-bg)` background, `var(--color-border)` outline, and 8 px padding — useful for surfacing the scrollbar visually in documentation contexts. Lives in `Feedback.uss`.
+
+## Drag & drop
+
+| Class | Use |
+| --- | --- |
+| `.ds-draggable` | Marks an element draggable; the runtime auto-wires pointer drag + a ghost. |
+| `.ds-drop-zone` | A container that accepts a dropped `.ds-draggable` (reparents the item on drop). |
+| `.ds-drop-zone.is-drag-over` | Highlight applied to a drop zone while a drag hovers it. |
+| `.ds-drag-ghost` | The floating preview that follows the pointer during a drag. Reuse it from custom drag code (e.g. a game inventory) for a consistent look. |
+
+The runtime (`DesignSystemRuntime.EnsureDraggables`) auto-wires `.ds-draggable` for the simple "move between zones" case. Inventories with split / merge / transfer logic drive their own pointer handling and reuse only the `.ds-drag-ghost` / `.is-drag-over` visuals.
 
 ## Icons
 
 `.ds-icon` is the base class. Pair with one of 63 `.ds-icon--<name>` classes from `Icons.uss`:
 
-```txt
+```
 arrow-up arrow-down arrow-left arrow-right
 chevron-up chevron-down chevron-left chevron-right
 sort-asc sort-desc
@@ -223,3 +246,22 @@ Tint variants: `--primary` (text-primary), `--secondary` (text-secondary), `--di
 | `.ds-caption` | 11 px / medium / text-secondary |
 | `.ds-text-success` | Helper colour utility (primary green). |
 | `.ds-text-primary` | Helper colour utility (text-primary white). |
+
+## Showcase helpers
+
+These classes exist for the showcase / live demo and aren't part of the drop-in design system per se — but they're useful patterns for anyone building a similar style guide on top of the system. All live in `Feedback.uss` so they ship in the same import chain.
+
+| Class | Use |
+| --- | --- |
+| `.ds-section` | Bordered section card (background, border, radius, padding) used to group related component demos in the showcase. |
+| `.ds-section__title` | Uppercase / bold / spaced label inside `.ds-section`. |
+| `.ds-row` | Flex-row helper with `align-items: center` — used inside sections to lay out controls in a line. |
+| `.ds-row__gap > *` | Adds `margin-right: var(--space-2)` to direct children — useful for spaced rows. |
+| `.ds-col-gap > *` | Adds `margin-bottom: var(--space-2)` — same pattern, vertical. |
+| `.ds-swatch-row` | Flex-row containing a swatch + name + hex label. |
+| `.ds-swatch` | 14 × 14 colour chip used in the COLORS section. Border uses `var(--color-border)` so it themes correctly. |
+| `.ds-swatch__name`, `.ds-swatch__hex` | Slots inside a swatch row. |
+| `.ds-swatch--<token>` | One per colour token: `--primary`, `--primary-hover`, `--secondary`, `--tertiary`, `--warning`, `--danger`, `--text-primary`, `--text-secondary`, `--text-disabled`, `--bg`, `--surface`, `--surface-elev`, `--border`. Each binds the swatch's background to its `var(--color-*)`, so a theme override repaints the COLORS section automatically. |
+| `.ds-btn--demo-hover` | Combine with a button variant (e.g. `class="ds-btn ds-btn--primary ds-btn--demo-hover"`) to lock the button to its `*-hover` token. Used in the showcase's BUTTONS section to display Default / Hover / Pressed / Disabled side-by-side without needing the cursor to actually be over the button. |
+| `.ds-scrollbar-demo` | Framed `<ui:ScrollView>` wrapper — adds `var(--color-bg)` background, `var(--color-border)` outline, and 8 px padding. Used in the showcase's SCROLLBARS section. |
+| `.showcase-chrome` | Marks an element (and all its descendants) as showcase page chrome — promo banner, future headers / footers. The selector-chain hover overlay (`ShowcaseDocOverlay.cs`) skips inspection inside `.showcase-chrome`. The `.ds-h1` colour is locked to a fixed light value under `.showcase-chrome` regardless of theme so titles stay readable on the always-black banner. |

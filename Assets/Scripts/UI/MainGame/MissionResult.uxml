@@ -1,7 +1,7 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/DesignSystem/Resources/UI/Styles/DesignSystem/DesignSystem.uss"/>
     <Style src="MissionResult.uss"/>
-    <ui:VisualElement name="mission-result-overlay" class="mission-result-overlay hidden">
+    <ui:VisualElement name="mission-result-overlay" class="ds-root ds-backdrop mission-result-overlay hidden">
         <ui:Label name="result-label" text="VICTORY" class="result-label"/>
     </ui:VisualElement>
 </ui:UXML>
-

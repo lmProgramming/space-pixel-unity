@@ -4,6 +4,7 @@ using System.IO;
 using Core.Constants;
 using Core.State;
 using UI.Common;
+using UI.Tools;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
@@ -13,7 +14,7 @@ using UnityEditor;
 
 namespace UI.MainMenu
 {
-    [RequireComponent(typeof(UIDocument))]
+    [RequireComponent(typeof(PanelRenderer))]
     public class MainMenuController : MonoBehaviour
     {
         private const string SnapshotFolderName = "ShipSnapshots";
@@ -26,6 +27,8 @@ namespace UI.MainMenu
         private Slider _asteroidCountSlider;
         private Slider _enemyCountSlider;
         private Slider _friendlyCountSlider;
+
+        private PanelRenderer _panelRenderer;
         private Button _quitButton;
         private Button _settingsButton;
         private SettingsPanelController _settingsPanelController;
@@ -36,17 +39,28 @@ namespace UI.MainMenu
         private Button _shipSelectLaunchButton;
         private Button _startButton;
 
-        private UIDocument _uiDocument;
-
         private void Awake()
         {
-            _uiDocument = GetComponent<UIDocument>();
-            BindMainMenuUi();
+            _panelRenderer = GetComponent<PanelRenderer>();
         }
 
-        private void BindMainMenuUi()
+        private void OnEnable()
         {
-            var root = _uiDocument.rootVisualElement;
+            _panelRenderer.RegisterUIReloadCallback(OnUIReload);
+        }
+
+        private void OnDisable()
+        {
+            _panelRenderer.UnregisterUIReloadCallback(OnUIReload);
+        }
+
+        private void OnUIReload(PanelRenderer renderer, VisualElement root)
+        {
+            BindMainMenuUi(root);
+        }
+
+        private void BindMainMenuUi(VisualElement root)
+        {
             if (root == null)
                 throw new InvalidOperationException("[MainMenuController] RootVisualElement is missing.");
 
@@ -79,6 +93,7 @@ namespace UI.MainMenu
             ConfigureCountSlider(_enemyCountSlider, DefaultEnemyShipCount);
             ConfigureCountSlider(_friendlyCountSlider, DefaultFriendlyShipCount);
 
+            DesignSystemThemeService.RegisterVisualTree(root);
             _settingsPanelController = new SettingsPanelController(root, true);
         }
 

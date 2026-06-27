@@ -5,6 +5,7 @@
    - Toast          : .ds-toast       (success/info/warning/danger)
    - Bottom sheet   : .ds-sheet       (mobile drawer)
    - Empty state    : .ds-empty       (centered icon + text + CTA)
+   - Tooltip        : .ds-tooltip     (floating info surface; consumer positions it)
    ============================================================================ */
 
 /* ---------- Backdrop (used to dim the screen behind modals) ---------- */
@@ -67,7 +68,7 @@
 
 .ds-modal__body-text {
     color: var(--color-text-secondary);
-    white-space: normal;
+    white-space: wrap;
 }
 
 .ds-modal__actions {
@@ -96,7 +97,7 @@
     color: var(--color-text-primary);
 }
 
-/* "Limit" warning illustration slot */
+/* "Animal Limit" warning illustration slot */
 .ds-modal__illustration {
     width: 100%;
     height: 96px;
@@ -129,6 +130,7 @@
 .ds-dialog__message {
     color: var(--color-text-secondary);
     -unity-text-align: middle-center;
+    white-space: wrap;
     margin-bottom: var(--space-4);
 }
 
@@ -176,7 +178,7 @@
     flex-shrink: 1;
     color: var(--color-text-primary);
     font-size: var(--font-size-body-2);
-    white-space: nowrap;
+    white-space: wrap;
 }
 
 .ds-toast__close {
@@ -331,13 +333,76 @@
     color: var(--color-text-primary);
     margin-bottom: var(--space-1);
     /* Allow wrapping AND keep the wrapped lines centered under the icon. */
-    white-space: normal;
+    white-space: wrap;
     -unity-text-align: middle-center;
 }
 
 .ds-empty__message {
     color: var(--color-text-secondary);
     -unity-text-align: middle-center;
-    white-space: normal;
+    white-space: wrap;
     margin-bottom: var(--space-3);
+}
+
+/* ---------- Tooltip ----------
+   A small floating info surface. The CONSUMER positions it (e.g. mouse-follow with
+   edge-flip in C#) — hence `position: absolute`. Sits on the elevated surface tier with a
+   STRONG border (not the regular border) so it reads clearly when floating over busy
+   game/app content rather than nested inside a card. Fills the gap that item/unit
+   tooltips previously had to cover by borrowing `.ds-card`. */
+.ds-tooltip {
+    position: absolute;
+    background-color: var(--color-surface-elev);
+    border-width: var(--border-thin);
+    border-color: var(--color-border-strong);
+    border-radius: var(--radius-md);
+    padding: var(--space-3);
+    max-width: 280px;
+}
+
+.ds-tooltip__title {
+    font-size: var(--font-size-body-1);
+    -unity-font-style: bold;
+    color: var(--color-text-primary);
+    white-space: wrap;
+}
+
+.ds-tooltip__subtitle {
+    font-size: var(--font-size-caption);
+    color: var(--color-text-secondary);
+    white-space: wrap;
+}
+
+.ds-tooltip__body {
+    font-size: var(--font-size-body-2);
+    color: var(--color-text-secondary);
+    white-space: wrap;
+    margin-top: var(--space-2);
+}
+
+/* Hairline section separator. Unity USS has no :first-child, so place one only where a
+   divider is actually wanted (between header and stats, etc.). */
+.ds-tooltip__divider {
+    height: 1px;
+    background-color: var(--color-border);
+    margin-top: var(--space-2);
+    margin-bottom: var(--space-2);
+}
+
+.ds-tooltip__row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: var(--space-1);
+}
+
+.ds-tooltip__row-label {
+    font-size: var(--font-size-caption);
+    color: var(--color-text-secondary);
+}
+
+.ds-tooltip__row-value {
+    font-size: var(--font-size-caption);
+    -unity-font-style: bold;
+    color: var(--color-text-primary);
 }
