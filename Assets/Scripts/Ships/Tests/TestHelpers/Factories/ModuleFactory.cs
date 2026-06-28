@@ -3,6 +3,7 @@ using Core.Ship;
 using Pixelation;
 using Ships.ModuleConnection;
 using Ships.Modules;
+using Ships.Systems.Gimbal;
 using Ships.Systems.Resources;
 using Ships.Tests.TestHelpers.Modules;
 using UnityEngine;
@@ -37,12 +38,34 @@ namespace Ships.Tests.TestHelpers.Factories
             var engineGo = CreateModuleBase("Engine", parent, localPosition, localRotationZ, container, createdObjects,
                 modulePixelWidth, modulePixelHeight);
 
-            var particleRoot = CreateGameObject("EngineExhaust", createdObjects, container);
-            particleRoot.transform.SetParent(engineGo.transform, false);
-            particleRoot.AddComponent<ParticleSystem>();
+            AddTestNozzle(engineGo, container, createdObjects);
 
             var engine = engineGo.AddComponent<Engine>();
             engine.ConfigureForTesting(engineMaxThrust, gimbalRange);
+        }
+
+        private static void AddTestNozzle(GameObject engineGo, DiContainer container,
+            ICollection<GameObject> createdObjects)
+        {
+            var nozzleGo = CreateGameObject("Nozzle", createdObjects, container);
+            nozzleGo.transform.SetParent(engineGo.transform, false);
+            nozzleGo.transform.localPosition = new Vector3(0f, 0f, 0f);
+
+            nozzleGo.AddComponent<SpriteRenderer>();
+
+            var nozzleRigidbody = nozzleGo.AddComponent<Rigidbody2D>();
+            nozzleRigidbody.bodyType = RigidbodyType2D.Kinematic;
+            nozzleRigidbody.gravityScale = 0f;
+
+            nozzleGo.AddComponent<PolygonCollider2D>();
+
+            var particleRoot = CreateGameObject("EngineExhaust", createdObjects, container);
+            particleRoot.transform.SetParent(nozzleGo.transform, false);
+            particleRoot.AddComponent<ParticleSystem>();
+
+            var nozzle = nozzleGo.AddComponent<Nozzle>();
+            container.Inject(nozzle);
+            nozzle.SetTextureFromColors(CreateSolidPixelGrid(3, 3));
         }
 
         public static GameObject CreateModuleBase(string name, Transform parent, Vector2 localPosition,

@@ -20,13 +20,14 @@ namespace Editor.InspectorExtensions
 
             DrawGimbalLimitArc(thrustPoint, pivotForward, neutralDirection, maxGimbalAngle, arcRadius);
             DrawDirectionLine(thrustPoint, neutralDirection, arcRadius, new Color(0.75f, 0.75f, 0.75f, 0.55f), 1f);
-            DrawDirectionLine(thrustPoint, GetGimbalDirection(engine.transform, engine.DesiredGimbalAngleForDebug),
+            DrawDirectionLine(thrustPoint, GetGimbalDirection(engine.transform, engine.DesiredGimbalAngleForTesting),
                 arcRadius, Color.yellow, 2f);
 
-            if (Mathf.Abs(Mathf.DeltaAngle(engine.DesiredGimbalAngleForDebug, engine.CurrentThrusterAngleForDebug)) >
+            if (Mathf.Abs(Mathf.DeltaAngle(engine.DesiredGimbalAngleForTesting,
+                    engine.CurrentThrusterAngleForTesting)) >
                 0.5f)
                 DrawDirectionLine(thrustPoint,
-                    GetGimbalDirection(engine.transform, engine.CurrentThrusterAngleForDebug), arcRadius * 0.92f,
+                    GetGimbalDirection(engine.transform, engine.CurrentThrusterAngleForTesting), arcRadius * 0.92f,
                     Color.green, 1.5f);
 
             DrawThrustArrow(thrustPoint, engine.WorldThrustDirection, engine.MaxThrust,
@@ -60,7 +61,8 @@ namespace Editor.InspectorExtensions
             DrawArrowHead(end, direction, length * 0.12f, color, thickness);
         }
 
-        private static void DrawThrustArrow(Vector3 origin, Vector2 direction, float maxThrust, float currentThrustRatio,
+        private static void DrawThrustArrow(Vector3 origin, Vector2 direction, float maxThrust,
+            float currentThrustRatio,
             float unitsPerNewton)
         {
             if (direction.sqrMagnitude <= Mathf.Epsilon || maxThrust <= Mathf.Epsilon) return;

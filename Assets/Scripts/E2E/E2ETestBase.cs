@@ -180,9 +180,9 @@ namespace E2E
                 cannon.SetResources(new Resources(0, 1f, 0, 0, 0));
                 var weaponSprite = CreateTestSprite();
                 var projectileSpawnGo = new GameObject("ProjectileSpawn");
-                projectileSpawnGo.transform.SetParent(shipGo.transform);
+                projectileSpawnGo.transform.SetParent(cannonGo.transform);
                 projectileSpawnGo.transform.position = cannonGo.transform.position;
-                cannon.SetupForTesting(bulletPrefab, 1.2f, 0.2f, weaponSprite,
+                cannon.SetupForTesting(bulletPrefab, 0.5f, 0.5f, weaponSprite,
                     new[] { projectileSpawnGo.transform });
             }
 

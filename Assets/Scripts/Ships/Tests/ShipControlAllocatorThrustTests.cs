@@ -23,6 +23,8 @@ namespace Ships.Tests
             shipWithEngines.Ship.ConfigureAllocatorForTesting(true);
             shipWithEngines.Ship.ApplyEngineForcesForTesting(1f, 0f, 0f, 0.02f);
 
+            yield return Utils.SimulateForSeconds(1f);
+
             Assert.That(shipWithEngines.Engines[0].CurrentThrustRatioForTesting, Is.GreaterThanOrEqualTo(0.9f));
         }
 
@@ -40,6 +42,8 @@ namespace Ships.Tests
             shipWithEngines.Ship.ConfigureAllocatorForTesting(true);
             shipWithEngines.Ship.ApplyEngineForcesForTesting(-1f, 0f, 0f, 0.02f);
 
+            yield return Utils.SimulateForSeconds(1f);
+
             Assert.That(shipWithEngines.Engines[0].CurrentThrustRatioForTesting, Is.GreaterThanOrEqualTo(0.9f));
         }
 
@@ -48,11 +52,11 @@ namespace Ships.Tests
         {
             var shipWithEngines = ShipTestBuilder.CreateShip(Container, CreatedObjects, "AllocatorTestShip")
                 .WithCommand("Command", Vector2.zero, 5, 5)
-                .WithEngineModule(new Vector2(-20f, -45f), 3000f, 5, 5)
-                .WithEngineModule(new Vector2(-20f, -50f), 3000f, 5, 5)
-                .WithEngineModule(new Vector2(0f, -48f), 3000f, 5, 5)
-                .WithEngineModule(new Vector2(20f, -50f), 3000f, 5, 5)
-                .WithEngineModule(new Vector2(20f, -45f), 3000f, 5, 5)
+                .WithEngineModule(new Vector2(-5f, 0f), 3000f, 5, 5)
+                .WithEngineModule(new Vector2(-10f, 0f), 3000f, 5, 5)
+                .WithEngineModule(new Vector2(0f, -5f), 3000f, 5, 5)
+                .WithEngineModule(new Vector2(5f, 0f), 3000f, 5, 5)
+                .WithEngineModule(new Vector2(10f, 0f), 3000f, 5, 5)
                 .BuildWithEnginesResult();
 
             yield return WaitForLifecycle();
@@ -61,6 +65,8 @@ namespace Ships.Tests
                 0.4f, 0.02f);
 
             shipWithEngines.Ship.ApplyEngineForcesForTesting(1f, 0f, 0f, 0.02f);
+
+            yield return Utils.SimulateForSeconds(1f);
 
             foreach (var engine in shipWithEngines.Engines)
                 Assert.That(engine.CurrentThrustRatioForTesting, Is.GreaterThanOrEqualTo(0.9f));
@@ -80,6 +86,8 @@ namespace Ships.Tests
             shipWithEngines.Ship.ConfigureAllocatorForTesting(true);
             shipWithEngines.Ship.ApplyEngineForcesForTesting(0f, 1f, 0f, 0.02f);
 
+            yield return Utils.SimulateForSeconds(1f);
+
             Assert.That(shipWithEngines.Engines[0].CurrentThrustRatioForTesting, Is.GreaterThanOrEqualTo(0.9f));
         }
 
@@ -96,6 +104,8 @@ namespace Ships.Tests
 
             shipWithEngines.Ship.ConfigureAllocatorForTesting(true);
             shipWithEngines.Ship.ApplyEngineForcesForTesting(-1f, 0f, 0f, 0.02f);
+
+            yield return Utils.SimulateForSeconds(1f);
 
             Assert.That(shipWithEngines.Engines[1].CurrentThrustRatioForTesting, Is.LessThanOrEqualTo(0.1f));
         }

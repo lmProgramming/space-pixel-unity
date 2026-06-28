@@ -17,8 +17,10 @@ namespace Ships.Modules
         [SerializeField] private float gimbalSpeed = 240f;
 
         [ReadOnly] [SerializeField] private float currentThrustRatio;
-        [ReadOnly] [SerializeField] internal float currentGimbalAngle;
+
+        [ReadOnly] [SerializeField] internal float currentGimbalAngleForDebug;
         [ReadOnly] [SerializeField] internal float desiredGimbalAngleForDebug;
+        [ReadOnly] [field: SerializeField] private float CurrentThrusterAngle { get; set; }
 
         private List<Nozzle> _nozzles;
 
@@ -26,8 +28,8 @@ namespace Ships.Modules
 
         internal float CurrentThrustRatioForTesting => currentThrustRatio;
 
-        internal float CurrentThrusterAngleForDebug => CurrentThrusterAngle;
-        internal float DesiredGimbalAngleForDebug { get; private set; }
+        internal float CurrentThrusterAngleForTesting => CurrentThrusterAngle;
+        internal float DesiredGimbalAngleForTesting { get; private set; }
 
         internal float MaxGimbalAngleForDebug => maxGimbalAngle;
         private bool IsActive { get; set; }
@@ -38,7 +40,6 @@ namespace Ships.Modules
         private Vector2 ThrustPoint => CalculateAverageThrustPoint();
 
         public float MaxThrust => maxThrust * ShipModuleEfficiency * GameplayConstants.EngineThrustEfficiencyMultiplier;
-        private float CurrentThrusterAngle { get; set; }
 
         public Vector2 WorldThrustPoint => transform.TransformPoint(ThrustPoint);
 
@@ -55,32 +56,65 @@ namespace Ships.Modules
             if (_nozzles.Count == 0)
                 throw new UnityException("[Engine] No Nozzles found");
 
-            ApplyExhaustVisuals();
+            foreach (var nozzle in _nozzles)
+                RegisterNozzle(nozzle);
+        }
+
+        protected override void Start()
+        {
+            base.Start();
+            ApplyNozzleVisuals();
         }
 
 #if UNITY_EDITOR
         private void Update()
         {
             currentThrustRatio = CurrentThrustRatioForTesting;
-            currentGimbalAngle = CurrentThrusterAngle;
-            desiredGimbalAngleForDebug = DesiredGimbalAngleForDebug;
+            currentGimbalAngleForDebug = CurrentThrusterAngle;
+            desiredGimbalAngleForDebug = DesiredGimbalAngleForTesting;
         }
 #endif
 
         protected override void OnDestroy()
         {
+            for (var i = _nozzles.Count - 1; i >= 0; i--)
+                UnregisterNozzle(_nozzles[i]);
+
             SetActive(false);
 
             base.OnDestroy();
         }
 
+        private void RegisterNozzle(Nozzle nozzle)
+        {
+            nozzle.Destroyed += OnNozzleDestroyed;
+        }
+
+        private void UnregisterNozzle(Nozzle nozzle)
+        {
+            if (!nozzle) return;
+
+            nozzle.Destroyed -= OnNozzleDestroyed;
+        }
+
+        private void OnNozzleDestroyed(Nozzle nozzle)
+        {
+            UnregisterNozzle(nozzle);
+            _nozzles.Remove(nozzle);
+        }
+
         private Vector2 CalculateAverageThrustPoint()
         {
-            var averageThrustPoint = Vector3.zero;
-            if (_nozzles.Count == 0) return averageThrustPoint;
+            if (_nozzles.Count == 0) return Vector2.zero;
 
-            averageThrustPoint = _nozzles.AsValueEnumerable().Aggregate(averageThrustPoint,
-                (current, nozzle) => current + nozzle.Transform.localPosition);
+            var averageThrustPoint = Vector2.zero;
+
+            foreach (var nozzle in _nozzles)
+            {
+                if (!nozzle) continue;
+
+                averageThrustPoint += (Vector2)nozzle.RestLocalPosition;
+            }
 
             averageThrustPoint /= _nozzles.Count;
 
@@ -107,13 +141,33 @@ namespace Ships.Modules
         public void SetActive(bool active)
         {
             IsActive = active;
-            ApplyExhaustVisuals();
+            ApplyNozzleVisuals();
+        }
+
+        private void ApplyNozzleTransforms()
+        {
+            foreach (var nozzle in _nozzles)
+            {
+                if (!nozzle) continue;
+
+                nozzle.ApplyGimbalTransform(CurrentThrusterAngle);
+            }
         }
 
         private void ApplyExhaustVisuals()
         {
             foreach (var nozzle in _nozzles)
-                nozzle.ApplyExhaustVisuals(CurrentThrusterAngle, currentThrustRatio, IsActive);
+            {
+                if (!nozzle) continue;
+
+                nozzle.ApplyExhaustVisuals(currentThrustRatio, IsActive);
+            }
+        }
+
+        private void ApplyNozzleVisuals()
+        {
+            ApplyNozzleTransforms();
+            ApplyExhaustVisuals();
         }
 
         public void SetCurrentThrust(float currentThrust)
@@ -121,22 +175,37 @@ namespace Ships.Modules
             if (MaxThrust <= Mathf.Epsilon)
             {
                 currentThrustRatio = 0f;
-                ApplyExhaustVisuals();
+                ApplyNozzleVisuals();
                 return;
             }
 
             currentThrustRatio = Mathf.Clamp01(currentThrust / MaxThrust);
-            ApplyExhaustVisuals();
+            ApplyNozzleVisuals();
         }
 
         public void RotateThrusterTowards(float targetAngle, float deltaTime)
         {
-            DesiredGimbalAngleForDebug = targetAngle;
+            DesiredGimbalAngleForTesting = targetAngle;
 
-            var clampedTarget = Mathf.Clamp(targetAngle, -maxGimbalAngle, maxGimbalAngle);
+            var clampedTarget = ClampTargetGimbalAngle(targetAngle);
+            var maxStep = GetGimbalStepSize(clampedTarget, deltaTime);
+            CurrentThrusterAngle = Mathf.MoveTowardsAngle(CurrentThrusterAngle, clampedTarget, maxStep);
+            ApplyNozzleVisuals();
+        }
+
+        private float ClampTargetGimbalAngle(float targetAngle)
+        {
+            return Mathf.Clamp(targetAngle, -maxGimbalAngle, maxGimbalAngle);
+        }
+
+        private float GetGimbalStepSize(float clampedTarget, float deltaTime)
+        {
             var maxStep = Mathf.Max(0f, gimbalSpeed) * Mathf.Max(0f, deltaTime);
-            CurrentThrusterAngle = Mathf.MoveTowards(CurrentThrusterAngle, clampedTarget, maxStep);
-            ApplyExhaustVisuals();
+
+            if (Mathf.Abs(clampedTarget) > Mathf.Epsilon || Mathf.Abs(CurrentThrusterAngle) <= Mathf.Epsilon)
+                return maxStep;
+
+            return maxStep * GameplayConstants.NozzleGoingBackToRestRotationMultiplierSpeed;
         }
 
         public override string CaptureTypePayloadJson(IGameContentCatalog contentCatalog)
@@ -167,18 +236,25 @@ namespace Ships.Modules
             maxThrust = data.maxThrust;
             maxGimbalAngle = data.maxGimbalAngle;
             gimbalSpeed = data.gimbalSpeed;
-            //
-            // if (contentCatalog != null &&
-            //     contentCatalog.TryGetPrefab(data.exhaustTemplateContentId, out var exhaustTemplate))
-            // {
-            //     if (exhaustParticles != null)
-            //         Destroy(exhaustParticles.gameObject);
-            //     var exhaustObject = Instantiate(exhaustTemplate, transform);
-            //     exhaustParticles = exhaustObject.GetComponent<ParticleSystem>();
-            //     if (exhaustParticles == null)
-            //         throw new UnityException("[Engine] Exhaust template must contain ParticleSystem.");
-            // }
+
+            if (contentCatalog != null &&
+                contentCatalog.TryGetPrefab(data.nozzleTemplateContentId, out var nozzleTemplate))
+            {
+                foreach (var nozzle in _nozzles.AsValueEnumerable().Where(nozzle => nozzle))
+                    Destroy(nozzle.gameObject);
+
+                var exhaustObject = Instantiate(nozzleTemplate, transform);
+                // exhaustParticles = exhaustObject.GetComponent<ParticleSystem>();
+                // if (exhaustParticles == null)
+                //     throw new UnityException("[Engine] Exhaust template must contain ParticleSystem.");
+            }
         }
+#if UNITY_INCLUDE_TESTS
+        internal void SetCurrentThrusterAngleForTesting(float nearFullCircleCurrentAngle)
+        {
+            CurrentThrusterAngle = nearFullCircleCurrentAngle;
+        }
+#endif
 
 #if UNITY_EDITOR
         [Header("Gimbal Gizmos")]

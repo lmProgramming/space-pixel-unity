@@ -1,10 +1,13 @@
+using System;
 using System.Collections.Generic;
 using Core.Ship;
+using Cysharp.Threading.Tasks;
 using Pixelation;
 using Ships.Modules;
 using Ships.Tests.TestHelpers.Proxies;
 using UnityEngine;
 using Zenject;
+using Object = UnityEngine.Object;
 using Resources = Core.Ship.Resources;
 
 namespace Ships.Tests.TestHelpers.Factories
@@ -176,7 +179,19 @@ namespace Ships.Tests.TestHelpers.Factories
         public ShipWithEnginesResult<ShipTestProxy> BuildWithEnginesResult()
         {
             var ship = WireShip<ShipTestProxy>(false);
+            EnsureAllModulesWired(ship).Forget();
             return new ShipWithEnginesResult<ShipTestProxy> { Ship = ship, Engines = new List<Engine>(_engines) };
+        }
+
+        private static async UniTask EnsureAllModulesWired(Ship ship)
+        {
+            await UniTask.Yield();
+
+            var allModulesConnected =
+                ship.AllModules.Count == ship.GetComponentsInChildren<Module>().Length;
+
+            if (!allModulesConnected)
+                throw new ArgumentException("[ShipTestBuilder] Not all modules connected");
         }
 
         public CommandWithEngineResult BuildCommandWithEngineResult()
