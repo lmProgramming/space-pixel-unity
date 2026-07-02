@@ -1,4 +1,5 @@
 using System;
+using Core.Ship;
 using Pixelation;
 using UnityEngine;
 
@@ -72,6 +73,11 @@ namespace Ships.Systems.Gimbal
 
             var main = _exhaustParticles.main;
             _exhaustBaseStartSpeedMultiplier = main.startSpeedMultiplier;
+        }
+
+        protected override PixelatedRigidbodyType GetSnapshotRigidbodyType()
+        {
+            return PixelatedRigidbodyType.Nozzle;
         }
     }
 }

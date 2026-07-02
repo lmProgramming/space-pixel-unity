@@ -77,7 +77,7 @@ namespace Ships.Tests.TestHelpers.Factories
             return this;
         }
 
-        public ShipTestBuilder WithCrewModule(string name, Vector2 localPosition, int width, int height,
+        public ShipTestBuilder WithTestCrewModule(string name, Vector2 localPosition, int width, int height,
             int crewNeeded, CrewSkillType mainSkill)
         {
             var moduleGo = ModuleFactory.CreateModuleBase(name, _shipGo.transform, localPosition, 0f, _container,
@@ -99,9 +99,9 @@ namespace Ships.Tests.TestHelpers.Factories
             return this;
         }
 
-        public ShipTestBuilder WithPowerModule(Vector2 localPosition, int width, int height)
+        public ShipTestBuilder WithTestPowerModule(Vector2 localPosition, int width, int height)
         {
-            ModuleFactory.CreatePowerModule(_shipGo.transform, localPosition, _container, _createdObjects, width,
+            ModuleFactory.CreateTestPowerModule(_shipGo.transform, localPosition, _container, _createdObjects, width,
                 height);
             return this;
         }
@@ -122,9 +122,7 @@ namespace Ships.Tests.TestHelpers.Factories
         {
             var engineGo = ModuleFactory.CreateModuleBase("Engine", _shipGo.transform, localPosition, 0f, _container,
                 _createdObjects, width, height);
-            var exhaustRoot = ModuleFactory.CreateGameObject("Exhaust", _createdObjects, _container);
-            exhaustRoot.transform.SetParent(engineGo.transform, false);
-            exhaustRoot.AddComponent<ParticleSystem>();
+            ModuleFactory.AddNozzle(engineGo, _container, _createdObjects);
             var engine = engineGo.AddComponent<Engine>();
             engine.SetResources(resources);
             var identity = engineGo.AddComponent<ModuleInstanceIdentity>();
@@ -148,11 +146,6 @@ namespace Ships.Tests.TestHelpers.Factories
             cannonIdentity.EnsureAssigned(ModuleOrigin.CatalogPrefab, archetypeId);
             RegisterOtherModule("Cannon", cannonInstance.GetComponent<Cannon>());
             return this;
-        }
-
-        public Module GetModule(string name)
-        {
-            return _modulesByName[name];
         }
 
         public ShipLayoutResult BuildLayoutResult(bool initializeModules = false)

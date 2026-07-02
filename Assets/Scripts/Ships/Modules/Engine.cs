@@ -4,6 +4,8 @@ using Core.Services;
 using Core.Ship;
 using Core.Ship.ModuleSnapshotPayloads;
 using LMPro.External.ReadOnly;
+using Pixelation;
+using Ships.Snapshot;
 using Ships.Systems.Gimbal;
 using UnityEngine;
 using ZLinq;
@@ -22,7 +24,8 @@ namespace Ships.Modules
         [ReadOnly] [SerializeField] internal float desiredGimbalAngleForDebug;
         [ReadOnly] [field: SerializeField] private float CurrentThrusterAngle { get; set; }
 
-        private List<Nozzle> _nozzles;
+        private List<Nozzle> _nozzles = new();
+        private List<PixelatedRigidbodySnapshot> _pendingNozzleSnapshots = new();
 
         public override ModuleType Type => ModuleType.Engine;
 
@@ -50,6 +53,11 @@ namespace Ships.Modules
         {
             base.Awake();
             Type = ModuleType.Engine;
+        }
+
+        protected override void Start()
+        {
+            base.Start();
 
             _nozzles = GetComponentsInChildren<Nozzle>().AsValueEnumerable().ToList();
 
@@ -58,11 +66,7 @@ namespace Ships.Modules
 
             foreach (var nozzle in _nozzles)
                 RegisterNozzle(nozzle);
-        }
 
-        protected override void Start()
-        {
-            base.Start();
             ApplyNozzleVisuals();
         }
 
@@ -77,8 +81,9 @@ namespace Ships.Modules
 
         protected override void OnDestroy()
         {
-            for (var i = _nozzles.Count - 1; i >= 0; i--)
-                UnregisterNozzle(_nozzles[i]);
+            if (_nozzles != null)
+                for (var i = _nozzles.Count - 1; i >= 0; i--)
+                    UnregisterNozzle(_nozzles[i]);
 
             SetActive(false);
 
@@ -121,17 +126,6 @@ namespace Ships.Modules
             return averageThrustPoint;
         }
 
-#if UNITY_INCLUDE_TESTS
-        internal void ConfigureForTesting(float maxThrustValue,
-            float maxGimbalAngleValue = 35f,
-            float gimbalSpeedValue = 9999f)
-        {
-            maxThrust = maxThrustValue;
-            maxGimbalAngle = maxGimbalAngleValue;
-            gimbalSpeed = gimbalSpeedValue;
-        }
-#endif
-
         public override float GetEnergyDraw()
         {
             return base.GetEnergyDraw() *
@@ -146,28 +140,15 @@ namespace Ships.Modules
 
         private void ApplyNozzleTransforms()
         {
-            foreach (var nozzle in _nozzles)
-            {
-                if (!nozzle) continue;
-
+            foreach (var nozzle in _nozzles.AsValueEnumerable().Where(nozzle => nozzle))
                 nozzle.ApplyGimbalTransform(CurrentThrusterAngle);
-            }
-        }
-
-        private void ApplyExhaustVisuals()
-        {
-            foreach (var nozzle in _nozzles)
-            {
-                if (!nozzle) continue;
-
-                nozzle.ApplyExhaustVisuals(currentThrustRatio, IsActive);
-            }
         }
 
         private void ApplyNozzleVisuals()
         {
             ApplyNozzleTransforms();
-            ApplyExhaustVisuals();
+            foreach (var nozzle in _nozzles.AsValueEnumerable().Where(nozzle => nozzle))
+                nozzle.ApplyExhaustVisuals(currentThrustRatio, IsActive);
         }
 
         public void SetCurrentThrust(float currentThrust)
@@ -210,16 +191,15 @@ namespace Ships.Modules
 
         public override string CaptureTypePayloadJson(IGameContentCatalog contentCatalog)
         {
+            var nozzles = GetComponentsInChildren<Nozzle>(true);
+
             var data = new EngineModuleData
             {
                 maxThrust = maxThrust,
                 maxGimbalAngle = maxGimbalAngle,
-                gimbalSpeed = gimbalSpeed
+                gimbalSpeed = gimbalSpeed,
+                nozzles = nozzles.AsValueEnumerable().Select(nozzle => nozzle.CaptureToSnapshot()).ToArray()
             };
-
-            // if (contentCatalog != null && exhaustParticles != null &&
-            //     contentCatalog.TryGetContentId(exhaustParticles.gameObject, out var exhaustContentId))
-            //     data.exhaustTemplateContentId = exhaustContentId;
 
             return JsonUtility.ToJson(data);
         }
@@ -237,19 +217,58 @@ namespace Ships.Modules
             maxGimbalAngle = data.maxGimbalAngle;
             gimbalSpeed = data.gimbalSpeed;
 
-            if (contentCatalog != null &&
-                contentCatalog.TryGetPrefab(data.nozzleTemplateContentId, out var nozzleTemplate))
-            {
-                foreach (var nozzle in _nozzles.AsValueEnumerable().Where(nozzle => nozzle))
-                    Destroy(nozzle.gameObject);
+            _pendingNozzleSnapshots =
+                data.nozzles?.AsValueEnumerable().ToList() ?? new List<PixelatedRigidbodySnapshot>();
 
-                var exhaustObject = Instantiate(nozzleTemplate, transform);
-                // exhaustParticles = exhaustObject.GetComponent<ParticleSystem>();
-                // if (exhaustParticles == null)
-                //     throw new UnityException("[Engine] Exhaust template must contain ParticleSystem.");
+            ClearExistingNozzleChildren();
+
+            foreach (var nozzleSnapshot in _pendingNozzleSnapshots)
+                NestedPixelatedRigidbodyFactory.CreateShell(transform, nozzleSnapshot);
+        }
+
+        internal void RestorePendingNozzleSnapshots()
+        {
+            foreach (var snapshot in _pendingNozzleSnapshots)
+            {
+                var nozzleTransform = transform.Find(snapshot.name);
+                if (!nozzleTransform)
+                    throw new UnityException(
+                        $"[Engine] Missing nozzle child '{snapshot.name}' during snapshot restore.");
+
+                var pixelatedRigidbody = nozzleTransform.GetComponent<PixelatedRigidbody>();
+                if (!pixelatedRigidbody)
+                    throw new UnityException(
+                        $"[Engine] Nozzle child '{snapshot.name}' has no PixelatedRigidbody.");
+
+                pixelatedRigidbody.RestoreFromSnapshot(snapshot);
+            }
+
+            _pendingNozzleSnapshots.Clear();
+        }
+
+        private void ClearExistingNozzleChildren()
+        {
+            var existingNozzles = GetComponentsInChildren<Nozzle>(true);
+
+            foreach (var nozzle in existingNozzles.AsValueEnumerable().ToArray())
+            {
+                if (!nozzle || nozzle.transform == transform)
+                    continue;
+
+                DestroyImmediate(nozzle.gameObject);
             }
         }
+
 #if UNITY_INCLUDE_TESTS
+        internal void ConfigureForTesting(float maxThrustValue,
+            float maxGimbalAngleValue = 35f,
+            float gimbalSpeedValue = 9999f)
+        {
+            maxThrust = maxThrustValue;
+            maxGimbalAngle = maxGimbalAngleValue;
+            gimbalSpeed = gimbalSpeedValue;
+        }
+
         internal void SetCurrentThrusterAngleForTesting(float nearFullCircleCurrentAngle)
         {
             CurrentThrusterAngle = nearFullCircleCurrentAngle;

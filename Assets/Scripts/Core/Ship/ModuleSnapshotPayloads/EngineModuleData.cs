@@ -1,5 +1,4 @@
 using System;
-using UnityEngine.Serialization;
 
 namespace Core.Ship.ModuleSnapshotPayloads
 {
@@ -9,7 +8,6 @@ namespace Core.Ship.ModuleSnapshotPayloads
         public float maxThrust;
         public float maxGimbalAngle;
         public float gimbalSpeed;
-
-        public string[] nozzleTemplateContentIds;
+        public PixelatedRigidbodySnapshot[] nozzles;
     }
 }

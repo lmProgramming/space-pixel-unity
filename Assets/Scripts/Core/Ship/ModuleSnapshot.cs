@@ -14,18 +14,10 @@ namespace Core.Ship
         public string archetypeId;
         public Vector3 localPosition;
         public Quaternion localRotation;
-
-        [SerializeReference]
-        public PixelGridSnapshot colorGrid;
-
-        [SerializeReference]
-        public ArmorGridSnapshot armorGrid;
-
-        [SerializeReference]
-        public HealthGridSnapshot healthGrid;
-        public float defaultPixelHealth = 1f;
-        public float maxArmorHealth = 10f;
         public Resources resources;
+
+        [SerializeReference]
+        public PixelatedRigidbodySnapshot pixelatedRigidbody;
 
         protected ModuleSnapshotBase()
         {

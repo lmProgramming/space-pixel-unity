@@ -306,6 +306,48 @@ namespace Pixelation
                 HealthGrid.SetHealth(new Vector2Int(x, y), snapshot.GetValue(x, y));
         }
 
+        public virtual PixelatedRigidbodySnapshot CaptureToSnapshot()
+        {
+            var snapshot = new PixelatedRigidbodySnapshot
+            {
+                name = transform.name,
+                rigidbodyType = GetSnapshotRigidbodyType(),
+                localPosition = transform.localPosition,
+                localRotation = transform.localRotation,
+                defaultPixelHealth = defaultPixelHealth,
+                maxArmorHealth = maxArmorHealth,
+                armorGrid = CaptureArmorGridSnapshot(),
+                healthGrid = CaptureHealthGridSnapshot()
+            };
+
+            if (TexturePixelGrid == null)
+                return snapshot;
+
+            var dimensions = TexturePixelGrid.Dimensions();
+            snapshot.colorGrid = new PixelGridSnapshot(dimensions.x, dimensions.y);
+
+            for (var y = 0; y < dimensions.y; y++)
+            for (var x = 0; x < dimensions.x; x++)
+            {
+                var pos = new Vector2Int(x, y);
+                if (TexturePixelGrid.IsPixel(pos))
+                    snapshot.colorGrid.SetPixel(x, y, TexturePixelGrid.GetValue(pos));
+            }
+
+            return snapshot;
+        }
+
+        public virtual void RestoreFromSnapshot(PixelatedRigidbodySnapshot snapshot)
+        {
+            if (snapshot == null)
+                throw new UnityException($"[PixelatedRigidbody] Cannot restore null snapshot on '{name}'.");
+
+            ApplySnapshotHealthDefaults(snapshot.defaultPixelHealth, snapshot.maxArmorHealth);
+            RestoreColorGridFromSnapshot(snapshot.colorGrid);
+            ApplyArmorGridSnapshot(snapshot.armorGrid);
+            ApplyHealthGridSnapshot(snapshot.healthGrid);
+        }
+
         public virtual void NoPixelsLeft()
         {
             OnNoPixelsLeft?.Invoke(this);
@@ -321,6 +363,33 @@ namespace Pixelation
         {
             sprite = newSprite;
             Setup(forceSetup: true, recalculateColliders: true);
+        }
+
+        protected virtual PixelatedRigidbodyType GetSnapshotRigidbodyType()
+        {
+            return PixelatedRigidbodyType.PixelatedRigidbody;
+        }
+
+        private void ApplySnapshotHealthDefaults(float defaultHealth, float maxArmor)
+        {
+            defaultPixelHealth = defaultHealth;
+            maxArmorHealth = maxArmor;
+        }
+
+        private void RestoreColorGridFromSnapshot(PixelGridSnapshot colorGrid)
+        {
+            if (colorGrid == null || colorGrid.width == 0 || colorGrid.height == 0)
+                throw new UnityException(
+                    $"[PixelatedRigidbody] '{name}' has no pixel data in snapshot. " +
+                    "Re-capture the snapshot — empty color grids are not supported.");
+
+            var colors = new Color32[colorGrid.width, colorGrid.height];
+
+            for (var y = 0; y < colorGrid.height; y++)
+            for (var x = 0; x < colorGrid.width; x++)
+                colors[x, y] = colorGrid.GetPixel(x, y);
+
+            SetTextureFromColors(colors);
         }
 
         public Color32 GetColor(Vector2Int point)

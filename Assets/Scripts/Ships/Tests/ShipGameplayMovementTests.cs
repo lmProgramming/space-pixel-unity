@@ -105,7 +105,7 @@ namespace Ships.Tests
 
             var ship = ShipTestBuilder.CreateShip(Container, CreatedObjects, "GameplayTestShip")
                 .WithCommand("Command", Vector2.zero, modulePixelSize, modulePixelSize)
-                .WithPowerModule(new Vector2(0f, moduleSpacing), modulePixelSize, modulePixelSize)
+                .WithTestPowerModule(new Vector2(0f, moduleSpacing), modulePixelSize, modulePixelSize)
                 .WithEngineModule(new Vector2(moduleSpacing, 0f), engineMaxThrust, modulePixelSize, modulePixelSize)
                 .WithEngineModule(new Vector2(-moduleSpacing, 0f), engineMaxThrust, modulePixelSize, modulePixelSize)
                 .Build<MovableShipTestProxy>();

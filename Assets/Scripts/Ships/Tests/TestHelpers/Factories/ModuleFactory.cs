@@ -22,7 +22,7 @@ namespace Ships.Tests.TestHelpers.Factories
             commandGo.AddComponent<Command>();
         }
 
-        public static void CreatePowerModule(Transform parent, Vector2 localPosition, DiContainer container,
+        public static void CreateTestPowerModule(Transform parent, Vector2 localPosition, DiContainer container,
             ICollection<GameObject> createdObjects,
             int modulePixelWidth, int modulePixelHeight)
         {
@@ -38,13 +38,13 @@ namespace Ships.Tests.TestHelpers.Factories
             var engineGo = CreateModuleBase("Engine", parent, localPosition, localRotationZ, container, createdObjects,
                 modulePixelWidth, modulePixelHeight);
 
-            AddTestNozzle(engineGo, container, createdObjects);
+            AddNozzle(engineGo, container, createdObjects);
 
             var engine = engineGo.AddComponent<Engine>();
             engine.ConfigureForTesting(engineMaxThrust, gimbalRange);
         }
 
-        private static void AddTestNozzle(GameObject engineGo, DiContainer container,
+        public static void AddNozzle(GameObject engineGo, DiContainer container,
             ICollection<GameObject> createdObjects)
         {
             var nozzleGo = CreateGameObject("Nozzle", createdObjects, container);
@@ -97,7 +97,7 @@ namespace Ships.Tests.TestHelpers.Factories
             return CreateSolidPixelGrid(width, height, new Color32(100, 100, 100, 255));
         }
 
-        public static Color32[,] CreateSolidPixelGrid(int width, int height, Color32 color)
+        private static Color32[,] CreateSolidPixelGrid(int width, int height, Color32 color)
         {
             var colors = new Color32[width, height];
 

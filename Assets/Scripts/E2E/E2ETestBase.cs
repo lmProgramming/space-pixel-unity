@@ -158,7 +158,7 @@ namespace E2E
             ModuleFactory.CreateCommandModule(shipGo.transform, Vector2.zero, Container, CreatedObjects,
                 modulePixelSize, modulePixelSize);
             // Power
-            ModuleFactory.CreatePowerModule(shipGo.transform, new Vector2(0f, moduleSpacing), Container,
+            ModuleFactory.CreateTestPowerModule(shipGo.transform, new Vector2(0f, moduleSpacing), Container,
                 CreatedObjects, modulePixelSize, modulePixelSize);
             if (withEngines)
             {

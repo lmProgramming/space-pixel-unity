@@ -1,19 +1,15 @@
 using System;
-using System.Collections.Generic;
-using System.Reflection;
 using Core.Services;
 using Core.Ship;
 using Pixelation;
 using Ships.Modules;
 using UnityEngine;
-using Module = Ships.Modules.Module;
 using Object = UnityEngine.Object;
 
 namespace Services
 {
     public class ModuleRestoreFactory
     {
-        private static readonly Dictionary<string, Type> ModuleTypeMap = BuildModuleTypeMap();
         private readonly IShipModuleCatalog _shipModuleCatalog;
 
         public ModuleRestoreFactory(IShipModuleCatalog shipModuleCatalog)
@@ -56,61 +52,14 @@ namespace Services
 
             moduleGo.AddComponent<PolygonCollider2D>();
 
-            var moduleType = ResolveModuleType(snapshot);
+            var moduleType = SnapshotComponentRegistry.ResolveModuleType(snapshot.moduleTypeName, snapshot.moduleType);
 
             if (moduleType == typeof(LaserBeam))
                 moduleGo.AddComponent<LineRenderer>();
 
-            if (moduleType == typeof(Engine))
-            {
-                var exhaustGo = new GameObject("EngineExhaust");
-                exhaustGo.transform.SetParent(moduleGo.transform, false);
-                exhaustGo.AddComponent<ParticleSystem>();
-            }
-
             moduleGo.AddComponent<PixelatedRigidbody>();
             moduleGo.AddComponent(moduleType);
             return moduleGo;
-        }
-
-        private static Type ResolveModuleType(ModuleSnapshot snapshot)
-        {
-            var typeName = snapshot.moduleTypeName;
-            if (!string.IsNullOrEmpty(typeName) && ModuleTypeMap.TryGetValue(typeName, out var type))
-                return type;
-            return snapshot.moduleType switch
-            {
-                ModuleType.Command => typeof(Command),
-                ModuleType.Engine => typeof(Engine),
-                ModuleType.Weapon => typeof(Cannon),
-                _ => typeof(Basic)
-            };
-        }
-
-        private static Dictionary<string, Type> BuildModuleTypeMap()
-        {
-            var baseType = typeof(Module);
-            var map = new Dictionary<string, Type>(StringComparer.Ordinal);
-            var shipsAssembly = typeof(Module).Assembly;
-
-            Type[] types;
-            try
-            {
-                types = shipsAssembly.GetTypes();
-            }
-            catch (ReflectionTypeLoadException ex)
-            {
-                types = ex.Types;
-            }
-
-            foreach (var type in types)
-            {
-                if (type == null || type.IsAbstract || !baseType.IsAssignableFrom(type))
-                    continue;
-                map[type.Name] = type;
-            }
-
-            return map;
         }
     }
 }

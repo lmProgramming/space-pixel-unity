@@ -23,7 +23,7 @@ namespace Ships.Tests
             for (var i = 0; i < moduleConfigs.Length; i++)
             {
                 var config = moduleConfigs[i];
-                builder.WithCrewModule($"Module{i}", new Vector2(5 * (i + 1), 0), 5, 5, config.crewNeeded,
+                builder.WithTestCrewModule($"Module{i}", new Vector2(5 * (i + 1), 0), 5, 5, config.crewNeeded,
                     config.mainSkill);
             }
 

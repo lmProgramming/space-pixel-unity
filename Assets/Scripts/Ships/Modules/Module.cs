@@ -15,6 +15,7 @@ using Resources = Core.Ship.Resources;
 
 [assembly: InternalsVisibleTo("Editor.InspectorExtensions")]
 [assembly: InternalsVisibleTo("Ships.Tests")]
+[assembly: InternalsVisibleTo("Services")]
 
 namespace Ships.Modules
 {

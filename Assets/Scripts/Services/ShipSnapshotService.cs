@@ -5,6 +5,7 @@ using Core.Services;
 using Core.Ship;
 using LMPro.External.IsAlive;
 using Ships;
+using Ships.Modules;
 using UnityEngine;
 using Zenject;
 
@@ -118,25 +119,9 @@ namespace Services
                 localPosition = module.Transform.localPosition,
                 localRotation = module.Transform.localRotation,
                 resources = module.Resources,
-                defaultPixelHealth = module.PixelatedRigidbody.DefaultPixelHealthForSnapshot,
-                maxArmorHealth = module.PixelatedRigidbody.MaxArmorHealthForSnapshot,
+                pixelatedRigidbody = module.PixelatedRigidbody.CaptureToSnapshot(),
                 typePayloadJson = module.CaptureTypePayloadJson(_gameContentCatalog)
             };
-
-            var grid = module.PixelatedRigidbody.TexturePixelGrid;
-            if (grid == null) return moduleSnapshot;
-            var dimensions = grid.Dimensions();
-            moduleSnapshot.colorGrid = new PixelGridSnapshot(dimensions.x, dimensions.y);
-
-            for (var y = 0; y < dimensions.y; y++)
-            for (var x = 0; x < dimensions.x; x++)
-            {
-                var pos = new Vector2Int(x, y);
-                if (grid.IsPixel(pos)) moduleSnapshot.colorGrid.SetPixel(x, y, grid.GetValue(pos));
-            }
-
-            moduleSnapshot.armorGrid = module.PixelatedRigidbody.CaptureArmorGridSnapshot();
-            moduleSnapshot.healthGrid = module.PixelatedRigidbody.CaptureHealthGridSnapshot();
 
             return moduleSnapshot;
         }
@@ -174,14 +159,15 @@ namespace Services
                 createdModules.Add((moduleGo, ms, module));
             }
 
-            foreach (var (moduleGo, ms, _) in createdModules)
+            foreach (var (moduleGo, ms, module) in createdModules)
             {
                 injectionContainer.InjectGameObject(moduleGo);
 
                 var pixelatedRigidbody = moduleGo.GetComponent<IPixelatedRigidbody>();
-                ApplyPixelData(pixelatedRigidbody, ms.colorGrid, ms.moduleName);
-                pixelatedRigidbody.ApplyArmorGridSnapshot(ms.armorGrid);
-                pixelatedRigidbody.ApplyHealthGridSnapshot(ms.healthGrid);
+                pixelatedRigidbody.RestoreFromSnapshot(ms.pixelatedRigidbody);
+
+                if (module is Engine engine)
+                    engine.RestorePendingNozzleSnapshots();
 
                 moduleGo.SetActive(true);
                 moduleGo.gameObject.layer = concreteShip.gameObject.layer;
@@ -200,26 +186,6 @@ namespace Services
             }
 
             return _container;
-        }
-
-        private static void ApplyPixelData(IPixelatedRigidbody pixelatedRb, PixelGridSnapshot pg, string moduleName)
-        {
-            if (pixelatedRb == null)
-                throw new UnityException(
-                    $"[ShipSnapshotService] PixelatedRigidbody is null on module '{moduleName}'");
-
-            if (pg == null || pg.width == 0 || pg.height == 0)
-                throw new UnityException(
-                    $"[ShipSnapshotService] Module '{moduleName}' has no pixel data in snapshot. " +
-                    "Re-capture the snapshot — old snapshots with empty pixel grids are not supported.");
-
-            var colors = new Color32[pg.width, pg.height];
-
-            for (var y = 0; y < pg.height; y++)
-            for (var x = 0; x < pg.width; x++)
-                colors[x, y] = pg.GetPixel(x, y);
-
-            pixelatedRb.SetTextureFromColors(colors);
         }
     }
 }
