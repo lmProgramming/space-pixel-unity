@@ -57,7 +57,7 @@ namespace Ships.Tests.TestHelpers.Factories
         {
             var layout = ShipTestBuilder.CreateShip(container, createdObjects)
                 .WithCommand("Command", Vector2.zero, moduleWidth, moduleHeight)
-                .WithModule("Module2", new Vector2(moduleWidth, 0), moduleWidth, moduleHeight)
+                .WithTestModule("Module2", new Vector2(moduleWidth, 0), moduleWidth, moduleHeight)
                 .BuildLayoutResult();
 
             return new TwoModuleShipResult
@@ -79,7 +79,7 @@ namespace Ships.Tests.TestHelpers.Factories
             return builder
                 .WithCommand("Command", Vector2.zero, modulePixelSize, modulePixelSize)
                 .WithEngineModule(new Vector2(engineSpacing, 0f), engineMaxThrust, modulePixelSize, modulePixelSize)
-                .Build(initializeModules: true);
+                .Build(true);
         }
     }
 }

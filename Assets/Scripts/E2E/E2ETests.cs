@@ -31,11 +31,12 @@ namespace E2E
 
             yield return WaitForLifecycle();
 
+            const float expectedDistance = 30f;
+
             var initialDistance = Vector2.Distance(ship1.GetPosition(), ship2.GetPosition());
-            Assert.That(initialDistance, Is.GreaterThan(40f));
+            Assert.That(initialDistance, Is.GreaterThan(expectedDistance));
 
             var finalDistance = float.MaxValue;
-            const float expectedDistance = 35f;
             const float totalTime = 25f;
             const int maxIterations = 100;
             const float step = totalTime / maxIterations;

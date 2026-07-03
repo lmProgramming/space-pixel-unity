@@ -9,6 +9,7 @@ using LMPro;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Zenject;
+using ZLinq;
 
 [assembly: InternalsVisibleTo("E2E")]
 [assembly: InternalsVisibleTo("Ships.Tests")]
@@ -21,7 +22,7 @@ namespace Ships.Modules
 
         [SerializeField] private float projectileSpeed;
 
-        [SerializeField] private Transform[] projectileSpawnPoints;
+        [SerializeField] private List<Transform> projectileSpawnPoints = new();
 
         [SerializeField] private float reloadTime;
 
@@ -44,10 +45,11 @@ namespace Ships.Modules
         protected override void Start()
         {
             base.Start();
+
             _reloadTimer.OnReady += HandleReady;
             _reloadTimer.OnNotReady += HandleNotReady;
 
-            Assert.IsTrue(projectileSpawnPoints.Length > 0, "Projectile spawn points must be assigned.");
+            Assert.IsTrue(projectileSpawnPoints.Count > 0, "Projectile spawn points must be assigned.");
         }
 
         public void Update()
@@ -134,7 +136,9 @@ namespace Ships.Modules
             var data = new CannonModuleData
             {
                 reloadTime = reloadTime,
-                projectileSpeed = projectileSpeed
+                projectileSpeed = projectileSpeed,
+                projectileLocalSpawnPoints =
+                    projectileSpawnPoints.AsValueEnumerable().Select(p => (Vector2)p.localPosition).ToArray()
             };
 
             if (contentCatalog != null && projectilePrefab &&
@@ -161,6 +165,16 @@ namespace Ships.Modules
             projectileSpeed = data.projectileSpeed;
             _reloadTimer = new ManualTimer(reloadTime);
 
+            projectileSpawnPoints.Clear();
+            foreach (var projectileLocalSpawnPoint in data.projectileLocalSpawnPoints)
+            {
+                var go = new GameObject("Projectile Spawn Point");
+                go.transform.SetParent(transform);
+                go.transform.localPosition = projectileLocalSpawnPoint;
+
+                projectileSpawnPoints.Add(go.transform);
+            }
+
             if (contentCatalog != null &&
                 contentCatalog.TryGetPrefab(data.projectileContentId, out var projectilePrefabValue))
                 projectilePrefab = projectilePrefabValue;
@@ -182,7 +196,7 @@ namespace Ships.Modules
             float newProjectileSpeed,
             float newReloadTime,
             Sprite newSprite,
-            Transform[] newProjectileSpawnPoints)
+            List<Transform> newProjectileSpawnPoints)
         {
             projectilePrefab = newProjectilePrefab;
             projectileSpeed = newProjectileSpeed;

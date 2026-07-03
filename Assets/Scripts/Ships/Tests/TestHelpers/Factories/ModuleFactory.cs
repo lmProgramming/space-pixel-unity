@@ -142,5 +142,20 @@ namespace Ships.Tests.TestHelpers.Factories
             testModule.SetModuleType(type);
             return testModule;
         }
+
+        public static Basic AddBasicComponent(GameObject moduleGo, ModuleType type = ModuleType.Resources)
+        {
+            var module = moduleGo.AddComponent<Basic>();
+            module.InitializeForTesting(type);
+
+            return module;
+        }
+
+        public static LaserBeam AddLaserComponent(GameObject moduleGo)
+        {
+            var laser = moduleGo.AddComponent<LaserBeam>();
+
+            return laser;
+        }
     }
 }

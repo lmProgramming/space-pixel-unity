@@ -183,7 +183,7 @@ namespace E2E
                 projectileSpawnGo.transform.SetParent(cannonGo.transform);
                 projectileSpawnGo.transform.position = cannonGo.transform.position;
                 cannon.SetupForTesting(bulletPrefab, 0.5f, 0.5f, weaponSprite,
-                    new[] { projectileSpawnGo.transform });
+                    new List<Transform> { projectileSpawnGo.transform });
             }
 
             shipGo.AddComponent<ModuleConnectionFactory>();

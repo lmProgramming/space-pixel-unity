@@ -10,6 +10,7 @@ using Ships.Tests.TestHelpers.Fixtures;
 using Ships.Tests.TestHelpers.Mocks;
 using UnityEngine;
 using UnityEngine.TestTools;
+using ZLinq;
 using Resources = Core.Ship.Resources;
 
 namespace Ships.Tests
@@ -45,8 +46,8 @@ namespace Ships.Tests
 
             var ship = ShipTestBuilder.CreateShip(Container, CreatedObjects, "Ship")
                 .ParentedTo(TestRoot.transform)
-                .WithCustomCommand(Vector2.zero, 5, 5)
-                .WithInstantiatedCannon(cannonPrefab, new Vector2(2f, 0f), "cannon_small_16", 5)
+                .WithCommandOfCustomSnapshotOrigin(Vector2.zero, 5, 5)
+                .WithInstantiatedModule("cannon", cannonPrefab, new Vector2(2f, 0f), "cannon_small_16", 5)
                 .Build(true);
 
             yield return null;
@@ -69,7 +70,7 @@ namespace Ships.Tests
         {
             var ship = ShipTestBuilder.CreateShip(Container, CreatedObjects, "Ship")
                 .ParentedTo(TestRoot.transform)
-                .WithCustomCommand(Vector2.zero, 5, 5)
+                .WithCommandOfCustomSnapshotOrigin(Vector2.zero, 5, 5)
                 .WithCustomEngine(new Vector2(2f, 0f), 5, 5, new Resources(0, 2f, 0, 0, 0))
                 .Build(true);
 
@@ -98,7 +99,7 @@ namespace Ships.Tests
         {
             var ship = ShipTestBuilder.CreateShip(Container, CreatedObjects, "Ship")
                 .ParentedTo(TestRoot.transform)
-                .WithCustomCommand(Vector2.zero, 5, 5)
+                .WithCommandOfCustomSnapshotOrigin(Vector2.zero, 5, 5)
                 .WithCustomEngine(new Vector2(2f, 0f), 5, 5, new Resources(0, 2f, 0, 0, 0))
                 .Build(true);
 
@@ -125,7 +126,7 @@ namespace Ships.Tests
         {
             var ship = ShipTestBuilder.CreateShip(Container, CreatedObjects, "Ship")
                 .ParentedTo(TestRoot.transform)
-                .WithCustomCommand(Vector2.zero, 5, 5)
+                .WithCommandOfCustomSnapshotOrigin(Vector2.zero, 5, 5)
                 .WithCustomEngine(new Vector2(2f, 0f), 5, 5, new Resources(0, 2f, 0, 0, 0))
                 .Build(true);
 
@@ -148,7 +149,7 @@ namespace Ships.Tests
         {
             var ship = ShipTestBuilder.CreateShip(Container, CreatedObjects, "Ship")
                 .ParentedTo(TestRoot.transform)
-                .WithCustomCommand(Vector2.zero, 5, 5)
+                .WithCommandOfCustomSnapshotOrigin(Vector2.zero, 5, 5)
                 .WithCustomEngine(new Vector2(2f, 0f), 5, 5, new Resources(0, 2f, 0, 0, 0))
                 .Build(true);
 
@@ -179,36 +180,43 @@ namespace Ships.Tests
         [UnityTest]
         public IEnumerator ShipWithAllModules_HasAllModulesAfterSnapshotRestoration()
         {
-            //todo: finish this!
+            var (projectilePrefab, weaponSprite) = CreateSimpleCannonDependencies();
             var ship = ShipTestBuilder.CreateShip(Container, CreatedObjects, "Ship")
                 .ParentedTo(TestRoot.transform)
-                .WithCustomCommand(Vector2.zero, 5, 5)
+                .WithCommand("Command Module", Vector2.zero, 5, 5)
                 .WithCustomEngine(new Vector2(5f, 0f), 5, 5, new Resources(0, 2f, 0, 0, 0))
-                //.WithTestPowerModule(new Vector2(0f, 0f), 5, 5)
+                .WithBasic("Power Module", new Vector2(0f, 5f), 15, 5, new Resources(100, 5, 1, 500, 0))
+                .WithBasic("Crew Module", new Vector2(0f, 10f), 5, 5, new Resources(100, 25, 1, 0, 10))
+                .WithBasic("Battery", new Vector2(-5f, 10f), 5, 5, new Resources(5000, 10, 1, 0, 0))
+                .WithLaser("Laser", new Vector2(5f, 5f), 5, 5)
+                .WithCannon(projectilePrefab, weaponSprite, new Vector2(10f, 5f), 5, 5)
                 .Build(true);
 
             yield return null;
 
-            var engine = (Engine)ship.AllModules[1];
-            var nozzle = engine.GetComponentInChildren<Nozzle>();
-            Assert.IsNotNull(nozzle);
-            nozzle.RemovePixelAt(new Vector2Int(1, 1));
-
             var snapshot = _service.CaptureSnapshot(ship);
-            snapshot.modules[1].origin = ModuleOrigin.Custom;
-            snapshot.modules[1].archetypeId = string.Empty;
-
             _service.ApplySnapshot(ship, snapshot);
             ship.InitializeModules();
 
             yield return null;
             yield return null;
 
-            var restoredEngine = (Engine)ship.AllModules[1];
-            var restoredNozzle = restoredEngine.GetComponentInChildren<Nozzle>();
-            Assert.IsNotNull(restoredNozzle);
-            Assert.IsFalse(restoredNozzle.IsPixel(new Vector2Int(1, 1)));
-            Assert.IsTrue(restoredNozzle.IsPixel(new Vector2Int(0, 0)));
+            var allModules = ship.AllModules;
+            var allModulesEnumerable = ship.AllModules.AsValueEnumerable();
+            Assert.IsTrue(allModules.Count == 7);
+            Assert.IsTrue(allModulesEnumerable.Where(m => m.Type == ModuleType.Command).Count() == 1);
+            Assert.IsTrue(allModulesEnumerable.Where(m => m.Type == ModuleType.Engine).Count() == 1);
+            Assert.IsTrue(allModulesEnumerable.Where(m => m.Type == ModuleType.Resources).Count() == 3);
+            Assert.IsTrue(allModulesEnumerable.Where(m => m.Type == ModuleType.Weapon).Count() == 2);
+        }
+
+        private (GameObject projectilePrefab, Sprite weaponSprite) CreateSimpleCannonDependencies()
+        {
+            var projectilePrefab = new GameObject("ProjectilePrefab");
+            var weaponSprite = CreateTestSprite();
+            projectilePrefab.transform.SetParent(TestRoot.transform);
+
+            return (projectilePrefab, weaponSprite);
         }
 
         private static Sprite CreateTestSprite()

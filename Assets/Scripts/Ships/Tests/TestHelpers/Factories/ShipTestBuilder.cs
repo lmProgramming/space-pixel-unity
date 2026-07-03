@@ -24,7 +24,6 @@ namespace Ships.Tests.TestHelpers.Factories
         private readonly DiContainer _container;
         private readonly ICollection<GameObject> _createdObjects;
         private readonly List<Engine> _engines = new();
-        private readonly Dictionary<string, Module> _modulesByName = new();
         private readonly List<Module> _otherModules = new();
         private readonly GameObject _shipGo;
         private Module _commandModule;
@@ -44,6 +43,12 @@ namespace Ships.Tests.TestHelpers.Factories
             return new ShipTestBuilder(container, createdObjects, shipName);
         }
 
+        private GameObject CreateModuleBase(string name, Vector2 localPosition, int width, int height)
+        {
+            return ModuleFactory.CreateModuleBase(name, _shipGo.transform, localPosition, 0f, _container,
+                _createdObjects, width, height);
+        }
+
         public ShipTestBuilder ParentedTo(Transform parent, bool deactivateBeforeWire = true)
         {
             _shipGo.transform.SetParent(parent);
@@ -60,32 +65,47 @@ namespace Ships.Tests.TestHelpers.Factories
 
         public ShipTestBuilder WithCommand(string name, Vector2 localPosition, int width, int height)
         {
-            var moduleGo = ModuleFactory.CreateModuleBase(name, _shipGo.transform, localPosition, 0f, _container,
-                _createdObjects, width, height);
+            var moduleGo = CreateModuleBase(name, localPosition, width, height);
             var command = ModuleFactory.AddCommandModuleComponent(moduleGo);
-            RegisterCommand(name, command);
+            RegisterCommand(command);
             return this;
         }
 
-        public ShipTestBuilder WithModule(string name, Vector2 localPosition, int width, int height,
+        public ShipTestBuilder WithBasic(string name, Vector2 localPosition, int width, int height, Resources resources)
+        {
+            var moduleGo = CreateModuleBase(name, localPosition, width, height);
+            var basic = ModuleFactory.AddBasicComponent(moduleGo);
+            RegisterOtherModule(basic);
+            basic.SetResources(resources);
+            return this;
+        }
+
+
+        public ShipTestBuilder WithLaser(string name, Vector2 localPosition, int width, int height)
+        {
+            var moduleGo = CreateModuleBase(name, localPosition, width, height);
+            var basic = ModuleFactory.AddLaserComponent(moduleGo);
+            RegisterOtherModule(basic);
+            return this;
+        }
+
+        public ShipTestBuilder WithTestModule(string name, Vector2 localPosition, int width, int height,
             ModuleType type = ModuleType.Resources)
         {
-            var moduleGo = ModuleFactory.CreateModuleBase(name, _shipGo.transform, localPosition, 0f, _container,
-                _createdObjects, width, height);
+            var moduleGo = CreateModuleBase(name, localPosition, width, height);
             var module = ModuleFactory.AddTestModuleComponent(moduleGo, type);
-            RegisterOtherModule(name, module);
+            RegisterOtherModule(module);
             return this;
         }
 
         public ShipTestBuilder WithTestCrewModule(string name, Vector2 localPosition, int width, int height,
             int crewNeeded, CrewSkillType mainSkill)
         {
-            var moduleGo = ModuleFactory.CreateModuleBase(name, _shipGo.transform, localPosition, 0f, _container,
-                _createdObjects, width, height);
+            var moduleGo = CreateModuleBase(name, localPosition, width, height);
             var testModule = ModuleFactory.AddTestModuleComponent(moduleGo);
             testModule.SetMainSkillType(mainSkill);
             testModule.SetResources(new Resources(0, 0, crewNeeded, 0, 0));
-            RegisterOtherModule(name, testModule);
+            RegisterOtherModule(testModule);
             return this;
         }
 
@@ -106,7 +126,7 @@ namespace Ships.Tests.TestHelpers.Factories
             return this;
         }
 
-        public ShipTestBuilder WithCustomCommand(Vector2 localPosition, int width, int height)
+        public ShipTestBuilder WithCommandOfCustomSnapshotOrigin(Vector2 localPosition, int width, int height)
         {
             var commandGo = ModuleFactory.CreateModuleBase("Command", _shipGo.transform, localPosition, 0f, _container,
                 _createdObjects, width, height);
@@ -114,7 +134,7 @@ namespace Ships.Tests.TestHelpers.Factories
             command.SetResources(new Resources(0, 0, 0, 0, 0));
             var identity = commandGo.AddComponent<ModuleInstanceIdentity>();
             identity.EnsureAssigned(ModuleOrigin.Custom);
-            RegisterCommand("Command", command);
+            RegisterCommand(command);
             return this;
         }
 
@@ -127,24 +147,24 @@ namespace Ships.Tests.TestHelpers.Factories
             engine.SetResources(resources);
             var identity = engineGo.AddComponent<ModuleInstanceIdentity>();
             identity.EnsureAssigned(ModuleOrigin.Custom);
-            RegisterOtherModule("Engine", engine);
+            RegisterOtherModule(engine);
             return this;
         }
 
-        public ShipTestBuilder WithInstantiatedCannon(GameObject cannonPrefab, Vector2 localPosition,
+        public ShipTestBuilder WithInstantiatedModule(string name, GameObject modulePrefab, Vector2 localPosition,
             string archetypeId,
             int pixelSize)
         {
-            var cannonInstance = Object.Instantiate(cannonPrefab, _shipGo.transform);
-            cannonInstance.transform.localPosition = localPosition;
-            cannonInstance.SetActive(true);
-            var cannonPixelRb = cannonInstance.GetComponent<PixelatedRigidbody>();
+            var moduleInstance = Object.Instantiate(modulePrefab, _shipGo.transform);
+            moduleInstance.transform.localPosition = localPosition;
+            moduleInstance.SetActive(true);
+            var cannonPixelRb = moduleInstance.GetComponent<PixelatedRigidbody>();
             cannonPixelRb.SetTextureFromColors(ModuleFactory.CreateSolidPixelGrid(pixelSize, pixelSize));
-            var cannonIdentity = cannonInstance.GetComponent<ModuleInstanceIdentity>();
+            var cannonIdentity = moduleInstance.GetComponent<ModuleInstanceIdentity>();
             if (cannonIdentity == null)
-                cannonIdentity = cannonInstance.AddComponent<ModuleInstanceIdentity>();
+                cannonIdentity = moduleInstance.AddComponent<ModuleInstanceIdentity>();
             cannonIdentity.EnsureAssigned(ModuleOrigin.CatalogPrefab, archetypeId);
-            RegisterOtherModule("Cannon", cannonInstance.GetComponent<Cannon>());
+            RegisterOtherModule(moduleInstance.GetComponent<Module>());
             return this;
         }
 
@@ -198,11 +218,25 @@ namespace Ships.Tests.TestHelpers.Factories
             };
         }
 
-        public static GameObject CreateCannonPrefab(DiContainer container, ICollection<GameObject> createdObjects,
-            Transform parent, GameObject projectilePrefab, Sprite weaponSprite, int pixelSize = 5)
+        public ShipTestBuilder WithCannon(GameObject projectilePrefab, Sprite weaponSprite, Vector2 localPosition,
+            int width, int height)
         {
-            var go = ModuleFactory.CreateModuleBase("CannonPrefab", parent, Vector2.zero, 0f,
-                container, createdObjects, pixelSize, pixelSize);
+            var moduleGo = CreateCannonPrefab(_container, _createdObjects, _shipGo.transform, projectilePrefab,
+                weaponSprite, localPosition, width, height);
+
+            moduleGo.SetActive(true);
+
+            RegisterOtherModule(moduleGo.GetComponent<Cannon>());
+
+            return this;
+        }
+
+        public static GameObject CreateCannonPrefab(DiContainer container, ICollection<GameObject> createdObjects,
+            Transform parent, GameObject projectilePrefab, Sprite weaponSprite, Vector2? localPosition = null,
+            int width = 5, int height = 5)
+        {
+            var go = ModuleFactory.CreateModuleBase("CannonPrefab", parent, localPosition ?? Vector2.zero, 0f,
+                container, createdObjects, width, height);
             go.SetActive(false);
             var cannon = go.AddComponent<Cannon>();
             cannon.SetResources(new Resources(0, 1, 0, 0, 0));
@@ -211,7 +245,8 @@ namespace Ships.Tests.TestHelpers.Factories
             projectileSpawnGo.transform.SetParent(go.transform);
             projectileSpawnGo.transform.position = go.transform.position;
 
-            cannon.SetupForTesting(projectilePrefab, 1f, 1.5f, weaponSprite, new[] { projectileSpawnGo.transform });
+            cannon.SetupForTesting(projectilePrefab, 1f, 1.5f, weaponSprite,
+                new List<Transform> { projectileSpawnGo.transform });
 
             return go;
         }
@@ -226,16 +261,14 @@ namespace Ships.Tests.TestHelpers.Factories
             return ship;
         }
 
-        private void RegisterCommand(string name, Command command)
+        private void RegisterCommand(Command command)
         {
             _commandModule = command;
-            _modulesByName[name] = command;
         }
 
-        private void RegisterOtherModule(string name, Module module)
+        private void RegisterOtherModule(Module module)
         {
             _otherModules.Add(module);
-            _modulesByName[name] = module;
         }
     }
 }

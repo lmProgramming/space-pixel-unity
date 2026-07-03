@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 
 namespace Core.Ship.ModuleSnapshotPayloads
 {
@@ -9,5 +10,6 @@ namespace Core.Ship.ModuleSnapshotPayloads
         public float projectileSpeed;
         public string projectileContentId;
         public string spriteContentId;
+        public Vector2[] projectileLocalSpawnPoints;
     }
 }
