@@ -51,7 +51,6 @@ namespace Services
 
             var spawnRect = spawnArea.GetSpawnRect();
 
-
             var reservations = new List<SkirmishSpawnPlacement.SpawnReservation>();
 
             SpawnAndSetupPlayer(reservations);

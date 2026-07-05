@@ -231,8 +231,9 @@ MonoBehaviour:
   maxGimbalAngle: 180
   gimbalSpeed: 240
   currentThrustRatio: 0
-  currentGimbalAngle: 0
+  currentGimbalAngleForDebug: 0
   desiredGimbalAngleForDebug: 0
+  <CurrentThrusterAngle>k__BackingField: 0
   drawGimbalGizmos: 1
   gizmoArcRadius: 1.5
   gizmoThrustUnitsPerNewton: 0.0025

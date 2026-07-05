@@ -2,7 +2,7 @@ using System;
 using System.Runtime.CompilerServices;
 using Core.Services;
 using Core.Ship;
-using Core.Ship.ModuleSnapshotPayloads;
+using Core.Ship.Snapshots.Module.ConcreteModule;
 using UnityEngine;
 
 [assembly: InternalsVisibleTo("Ships.Tests")]
@@ -52,9 +52,9 @@ namespace Ships.Modules
         }
 
 #if UNITY_INCLUDE_TESTS
-        internal void InitializeForTesting(ModuleType moduleType)
+        internal void InitializeForTesting(ModuleType newModuleType)
         {
-            this.moduleType = moduleType;
+            moduleType = newModuleType;
         }
 #endif
     }

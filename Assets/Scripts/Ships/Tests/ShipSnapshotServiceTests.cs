@@ -1,6 +1,6 @@
 using System.Collections;
 using Core.Ship;
-using Core.Ship.ModuleSnapshotPayloads;
+using Core.Ship.Snapshots.Module.ConcreteModule;
 using NUnit.Framework;
 using Services;
 using Ships.Modules;
@@ -78,7 +78,7 @@ namespace Ships.Tests
 
             var snapshot = _service.CaptureSnapshot(ship);
             var moduleSnapshot = snapshot.modules[1];
-            moduleSnapshot.origin = ModuleOrigin.Custom;
+            moduleSnapshot.origin = InstanceOrigin.Custom;
             moduleSnapshot.archetypeId = string.Empty;
             moduleSnapshot.pixelatedRigidbody.colorGrid.RemovePixel(0, 0);
 
@@ -161,7 +161,7 @@ namespace Ships.Tests
             nozzle.RemovePixelAt(new Vector2Int(1, 1));
 
             var snapshot = _service.CaptureSnapshot(ship);
-            snapshot.modules[1].origin = ModuleOrigin.Custom;
+            snapshot.modules[1].origin = InstanceOrigin.Custom;
             snapshot.modules[1].archetypeId = string.Empty;
 
             _service.ApplySnapshot(ship, snapshot);

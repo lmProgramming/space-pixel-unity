@@ -3,6 +3,7 @@ using System.IO;
 using Core.Pixelation;
 using Core.Services;
 using Core.Ship;
+using Core.Ship.Snapshots.Module;
 using LMPro.External.IsAlive;
 using Ships;
 using Ships.Modules;
@@ -100,11 +101,11 @@ namespace Services
                     $"[ShipSnapshotService] Cannot capture snapshot for module '{module}' because its transform is null. " +
                     "Ensure that all modules have valid transforms before capturing snapshots.");
 
-            var identity = module.Transform.GetComponent<ModuleInstanceIdentity>();
+            var identity = module.Transform.GetComponent<GameObjectInstanceIdentity>();
             if (!identity)
             {
-                identity = module.Transform.gameObject.AddComponent<ModuleInstanceIdentity>();
-                identity.EnsureAssigned(ModuleOrigin.Custom);
+                identity = module.Transform.gameObject.AddComponent<GameObjectInstanceIdentity>();
+                identity.EnsureAssigned(InstanceOrigin.Custom);
             }
             else if (string.IsNullOrWhiteSpace(identity.InstanceId))
             {
@@ -119,7 +120,7 @@ namespace Services
                 localPosition = module.Transform.localPosition,
                 localRotation = module.Transform.localRotation,
                 resources = module.Resources,
-                pixelatedRigidbody = module.PixelatedRigidbody.CaptureToSnapshot(),
+                pixelatedRigidbody = module.PixelatedRigidbody.CaptureToSnapshot(_gameContentCatalog),
                 typePayloadJson = module.CaptureTypePayloadJson(_gameContentCatalog)
             };
 
@@ -143,9 +144,9 @@ namespace Services
                 moduleGo.transform.localPosition = ms.localPosition;
                 moduleGo.transform.localRotation = ms.localRotation;
 
-                var identity = moduleGo.GetComponent<ModuleInstanceIdentity>();
+                var identity = moduleGo.GetComponent<GameObjectInstanceIdentity>();
                 if (!identity)
-                    identity = moduleGo.AddComponent<ModuleInstanceIdentity>();
+                    identity = moduleGo.AddComponent<GameObjectInstanceIdentity>();
                 identity.RestoreFromSnapshot(ms.instanceId, ms.origin, ms.archetypeId);
 
                 var module = moduleGo.GetComponent<IModule>();
@@ -164,10 +165,10 @@ namespace Services
                 injectionContainer.InjectGameObject(moduleGo);
 
                 var pixelatedRigidbody = moduleGo.GetComponent<IPixelatedRigidbody>();
-                pixelatedRigidbody.RestoreFromSnapshot(ms.pixelatedRigidbody);
+                pixelatedRigidbody.RestoreFromSnapshot(ms.pixelatedRigidbody, _gameContentCatalog);
 
                 if (module is Engine engine)
-                    engine.RestorePendingNozzleSnapshots();
+                    engine.RestorePendingNozzleSnapshots(_gameContentCatalog);
 
                 moduleGo.SetActive(true);
                 moduleGo.gameObject.layer = concreteShip.gameObject.layer;

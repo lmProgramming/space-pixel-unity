@@ -1,5 +1,6 @@
 using System;
 using Core.Ship;
+using Core.Ship.Snapshots.PixelatedRigidbody;
 using Pixelation;
 using Ships.Systems.Gimbal;
 using UnityEngine;
@@ -31,13 +32,6 @@ namespace Ships.Snapshot
                 : RigidbodyType2D.Dynamic;
 
             childGo.AddComponent<PolygonCollider2D>();
-
-            if (snapshot.rigidbodyType == PixelatedRigidbodyType.Nozzle)
-            {
-                var exhaustGo = new GameObject("EngineExhaust");
-                exhaustGo.transform.SetParent(childGo.transform, false);
-                exhaustGo.AddComponent<ParticleSystem>();
-            }
 
             childGo.AddComponent(ResolveComponentType(snapshot.rigidbodyType));
 

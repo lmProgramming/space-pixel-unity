@@ -418,10 +418,10 @@ namespace ShipFactory
             _ship.ManualAddModule(module);
             module.SetLocalPosition(localPosition);
 
-            var identity = instance.GetComponent<ModuleInstanceIdentity>();
+            var identity = instance.GetComponent<GameObjectInstanceIdentity>();
             if (identity == null)
-                identity = instance.AddComponent<ModuleInstanceIdentity>();
-            identity.EnsureAssigned(ModuleOrigin.CatalogPrefab, shipModuleSO.ArchetypeId);
+                identity = instance.AddComponent<GameObjectInstanceIdentity>();
+            identity.EnsureAssigned(InstanceOrigin.CatalogPrefab, shipModuleSO.ArchetypeId);
 
             instance.GetComponent<Rigidbody2D>().simulated = false;
 

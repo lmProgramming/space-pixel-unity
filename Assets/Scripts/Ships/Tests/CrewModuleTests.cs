@@ -369,7 +369,7 @@ namespace Ships.Tests
         {
             var module = CreateStandaloneModule(0);
 
-            Assert.AreEqual(1f, module.Efficiency, 0.0001f);
+            Assert.AreEqual(1f, module.ModuleEfficiency, 0.0001f);
         }
 
 
@@ -378,7 +378,7 @@ namespace Ships.Tests
         {
             var module = CreateStandaloneModule(1);
 
-            Assert.AreEqual(0f, module.Efficiency, 0.0001f);
+            Assert.AreEqual(0f, module.ModuleEfficiency, 0.0001f);
         }
 
 
@@ -390,7 +390,7 @@ namespace Ships.Tests
             module.AssignCrew(MakeCrew("Nav", "Expert", 30, skills));
 
             // fillRatio = 1, GetCrewMultiplier = 1 * (1 + 5 * 1.0 * 0.02) = 1.1, efficiency = 1.0 * 1.1 = 1.1
-            Assert.AreEqual(1.1f, module.Efficiency, 0.0001f);
+            Assert.AreEqual(1.1f, module.ModuleEfficiency, 0.0001f);
         }
 
         [UnityTest]
@@ -480,11 +480,11 @@ namespace Ships.Tests
                 module.AssignCrew(crewMember);
             }
 
-            var previousEfficiency = module.Efficiency;
+            var previousEfficiency = module.ModuleEfficiency;
             for (var i = 0; i < crewCount / 2; i++)
             {
                 crew[i].Kill();
-                var currentEfficiency = module.Efficiency;
+                var currentEfficiency = module.ModuleEfficiency;
                 Assert.Less(currentEfficiency, previousEfficiency,
                     $"Efficiency should decrease after crew member {crew[i].FirstName} dies");
                 previousEfficiency = currentEfficiency;
@@ -493,7 +493,7 @@ namespace Ships.Tests
             for (var i = crewCount / 2; i < crewCount; i++)
             {
                 module.KillRandomCrew(1);
-                var currentEfficiency = module.Efficiency;
+                var currentEfficiency = module.ModuleEfficiency;
                 Assert.Less(currentEfficiency, previousEfficiency,
                     $"Efficiency should decrease after crew member {crew[i].FirstName} dies");
                 previousEfficiency = currentEfficiency;

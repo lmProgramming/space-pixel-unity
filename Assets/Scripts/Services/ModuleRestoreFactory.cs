@@ -1,6 +1,7 @@
 using System;
 using Core.Services;
 using Core.Ship;
+using Core.Ship.Snapshots.Module;
 using Pixelation;
 using Ships.Modules;
 using UnityEngine;
@@ -21,8 +22,8 @@ namespace Services
         {
             return snapshot.origin switch
             {
-                ModuleOrigin.CatalogPrefab => CreateFromCatalog(snapshot, parent),
-                ModuleOrigin.Custom => CreateCustom(snapshot, parent),
+                InstanceOrigin.CatalogPrefab => CreateFromCatalog(snapshot, parent),
+                InstanceOrigin.Custom => CreateCustom(snapshot, parent),
                 _ => throw new ArgumentOutOfRangeException(nameof(snapshot.origin), snapshot.origin,
                     "Unknown module origin.")
             };

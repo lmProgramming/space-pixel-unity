@@ -6,6 +6,8 @@ using Core.Grid;
 using Core.Pixelation;
 using Core.Services;
 using Core.Ship;
+using Core.Ship.Snapshots.PixelatedRigidbody;
+using Core.Ship.Snapshots.PixelatedRigidbody.Internals;
 using Cysharp.Threading.Tasks;
 using Events.Gameplay.Collision;
 using Grid;
@@ -227,7 +229,75 @@ namespace Pixelation
         public float DefaultPixelHealthForSnapshot => defaultPixelHealth;
         public float MaxArmorHealthForSnapshot => maxArmorHealth;
 
-        public ArmorGridSnapshot CaptureArmorGridSnapshot()
+        public virtual PixelatedRigidbodySnapshot CaptureToSnapshot(IGameContentCatalog contentCatalog)
+        {
+            var snapshot = new PixelatedRigidbodySnapshot
+            {
+                name = transform.name,
+                rigidbodyType = GetSnapshotRigidbodyType(),
+                localPosition = transform.localPosition,
+                localRotation = transform.localRotation,
+                spriteRenderedOrderInLayer = SpriteRenderer.sortingOrder,
+                spriteRenderedSortingLayerID = SpriteRenderer.sortingLayerID,
+                defaultPixelHealth = defaultPixelHealth,
+                maxArmorHealth = maxArmorHealth,
+                armorGrid = CaptureArmorGridSnapshot(),
+                healthGrid = CaptureHealthGridSnapshot()
+            };
+
+            if (TexturePixelGrid == null)
+                return snapshot;
+
+            var dimensions = TexturePixelGrid.Dimensions();
+            snapshot.colorGrid = new PixelGridSnapshot(dimensions.x, dimensions.y);
+
+            for (var y = 0; y < dimensions.y; y++)
+            for (var x = 0; x < dimensions.x; x++)
+            {
+                var pos = new Vector2Int(x, y);
+                if (TexturePixelGrid.IsPixel(pos))
+                    snapshot.colorGrid.SetPixel(x, y, TexturePixelGrid.GetValue(pos));
+            }
+
+            return snapshot;
+        }
+
+        public virtual void RestoreFromSnapshot(PixelatedRigidbodySnapshot snapshot, IGameContentCatalog contentCatalog)
+        {
+            if (snapshot == null)
+                throw new UnityException($"[PixelatedRigidbody] Cannot restore null snapshot on '{name}'.");
+
+            ApplySnapshotHealthDefaults(snapshot.defaultPixelHealth, snapshot.maxArmorHealth);
+            RestoreColorGridFromSnapshot(snapshot.colorGrid);
+            ApplyArmorGridSnapshot(snapshot.armorGrid);
+            ApplyHealthGridSnapshot(snapshot.healthGrid);
+            ApplySpriteRenderedOptions(snapshot.spriteRenderedSortingLayerID, snapshot.spriteRenderedOrderInLayer);
+        }
+
+        public virtual void NoPixelsLeft()
+        {
+            OnNoPixelsLeft?.Invoke(this);
+            Destroy(gameObject);
+        }
+
+        public Sprite GetSprite()
+        {
+            return sprite;
+        }
+
+        public void SetSprite(Sprite newSprite)
+        {
+            sprite = newSprite;
+            Setup(forceSetup: true, recalculateColliders: true);
+        }
+
+        private void ApplySpriteRenderedOptions(int sortingLayerID, int orderInLayer)
+        {
+            SpriteRenderer.sortingLayerID = sortingLayerID;
+            SpriteRenderer.sortingOrder = orderInLayer;
+        }
+
+        private ArmorGridSnapshot CaptureArmorGridSnapshot()
         {
             if (TexturePixelGrid == null)
                 return null;
@@ -255,7 +325,7 @@ namespace Pixelation
             return armorSnapshot;
         }
 
-        public HealthGridSnapshot CaptureHealthGridSnapshot()
+        private HealthGridSnapshot CaptureHealthGridSnapshot()
         {
             if (TexturePixelGrid == null || HealthGrid == null)
                 return null;
@@ -269,7 +339,7 @@ namespace Pixelation
             return snapshot;
         }
 
-        public void ApplyArmorGridSnapshot(ArmorGridSnapshot snapshot)
+        private void ApplyArmorGridSnapshot(ArmorGridSnapshot snapshot)
         {
             if (snapshot == null || HealthGrid == null || TexturePixelGrid == null)
                 return;
@@ -291,7 +361,7 @@ namespace Pixelation
             }
         }
 
-        public void ApplyHealthGridSnapshot(HealthGridSnapshot snapshot)
+        private void ApplyHealthGridSnapshot(HealthGridSnapshot snapshot)
         {
             if (snapshot == null || HealthGrid == null || TexturePixelGrid == null)
                 return;
@@ -304,65 +374,6 @@ namespace Pixelation
             for (var y = 0; y < snapshot.height; y++)
             for (var x = 0; x < snapshot.width; x++)
                 HealthGrid.SetHealth(new Vector2Int(x, y), snapshot.GetValue(x, y));
-        }
-
-        public virtual PixelatedRigidbodySnapshot CaptureToSnapshot()
-        {
-            var snapshot = new PixelatedRigidbodySnapshot
-            {
-                name = transform.name,
-                rigidbodyType = GetSnapshotRigidbodyType(),
-                localPosition = transform.localPosition,
-                localRotation = transform.localRotation,
-                defaultPixelHealth = defaultPixelHealth,
-                maxArmorHealth = maxArmorHealth,
-                armorGrid = CaptureArmorGridSnapshot(),
-                healthGrid = CaptureHealthGridSnapshot()
-            };
-
-            if (TexturePixelGrid == null)
-                return snapshot;
-
-            var dimensions = TexturePixelGrid.Dimensions();
-            snapshot.colorGrid = new PixelGridSnapshot(dimensions.x, dimensions.y);
-
-            for (var y = 0; y < dimensions.y; y++)
-            for (var x = 0; x < dimensions.x; x++)
-            {
-                var pos = new Vector2Int(x, y);
-                if (TexturePixelGrid.IsPixel(pos))
-                    snapshot.colorGrid.SetPixel(x, y, TexturePixelGrid.GetValue(pos));
-            }
-
-            return snapshot;
-        }
-
-        public virtual void RestoreFromSnapshot(PixelatedRigidbodySnapshot snapshot)
-        {
-            if (snapshot == null)
-                throw new UnityException($"[PixelatedRigidbody] Cannot restore null snapshot on '{name}'.");
-
-            ApplySnapshotHealthDefaults(snapshot.defaultPixelHealth, snapshot.maxArmorHealth);
-            RestoreColorGridFromSnapshot(snapshot.colorGrid);
-            ApplyArmorGridSnapshot(snapshot.armorGrid);
-            ApplyHealthGridSnapshot(snapshot.healthGrid);
-        }
-
-        public virtual void NoPixelsLeft()
-        {
-            OnNoPixelsLeft?.Invoke(this);
-            Destroy(gameObject);
-        }
-
-        public Sprite GetSprite()
-        {
-            return sprite;
-        }
-
-        public void SetSprite(Sprite newSprite)
-        {
-            sprite = newSprite;
-            Setup(forceSetup: true, recalculateColliders: true);
         }
 
         protected virtual PixelatedRigidbodyType GetSnapshotRigidbodyType()

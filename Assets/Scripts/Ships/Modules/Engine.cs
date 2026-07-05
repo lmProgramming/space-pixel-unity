@@ -2,18 +2,21 @@ using System.Collections.Generic;
 using Core.Constants;
 using Core.Services;
 using Core.Ship;
-using Core.Ship.ModuleSnapshotPayloads;
+using Core.Ship.Snapshots.Module.ConcreteModule;
+using Core.Ship.Snapshots.PixelatedRigidbody;
 using LMPro.External.ReadOnly;
 using Pixelation;
 using Ships.Snapshot;
 using Ships.Systems.Gimbal;
 using UnityEngine;
 using ZLinq;
+using ZLinq.Linq;
 
 namespace Ships.Modules
 {
     public class Engine : Module
     {
+        private const float ThrustRatioToShowNozzleVisualsAsResting = 0.005f;
         [SerializeField] private float maxThrust;
         [SerializeField] private float maxGimbalAngle = 45f;
         [SerializeField] private float gimbalSpeed = 240f;
@@ -27,6 +30,9 @@ namespace Ships.Modules
         private List<Nozzle> _nozzles = new();
         private List<PixelatedRigidbodySnapshot> _pendingNozzleSnapshots = new();
 
+        private ValueEnumerable<ListWhere<Nozzle>, Nozzle> ActiveNozzles =>
+            _nozzles.AsValueEnumerable().Where(nozzle => nozzle);
+
         public override ModuleType Type => ModuleType.Engine;
 
         internal float CurrentThrustRatioForTesting => currentThrustRatio;
@@ -38,11 +44,11 @@ namespace Ships.Modules
         private bool IsActive { get; set; }
 
         internal float MaxThrustBaseForDebug => maxThrust;
-        internal float ShipModuleEfficiencyForDebug => ShipModuleEfficiency;
+        internal float ShipModuleEfficiencyForDebug => ActualEfficiency;
 
         private Vector2 ThrustPoint => CalculateAverageThrustPoint();
 
-        public float MaxThrust => maxThrust * ShipModuleEfficiency * GameplayConstants.EngineThrustEfficiencyMultiplier;
+        public float MaxThrust => maxThrust * ActualEfficiency * GameplayConstants.EngineThrustEfficiencyMultiplier;
 
         public Vector2 WorldThrustPoint => transform.TransformPoint(ThrustPoint);
 
@@ -66,18 +72,16 @@ namespace Ships.Modules
 
             foreach (var nozzle in _nozzles)
                 RegisterNozzle(nozzle);
-
-            ApplyNozzleVisuals();
         }
 
-#if UNITY_EDITOR
         private void Update()
         {
             currentThrustRatio = CurrentThrustRatioForTesting;
             currentGimbalAngleForDebug = CurrentThrusterAngle;
             desiredGimbalAngleForDebug = DesiredGimbalAngleForTesting;
+
+            ApplyNozzleVisuals();
         }
-#endif
 
         protected override void OnDestroy()
         {
@@ -135,20 +139,31 @@ namespace Ships.Modules
         public void SetActive(bool active)
         {
             IsActive = active;
-            ApplyNozzleVisuals();
         }
 
-        private void ApplyNozzleTransforms()
+        private void ApplyNozzleTransforms(float thrusterAngle)
         {
-            foreach (var nozzle in _nozzles.AsValueEnumerable().Where(nozzle => nozzle))
-                nozzle.ApplyGimbalTransform(CurrentThrusterAngle);
+            foreach (var nozzle in ActiveNozzles)
+                nozzle.ApplyGimbalTransform(thrusterAngle);
         }
 
         private void ApplyNozzleVisuals()
         {
-            ApplyNozzleTransforms();
-            foreach (var nozzle in _nozzles.AsValueEnumerable().Where(nozzle => nozzle))
-                nozzle.ApplyExhaustVisuals(currentThrustRatio, IsActive);
+            var visualizedThrustRatio = currentThrustRatio;
+            var visualizedThrustAngle = CurrentThrusterAngle;
+            var visualizedIsActive = IsActive;
+
+            if (currentThrustRatio <= ThrustRatioToShowNozzleVisualsAsResting)
+            {
+                visualizedThrustRatio = 0f;
+                visualizedIsActive = false;
+            }
+
+            visualizedThrustRatio *= ActualEfficiency;
+
+            ApplyNozzleTransforms(visualizedThrustAngle);
+            foreach (var nozzle in ActiveNozzles)
+                nozzle.ApplyExhaustVisuals(visualizedThrustRatio, visualizedIsActive);
         }
 
         public void SetCurrentThrust(float currentThrust)
@@ -156,12 +171,10 @@ namespace Ships.Modules
             if (MaxThrust <= Mathf.Epsilon)
             {
                 currentThrustRatio = 0f;
-                ApplyNozzleVisuals();
                 return;
             }
 
             currentThrustRatio = Mathf.Clamp01(currentThrust / MaxThrust);
-            ApplyNozzleVisuals();
         }
 
         public void RotateThrusterTowards(float targetAngle, float deltaTime)
@@ -171,7 +184,6 @@ namespace Ships.Modules
             var clampedTarget = ClampTargetGimbalAngle(targetAngle);
             var maxStep = GetGimbalStepSize(clampedTarget, deltaTime);
             CurrentThrusterAngle = Mathf.MoveTowardsAngle(CurrentThrusterAngle, clampedTarget, maxStep);
-            ApplyNozzleVisuals();
         }
 
         private float ClampTargetGimbalAngle(float targetAngle)
@@ -198,7 +210,8 @@ namespace Ships.Modules
                 maxThrust = maxThrust,
                 maxGimbalAngle = maxGimbalAngle,
                 gimbalSpeed = gimbalSpeed,
-                nozzles = nozzles.AsValueEnumerable().Select(nozzle => nozzle.CaptureToSnapshot()).ToArray()
+                nozzles = nozzles.AsValueEnumerable().Select(nozzle => nozzle.CaptureToSnapshot(contentCatalog))
+                    .ToArray()
             };
 
             return JsonUtility.ToJson(data);
@@ -226,7 +239,7 @@ namespace Ships.Modules
                 NestedPixelatedRigidbodyFactory.CreateShell(transform, nozzleSnapshot);
         }
 
-        internal void RestorePendingNozzleSnapshots()
+        internal void RestorePendingNozzleSnapshots(IGameContentCatalog contentCatalog)
         {
             foreach (var snapshot in _pendingNozzleSnapshots)
             {
@@ -240,7 +253,7 @@ namespace Ships.Modules
                     throw new UnityException(
                         $"[Engine] Nozzle child '{snapshot.name}' has no PixelatedRigidbody.");
 
-                pixelatedRigidbody.RestoreFromSnapshot(snapshot);
+                pixelatedRigidbody.RestoreFromSnapshot(snapshot, contentCatalog);
             }
 
             _pendingNozzleSnapshots.Clear();

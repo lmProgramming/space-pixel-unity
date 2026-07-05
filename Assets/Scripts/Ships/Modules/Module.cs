@@ -48,7 +48,7 @@ namespace Ships.Modules
 
         internal IReadOnlyDictionary<Module, List<Vector2Int>> ConnectionPoints => _connectionPoints;
 
-        protected float ShipModuleEfficiency => Ship.GeneralEfficiency * Efficiency;
+        protected float ActualEfficiency => Ship.GeneralEfficiency * ModuleEfficiency;
 
         private float PixelEfficiency =>
             Mathf.Pow((float)PixelatedRigidbody.CurrentPixelCount / PixelatedRigidbody.StartPixelCount, 2);
@@ -110,9 +110,10 @@ namespace Ships.Modules
 
         public int AliveCrewCount => AliveCrew.Count;
 
-        public virtual float EnergyCapacity => Resources.energyCapacity * Efficiency;
+        public virtual float EnergyCapacity => Resources.energyCapacity * ModuleEfficiency;
 
-        public float Efficiency => PixelEfficiency * GetCrewEfficiency();
+        // todo: consider caching this in the future
+        public float ModuleEfficiency => PixelEfficiency * GetCrewEfficiency();
 
         public IReadOnlyList<CrewMember> AssignedCrew => assignedCrew;
         public int CrewMissingCount => Mathf.Max(0, CrewNeededCount - AliveCrewCount);
@@ -175,12 +176,12 @@ namespace Ships.Modules
 
         public virtual float GetEnergyDraw()
         {
-            return Resources.energyDraw * Efficiency;
+            return Resources.energyDraw * ModuleEfficiency;
         }
 
         public virtual float GetEnergyProduction()
         {
-            return Resources.energyProduction * Efficiency;
+            return Resources.energyProduction * ModuleEfficiency;
         }
 
         public void KillAllCrew()
@@ -406,7 +407,7 @@ namespace Ships.Modules
         }
 
 #if UNITY_EDITOR
-        internal float InternalEfficiency => Efficiency;
+        internal float InternalEfficiency => ModuleEfficiency;
 
         internal Resources InternalResources => Resources;
 #endif

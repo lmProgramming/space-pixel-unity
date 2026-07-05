@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using Core.Constants;
 using Core.Services;
-using Core.Ship.ModuleSnapshotPayloads;
+using Core.Ship.Snapshots.Module.ConcreteModule;
 using Events.Gameplay.Shooting;
 using LMPro;
 using UnityEngine;
@@ -54,7 +54,7 @@ namespace Ships.Modules
 
         public void Update()
         {
-            _reloadTimer.Progress(Time.deltaTime * ShipModuleEfficiency);
+            _reloadTimer.Progress(Time.deltaTime * ActualEfficiency);
         }
 
         protected override void OnDestroy()

@@ -1,5 +1,7 @@
 using System;
+using Core.Services;
 using Core.Ship;
+using Core.Ship.Snapshots.PixelatedRigidbody;
 using Pixelation;
 using UnityEngine;
 
@@ -23,7 +25,10 @@ namespace Ships.Systems.Gimbal
             _restLocalRotationZ = transform.localEulerAngles.z;
 
             Rigidbody.bodyType = RigidbodyType2D.Kinematic;
+        }
 
+        private void Start()
+        {
             EnsureExhaustParticlesInitialized();
         }
 
@@ -46,8 +51,6 @@ namespace Ships.Systems.Gimbal
 
         public void ApplyExhaustVisuals(float currentThrustRatio, bool isActive)
         {
-            EnsureExhaustParticlesInitialized();
-
             var thrustRatio = Mathf.Pow(isActive ? currentThrustRatio : 0f, 2);
 
             var emission = _exhaustParticles.emission;
@@ -73,6 +76,39 @@ namespace Ships.Systems.Gimbal
 
             var main = _exhaustParticles.main;
             _exhaustBaseStartSpeedMultiplier = main.startSpeedMultiplier;
+        }
+
+        public override PixelatedRigidbodySnapshot CaptureToSnapshot(IGameContentCatalog contentCatalog)
+        {
+            var baseSnapshot = base.CaptureToSnapshot(contentCatalog);
+
+            var instanceIdentity = _exhaustParticles.gameObject.GetComponentInParent<GameObjectInstanceIdentity>();
+
+            if (!instanceIdentity)
+                throw new InvalidOperationException("[Nozzle] Particle Effect content id was not found.");
+
+            var typePayloadJson = new NozzleData
+            {
+                ParticleEffectContentId = instanceIdentity.ArchetypeId,
+                ParticleEffectPosition = _exhaustParticles.transform.parent.localPosition
+            };
+
+            baseSnapshot.typePayloadJson = JsonUtility.ToJson(typePayloadJson);
+
+            return baseSnapshot;
+        }
+
+        public override void RestoreFromSnapshot(PixelatedRigidbodySnapshot snapshot,
+            IGameContentCatalog contentCatalog)
+        {
+            base.RestoreFromSnapshot(snapshot, contentCatalog);
+
+            var typeData = JsonUtility.FromJson<NozzleData>(snapshot.typePayloadJson);
+
+            contentCatalog.TryGetPrefab(typeData.ParticleEffectContentId, out var prefab);
+
+            var newGo = Instantiate(prefab, transform);
+            newGo.transform.localPosition = typeData.ParticleEffectPosition;
         }
 
         protected override PixelatedRigidbodyType GetSnapshotRigidbodyType()

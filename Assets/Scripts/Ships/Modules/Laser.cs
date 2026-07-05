@@ -1,7 +1,7 @@
 using System;
 using System.Threading;
 using Core.Services;
-using Core.Ship.ModuleSnapshotPayloads;
+using Core.Ship.Snapshots.Module.ConcreteModule;
 using Cysharp.Threading.Tasks;
 using LMPro;
 using Pixelation;
@@ -66,7 +66,7 @@ namespace Ships.Modules
 
         private void Update()
         {
-            _reloadTimer.Progress(Time.deltaTime * ShipModuleEfficiency);
+            _reloadTimer.Progress(Time.deltaTime * ActualEfficiency);
         }
 
         protected override void OnDestroy()
@@ -194,7 +194,7 @@ namespace Ships.Modules
 
         private async UniTask FireBeamUpdateAsync(CancellationToken token)
         {
-            var timeRemaining = maxFireDuration * ShipModuleEfficiency;
+            var timeRemaining = maxFireDuration * ActualEfficiency;
             try
             {
                 while (_isFiring && !token.IsCancellationRequested && timeRemaining > 0)

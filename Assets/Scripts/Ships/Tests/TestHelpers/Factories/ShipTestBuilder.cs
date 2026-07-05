@@ -132,8 +132,8 @@ namespace Ships.Tests.TestHelpers.Factories
                 _createdObjects, width, height);
             var command = ModuleFactory.AddCommandModuleComponent(commandGo);
             command.SetResources(new Resources(0, 0, 0, 0, 0));
-            var identity = commandGo.AddComponent<ModuleInstanceIdentity>();
-            identity.EnsureAssigned(ModuleOrigin.Custom);
+            var identity = commandGo.AddComponent<GameObjectInstanceIdentity>();
+            identity.EnsureAssigned(InstanceOrigin.Custom);
             RegisterCommand(command);
             return this;
         }
@@ -145,8 +145,8 @@ namespace Ships.Tests.TestHelpers.Factories
             ModuleFactory.AddNozzle(engineGo, _container, _createdObjects);
             var engine = engineGo.AddComponent<Engine>();
             engine.SetResources(resources);
-            var identity = engineGo.AddComponent<ModuleInstanceIdentity>();
-            identity.EnsureAssigned(ModuleOrigin.Custom);
+            var identity = engineGo.AddComponent<GameObjectInstanceIdentity>();
+            identity.EnsureAssigned(InstanceOrigin.Custom);
             RegisterOtherModule(engine);
             return this;
         }
@@ -160,10 +160,10 @@ namespace Ships.Tests.TestHelpers.Factories
             moduleInstance.SetActive(true);
             var cannonPixelRb = moduleInstance.GetComponent<PixelatedRigidbody>();
             cannonPixelRb.SetTextureFromColors(ModuleFactory.CreateSolidPixelGrid(pixelSize, pixelSize));
-            var cannonIdentity = moduleInstance.GetComponent<ModuleInstanceIdentity>();
+            var cannonIdentity = moduleInstance.GetComponent<GameObjectInstanceIdentity>();
             if (cannonIdentity == null)
-                cannonIdentity = moduleInstance.AddComponent<ModuleInstanceIdentity>();
-            cannonIdentity.EnsureAssigned(ModuleOrigin.CatalogPrefab, archetypeId);
+                cannonIdentity = moduleInstance.AddComponent<GameObjectInstanceIdentity>();
+            cannonIdentity.EnsureAssigned(InstanceOrigin.CatalogPrefab, archetypeId);
             RegisterOtherModule(moduleInstance.GetComponent<Module>());
             return this;
         }
