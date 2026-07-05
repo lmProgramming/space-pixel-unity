@@ -1,6 +1,7 @@
 using System;
+using Core.Ship.Snapshots.PixelatedRigidbody;
 
-namespace Core.Ship.ModuleSnapshotPayloads
+namespace Core.Ship.Snapshots.Module.ConcreteModule
 {
     [Serializable]
     public class EngineModuleData

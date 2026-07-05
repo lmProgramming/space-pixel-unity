@@ -1,6 +1,6 @@
 using System;
 
-namespace Core.Ship.ModuleSnapshotPayloads
+namespace Core.Ship.Snapshots.Module.ConcreteModule
 {
     [Serializable]
     public class BasicModuleData

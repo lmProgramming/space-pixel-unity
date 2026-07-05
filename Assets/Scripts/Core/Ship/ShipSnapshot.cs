@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Core.Ship.Snapshots.Module;
 
 namespace Core.Ship
 {

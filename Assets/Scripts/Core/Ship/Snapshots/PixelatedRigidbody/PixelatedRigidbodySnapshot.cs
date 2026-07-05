@@ -1,7 +1,8 @@
 using System;
+using Core.Ship.Snapshots.PixelatedRigidbody.Internals;
 using UnityEngine;
 
-namespace Core.Ship
+namespace Core.Ship.Snapshots.PixelatedRigidbody
 {
     [Serializable]
     public class PixelatedRigidbodySnapshot
@@ -13,6 +14,9 @@ namespace Core.Ship
         public float defaultPixelHealth = 1f;
         public float maxArmorHealth = 10f;
 
+        public int spriteRenderedOrderInLayer;
+        public int spriteRenderedSortingLayerID;
+
         [SerializeReference]
         public PixelGridSnapshot colorGrid;
 
@@ -21,5 +25,7 @@ namespace Core.Ship
 
         [SerializeReference]
         public HealthGridSnapshot healthGrid;
+
+        public string typePayloadJson;
     }
 }

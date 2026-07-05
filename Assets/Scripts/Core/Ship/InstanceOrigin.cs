@@ -1,6 +1,6 @@
 namespace Core.Ship
 {
-    public enum ModuleOrigin
+    public enum InstanceOrigin
     {
         CatalogPrefab = 0,
         Custom = 1

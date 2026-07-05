@@ -3,17 +3,17 @@ using UnityEngine;
 
 namespace Core.Ship
 {
-    public class ModuleInstanceIdentity : MonoBehaviour
+    public class GameObjectInstanceIdentity : MonoBehaviour
     {
         [SerializeField] private string instanceId;
-        [SerializeField] private ModuleOrigin origin = ModuleOrigin.Custom;
+        [SerializeField] private InstanceOrigin origin = InstanceOrigin.Custom;
         [SerializeField] private string archetypeId;
 
         public string InstanceId => instanceId;
-        public ModuleOrigin Origin => origin;
+        public InstanceOrigin Origin => origin;
         public string ArchetypeId => archetypeId;
 
-        public void EnsureAssigned(ModuleOrigin newOrigin, string newArchetypeId = null)
+        public void EnsureAssigned(InstanceOrigin newOrigin, string newArchetypeId = null)
         {
             if (string.IsNullOrWhiteSpace(instanceId))
                 instanceId = Guid.NewGuid().ToString("N");
@@ -22,7 +22,7 @@ namespace Core.Ship
             archetypeId = string.IsNullOrWhiteSpace(newArchetypeId) ? string.Empty : newArchetypeId;
         }
 
-        public void RestoreFromSnapshot(string snapshotInstanceId, ModuleOrigin newOrigin, string newArchetypeId)
+        public void RestoreFromSnapshot(string snapshotInstanceId, InstanceOrigin newOrigin, string newArchetypeId)
         {
             instanceId = string.IsNullOrWhiteSpace(snapshotInstanceId)
                 ? Guid.NewGuid().ToString("N")

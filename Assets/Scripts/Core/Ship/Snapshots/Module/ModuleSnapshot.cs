@@ -1,7 +1,8 @@
 using System;
+using Core.Ship.Snapshots.PixelatedRigidbody;
 using UnityEngine;
 
-namespace Core.Ship
+namespace Core.Ship.Snapshots.Module
 {
     [Serializable]
     public abstract class ModuleSnapshotBase
@@ -10,7 +11,7 @@ namespace Core.Ship
         public string moduleName;
         public ModuleType moduleType;
         public string moduleTypeName;
-        public ModuleOrigin origin;
+        public InstanceOrigin origin;
         public string archetypeId;
         public Vector3 localPosition;
         public Quaternion localRotation;

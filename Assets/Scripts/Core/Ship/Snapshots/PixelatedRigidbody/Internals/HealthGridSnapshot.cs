@@ -1,44 +1,38 @@
 using System;
 using UnityEngine;
 
-namespace Core.Ship
+namespace Core.Ship.Snapshots.PixelatedRigidbody.Internals
 {
     [Serializable]
-    public class ArmorGridSnapshot
+    public class HealthGridSnapshot
     {
         public int width;
         public int height;
-        public byte[] values;
+        public float[] values;
 
-        public ArmorGridSnapshot()
+        public HealthGridSnapshot()
         {
         }
 
-        public ArmorGridSnapshot(int widthValue, int heightValue)
+        public HealthGridSnapshot(int widthValue, int heightValue)
         {
             width = widthValue;
             height = heightValue;
-            values = new byte[width * height];
+            values = new float[width * height];
         }
 
-        public byte GetValue(int x, int y)
+        public float GetValue(int x, int y)
         {
             if (!InBounds(x, y) || values == null || values.Length != width * height)
-                return 0;
+                return 0f;
             return values[y * width + x];
         }
 
-        public void SetValue(int x, int y, byte value)
+        public void SetValue(int x, int y, float value)
         {
             if (!InBounds(x, y) || values == null || values.Length != width * height)
                 return;
-            values[y * width + x] = value;
-        }
-
-        public Color32 GetColor(int x, int y)
-        {
-            var v = GetValue(x, y);
-            return new Color32(v, v, v, 255);
+            values[y * width + x] = Mathf.Max(0f, value);
         }
 
         private bool InBounds(int x, int y)

@@ -15,7 +15,7 @@ namespace Core.Ship
         Transform Transform { get; }
 
         Resources Resources { get; }
-        float Efficiency { get; }
+        float ModuleEfficiency { get; }
         int CrewNeededCount { get; }
         float EnergyCapacity { get; }
         IReadOnlyList<CrewMember> AssignedCrew { get; }

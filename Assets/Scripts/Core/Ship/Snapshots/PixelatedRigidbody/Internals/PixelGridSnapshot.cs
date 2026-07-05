@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Core.Ship
+namespace Core.Ship.Snapshots.PixelatedRigidbody.Internals
 {
     [Serializable]
     public class PixelGridSnapshot
