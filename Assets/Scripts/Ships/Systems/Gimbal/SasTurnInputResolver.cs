@@ -26,7 +26,7 @@ namespace Ships.Systems.Gimbal
             var headingHoldTurnInput = GetHeadingHoldTurnInput(requestedTurnInput, selfRigidbody, currentHeadingDegrees,
                 settings);
             if (Mathf.Abs(requestedTurnInput) > settings.TurnReleaseThreshold ||
-                (Mathf.Abs(forwardInput) <= Mathf.Epsilon && Mathf.Abs(horizontalInput) <= Mathf.Epsilon))
+                IsMovementInputIdle(forwardInput, horizontalInput, settings))
                 return headingHoldTurnInput;
 
             var forwardCompensation = CalculateThrustCompensationTurnInput(forwardInput, horizontalInput, engines,
@@ -58,7 +58,15 @@ namespace Ships.Systems.Gimbal
 
             CaptureCurrentHeadingIfNeeded(currentHeadingDegrees);
 
-            var headingError = Mathf.DeltaAngle(currentHeadingDegrees, _desiredHeadingDegrees);
+            var headingError = GetPredictiveHeadingError(currentHeadingDegrees, _desiredHeadingDegrees,
+                selfRigidbody.angularVelocity, settings.PredictionHorizon);
+
+            if (Mathf.Abs(headingError) < settings.HeadingDeadZoneDegrees &&
+                Mathf.Abs(selfRigidbody.angularVelocity) < settings.AngularVelocityDeadZoneDegreesPerSecond)
+            {
+                CaptureDesiredHeading(currentHeadingDegrees);
+                return 0f;
+            }
 
             var angularVelocityDamping = -selfRigidbody.angularVelocity * settings.AngularVelocityGain;
             var turnCorrection = headingError * settings.HeadingGain + angularVelocityDamping;
@@ -67,6 +75,20 @@ namespace Ships.Systems.Gimbal
                 turnCorrection = 0f;
 
             return Mathf.Clamp(turnCorrection, -settings.MaxTurnInput, settings.MaxTurnInput);
+        }
+
+        private static bool IsMovementInputIdle(float forwardInput, float horizontalInput,
+            SasTurnInputSettings settings)
+        {
+            return Mathf.Abs(forwardInput) <= settings.MovementInputDeadZone &&
+                   Mathf.Abs(horizontalInput) <= settings.MovementInputDeadZone;
+        }
+
+        private static float GetPredictiveHeadingError(float currentHeadingDegrees, float desiredHeadingDegrees,
+            float angularVelocityDegreesPerSecond, float predictionHorizonSeconds)
+        {
+            var predictedHeading = currentHeadingDegrees + angularVelocityDegreesPerSecond * predictionHorizonSeconds;
+            return Mathf.DeltaAngle(predictedHeading, desiredHeadingDegrees);
         }
 
         private static float CalculateThrustCompensationTurnInput(float forwardInput, float horizontalInput,

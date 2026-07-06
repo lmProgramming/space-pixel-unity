@@ -416,6 +416,13 @@ namespace Ships
         protected bool ApplyEngineForces(float forwardInput, float horizontalInput, float turnInput, float deltaTime,
             bool sasEnabled = false)
         {
+            if (sasEnabled)
+            {
+                forwardInput = ApplyInputDeadZone(forwardInput, sasTurnInputSettings.MovementInputDeadZone);
+                horizontalInput = ApplyInputDeadZone(horizontalInput, sasTurnInputSettings.MovementInputDeadZone);
+                turnInput = ApplyInputDeadZone(turnInput, sasTurnInputSettings.TurnReleaseThreshold);
+            }
+
             forwardInput = Mathf.Clamp(forwardInput, -1f, 1f);
             horizontalInput = Mathf.Clamp(horizontalInput, -1f, 1f);
             turnInput = Mathf.Clamp(turnInput, -1f, 1f);
@@ -488,9 +495,13 @@ namespace Ships
                 }
 
                 var thrust = Mathf.Clamp01(thrustRatios[i]) * engine.MaxThrust;
-                engine.SetCurrentThrust(thrust);
+                if (thrust <= engine.MaxThrust * sasTurnInputSettings.MinAppliedThrustRatio)
+                {
+                    engine.SetCurrentThrust(0f);
+                    continue;
+                }
 
-                if (thrust <= Mathf.Epsilon) continue;
+                engine.SetCurrentThrust(thrust);
 
                 var force = engine.WorldThrustDirection * thrust;
 
@@ -498,7 +509,41 @@ namespace Ships
                 anyForceApplied |= force.sqrMagnitude > Mathf.Epsilon;
             }
 
+            if (sasEnabled && !anyForceApplied &&
+                IsShipMovementInputIdle(forwardInput, horizontalInput, turnInput, finalTurnInput))
+                StabilizeIdleShipAngularVelocity(selfRigidbody);
+
             return anyForceApplied;
+        }
+
+        private static float ApplyInputDeadZone(float input, float deadZone)
+        {
+            return Mathf.Abs(input) <= deadZone ? 0f : input;
+        }
+
+        private bool IsShipMovementInputIdle(float forwardInput, float horizontalInput, float turnInput,
+            float finalTurnInput)
+        {
+            return Mathf.Abs(forwardInput) <= sasTurnInputSettings.MovementInputDeadZone &&
+                   Mathf.Abs(horizontalInput) <= sasTurnInputSettings.MovementInputDeadZone &&
+                   Mathf.Abs(turnInput) <= sasTurnInputSettings.TurnReleaseThreshold &&
+                   Mathf.Abs(finalTurnInput) <= sasTurnInputSettings.MinTurnInputChange;
+        }
+
+        private void StabilizeIdleShipAngularVelocity(Rigidbody2D commandRigidbody)
+        {
+            if (Mathf.Abs(commandRigidbody.angularVelocity) >
+                sasTurnInputSettings.AngularVelocityDeadZoneDegreesPerSecond)
+                return;
+
+            commandRigidbody.angularVelocity = 0f;
+
+            foreach (var module in AllModules)
+            {
+                var moduleRigidbody = module.PixelatedRigidbody?.Rigidbody;
+                if (moduleRigidbody)
+                    moduleRigidbody.angularVelocity = 0f;
+            }
         }
 
         private ControlAllocatorSettings GetControlAllocatorSettings()
