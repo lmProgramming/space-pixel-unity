@@ -59,11 +59,12 @@ namespace Ships.Systems.Gimbal
             CaptureCurrentHeadingIfNeeded(currentHeadingDegrees);
 
             var headingError = Mathf.DeltaAngle(currentHeadingDegrees, _desiredHeadingDegrees);
-            if (Mathf.Abs(headingError) < settings.HeadingDeadZoneDegrees)
-                headingError = 0f;
 
             var angularVelocityDamping = -selfRigidbody.angularVelocity * settings.AngularVelocityGain;
             var turnCorrection = headingError * settings.HeadingGain + angularVelocityDamping;
+
+            if (Mathf.Abs(turnCorrection) < settings.MinTurnInputChange)
+                turnCorrection = 0f;
 
             return Mathf.Clamp(turnCorrection, -settings.MaxTurnInput, settings.MaxTurnInput);
         }

@@ -36,15 +36,7 @@ namespace Ships
         [SerializeField]
         private Team team;
 
-        [Header("SAS")]
-        [SerializeField] private float sasTurnReleaseThreshold = 0.05f;
-
-        [SerializeField] private float sasHeadingDeadZoneDegrees = 0.3f;
-        [SerializeField] private float sasHeadingGain = 0.04f;
-        [SerializeField] private float sasAngularVelocityGain = 0.03f;
-        [SerializeField] private float sasMaxTurnInput = 2f;
-        [SerializeField] private float sasForwardCompensationStrength = 1f;
-        [SerializeField] private float sasForwardCompensationMaxTurnInput = 1.5f;
+        [Header("SAS")] [SerializeField] private SasTurnInputSettings sasTurnInputSettings;
 
         [Header("Control Allocator")]
         [SerializeField] private int allocatorIterations = 14;
@@ -440,7 +432,7 @@ namespace Ships
             var maxLeverArm = EngineDirectionSolver.GetMaxLeverArmLength(engines, centerOfMass);
             var finalTurnInput = sasEnabled
                 ? _sasTurnInputResolver.ResolveTurnInput(turnInput, forwardInput, horizontalInput, selfRigidbody,
-                    GetCurrentHeadingDegrees(), engines, forward, centerOfMass, maxLeverArm, GetSasSettings())
+                    GetCurrentHeadingDegrees(), engines, forward, centerOfMass, maxLeverArm, sasTurnInputSettings)
                 : turnInput;
             var desiredDirectionPerEngine = new Vector2[engines.Count];
 
@@ -513,13 +505,6 @@ namespace Ships
         {
             return new ControlAllocatorSettings(allocatorIterations, allocatorForceWeight,
                 allocatorTorqueWeight, allocatorRegularization);
-        }
-
-        private SasTurnInputSettings GetSasSettings()
-        {
-            return new SasTurnInputSettings(sasTurnReleaseThreshold, sasHeadingDeadZoneDegrees, sasHeadingGain,
-                sasAngularVelocityGain, sasMaxTurnInput, sasForwardCompensationStrength,
-                sasForwardCompensationMaxTurnInput);
         }
 
         private float GetCurrentHeadingDegrees()

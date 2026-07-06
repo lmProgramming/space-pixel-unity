@@ -53,6 +53,8 @@ namespace Ships.Systems.Gimbal
         {
             var thrustRatio = Mathf.Pow(isActive ? currentThrustRatio : 0f, 2);
 
+            EnsureExhaustParticlesInitialized();
+
             var emission = _exhaustParticles.emission;
             emission.enabled = isActive;
             emission.rateOverTimeMultiplier = _exhaustBaseRateOverTimeMultiplier * thrustRatio;
