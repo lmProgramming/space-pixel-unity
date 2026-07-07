@@ -158,7 +158,7 @@ namespace UI.MainGame
         {
             if (_sasSyncing || playerShip is not PlayerShip playerShipTyped)
                 return;
-            if (playerShipTyped.SasEnabled == evt.newValue)
+            if (playerShipTyped.IsSasOn == evt.newValue)
                 return;
             playerShipTyped.ToggleSas();
         }
@@ -203,7 +203,7 @@ namespace UI.MainGame
                 return;
 
             _sasSyncing = true;
-            _sasToggle.SetValueWithoutNotify(playerShipTyped.SasEnabled);
+            _sasToggle.SetValueWithoutNotify(playerShipTyped.IsSasOn);
             _sasSyncing = false;
         }
 

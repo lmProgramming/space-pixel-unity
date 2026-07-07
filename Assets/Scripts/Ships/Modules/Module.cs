@@ -48,7 +48,7 @@ namespace Ships.Modules
 
         internal IReadOnlyDictionary<Module, List<Vector2Int>> ConnectionPoints => _connectionPoints;
 
-        protected float ActualEfficiency => Ship.GeneralEfficiency * ModuleEfficiency;
+        public float ActualEfficiency => Ship.GeneralEfficiency * ModuleEfficiency;
 
         private float PixelEfficiency =>
             Mathf.Pow((float)PixelatedRigidbody.CurrentPixelCount / PixelatedRigidbody.StartPixelCount, 2);

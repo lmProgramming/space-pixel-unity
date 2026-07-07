@@ -156,6 +156,7 @@ namespace Ships
 
         public string Name => transform.name;
         public IReadOnlyList<IModule> AllModules => _allModulesCache;
+        public virtual bool IsSasOn => false;
 
         public float GeneralEfficiency => Math.Max(0.01f, ResourceManager.EnergyEfficiency);
 
@@ -185,7 +186,7 @@ namespace Ships
             Debug.Log($"[Ship] Module destroyed: {module.Transform?.name}", module.Transform);
 
             _biCohesionGraph.RemoveNode(module);
-            RecacheModulesDictionary();
+            HandleModuleChange();
 
             DeIgnoreCollider(module.Collider2D);
         }
@@ -252,7 +253,7 @@ namespace Ships
 
             _shipInitializeModulesEventChannel.Raise();
 
-            RecacheModulesDictionary();
+            HandleModuleChange();
 
             IgnoreModuleColliders();
         }
@@ -352,10 +353,10 @@ namespace Ships
 
             foreach (var module in unreachableModules) ReleaseModuleAsJunk(module);
 
-            RecacheModulesDictionary();
+            HandleModuleChange();
         }
 
-        private void RecacheModulesDictionary()
+        private void HandleModuleChange()
         {
             _modulesDictionary.Clear();
             _allModulesCache.Clear();
@@ -509,41 +510,12 @@ namespace Ships
                 anyForceApplied |= force.sqrMagnitude > Mathf.Epsilon;
             }
 
-            if (sasEnabled && !anyForceApplied &&
-                IsShipMovementInputIdle(forwardInput, horizontalInput, turnInput, finalTurnInput))
-                StabilizeIdleShipAngularVelocity(selfRigidbody);
-
             return anyForceApplied;
         }
 
         private static float ApplyInputDeadZone(float input, float deadZone)
         {
             return Mathf.Abs(input) <= deadZone ? 0f : input;
-        }
-
-        private bool IsShipMovementInputIdle(float forwardInput, float horizontalInput, float turnInput,
-            float finalTurnInput)
-        {
-            return Mathf.Abs(forwardInput) <= sasTurnInputSettings.MovementInputDeadZone &&
-                   Mathf.Abs(horizontalInput) <= sasTurnInputSettings.MovementInputDeadZone &&
-                   Mathf.Abs(turnInput) <= sasTurnInputSettings.TurnReleaseThreshold &&
-                   Mathf.Abs(finalTurnInput) <= sasTurnInputSettings.MinTurnInputChange;
-        }
-
-        private void StabilizeIdleShipAngularVelocity(Rigidbody2D commandRigidbody)
-        {
-            if (Mathf.Abs(commandRigidbody.angularVelocity) >
-                sasTurnInputSettings.AngularVelocityDeadZoneDegreesPerSecond)
-                return;
-
-            commandRigidbody.angularVelocity = 0f;
-
-            foreach (var module in AllModules)
-            {
-                var moduleRigidbody = module.PixelatedRigidbody?.Rigidbody;
-                if (moduleRigidbody)
-                    moduleRigidbody.angularVelocity = 0f;
-            }
         }
 
         private ControlAllocatorSettings GetControlAllocatorSettings()

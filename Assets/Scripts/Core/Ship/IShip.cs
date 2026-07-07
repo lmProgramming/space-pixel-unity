@@ -17,6 +17,7 @@ namespace Core.Ship
         float CaptainMultiplier { get; }
         string Name { get; }
         IReadOnlyList<IModule> AllModules { get; }
+        bool IsSasOn { get; }
         Vector2 GetPosition();
         void OnModuleConnectionLost(IModule module);
         void ManualAddModule(IModule module);
