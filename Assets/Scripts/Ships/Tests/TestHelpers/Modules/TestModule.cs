@@ -1,4 +1,4 @@
-using Core.Ship;
+using Core.Ships;
 using Ships.Modules;
 
 namespace Ships.Tests.TestHelpers.Modules

@@ -1,6 +1,6 @@
 using System;
 
-namespace Core.Ship.ModuleSnapshotPayloads
+namespace Core.Ships.ModuleSnapshotPayloads
 {
     [Serializable]
     public class EngineModuleData

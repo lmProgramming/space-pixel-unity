@@ -5,7 +5,7 @@ using JetBrains.Annotations;
 using LMPro.External.IsAlive;
 using UnityEngine;
 
-namespace Core.Ship
+namespace Core.Ships
 {
     public interface IModule : IHasAliveCheck
     {

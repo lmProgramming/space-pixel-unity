@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using Core.Pixelation;
-using Core.Ship;
+using Core.Ships;
 using UnityEngine;
 
 namespace Core.Services

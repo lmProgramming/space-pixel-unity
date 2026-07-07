@@ -1,7 +1,7 @@
 using Core.Constants;
 using Core.Gameplay.Sound;
 using Core.Services;
-using Core.Ship;
+using Core.Ships;
 using Events.Gameplay.Collision;
 using Services;
 using Services.Sound;

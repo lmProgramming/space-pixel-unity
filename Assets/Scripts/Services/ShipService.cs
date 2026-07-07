@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Core.Gameplay.EasyTeam;
 using Core.Services;
-using Core.Ship;
+using Core.Ships;
 using UnityEngine;
 
 namespace Services

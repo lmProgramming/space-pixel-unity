@@ -6,7 +6,7 @@ using UnityEngine;
 
 [assembly: InternalsVisibleTo("Ships.Tests")]
 
-namespace Core.Ship
+namespace Core.Ships
 {
     [Serializable]
     public class CrewMember
@@ -38,6 +38,11 @@ namespace Core.Ship
             IsAlive = true;
         }
 
+#if UNITY_INCLUDE_TESTS
+        internal int OnDiedSubscriberCountForTesting =>
+            OnDied?.GetInvocationList().Length ?? 0;
+#endif
+
         public event Action<CrewMember> OnDied;
 
         public int GetSkillLevel(CrewSkillType skillType)
@@ -52,10 +57,5 @@ namespace Core.Ship
             IsAlive = false;
             OnDied?.Invoke(this);
         }
-
-#if UNITY_INCLUDE_TESTS
-        internal int OnDiedSubscriberCountForTesting =>
-            OnDied?.GetInvocationList().Length ?? 0;
-#endif
     }
 }

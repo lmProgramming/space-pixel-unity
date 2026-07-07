@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Core.Services;
-using Core.Ship;
+using Core.Ships;
 using Pixelation;
 using Ships.Modules;
 using UnityEngine;

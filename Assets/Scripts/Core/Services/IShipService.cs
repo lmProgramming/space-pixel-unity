@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using Core.Gameplay.EasyTeam;
-using Core.Ship;
+using Core.Ships;
 using JetBrains.Annotations;
 using UnityEngine;
 

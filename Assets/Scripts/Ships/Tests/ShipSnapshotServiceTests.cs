@@ -1,5 +1,5 @@
 using System.Collections;
-using Core.Ship;
+using Core.Ships;
 using NUnit.Framework;
 using Services;
 using Ships.Modules;
@@ -8,7 +8,7 @@ using Ships.Tests.TestHelpers.Fixtures;
 using Ships.Tests.TestHelpers.Mocks;
 using UnityEngine;
 using UnityEngine.TestTools;
-using Resources = Core.Ship.Resources;
+using Resources = Core.Ships.Resources;
 
 namespace Ships.Tests
 {

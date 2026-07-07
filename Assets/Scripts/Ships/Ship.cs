@@ -5,7 +5,7 @@ using Core.Constants;
 using Core.Gameplay.EasyTeam;
 using Core.Pixelation;
 using Core.Services;
-using Core.Ship;
+using Core.Ships;
 using Cysharp.Threading.Tasks;
 using Events.Gameplay.Ship;
 using Gameplay.EasyTeam;

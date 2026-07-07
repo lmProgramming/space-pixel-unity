@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Core.Ship;
+using Core.Ships;
 using UnityEngine;
 
 namespace Ships.Systems.Resources

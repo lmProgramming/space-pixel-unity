@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Core.Ship
+namespace Core.Ships
 {
     [Serializable]
     public class ShipSnapshot

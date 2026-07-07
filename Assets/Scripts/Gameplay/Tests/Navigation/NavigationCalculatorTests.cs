@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using Core.Services;
-using Core.Ship;
+using Core.Ships;
 using Gameplay.Navigation;
 using NSubstitute;
 using NUnit.Framework;
