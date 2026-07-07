@@ -5,6 +5,8 @@ using Core.Constants;
 using Core.Pixelation;
 using Core.Services;
 using Core.Ships;
+using Core.Ships.Snapshots.Module;
+using Core.Ships.Snapshots.Module.Systems;
 using LMPro;
 using Pixelation;
 using UnityEngine;
@@ -64,7 +66,7 @@ namespace Ships.Modules
 
         protected virtual void Awake()
         {
-            PixelatedRigidbody = GetComponent<PixelatedRigidbody>();
+            EnsurePixelatedRigidbodyCached();
             OnCrewChange();
         }
 
@@ -214,9 +216,71 @@ namespace Ships.Modules
             Ship = ship;
         }
 
+        public ModuleSnapshot CaptureToSnapshot(IGameContentCatalog contentCatalog)
+        {
+            if (!Transform)
+                throw new UnityException(
+                    $"[Module] Cannot capture snapshot for module '{Transform?.name}' because its transform is null. " +
+                    "Ensure that all modules have valid transforms before capturing snapshots.");
+
+            var identity = Transform.GetComponent<GameObjectInstanceIdentity>();
+            if (!identity)
+            {
+                identity = Transform.gameObject.AddComponent<GameObjectInstanceIdentity>();
+                identity.EnsureAssigned(InstanceOrigin.Custom);
+            }
+            else if (string.IsNullOrWhiteSpace(identity.InstanceId))
+            {
+                identity.EnsureAssigned(identity.Origin, identity.ArchetypeId);
+            }
+
+            var typeName = GetType().Name;
+            var moduleSnapshot = new ModuleSnapshot
+            {
+                instanceId = identity.InstanceId,
+                moduleName = Transform.name,
+                moduleType = Type,
+                moduleTypeName = typeName,
+                origin = identity.Origin,
+                archetypeId = identity.ArchetypeId,
+                localPosition = Transform.localPosition,
+                localRotation = Transform.localRotation,
+                resources = Resources,
+                pixelatedRigidbody = PixelatedRigidbody.CaptureToSnapshot(contentCatalog),
+                typePayloadJson = CaptureTypePayloadJson(contentCatalog),
+                systems = new SystemData[]
+                {
+                }
+            };
+
+            return moduleSnapshot;
+        }
+
+        public virtual void RestoreFromSnapshot(ModuleSnapshot snapshot, IGameContentCatalog contentCatalog)
+        {
+            EnsurePixelatedRigidbodyCached();
+
+            SetResources(snapshot.resources);
+
+            ApplyTypePayloadJson(snapshot.typePayloadJson, contentCatalog);
+
+            PixelatedRigidbody.RestoreFromSnapshot(snapshot.pixelatedRigidbody, contentCatalog);
+        }
+
         public void SetResources(Resources newResources)
         {
             Resources = newResources;
+        }
+
+        private void EnsurePixelatedRigidbodyCached()
+        {
+            if (PixelatedRigidbody != null)
+                return;
+
+            PixelatedRigidbody = GetComponent<PixelatedRigidbody>();
+            if (PixelatedRigidbody == null)
+                throw new UnityException(
+                    $"[Module] Cannot restore snapshot on '{name}': missing PixelatedRigidbody component.");
         }
 
         public virtual string CaptureTypePayloadJson(IGameContentCatalog contentCatalog)

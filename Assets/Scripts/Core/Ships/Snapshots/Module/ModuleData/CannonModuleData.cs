@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace Core.Ships.Snapshots.Module.ConcreteModule
+namespace Core.Ships.Snapshots.Module.ModuleData
 {
     [Serializable]
     public class CannonModuleData

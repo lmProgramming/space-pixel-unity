@@ -18,8 +18,12 @@ namespace Ships.Tests
         public override void SetUp()
         {
             base.SetUp();
+
+            var contentCatalog = new TestContentCatalog();
+            contentCatalog.Seed(Container, CreatedObjects);
+
             _snapshotService =
-                new ShipSnapshotService(Container, null, new TestModuleCatalog(), new TestContentCatalog());
+                new ShipSnapshotService(Container, null, new TestModuleCatalog(), contentCatalog);
         }
 
         private ShipSnapshotService _snapshotService;

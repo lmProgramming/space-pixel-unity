@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Core.Pixelation;
 using Core.Services;
+using Core.Ships.Snapshots.Module;
 using JetBrains.Annotations;
 using LMPro.External.IsAlive;
 using UnityEngine;
@@ -35,7 +36,7 @@ namespace Core.Ships
         void SetResources(Resources newResources);
         void SetLocalPosition(Vector2 localPosition);
         void SetShip(IShip ship);
-        string CaptureTypePayloadJson(IGameContentCatalog contentCatalog);
-        void ApplyTypePayloadJson(string typePayloadJson, IGameContentCatalog contentCatalog);
+        ModuleSnapshot CaptureToSnapshot(IGameContentCatalog contentCatalog);
+        void RestoreFromSnapshot(ModuleSnapshot snapshot, IGameContentCatalog contentCatalog);
     }
 }

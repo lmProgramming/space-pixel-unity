@@ -8,8 +8,6 @@ namespace Core.Services
 
         void ApplySnapshot(IShip ship, ShipSnapshot snapshot);
 
-        string ToJson(ShipSnapshot snapshot, bool prettyPrint = true);
-
         ShipSnapshot LoadSnapshotFromFile(string path);
     }
 }

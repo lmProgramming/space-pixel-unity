@@ -1,12 +1,8 @@
-using System.Collections.Generic;
 using System.IO;
-using Core.Pixelation;
 using Core.Services;
 using Core.Ships;
-using Core.Ships.Snapshots.Module;
 using LMPro.External.IsAlive;
 using Ships;
-using Ships.Modules;
 using UnityEngine;
 using Zenject;
 
@@ -42,7 +38,7 @@ namespace Services
             var snapshot = new ShipSnapshot(ship.Name);
             foreach (var module in ship.AllModules)
             {
-                var moduleSnapshot = CaptureModuleSnapshot(module);
+                var moduleSnapshot = module.CaptureToSnapshot(_gameContentCatalog);
                 snapshot.modules.Add(moduleSnapshot);
 
                 if (ship.CommandModule == module)
@@ -76,11 +72,6 @@ namespace Services
                 $"[ShipSnapshotService] Applied snapshot '{snapshot.shipName}' to '{ship.Name}' ({snapshot.modules.Count} modules)");
         }
 
-        public string ToJson(ShipSnapshot snapshot, bool prettyPrint = true)
-        {
-            return JsonUtility.ToJson(snapshot, prettyPrint);
-        }
-
         public ShipSnapshot LoadSnapshotFromFile(string path)
         {
             var json = File.ReadAllText(path);
@@ -94,43 +85,9 @@ namespace Services
             return JsonUtility.FromJson<ShipSnapshot>(json);
         }
 
-        private ModuleSnapshot CaptureModuleSnapshot(IModule module)
-        {
-            if (!module.Transform)
-                throw new UnityException(
-                    $"[ShipSnapshotService] Cannot capture snapshot for module '{module}' because its transform is null. " +
-                    "Ensure that all modules have valid transforms before capturing snapshots.");
-
-            var identity = module.Transform.GetComponent<GameObjectInstanceIdentity>();
-            if (!identity)
-            {
-                identity = module.Transform.gameObject.AddComponent<GameObjectInstanceIdentity>();
-                identity.EnsureAssigned(InstanceOrigin.Custom);
-            }
-            else if (string.IsNullOrWhiteSpace(identity.InstanceId))
-            {
-                identity.EnsureAssigned(identity.Origin, identity.ArchetypeId);
-            }
-
-            var typeName = module.GetType().Name;
-            var moduleSnapshot = new ModuleSnapshot(identity.InstanceId, module.Transform.name, module.Type, typeName)
-            {
-                origin = identity.Origin,
-                archetypeId = identity.ArchetypeId,
-                localPosition = module.Transform.localPosition,
-                localRotation = module.Transform.localRotation,
-                resources = module.Resources,
-                pixelatedRigidbody = module.PixelatedRigidbody.CaptureToSnapshot(_gameContentCatalog),
-                typePayloadJson = module.CaptureTypePayloadJson(_gameContentCatalog)
-            };
-
-            return moduleSnapshot;
-        }
-
         private void CreateModulesFromSnapshot(IShip ship, ShipSnapshot snapshot)
         {
             var injectionContainer = ResolveInjectionContainer(ship);
-            var createdModules = new List<(GameObject go, ModuleSnapshot ms, IModule module)>();
 
             var concreteShip = ship as Ship;
 
@@ -155,20 +112,8 @@ namespace Services
                         $"[ShipSnapshotService] Failed to add a Module component for '{ms.moduleName}' (typeName: '{ms.moduleTypeName}', moduleType: {ms.moduleType}).");
 
                 module.SetShip(ship);
-                module.SetResources(ms.resources);
-                module.ApplyTypePayloadJson(ms.typePayloadJson, _gameContentCatalog);
-                createdModules.Add((moduleGo, ms, module));
-            }
-
-            foreach (var (moduleGo, ms, module) in createdModules)
-            {
                 injectionContainer.InjectGameObject(moduleGo);
-
-                var pixelatedRigidbody = moduleGo.GetComponent<IPixelatedRigidbody>();
-                pixelatedRigidbody.RestoreFromSnapshot(ms.pixelatedRigidbody, _gameContentCatalog);
-
-                if (module is Engine engine)
-                    engine.RestorePendingNozzleSnapshots(_gameContentCatalog);
+                module.RestoreFromSnapshot(ms, _gameContentCatalog);
 
                 moduleGo.SetActive(true);
                 moduleGo.gameObject.layer = concreteShip.gameObject.layer;
@@ -177,16 +122,11 @@ namespace Services
 
         private DiContainer ResolveInjectionContainer(IShip ship)
         {
-            if (ship is Component shipComponent && _sceneContextRegistry != null)
-            {
-                var sceneContainer =
-                    _sceneContextRegistry.TryGetContainerForScene(shipComponent.gameObject.scene);
+            if (ship is not Component shipComponent || _sceneContextRegistry == null) return _container;
+            var sceneContainer =
+                _sceneContextRegistry.TryGetContainerForScene(shipComponent.gameObject.scene);
 
-                if (sceneContainer != null)
-                    return sceneContainer;
-            }
-
-            return _container;
+            return sceneContainer ?? _container;
         }
     }
 }

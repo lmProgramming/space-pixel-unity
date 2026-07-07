@@ -15,6 +15,7 @@ using Services;
 using Ships;
 using Ships.ModuleConnection;
 using Ships.Modules;
+using Ships.Systems.Gimbal;
 using Ships.Systems.Sensing;
 using Ships.Tests.TestHelpers.Factories;
 using Ships.Tests.TestHelpers.Mocks;
@@ -146,7 +147,7 @@ namespace E2E
         protected AIShip CreateAIShip(string name, Team team, Vector2 position, bool withWeapons,
             bool withEngines)
         {
-            var shipGo = ModuleFactory.CreateGameObject(name, CreatedObjects, Container);
+            var shipGo = UnityBuilder.CreateGameObject(name, CreatedObjects, Container);
             shipGo.layer = team.Layer;
             shipGo.transform.position = position;
 
@@ -193,6 +194,8 @@ namespace E2E
             var ship = shipGo.AddComponent<AIShip>();
             Container.InjectGameObject(shipGo);
             shipGo.SetActive(true);
+
+            ship.ConfigureSasSettingsForTesting(new SasTurnInputSettings());
 
             ship.SetTeam(team);
             ship.SetNavigationSize(15);

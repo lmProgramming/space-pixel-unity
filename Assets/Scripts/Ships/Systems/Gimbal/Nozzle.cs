@@ -82,6 +82,7 @@ namespace Ships.Systems.Gimbal
 
         public override PixelatedRigidbodySnapshot CaptureToSnapshot(IGameContentCatalog contentCatalog)
         {
+            // remember that _exhaustParticles is supposed to have a parent with the GameObjectInstanceIdentity between Nozzle and Particle System
             var baseSnapshot = base.CaptureToSnapshot(contentCatalog);
 
             var instanceIdentity = _exhaustParticles.gameObject.GetComponentInParent<GameObjectInstanceIdentity>();

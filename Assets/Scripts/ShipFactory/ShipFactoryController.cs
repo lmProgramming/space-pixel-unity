@@ -180,7 +180,7 @@ namespace ShipFactory
             }
 
             snapshot.shipName = requestedName;
-            var json = _snapshotService.ToJson(snapshot);
+            var json = JsonUtility.ToJson(snapshot, true);
 
             var sanitizedName = SnapshotNameUtility.SanitizeFileName(requestedName);
             var outputPath = Path.Combine(snapshotFolderPath, sanitizedName + SnapshotExtension);

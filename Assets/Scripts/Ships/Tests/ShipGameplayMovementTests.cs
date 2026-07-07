@@ -108,7 +108,7 @@ namespace Ships.Tests
                 .WithTestPowerModule(new Vector2(0f, moduleSpacing), modulePixelSize, modulePixelSize)
                 .WithEngineModule(new Vector2(moduleSpacing, 0f), engineMaxThrust, modulePixelSize, modulePixelSize)
                 .WithEngineModule(new Vector2(-moduleSpacing, 0f), engineMaxThrust, modulePixelSize, modulePixelSize)
-                .Build<MovableShipTestProxy>();
+                .BuildMovableProxy();
 
             ship.ConfigureAllocatorForTesting(true, 14, 1f, 0.4f, 0.02f);
             return ship;

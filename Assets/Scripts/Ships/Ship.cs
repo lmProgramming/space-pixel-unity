@@ -584,6 +584,11 @@ namespace Ships
             allocatorTorqueWeight = torqueWeight;
             allocatorRegularization = regularization;
         }
+
+        internal void ConfigureSasSettingsForTesting(SasTurnInputSettings sasSettings)
+        {
+            sasTurnInputSettings = sasSettings;
+        }
 #endif
     }
 }

@@ -31,7 +31,7 @@ namespace Ships.Tests.TestHelpers.Factories
             powerGo.AddComponent<TestPowerModule>();
         }
 
-        public static void CreateEngineModule(Transform parent, Vector2 localPosition, DiContainer container,
+        public static Engine CreateEngineModule(Transform parent, Vector2 localPosition, DiContainer container,
             ICollection<GameObject> createdObjects, float engineMaxThrust,
             int modulePixelWidth, int modulePixelHeight, float localRotationZ = 0f, float gimbalRange = 45f)
         {
@@ -42,12 +42,14 @@ namespace Ships.Tests.TestHelpers.Factories
 
             var engine = engineGo.AddComponent<Engine>();
             engine.ConfigureForTesting(engineMaxThrust, gimbalRange);
+
+            return engine;
         }
 
         public static void AddNozzle(GameObject engineGo, DiContainer container,
             ICollection<GameObject> createdObjects)
         {
-            var nozzleGo = CreateGameObject("Nozzle", createdObjects, container);
+            var nozzleGo = UnityBuilder.CreateGameObject("Nozzle", createdObjects, container);
             nozzleGo.transform.SetParent(engineGo.transform, false);
             nozzleGo.transform.localPosition = new Vector3(0f, 0f, 0f);
 
@@ -59,9 +61,7 @@ namespace Ships.Tests.TestHelpers.Factories
 
             nozzleGo.AddComponent<PolygonCollider2D>();
 
-            var particleRoot = CreateGameObject("EngineExhaust", createdObjects, container);
-            particleRoot.transform.SetParent(nozzleGo.transform, false);
-            particleRoot.AddComponent<ParticleSystem>();
+            SystemsBuilder.CreateNozzleParticleSystem(container, createdObjects, nozzleGo);
 
             var nozzle = nozzleGo.AddComponent<Nozzle>();
             container.Inject(nozzle);
@@ -72,7 +72,7 @@ namespace Ships.Tests.TestHelpers.Factories
             float localRotationZ, DiContainer container, ICollection<GameObject> createdObjects,
             int modulePixelWidth, int modulePixelHeight)
         {
-            var moduleGo = CreateGameObject(name, createdObjects, container);
+            var moduleGo = UnityBuilder.CreateGameObject(name, createdObjects, container);
             moduleGo.transform.SetParent(parent);
             moduleGo.transform.localPosition = localPosition;
             moduleGo.transform.localRotation = Quaternion.Euler(0f, 0f, localRotationZ);
@@ -120,15 +120,6 @@ namespace Ships.Tests.TestHelpers.Factories
             shipGo.SetActive(true);
 
             return ship;
-        }
-
-        public static GameObject CreateGameObject(string name, ICollection<GameObject> createdObjects,
-            DiContainer container)
-        {
-            var go = new GameObject(name);
-            createdObjects.Add(go);
-            container.Inject(go);
-            return go;
         }
 
         public static Command AddCommandModuleComponent(GameObject moduleGo)

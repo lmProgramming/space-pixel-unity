@@ -1,6 +1,6 @@
 using System.Collections;
 using Core.Ships;
-using Core.Ships.Snapshots.Module.ConcreteModule;
+using Core.Ships.Snapshots.Module.ModuleData;
 using NUnit.Framework;
 using Services;
 using Ships.Modules;
@@ -23,6 +23,7 @@ namespace Ships.Tests
         {
             base.SetUp();
             _contentCatalog = new TestContentCatalog();
+            _contentCatalog.Seed(Container, CreatedObjects);
             _moduleCatalog = new TestModuleCatalog();
             _service = new ShipSnapshotService(Container, null, _moduleCatalog, _contentCatalog);
         }
@@ -53,7 +54,7 @@ namespace Ships.Tests
             yield return null;
 
             var snapshot = _service.CaptureSnapshot(ship);
-            var json = _service.ToJson(snapshot);
+            var json = JsonUtility.ToJson(snapshot, true);
             var fromJson = ShipSnapshotService.FromJson(json);
             _service.ApplySnapshot(ship, fromJson);
             ship.InitializeModules();

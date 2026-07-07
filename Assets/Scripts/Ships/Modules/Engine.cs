@@ -2,7 +2,8 @@ using System.Collections.Generic;
 using Core.Constants;
 using Core.Services;
 using Core.Ships;
-using Core.Ships.Snapshots.Module.ConcreteModule;
+using Core.Ships.Snapshots.Module;
+using Core.Ships.Snapshots.Module.ModuleData;
 using Core.Ships.Snapshots.PixelatedRigidbody;
 using LMPro.External.ReadOnly;
 using Pixelation;
@@ -270,6 +271,13 @@ namespace Ships.Modules
 
                 DestroyImmediate(nozzle.gameObject);
             }
+        }
+
+        public override void RestoreFromSnapshot(ModuleSnapshot snapshot, IGameContentCatalog contentCatalog)
+        {
+            base.RestoreFromSnapshot(snapshot, contentCatalog);
+
+            RestorePendingNozzleSnapshots(contentCatalog);
         }
 
 #if UNITY_INCLUDE_TESTS

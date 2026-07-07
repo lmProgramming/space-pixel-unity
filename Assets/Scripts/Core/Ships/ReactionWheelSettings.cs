@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace Ships.Systems.Gimbal
+namespace Core.Ships
 {
     [Serializable]
     public class ReactionWheelSettings

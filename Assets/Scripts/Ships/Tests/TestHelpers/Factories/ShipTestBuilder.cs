@@ -4,6 +4,7 @@ using Core.Ships;
 using Cysharp.Threading.Tasks;
 using Pixelation;
 using Ships.Modules;
+using Ships.Systems.Gimbal;
 using Ships.Tests.TestHelpers.Proxies;
 using UnityEngine;
 using Zenject;
@@ -34,7 +35,7 @@ namespace Ships.Tests.TestHelpers.Factories
         {
             _container = container;
             _createdObjects = createdObjects;
-            _shipGo = ModuleFactory.CreateGameObject(shipName, createdObjects, container);
+            _shipGo = UnityBuilder.CreateGameObject(shipName, createdObjects, container);
         }
 
         public static ShipTestBuilder CreateShip(DiContainer container, ICollection<GameObject> createdObjects,
@@ -112,9 +113,9 @@ namespace Ships.Tests.TestHelpers.Factories
         public ShipTestBuilder WithEngineModule(Vector2 localPosition, float maxThrust, int width, int height,
             float rotationZ = 0f, float gimbalRange = 45f)
         {
-            ModuleFactory.CreateEngineModule(_shipGo.transform, localPosition, _container, _createdObjects, maxThrust,
+            var engine = ModuleFactory.CreateEngineModule(_shipGo.transform, localPosition, _container, _createdObjects,
+                maxThrust,
                 width, height, rotationZ, gimbalRange);
-            var engine = _shipGo.transform.GetChild(_shipGo.transform.childCount - 1).GetComponent<Engine>();
             _engines.Add(engine);
             return this;
         }
@@ -184,15 +185,23 @@ namespace Ships.Tests.TestHelpers.Factories
             return WireShip<Ship>(initializeModules);
         }
 
-        public T Build<T>(bool initializeModules = false) where T : Ship
+        public MovableShipTestProxy BuildMovableProxy(bool initializeModules = false)
         {
-            return WireShip<T>(initializeModules);
+            var ship = WireShip<MovableShipTestProxy>(initializeModules);
+            EnsureAllModulesWired(ship).Forget();
+
+            ship.ConfigureSasSettingsForTesting(new SasTurnInputSettings());
+
+            return ship;
         }
 
         public ShipWithEnginesResult<ShipTestProxy> BuildWithEnginesResult()
         {
             var ship = WireShip<ShipTestProxy>(false);
             EnsureAllModulesWired(ship).Forget();
+
+            ship.ConfigureSasSettingsForTesting(new SasTurnInputSettings());
+
             return new ShipWithEnginesResult<ShipTestProxy> { Ship = ship, Engines = new List<Engine>(_engines) };
         }
 

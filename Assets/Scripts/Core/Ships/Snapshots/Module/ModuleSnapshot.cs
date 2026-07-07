@@ -1,4 +1,5 @@
 using System;
+using Core.Ships.Snapshots.Module.Systems;
 using Core.Ships.Snapshots.PixelatedRigidbody;
 using UnityEngine;
 
@@ -18,6 +19,8 @@ namespace Core.Ships.Snapshots.Module
         public Resources resources;
 
         public string typePayloadJson;
+
+        public SystemData[] systems;
 
         [SerializeReference]
         public PixelatedRigidbodySnapshot pixelatedRigidbody;

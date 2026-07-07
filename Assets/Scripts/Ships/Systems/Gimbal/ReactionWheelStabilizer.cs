@@ -1,3 +1,4 @@
+using Core.Ships;
 using Ships.Modules;
 using UnityEngine;
 using UnityEngine.Assertions;
