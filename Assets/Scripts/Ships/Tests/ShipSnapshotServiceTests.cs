@@ -1,6 +1,6 @@
 using System.Collections;
-using Core.Ship;
-using Core.Ship.Snapshots.Module.ConcreteModule;
+using Core.Ships;
+using Core.Ships.Snapshots.Module.ConcreteModule;
 using NUnit.Framework;
 using Services;
 using Ships.Modules;
@@ -11,7 +11,7 @@ using Ships.Tests.TestHelpers.Mocks;
 using UnityEngine;
 using UnityEngine.TestTools;
 using ZLinq;
-using Resources = Core.Ship.Resources;
+using Resources = Core.Ships.Resources;
 
 namespace Ships.Tests
 {

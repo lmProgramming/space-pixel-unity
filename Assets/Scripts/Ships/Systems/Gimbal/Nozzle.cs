@@ -1,7 +1,7 @@
 using System;
 using Core.Services;
-using Core.Ship;
-using Core.Ship.Snapshots.PixelatedRigidbody;
+using Core.Ships;
+using Core.Ships.Snapshots.PixelatedRigidbody;
 using Pixelation;
 using UnityEngine;
 

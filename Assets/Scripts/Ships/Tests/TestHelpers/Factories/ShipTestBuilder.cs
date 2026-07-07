@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Core.Ship;
+using Core.Ships;
 using Cysharp.Threading.Tasks;
 using Pixelation;
 using Ships.Modules;
@@ -8,7 +8,7 @@ using Ships.Tests.TestHelpers.Proxies;
 using UnityEngine;
 using Zenject;
 using Object = UnityEngine.Object;
-using Resources = Core.Ship.Resources;
+using Resources = Core.Ships.Resources;
 
 namespace Ships.Tests.TestHelpers.Factories
 {

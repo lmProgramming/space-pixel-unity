@@ -1,7 +1,7 @@
 using System;
 using Core.Services;
-using Core.Ship;
-using Core.Ship.Snapshots.Module;
+using Core.Ships;
+using Core.Ships.Snapshots.Module;
 using Pixelation;
 using Ships.Modules;
 using UnityEngine;

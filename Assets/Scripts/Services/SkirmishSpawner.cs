@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Core.Constants;
 using Core.Services;
-using Core.Ship;
+using Core.Ships;
 using Core.State;
 using Gameplay.EasyTeam;
 using Instantiation;

@@ -4,14 +4,14 @@ using System.Runtime.CompilerServices;
 using Core.Constants;
 using Core.Pixelation;
 using Core.Services;
-using Core.Ship;
+using Core.Ships;
 using LMPro;
 using Pixelation;
 using UnityEngine;
 using Zenject;
 using ZLinq;
 using Random = UnityEngine.Random;
-using Resources = Core.Ship.Resources;
+using Resources = Core.Ships.Resources;
 
 [assembly: InternalsVisibleTo("Editor.InspectorExtensions")]
 [assembly: InternalsVisibleTo("Ships.Tests")]

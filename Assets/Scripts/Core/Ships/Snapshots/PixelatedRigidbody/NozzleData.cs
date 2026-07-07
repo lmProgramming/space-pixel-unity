@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Core.Ship.Snapshots.PixelatedRigidbody
+namespace Core.Ships.Snapshots.PixelatedRigidbody
 {
     public class NozzleData
     {

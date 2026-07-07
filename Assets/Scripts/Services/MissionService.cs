@@ -3,7 +3,7 @@ using Core.Constants;
 using Core.Gameplay.EasyTeam;
 using Core.Pixelation;
 using Core.Services;
-using Core.Ship;
+using Core.Ships;
 using UnityEngine;
 using Zenject;
 using ZLinq;

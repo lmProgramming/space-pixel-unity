@@ -1,6 +1,6 @@
 using System;
 
-namespace Core.Ship.Snapshots.Module.ConcreteModule
+namespace Core.Ships.Snapshots.Module.ConcreteModule
 {
     [Serializable]
     public class LaserBeamModuleData

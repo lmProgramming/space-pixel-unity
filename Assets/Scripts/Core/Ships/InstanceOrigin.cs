@@ -1,4 +1,4 @@
-namespace Core.Ship
+namespace Core.Ships
 {
     public enum InstanceOrigin
     {

@@ -1,6 +1,6 @@
 using System;
-using Core.Ship;
-using Core.Ship.Snapshots.PixelatedRigidbody;
+using Core.Ships;
+using Core.Ships.Snapshots.PixelatedRigidbody;
 using Pixelation;
 using Ships.Systems.Gimbal;
 using UnityEngine;

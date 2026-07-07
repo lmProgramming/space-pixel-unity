@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Core.Ship;
+using Core.Ships;
 using Pixelation;
 using Ships.ModuleConnection;
 using Ships.Modules;

@@ -1,7 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Core.Ship;
+using Core.Ships;
 using NSubstitute;
 using NUnit.Framework;
 using Ships.Tests.TestHelpers.Factories;
@@ -10,7 +10,7 @@ using Ships.Tests.TestHelpers.Modules;
 using UnityEngine;
 using UnityEngine.TestTools;
 using Object = UnityEngine.Object;
-using Resources = Core.Ship.Resources;
+using Resources = Core.Ships.Resources;
 
 namespace Ships.Tests
 {

@@ -1,7 +1,7 @@
 using System;
 using System.Threading;
 using Core.Services;
-using Core.Ship.Snapshots.Module.ConcreteModule;
+using Core.Ships.Snapshots.Module.ConcreteModule;
 using Cysharp.Threading.Tasks;
 using LMPro;
 using Pixelation;

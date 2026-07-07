@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace Core.Ship.Snapshots.PixelatedRigidbody.Internals
+namespace Core.Ships.Snapshots.PixelatedRigidbody.Internals
 {
     [Serializable]
     public class ArmorGridSnapshot

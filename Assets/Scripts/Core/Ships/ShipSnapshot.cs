@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using Core.Ship.Snapshots.Module;
+using Core.Ships.Snapshots.Module;
 
-namespace Core.Ship
+namespace Core.Ships
 {
     [Serializable]
     public class ShipSnapshot

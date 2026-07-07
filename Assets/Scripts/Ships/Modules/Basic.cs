@@ -1,8 +1,8 @@
 using System;
 using System.Runtime.CompilerServices;
 using Core.Services;
-using Core.Ship;
-using Core.Ship.Snapshots.Module.ConcreteModule;
+using Core.Ships;
+using Core.Ships.Snapshots.Module.ConcreteModule;
 using UnityEngine;
 
 [assembly: InternalsVisibleTo("Ships.Tests")]

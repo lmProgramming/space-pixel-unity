@@ -1,11 +1,11 @@
 using System;
-using Core.Ship.Snapshots.PixelatedRigidbody;
+using Core.Ships.Snapshots.PixelatedRigidbody;
 using UnityEngine;
 
-namespace Core.Ship.Snapshots.Module
+namespace Core.Ships.Snapshots.Module
 {
     [Serializable]
-    public abstract class ModuleSnapshotBase
+    public class ModuleSnapshot
     {
         public string instanceId;
         public string moduleName;
@@ -17,34 +17,21 @@ namespace Core.Ship.Snapshots.Module
         public Quaternion localRotation;
         public Resources resources;
 
+        public string typePayloadJson;
+
         [SerializeReference]
         public PixelatedRigidbodySnapshot pixelatedRigidbody;
-
-        protected ModuleSnapshotBase()
-        {
-        }
-
-        protected ModuleSnapshotBase(string instanceIdValue, string name, ModuleType type, string typeName)
-        {
-            instanceId = instanceIdValue;
-            moduleName = name;
-            moduleType = type;
-            moduleTypeName = typeName;
-        }
-    }
-
-    [Serializable]
-    public class ModuleSnapshot : ModuleSnapshotBase
-    {
-        public string typePayloadJson;
 
         public ModuleSnapshot()
         {
         }
 
-        public ModuleSnapshot(string instanceIdValue, string name, ModuleType type, string typeName) :
-            base(instanceIdValue, name, type, typeName)
+        public ModuleSnapshot(string instanceIdValue, string name, ModuleType type, string typeName)
         {
+            instanceId = instanceIdValue;
+            moduleName = name;
+            moduleType = type;
+            moduleTypeName = typeName;
         }
     }
 }

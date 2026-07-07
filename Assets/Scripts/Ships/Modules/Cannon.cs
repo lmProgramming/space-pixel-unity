@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using Core.Constants;
 using Core.Services;
-using Core.Ship.Snapshots.Module.ConcreteModule;
+using Core.Ships.Snapshots.Module.ConcreteModule;
 using Events.Gameplay.Shooting;
 using LMPro;
 using UnityEngine;

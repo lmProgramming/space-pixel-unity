@@ -1,8 +1,8 @@
 using System;
-using Core.Ship.Snapshots.PixelatedRigidbody.Internals;
+using Core.Ships.Snapshots.PixelatedRigidbody.Internals;
 using UnityEngine;
 
-namespace Core.Ship.Snapshots.PixelatedRigidbody
+namespace Core.Ships.Snapshots.PixelatedRigidbody
 {
     [Serializable]
     public class PixelatedRigidbodySnapshot

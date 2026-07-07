@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Core.Ship;
+using Core.Ships;
 using NSubstitute;
 using NUnit.Framework;
 using ShipFactory.LegalPositionCalculator;
@@ -85,7 +85,7 @@ namespace ShipFactory.Tests.LegalPositionCalculator
             Assert.That(unrotatedLegality, Is.EqualTo(PositionLegality.OutsideShip));
             Assert.That(rotatedLegality, Is.EqualTo(PositionLegality.Correct));
         }
-        
+
         [Test]
         public void CalculateLegalityPosition_OddMultipleOfEightModules_TouchWhenEdgeAligned()
         {

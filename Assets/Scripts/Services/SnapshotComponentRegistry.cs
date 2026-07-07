@@ -1,5 +1,5 @@
 using System;
-using Core.Ship;
+using Core.Ships;
 using Ships.Modules;
 
 namespace Services

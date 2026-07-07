@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using Core.Constants;
 using Core.Services;
-using Core.Ship;
-using Core.Ship.Snapshots.Module.ConcreteModule;
-using Core.Ship.Snapshots.PixelatedRigidbody;
+using Core.Ships;
+using Core.Ships.Snapshots.Module.ConcreteModule;
+using Core.Ships.Snapshots.PixelatedRigidbody;
 using LMPro.External.ReadOnly;
 using Pixelation;
 using Ships.Snapshot;

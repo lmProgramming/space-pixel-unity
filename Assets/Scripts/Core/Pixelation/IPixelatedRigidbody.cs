@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Core.Grid;
 using Core.Services;
-using Core.Ship.Snapshots.PixelatedRigidbody;
+using Core.Ships.Snapshots.PixelatedRigidbody;
 using LMPro.External.IsAlive;
 using UnityEngine;
 
