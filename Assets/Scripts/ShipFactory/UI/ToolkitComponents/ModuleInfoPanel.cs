@@ -1,8 +1,8 @@
 using System;
-using Core.Ship;
+using Core.Ships;
 using UnityEngine;
 using UnityEngine.UIElements;
-using Resources = Core.Ship.Resources;
+using Resources = Core.Ships.Resources;
 
 namespace ShipFactory.UI.ToolkitComponents
 {

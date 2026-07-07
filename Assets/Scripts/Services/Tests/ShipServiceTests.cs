@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using Core.Gameplay.EasyTeam;
-using Core.Ship;
+using Core.Ships;
 using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;

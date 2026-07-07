@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Core.Ships;
 using UnityEngine;
 
 namespace ShipFactory.LegalPositionCalculator
@@ -81,7 +82,7 @@ namespace ShipFactory.LegalPositionCalculator
             if (bundles.Count <= 1)
                 return true;
 
-            var commandIndex = bundles.FindIndex(bundle => bundle.PlacedModule.Type == Core.Ship.ModuleType.Command);
+            var commandIndex = bundles.FindIndex(bundle => bundle.PlacedModule.Type == ModuleType.Command);
             if (commandIndex < 0)
                 throw new UnityException("[ShipFactory] No command module found while validating placement.");
 

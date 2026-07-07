@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 using AI.EasyState;
-using Core.Ship;
+using Core.Ships;
 using JetBrains.Annotations;
 using Ships.StateMachines.AIShip;
 using Ships.StateMachines.AIShip.States;

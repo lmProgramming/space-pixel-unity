@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 using Core.Services;
-using Core.Ship;
+using Core.Ships;
 using Events.Camera;
 using JetBrains.Annotations;
 using ShipFactory.LegalPositionCalculator;

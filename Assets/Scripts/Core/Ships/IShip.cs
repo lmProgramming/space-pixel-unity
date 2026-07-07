@@ -4,7 +4,7 @@ using LMPro.DataStructures.Graph;
 using LMPro.External.IsAlive;
 using UnityEngine;
 
-namespace Core.Ship
+namespace Core.Ships
 {
     public interface IShip : IHasAliveCheck
     {

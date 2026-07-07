@@ -1,5 +1,6 @@
+using System;
 using System.Collections.Generic;
-using Core.Ship;
+using Core.Ships;
 using NUnit.Framework;
 
 namespace Core.Tests
@@ -87,7 +88,7 @@ namespace Core.Tests
         {
             var crew = new CrewMember("Bob", "Ray", 40);
 
-            foreach (CrewSkillType skill in System.Enum.GetValues(typeof(CrewSkillType)))
+            foreach (CrewSkillType skill in Enum.GetValues(typeof(CrewSkillType)))
                 Assert.AreEqual(0, crew.GetSkillLevel(skill));
         }
     }

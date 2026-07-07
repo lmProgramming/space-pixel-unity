@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Core.Grid;
-using Core.Ship;
+using Core.Ships;
 using LMPro.External.IsAlive;
 using UnityEngine;
 

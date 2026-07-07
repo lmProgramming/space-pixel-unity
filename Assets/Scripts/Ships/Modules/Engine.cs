@@ -1,7 +1,7 @@
 using Core.Constants;
 using Core.Services;
-using Core.Ship;
-using Core.Ship.ModuleSnapshotPayloads;
+using Core.Ships;
+using Core.Ships.ModuleSnapshotPayloads;
 using UnityEngine;
 using UnityEngine.Assertions;
 

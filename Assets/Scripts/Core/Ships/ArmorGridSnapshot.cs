@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace Core.Ship
+namespace Core.Ships
 {
     [Serializable]
     public class ArmorGridSnapshot

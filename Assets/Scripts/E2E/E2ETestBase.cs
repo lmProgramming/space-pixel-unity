@@ -21,7 +21,7 @@ using Ships.Tests.TestHelpers.Mocks;
 using UnityEngine;
 using Zenject;
 using Object = UnityEngine.Object;
-using Resources = Core.Ship.Resources;
+using Resources = Core.Ships.Resources;
 
 namespace E2E
 {

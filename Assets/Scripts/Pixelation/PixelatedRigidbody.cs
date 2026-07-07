@@ -5,7 +5,7 @@ using System.Threading;
 using Core.Grid;
 using Core.Pixelation;
 using Core.Services;
-using Core.Ship;
+using Core.Ships;
 using Cysharp.Threading.Tasks;
 using Events.Gameplay.Collision;
 using Grid;
