@@ -17,7 +17,9 @@ namespace Grid
         [LMPro.External.ReadOnly.ReadOnly] public Vector2Int StartPoint;
         [LMPro.External.ReadOnly.ReadOnly] public int Width;
         [LMPro.External.ReadOnly.ReadOnly] public int Height;
-        [LMPro.External.ReadOnly.ReadOnly] public NativeArray<Color32> Pixels;
+
+        [ReadOnly] [LMPro.External.ReadOnly.ReadOnly]
+        public NativeArray<Color32> Pixels;
 
         public NativeArray<bool> Visited;
 

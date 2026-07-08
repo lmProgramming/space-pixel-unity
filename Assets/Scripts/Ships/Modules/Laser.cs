@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using Core.Services;
+using Core.Ships.Snapshots.Module;
 using Core.Ships.Snapshots.Module.ModuleData;
 using Cysharp.Threading.Tasks;
 using LMPro;
@@ -190,6 +191,13 @@ namespace Ships.Modules
         private static bool IsOwnCollider(Collider2D collider, Collider2D[] ownColliders)
         {
             return ownColliders.AsValueEnumerable().Any(own => own == collider);
+        }
+
+        public override void RestoreFromSnapshot(ModuleSnapshot snapshot, IGameContentCatalog contentCatalog)
+        {
+            base.RestoreFromSnapshot(snapshot, contentCatalog);
+
+            gameObject.AddComponent<LineRenderer>();
         }
 
         private async UniTask FireBeamUpdateAsync(CancellationToken token)

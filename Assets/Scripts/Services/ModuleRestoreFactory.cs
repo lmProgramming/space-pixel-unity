@@ -3,7 +3,6 @@ using Core.Services;
 using Core.Ships;
 using Core.Ships.Snapshots.Module;
 using Pixelation;
-using Ships.Modules;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -53,10 +52,7 @@ namespace Services
 
             moduleGo.AddComponent<PolygonCollider2D>();
 
-            var moduleType = SnapshotComponentRegistry.ResolveModuleType(snapshot.moduleTypeName, snapshot.moduleType);
-
-            if (moduleType == typeof(LaserBeam))
-                moduleGo.AddComponent<LineRenderer>();
+            var moduleType = SnapshotComponentRegistry.ResolveModuleType(snapshot.moduleType);
 
             moduleGo.AddComponent<PixelatedRigidbody>();
             moduleGo.AddComponent(moduleType);

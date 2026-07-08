@@ -109,7 +109,7 @@ namespace Services
                 var module = moduleGo.GetComponent<IModule>();
                 if (module == null)
                     throw new UnityException(
-                        $"[ShipSnapshotService] Failed to add a Module component for '{ms.moduleName}' (typeName: '{ms.moduleTypeName}', moduleType: {ms.moduleType}).");
+                        $"[ShipSnapshotService] Failed to add a Module component for '{ms.moduleName}' (moduleType: {ms.moduleType}).");
 
                 module.SetShip(ship);
                 injectionContainer.InjectGameObject(moduleGo);

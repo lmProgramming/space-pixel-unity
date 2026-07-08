@@ -234,13 +234,11 @@ namespace Ships.Modules
                 identity.EnsureAssigned(identity.Origin, identity.ArchetypeId);
             }
 
-            var typeName = GetType().Name;
             var moduleSnapshot = new ModuleSnapshot
             {
                 instanceId = identity.InstanceId,
                 moduleName = Transform.name,
                 moduleType = Type,
-                moduleTypeName = typeName,
                 origin = identity.Origin,
                 archetypeId = identity.ArchetypeId,
                 localPosition = Transform.localPosition,

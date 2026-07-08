@@ -24,11 +24,6 @@ namespace Ships.Modules
                 throw new UnityException("[Basic] Wrong Type assigned as ModuleType");
         }
 
-        private void OnValidate()
-        {
-            Type = moduleType;
-        }
-
         public override string CaptureTypePayloadJson(IGameContentCatalog contentCatalog)
         {
             var data = new BasicModuleData
@@ -46,7 +41,7 @@ namespace Ships.Modules
 
             var data = JsonUtility.FromJson<BasicModuleData>(typePayloadJson);
             if (data == null)
-                throw new ArgumentException("[Basic] typePayloadJson cannot be null or whitespace.");
+                throw new ArgumentException("[Basic] typePayloadJson was parsed as null.");
 
             moduleType = data.moduleType;
         }

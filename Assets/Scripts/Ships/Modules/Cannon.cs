@@ -165,6 +165,7 @@ namespace Ships.Modules
             projectileSpeed = data.projectileSpeed;
             _reloadTimer = new ManualTimer(reloadTime);
 
+            foreach (var projectileSpawnPoint in projectileSpawnPoints) Destroy(projectileSpawnPoint.gameObject);
             projectileSpawnPoints.Clear();
             foreach (var projectileLocalSpawnPoint in data.projectileLocalSpawnPoints)
             {

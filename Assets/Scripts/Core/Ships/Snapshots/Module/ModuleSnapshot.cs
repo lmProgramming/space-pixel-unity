@@ -11,7 +11,6 @@ namespace Core.Ships.Snapshots.Module
         public string instanceId;
         public string moduleName;
         public ModuleType moduleType;
-        public string moduleTypeName;
         public InstanceOrigin origin;
         public string archetypeId;
         public Vector3 localPosition;
@@ -29,12 +28,11 @@ namespace Core.Ships.Snapshots.Module
         {
         }
 
-        public ModuleSnapshot(string instanceIdValue, string name, ModuleType type, string typeName)
+        public ModuleSnapshot(string instanceIdValue, string name, ModuleType type)
         {
             instanceId = instanceIdValue;
             moduleName = name;
             moduleType = type;
-            moduleTypeName = typeName;
         }
     }
 }

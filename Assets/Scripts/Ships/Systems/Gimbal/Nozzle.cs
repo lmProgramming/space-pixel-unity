@@ -92,8 +92,8 @@ namespace Ships.Systems.Gimbal
 
             var typePayloadJson = new NozzleData
             {
-                ParticleEffectContentId = instanceIdentity.ArchetypeId,
-                ParticleEffectPosition = _exhaustParticles.transform.parent.localPosition
+                particleEffectContentId = instanceIdentity.ArchetypeId,
+                particleEffectPosition = _exhaustParticles.transform.parent.localPosition
             };
 
             baseSnapshot.typePayloadJson = JsonUtility.ToJson(typePayloadJson);
@@ -108,10 +108,14 @@ namespace Ships.Systems.Gimbal
 
             var typeData = JsonUtility.FromJson<NozzleData>(snapshot.typePayloadJson);
 
-            contentCatalog.TryGetPrefab(typeData.ParticleEffectContentId, out var prefab);
+            contentCatalog.TryGetPrefab(typeData.particleEffectContentId, out var prefab);
+
+            if (!prefab)
+                throw new ArgumentNullException(
+                    $"[Nozzle] prefab was not found. Particle content id: {typeData.particleEffectContentId}");
 
             var newGo = Instantiate(prefab, transform);
-            newGo.transform.localPosition = typeData.ParticleEffectPosition;
+            newGo.transform.localPosition = typeData.particleEffectPosition;
         }
 
         protected override PixelatedRigidbodyType GetSnapshotRigidbodyType()

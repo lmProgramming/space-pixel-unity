@@ -66,13 +66,7 @@ namespace Ships.Modules
         {
             base.Start();
 
-            _nozzles = GetComponentsInChildren<Nozzle>().AsValueEnumerable().ToList();
-
-            if (_nozzles.Count == 0)
-                throw new UnityException("[Engine] No Nozzles found");
-
-            foreach (var nozzle in _nozzles)
-                RegisterNozzle(nozzle);
+            RegisterNozzles();
         }
 
         private void Update()
@@ -93,6 +87,17 @@ namespace Ships.Modules
             SetActive(false);
 
             base.OnDestroy();
+        }
+
+        private void RegisterNozzles()
+        {
+            _nozzles = GetComponentsInChildren<Nozzle>().AsValueEnumerable().ToList();
+
+            if (_nozzles.Count == 0)
+                throw new UnityException("[Engine] No Nozzles found");
+
+            foreach (var nozzle in _nozzles)
+                RegisterNozzle(nozzle);
         }
 
         private void RegisterNozzle(Nozzle nozzle)
@@ -119,14 +124,11 @@ namespace Ships.Modules
 
             var averageThrustPoint = Vector2.zero;
 
-            foreach (var nozzle in _nozzles)
-            {
-                if (!nozzle) continue;
+            var actualNozzles = ActiveNozzles;
 
-                averageThrustPoint += (Vector2)nozzle.RestLocalPosition;
-            }
+            foreach (var nozzle in actualNozzles) averageThrustPoint += (Vector2)nozzle.RestLocalPosition;
 
-            averageThrustPoint /= _nozzles.Count;
+            averageThrustPoint /= actualNozzles.Count();
 
             return averageThrustPoint;
         }
@@ -240,7 +242,7 @@ namespace Ships.Modules
                 NestedPixelatedRigidbodyFactory.CreateShell(transform, nozzleSnapshot);
         }
 
-        internal void RestorePendingNozzleSnapshots(IGameContentCatalog contentCatalog)
+        private void RestorePendingNozzleSnapshots(IGameContentCatalog contentCatalog)
         {
             foreach (var snapshot in _pendingNozzleSnapshots)
             {
@@ -258,6 +260,8 @@ namespace Ships.Modules
             }
 
             _pendingNozzleSnapshots.Clear();
+
+            RegisterNozzles();
         }
 
         private void ClearExistingNozzleChildren()

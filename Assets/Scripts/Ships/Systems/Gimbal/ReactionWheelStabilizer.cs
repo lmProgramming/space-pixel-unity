@@ -20,14 +20,13 @@ namespace Ships.Systems.Gimbal
             _initialMass = _module.PixelatedRigidbody.Rigidbody.mass;
         }
 
-        private void Update()
+        private void FixedUpdate()
         {
             if (_module.Ship.IsSasOn)
-
                 Apply(_module.PixelatedRigidbody.Rigidbody, _initialMass * _module.ActualEfficiency);
         }
 
-        public void Apply(Rigidbody2D commandRigidbody, float multiplier)
+        private void Apply(Rigidbody2D commandRigidbody, float multiplier)
         {
             Assert.IsNotNull(commandRigidbody, "commandRigidbody != null");
             Assert.IsNotNull(settings, "settings != null");

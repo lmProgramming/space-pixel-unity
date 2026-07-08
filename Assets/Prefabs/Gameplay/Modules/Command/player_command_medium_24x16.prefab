@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 2148071801949329020}
   - component: {fileID: 7854754410379322630}
   - component: {fileID: -6676080231140950813}
+  - component: {fileID: 7620094415523487870}
   m_Layer: 0
   m_Name: player_command_medium_24x16
   m_TagString: Untagged
@@ -132,7 +133,7 @@ Rigidbody2D:
   m_Constraints: 0
 --- !u!212 &2148071801949329020
 SpriteRenderer:
-  serializedVersion: 2
+  serializedVersion: 3
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -189,6 +190,7 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+  m_BlendShapeWeights: []
 --- !u!114 &7854754410379322630
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -229,3 +231,20 @@ MonoBehaviour:
     energyProduction: 0
     crewNeeded: 7
     crewQuarters: 0
+--- !u!114 &7620094415523487870
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4632285958115763044}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1faa5c4bc848be588d1c2a19b322020, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Ships::Ships.Systems.Gimbal.ReactionWheelStabilizer
+  settings:
+    <DampingStrength>k__BackingField: 5
+    <MaxTorque>k__BackingField: 3
+    <AngularVelocityDeadZoneDegreesPerSecond>k__BackingField: 1e-45
+    <AngularVelocityAtWhichSetItToZero>k__BackingField: 0.0001

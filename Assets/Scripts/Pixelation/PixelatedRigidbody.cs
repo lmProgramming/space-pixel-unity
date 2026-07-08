@@ -246,7 +246,11 @@ namespace Pixelation
             };
 
             if (TexturePixelGrid == null)
+            {
+                Debug.LogWarning(
+                    $"[PixelatedRigidbody] '{name}' has no TexturePixelGrid. Snapshot will not contain pixel data.");
                 return snapshot;
+            }
 
             var dimensions = TexturePixelGrid.Dimensions();
             snapshot.colorGrid = new PixelGridSnapshot(dimensions.x, dimensions.y);

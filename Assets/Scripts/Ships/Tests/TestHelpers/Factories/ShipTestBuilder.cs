@@ -67,17 +67,23 @@ namespace Ships.Tests.TestHelpers.Factories
         public ShipTestBuilder WithCommand(string name, Vector2 localPosition, int width, int height)
         {
             var moduleGo = CreateModuleBase(name, localPosition, width, height);
+
             var command = ModuleFactory.AddCommandModuleComponent(moduleGo);
+
             RegisterCommand(command);
+
             return this;
         }
 
         public ShipTestBuilder WithBasic(string name, Vector2 localPosition, int width, int height, Resources resources)
         {
             var moduleGo = CreateModuleBase(name, localPosition, width, height);
+
             var basic = ModuleFactory.AddBasicComponent(moduleGo);
-            RegisterOtherModule(basic);
             basic.SetResources(resources);
+
+            RegisterOtherModule(basic);
+
             return this;
         }
 
@@ -85,8 +91,11 @@ namespace Ships.Tests.TestHelpers.Factories
         public ShipTestBuilder WithLaser(string name, Vector2 localPosition, int width, int height)
         {
             var moduleGo = CreateModuleBase(name, localPosition, width, height);
+
             var basic = ModuleFactory.AddLaserComponent(moduleGo);
+
             RegisterOtherModule(basic);
+
             return this;
         }
 
@@ -94,8 +103,11 @@ namespace Ships.Tests.TestHelpers.Factories
             ModuleType type = ModuleType.Resources)
         {
             var moduleGo = CreateModuleBase(name, localPosition, width, height);
+
             var module = ModuleFactory.AddTestModuleComponent(moduleGo, type);
+
             RegisterOtherModule(module);
+
             return this;
         }
 
@@ -103,10 +115,13 @@ namespace Ships.Tests.TestHelpers.Factories
             int crewNeeded, CrewSkillType mainSkill)
         {
             var moduleGo = CreateModuleBase(name, localPosition, width, height);
+
             var testModule = ModuleFactory.AddTestModuleComponent(moduleGo);
             testModule.SetMainSkillType(mainSkill);
             testModule.SetResources(new Resources(0, 0, crewNeeded, 0, 0));
+
             RegisterOtherModule(testModule);
+
             return this;
         }
 
@@ -131,11 +146,15 @@ namespace Ships.Tests.TestHelpers.Factories
         {
             var commandGo = ModuleFactory.CreateModuleBase("Command", _shipGo.transform, localPosition, 0f, _container,
                 _createdObjects, width, height);
+
             var command = ModuleFactory.AddCommandModuleComponent(commandGo);
             command.SetResources(new Resources(0, 0, 0, 0, 0));
+
             var identity = commandGo.AddComponent<GameObjectInstanceIdentity>();
             identity.EnsureAssigned(InstanceOrigin.Custom);
+
             RegisterCommand(command);
+
             return this;
         }
 
@@ -143,12 +162,17 @@ namespace Ships.Tests.TestHelpers.Factories
         {
             var engineGo = ModuleFactory.CreateModuleBase("Engine", _shipGo.transform, localPosition, 0f, _container,
                 _createdObjects, width, height);
+
             ModuleFactory.AddNozzle(engineGo, _container, _createdObjects);
+
             var engine = engineGo.AddComponent<Engine>();
             engine.SetResources(resources);
+
             var identity = engineGo.AddComponent<GameObjectInstanceIdentity>();
             identity.EnsureAssigned(InstanceOrigin.Custom);
+
             RegisterOtherModule(engine);
+
             return this;
         }
 
@@ -159,13 +183,27 @@ namespace Ships.Tests.TestHelpers.Factories
             var moduleInstance = Object.Instantiate(modulePrefab, _shipGo.transform);
             moduleInstance.transform.localPosition = localPosition;
             moduleInstance.SetActive(true);
+
+            moduleInstance.name = name;
+
             var cannonPixelRb = moduleInstance.GetComponent<PixelatedRigidbody>();
+            var module = moduleInstance.GetComponent<Module>();
+
+            if (!cannonPixelRb)
+                throw new UnityException(
+                    $"[ShipTestBuilder] Module '{name}' does not have a PixelatedRigidbody component.");
+            if (!module)
+                throw new UnityException($"[ShipTestBuilder] Module '{name}' does not have a Module component.");
+
             cannonPixelRb.SetTextureFromColors(ModuleFactory.CreateSolidPixelGrid(pixelSize, pixelSize));
+
             var cannonIdentity = moduleInstance.GetComponent<GameObjectInstanceIdentity>();
             if (cannonIdentity == null)
                 cannonIdentity = moduleInstance.AddComponent<GameObjectInstanceIdentity>();
             cannonIdentity.EnsureAssigned(InstanceOrigin.CatalogPrefab, archetypeId);
-            RegisterOtherModule(moduleInstance.GetComponent<Module>());
+
+            RegisterOtherModule(module);
+
             return this;
         }
 
