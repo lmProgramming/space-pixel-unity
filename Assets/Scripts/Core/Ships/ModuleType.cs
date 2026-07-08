@@ -8,4 +8,13 @@ namespace Core.Ships
         Engine,
         Structural
     }
+
+    public enum ConcreteModuleType
+    {
+        Command,
+        Basic,
+        Cannon,
+        Laser,
+        Engine
+    }
 }

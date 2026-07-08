@@ -11,6 +11,7 @@ namespace Ships.Modules
         {
             base.Awake();
             Type = ModuleType.Command;
+            ConcreteType = ConcreteModuleType.Command;
         }
 
         public override float GetCrewEfficiency()

@@ -9,6 +9,7 @@ using Ships;
 using UI.Common;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 using UnityEngine.UIElements;
 using Zenject;
 
@@ -23,7 +24,10 @@ namespace ShipFactory
         private static readonly object ModuleDragPointerBlocker = new();
         private static readonly object UiHoverBlocker = new();
         private static readonly object UiPointerDownBlocker = new();
-        [SerializeField] private ModulePrefabLibrary modulePrefabLibrary;
+
+        [FormerlySerializedAs("modulePrefabLibrary")] [SerializeField]
+        private ShipModuleCatalog shipModuleCatalog;
+
         [SerializeField] private Ship initialShip;
 
         [SerializeField] private string snapshotFolderName = "ShipSnapshots";
@@ -65,7 +69,7 @@ namespace ShipFactory
             _uiDocument = GetComponent<UIDocument>();
             _camera = Camera.main;
 
-            if (modulePrefabLibrary == null)
+            if (shipModuleCatalog == null)
                 Debug.LogError("[ShipFactoryController] ModulePrefabLibrary is not assigned!", this);
         }
 
@@ -89,7 +93,7 @@ namespace ShipFactory
                     "[ShipFactoryController] CameraResetRequestEventChannel is not assigned!");
 
             _canvasController = new ShipFactoryCanvasController(_uiRoot, _gameInput, cameraResetRequestEventChannel);
-            _paletteController = new ModulePaletteController(_uiRoot, modulePrefabLibrary);
+            _paletteController = new ModulePaletteController(_uiRoot, shipModuleCatalog);
 
             _shipNameField = _uiRoot.Q<TextField>("ship-name-field");
             _saveShipButton = _uiRoot.Q<Button>("save-ship-button");

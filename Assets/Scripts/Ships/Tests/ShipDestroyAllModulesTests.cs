@@ -1,4 +1,5 @@
 using System.Collections;
+using Core.Services;
 using LMPro.External.IsAlive;
 using NUnit.Framework;
 using Services;
@@ -22,8 +23,17 @@ namespace Ships.Tests
             var contentCatalog = new TestContentCatalog();
             contentCatalog.Seed(Container, CreatedObjects);
 
+            // AsCached because AsSingle can not be Rebind
+            var moduleCatalog = new TestModuleCatalog();
+            Container.Rebind<IShipModuleCatalog>()
+                .FromInstance(moduleCatalog)
+                .AsCached();
+            Container.Rebind<IModuleRestoreFactory>()
+                .FromInstance(new ModuleRestoreFactory(moduleCatalog))
+                .AsCached();
+
             _snapshotService =
-                new ShipSnapshotService(Container, null, new TestModuleCatalog(), contentCatalog);
+                new ShipSnapshotService(contentCatalog);
         }
 
         private ShipSnapshotService _snapshotService;

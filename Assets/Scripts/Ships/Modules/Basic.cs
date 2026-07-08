@@ -15,12 +15,13 @@ namespace Ships.Modules
         private ModuleType moduleType;
 
         public override ModuleType Type => moduleType;
+        public override ConcreteModuleType ConcreteType => ConcreteModuleType.Basic;
 
         protected override void Start()
         {
             base.Start();
 
-            if (Type is ModuleType.Engine or ModuleType.Command or ModuleType.Weapon)
+            if (Type is not ModuleType.Resources and not ModuleType.Structural)
                 throw new UnityException("[Basic] Wrong Type assigned as ModuleType");
         }
 

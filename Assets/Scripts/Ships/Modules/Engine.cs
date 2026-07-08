@@ -56,11 +56,7 @@ namespace Ships.Modules
         public Vector2 WorldThrustDirection =>
             (Quaternion.AngleAxis(CurrentThrusterAngle, Vector3.forward) * transform.up).normalized;
 
-        protected override void Awake()
-        {
-            base.Awake();
-            Type = ModuleType.Engine;
-        }
+        public override ConcreteModuleType ConcreteType => ConcreteModuleType.Engine;
 
         protected override void Start()
         {

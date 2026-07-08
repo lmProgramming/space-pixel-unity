@@ -1,9 +1,7 @@
-using System;
 using System.IO;
 using Core.Services;
 using Core.Ships;
 using LMPro.External.IsAlive;
-using Ships;
 using UnityEngine;
 using Zenject;
 
@@ -11,21 +9,12 @@ namespace Services
 {
     public class ShipSnapshotService : IShipSnapshotService
     {
-        private readonly DiContainer _container;
         private readonly IGameContentCatalog _gameContentCatalog;
-        private readonly ModuleRestoreFactory _moduleRestoreFactory;
-        private readonly SceneContextRegistry _sceneContextRegistry;
 
         [Inject]
-        public ShipSnapshotService(DiContainer container,
-            SceneContextRegistry sceneContextRegistry,
-            IShipModuleCatalog shipModuleCatalog,
-            IGameContentCatalog gameContentCatalog)
+        public ShipSnapshotService(IGameContentCatalog gameContentCatalog)
         {
-            _container = container;
-            _sceneContextRegistry = sceneContextRegistry;
             _gameContentCatalog = gameContentCatalog;
-            _moduleRestoreFactory = new ModuleRestoreFactory(shipModuleCatalog);
         }
 
         public ShipSnapshot CaptureSnapshot(IShip ship)
@@ -36,25 +25,7 @@ namespace Services
                 return null;
             }
 
-            var snapshot = new ShipSnapshot(ship.Name);
-            foreach (var module in ship.AllModules)
-            {
-                var moduleSnapshot = module.CaptureSnapshot(_gameContentCatalog);
-                snapshot.modules.Add(moduleSnapshot);
-
-                if (ship.CommandModule != module) continue;
-
-                if (snapshot.commandModuleInstanceId != null)
-                    throw new InvalidOperationException(
-                        "[ShipSnapshotService] Multiple command modules found. Only the first one will be recorded in the snapshot.");
-
-                snapshot.commandModuleInstanceId = moduleSnapshot.instanceId;
-            }
-
-            Debug.Log(
-                $"[ShipSnapshotService] Captured snapshot of '{ship.Name}' with {snapshot.modules.Count} modules");
-
-            return snapshot;
+            return ship.CaptureSnapshot(_gameContentCatalog);
         }
 
         public void ApplySnapshot(IShip ship, ShipSnapshot snapshot)
@@ -71,11 +42,7 @@ namespace Services
                 return;
             }
 
-            ship.DestroyAllModulesSilently();
-            CreateModulesFromSnapshot(ship, snapshot);
-
-            Debug.Log(
-                $"[ShipSnapshotService] Applied snapshot '{snapshot.shipName}' to '{ship.Name}' ({snapshot.modules.Count} modules)");
+            ship.RestoreFromSnapshot(snapshot, _gameContentCatalog);
         }
 
         public ShipSnapshot LoadSnapshotFromFile(string path)
@@ -84,50 +51,6 @@ namespace Services
             var snapshot = JsonUtility.FromJson<ShipSnapshot>(json);
 
             return snapshot;
-        }
-
-        private void CreateModulesFromSnapshot(IShip ship, ShipSnapshot snapshot)
-        {
-            var injectionContainer = ResolveInjectionContainer(ship);
-
-            var concreteShip = ship as Ship;
-
-            Debug.Assert(concreteShip,
-                "[ShipSnapshotService] Ship is not a concrete Ship class. Module restoration may fail if the ship's module attachment logic is customized.");
-
-            foreach (var ms in snapshot.modules)
-            {
-                var moduleGo = _moduleRestoreFactory.CreateModuleObject(ms, concreteShip.transform);
-                moduleGo.SetActive(false);
-                moduleGo.transform.localPosition = ms.localPosition;
-                moduleGo.transform.localRotation = ms.localRotation;
-
-                var identity = moduleGo.GetComponent<GameObjectInstanceIdentity>();
-                if (!identity)
-                    identity = moduleGo.AddComponent<GameObjectInstanceIdentity>();
-                identity.RestoreFromSnapshot(ms.instanceId, ms.origin, ms.archetypeId);
-
-                var module = moduleGo.GetComponent<IModule>();
-                if (module == null)
-                    throw new UnityException(
-                        $"[ShipSnapshotService] Failed to add a Module component for '{ms.moduleName}' (moduleType: {ms.moduleType}).");
-
-                module.SetShip(ship);
-                injectionContainer.InjectGameObject(moduleGo);
-                module.RestoreFromSnapshot(ms, _gameContentCatalog);
-
-                moduleGo.SetActive(true);
-                moduleGo.gameObject.layer = concreteShip.gameObject.layer;
-            }
-        }
-
-        private DiContainer ResolveInjectionContainer(IShip ship)
-        {
-            if (ship is not Component shipComponent || _sceneContextRegistry == null) return _container;
-            var sceneContainer =
-                _sceneContextRegistry.TryGetContainerForScene(shipComponent.gameObject.scene);
-
-            return sceneContainer ?? _container;
         }
     }
 }

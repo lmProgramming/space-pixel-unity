@@ -9,9 +9,9 @@ using Events.Gameplay.Ship;
 using Events.Gameplay.Shooting;
 using Gameplay.EasyTeam;
 using Instantiation;
-using NSubstitute;
 using NUnit.Framework;
 using Services;
+using ShipFactory;
 using Ships;
 using Ships.ModuleConnection;
 using Ships.Modules;
@@ -67,6 +67,11 @@ namespace E2E
             var mapInfo = new TestMapInfo(_testRoot.transform);
             Container.Bind<IMapInfo>().FromInstance(mapInfo).AsSingle();
 
+            var shipInitializeModulesEventChannel = new GameObject("Initialize Modules Event Channel")
+                .AddComponent<ShipInitializeModulesEventChannel>();
+            Container.Bind<ShipInitializeModulesEventChannel>().FromInstance(shipInitializeModulesEventChannel)
+                .AsSingle();
+
             // Bind ShipService
             var shipServiceGo = new GameObject("ShipService");
             CreatedObjects.Add(shipServiceGo);
@@ -94,9 +99,7 @@ namespace E2E
             _projectilesSpawner.InternalProjectilesHolder = _testRoot.transform;
             Container.Bind<IProjectilesSpawner>().FromInstance(_projectilesSpawner).AsSingle();
 
-            var shipInitializeModulesEventChannel = Substitute.For<ShipInitializeModulesEventChannel>();
-            Container.Bind<ShipInitializeModulesEventChannel>().FromInstance(shipInitializeModulesEventChannel)
-                .AsSingle();
+            // Bind EffectsSpawner
 
             var effectsSpawnerGo = new GameObject("EffectsSpawner");
             CreatedObjects.Add(effectsSpawnerGo);
@@ -105,6 +108,15 @@ namespace E2E
             effectsSpawner.SetupForTesting(GetExplosionPrefab(), _testRoot.transform, Instantiator);
             effectsSpawnerGo.SetActive(true);
             Container.Bind<IEffectsSpawner>().FromInstance(effectsSpawner).AsSingle();
+
+            // Bind Snapshot helpers
+
+            Container.Bind<IModuleRestoreFactory>()
+                .To<ModuleRestoreFactory>()
+                .AsSingle();
+
+            var shipModuleCatalog = ScriptableObject.CreateInstance<ShipModuleCatalog>();
+            Container.Bind<IShipModuleCatalog>().FromInstance(shipModuleCatalog).AsSingle();
 
             InjectAllObjectsInScene(Container);
         }
@@ -207,7 +219,7 @@ namespace E2E
             return ship;
         }
 
-        protected static GameObject GetBulletPrefab()
+        private static GameObject GetBulletPrefab()
         {
             var bulletPrefab = UnityEngine.Resources.Load<GameObject>("Tests/Prefabs/Bullet");
 

@@ -52,6 +52,8 @@ namespace Ships
 
         private BiCohesionGraph<IModule> _biCohesionGraph;
 
+        [Inject] private DiContainer _container;
+
         private ControlAllocator _controlAllocator;
 
         private bool _destroyRequested;
@@ -63,9 +65,13 @@ namespace Ships
 
         private IModuleConnectionFactory _moduleConnectionFactory;
 
+        [Inject] private IModuleRestoreFactory _moduleRestoreFactory;
+
         private Action<IPixelated> _onCommandModuleNoPixelsLeft;
 
         private SasTurnInputResolver _sasTurnInputResolver;
+
+        [InjectOptional] private SceneContextRegistry _sceneContextRegistry;
 
         [Inject]
         private ShipInitializeModulesEventChannel _shipInitializeModulesEventChannel;
@@ -281,12 +287,81 @@ namespace Ships
 
         public ShipSnapshot CaptureSnapshot(IGameContentCatalog contentCatalog)
         {
-            throw new NotImplementedException();
+            if (!this.IsAlive())
+            {
+                Debug.LogError("[Ship] Cannot capture snapshot: ship is null");
+                return null;
+            }
+
+            if (contentCatalog == null) throw new ArgumentNullException(nameof(contentCatalog));
+
+            var snapshot = new ShipSnapshot(Name);
+
+            foreach (var module in AllModules)
+            {
+                var moduleSnapshot = module.CaptureSnapshot(contentCatalog);
+                snapshot.modules.Add(moduleSnapshot);
+
+                if (CommandModule != module) continue;
+
+                if (snapshot.commandModuleInstanceId != null)
+                    throw new InvalidOperationException(
+                        "[Ship] Multiple command modules found. Only the first one will be recorded in the snapshot.");
+
+                snapshot.commandModuleInstanceId = moduleSnapshot.instanceId;
+            }
+
+            Debug.Log($"[Ship] Captured snapshot of '{Name}' with {snapshot.modules.Count} modules");
+            return snapshot;
         }
 
         public void RestoreFromSnapshot(ShipSnapshot snapshot, IGameContentCatalog contentCatalog)
         {
-            throw new NotImplementedException();
+            if (snapshot == null) throw new ArgumentNullException(nameof(snapshot));
+            if (contentCatalog == null) throw new ArgumentNullException(nameof(contentCatalog));
+
+            DestroyAllModulesSilently();
+
+            CreateModulesFromSnapshot(snapshot, contentCatalog);
+
+            Debug.Log(
+                $"[Ship] Applied snapshot '{snapshot.shipName}' to '{Name}' ({snapshot.modules.Count} modules)");
+        }
+
+        private void CreateModulesFromSnapshot(ShipSnapshot snapshot, IGameContentCatalog contentCatalog)
+        {
+            foreach (var ms in snapshot.modules)
+            {
+                var moduleGo = _moduleRestoreFactory.CreateModuleObject(ms, transform);
+                moduleGo.SetActive(false);
+                moduleGo.transform.localPosition = ms.localPosition;
+                moduleGo.transform.localRotation = ms.localRotation;
+
+                var identity = moduleGo.GetComponent<GameObjectInstanceIdentity>();
+                if (!identity)
+                    identity = moduleGo.AddComponent<GameObjectInstanceIdentity>();
+                identity.RestoreFromSnapshot(ms.instanceId, ms.origin, ms.archetypeId);
+
+                var module = moduleGo.GetComponent<IModule>();
+                if (module == null)
+                    throw new UnityException(
+                        $"[Ship] Failed to add a Module component for '{ms.moduleName}' (moduleType: {ms.concreteModuleType}).");
+
+                module.SetShip(this);
+                ResolveInjectionContainer().InjectGameObject(moduleGo);
+                module.RestoreFromSnapshot(ms, contentCatalog);
+
+                moduleGo.SetActive(true);
+                moduleGo.gameObject.layer = gameObject.layer;
+            }
+        }
+
+        private DiContainer ResolveInjectionContainer()
+        {
+            if (_sceneContextRegistry == null) return _container;
+
+            var sceneContainer = _sceneContextRegistry.TryGetContainerForScene(gameObject.scene);
+            return sceneContainer ?? _container;
         }
 
         private void IgnoreModuleColliders()
@@ -300,6 +375,8 @@ namespace Ships
 
         private void DeIgnoreCollider(Collider2D other)
         {
+            if (!other) return;
+
             foreach (var item1 in OwnColliders) Physics2D.IgnoreCollision(other, item1, false);
         }
 
@@ -378,7 +455,9 @@ namespace Ships
                 _allModulesCache.Add(mod);
             }
 
-            OwnColliders = GetComponentsInChildren<Collider2D>();
+            OwnColliders = ModuleGraph.GetAllNodes().AsValueEnumerable()
+                .SelectMany(m => m.Transform?.GetComponentsInChildren<Collider2D>())
+                .ToArray();
 
             ResourceManager.Recalculate(_allModulesCache);
         }

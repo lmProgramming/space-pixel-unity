@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using Core.Services;
+using Core.Ships;
 using Core.Ships.Snapshots.Module;
 using Core.Ships.Snapshots.Module.ModuleData;
 using Cysharp.Threading.Tasks;
@@ -43,6 +44,8 @@ namespace Ships.Modules
         private LineRenderer _lineRenderer;
 
         private ManualTimer _reloadTimer;
+
+        public override ConcreteModuleType ConcreteType => ConcreteModuleType.Laser;
 
         protected override void Awake()
         {

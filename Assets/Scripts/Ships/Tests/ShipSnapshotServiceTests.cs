@@ -1,4 +1,5 @@
 using System.Collections;
+using Core.Services;
 using Core.Ships;
 using Core.Ships.Snapshots.Module.ModuleData;
 using NUnit.Framework;
@@ -25,7 +26,16 @@ namespace Ships.Tests
             _contentCatalog = new TestContentCatalog();
             _contentCatalog.Seed(Container, CreatedObjects);
             _moduleCatalog = new TestModuleCatalog();
-            _service = new ShipSnapshotService(Container, null, _moduleCatalog, _contentCatalog);
+
+            // AsCached because AsSingle can not be Rebind
+            Container.Rebind<IShipModuleCatalog>()
+                .FromInstance(_moduleCatalog)
+                .AsCached();
+            Container.Rebind<IModuleRestoreFactory>()
+                .FromInstance(new ModuleRestoreFactory(_moduleCatalog))
+                .AsCached();
+
+            _service = new ShipSnapshotService(_contentCatalog);
         }
 
         private TestContentCatalog _contentCatalog;

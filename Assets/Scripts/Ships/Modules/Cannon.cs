@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using Core.Constants;
 using Core.Services;
+using Core.Ships;
 using Core.Ships.Snapshots.Module.ModuleData;
 using Events.Gameplay.Shooting;
 using LMPro;
@@ -33,6 +34,8 @@ namespace Ships.Modules
 
         private ManualTimer _reloadTimer;
         [Inject] private ShootingEventChannel _shootingEventChannel;
+
+        public override ConcreteModuleType ConcreteType => ConcreteModuleType.Cannon;
 
         protected override void Awake()
         {

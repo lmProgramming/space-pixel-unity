@@ -64,6 +64,8 @@ namespace Ships.Modules
             PixelatedRigidbody.CurrentPixelCount <
             PixelatedRigidbody.StartPixelCount * GameplayConstants.ModuleDestroyedBelowPixelRatio;
 
+        public virtual ConcreteModuleType ConcreteType { get; protected set; } = ConcreteModuleType.Basic;
+
         protected virtual void Awake()
         {
             EnsurePixelatedRigidbodyCached();
@@ -238,7 +240,7 @@ namespace Ships.Modules
             {
                 instanceId = identity.InstanceId,
                 moduleName = Transform.name,
-                moduleType = Type,
+                concreteModuleType = ConcreteType,
                 origin = identity.Origin,
                 archetypeId = identity.ArchetypeId,
                 localPosition = Transform.localPosition,

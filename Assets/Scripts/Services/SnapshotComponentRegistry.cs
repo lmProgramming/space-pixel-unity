@@ -6,15 +6,16 @@ namespace Services
 {
     public static class SnapshotComponentRegistry
     {
-        public static Type ResolveModuleType(ModuleType moduleType)
+        // useful for resolving module types from snapshots, because 
+        public static Type ResolveModuleType(ConcreteModuleType moduleType)
         {
             return moduleType switch
             {
-                ModuleType.Command => typeof(Command),
-                ModuleType.Engine => typeof(Engine),
-                ModuleType.Weapon => typeof(Cannon),
-                ModuleType.Resources => typeof(Basic),
-                ModuleType.Structural => typeof(Basic),
+                ConcreteModuleType.Command => typeof(Command),
+                ConcreteModuleType.Engine => typeof(Engine),
+                ConcreteModuleType.Cannon => typeof(Cannon),
+                ConcreteModuleType.Basic => typeof(Basic),
+                ConcreteModuleType.Laser => typeof(LaserBeam),
                 _ => throw new ArgumentOutOfRangeException(nameof(moduleType), moduleType, null)
             };
         }

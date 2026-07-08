@@ -8,7 +8,7 @@ using Object = UnityEngine.Object;
 
 namespace Services
 {
-    public class ModuleRestoreFactory
+    public class ModuleRestoreFactory : IModuleRestoreFactory
     {
         private readonly IShipModuleCatalog _shipModuleCatalog;
 
@@ -52,7 +52,7 @@ namespace Services
 
             moduleGo.AddComponent<PolygonCollider2D>();
 
-            var moduleType = SnapshotComponentRegistry.ResolveModuleType(snapshot.moduleType);
+            var moduleType = SnapshotComponentRegistry.ResolveModuleType(snapshot.concreteModuleType);
 
             moduleGo.AddComponent<PixelatedRigidbody>();
             moduleGo.AddComponent(moduleType);

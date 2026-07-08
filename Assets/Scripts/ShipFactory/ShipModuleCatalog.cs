@@ -8,7 +8,7 @@ using ZLinq;
 namespace ShipFactory
 {
     [CreateAssetMenu(fileName = "ModulePrefabLibrary", menuName = "Ship Factory/Module Prefab Library")]
-    public class ModulePrefabLibrary : ScriptableObject, IShipModuleCatalog
+    public class ShipModuleCatalog : ScriptableObject, IShipModuleCatalog
     {
         [SerializeField] private List<ModuleTypeEntry> entries = new();
 
