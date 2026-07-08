@@ -279,6 +279,16 @@ namespace Ships
             }
         }
 
+        public ShipSnapshot CaptureSnapshot(IGameContentCatalog contentCatalog)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void RestoreFromSnapshot(ShipSnapshot snapshot, IGameContentCatalog contentCatalog)
+        {
+            throw new NotImplementedException();
+        }
+
         private void IgnoreModuleColliders()
         {
             var combinations = from item1 in OwnColliders.AsValueEnumerable()

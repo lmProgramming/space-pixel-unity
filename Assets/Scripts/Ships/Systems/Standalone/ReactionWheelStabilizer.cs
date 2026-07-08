@@ -1,12 +1,15 @@
+using System;
+using Core.Services;
 using Core.Ships;
+using Core.Ships.Snapshots.Module.Systems;
 using Ships.Modules;
 using UnityEngine;
 using UnityEngine.Assertions;
 
-namespace Ships.Systems.Gimbal
+namespace Ships.Systems.Standalone
 {
     [RequireComponent(typeof(Module))]
-    public class ReactionWheelStabilizer : MonoBehaviour
+    public class ReactionWheelStabilizer : StandaloneModuleSystem
     {
         [SerializeField] private ReactionWheelSettings settings;
 
@@ -44,6 +47,16 @@ namespace Ships.Systems.Gimbal
             var counterTorque = -angularVelocity * settings.DampingStrength;
             counterTorque = Mathf.Clamp(counterTorque, -settings.MaxTorque, settings.MaxTorque) * multiplier;
             commandRigidbody.AddTorque(counterTorque);
+        }
+
+        public override SystemData CaptureSnapshot(IGameContentCatalog contentCatalog)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void RestoreFromSnapshot(SystemData snapshot, IGameContentCatalog contentCatalog)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using Core.Services;
 using Core.Ships;
@@ -38,11 +39,16 @@ namespace Services
             var snapshot = new ShipSnapshot(ship.Name);
             foreach (var module in ship.AllModules)
             {
-                var moduleSnapshot = module.CaptureToSnapshot(_gameContentCatalog);
+                var moduleSnapshot = module.CaptureSnapshot(_gameContentCatalog);
                 snapshot.modules.Add(moduleSnapshot);
 
-                if (ship.CommandModule == module)
-                    snapshot.commandModuleInstanceId = moduleSnapshot.instanceId;
+                if (ship.CommandModule != module) continue;
+
+                if (snapshot.commandModuleInstanceId != null)
+                    throw new InvalidOperationException(
+                        "[ShipSnapshotService] Multiple command modules found. Only the first one will be recorded in the snapshot.");
+
+                snapshot.commandModuleInstanceId = moduleSnapshot.instanceId;
             }
 
             Debug.Log(
@@ -75,14 +81,9 @@ namespace Services
         public ShipSnapshot LoadSnapshotFromFile(string path)
         {
             var json = File.ReadAllText(path);
-            var snapshot = FromJson(json);
+            var snapshot = JsonUtility.FromJson<ShipSnapshot>(json);
 
             return snapshot;
-        }
-
-        public static ShipSnapshot FromJson(string json)
-        {
-            return JsonUtility.FromJson<ShipSnapshot>(json);
         }
 
         private void CreateModulesFromSnapshot(IShip ship, ShipSnapshot snapshot)

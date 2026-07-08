@@ -216,7 +216,7 @@ namespace Ships.Modules
             Ship = ship;
         }
 
-        public ModuleSnapshot CaptureToSnapshot(IGameContentCatalog contentCatalog)
+        public ModuleSnapshot CaptureSnapshot(IGameContentCatalog contentCatalog)
         {
             if (!Transform)
                 throw new UnityException(
@@ -244,11 +244,9 @@ namespace Ships.Modules
                 localPosition = Transform.localPosition,
                 localRotation = Transform.localRotation,
                 resources = Resources,
-                pixelatedRigidbody = PixelatedRigidbody.CaptureToSnapshot(contentCatalog),
+                pixelatedRigidbody = PixelatedRigidbody.CaptureSnapshot(contentCatalog),
                 typePayloadJson = CaptureTypePayloadJson(contentCatalog),
-                systems = new SystemData[]
-                {
-                }
+                systems = CaptureSystemSnapshots(contentCatalog)
             };
 
             return moduleSnapshot;
@@ -268,6 +266,13 @@ namespace Ships.Modules
         public void SetResources(Resources newResources)
         {
             Resources = newResources;
+        }
+
+        private SystemData[] CaptureSystemSnapshots(IGameContentCatalog contentCatalog)
+        {
+            var systems = GetComponentsInChildren<IStandaloneModuleSystem>();
+
+            return systems.AsValueEnumerable().Select(system => system.CaptureSnapshot(contentCatalog)).ToArray();
         }
 
         private void EnsurePixelatedRigidbodyCached()

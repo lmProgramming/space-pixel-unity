@@ -55,7 +55,7 @@ namespace Ships.Tests
 
             var snapshot = _service.CaptureSnapshot(ship);
             var json = JsonUtility.ToJson(snapshot, true);
-            var fromJson = ShipSnapshotService.FromJson(json);
+            var fromJson = JsonUtility.FromJson<ShipSnapshot>(json);
             _service.ApplySnapshot(ship, fromJson);
             ship.InitializeModules();
 

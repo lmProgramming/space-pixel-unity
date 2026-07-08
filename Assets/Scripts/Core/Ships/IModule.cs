@@ -1,14 +1,14 @@
 using System.Collections.Generic;
 using Core.Pixelation;
-using Core.Services;
 using Core.Ships.Snapshots.Module;
+using Core.Snapshot;
 using JetBrains.Annotations;
 using LMPro.External.IsAlive;
 using UnityEngine;
 
 namespace Core.Ships
 {
-    public interface IModule : IHasAliveCheck
+    public interface IModule : IHasAliveCheck, ISnapshottable<ModuleSnapshot>
     {
         ModuleType Type { get; }
 
@@ -36,7 +36,5 @@ namespace Core.Ships
         void SetResources(Resources newResources);
         void SetLocalPosition(Vector2 localPosition);
         void SetShip(IShip ship);
-        ModuleSnapshot CaptureToSnapshot(IGameContentCatalog contentCatalog);
-        void RestoreFromSnapshot(ModuleSnapshot snapshot, IGameContentCatalog contentCatalog);
     }
 }

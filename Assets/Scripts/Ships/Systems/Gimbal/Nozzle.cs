@@ -80,10 +80,10 @@ namespace Ships.Systems.Gimbal
             _exhaustBaseStartSpeedMultiplier = main.startSpeedMultiplier;
         }
 
-        public override PixelatedRigidbodySnapshot CaptureToSnapshot(IGameContentCatalog contentCatalog)
+        public override PixelatedRigidbodySnapshot CaptureSnapshot(IGameContentCatalog contentCatalog)
         {
             // remember that _exhaustParticles is supposed to have a parent with the GameObjectInstanceIdentity between Nozzle and Particle System
-            var baseSnapshot = base.CaptureToSnapshot(contentCatalog);
+            var baseSnapshot = base.CaptureSnapshot(contentCatalog);
 
             var instanceIdentity = _exhaustParticles.gameObject.GetComponentInParent<GameObjectInstanceIdentity>();
 

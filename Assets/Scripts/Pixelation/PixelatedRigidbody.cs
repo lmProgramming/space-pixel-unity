@@ -229,7 +229,7 @@ namespace Pixelation
         public float DefaultPixelHealthForSnapshot => defaultPixelHealth;
         public float MaxArmorHealthForSnapshot => maxArmorHealth;
 
-        public virtual PixelatedRigidbodySnapshot CaptureToSnapshot(IGameContentCatalog contentCatalog)
+        public virtual PixelatedRigidbodySnapshot CaptureSnapshot(IGameContentCatalog contentCatalog)
         {
             var snapshot = new PixelatedRigidbodySnapshot
             {

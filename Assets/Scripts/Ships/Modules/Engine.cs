@@ -213,7 +213,7 @@ namespace Ships.Modules
                 maxThrust = maxThrust,
                 maxGimbalAngle = maxGimbalAngle,
                 gimbalSpeed = gimbalSpeed,
-                nozzles = nozzles.AsValueEnumerable().Select(nozzle => nozzle.CaptureToSnapshot(contentCatalog))
+                nozzles = nozzles.AsValueEnumerable().Select(nozzle => nozzle.CaptureSnapshot(contentCatalog))
                     .ToArray()
             };
 

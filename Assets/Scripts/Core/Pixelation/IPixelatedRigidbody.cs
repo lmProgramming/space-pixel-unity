@@ -1,14 +1,14 @@
 using System;
 using System.Collections.Generic;
 using Core.Grid;
-using Core.Services;
 using Core.Ships.Snapshots.PixelatedRigidbody;
+using Core.Snapshot;
 using LMPro.External.IsAlive;
 using UnityEngine;
 
 namespace Core.Pixelation
 {
-    public interface IPixelatedRigidbody : IPixelated, IHasAliveCheck
+    public interface IPixelatedRigidbody : IPixelated, IHasAliveCheck, ISnapshottable<PixelatedRigidbodySnapshot>
     {
         float MassMultiplier { get; }
         bool HasSprite { get; }
@@ -27,8 +27,6 @@ namespace Core.Pixelation
         Vector2Int WorldToLocalPixel(Vector2 worldPosition);
         Vector2 LocalToWorldPoint(Vector2Int localPosition);
         Vector2 LocalToWorldPoint(Vector2 localPosition);
-        PixelatedRigidbodySnapshot CaptureToSnapshot(IGameContentCatalog contentCatalog);
-        void RestoreFromSnapshot(PixelatedRigidbodySnapshot snapshot, IGameContentCatalog contentCatalog);
         void NoPixelsLeft();
         event Action<IPixelated> OnNoPixelsLeft;
         event Action<List<Vector2Int>, PixelLoseReason> OnPixelsLost;

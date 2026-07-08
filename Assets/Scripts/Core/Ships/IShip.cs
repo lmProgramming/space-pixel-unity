@@ -1,12 +1,13 @@
 using System.Collections.Generic;
 using Core.Gameplay.EasyTeam;
+using Core.Snapshot;
 using LMPro.DataStructures.Graph;
 using LMPro.External.IsAlive;
 using UnityEngine;
 
 namespace Core.Ships
 {
-    public interface IShip : IHasAliveCheck
+    public interface IShip : IHasAliveCheck, ISnapshottable<ShipSnapshot>
     {
         ITeam Team { get; }
         IModule CommandModule { get; }
