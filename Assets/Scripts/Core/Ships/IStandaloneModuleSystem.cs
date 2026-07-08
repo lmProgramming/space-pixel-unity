@@ -1,9 +1,9 @@
-using Core.Ships.Snapshots.Module.Systems;
+using Core.Ships.Snapshots.Module.StandaloneModuleSystemData;
 using Core.Snapshot;
 
 namespace Core.Ships
 {
-    public interface IStandaloneModuleSystem : ISnapshottable<SystemData>
+    public interface IStandaloneModuleSystem : ISnapshottable<StandaloneModuleSystemData>
     {
     }
 }

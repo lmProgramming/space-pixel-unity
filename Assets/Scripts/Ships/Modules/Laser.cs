@@ -108,7 +108,7 @@ namespace Ships.Modules
             _reloadTimer?.Reset();
         }
 
-        public override string CaptureTypePayloadJson(IGameContentCatalog contentCatalog)
+        protected override string CaptureTypePayloadJson(IGameContentCatalog contentCatalog)
         {
             var data = new LaserBeamModuleData
             {
@@ -123,7 +123,7 @@ namespace Ships.Modules
             return JsonUtility.ToJson(data);
         }
 
-        public override void ApplyTypePayloadJson(string typePayloadJson, IGameContentCatalog contentCatalog)
+        protected override void ApplyTypePayloadJson(string typePayloadJson, IGameContentCatalog contentCatalog)
         {
             if (string.IsNullOrWhiteSpace(typePayloadJson))
                 return;

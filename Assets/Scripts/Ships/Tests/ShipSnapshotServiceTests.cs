@@ -195,6 +195,7 @@ namespace Ships.Tests
             var ship = ShipTestBuilder.CreateShip(Container, CreatedObjects, "Ship")
                 .ParentedTo(TestRoot.transform)
                 .WithCommand("Command Module", Vector2.zero, 5, 5)
+                // todo: add standalone system check here
                 .WithCustomEngine(new Vector2(5f, 0f), 5, 5, new Resources(0, 2f, 0, 0, 0))
                 .WithBasic("Power Module", new Vector2(0f, 5f), 15, 5, new Resources(100, 5, 1, 500, 0))
                 .WithBasic("Crew Module", new Vector2(0f, 10f), 5, 5, new Resources(100, 25, 1, 0, 10))

@@ -200,7 +200,7 @@ namespace Ships.Modules
             return maxStep * GameplayConstants.NozzleGoingBackToRestRotationMultiplierSpeed;
         }
 
-        public override string CaptureTypePayloadJson(IGameContentCatalog contentCatalog)
+        protected override string CaptureTypePayloadJson(IGameContentCatalog contentCatalog)
         {
             var nozzles = GetComponentsInChildren<Nozzle>(true);
 
@@ -216,7 +216,7 @@ namespace Ships.Modules
             return JsonUtility.ToJson(data);
         }
 
-        public override void ApplyTypePayloadJson(string typePayloadJson, IGameContentCatalog contentCatalog)
+        protected override void ApplyTypePayloadJson(string typePayloadJson, IGameContentCatalog contentCatalog)
         {
             if (string.IsNullOrWhiteSpace(typePayloadJson))
                 return;

@@ -1,7 +1,7 @@
 using System;
 using Core.Services;
 using Core.Ships;
-using Core.Ships.Snapshots.Module.Systems;
+using Core.Ships.Snapshots.Module.StandaloneModuleSystemData;
 using Ships.Modules;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -49,14 +49,21 @@ namespace Ships.Systems.Standalone
             commandRigidbody.AddTorque(counterTorque);
         }
 
-        public override SystemData CaptureSnapshot(IGameContentCatalog contentCatalog)
+        public override StandaloneModuleSystemData CaptureSnapshot(IGameContentCatalog contentCatalog)
         {
-            throw new NotImplementedException();
+            return new ReactionWheelData
+            {
+                data = settings
+            };
         }
 
-        public override void RestoreFromSnapshot(SystemData snapshot, IGameContentCatalog contentCatalog)
+        public override void RestoreFromSnapshot(StandaloneModuleSystemData snapshot,
+            IGameContentCatalog contentCatalog)
         {
-            throw new NotImplementedException();
+            if (snapshot is ReactionWheelData reactionWheelData)
+                settings = reactionWheelData.data;
+            else
+                throw new ArgumentException("[ReactionWheelStabilizer] snapshot is of wrong type");
         }
     }
 }

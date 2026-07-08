@@ -6,9 +6,10 @@ using Core.Pixelation;
 using Core.Services;
 using Core.Ships;
 using Core.Ships.Snapshots.Module;
-using Core.Ships.Snapshots.Module.Systems;
+using Core.Ships.Snapshots.Module.StandaloneModuleSystemData;
 using LMPro;
 using Pixelation;
+using Ships.Systems.Standalone;
 using UnityEngine;
 using Zenject;
 using ZLinq;
@@ -262,6 +263,8 @@ namespace Ships.Modules
 
             ApplyTypePayloadJson(snapshot.typePayloadJson, contentCatalog);
 
+            RestoreSystems(snapshot.systems, contentCatalog);
+
             PixelatedRigidbody.RestoreFromSnapshot(snapshot.pixelatedRigidbody, contentCatalog);
         }
 
@@ -270,7 +273,22 @@ namespace Ships.Modules
             Resources = newResources;
         }
 
-        private SystemData[] CaptureSystemSnapshots(IGameContentCatalog contentCatalog)
+        private void RestoreSystems(StandaloneModuleSystemData[] systemData, IGameContentCatalog contentCatalog)
+        {
+            foreach (var system in systemData)
+                switch (system)
+                {
+                    case ReactionWheelData reactionWheelData:
+                        gameObject.AddComponent<ReactionWheelStabilizer>()
+                            .RestoreFromSnapshot(reactionWheelData, contentCatalog);
+                        break;
+                    default:
+                        throw new ArgumentException("[Module] Cannot restore systems for system data '" + system +
+                                                    "'.");
+                }
+        }
+
+        private StandaloneModuleSystemData[] CaptureSystemSnapshots(IGameContentCatalog contentCatalog)
         {
             var systems = GetComponentsInChildren<IStandaloneModuleSystem>();
 
@@ -288,12 +306,12 @@ namespace Ships.Modules
                     $"[Module] Cannot restore snapshot on '{name}': missing PixelatedRigidbody component.");
         }
 
-        public virtual string CaptureTypePayloadJson(IGameContentCatalog contentCatalog)
+        protected virtual string CaptureTypePayloadJson(IGameContentCatalog contentCatalog)
         {
             return string.Empty;
         }
 
-        public virtual void ApplyTypePayloadJson(string typePayloadJson, IGameContentCatalog contentCatalog)
+        protected virtual void ApplyTypePayloadJson(string typePayloadJson, IGameContentCatalog contentCatalog)
         {
         }
 
