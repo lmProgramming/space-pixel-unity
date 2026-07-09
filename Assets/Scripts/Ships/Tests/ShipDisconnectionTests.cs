@@ -69,8 +69,8 @@ namespace Ships.Tests
             const int moduleHeight = 5;
             var components = ShipTestBuilder.CreateShip(Container, CreatedObjects)
                 .WithCommand("Command", Vector2.zero, moduleWidth, moduleHeight)
-                .WithModule("Module2", new Vector2(moduleWidth, 0), moduleWidth, moduleHeight)
-                .WithModule("Module3", new Vector2(moduleWidth * 2, 0), moduleWidth, moduleHeight)
+                .WithTestModule("Module2", new Vector2(moduleWidth, 0), moduleWidth, moduleHeight)
+                .WithTestModule("Module3", new Vector2(moduleWidth * 2, 0), moduleWidth, moduleHeight)
                 .BuildLayoutResult();
             yield return WaitForLifecycle();
 
@@ -104,9 +104,9 @@ namespace Ships.Tests
             const int moduleSize = 5;
             var components = ShipTestBuilder.CreateShip(Container, CreatedObjects)
                 .WithCommand("Command", Vector2.zero, moduleSize, moduleSize)
-                .WithModule("ModuleA", new Vector2(moduleSize, 0), moduleSize, moduleSize)
-                .WithModule("ModuleB", new Vector2(0, moduleSize), moduleSize, moduleSize)
-                .WithModule("ModuleC", new Vector2(moduleSize, moduleSize), moduleSize, moduleSize)
+                .WithTestModule("ModuleA", new Vector2(moduleSize, 0), moduleSize, moduleSize)
+                .WithTestModule("ModuleB", new Vector2(0, moduleSize), moduleSize, moduleSize)
+                .WithTestModule("ModuleC", new Vector2(moduleSize, moduleSize), moduleSize, moduleSize)
                 .BuildLayoutResult();
             yield return WaitForLifecycle();
 
@@ -210,8 +210,8 @@ namespace Ships.Tests
             const int moduleHeight = 10;
             var components = ShipTestBuilder.CreateShip(Container, CreatedObjects)
                 .WithCommand("CommandB", Vector2.zero, moduleWidth, moduleHeight)
-                .WithModule("ModuleA", new Vector2(0, moduleHeight), moduleWidth, moduleHeight)
-                .WithModule("ModuleC", new Vector2(0, -moduleHeight), moduleWidth, moduleHeight)
+                .WithTestModule("ModuleA", new Vector2(0, moduleHeight), moduleWidth, moduleHeight)
+                .WithTestModule("ModuleC", new Vector2(0, -moduleHeight), moduleWidth, moduleHeight)
                 .BuildLayoutResult();
             yield return WaitForLifecycle();
 
@@ -262,8 +262,8 @@ namespace Ships.Tests
             const int moduleHeight = 10;
             var components = ShipTestBuilder.CreateShip(Container, CreatedObjects)
                 .WithCommand("CommandB", Vector2.zero, moduleWidth, moduleHeight)
-                .WithModule("ModuleA", new Vector2(0, moduleHeight), moduleWidth, moduleHeight)
-                .WithModule("ModuleC", new Vector2(0, -moduleHeight), moduleWidth, moduleHeight)
+                .WithTestModule("ModuleA", new Vector2(0, moduleHeight), moduleWidth, moduleHeight)
+                .WithTestModule("ModuleC", new Vector2(0, -moduleHeight), moduleWidth, moduleHeight)
                 .BuildLayoutResult();
             yield return WaitForLifecycle();
 
@@ -309,8 +309,8 @@ namespace Ships.Tests
             const int moduleHeight = 10;
             var components = ShipTestBuilder.CreateShip(Container, CreatedObjects)
                 .WithCommand("CommandB", Vector2.zero, moduleWidth, moduleHeight)
-                .WithModule("ModuleA", new Vector2(0, moduleHeight), moduleWidth, moduleHeight)
-                .WithModule("ModuleC", new Vector2(0, -moduleHeight), moduleWidth, moduleHeight)
+                .WithTestModule("ModuleA", new Vector2(0, moduleHeight), moduleWidth, moduleHeight)
+                .WithTestModule("ModuleC", new Vector2(0, -moduleHeight), moduleWidth, moduleHeight)
                 .BuildLayoutResult();
             yield return WaitForLifecycle();
 
@@ -372,7 +372,7 @@ namespace Ships.Tests
             var layout = ShipTestBuilder.CreateShip(Container, CreatedObjects)
                 .WithoutGameObjectInjection()
                 .WithCommand("Command", new Vector2((cannonWidth + commandWidth) / 2f, 0), commandWidth, commandHeight)
-                .WithModule("Cannon", Vector2.zero, cannonWidth, cannonHeight)
+                .WithTestModule("Cannon", Vector2.zero, cannonWidth, cannonHeight)
                 .BuildLayoutResult();
             var ship = layout.Ship;
             var commandModule = layout.CommandModule;
@@ -564,7 +564,7 @@ namespace Ships.Tests
             var layout = ShipTestBuilder.CreateShip(Container, CreatedObjects)
                 .WithoutGameObjectInjection()
                 .WithCommand("Command", new Vector2((cannonWidth + commandWidth) / 2f, 0), commandWidth, commandHeight)
-                .WithModule("Cannon", Vector2.zero, cannonWidth, cannonHeight)
+                .WithTestModule("Cannon", Vector2.zero, cannonWidth, cannonHeight)
                 .BuildLayoutResult();
             var ship = layout.Ship;
             var commandModule = layout.CommandModule;

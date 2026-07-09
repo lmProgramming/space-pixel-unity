@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using Core.Grid;
 using Core.Pixelation;
 using Core.Services;
 using Core.Ships;
+using Core.Ships.Snapshots.PixelatedRigidbody;
+using Core.Ships.Snapshots.PixelatedRigidbody.Internals;
 using Cysharp.Threading.Tasks;
 using Events.Gameplay.Collision;
 using Grid;
@@ -55,7 +58,14 @@ namespace Pixelation
         protected virtual void Awake()
         {
             Rigidbody = GetComponent<Rigidbody2D>();
+
             Setup();
+        }
+
+        private void Start()
+        {
+            if (TexturePixelGrid == null || TexturePixelGrid.PixelCount == 0)
+                throw new InvalidDataException("TexturePixelGrid is null or has no pixels.");
         }
 
         private void FixedUpdate()
@@ -227,7 +237,79 @@ namespace Pixelation
         public float DefaultPixelHealthForSnapshot => defaultPixelHealth;
         public float MaxArmorHealthForSnapshot => maxArmorHealth;
 
-        public ArmorGridSnapshot CaptureArmorGridSnapshot()
+        public virtual PixelatedRigidbodySnapshot CaptureSnapshot(IGameContentCatalog contentCatalog)
+        {
+            var snapshot = new PixelatedRigidbodySnapshot
+            {
+                name = transform.name,
+                rigidbodyType = GetSnapshotRigidbodyType(),
+                localPosition = transform.localPosition,
+                localRotation = transform.localRotation,
+                spriteRenderedOrderInLayer = SpriteRenderer.sortingOrder,
+                spriteRenderedSortingLayerID = SpriteRenderer.sortingLayerID,
+                defaultPixelHealth = defaultPixelHealth,
+                maxArmorHealth = maxArmorHealth,
+                armorGrid = CaptureArmorGridSnapshot(),
+                healthGrid = CaptureHealthGridSnapshot()
+            };
+
+            if (TexturePixelGrid == null)
+            {
+                Debug.LogWarning(
+                    $"[PixelatedRigidbody] '{name}' has no TexturePixelGrid. Snapshot will not contain pixel data.");
+                return snapshot;
+            }
+
+            var dimensions = TexturePixelGrid.Dimensions();
+            snapshot.colorGrid = new PixelGridSnapshot(dimensions.x, dimensions.y);
+
+            for (var y = 0; y < dimensions.y; y++)
+            for (var x = 0; x < dimensions.x; x++)
+            {
+                var pos = new Vector2Int(x, y);
+                if (TexturePixelGrid.IsPixel(pos))
+                    snapshot.colorGrid.SetPixel(x, y, TexturePixelGrid.GetValue(pos));
+            }
+
+            return snapshot;
+        }
+
+        public virtual void RestoreFromSnapshot(PixelatedRigidbodySnapshot snapshot, IGameContentCatalog contentCatalog)
+        {
+            if (snapshot == null)
+                throw new UnityException($"[PixelatedRigidbody] Cannot restore null snapshot on '{name}'.");
+
+            ApplySnapshotHealthDefaults(snapshot.defaultPixelHealth, snapshot.maxArmorHealth);
+            RestoreColorGridFromSnapshot(snapshot.colorGrid);
+            ApplyArmorGridSnapshot(snapshot.armorGrid);
+            ApplyHealthGridSnapshot(snapshot.healthGrid);
+            ApplySpriteRenderedOptions(snapshot.spriteRenderedSortingLayerID, snapshot.spriteRenderedOrderInLayer);
+        }
+
+        public virtual void NoPixelsLeft()
+        {
+            OnNoPixelsLeft?.Invoke(this);
+            Destroy(gameObject);
+        }
+
+        public Sprite GetSprite()
+        {
+            return sprite;
+        }
+
+        public void SetSprite(Sprite newSprite)
+        {
+            sprite = newSprite;
+            Setup(forceSetup: true, recalculateColliders: true);
+        }
+
+        private void ApplySpriteRenderedOptions(int sortingLayerID, int orderInLayer)
+        {
+            SpriteRenderer.sortingLayerID = sortingLayerID;
+            SpriteRenderer.sortingOrder = orderInLayer;
+        }
+
+        private ArmorGridSnapshot CaptureArmorGridSnapshot()
         {
             if (TexturePixelGrid == null)
                 return null;
@@ -255,7 +337,7 @@ namespace Pixelation
             return armorSnapshot;
         }
 
-        public HealthGridSnapshot CaptureHealthGridSnapshot()
+        private HealthGridSnapshot CaptureHealthGridSnapshot()
         {
             if (TexturePixelGrid == null || HealthGrid == null)
                 return null;
@@ -269,7 +351,7 @@ namespace Pixelation
             return snapshot;
         }
 
-        public void ApplyArmorGridSnapshot(ArmorGridSnapshot snapshot)
+        private void ApplyArmorGridSnapshot(ArmorGridSnapshot snapshot)
         {
             if (snapshot == null || HealthGrid == null || TexturePixelGrid == null)
                 return;
@@ -291,7 +373,7 @@ namespace Pixelation
             }
         }
 
-        public void ApplyHealthGridSnapshot(HealthGridSnapshot snapshot)
+        private void ApplyHealthGridSnapshot(HealthGridSnapshot snapshot)
         {
             if (snapshot == null || HealthGrid == null || TexturePixelGrid == null)
                 return;
@@ -306,21 +388,31 @@ namespace Pixelation
                 HealthGrid.SetHealth(new Vector2Int(x, y), snapshot.GetValue(x, y));
         }
 
-        public virtual void NoPixelsLeft()
+        protected virtual PixelatedRigidbodyType GetSnapshotRigidbodyType()
         {
-            OnNoPixelsLeft?.Invoke(this);
-            Destroy(gameObject);
+            return PixelatedRigidbodyType.PixelatedRigidbody;
         }
 
-        public Sprite GetSprite()
+        private void ApplySnapshotHealthDefaults(float defaultHealth, float maxArmor)
         {
-            return sprite;
+            defaultPixelHealth = defaultHealth;
+            maxArmorHealth = maxArmor;
         }
 
-        public void SetSprite(Sprite newSprite)
+        private void RestoreColorGridFromSnapshot(PixelGridSnapshot colorGrid)
         {
-            sprite = newSprite;
-            Setup(forceSetup: true, recalculateColliders: true);
+            if (colorGrid == null || colorGrid.width == 0 || colorGrid.height == 0)
+                throw new UnityException(
+                    $"[PixelatedRigidbody] '{name}' has no pixel data in snapshot. " +
+                    "Re-capture the snapshot — empty color grids are not supported.");
+
+            var colors = new Color32[colorGrid.width, colorGrid.height];
+
+            for (var y = 0; y < colorGrid.height; y++)
+            for (var x = 0; x < colorGrid.width; x++)
+                colors[x, y] = colorGrid.GetPixel(x, y);
+
+            SetTextureFromColors(colors);
         }
 
         public Color32 GetColor(Vector2Int point)
@@ -337,13 +429,27 @@ namespace Pixelation
 
         public void Setup(Color32[,] colors = null, bool forceSetup = false, bool recalculateColliders = false)
         {
-            if (_isSetup && !forceSetup) return;
+            if (_isSetup && !forceSetup)
+            {
+                Debug.LogWarning($"[PixelatedRigidbody] Setup already called on '{name}'.");
+                return;
+            }
 
             if (!sprite && colors is null)
             {
-                Debug.LogWarning($"[PixelatedRigidbody] Setup skipped on '{name}': no sprite and no colors provided. " +
-                                 "Expecting SetTextureFromColors to be called later.");
-                return;
+                if (TexturePixelGrid == null || TexturePixelGrid.PixelCount == 0)
+                {
+                    Debug.LogWarning(
+                        $"[PixelatedRigidbody] Setup skipped on '{name}': no sprite and no colors provided. " +
+                        "Expecting SetTextureFromColors to be called later.");
+                    return;
+                }
+
+                colors = TexturePixelGrid.GetValues2D();
+
+                if (colors is null || colors.Length == 0)
+                    throw new InvalidOperationException(
+                        $"[PixelatedRigidbody] Setup failed on '{name}': no sprite and no colors provided, and existing TexturePixelGrid has no pixels.");
             }
 
             CollisionHandler?.Unsubscribe();

@@ -31,11 +31,12 @@ namespace E2E
 
             yield return WaitForLifecycle();
 
+            const float expectedDistance = 30f;
+
             var initialDistance = Vector2.Distance(ship1.GetPosition(), ship2.GetPosition());
-            Assert.That(initialDistance, Is.GreaterThan(40f));
+            Assert.That(initialDistance, Is.GreaterThan(expectedDistance));
 
             var finalDistance = float.MaxValue;
-            const float expectedDistance = 35f;
             const float totalTime = 25f;
             const int maxIterations = 100;
             const float step = totalTime / maxIterations;
@@ -116,10 +117,16 @@ namespace E2E
 
             yield return WaitForLifecycle();
 
-            var startPixelsB = shipB.AllModules.AsValueEnumerable().Sum(m => m.PixelatedRigidbody.CurrentPixelCount);
-            var startPixelsA1 = shipA1.AllModules.AsValueEnumerable().Sum(m => m.PixelatedRigidbody.CurrentPixelCount);
-            var startPixelsA2 = shipA2.AllModules.AsValueEnumerable().Sum(m => m.PixelatedRigidbody.CurrentPixelCount);
-            var startPixelsA3 = shipA3.AllModules.AsValueEnumerable().Sum(m => m.PixelatedRigidbody.CurrentPixelCount);
+            var shipBModules = shipB.AllModules;
+
+            var shipA1Modules = shipA1.AllModules;
+            var shipA2Modules = shipA2.AllModules;
+            var shipA3Modules = shipA3.AllModules;
+
+            var startPixelsB = shipBModules.AsValueEnumerable().Sum(m => m.PixelatedRigidbody.CurrentPixelCount);
+            var startPixelsA1 = shipA1Modules.AsValueEnumerable().Sum(m => m.PixelatedRigidbody.CurrentPixelCount);
+            var startPixelsA2 = shipA2Modules.AsValueEnumerable().Sum(m => m.PixelatedRigidbody.CurrentPixelCount);
+            var startPixelsA3 = shipA3Modules.AsValueEnumerable().Sum(m => m.PixelatedRigidbody.CurrentPixelCount);
             var startPixelsACombined = startPixelsA1 + startPixelsA2 + startPixelsA3;
 
             // act
@@ -128,18 +135,14 @@ namespace E2E
 
             // assert
 
-            var finalPixelsB = shipB != null
-                ? shipB.AllModules.AsValueEnumerable().Sum(m => m.PixelatedRigidbody.CurrentPixelCount)
-                : 0;
-            var finalPixelsA1 = shipA1 != null
-                ? shipA1.AllModules.AsValueEnumerable().Sum(m => m.PixelatedRigidbody.CurrentPixelCount)
-                : 0;
-            var finalPixelsA2 = shipA2 != null
-                ? shipA2.AllModules.AsValueEnumerable().Sum(m => m.PixelatedRigidbody.CurrentPixelCount)
-                : 0;
-            var finalPixelsA3 = shipA3 != null
-                ? shipA3.AllModules.AsValueEnumerable().Sum(m => m.PixelatedRigidbody.CurrentPixelCount)
-                : 0;
+            var finalPixelsB =
+                shipBModules.AsValueEnumerable().Sum(m => m != null ? m.PixelatedRigidbody.CurrentPixelCount : 0);
+            var finalPixelsA1 = shipA1Modules.AsValueEnumerable()
+                .Sum(m => m != null ? m.PixelatedRigidbody.CurrentPixelCount : 0);
+            var finalPixelsA2 = shipA2Modules.AsValueEnumerable()
+                .Sum(m => m != null ? m.PixelatedRigidbody.CurrentPixelCount : 0);
+            var finalPixelsA3 = shipA3Modules.AsValueEnumerable()
+                .Sum(m => m != null ? m.PixelatedRigidbody.CurrentPixelCount : 0);
             var finalPixelsACombined = finalPixelsA1 + finalPixelsA2 + finalPixelsA3;
 
             var damageB = startPixelsB - finalPixelsB;

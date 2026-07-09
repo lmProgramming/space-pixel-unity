@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using Core.Services;
+using Ships.Tests.TestHelpers.Factories;
 using UnityEngine;
+using Zenject;
 
 namespace Ships.Tests.TestHelpers.Mocks
 {
@@ -29,6 +31,15 @@ namespace Ships.Tests.TestHelpers.Mocks
         public bool TryGetSpriteContentId(Sprite sprite, out string contentId)
         {
             return _spriteToId.TryGetValue(sprite, out contentId);
+        }
+
+        public void Seed(DiContainer container, List<GameObject> createdObjects)
+        {
+            var emptyPrefab = new GameObject();
+            AddPrefab("bullet_big", emptyPrefab);
+            AddPrefab("bullet_small", emptyPrefab);
+            AddPrefab("engine_exhaust",
+                SystemsBuilder.CreateNozzleParticleSystem(container, createdObjects, new GameObject()));
         }
 
         public void AddPrefab(string id, GameObject prefab)

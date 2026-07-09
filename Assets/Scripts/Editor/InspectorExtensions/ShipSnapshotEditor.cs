@@ -61,7 +61,7 @@ namespace Editor.InspectorExtensions
                 return;
             }
 
-            var json = _shipSnapshotService.ToJson(snapshot);
+            var json = JsonUtility.ToJson(snapshot, true);
 
             EnsureSnapshotFolderExists();
 

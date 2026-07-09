@@ -41,11 +41,18 @@ TagManager:
   - name: Background
     uniqueID: 1081692607
     locked: 0
+  - name: BackgroundEffects
+    uniqueID: 3580381729
+    locked: 0
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: FrontModules
+    uniqueID: 1531473159
     locked: 0
   - name: Effects
     uniqueID: 2151466139
     locked: 0
   m_RenderingLayers:
   - Default
+  m_MigratedRenderPipelines: []

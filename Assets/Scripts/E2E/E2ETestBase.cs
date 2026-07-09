@@ -9,12 +9,13 @@ using Events.Gameplay.Ship;
 using Events.Gameplay.Shooting;
 using Gameplay.EasyTeam;
 using Instantiation;
-using NSubstitute;
 using NUnit.Framework;
 using Services;
+using ShipFactory;
 using Ships;
 using Ships.ModuleConnection;
 using Ships.Modules;
+using Ships.Systems.Gimbal;
 using Ships.Systems.Sensing;
 using Ships.Tests.TestHelpers.Factories;
 using Ships.Tests.TestHelpers.Mocks;
@@ -48,6 +49,8 @@ namespace E2E
             var cameraObj = new GameObject("Camera");
             CreatedObjects.Add(cameraObj);
             cameraObj.transform.SetParent(_testRoot.transform);
+            cameraObj.transform.position = new Vector3(0f, 0f, -10f);
+
             var camera = cameraObj.AddComponent<Camera>();
             camera.transform.tag = "MainCamera";
             camera.orthographic = true;
@@ -65,6 +68,12 @@ namespace E2E
 
             var mapInfo = new TestMapInfo(_testRoot.transform);
             Container.Bind<IMapInfo>().FromInstance(mapInfo).AsSingle();
+
+            var shipInitializeModulesEventChannel = new GameObject("Initialize Modules Event Channel")
+                .AddComponent<ShipInitializeModulesEventChannel>();
+            Container.Bind<ShipInitializeModulesEventChannel>().FromInstance(shipInitializeModulesEventChannel)
+                .AsSingle();
+            CreatedObjects.Add(shipInitializeModulesEventChannel.gameObject);
 
             // Bind ShipService
             var shipServiceGo = new GameObject("ShipService");
@@ -93,9 +102,7 @@ namespace E2E
             _projectilesSpawner.InternalProjectilesHolder = _testRoot.transform;
             Container.Bind<IProjectilesSpawner>().FromInstance(_projectilesSpawner).AsSingle();
 
-            var shipInitializeModulesEventChannel = Substitute.For<ShipInitializeModulesEventChannel>();
-            Container.Bind<ShipInitializeModulesEventChannel>().FromInstance(shipInitializeModulesEventChannel)
-                .AsSingle();
+            // Bind EffectsSpawner
 
             var effectsSpawnerGo = new GameObject("EffectsSpawner");
             CreatedObjects.Add(effectsSpawnerGo);
@@ -104,6 +111,11 @@ namespace E2E
             effectsSpawner.SetupForTesting(GetExplosionPrefab(), _testRoot.transform, Instantiator);
             effectsSpawnerGo.SetActive(true);
             Container.Bind<IEffectsSpawner>().FromInstance(effectsSpawner).AsSingle();
+
+            var shipModuleCatalog = ScriptableObject.CreateInstance<ShipModuleCatalog>();
+            Container.Bind<IShipModuleCatalog>().FromInstance(shipModuleCatalog).AsSingle();
+
+            SnapshotRestoreServicesFactory.Bind(Container, CreatedObjects);
 
             InjectAllObjectsInScene(Container);
         }
@@ -146,7 +158,7 @@ namespace E2E
         protected AIShip CreateAIShip(string name, Team team, Vector2 position, bool withWeapons,
             bool withEngines)
         {
-            var shipGo = ModuleFactory.CreateGameObject(name, CreatedObjects, Container);
+            var shipGo = UnityBuilder.CreateGameObject(name, CreatedObjects, Container);
             shipGo.layer = team.Layer;
             shipGo.transform.position = position;
 
@@ -158,7 +170,7 @@ namespace E2E
             ModuleFactory.CreateCommandModule(shipGo.transform, Vector2.zero, Container, CreatedObjects,
                 modulePixelSize, modulePixelSize);
             // Power
-            ModuleFactory.CreatePowerModule(shipGo.transform, new Vector2(0f, moduleSpacing), Container,
+            ModuleFactory.CreateTestPowerModule(shipGo.transform, new Vector2(0f, moduleSpacing), Container,
                 CreatedObjects, modulePixelSize, modulePixelSize);
             if (withEngines)
             {
@@ -180,10 +192,10 @@ namespace E2E
                 cannon.SetResources(new Resources(0, 1f, 0, 0, 0));
                 var weaponSprite = CreateTestSprite();
                 var projectileSpawnGo = new GameObject("ProjectileSpawn");
-                projectileSpawnGo.transform.SetParent(shipGo.transform);
+                projectileSpawnGo.transform.SetParent(cannonGo.transform);
                 projectileSpawnGo.transform.position = cannonGo.transform.position;
-                cannon.SetupForTesting(bulletPrefab, 1.2f, 0.2f, weaponSprite,
-                    new[] { projectileSpawnGo.transform });
+                cannon.SetupForTesting(bulletPrefab, 0.5f, 0.5f, weaponSprite,
+                    new List<Transform> { projectileSpawnGo.transform });
             }
 
             shipGo.AddComponent<ModuleConnectionFactory>();
@@ -193,6 +205,8 @@ namespace E2E
             var ship = shipGo.AddComponent<AIShip>();
             Container.InjectGameObject(shipGo);
             shipGo.SetActive(true);
+
+            ship.ConfigureSasSettingsForTesting(new SasTurnInputSettings());
 
             ship.SetTeam(team);
             ship.SetNavigationSize(15);
@@ -204,7 +218,7 @@ namespace E2E
             return ship;
         }
 
-        protected static GameObject GetBulletPrefab()
+        private static GameObject GetBulletPrefab()
         {
             var bulletPrefab = UnityEngine.Resources.Load<GameObject>("Tests/Prefabs/Bullet");
 

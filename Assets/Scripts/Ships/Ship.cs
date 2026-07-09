@@ -36,15 +36,7 @@ namespace Ships
         [SerializeField]
         private Team team;
 
-        [Header("SAS")]
-        [SerializeField] private float sasTurnReleaseThreshold = 0.05f;
-
-        [SerializeField] private float sasHeadingDeadZoneDegrees = 0.3f;
-        [SerializeField] private float sasHeadingGain = 0.04f;
-        [SerializeField] private float sasAngularVelocityGain = 0.03f;
-        [SerializeField] private float sasMaxTurnInput = 2f;
-        [SerializeField] private float sasForwardCompensationStrength = 1f;
-        [SerializeField] private float sasForwardCompensationMaxTurnInput = 1.5f;
+        [Header("SAS")] [SerializeField] private SasTurnInputSettings sasTurnInputSettings;
 
         [Header("Control Allocator")]
         [SerializeField] private int allocatorIterations = 14;
@@ -60,6 +52,8 @@ namespace Ships
 
         private BiCohesionGraph<IModule> _biCohesionGraph;
 
+        [Inject] private DiContainer _container;
+
         private ControlAllocator _controlAllocator;
 
         private bool _destroyRequested;
@@ -71,9 +65,13 @@ namespace Ships
 
         private IModuleConnectionFactory _moduleConnectionFactory;
 
+        [Inject] private IModuleRestoreFactory _moduleRestoreFactory;
+
         private Action<IPixelated> _onCommandModuleNoPixelsLeft;
 
         private SasTurnInputResolver _sasTurnInputResolver;
+
+        [InjectOptional] private SceneContextRegistry _sceneContextRegistry;
 
         [Inject]
         private ShipInitializeModulesEventChannel _shipInitializeModulesEventChannel;
@@ -164,6 +162,7 @@ namespace Ships
 
         public string Name => transform.name;
         public IReadOnlyList<IModule> AllModules => _allModulesCache;
+        public virtual bool IsSasOn => false;
 
         public float GeneralEfficiency => Math.Max(0.01f, ResourceManager.EnergyEfficiency);
 
@@ -193,7 +192,7 @@ namespace Ships
             Debug.Log($"[Ship] Module destroyed: {module.Transform?.name}", module.Transform);
 
             _biCohesionGraph.RemoveNode(module);
-            RecacheModulesDictionary();
+            HandleModuleChange();
 
             DeIgnoreCollider(module.Collider2D);
         }
@@ -260,7 +259,7 @@ namespace Ships
 
             _shipInitializeModulesEventChannel.Raise();
 
-            RecacheModulesDictionary();
+            HandleModuleChange();
 
             IgnoreModuleColliders();
         }
@@ -286,6 +285,76 @@ namespace Ships
             }
         }
 
+        public ShipSnapshot CaptureSnapshot(IGameContentCatalog contentCatalog)
+        {
+            if (!this.IsAlive())
+            {
+                Debug.LogError("[Ship] Cannot capture snapshot: ship is null");
+                return null;
+            }
+
+            if (contentCatalog == null) throw new ArgumentNullException(nameof(contentCatalog));
+
+            var snapshot = new ShipSnapshot(Name);
+
+            foreach (var module in AllModules)
+            {
+                var moduleSnapshot = module.CaptureSnapshot(contentCatalog);
+                snapshot.modules.Add(moduleSnapshot);
+
+                if (CommandModule != module) continue;
+
+                if (snapshot.commandModuleInstanceId != null)
+                    throw new InvalidOperationException(
+                        "[Ship] Multiple command modules found. Only the first one will be recorded in the snapshot.");
+
+                snapshot.commandModuleInstanceId = moduleSnapshot.instanceId;
+            }
+
+            Debug.Log($"[Ship] Captured snapshot of '{Name}' with {snapshot.modules.Count} modules");
+            return snapshot;
+        }
+
+        public void RestoreFromSnapshot(ShipSnapshot snapshot, IGameContentCatalog contentCatalog)
+        {
+            if (snapshot == null) throw new ArgumentNullException(nameof(snapshot));
+            if (contentCatalog == null) throw new ArgumentNullException(nameof(contentCatalog));
+
+            DestroyAllModulesSilently();
+
+            CreateModulesFromSnapshot(snapshot, contentCatalog);
+
+            Debug.Log(
+                $"[Ship] Applied snapshot '{snapshot.shipName}' to '{Name}' ({snapshot.modules.Count} modules)");
+        }
+
+        private void CreateModulesFromSnapshot(ShipSnapshot snapshot, IGameContentCatalog contentCatalog)
+        {
+            foreach (var ms in snapshot.modules)
+            {
+                var moduleGo = _moduleRestoreFactory.CreateModuleShell(ms, transform);
+                moduleGo.SetActive(false);
+                moduleGo.transform.localPosition = ms.localPosition;
+                moduleGo.transform.localRotation = ms.localRotation;
+
+                var identity = moduleGo.GetComponent<GameObjectInstanceIdentity>();
+                if (!identity)
+                    identity = moduleGo.AddComponent<GameObjectInstanceIdentity>();
+                identity.RestoreFromSnapshot(ms.instanceId, ms.origin, ms.archetypeId);
+
+                var module = moduleGo.GetComponent<IModule>();
+                if (module == null)
+                    throw new UnityException(
+                        $"[Ship] Failed to add a Module component for '{ms.moduleName}' (moduleType: {ms.concreteModuleType}).");
+
+                module.SetShip(this);
+                module.RestoreFromSnapshot(ms, contentCatalog);
+
+                moduleGo.SetActive(true);
+                moduleGo.gameObject.layer = gameObject.layer;
+            }
+        }
+
         private void IgnoreModuleColliders()
         {
             var combinations = from item1 in OwnColliders.AsValueEnumerable()
@@ -297,6 +366,8 @@ namespace Ships
 
         private void DeIgnoreCollider(Collider2D other)
         {
+            if (!other) return;
+
             foreach (var item1 in OwnColliders) Physics2D.IgnoreCollision(other, item1, false);
         }
 
@@ -360,10 +431,10 @@ namespace Ships
 
             foreach (var module in unreachableModules) ReleaseModuleAsJunk(module);
 
-            RecacheModulesDictionary();
+            HandleModuleChange();
         }
 
-        private void RecacheModulesDictionary()
+        private void HandleModuleChange()
         {
             _modulesDictionary.Clear();
             _allModulesCache.Clear();
@@ -375,7 +446,9 @@ namespace Ships
                 _allModulesCache.Add(mod);
             }
 
-            OwnColliders = GetComponentsInChildren<Collider2D>();
+            OwnColliders = ModuleGraph.GetAllNodes().AsValueEnumerable()
+                .SelectMany(m => m.Transform?.GetComponentsInChildren<Collider2D>())
+                .ToArray();
 
             ResourceManager.Recalculate(_allModulesCache);
         }
@@ -424,6 +497,13 @@ namespace Ships
         protected bool ApplyEngineForces(float forwardInput, float horizontalInput, float turnInput, float deltaTime,
             bool sasEnabled = false)
         {
+            if (sasEnabled)
+            {
+                forwardInput = ApplyInputDeadZone(forwardInput, sasTurnInputSettings.MovementInputDeadZone);
+                horizontalInput = ApplyInputDeadZone(horizontalInput, sasTurnInputSettings.MovementInputDeadZone);
+                turnInput = ApplyInputDeadZone(turnInput, sasTurnInputSettings.TurnReleaseThreshold);
+            }
+
             forwardInput = Mathf.Clamp(forwardInput, -1f, 1f);
             horizontalInput = Mathf.Clamp(horizontalInput, -1f, 1f);
             turnInput = Mathf.Clamp(turnInput, -1f, 1f);
@@ -440,7 +520,7 @@ namespace Ships
             var maxLeverArm = EngineDirectionSolver.GetMaxLeverArmLength(engines, centerOfMass);
             var finalTurnInput = sasEnabled
                 ? _sasTurnInputResolver.ResolveTurnInput(turnInput, forwardInput, horizontalInput, selfRigidbody,
-                    GetCurrentHeadingDegrees(), engines, forward, centerOfMass, maxLeverArm, GetSasSettings())
+                    GetCurrentHeadingDegrees(), engines, forward, centerOfMass, maxLeverArm, sasTurnInputSettings)
                 : turnInput;
             var desiredDirectionPerEngine = new Vector2[engines.Count];
 
@@ -496,9 +576,13 @@ namespace Ships
                 }
 
                 var thrust = Mathf.Clamp01(thrustRatios[i]) * engine.MaxThrust;
-                engine.SetCurrentThrust(thrust);
+                if (thrust <= engine.MaxThrust * sasTurnInputSettings.MinAppliedThrustRatio)
+                {
+                    engine.SetCurrentThrust(0f);
+                    continue;
+                }
 
-                if (thrust <= Mathf.Epsilon) continue;
+                engine.SetCurrentThrust(thrust);
 
                 var force = engine.WorldThrustDirection * thrust;
 
@@ -509,17 +593,15 @@ namespace Ships
             return anyForceApplied;
         }
 
+        private static float ApplyInputDeadZone(float input, float deadZone)
+        {
+            return Mathf.Abs(input) <= deadZone ? 0f : input;
+        }
+
         private ControlAllocatorSettings GetControlAllocatorSettings()
         {
             return new ControlAllocatorSettings(allocatorIterations, allocatorForceWeight,
                 allocatorTorqueWeight, allocatorRegularization);
-        }
-
-        private SasTurnInputSettings GetSasSettings()
-        {
-            return new SasTurnInputSettings(sasTurnReleaseThreshold, sasHeadingDeadZoneDegrees, sasHeadingGain,
-                sasAngularVelocityGain, sasMaxTurnInput, sasForwardCompensationStrength,
-                sasForwardCompensationMaxTurnInput);
         }
 
         private float GetCurrentHeadingDegrees()
@@ -581,6 +663,11 @@ namespace Ships
             allocatorForceWeight = forceWeight;
             allocatorTorqueWeight = torqueWeight;
             allocatorRegularization = regularization;
+        }
+
+        internal void ConfigureSasSettingsForTesting(SasTurnInputSettings sasSettings)
+        {
+            sasTurnInputSettings = sasSettings;
         }
 #endif
     }

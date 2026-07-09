@@ -14,7 +14,7 @@ namespace Ships
 
         [Inject] private IGameInput _gameInput;
 
-        public bool SasEnabled => sasEnabled;
+        public override bool IsSasOn => sasEnabled;
 
         protected override void Start()
         {

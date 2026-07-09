@@ -19,7 +19,7 @@ namespace ShipFactory
         private const string CardDimensionsTextClass = "ds-body-2";
         private const string CardLabelsClass = "palette-card__labels";
         private const string CardSpriteClass = "ds-card__sprite";
-        private readonly ModulePrefabLibrary _library;
+        private readonly ShipModuleCatalog _library;
 
         private readonly VisualElement _paletteContent;
         private VisualElement _activeTabButton;
@@ -29,11 +29,11 @@ namespace ShipFactory
 
         private bool _isInputLocked;
 
-        public ModulePaletteController(VisualElement root, ModulePrefabLibrary library)
+        public ModulePaletteController(VisualElement root, ShipModuleCatalog library)
         {
             if (library == null)
                 throw new ArgumentNullException(nameof(library),
-                    "[ModulePaletteController] ModulePrefabLibrary must be assigned!");
+                    "[ModulePaletteController] ShipModuleCatalog library must be assigned!");
 
             _library = library;
 

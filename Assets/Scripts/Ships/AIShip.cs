@@ -30,6 +30,7 @@ namespace Ships
 
         public static float SightRange => 2000f;
         private ShipSensing Sensing { get; set; }
+        public override bool IsSasOn => true;
 
 #if UNITY_INCLUDE_TESTS
         internal float InternalStopDistance

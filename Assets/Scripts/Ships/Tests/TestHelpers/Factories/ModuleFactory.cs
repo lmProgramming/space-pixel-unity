@@ -3,6 +3,7 @@ using Core.Ships;
 using Pixelation;
 using Ships.ModuleConnection;
 using Ships.Modules;
+using Ships.Systems.Gimbal;
 using Ships.Systems.Resources;
 using Ships.Tests.TestHelpers.Modules;
 using UnityEngine;
@@ -21,7 +22,7 @@ namespace Ships.Tests.TestHelpers.Factories
             commandGo.AddComponent<Command>();
         }
 
-        public static void CreatePowerModule(Transform parent, Vector2 localPosition, DiContainer container,
+        public static void CreateTestPowerModule(Transform parent, Vector2 localPosition, DiContainer container,
             ICollection<GameObject> createdObjects,
             int modulePixelWidth, int modulePixelHeight)
         {
@@ -30,26 +31,48 @@ namespace Ships.Tests.TestHelpers.Factories
             powerGo.AddComponent<TestPowerModule>();
         }
 
-        public static void CreateEngineModule(Transform parent, Vector2 localPosition, DiContainer container,
+        public static Engine CreateEngineModule(Transform parent, Vector2 localPosition, DiContainer container,
             ICollection<GameObject> createdObjects, float engineMaxThrust,
             int modulePixelWidth, int modulePixelHeight, float localRotationZ = 0f, float gimbalRange = 45f)
         {
             var engineGo = CreateModuleBase("Engine", parent, localPosition, localRotationZ, container, createdObjects,
                 modulePixelWidth, modulePixelHeight);
 
-            var particleRoot = CreateGameObject("EngineExhaust", createdObjects, container);
-            particleRoot.transform.SetParent(engineGo.transform, false);
-            particleRoot.AddComponent<ParticleSystem>();
+            AddNozzle(engineGo, container, createdObjects);
 
             var engine = engineGo.AddComponent<Engine>();
             engine.ConfigureForTesting(engineMaxThrust, gimbalRange);
+
+            return engine;
+        }
+
+        public static void AddNozzle(GameObject engineGo, DiContainer container,
+            ICollection<GameObject> createdObjects)
+        {
+            var nozzleGo = UnityBuilder.CreateGameObject("Nozzle", createdObjects, container);
+            nozzleGo.transform.SetParent(engineGo.transform, false);
+            nozzleGo.transform.localPosition = new Vector3(0f, 0f, 0f);
+
+            nozzleGo.AddComponent<SpriteRenderer>();
+
+            var nozzleRigidbody = nozzleGo.AddComponent<Rigidbody2D>();
+            nozzleRigidbody.bodyType = RigidbodyType2D.Kinematic;
+            nozzleRigidbody.gravityScale = 0f;
+
+            nozzleGo.AddComponent<PolygonCollider2D>();
+
+            SystemsBuilder.CreateNozzleParticleSystem(container, createdObjects, nozzleGo);
+
+            var nozzle = nozzleGo.AddComponent<Nozzle>();
+            container.Inject(nozzle);
+            nozzle.SetTextureFromColors(CreateSolidPixelGrid(3, 3));
         }
 
         public static GameObject CreateModuleBase(string name, Transform parent, Vector2 localPosition,
             float localRotationZ, DiContainer container, ICollection<GameObject> createdObjects,
             int modulePixelWidth, int modulePixelHeight)
         {
-            var moduleGo = CreateGameObject(name, createdObjects, container);
+            var moduleGo = UnityBuilder.CreateGameObject(name, createdObjects, container);
             moduleGo.transform.SetParent(parent);
             moduleGo.transform.localPosition = localPosition;
             moduleGo.transform.localRotation = Quaternion.Euler(0f, 0f, localRotationZ);
@@ -74,7 +97,7 @@ namespace Ships.Tests.TestHelpers.Factories
             return CreateSolidPixelGrid(width, height, new Color32(100, 100, 100, 255));
         }
 
-        public static Color32[,] CreateSolidPixelGrid(int width, int height, Color32 color)
+        private static Color32[,] CreateSolidPixelGrid(int width, int height, Color32 color)
         {
             var colors = new Color32[width, height];
 
@@ -99,15 +122,6 @@ namespace Ships.Tests.TestHelpers.Factories
             return ship;
         }
 
-        public static GameObject CreateGameObject(string name, ICollection<GameObject> createdObjects,
-            DiContainer container)
-        {
-            var go = new GameObject(name);
-            createdObjects.Add(go);
-            container.Inject(go);
-            return go;
-        }
-
         public static Command AddCommandModuleComponent(GameObject moduleGo)
         {
             return moduleGo.AddComponent<Command>();
@@ -118,6 +132,21 @@ namespace Ships.Tests.TestHelpers.Factories
             var testModule = moduleGo.AddComponent<TestModule>();
             testModule.SetModuleType(type);
             return testModule;
+        }
+
+        public static Basic AddBasicComponent(GameObject moduleGo, ModuleType type = ModuleType.Resources)
+        {
+            var module = moduleGo.AddComponent<Basic>();
+            module.InitializeForTesting(type);
+
+            return module;
+        }
+
+        public static LaserBeam AddLaserComponent(GameObject moduleGo)
+        {
+            var laser = moduleGo.AddComponent<LaserBeam>();
+
+            return laser;
         }
     }
 }

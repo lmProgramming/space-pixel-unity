@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Core.Grid;
+using LMPro.DataStructures;
 using UnityEngine;
 using ZLinq;
 
@@ -27,6 +28,11 @@ namespace Pixelation
         public float GetValue(Vector2Int point)
         {
             return _health[point.y * Width + point.x];
+        }
+
+        public float[,] GetValues2D()
+        {
+            return Helpers.Make2DArray(_health, Height, Width);
         }
 
         public bool InBounds(Vector2Int point)

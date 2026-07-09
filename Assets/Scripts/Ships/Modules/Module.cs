@@ -5,8 +5,11 @@ using Core.Constants;
 using Core.Pixelation;
 using Core.Services;
 using Core.Ships;
+using Core.Ships.Snapshots.Module;
+using Core.Ships.Snapshots.Module.StandaloneModuleSystemData;
 using LMPro;
 using Pixelation;
+using Ships.Systems.Standalone;
 using UnityEngine;
 using Zenject;
 using ZLinq;
@@ -15,6 +18,7 @@ using Resources = Core.Ships.Resources;
 
 [assembly: InternalsVisibleTo("Editor.InspectorExtensions")]
 [assembly: InternalsVisibleTo("Ships.Tests")]
+[assembly: InternalsVisibleTo("Services")]
 
 namespace Ships.Modules
 {
@@ -47,7 +51,7 @@ namespace Ships.Modules
 
         internal IReadOnlyDictionary<Module, List<Vector2Int>> ConnectionPoints => _connectionPoints;
 
-        protected float ShipModuleEfficiency => Ship.GeneralEfficiency * Efficiency;
+        public float ActualEfficiency => Ship.GeneralEfficiency * ModuleEfficiency;
 
         private float PixelEfficiency =>
             Mathf.Pow((float)PixelatedRigidbody.CurrentPixelCount / PixelatedRigidbody.StartPixelCount, 2);
@@ -61,9 +65,11 @@ namespace Ships.Modules
             PixelatedRigidbody.CurrentPixelCount <
             PixelatedRigidbody.StartPixelCount * GameplayConstants.ModuleDestroyedBelowPixelRatio;
 
+        public virtual ConcreteModuleType ConcreteType { get; protected set; } = ConcreteModuleType.Basic;
+
         protected virtual void Awake()
         {
-            PixelatedRigidbody = GetComponent<PixelatedRigidbody>();
+            EnsurePixelatedRigidbodyCached();
             OnCrewChange();
         }
 
@@ -109,9 +115,10 @@ namespace Ships.Modules
 
         public int AliveCrewCount => AliveCrew.Count;
 
-        public virtual float EnergyCapacity => Resources.energyCapacity * Efficiency;
+        public virtual float EnergyCapacity => Resources.energyCapacity * ModuleEfficiency;
 
-        public float Efficiency => PixelEfficiency * GetCrewEfficiency();
+        // todo: consider caching this in the future
+        public float ModuleEfficiency => PixelEfficiency * GetCrewEfficiency();
 
         public IReadOnlyList<CrewMember> AssignedCrew => assignedCrew;
         public int CrewMissingCount => Mathf.Max(0, CrewNeededCount - AliveCrewCount);
@@ -174,12 +181,12 @@ namespace Ships.Modules
 
         public virtual float GetEnergyDraw()
         {
-            return Resources.energyDraw * Efficiency;
+            return Resources.energyDraw * ModuleEfficiency;
         }
 
         public virtual float GetEnergyProduction()
         {
-            return Resources.energyProduction * Efficiency;
+            return Resources.energyProduction * ModuleEfficiency;
         }
 
         public void KillAllCrew()
@@ -212,17 +219,100 @@ namespace Ships.Modules
             Ship = ship;
         }
 
+        public ModuleSnapshot CaptureSnapshot(IGameContentCatalog contentCatalog)
+        {
+            if (!Transform)
+                throw new UnityException(
+                    $"[Module] Cannot capture snapshot for module '{Transform?.name}' because its transform is null. " +
+                    "Ensure that all modules have valid transforms before capturing snapshots.");
+
+            var identity = Transform.GetComponent<GameObjectInstanceIdentity>();
+            if (!identity)
+            {
+                identity = Transform.gameObject.AddComponent<GameObjectInstanceIdentity>();
+                identity.EnsureAssigned(InstanceOrigin.Custom);
+            }
+            else if (string.IsNullOrWhiteSpace(identity.InstanceId))
+            {
+                identity.EnsureAssigned(identity.Origin, identity.ArchetypeId);
+            }
+
+            var moduleSnapshot = new ModuleSnapshot
+            {
+                instanceId = identity.InstanceId,
+                moduleName = Transform.name,
+                concreteModuleType = ConcreteType,
+                origin = identity.Origin,
+                archetypeId = identity.ArchetypeId,
+                localPosition = Transform.localPosition,
+                localRotation = Transform.localRotation,
+                resources = Resources,
+                pixelatedRigidbody = PixelatedRigidbody.CaptureSnapshot(contentCatalog),
+                typePayloadJson = CaptureTypePayloadJson(contentCatalog),
+                systems = CaptureSystemSnapshots(contentCatalog)
+            };
+
+            return moduleSnapshot;
+        }
+
+        public virtual void RestoreFromSnapshot(ModuleSnapshot snapshot, IGameContentCatalog contentCatalog)
+        {
+            EnsurePixelatedRigidbodyCached();
+
+            SetResources(snapshot.resources);
+
+            ApplyTypePayloadJson(snapshot.typePayloadJson, contentCatalog);
+
+            RestoreSystems(snapshot.systems, contentCatalog);
+
+            PixelatedRigidbody.RestoreFromSnapshot(snapshot.pixelatedRigidbody, contentCatalog);
+        }
+
         public void SetResources(Resources newResources)
         {
             Resources = newResources;
         }
 
-        public virtual string CaptureTypePayloadJson(IGameContentCatalog contentCatalog)
+        private void RestoreSystems(StandaloneModuleSystemData[] systemData, IGameContentCatalog contentCatalog)
+        {
+            foreach (var system in systemData)
+            {
+                var systemType = system.type switch
+                {
+                    StandaloneModuleSystemType.ReactionWheel => typeof(ReactionWheelStabilizer),
+                    _ => throw new ArgumentException(
+                        "[Module] Cannot restore systems for system data '" + system + "'.")
+                };
+
+                var component = (IStandaloneModuleSystem)gameObject.AddComponent(systemType);
+                component.RestoreFromSnapshot(system, contentCatalog);
+            }
+        }
+
+        private StandaloneModuleSystemData[] CaptureSystemSnapshots(IGameContentCatalog contentCatalog)
+        {
+            var systems = GetComponentsInChildren<IStandaloneModuleSystem>();
+
+            return systems.AsValueEnumerable().Select(system => system.CaptureSnapshot(contentCatalog)).ToArray();
+        }
+
+        private void EnsurePixelatedRigidbodyCached()
+        {
+            if (PixelatedRigidbody != null)
+                return;
+
+            PixelatedRigidbody = GetComponent<PixelatedRigidbody>();
+            if (PixelatedRigidbody == null)
+                throw new UnityException(
+                    $"[Module] Cannot restore snapshot on '{name}': missing PixelatedRigidbody component.");
+        }
+
+        protected virtual string CaptureTypePayloadJson(IGameContentCatalog contentCatalog)
         {
             return string.Empty;
         }
 
-        public virtual void ApplyTypePayloadJson(string typePayloadJson, IGameContentCatalog contentCatalog)
+        protected virtual void ApplyTypePayloadJson(string typePayloadJson, IGameContentCatalog contentCatalog)
         {
         }
 
@@ -405,7 +495,7 @@ namespace Ships.Modules
         }
 
 #if UNITY_EDITOR
-        internal float InternalEfficiency => Efficiency;
+        internal float InternalEfficiency => ModuleEfficiency;
 
         internal Resources InternalResources => Resources;
 #endif

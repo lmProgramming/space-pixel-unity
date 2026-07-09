@@ -224,7 +224,7 @@ GameObject:
   m_IsActive: 1
 --- !u!212 &351339373
 SpriteRenderer:
-  serializedVersion: 2
+  serializedVersion: 3
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -281,6 +281,7 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+  m_BlendShapeWeights: []
 --- !u!60 &351339374
 PolygonCollider2D:
   m_ObjectHideFlags: 0
@@ -700,7 +701,7 @@ GameObject:
   m_IsActive: 1
 --- !u!212 &825322232
 SpriteRenderer:
-  serializedVersion: 2
+  serializedVersion: 3
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -757,6 +758,7 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+  m_BlendShapeWeights: []
 --- !u!60 &825322233
 PolygonCollider2D:
   m_ObjectHideFlags: 0
@@ -1098,6 +1100,7 @@ Transform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!213 &1165100214
 Sprite:
+  serializedVersion: 2
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -1114,14 +1117,13 @@ Sprite:
   m_PixelsToUnits: 1
   m_Pivot: {x: 0.5, y: 0.5}
   m_Extrude: 0
-  m_IsPolygon: 0
   m_PackingTag: 
   m_RenderDataKey:
     00000000000000000000000000000000: 0
   m_AtlasTags: []
   m_SpriteAtlas: {fileID: 0}
   m_RD:
-    serializedVersion: 3
+    serializedVersion: 4
     texture: {fileID: 1633281666}
     alphaTexture: {fileID: 0}
     secondaryTextures: []
@@ -1200,6 +1202,11 @@ Sprite:
       m_DataSize: 160
       _typelessdata: 00008041000060410000000000003041000080c100000000000080410000c0c000000000000020410000804100000000000010c1000080c100000000000050c10000804100000000000080c10000404100000000000080c1000030c1000000000000803f0000703f0000583f000000000000803f0000a03e0000503f0000803f0000603e000000000000c03d0000803f000000000000603f000000000000203e
     m_Bindpose: []
+    m_BlendShapes:
+      vertices: []
+      shapes: []
+      channels: []
+      fullWeights: []
     textureRect:
       serializedVersion: 2
       x: 0
@@ -1212,7 +1219,7 @@ Sprite:
     uvTransform: {x: 1, y: 16, z: 1, w: 16}
     downscaleMultiplier: 1
   m_AtlasRD:
-    serializedVersion: 3
+    serializedVersion: 4
     texture: {fileID: 1633281666}
     alphaTexture: {fileID: 0}
     secondaryTextures: []
@@ -1291,6 +1298,11 @@ Sprite:
       m_DataSize: 160
       _typelessdata: 00008041000060410000000000003041000080c100000000000080410000c0c000000000000020410000804100000000000010c1000080c100000000000050c10000804100000000000080c10000404100000000000080c1000030c1000000000000803f0000703f0000583f000000000000803f0000a03e0000503f0000803f0000603e000000000000c03d0000803f000000000000603f000000000000203e
     m_Bindpose: []
+    m_BlendShapes:
+      vertices: []
+      shapes: []
+      channels: []
+      fullWeights: []
     textureRect:
       serializedVersion: 2
       x: 0
@@ -1299,7 +1311,7 @@ Sprite:
       height: 32
     textureRectOffset: {x: 0, y: 0}
     atlasRectOffset: {x: -1, y: -1}
-    settingsRaw: 64
+    settingsRaw: 3136
     uvTransform: {x: 1, y: 16, z: 1, w: 16}
     downscaleMultiplier: 1
   m_PhysicsShape: []
@@ -1627,7 +1639,7 @@ PolygonCollider2D:
   m_UseDelaunayMesh: 0
 --- !u!212 &1384098533
 SpriteRenderer:
-  serializedVersion: 2
+  serializedVersion: 3
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -1684,6 +1696,7 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+  m_BlendShapeWeights: []
 --- !u!4 &1384098534
 Transform:
   m_ObjectHideFlags: 0
@@ -1784,7 +1797,7 @@ GameObject:
   m_IsActive: 1
 --- !u!212 &1579913505
 SpriteRenderer:
-  serializedVersion: 2
+  serializedVersion: 3
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -1841,6 +1854,7 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+  m_BlendShapeWeights: []
 --- !u!60 &1579913506
 PolygonCollider2D:
   m_ObjectHideFlags: 0
@@ -2080,6 +2094,7 @@ Texture2D:
     path: 
 --- !u!213 &1817160241
 Sprite:
+  serializedVersion: 2
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -2096,14 +2111,13 @@ Sprite:
   m_PixelsToUnits: 1
   m_Pivot: {x: 0.5, y: 0.5}
   m_Extrude: 0
-  m_IsPolygon: 0
   m_PackingTag: 
   m_RenderDataKey:
     00000000000000000000000000000000: 0
   m_AtlasTags: []
   m_SpriteAtlas: {fileID: 0}
   m_RD:
-    serializedVersion: 3
+    serializedVersion: 4
     texture: {fileID: 1315293367}
     alphaTexture: {fileID: 0}
     secondaryTextures: []
@@ -2182,6 +2196,11 @@ Sprite:
       m_DataSize: 80
       _typelessdata: 000000c10000004100000000000000410000004100000000000000c1000000c10000000000000041000000c100000000000000000000803f0000803f0000803f00000000000000000000803f00000000
     m_Bindpose: []
+    m_BlendShapes:
+      vertices: []
+      shapes: []
+      channels: []
+      fullWeights: []
     textureRect:
       serializedVersion: 2
       x: 0
@@ -2190,11 +2209,11 @@ Sprite:
       height: 16
     textureRectOffset: {x: 0, y: 0}
     atlasRectOffset: {x: -1, y: -1}
-    settingsRaw: 64
+    settingsRaw: 3136
     uvTransform: {x: 1, y: 8, z: 1, w: 8}
     downscaleMultiplier: 1
   m_AtlasRD:
-    serializedVersion: 3
+    serializedVersion: 4
     texture: {fileID: 1315293367}
     alphaTexture: {fileID: 0}
     secondaryTextures: []
@@ -2273,6 +2292,11 @@ Sprite:
       m_DataSize: 80
       _typelessdata: 000000c10000004100000000000000410000004100000000000000c1000000c10000000000000041000000c100000000000000000000803f0000803f0000803f00000000000000000000803f00000000
     m_Bindpose: []
+    m_BlendShapes:
+      vertices: []
+      shapes: []
+      channels: []
+      fullWeights: []
     textureRect:
       serializedVersion: 2
       x: 0
@@ -2281,7 +2305,7 @@ Sprite:
       height: 16
     textureRectOffset: {x: 0, y: 0}
     atlasRectOffset: {x: -1, y: -1}
-    settingsRaw: 64
+    settingsRaw: 3136
     uvTransform: {x: 1, y: 8, z: 1, w: 8}
     downscaleMultiplier: 1
   m_PhysicsShape: []
@@ -2528,11 +2552,6 @@ MonoBehaviour:
   - {fileID: 4324520987836842763}
   <Layer>k__BackingField:
     layerIndex: 7
---- !u!1 &375382050961298073 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 4673717031829467301, guid: ae55b639e695d2a22bab2adebe34c205, type: 3}
-  m_PrefabInstance: {fileID: 3723047138623760857}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &675408359115638743
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2544,7 +2563,7 @@ PrefabInstance:
     - target: {fileID: 3629323190215071535, guid: c9fdcbb0df9d8753088130f6567e0059, type: 3}
       propertyPath: objectToFollow
       value: 
-      objectReference: {fileID: 375382050961298073}
+      objectReference: {fileID: 0}
     - target: {fileID: 3701483033304711277, guid: c9fdcbb0df9d8753088130f6567e0059, type: 3}
       propertyPath: m_Name
       value: MainCamera
@@ -2741,7 +2760,11 @@ PrefabInstance:
       value: Player
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 1084801128714439732, guid: ae55b639e695d2a22bab2adebe34c205, type: 3}
+    - {fileID: 6680816973901073099, guid: ae55b639e695d2a22bab2adebe34c205, type: 3}
+    - {fileID: 8682929064393612949, guid: ae55b639e695d2a22bab2adebe34c205, type: 3}
+    - {fileID: 4673717031829467301, guid: ae55b639e695d2a22bab2adebe34c205, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ae55b639e695d2a22bab2adebe34c205, type: 3}
@@ -2889,14 +2912,6 @@ PrefabInstance:
       propertyPath: playerShip
       value: 
       objectReference: {fileID: 4229628396879989915}
-    - target: {fileID: 4119072753297442404, guid: cf3e414adef6859f2af6ac1a62b52293, type: 3}
-      propertyPath: minMagnitudeForClunk
-      value: 5
-      objectReference: {fileID: 0}
-    - target: {fileID: 4648251575334767366, guid: cf3e414adef6859f2af6ac1a62b52293, type: 3}
-      propertyPath: m_Enabled
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 8678225184202570128, guid: cf3e414adef6859f2af6ac1a62b52293, type: 3}
       propertyPath: enemyTeam
       value: 

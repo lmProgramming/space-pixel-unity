@@ -1,7 +1,8 @@
 using System;
 using System.Threading;
 using Core.Services;
-using Core.Ships.ModuleSnapshotPayloads;
+using Core.Ships;
+using Core.Ships.Snapshots.Module.ModuleData;
 using Cysharp.Threading.Tasks;
 using LMPro;
 using Pixelation;
@@ -43,6 +44,8 @@ namespace Ships.Modules
 
         private ManualTimer _reloadTimer;
 
+        public override ConcreteModuleType ConcreteType => ConcreteModuleType.Laser;
+
         protected override void Awake()
         {
             base.Awake();
@@ -66,7 +69,7 @@ namespace Ships.Modules
 
         private void Update()
         {
-            _reloadTimer.Progress(Time.deltaTime * ShipModuleEfficiency);
+            _reloadTimer.Progress(Time.deltaTime * ActualEfficiency);
         }
 
         protected override void OnDestroy()
@@ -104,7 +107,7 @@ namespace Ships.Modules
             _reloadTimer?.Reset();
         }
 
-        public override string CaptureTypePayloadJson(IGameContentCatalog contentCatalog)
+        protected override string CaptureTypePayloadJson(IGameContentCatalog contentCatalog)
         {
             var data = new LaserBeamModuleData
             {
@@ -119,7 +122,7 @@ namespace Ships.Modules
             return JsonUtility.ToJson(data);
         }
 
-        public override void ApplyTypePayloadJson(string typePayloadJson, IGameContentCatalog contentCatalog)
+        protected override void ApplyTypePayloadJson(string typePayloadJson, IGameContentCatalog contentCatalog)
         {
             if (string.IsNullOrWhiteSpace(typePayloadJson))
                 return;
@@ -194,7 +197,7 @@ namespace Ships.Modules
 
         private async UniTask FireBeamUpdateAsync(CancellationToken token)
         {
-            var timeRemaining = maxFireDuration * ShipModuleEfficiency;
+            var timeRemaining = maxFireDuration * ActualEfficiency;
             try
             {
                 while (_isFiring && !token.IsCancellationRequested && timeRemaining > 0)

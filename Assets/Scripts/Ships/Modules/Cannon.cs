@@ -3,12 +3,14 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using Core.Constants;
 using Core.Services;
-using Core.Ships.ModuleSnapshotPayloads;
+using Core.Ships;
+using Core.Ships.Snapshots.Module.ModuleData;
 using Events.Gameplay.Shooting;
 using LMPro;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Zenject;
+using ZLinq;
 
 [assembly: InternalsVisibleTo("E2E")]
 [assembly: InternalsVisibleTo("Ships.Tests")]
@@ -21,7 +23,7 @@ namespace Ships.Modules
 
         [SerializeField] private float projectileSpeed;
 
-        [SerializeField] private Transform[] projectileSpawnPoints;
+        [SerializeField] private List<Transform> projectileSpawnPoints = new();
 
         [SerializeField] private float reloadTime;
 
@@ -32,6 +34,8 @@ namespace Ships.Modules
 
         private ManualTimer _reloadTimer;
         [Inject] private ShootingEventChannel _shootingEventChannel;
+
+        public override ConcreteModuleType ConcreteType => ConcreteModuleType.Cannon;
 
         protected override void Awake()
         {
@@ -44,15 +48,16 @@ namespace Ships.Modules
         protected override void Start()
         {
             base.Start();
+
             _reloadTimer.OnReady += HandleReady;
             _reloadTimer.OnNotReady += HandleNotReady;
 
-            Assert.IsTrue(projectileSpawnPoints.Length > 0, "Projectile spawn points must be assigned.");
+            Assert.IsTrue(projectileSpawnPoints.Count > 0, "Projectile spawn points must be assigned.");
         }
 
         public void Update()
         {
-            _reloadTimer.Progress(Time.deltaTime * ShipModuleEfficiency);
+            _reloadTimer.Progress(Time.deltaTime * ActualEfficiency);
         }
 
         protected override void OnDestroy()
@@ -97,7 +102,9 @@ namespace Ships.Modules
                 bulletColliders.Add(bulletCollider);
 
                 var bulletRigidbody = newBullet.GetComponent<Rigidbody2D>();
-                bulletRigidbody.linearVelocity = PixelatedRigidbody.Rigidbody.linearVelocity;
+                // will be used in the future when proper cannon sprites will rotate 
+                // bulletRigidbody.linearVelocity = PixelatedRigidbody.Rigidbody.linearVelocity;
+
                 bulletRigidbody.AddForce(
                     direction * (projectileSpeed * GameplayConstants.CannonProjectileSpeedMultiplier),
                     ForceMode2D.Impulse);
@@ -127,12 +134,14 @@ namespace Ships.Modules
             return sprite;
         }
 
-        public override string CaptureTypePayloadJson(IGameContentCatalog contentCatalog)
+        protected override string CaptureTypePayloadJson(IGameContentCatalog contentCatalog)
         {
             var data = new CannonModuleData
             {
                 reloadTime = reloadTime,
-                projectileSpeed = projectileSpeed
+                projectileSpeed = projectileSpeed,
+                projectileLocalSpawnPoints =
+                    projectileSpawnPoints.AsValueEnumerable().Select(p => (Vector2)p.localPosition).ToArray()
             };
 
             if (contentCatalog != null && projectilePrefab &&
@@ -146,7 +155,7 @@ namespace Ships.Modules
             return JsonUtility.ToJson(data);
         }
 
-        public override void ApplyTypePayloadJson(string typePayloadJson, IGameContentCatalog contentCatalog)
+        protected override void ApplyTypePayloadJson(string typePayloadJson, IGameContentCatalog contentCatalog)
         {
             if (string.IsNullOrWhiteSpace(typePayloadJson))
                 return;
@@ -158,6 +167,17 @@ namespace Ships.Modules
             reloadTime = data.reloadTime;
             projectileSpeed = data.projectileSpeed;
             _reloadTimer = new ManualTimer(reloadTime);
+
+            foreach (var projectileSpawnPoint in projectileSpawnPoints) Destroy(projectileSpawnPoint.gameObject);
+            projectileSpawnPoints.Clear();
+            foreach (var projectileLocalSpawnPoint in data.projectileLocalSpawnPoints)
+            {
+                var go = new GameObject("Projectile Spawn Point");
+                go.transform.SetParent(transform);
+                go.transform.localPosition = projectileLocalSpawnPoint;
+
+                projectileSpawnPoints.Add(go.transform);
+            }
 
             if (contentCatalog != null &&
                 contentCatalog.TryGetPrefab(data.projectileContentId, out var projectilePrefabValue))
@@ -180,7 +200,7 @@ namespace Ships.Modules
             float newProjectileSpeed,
             float newReloadTime,
             Sprite newSprite,
-            Transform[] newProjectileSpawnPoints)
+            List<Transform> newProjectileSpawnPoints)
         {
             projectilePrefab = newProjectilePrefab;
             projectileSpeed = newProjectileSpeed;

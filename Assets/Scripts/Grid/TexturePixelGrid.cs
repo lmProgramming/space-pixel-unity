@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Core.Grid;
 using LMPro;
+using LMPro.DataStructures;
 using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -48,6 +49,11 @@ namespace Grid
         public Color32 GetValue(Vector2Int point)
         {
             return Texture.GetPixel(point.x, point.y);
+        }
+
+        public Color32[,] GetValues2D()
+        {
+            return Helpers.Make2DArray(Texture.GetPixels32(), Texture.height, Texture.width);
         }
 
         public bool InBounds(Vector2Int point)

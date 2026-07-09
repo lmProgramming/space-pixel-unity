@@ -49,7 +49,7 @@ namespace Services
 
             var index = Random.Range(0, availableSnapshots.Count);
             var snapshotJson = availableSnapshots[index].text;
-            var snapshot = ShipSnapshotService.FromJson(snapshotJson);
+            var snapshot = JsonUtility.FromJson<ShipSnapshot>(snapshotJson);
 
             if (snapshot == null)
                 throw new UnityException($"[SkirmishSnapshotCatalog] Failed to parse {teamName} snapshot JSON.");

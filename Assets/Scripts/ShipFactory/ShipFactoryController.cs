@@ -23,7 +23,10 @@ namespace ShipFactory
         private static readonly object ModuleDragPointerBlocker = new();
         private static readonly object UiHoverBlocker = new();
         private static readonly object UiPointerDownBlocker = new();
-        [SerializeField] private ModulePrefabLibrary modulePrefabLibrary;
+
+        [SerializeField]
+        private ShipModuleCatalog shipModuleCatalog;
+
         [SerializeField] private Ship initialShip;
 
         [SerializeField] private string snapshotFolderName = "ShipSnapshots";
@@ -65,8 +68,8 @@ namespace ShipFactory
             _uiDocument = GetComponent<UIDocument>();
             _camera = Camera.main;
 
-            if (modulePrefabLibrary == null)
-                Debug.LogError("[ShipFactoryController] ModulePrefabLibrary is not assigned!", this);
+            if (shipModuleCatalog == null)
+                Debug.LogError($"[ShipFactoryController] {nameof(ShipModuleCatalog)} is not assigned!", this);
         }
 
         private void Update()
@@ -89,7 +92,7 @@ namespace ShipFactory
                     "[ShipFactoryController] CameraResetRequestEventChannel is not assigned!");
 
             _canvasController = new ShipFactoryCanvasController(_uiRoot, _gameInput, cameraResetRequestEventChannel);
-            _paletteController = new ModulePaletteController(_uiRoot, modulePrefabLibrary);
+            _paletteController = new ModulePaletteController(_uiRoot, shipModuleCatalog);
 
             _shipNameField = _uiRoot.Q<TextField>("ship-name-field");
             _saveShipButton = _uiRoot.Q<Button>("save-ship-button");
@@ -180,7 +183,7 @@ namespace ShipFactory
             }
 
             snapshot.shipName = requestedName;
-            var json = _snapshotService.ToJson(snapshot);
+            var json = JsonUtility.ToJson(snapshot, true);
 
             var sanitizedName = SnapshotNameUtility.SanitizeFileName(requestedName);
             var outputPath = Path.Combine(snapshotFolderPath, sanitizedName + SnapshotExtension);

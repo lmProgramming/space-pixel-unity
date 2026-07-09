@@ -209,7 +209,7 @@ namespace LMPro
             return Random.Range(x, y + 1);
         }
 
-        public static Vector3 AverageOfVectors(Transform[] transforms)
+        public static Vector3 AverageOfVectors(IEnumerable<Transform> transforms)
         {
             return AverageOfVectors(transforms.AsValueEnumerable().Select(v => v.position).ToArray());
         }

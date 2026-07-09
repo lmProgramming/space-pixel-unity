@@ -34,6 +34,19 @@ namespace Ships.Tests.TestHelpers.Fixtures
             container.Bind<ShipInitializeModulesEventChannel>().FromInstance(shipInitializeModulesEventChannel)
                 .AsSingle();
 
+            var moduleCatalog = Substitute.For<IShipModuleCatalog>();
+            container.Bind<IShipModuleCatalog>()
+                .FromInstance(moduleCatalog)
+                .AsSingle();
+
+            var pixelatedRigidbodyFactory = Substitute.For<IPixelatedRigidbodyFactory>();
+            container.Bind<IPixelatedRigidbodyFactory>()
+                .FromInstance(pixelatedRigidbodyFactory)
+                .AsSingle();
+
+            var moduleRestoreFactory = Substitute.For<IModuleRestoreFactory>();
+            container.Bind<IModuleRestoreFactory>().FromInstance(moduleRestoreFactory).AsSingle();
+
             var shootingEventChannel = Substitute.For<ShootingEventChannel>();
             container.Bind<ShootingEventChannel>().FromInstance(shootingEventChannel).AsSingle();
 

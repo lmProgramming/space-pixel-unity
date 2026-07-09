@@ -76,6 +76,16 @@ namespace Context
                 .WithId(Constants.PlayerShipId)
                 .FromInstance(playerShip)
                 .AsSingle();
+
+            Container.Bind<IPixelatedRigidbodyFactory>()
+                .To<PixelatedRigidbodyFactory>()
+                .FromComponentInHierarchy()
+                .AsSingle();
+
+            Container.Bind<IModuleRestoreFactory>()
+                .To<ModuleRestoreFactory>()
+                .FromComponentInHierarchy()
+                .AsSingle();
         }
     }
 }
