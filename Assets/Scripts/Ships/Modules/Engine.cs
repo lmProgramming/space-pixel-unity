@@ -7,9 +7,9 @@ using Core.Ships.Snapshots.Module.ModuleData;
 using Core.Ships.Snapshots.PixelatedRigidbody;
 using LMPro.External.ReadOnly;
 using Pixelation;
-using Ships.Snapshot;
 using Ships.Systems.Gimbal;
 using UnityEngine;
+using Zenject;
 using ZLinq;
 using ZLinq.Linq;
 
@@ -30,6 +30,8 @@ namespace Ships.Modules
 
         private List<Nozzle> _nozzles = new();
         private List<PixelatedRigidbodySnapshot> _pendingNozzleSnapshots = new();
+
+        [Inject] private IPixelatedRigidbodyFactory _pixelatedRigidbodyFactory;
 
         private ValueEnumerable<ListWhere<Nozzle>, Nozzle> ActiveNozzles =>
             _nozzles.AsValueEnumerable().Where(nozzle => nozzle);
@@ -235,7 +237,26 @@ namespace Ships.Modules
             ClearExistingNozzleChildren();
 
             foreach (var nozzleSnapshot in _pendingNozzleSnapshots)
-                NestedPixelatedRigidbodyFactory.CreateShell(transform, nozzleSnapshot);
+                CreateNozzleShell(nozzleSnapshot);
+        }
+
+        private void CreateNozzleShell(PixelatedRigidbodySnapshot nozzleSnapshot)
+        {
+            if (nozzleSnapshot.rigidbodyType != PixelatedRigidbodyType.Nozzle)
+                throw new UnityException(
+                    $"[Engine] Unsupported nested rigidbody type '{nozzleSnapshot.rigidbodyType}'.");
+
+            var childName = string.IsNullOrWhiteSpace(nozzleSnapshot.name)
+                ? nozzleSnapshot.rigidbodyType.ToString()
+                : nozzleSnapshot.name;
+
+            _pixelatedRigidbodyFactory.CreatePixelatedRigidbodyShell(
+                    transform,
+                    childName,
+                    nozzleSnapshot.localPosition,
+                    nozzleSnapshot.localRotation,
+                    RigidbodyType2D.Kinematic)
+                .WithPixelatedRigidbody<Nozzle>();
         }
 
         private void RestorePendingNozzleSnapshots(IGameContentCatalog contentCatalog)

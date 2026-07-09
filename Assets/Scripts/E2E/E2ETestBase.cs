@@ -112,14 +112,10 @@ namespace E2E
             effectsSpawnerGo.SetActive(true);
             Container.Bind<IEffectsSpawner>().FromInstance(effectsSpawner).AsSingle();
 
-            // Bind Snapshot helpers
-
-            Container.Bind<IModuleRestoreFactory>()
-                .To<ModuleRestoreFactory>()
-                .AsSingle();
-
             var shipModuleCatalog = ScriptableObject.CreateInstance<ShipModuleCatalog>();
             Container.Bind<IShipModuleCatalog>().FromInstance(shipModuleCatalog).AsSingle();
+
+            SnapshotRestoreServicesFactory.Bind(Container, CreatedObjects);
 
             InjectAllObjectsInScene(Container);
         }

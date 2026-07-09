@@ -28,9 +28,7 @@ namespace Ships.Tests
             Container.Rebind<IShipModuleCatalog>()
                 .FromInstance(moduleCatalog)
                 .AsCached();
-            Container.Rebind<IModuleRestoreFactory>()
-                .FromInstance(new ModuleRestoreFactory(moduleCatalog))
-                .AsCached();
+            SnapshotRestoreServicesFactory.Rebind(Container, CreatedObjects);
 
             _snapshotService =
                 new ShipSnapshotService(contentCatalog);

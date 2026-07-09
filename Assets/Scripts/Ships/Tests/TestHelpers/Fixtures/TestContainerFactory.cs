@@ -39,6 +39,11 @@ namespace Ships.Tests.TestHelpers.Fixtures
                 .FromInstance(moduleCatalog)
                 .AsSingle();
 
+            var pixelatedRigidbodyFactory = Substitute.For<IPixelatedRigidbodyFactory>();
+            container.Bind<IPixelatedRigidbodyFactory>()
+                .FromInstance(pixelatedRigidbodyFactory)
+                .AsSingle();
+
             var moduleRestoreFactory = Substitute.For<IModuleRestoreFactory>();
             container.Bind<IModuleRestoreFactory>().FromInstance(moduleRestoreFactory).AsSingle();
 

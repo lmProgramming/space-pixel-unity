@@ -4,28 +4,42 @@ using Core.Ships;
 using Core.Ships.Snapshots.Module;
 using Pixelation;
 using UnityEngine;
-using Object = UnityEngine.Object;
+using Zenject;
 
 namespace Services
 {
-    public class ModuleRestoreFactory : IModuleRestoreFactory
+    public class ModuleRestoreFactory : MonoBehaviour, IModuleRestoreFactory
     {
-        private readonly IShipModuleCatalog _shipModuleCatalog;
+        private DiContainer _container;
+        private IInstantiator _instantiator;
+        private IPixelatedRigidbodyFactory _pixelatedRigidbodyFactory;
+        private IShipModuleCatalog _shipModuleCatalog;
 
-        public ModuleRestoreFactory(IShipModuleCatalog shipModuleCatalog)
+        public GameObject CreateModuleShell(ModuleSnapshot snapshot, Transform parent)
         {
-            _shipModuleCatalog = shipModuleCatalog;
-        }
-
-        public GameObject CreateModuleObject(ModuleSnapshot snapshot, Transform parent)
-        {
-            return snapshot.origin switch
+            var moduleGo = snapshot.origin switch
             {
                 InstanceOrigin.CatalogPrefab => CreateFromCatalog(snapshot, parent),
                 InstanceOrigin.Custom => CreateCustom(snapshot, parent),
                 _ => throw new ArgumentOutOfRangeException(nameof(snapshot.origin), snapshot.origin,
                     "Unknown module origin.")
             };
+
+            _container.InjectGameObject(moduleGo);
+            return moduleGo;
+        }
+
+        [Inject]
+        private void Construct(
+            IInstantiator instantiator,
+            DiContainer container,
+            IShipModuleCatalog shipModuleCatalog,
+            IPixelatedRigidbodyFactory pixelatedRigidbodyFactory)
+        {
+            _instantiator = instantiator;
+            _container = container;
+            _shipModuleCatalog = shipModuleCatalog;
+            _pixelatedRigidbodyFactory = pixelatedRigidbodyFactory;
         }
 
         private GameObject CreateFromCatalog(ModuleSnapshot snapshot, Transform parent)
@@ -34,29 +48,25 @@ namespace Services
                 throw new UnityException(
                     $"[ModuleRestoreFactory] Missing module prefab for archetype '{snapshot.archetypeId}'.");
 
-            var instance = Object.Instantiate(prefab, parent);
+            var instance = _instantiator.InstantiatePrefab(prefab, parent);
             instance.name = snapshot.moduleName;
             return instance;
         }
 
-        private static GameObject CreateCustom(ModuleSnapshot snapshot, Transform parent)
+        private GameObject CreateCustom(ModuleSnapshot snapshot, Transform parent)
         {
-            var moduleGo = new GameObject(snapshot.moduleName);
-            moduleGo.transform.SetParent(parent);
-
-            moduleGo.AddComponent<SpriteRenderer>();
-
-            var rb = moduleGo.AddComponent<Rigidbody2D>();
-            rb.bodyType = RigidbodyType2D.Dynamic;
-            rb.gravityScale = 0f;
-
-            moduleGo.AddComponent<PolygonCollider2D>();
+            var builder = _pixelatedRigidbodyFactory.CreatePixelatedRigidbodyShell(
+                    parent,
+                    snapshot.moduleName,
+                    Vector3.zero,
+                    Quaternion.identity,
+                    RigidbodyType2D.Dynamic)
+                .WithPixelatedRigidbody<PixelatedRigidbody>();
 
             var moduleType = SnapshotComponentRegistry.ResolveModuleType(snapshot.concreteModuleType);
+            _container.InstantiateComponent(moduleType, builder.GameObject);
 
-            moduleGo.AddComponent<PixelatedRigidbody>();
-            moduleGo.AddComponent(moduleType);
-            return moduleGo;
+            return builder.GameObject;
         }
     }
 }

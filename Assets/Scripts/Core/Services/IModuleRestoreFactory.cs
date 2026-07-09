@@ -5,6 +5,6 @@ namespace Core.Services
 {
     public interface IModuleRestoreFactory
     {
-        GameObject CreateModuleObject(ModuleSnapshot snapshot, Transform parent);
+        GameObject CreateModuleShell(ModuleSnapshot snapshot, Transform parent);
     }
 }

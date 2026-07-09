@@ -1,4 +1,5 @@
 using System.Collections;
+using Core.Pixelation;
 using Core.Services;
 using Core.Ships;
 using Core.Ships.Snapshots.Module.ModuleData;
@@ -33,9 +34,7 @@ namespace Ships.Tests
             Container.Rebind<IShipModuleCatalog>()
                 .FromInstance(_moduleCatalog)
                 .AsCached();
-            Container.Rebind<IModuleRestoreFactory>()
-                .FromInstance(new ModuleRestoreFactory(_moduleCatalog))
-                .AsCached();
+            SnapshotRestoreServicesFactory.Rebind(Container, CreatedObjects);
 
             _service = new ShipSnapshotService(_contentCatalog);
         }
@@ -186,6 +185,7 @@ namespace Ships.Tests
             var restoredEngine = (Engine)ship.AllModules[1];
             var restoredNozzle = restoredEngine.GetComponentInChildren<Nozzle>();
             Assert.IsNotNull(restoredNozzle);
+            Assert.IsNotNull(((IPixelatedRigidbody)restoredNozzle).CollisionHandler);
             Assert.IsFalse(restoredNozzle.IsPixel(new Vector2Int(1, 1)));
             Assert.IsTrue(restoredNozzle.IsPixel(new Vector2Int(0, 0)));
         }

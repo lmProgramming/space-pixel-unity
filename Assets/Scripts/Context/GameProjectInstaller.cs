@@ -57,10 +57,6 @@ namespace Context
                 .To<ShipSnapshotService>()
                 .AsSingle();
 
-            Container.Bind<IModuleRestoreFactory>()
-                .To<ModuleRestoreFactory>()
-                .AsSingle();
-
             Container.Bind<PointerOverUiEventChannel>()
                 .FromInstance(pointerOverUiChannel)
                 .AsSingle();

@@ -332,7 +332,7 @@ namespace Ships
         {
             foreach (var ms in snapshot.modules)
             {
-                var moduleGo = _moduleRestoreFactory.CreateModuleObject(ms, transform);
+                var moduleGo = _moduleRestoreFactory.CreateModuleShell(ms, transform);
                 moduleGo.SetActive(false);
                 moduleGo.transform.localPosition = ms.localPosition;
                 moduleGo.transform.localRotation = ms.localRotation;
@@ -348,20 +348,11 @@ namespace Ships
                         $"[Ship] Failed to add a Module component for '{ms.moduleName}' (moduleType: {ms.concreteModuleType}).");
 
                 module.SetShip(this);
-                ResolveInjectionContainer().InjectGameObject(moduleGo);
                 module.RestoreFromSnapshot(ms, contentCatalog);
 
                 moduleGo.SetActive(true);
                 moduleGo.gameObject.layer = gameObject.layer;
             }
-        }
-
-        private DiContainer ResolveInjectionContainer()
-        {
-            if (_sceneContextRegistry == null) return _container;
-
-            var sceneContainer = _sceneContextRegistry.TryGetContainerForScene(gameObject.scene);
-            return sceneContainer ?? _container;
         }
 
         private void IgnoreModuleColliders()
