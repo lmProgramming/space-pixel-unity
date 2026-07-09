@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using Core.Grid;
@@ -57,7 +58,14 @@ namespace Pixelation
         protected virtual void Awake()
         {
             Rigidbody = GetComponent<Rigidbody2D>();
+
             Setup();
+        }
+
+        private void Start()
+        {
+            if (TexturePixelGrid == null || TexturePixelGrid.PixelCount == 0)
+                throw new InvalidDataException("TexturePixelGrid is null or has no pixels.");
         }
 
         private void FixedUpdate()
@@ -421,13 +429,27 @@ namespace Pixelation
 
         public void Setup(Color32[,] colors = null, bool forceSetup = false, bool recalculateColliders = false)
         {
-            if (_isSetup && !forceSetup) return;
+            if (_isSetup && !forceSetup)
+            {
+                Debug.LogWarning($"[PixelatedRigidbody] Setup already called on '{name}'.");
+                return;
+            }
 
             if (!sprite && colors is null)
             {
-                Debug.LogWarning($"[PixelatedRigidbody] Setup skipped on '{name}': no sprite and no colors provided. " +
-                                 "Expecting SetTextureFromColors to be called later.");
-                return;
+                if (TexturePixelGrid == null || TexturePixelGrid.PixelCount == 0)
+                {
+                    Debug.LogWarning(
+                        $"[PixelatedRigidbody] Setup skipped on '{name}': no sprite and no colors provided. " +
+                        "Expecting SetTextureFromColors to be called later.");
+                    return;
+                }
+
+                colors = TexturePixelGrid.GetValues2D();
+
+                if (colors is null || colors.Length == 0)
+                    throw new InvalidOperationException(
+                        $"[PixelatedRigidbody] Setup failed on '{name}': no sprite and no colors provided, and existing TexturePixelGrid has no pixels.");
             }
 
             CollisionHandler?.Unsubscribe();

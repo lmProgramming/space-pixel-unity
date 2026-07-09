@@ -253,6 +253,7 @@ namespace Ships.Modules
                         $"[Engine] Nozzle child '{snapshot.name}' has no PixelatedRigidbody.");
 
                 pixelatedRigidbody.RestoreFromSnapshot(snapshot, contentCatalog);
+                pixelatedRigidbody.Setup(forceSetup: true, recalculateColliders: true);
             }
 
             _pendingNozzleSnapshots.Clear();

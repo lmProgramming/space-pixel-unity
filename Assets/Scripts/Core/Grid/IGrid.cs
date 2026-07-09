@@ -8,6 +8,7 @@ namespace Core.Grid
         int Width { get; }
         int Height { get; }
         T GetValue(Vector2Int point);
+        T[,] GetValues2D();
         bool InBounds(Vector2Int point);
         Vector2Int Dimensions();
     }
