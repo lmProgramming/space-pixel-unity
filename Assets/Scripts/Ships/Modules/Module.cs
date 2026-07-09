@@ -276,16 +276,17 @@ namespace Ships.Modules
         private void RestoreSystems(StandaloneModuleSystemData[] systemData, IGameContentCatalog contentCatalog)
         {
             foreach (var system in systemData)
-                switch (system)
+            {
+                var systemType = system.type switch
                 {
-                    case ReactionWheelData reactionWheelData:
-                        gameObject.AddComponent<ReactionWheelStabilizer>()
-                            .RestoreFromSnapshot(reactionWheelData, contentCatalog);
-                        break;
-                    default:
-                        throw new ArgumentException("[Module] Cannot restore systems for system data '" + system +
-                                                    "'.");
-                }
+                    StandaloneModuleSystemType.ReactionWheel => typeof(ReactionWheelStabilizer),
+                    _ => throw new ArgumentException(
+                        "[Module] Cannot restore systems for system data '" + system + "'.")
+                };
+
+                var component = (IStandaloneModuleSystem)gameObject.AddComponent(systemType);
+                component.RestoreFromSnapshot(system, contentCatalog);
+            }
         }
 
         private StandaloneModuleSystemData[] CaptureSystemSnapshots(IGameContentCatalog contentCatalog)

@@ -239,7 +239,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c1a79923e8f49fb8fb32853329765b1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ShipFactory::ShipFactory.ShipFactoryController
-  modulePrefabLibrary: {fileID: 11400000, guid: c7f8c73c057efe68c87d7df2ac599fd9, type: 2}
+  shipModuleCatalog: {fileID: 11400000, guid: c7f8c73c057efe68c87d7df2ac599fd9, type: 2}
   initialShip: {fileID: 821443508}
   snapshotFolderName: ShipSnapshots
   cameraResetRequestEventChannel: {fileID: 2036902626}
@@ -333,13 +333,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Game.Ships::Ships.Ship
   team: {fileID: 218396973}
-  sasTurnReleaseThreshold: 0.05
-  sasHeadingDeadZoneDegrees: 0.3
-  sasHeadingGain: 0.04
-  sasAngularVelocityGain: 0.03
-  sasMaxTurnInput: 2
-  sasForwardCompensationStrength: 1
-  sasForwardCompensationMaxTurnInput: 1.5
+  sasTurnInputSettings:
+    <TurnReleaseThreshold>k__BackingField: 0.05
+    <MovementInputDeadZone>k__BackingField: 0.05
+    <MinTurnInputChange>k__BackingField: 0.01
+    <HeadingDeadZoneDegrees>k__BackingField: 0.3
+    <AngularVelocityDeadZoneDegreesPerSecond>k__BackingField: 0.1
+    <MinAppliedThrustRatio>k__BackingField: 0.01
+    <MinDesiredDirectionSquareMagnitude>k__BackingField: 0.0001
+    <HeadingGain>k__BackingField: 0.04
+    <AngularVelocityGain>k__BackingField: 0.03
+    <PredictionHorizon>k__BackingField: 0.3
+    <MaxTurnInput>k__BackingField: 2
+    <ForwardCompensationStrength>k__BackingField: 1
+    <ForwardCompensationMaxTurnInput>k__BackingField: 1.5
   allocatorIterations: 14
   allocatorForceWeight: 1
   allocatorTorqueWeight: 0.4
@@ -813,6 +820,7 @@ Transform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!213 &2006869435
 Sprite:
+  serializedVersion: 2
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -829,14 +837,13 @@ Sprite:
   m_PixelsToUnits: 1
   m_Pivot: {x: 0.5, y: 0.5}
   m_Extrude: 0
-  m_IsPolygon: 0
   m_PackingTag: 
   m_RenderDataKey:
     00000000000000000000000000000000: 0
   m_AtlasTags: []
   m_SpriteAtlas: {fileID: 0}
   m_RD:
-    serializedVersion: 3
+    serializedVersion: 4
     texture: {fileID: 1564284057}
     alphaTexture: {fileID: 0}
     secondaryTextures: []
@@ -915,6 +922,11 @@ Sprite:
       m_DataSize: 80
       _typelessdata: 000000c10000004100000000000000410000004100000000000000c1000000c10000000000000041000000c100000000000000000000803f0000803f0000803f00000000000000000000803f00000000
     m_Bindpose: []
+    m_BlendShapes:
+      vertices: []
+      shapes: []
+      channels: []
+      fullWeights: []
     textureRect:
       serializedVersion: 2
       x: 0
@@ -927,7 +939,7 @@ Sprite:
     uvTransform: {x: 1, y: 8, z: 1, w: 8}
     downscaleMultiplier: 1
   m_AtlasRD:
-    serializedVersion: 3
+    serializedVersion: 4
     texture: {fileID: 1564284057}
     alphaTexture: {fileID: 0}
     secondaryTextures: []
@@ -1006,6 +1018,11 @@ Sprite:
       m_DataSize: 80
       _typelessdata: 000000c10000004100000000000000410000004100000000000000c1000000c10000000000000041000000c100000000000000000000803f0000803f0000803f00000000000000000000803f00000000
     m_Bindpose: []
+    m_BlendShapes:
+      vertices: []
+      shapes: []
+      channels: []
+      fullWeights: []
     textureRect:
       serializedVersion: 2
       x: 0
@@ -1014,7 +1031,7 @@ Sprite:
       height: 16
     textureRectOffset: {x: 0, y: 0}
     atlasRectOffset: {x: -1, y: -1}
-    settingsRaw: 64
+    settingsRaw: 3136
     uvTransform: {x: 1, y: 8, z: 1, w: 8}
     downscaleMultiplier: 1
   m_PhysicsShape: []

@@ -35,17 +35,17 @@ namespace Ships.Systems.Standalone
             Assert.IsNotNull(settings, "settings != null");
 
             var angularVelocity = commandRigidbody.angularVelocity;
-            if (Mathf.Abs(angularVelocity) <= settings.AngularVelocityDeadZoneDegreesPerSecond)
+            if (Mathf.Abs(angularVelocity) <= settings.angularVelocityDeadZoneDegreesPerSecond)
                 return;
 
-            if (Mathf.Abs(angularVelocity) <= settings.AngularVelocityAtWhichSetItToZero)
+            if (Mathf.Abs(angularVelocity) <= settings.angularVelocityAtWhichSetItToZero)
             {
                 commandRigidbody.angularVelocity = 0f;
                 return;
             }
 
-            var counterTorque = -angularVelocity * settings.DampingStrength;
-            counterTorque = Mathf.Clamp(counterTorque, -settings.MaxTorque, settings.MaxTorque) * multiplier;
+            var counterTorque = -angularVelocity * settings.dampingStrength;
+            counterTorque = Mathf.Clamp(counterTorque, -settings.maxTorque, settings.maxTorque) * multiplier;
             commandRigidbody.AddTorque(counterTorque);
         }
 
@@ -65,5 +65,12 @@ namespace Ships.Systems.Standalone
             else
                 throw new ArgumentException("[ReactionWheelStabilizer] snapshot is of wrong type");
         }
+
+#if UNITY_INCLUDE_TESTS
+        internal ReactionWheelSettings GetSettingsForTesting()
+        {
+            return settings;
+        }
+#endif
     }
 }

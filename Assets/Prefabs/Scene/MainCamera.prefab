@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 3119385306897686704}
   - component: {fileID: 4830848684246394094}
   - component: {fileID: 8492509113325546016}
+  - component: {fileID: 2201086914134498868}
   m_Layer: 0
   m_Name: Background
   m_TagString: Untagged
@@ -132,6 +133,19 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 515843053553540695}
   m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!210 &2201086914134498868
+SortingGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 515843053553540695}
+  m_Enabled: 1
+  m_SortingLayerID: 1081692607
+  m_SortingLayer: -2
+  m_SortingOrder: 0
+  m_SortAtRoot: 0
+  m_Sort3DAs2D: 0
 --- !u!1 &3701483033304711277
 GameObject:
   m_ObjectHideFlags: 0

@@ -2,10 +2,12 @@ using System.Collections;
 using Core.Services;
 using Core.Ships;
 using Core.Ships.Snapshots.Module.ModuleData;
+using Core.Ships.Snapshots.Module.StandaloneModuleSystemData;
 using NUnit.Framework;
 using Services;
 using Ships.Modules;
 using Ships.Systems.Gimbal;
+using Ships.Systems.Standalone;
 using Ships.Tests.TestHelpers.Factories;
 using Ships.Tests.TestHelpers.Fixtures;
 using Ships.Tests.TestHelpers.Mocks;
@@ -195,7 +197,13 @@ namespace Ships.Tests
             var ship = ShipTestBuilder.CreateShip(Container, CreatedObjects, "Ship")
                 .ParentedTo(TestRoot.transform)
                 .WithCommand("Command Module", Vector2.zero, 5, 5)
-                // todo: add standalone system check here
+                .AddStandaloneModuleSystemToLastModule<ReactionWheelStabilizer>(new ReactionWheelData
+                {
+                    data = new ReactionWheelSettings
+                    {
+                        dampingStrength = 1234
+                    }
+                })
                 .WithCustomEngine(new Vector2(5f, 0f), 5, 5, new Resources(0, 2f, 0, 0, 0))
                 .WithBasic("Power Module", new Vector2(0f, 5f), 15, 5, new Resources(100, 5, 1, 500, 0))
                 .WithBasic("Crew Module", new Vector2(0f, 10f), 5, 5, new Resources(100, 25, 1, 0, 10))
@@ -217,6 +225,13 @@ namespace Ships.Tests
             var allModulesEnumerable = ship.AllModules.AsValueEnumerable();
             Assert.IsTrue(allModules.Count == 7);
             Assert.IsTrue(allModulesEnumerable.Where(m => m.Type == ModuleType.Command).Count() == 1);
+
+            var commandModule = ship.CommandModule;
+            var reactionWheel = commandModule.Transform?.gameObject.GetComponentInChildren<ReactionWheelStabilizer>();
+            Assert.IsNotNull(reactionWheel);
+
+            Assert.AreEqual(reactionWheel.GetSettingsForTesting().dampingStrength, 1234);
+
             Assert.IsTrue(allModulesEnumerable.Where(m => m.Type == ModuleType.Engine).Count() == 1);
             Assert.IsTrue(allModulesEnumerable.Where(m => m.Type == ModuleType.Resources).Count() == 3);
             Assert.IsTrue(allModulesEnumerable.Where(m => m.Type == ModuleType.Weapon).Count() == 2);

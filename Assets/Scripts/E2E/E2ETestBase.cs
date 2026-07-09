@@ -49,6 +49,8 @@ namespace E2E
             var cameraObj = new GameObject("Camera");
             CreatedObjects.Add(cameraObj);
             cameraObj.transform.SetParent(_testRoot.transform);
+            cameraObj.transform.position = new Vector3(0f, 0f, -10f);
+
             var camera = cameraObj.AddComponent<Camera>();
             camera.transform.tag = "MainCamera";
             camera.orthographic = true;
@@ -71,6 +73,7 @@ namespace E2E
                 .AddComponent<ShipInitializeModulesEventChannel>();
             Container.Bind<ShipInitializeModulesEventChannel>().FromInstance(shipInitializeModulesEventChannel)
                 .AsSingle();
+            CreatedObjects.Add(shipInitializeModulesEventChannel.gameObject);
 
             // Bind ShipService
             var shipServiceGo = new GameObject("ShipService");

@@ -1,13 +1,16 @@
 using System;
 using System.Collections.Generic;
 using Core.Ships;
+using Core.Ships.Snapshots.Module.StandaloneModuleSystemData;
 using Cysharp.Threading.Tasks;
 using Pixelation;
 using Ships.Modules;
 using Ships.Systems.Gimbal;
+using Ships.Systems.Standalone;
 using Ships.Tests.TestHelpers.Proxies;
 using UnityEngine;
 using Zenject;
+using ZLinq;
 using Object = UnityEngine.Object;
 using Resources = Core.Ships.Resources;
 
@@ -22,6 +25,7 @@ namespace Ships.Tests.TestHelpers.Factories
 
     public sealed class ShipTestBuilder
     {
+        private readonly List<Module> _allModules = new();
         private readonly DiContainer _container;
         private readonly ICollection<GameObject> _createdObjects;
         private readonly List<Engine> _engines = new();
@@ -207,6 +211,17 @@ namespace Ships.Tests.TestHelpers.Factories
             return this;
         }
 
+        public ShipTestBuilder AddStandaloneModuleSystemToLastModule<T>(StandaloneModuleSystemData data)
+            where T : StandaloneModuleSystem
+        {
+            var lastModule = _allModules.AsValueEnumerable().Last();
+            var standaloneSystem = lastModule.gameObject.AddComponent<T>();
+
+            standaloneSystem.RestoreFromSnapshot(data, null);
+
+            return this;
+        }
+
         public ShipLayoutResult BuildLayoutResult(bool initializeModules = false)
         {
             var ship = WireShip<Ship>(initializeModules);
@@ -311,11 +326,13 @@ namespace Ships.Tests.TestHelpers.Factories
         private void RegisterCommand(Command command)
         {
             _commandModule = command;
+            _allModules.Add(command);
         }
 
         private void RegisterOtherModule(Module module)
         {
             _otherModules.Add(module);
+            _allModules.Add(module);
         }
     }
 }
