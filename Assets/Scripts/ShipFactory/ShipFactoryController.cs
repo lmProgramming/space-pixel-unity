@@ -9,7 +9,6 @@ using Ships;
 using UI.Common;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.Serialization;
 using UnityEngine.UIElements;
 using Zenject;
 
@@ -25,7 +24,7 @@ namespace ShipFactory
         private static readonly object UiHoverBlocker = new();
         private static readonly object UiPointerDownBlocker = new();
 
-        [FormerlySerializedAs("modulePrefabLibrary")] [SerializeField]
+        [SerializeField]
         private ShipModuleCatalog shipModuleCatalog;
 
         [SerializeField] private Ship initialShip;
@@ -70,7 +69,7 @@ namespace ShipFactory
             _camera = Camera.main;
 
             if (shipModuleCatalog == null)
-                Debug.LogError("[ShipFactoryController] ModulePrefabLibrary is not assigned!", this);
+                Debug.LogError($"[ShipFactoryController] {nameof(ShipModuleCatalog)} is not assigned!", this);
         }
 
         private void Update()

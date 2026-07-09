@@ -6,7 +6,6 @@ namespace Services
 {
     public static class SnapshotComponentRegistry
     {
-        // useful for resolving module types from snapshots, because 
         public static Type ResolveModuleType(ConcreteModuleType moduleType)
         {
             return moduleType switch

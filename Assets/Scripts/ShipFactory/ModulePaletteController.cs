@@ -33,7 +33,7 @@ namespace ShipFactory
         {
             if (library == null)
                 throw new ArgumentNullException(nameof(library),
-                    "[ModulePaletteController] ModulePrefabLibrary must be assigned!");
+                    "[ModulePaletteController] ShipModuleCatalog library must be assigned!");
 
             _library = library;
 

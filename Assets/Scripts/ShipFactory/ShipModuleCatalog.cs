@@ -7,7 +7,7 @@ using ZLinq;
 
 namespace ShipFactory
 {
-    [CreateAssetMenu(fileName = "ModulePrefabLibrary", menuName = "Ship Factory/Module Prefab Library")]
+    [CreateAssetMenu(fileName = nameof(ShipModuleCatalog), menuName = "Ship Factory/" + nameof(ShipModuleCatalog))]
     public class ShipModuleCatalog : ScriptableObject, IShipModuleCatalog
     {
         [SerializeField] private List<ModuleTypeEntry> entries = new();
@@ -44,7 +44,7 @@ namespace ShipFactory
                 return entry.prefabs;
 
             Debug.LogWarning(
-                $"[ModulePrefabLibrary] '{name}' — no entry for type {type}. Existing entries: [{string.Join(", ", entries.ConvertAll(e => e.moduleType.ToString()))}]");
+                $"{nameof(ShipModuleCatalog)} '{name}' — no entry for type {type}. Existing entries: [{string.Join(", ", entries.ConvertAll(e => e.moduleType.ToString()))}]");
             return Array.Empty<ShipModuleSO>();
         }
 
@@ -53,7 +53,7 @@ namespace ShipFactory
             if (entries.Count == 0)
             {
                 Debug.LogWarning(
-                    $"[ModulePrefabLibrary] '{name}' has NO entries. Open the asset and add ModuleTypeEntry rows, then drag prefabs into each row.",
+                    $"{nameof(ShipModuleCatalog)} '{name}' has NO entries. Open the asset and add ModuleTypeEntry rows, then drag prefabs into each row.",
                     this);
                 return;
             }
@@ -63,11 +63,11 @@ namespace ShipFactory
                 var nullCount = entry.prefabs.FindAll(p => p == null).Count;
                 if (nullCount > 0)
                     Debug.LogWarning(
-                        $"[ModulePrefabLibrary] '{name}' — type {entry.moduleType} has {nullCount} null prefab slot(s). Check the asset in the Inspector.",
+                        $"{nameof(ShipModuleCatalog)} '{name}' — type {entry.moduleType} has {nullCount} null prefab slot(s). Check the asset in the Inspector.",
                         this);
                 else
                     Debug.Log(
-                        $"[ModulePrefabLibrary] '{name}' — type {entry.moduleType}: {entry.prefabs.Count} prefab(s) ready.",
+                        $"{nameof(ShipModuleCatalog)} '{name}' — type {entry.moduleType}: {entry.prefabs.Count} prefab(s) ready.",
                         this);
             }
         }
