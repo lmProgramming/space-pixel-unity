@@ -13,6 +13,7 @@ namespace Core.Services
         // Gameplay intent gates: the input system owns the rules for when the player
         // is allowed to act, so gameplay code does not need to know about pause/UI state.
         bool CanControlShip { get; }
+        bool CanControlCamera { get; }
         bool CanFireWeapons { get; }
 
         bool LeftDoubleClick { get; }

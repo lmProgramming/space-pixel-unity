@@ -46,6 +46,9 @@ namespace Services.Camera
             if (!updateCamera)
                 return;
 
+            if (!_gameInput.CanControlCamera)
+                return;
+
             if (objectToFollow)
                 FollowObject();
             else

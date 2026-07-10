@@ -45,6 +45,7 @@ namespace Services.GameInput
         public bool IsPaused { get; private set; }
 
         public bool CanControlShip => !IsPaused;
+        public bool CanControlCamera => !IsPaused;
         public bool CanFireWeapons => !IsPaused && !IsPointerOverUI;
 
         private void OnEnable()
