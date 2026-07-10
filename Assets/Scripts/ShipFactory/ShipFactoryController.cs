@@ -14,7 +14,6 @@ using Zenject;
 
 namespace ShipFactory
 {
-    [RequireComponent(typeof(UIDocument))]
     public class ShipFactoryController : MonoBehaviour
     {
         private const string CanvasContainerName = "canvas-container";
@@ -40,19 +39,25 @@ namespace ShipFactory
         private IGameInput _gameInput;
 
         private GameObject _gameObjectUnderPointer;
+        private bool _isBound;
         private bool _isModuleDragBlockingCamera;
         private bool _isPaused;
         private bool _isUiHoverBlockingCamera;
         private bool _isUiPointerDownBlockingCamera;
         private ModulePaletteController _paletteController;
+
+        private PanelRenderer _panelRenderer;
         private VisualElement _pauseOverlay;
         private VisualElement _pauseOverlayHost;
-        private bool _pauseUiInitialized;
 
         [Inject]
         private PointerOverUiEventChannel _pointerOverUiChannel;
 
+        private Button _quitButton;
+        private Button _resumeButton;
+        private VisualElement _root;
         private Button _saveShipButton;
+        private Button _settingsButton;
         private SettingsPanelController _settingsPanelController;
 
         private TextField _shipNameField;
@@ -60,13 +65,15 @@ namespace ShipFactory
         [Inject]
         private IShipSnapshotService _snapshotService;
 
-        private UIDocument _uiDocument;
-        private VisualElement _uiRoot;
+        private int _uiVersion = -1;
 
         private void Awake()
         {
-            _uiDocument = GetComponent<UIDocument>();
+            _panelRenderer = GetComponent<PanelRenderer>();
             _camera = Camera.main;
+
+            if (_panelRenderer == null)
+                throw new UnityException("[ShipFactoryController] PanelRenderer is required.");
 
             if (shipModuleCatalog == null)
                 Debug.LogError($"[ShipFactoryController] {nameof(ShipModuleCatalog)} is not assigned!", this);
@@ -83,19 +90,43 @@ namespace ShipFactory
 
         private void OnEnable()
         {
-            _uiRoot = _uiDocument.rootVisualElement;
-            if (_uiRoot == null)
-                throw new InvalidOperationException("[ShipFactoryController] UI root is missing.");
+            _panelRenderer.RegisterUIReloadCallback(OnUIReload);
+        }
+
+        private void OnDisable()
+        {
+            _panelRenderer.UnregisterUIReloadCallback(OnUIReload);
+            SetPaused(false);
+            UnbindUi();
+        }
+
+        private void OnUIReload(PanelRenderer renderer, VisualElement root, int version)
+        {
+            if (version == _uiVersion && _isBound)
+                return;
+
+            if (version != _uiVersion)
+                UnbindUi();
+
+            _uiVersion = version;
+            BindUi(root);
+        }
+
+        private void BindUi(VisualElement root)
+        {
+            if (_isBound || root == null)
+                return;
 
             if (cameraResetRequestEventChannel == null)
                 throw new InvalidOperationException(
                     "[ShipFactoryController] CameraResetRequestEventChannel is not assigned!");
 
-            _canvasController = new ShipFactoryCanvasController(_uiRoot, _gameInput, cameraResetRequestEventChannel);
-            _paletteController = new ModulePaletteController(_uiRoot, shipModuleCatalog);
+            _root = root;
+            _canvasController = new ShipFactoryCanvasController(root, _gameInput, cameraResetRequestEventChannel);
+            _paletteController = new ModulePaletteController(root, shipModuleCatalog);
 
-            _shipNameField = _uiRoot.Q<TextField>("ship-name-field");
-            _saveShipButton = _uiRoot.Q<Button>("save-ship-button");
+            _shipNameField = root.Q<TextField>("ship-name-field");
+            _saveShipButton = root.Q<Button>("save-ship-button");
 
             if (_shipNameField == null || _saveShipButton == null)
                 throw new InvalidOperationException("[ShipFactoryController] Save controls are missing in UXML.");
@@ -114,34 +145,49 @@ namespace ShipFactory
             if (initialShip != null)
                 _canvasController.SetShip(initialShip);
 
-            InitializePauseUi(_uiRoot);
-            RegisterCameraDragPointerBlockers(_uiRoot);
+            BindPauseUi(root);
+            RegisterCameraDragPointerBlockers(root);
+            _isBound = true;
         }
 
-        private void OnDisable()
+        private void UnbindUi()
         {
+            if (!_isBound)
+                return;
+
             SetModuleDragPointerBlock(false);
             SetUiHoverBlock(false);
             SetUiPointerDownBlock(false);
             ReleaseGameObjectPointerBlocking();
-            UnregisterCameraDragPointerBlockers();
+
+            UnbindPauseUi();
+            UnregisterCameraDragPointerBlockers(_root);
 
             if (_saveShipButton != null)
                 _saveShipButton.clicked -= SaveSnapshot;
 
-            _canvasController?.Dispose();
+            if (_paletteController != null)
+            {
+                _paletteController.OnModuleDragStarted -= OnModuleDragStarted;
+                _paletteController.OnModuleDragFinished -= OnModuleDragFinished;
+                _paletteController.OnModuleHoverStarted -= OnPaletteModuleHoverStarted;
+                _paletteController.OnModuleHoverEnded -= OnPaletteModuleHoverEnded;
+            }
 
-            if (_paletteController == null || _canvasController == null)
-                return;
+            if (_canvasController != null)
+            {
+                _canvasController.OnModuleDragFinished -= OnModuleDragFinished;
+                _canvasController.OnInputLockChanged -= OnCanvasInputLockChanged;
+                _canvasController.Dispose();
+            }
 
-            _paletteController.OnModuleDragStarted -= OnModuleDragStarted;
-            _paletteController.OnModuleDragFinished -= OnModuleDragFinished;
-            _canvasController.OnModuleDragFinished -= OnModuleDragFinished;
-            _canvasController.OnInputLockChanged -= OnCanvasInputLockChanged;
-            _paletteController.OnModuleHoverStarted -= OnPaletteModuleHoverStarted;
-            _paletteController.OnModuleHoverEnded -= OnPaletteModuleHoverEnded;
-
-            SetPaused(false);
+            _canvasContainer = null;
+            _canvasController = null;
+            _paletteController = null;
+            _shipNameField = null;
+            _saveShipButton = null;
+            _root = null;
+            _isBound = false;
         }
 
         private void SaveSnapshot()
@@ -226,19 +272,16 @@ namespace ShipFactory
             _canvasController.HidePaletteModuleInfo(moduleSO);
         }
 
-        private void InitializePauseUi(VisualElement root)
+        private void BindPauseUi(VisualElement root)
         {
-            if (_pauseUiInitialized)
-                return;
-
             _pauseOverlay = root.Q<VisualElement>(SharedUiElementNames.Pause.Overlay);
             _pauseOverlayHost = root.Q<VisualElement>(SharedUiElementNames.Pause.OverlayHost);
             var title = root.Q<Label>(SharedUiElementNames.Pause.Title);
-            var resumeButton = root.Q<Button>(SharedUiElementNames.Pause.ResumeButton);
-            var settingsButton = root.Q<Button>(SharedUiElementNames.Pause.SettingsButton);
-            var quitButton = root.Q<Button>(SharedUiElementNames.Pause.QuitButton);
+            _resumeButton = root.Q<Button>(SharedUiElementNames.Pause.ResumeButton);
+            _settingsButton = root.Q<Button>(SharedUiElementNames.Pause.SettingsButton);
+            _quitButton = root.Q<Button>(SharedUiElementNames.Pause.QuitButton);
 
-            if (title == null || resumeButton == null || settingsButton == null || quitButton == null)
+            if (title == null || _resumeButton == null || _settingsButton == null || _quitButton == null)
                 throw new InvalidOperationException(
                     "[ShipFactoryController] Pause elements missing in ShipFactory UXML.");
 
@@ -246,11 +289,40 @@ namespace ShipFactory
             if (_pauseOverlayHost != null)
                 _pauseOverlayHost.style.display = DisplayStyle.None;
             _pauseOverlay.style.display = DisplayStyle.None;
-            resumeButton.clicked += () => { SetPaused(false); };
-            settingsButton.clicked += () => { _settingsPanelController.Toggle(); };
-            quitButton.clicked += QuitToMainMenu;
+
+            _resumeButton.clicked += OnResumeClicked;
+            _settingsButton.clicked += OnSettingsClicked;
+            _quitButton.clicked += QuitToMainMenu;
             _settingsPanelController = new SettingsPanelController(root, false);
-            _pauseUiInitialized = true;
+        }
+
+        private void UnbindPauseUi()
+        {
+            _settingsPanelController?.Unbind();
+            _settingsPanelController = null;
+
+            if (_resumeButton != null)
+                _resumeButton.clicked -= OnResumeClicked;
+            if (_settingsButton != null)
+                _settingsButton.clicked -= OnSettingsClicked;
+            if (_quitButton != null)
+                _quitButton.clicked -= QuitToMainMenu;
+
+            _pauseOverlay = null;
+            _pauseOverlayHost = null;
+            _resumeButton = null;
+            _settingsButton = null;
+            _quitButton = null;
+        }
+
+        private void OnResumeClicked()
+        {
+            SetPaused(false);
+        }
+
+        private void OnSettingsClicked()
+        {
+            _settingsPanelController?.Toggle();
         }
 
         private void HandleRotationInput()
@@ -297,7 +369,7 @@ namespace ShipFactory
                 _settingsPanelController.Hide();
         }
 
-        private void QuitToMainMenu()
+        private static void QuitToMainMenu()
         {
             Time.timeScale = 1f;
             SceneManager.LoadScene(SceneNames.MainMenu);
@@ -316,15 +388,15 @@ namespace ShipFactory
             root.RegisterCallback<PointerLeaveEvent>(OnPointerLeaveForUiHoverBlock, TrickleDown.TrickleDown);
         }
 
-        private void UnregisterCameraDragPointerBlockers()
+        private void UnregisterCameraDragPointerBlockers(VisualElement root)
         {
-            if (_uiRoot == null)
+            if (root == null)
                 return;
 
-            _uiRoot.UnregisterCallback<PointerDownEvent>(OnPointerDownForCameraBlock);
-            _uiRoot.UnregisterCallback<PointerUpEvent>(OnPointerUpForCameraBlock);
-            _uiRoot.UnregisterCallback<PointerMoveEvent>(OnPointerMoveForUiHoverBlock);
-            _uiRoot.UnregisterCallback<PointerLeaveEvent>(OnPointerLeaveForUiHoverBlock);
+            root.UnregisterCallback<PointerDownEvent>(OnPointerDownForCameraBlock);
+            root.UnregisterCallback<PointerUpEvent>(OnPointerUpForCameraBlock);
+            root.UnregisterCallback<PointerMoveEvent>(OnPointerMoveForUiHoverBlock);
+            root.UnregisterCallback<PointerLeaveEvent>(OnPointerLeaveForUiHoverBlock);
         }
 
         private void OnPointerDownForCameraBlock(PointerDownEvent evt)
@@ -381,9 +453,6 @@ namespace ShipFactory
 
         private void OnPointerLeaveForUiHoverBlock(PointerLeaveEvent evt)
         {
-            if (evt.target != _uiRoot)
-                return;
-
             SetUiHoverBlock(false);
         }
 

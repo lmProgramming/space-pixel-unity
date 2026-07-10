@@ -28,6 +28,7 @@ namespace UI.MainMenu
         private Slider _enemyCountSlider;
         private Slider _friendlyCountSlider;
 
+        private bool _isBound;
         private PanelRenderer _panelRenderer;
         private Button _quitButton;
         private Button _settingsButton;
@@ -38,6 +39,7 @@ namespace UI.MainMenu
         private VisualElement _shipSelectionOverlay;
         private Button _shipSelectLaunchButton;
         private Button _startButton;
+        private int _uiVersion = -1;
 
         private void Awake()
         {
@@ -52,17 +54,25 @@ namespace UI.MainMenu
         private void OnDisable()
         {
             _panelRenderer.UnregisterUIReloadCallback(OnUIReload);
+            UnbindMainMenuUi();
         }
 
-        private void OnUIReload(PanelRenderer renderer, VisualElement root)
+        private void OnUIReload(PanelRenderer renderer, VisualElement root, int version)
         {
+            if (version == _uiVersion && _isBound)
+                return;
+
+            if (version != _uiVersion)
+                UnbindMainMenuUi();
+
+            _uiVersion = version;
             BindMainMenuUi(root);
         }
 
         private void BindMainMenuUi(VisualElement root)
         {
-            if (root == null)
-                throw new InvalidOperationException("[MainMenuController] RootVisualElement is missing.");
+            if (_isBound || root == null)
+                return;
 
             _startButton = root.Q<Button>("start-button");
             _shipFactoryButton = root.Q<Button>("ship-factory-button");
@@ -89,12 +99,45 @@ namespace UI.MainMenu
             _quitButton.clicked += QuitGame;
             _shipSelectCancelButton.clicked += CloseShipSelectionDialog;
             _shipSelectLaunchButton.clicked += LaunchCombat;
-            ConfigureCountSlider(_asteroidCountSlider, DefaultAsteroidCount);
-            ConfigureCountSlider(_enemyCountSlider, DefaultEnemyShipCount);
-            ConfigureCountSlider(_friendlyCountSlider, DefaultFriendlyShipCount);
+            ConfigureCountSlider(_asteroidCountSlider, DefaultAsteroidCount, OnAsteroidCountSliderChanged);
+            ConfigureCountSlider(_enemyCountSlider, DefaultEnemyShipCount, OnEnemyCountSliderChanged);
+            ConfigureCountSlider(_friendlyCountSlider, DefaultFriendlyShipCount, OnFriendlyCountSliderChanged);
 
             DesignSystemThemeService.RegisterVisualTree(root);
             _settingsPanelController = new SettingsPanelController(root, true);
+            _isBound = true;
+        }
+
+        private void UnbindMainMenuUi()
+        {
+            if (!_isBound)
+                return;
+
+            _settingsPanelController?.Unbind();
+            _settingsPanelController = null;
+
+            _startButton.clicked -= OpenShipSelectionDialog;
+            _shipFactoryButton.clicked -= OpenShipFactory;
+            _settingsButton.clicked -= OpenSettings;
+            _quitButton.clicked -= QuitGame;
+            _shipSelectCancelButton.clicked -= CloseShipSelectionDialog;
+            _shipSelectLaunchButton.clicked -= LaunchCombat;
+            _asteroidCountSlider.UnregisterValueChangedCallback(OnAsteroidCountSliderChanged);
+            _enemyCountSlider.UnregisterValueChangedCallback(OnEnemyCountSliderChanged);
+            _friendlyCountSlider.UnregisterValueChangedCallback(OnFriendlyCountSliderChanged);
+
+            _startButton = null;
+            _shipFactoryButton = null;
+            _settingsButton = null;
+            _quitButton = null;
+            _shipSelectionOverlay = null;
+            _shipDropdown = null;
+            _shipSelectCancelButton = null;
+            _shipSelectLaunchButton = null;
+            _asteroidCountSlider = null;
+            _enemyCountSlider = null;
+            _friendlyCountSlider = null;
+            _isBound = false;
         }
 
         private void OpenShipSelectionDialog()
@@ -171,10 +214,26 @@ namespace UI.MainMenu
             _shipDropdown.index = 0;
         }
 
-        private static void ConfigureCountSlider(Slider slider, float defaultValue)
+        private static void ConfigureCountSlider(Slider slider, float defaultValue,
+            EventCallback<ChangeEvent<float>> onValueChanged)
         {
             slider.SetValueWithoutNotify(defaultValue);
-            slider.RegisterValueChangedCallback(evt => slider.SetValueWithoutNotify(Mathf.Round(evt.newValue)));
+            slider.RegisterValueChangedCallback(onValueChanged);
+        }
+
+        private void OnAsteroidCountSliderChanged(ChangeEvent<float> evt)
+        {
+            _asteroidCountSlider.SetValueWithoutNotify(Mathf.Round(evt.newValue));
+        }
+
+        private void OnEnemyCountSliderChanged(ChangeEvent<float> evt)
+        {
+            _enemyCountSlider.SetValueWithoutNotify(Mathf.Round(evt.newValue));
+        }
+
+        private void OnFriendlyCountSliderChanged(ChangeEvent<float> evt)
+        {
+            _friendlyCountSlider.SetValueWithoutNotify(Mathf.Round(evt.newValue));
         }
     }
 }

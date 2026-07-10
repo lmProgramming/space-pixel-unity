@@ -20,11 +20,11 @@ namespace LMPro
 
         public void Reset(float? newInterval = null)
         {
-            OnNotReady?.Invoke();
-
             var actualInterval = newInterval ?? _interval;
             _timeLeftToReady = actualInterval;
             IsReady = false;
+
+            OnNotReady?.Invoke();
         }
 
         public void Progress(float deltaTime)

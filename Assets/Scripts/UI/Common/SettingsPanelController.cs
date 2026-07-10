@@ -12,13 +12,16 @@ namespace UI.Common
     public class SettingsPanelController
     {
         private readonly VisualElement _backdrop;
+
+        private readonly Button _closeButton;
         private readonly Slider _effectsSlider;
         private readonly Slider _masterSlider;
         private readonly Slider _musicSlider;
         private readonly VisualElement _overlayHost;
         private readonly DropdownField _themeProviderDropdown;
         private readonly Toggle _themeToggle;
-
+        private int _codigrateFetchGeneration;
+        private bool _isBound;
         private bool _suppressPersist;
 
         public SettingsPanelController(VisualElement parent, bool isMainMenu, string title = "Settings")
@@ -32,33 +35,58 @@ namespace UI.Common
             _masterSlider = parent.Q<Slider>(SharedUiElementNames.Settings.MasterSlider);
             _musicSlider = parent.Q<Slider>(SharedUiElementNames.Settings.MusicSlider);
             _effectsSlider = parent.Q<Slider>(SharedUiElementNames.Settings.EffectsSlider);
-            var closeButton = parent.Q<Button>(SharedUiElementNames.Settings.CloseButton);
+            _closeButton = parent.Q<Button>(SharedUiElementNames.Settings.CloseButton);
             _themeToggle = parent.Q<Toggle>("theme-toggle");
             _themeProviderDropdown = parent.Q<DropdownField>("theme-provider-dropdown");
-            DesignSystemThemeService.RegisterVisualTree(parent);
-            DesignSystemRuntime.EnsureToggleKnobs(parent);
-            WireThemeToggle();
-            WireThemeProvider(parent);
 
             if (titleLabel == null || _masterSlider == null || _musicSlider == null || _effectsSlider == null ||
-                closeButton == null || _backdrop == null)
+                _closeButton == null || _backdrop == null)
                 throw new InvalidOperationException(
                     "[SettingsPanelController] Required settings elements are missing in UIDocument.");
 
             titleLabel.text = isMainMenu ? $"{title} (Main Menu)" : title;
-            closeButton.clicked += Hide;
+            Bind(parent);
+        }
+
+        public bool IsOpen => _backdrop.style.display == DisplayStyle.Flex;
+
+        public void Unbind()
+        {
+            if (!_isBound)
+                return;
+
+            _codigrateFetchGeneration++;
+            _closeButton.clicked -= Hide;
+            _masterSlider.UnregisterValueChangedCallback(OnMasterVolumeChanged);
+            _musicSlider.UnregisterValueChangedCallback(OnMusicVolumeChanged);
+            _effectsSlider.UnregisterValueChangedCallback(OnEffectsVolumeChanged);
+            _themeToggle?.UnregisterValueChangedCallback(OnThemeToggleChanged);
+            _themeProviderDropdown?.UnregisterValueChangedCallback(OnThemeProviderChanged);
+            Hide();
+            _isBound = false;
+        }
+
+        private void Bind(VisualElement parent)
+        {
+            if (_isBound)
+                return;
+
+            DesignSystemThemeService.RegisterVisualTree(parent);
+            DesignSystemRuntime.EnsureToggleKnobs(parent);
+
             if (_overlayHost != null)
                 _overlayHost.style.display = DisplayStyle.None;
             _backdrop.style.display = DisplayStyle.None;
 
+            _closeButton.clicked += Hide;
             _masterSlider.RegisterValueChangedCallback(OnMasterVolumeChanged);
             _musicSlider.RegisterValueChangedCallback(OnMusicVolumeChanged);
             _effectsSlider.RegisterValueChangedCallback(OnEffectsVolumeChanged);
-
+            WireThemeToggle();
+            WireThemeProvider();
             LoadFromPlayerPrefs();
+            _isBound = true;
         }
-
-        public bool IsOpen => _backdrop.style.display == DisplayStyle.Flex;
 
         private void SyncThemeToggleState()
         {
@@ -74,16 +102,20 @@ namespace UI.Common
             _themeToggle?.RegisterValueChangedCallback(OnThemeToggleChanged);
         }
 
-        private void WireThemeProvider(VisualElement root)
+        private void WireThemeProvider()
         {
-            if (root == null || _themeProviderDropdown == null)
+            if (_themeProviderDropdown == null)
                 return;
 
             _themeProviderDropdown.choices = new List<string> { DesignSystemThemeService.DefaultProvider };
             SyncThemeProviderDropdownSelection();
 
+            var fetchGeneration = ++_codigrateFetchGeneration;
             CodigrateThemeProvider.FetchList((list, error) =>
             {
+                if (fetchGeneration != _codigrateFetchGeneration || !_isBound)
+                    return;
+
                 if (error != null || list == null)
                 {
                     Debug.LogWarning($"[SettingsPanelController] Codigrate list load failed: {error}");

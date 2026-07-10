@@ -8,12 +8,11 @@ using UnityEngine.UIElements;
 
 namespace UI.MainGame
 {
+    [RequireComponent(typeof(PanelRenderer))]
     public class ShipStatusPanelController : MonoBehaviour
     {
         [Header("References")]
         [SerializeField] private Ship playerShip;
-
-        [SerializeField] private UIDocument uiDocument;
 
         [SerializeField] private PointerOverUiEventChannel pointerOverUiChannel;
 
@@ -27,34 +26,31 @@ namespace UI.MainGame
         private VisualElement _energyBarFill;
         private VisualElement _energyBarGlow;
         private Label _energyFlowLabel;
+        private bool _isBound;
         private VisualElement _mainHudRoot;
-        private bool _pointerBlockersRegistered;
 
+        private PanelRenderer _panelRenderer;
         private VisualElement _root;
         private VisualElement _sasCluster;
-        private bool _sasHandlersRegistered;
         private bool _sasSyncing;
         private Toggle _sasToggle;
         private VisualElement _shipStatusPanel;
         private Label _speedValueLabel;
         private float _targetEnergyBarHeight;
         private UiPointerTracker _uiPointerTracker;
+        private int _uiVersion = -1;
 
         private void Awake()
         {
-            if (uiDocument == null)
-                uiDocument = GetComponent<UIDocument>();
+            _panelRenderer = GetComponent<PanelRenderer>();
+            if (_panelRenderer == null)
+                throw new UnityException("[ShipStatusPanelController] PanelRenderer is required.");
         }
 
         private void Update()
         {
-            if (_mainHudRoot == null && uiDocument && uiDocument.rootVisualElement != null)
-            {
-                _root = uiDocument.rootVisualElement;
-                CacheUIReferences();
-                RegisterSasToggle();
-                RegisterUiPointerBlockers();
-            }
+            if (!_isBound)
+                return;
 
             if (!playerShip)
             {
@@ -83,18 +79,58 @@ namespace UI.MainGame
 
         private void OnEnable()
         {
-            if (uiDocument == null || uiDocument.rootVisualElement == null)
-                return;
-
-            _root = uiDocument.rootVisualElement;
-            CacheUIReferences();
-            RegisterSasToggle();
-            RegisterUiPointerBlockers();
+            _panelRenderer.RegisterUIReloadCallback(OnUIReload);
         }
 
         private void OnDisable()
         {
+            _panelRenderer.UnregisterUIReloadCallback(OnUIReload);
+            UnbindUi();
+        }
+
+        private void OnUIReload(PanelRenderer renderer, VisualElement root, int version)
+        {
+            if (version == _uiVersion && _isBound)
+                return;
+
+            if (version != _uiVersion)
+                UnbindUi();
+
+            _uiVersion = version;
+            BindUi(root);
+        }
+
+        private void BindUi(VisualElement root)
+        {
+            if (_isBound || root == null)
+                return;
+
+            _root = root;
+            CacheUIReferences();
+            RegisterSasToggle();
+            RegisterUiPointerBlockers();
+            _isBound = true;
+        }
+
+        private void UnbindUi()
+        {
+            if (!_isBound)
+                return;
+
             UnregisterSasToggle();
+
+            _mainHudRoot = null;
+            _sasCluster = null;
+            _shipStatusPanel = null;
+            _energyBarFill = null;
+            _energyBarGlow = null;
+            _energyFlowLabel = null;
+            _crewCountLabel = null;
+            _speedValueLabel = null;
+            _sasToggle = null;
+            _root = null;
+            _uiPointerTracker = null;
+            _isBound = false;
         }
 
         private void CacheUIReferences()
@@ -112,10 +148,7 @@ namespace UI.MainGame
 
         private void RegisterUiPointerBlockers()
         {
-            if (_pointerBlockersRegistered || _root == null)
-                return;
-
-            if (pointerOverUiChannel == null)
+            if (!pointerOverUiChannel)
                 throw new InvalidOperationException(
                     "[ShipStatusPanelController] Pointer Over UI event channel is not assigned. " +
                     "Assign the SAME PointerOverUiEventChannel asset that is set on GameProjectInstaller.");
@@ -126,8 +159,6 @@ namespace UI.MainGame
             TrackPointerBlocker("hud-sas-cluster");
             TrackPointerBlocker("ship-status-panel");
             TrackPointerBlocker("speed-readout");
-
-            _pointerBlockersRegistered = true;
         }
 
         private void TrackPointerBlocker(string elementName)
@@ -138,20 +169,18 @@ namespace UI.MainGame
 
         private void RegisterSasToggle()
         {
-            if (_sasHandlersRegistered || _sasToggle == null)
+            if (_sasToggle == null)
                 return;
 
             _sasToggle.RegisterValueChangedCallback(OnSasToggleChanged);
-            _sasHandlersRegistered = true;
         }
 
         private void UnregisterSasToggle()
         {
-            if (!_sasHandlersRegistered || _sasToggle == null)
+            if (_sasToggle == null)
                 return;
 
             _sasToggle.UnregisterValueChangedCallback(OnSasToggleChanged);
-            _sasHandlersRegistered = false;
         }
 
         private void OnSasToggleChanged(ChangeEvent<bool> evt)
