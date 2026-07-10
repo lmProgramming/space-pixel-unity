@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Core.Ships;
+using Core.Ships.Module;
 using NSubstitute;
 using NUnit.Framework;
 using ShipFactory.LegalPositionCalculator;

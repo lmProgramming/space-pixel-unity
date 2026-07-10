@@ -1,10 +1,13 @@
 using System;
+using System.Resources;
+using Core.Constants;
+using Core.Ships;
 using Events.UI;
-using Ships;
-using Ships.Systems.Resources;
+using LMPro.External.IsAlive;
 using UI.Common;
 using UnityEngine;
 using UnityEngine.UIElements;
+using Zenject;
 
 namespace UI.MainGame
 {
@@ -12,8 +15,6 @@ namespace UI.MainGame
     public class ShipStatusPanelController : MonoBehaviour
     {
         [Header("References")]
-        [SerializeField] private Ship playerShip;
-
         [SerializeField] private PointerOverUiEventChannel pointerOverUiChannel;
 
         [Header("Animation Settings")]
@@ -30,6 +31,8 @@ namespace UI.MainGame
         private VisualElement _mainHudRoot;
 
         private PanelRenderer _panelRenderer;
+
+        [Inject(Id = Constants.PlayerShipId)] private IShip _playerShip;
         private VisualElement _root;
         private VisualElement _sasCluster;
         private bool _sasSyncing;
@@ -52,7 +55,7 @@ namespace UI.MainGame
             if (!_isBound)
                 return;
 
-            if (!playerShip)
+            if (!_playerShip.IsAlive())
             {
                 SetMainHudVisible(false);
                 return;
@@ -63,7 +66,7 @@ namespace UI.MainGame
             UpdateSpeedDisplay();
             UpdateSasDisplay();
 
-            if (!playerShip.ResourceManager)
+            if (!_playerShip.ResourceManager)
             {
                 SetShipStatusBlockVisible(false);
                 return;
@@ -71,7 +74,7 @@ namespace UI.MainGame
 
             SetShipStatusBlockVisible(true);
 
-            var resourceManager = playerShip.ResourceManager;
+            var resourceManager = _playerShip.ResourceManager;
             UpdateEnergyDisplay(resourceManager);
             UpdateCrewDisplay(resourceManager);
             AnimateBars();
@@ -185,7 +188,7 @@ namespace UI.MainGame
 
         private void OnSasToggleChanged(ChangeEvent<bool> evt)
         {
-            if (_sasSyncing || playerShip is not PlayerShip playerShipTyped)
+            if (_sasSyncing || _playerShip is not PlayerShip playerShipTyped)
                 return;
             if (playerShipTyped.IsSasOn == evt.newValue)
                 return;
@@ -209,14 +212,14 @@ namespace UI.MainGame
             if (_speedValueLabel == null)
                 return;
 
-            var rb = playerShip.CommandModule?.PixelatedRigidbody?.Rigidbody;
+            var rb = _playerShip.CommandModule?.PixelatedRigidbody?.Rigidbody;
             var magnitude = rb ? rb.linearVelocity.magnitude : 0f;
             _speedValueLabel.text = magnitude.ToString("F1");
         }
 
         private void UpdateSasDisplay()
         {
-            var playerShipTyped = playerShip as PlayerShip;
+            var playerShipTyped = _playerShip as PlayerShip;
 
             if (!playerShipTyped)
             {
@@ -305,7 +308,7 @@ namespace UI.MainGame
 
         public void SetPlayerShip(Ship ship)
         {
-            playerShip = ship;
+            _playerShip = ship;
         }
     }
 }

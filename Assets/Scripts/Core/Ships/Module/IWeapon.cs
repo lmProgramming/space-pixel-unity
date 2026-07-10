@@ -1,9 +1,9 @@
 using System;
 using UnityEngine;
 
-namespace Core.Gameplay.Combat
+namespace Core.Ships.Module
 {
-    public interface IWeapon
+    public interface IWeapon : IModule
     {
         void Shoot();
         void StopShooting();

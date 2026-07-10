@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Core.Constants;
 using Core.Services;
 using Core.Ships;
+using Core.Ships.Module;
 using Core.Ships.Snapshots.Module;
 using Core.Ships.Snapshots.Module.ModuleData;
 using Core.Ships.Snapshots.PixelatedRigidbody;
@@ -15,7 +16,7 @@ using ZLinq.Linq;
 
 namespace Ships.Modules
 {
-    public class Engine : Module
+    public class Engine : Module, IEngine
     {
         private const float ThrustRatioToShowNozzleVisualsAsResting = 0.005f;
         [SerializeField] private float maxThrust;
@@ -36,8 +37,6 @@ namespace Ships.Modules
         private ValueEnumerable<ListWhere<Nozzle>, Nozzle> ActiveNozzles =>
             _nozzles.AsValueEnumerable().Where(nozzle => nozzle);
 
-        public override ModuleType Type => ModuleType.Engine;
-
         internal float CurrentThrustRatioForTesting => currentThrustRatio;
 
         internal float CurrentThrusterAngleForTesting => CurrentThrusterAngle;
@@ -50,13 +49,6 @@ namespace Ships.Modules
         internal float ShipModuleEfficiencyForDebug => ActualEfficiency;
 
         private Vector2 ThrustPoint => CalculateAverageThrustPoint();
-
-        public float MaxThrust => maxThrust * ActualEfficiency * GameplayConstants.EngineThrustEfficiencyMultiplier;
-
-        public Vector2 WorldThrustPoint => transform.TransformPoint(ThrustPoint);
-
-        public Vector2 WorldThrustDirection =>
-            (Quaternion.AngleAxis(CurrentThrusterAngle, Vector3.forward) * transform.up).normalized;
 
         public override ConcreteModuleType ConcreteType => ConcreteModuleType.Engine;
 
@@ -85,6 +77,53 @@ namespace Ships.Modules
             SetActive(false);
 
             base.OnDestroy();
+        }
+
+        public override ModuleType Type => ModuleType.Engine;
+
+        public float MaxThrust => maxThrust * ActualEfficiency * GameplayConstants.EngineThrustEfficiencyMultiplier;
+
+        public Vector2 WorldThrustPoint => transform.TransformPoint(ThrustPoint);
+
+        public Vector2 WorldThrustDirection =>
+            (Quaternion.AngleAxis(CurrentThrusterAngle, Vector3.forward) * transform.up).normalized;
+
+        public override float GetEnergyDraw()
+        {
+            return base.GetEnergyDraw() *
+                   (0.25f + (IsActive ? 0.75f * CurrentThrustRatioForTesting : 0));
+        }
+
+        public void SetActive(bool active)
+        {
+            IsActive = active;
+        }
+
+        public void SetCurrentThrust(float currentThrust)
+        {
+            if (MaxThrust <= Mathf.Epsilon)
+            {
+                currentThrustRatio = 0f;
+                return;
+            }
+
+            currentThrustRatio = Mathf.Clamp01(currentThrust / MaxThrust);
+        }
+
+        public void RotateThrusterTowards(float targetAngle, float deltaTime)
+        {
+            DesiredGimbalAngleForTesting = targetAngle;
+
+            var clampedTarget = ClampTargetGimbalAngle(targetAngle);
+            var maxStep = GetGimbalStepSize(clampedTarget, deltaTime);
+            CurrentThrusterAngle = Mathf.MoveTowardsAngle(CurrentThrusterAngle, clampedTarget, maxStep);
+        }
+
+        public override void RestoreFromSnapshot(ModuleSnapshot snapshot, IGameContentCatalog contentCatalog)
+        {
+            base.RestoreFromSnapshot(snapshot, contentCatalog);
+
+            RestorePendingNozzleSnapshots(contentCatalog);
         }
 
         private void RegisterNozzles()
@@ -131,17 +170,6 @@ namespace Ships.Modules
             return averageThrustPoint;
         }
 
-        public override float GetEnergyDraw()
-        {
-            return base.GetEnergyDraw() *
-                   (0.25f + (IsActive ? 0.75f * CurrentThrustRatioForTesting : 0));
-        }
-
-        public void SetActive(bool active)
-        {
-            IsActive = active;
-        }
-
         private void ApplyNozzleTransforms(float thrusterAngle)
         {
             foreach (var nozzle in ActiveNozzles)
@@ -165,26 +193,6 @@ namespace Ships.Modules
             ApplyNozzleTransforms(visualizedThrustAngle);
             foreach (var nozzle in ActiveNozzles)
                 nozzle.ApplyExhaustVisuals(visualizedThrustRatio, visualizedIsActive);
-        }
-
-        public void SetCurrentThrust(float currentThrust)
-        {
-            if (MaxThrust <= Mathf.Epsilon)
-            {
-                currentThrustRatio = 0f;
-                return;
-            }
-
-            currentThrustRatio = Mathf.Clamp01(currentThrust / MaxThrust);
-        }
-
-        public void RotateThrusterTowards(float targetAngle, float deltaTime)
-        {
-            DesiredGimbalAngleForTesting = targetAngle;
-
-            var clampedTarget = ClampTargetGimbalAngle(targetAngle);
-            var maxStep = GetGimbalStepSize(clampedTarget, deltaTime);
-            CurrentThrusterAngle = Mathf.MoveTowardsAngle(CurrentThrusterAngle, clampedTarget, maxStep);
         }
 
         private float ClampTargetGimbalAngle(float targetAngle)
@@ -293,13 +301,6 @@ namespace Ships.Modules
 
                 DestroyImmediate(nozzle.gameObject);
             }
-        }
-
-        public override void RestoreFromSnapshot(ModuleSnapshot snapshot, IGameContentCatalog contentCatalog)
-        {
-            base.RestoreFromSnapshot(snapshot, contentCatalog);
-
-            RestorePendingNozzleSnapshots(contentCatalog);
         }
 
 #if UNITY_INCLUDE_TESTS

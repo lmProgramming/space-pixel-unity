@@ -8,6 +8,13 @@ namespace LMPro.External.IsAlive
 
     public static class UnityGameObjectAliveExtension
     {
+        public static override bool Equals(this IHasAliveCheck aObj, object obj)
+        {
+            if (aObj is Object o)
+                return o.Equals(obj);
+            return aObj.Equals(obj);
+        }
+        
         public static bool IsAlive(this IHasAliveCheck aObj)
         {
             if (aObj is Object o)

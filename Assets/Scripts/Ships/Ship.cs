@@ -6,6 +6,7 @@ using Core.Gameplay.EasyTeam;
 using Core.Pixelation;
 using Core.Services;
 using Core.Ships;
+using Core.Ships.Module;
 using Cysharp.Threading.Tasks;
 using Events.Gameplay.Ship;
 using Gameplay.EasyTeam;
@@ -89,14 +90,6 @@ namespace Ships
             set => _moduleConnectionFactory = value;
         }
 
-        public List<WeaponBase> Weapons =>
-            _modulesDictionary[ModuleType.Weapon].AsValueEnumerable().Cast<WeaponBase>().Where(e => e.IsAliveEnabled())
-                .ToList();
-
-        public List<Engine> Engines =>
-            _modulesDictionary[ModuleType.Engine].AsValueEnumerable().Cast<Engine>().Where(e => e.IsAliveEnabled())
-                .ToList();
-
         public ResourceManager ResourceManager { get; private set; }
 
         public int CrewMissingCount =>
@@ -159,6 +152,14 @@ namespace Ships
             if (CommandModule != null && _onCommandModuleNoPixelsLeft != null)
                 CommandModule.PixelatedRigidbody.OnNoPixelsLeft -= _onCommandModuleNoPixelsLeft;
         }
+
+        public List<IWeapon> Weapons =>
+            _modulesDictionary[ModuleType.Weapon].AsValueEnumerable().Cast<IWeapon>().Where(e => e.IsAliveEnabled())
+                .ToList();
+
+        public List<IEngine> Engines =>
+            _modulesDictionary[ModuleType.Engine].AsValueEnumerable().Cast<IEngine>().Where(e => e.IsAliveEnabled())
+                .ToList();
 
         public string Name => transform.name;
         public IReadOnlyList<IModule> AllModules => _allModulesCache;
@@ -548,7 +549,7 @@ namespace Ships
 
                 if (!engine.Transform)
                 {
-                    Debug.LogWarning($"[Ship] Engine {engine.name} has null Transform. Skipping thruster rotation.",
+                    Debug.LogWarning("[Ship] Engine has null Transform. Skipping thruster rotation.",
                         this);
                     desiredDirectionPerEngine[i] = Vector2.zero;
                     engine.SetCurrentThrust(0f);

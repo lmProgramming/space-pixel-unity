@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Ships.Modules;
+using Core.Ships.Module;
 using UnityEngine;
 
 namespace Ships.Systems.Gimbal
@@ -18,7 +18,7 @@ namespace Ships.Systems.Gimbal
 
         public float ResolveTurnInput(float requestedTurnInput, float forwardInput, float horizontalInput,
             Rigidbody2D selfRigidbody,
-            float currentHeadingDegrees, IReadOnlyList<Engine> engines, Vector2 shipForward, Vector2 centerOfMass,
+            float currentHeadingDegrees, IReadOnlyList<IEngine> engines, Vector2 shipForward, Vector2 centerOfMass,
             float maxLeverArm, SasTurnInputSettings settings)
         {
             UpdateDesiredHeadingOnTurnRelease(requestedTurnInput, currentHeadingDegrees, settings);
@@ -92,7 +92,7 @@ namespace Ships.Systems.Gimbal
         }
 
         private static float CalculateThrustCompensationTurnInput(float forwardInput, float horizontalInput,
-            IReadOnlyList<Engine> engines,
+            IReadOnlyList<IEngine> engines,
             Vector2 shipForward, Vector2 centerOfMass, float maxLeverArm, SasTurnInputSettings settings)
         {
             if (engines.Count == 0)

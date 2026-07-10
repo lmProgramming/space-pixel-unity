@@ -437,13 +437,7 @@ namespace Pixelation
 
             if (!sprite && colors is null)
             {
-                if (TexturePixelGrid == null || TexturePixelGrid.PixelCount == 0)
-                {
-                    Debug.LogWarning(
-                        $"[PixelatedRigidbody] Setup skipped on '{name}': no sprite and no colors provided. " +
-                        "Expecting SetTextureFromColors to be called later.");
-                    return;
-                }
+                if (TexturePixelGrid == null || TexturePixelGrid.PixelCount == 0) return;
 
                 colors = TexturePixelGrid.GetValues2D();
 

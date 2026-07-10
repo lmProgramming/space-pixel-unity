@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using Core.Constants;
-using Core.Gameplay.Combat;
 using Core.Ships;
+using Core.Ships.Module;
 using UI.Common;
 using UnityEngine;
 using UnityEngine.UIElements;

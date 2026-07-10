@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
-using Core.Ships;
+using Core.Ships.Module;
 using UnityEngine;
 
 namespace Ships.Systems.Resources
 {
-    public class ResourceManager : MonoBehaviour
+    public class ResourceManager : MonoBehaviour, IResourceManager
     {
         [SerializeField] private float energyEfficiency;
         [SerializeField] private float energy;
