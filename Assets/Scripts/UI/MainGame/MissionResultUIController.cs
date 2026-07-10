@@ -1,3 +1,4 @@
+using System;
 using Core.Services;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -20,7 +21,8 @@ namespace UI.MainGame
         private void Awake()
         {
             _panelRenderer = GetComponent<PanelRenderer>();
-            Debug.Assert(_panelRenderer != null, "[MissionResultUIController] PanelRenderer is required!", this);
+            if (_panelRenderer == null)
+                throw new UnityException("[MissionResultUIController] PanelRenderer is required.");
         }
 
         private void OnEnable()
@@ -58,9 +60,9 @@ namespace UI.MainGame
             _overlay = root.Q<VisualElement>("mission-result-overlay");
             _resultLabel = root.Q<Label>("result-label");
 
-            Debug.Assert(_overlay != null, "[MissionResultUIController] 'mission-result-overlay' element not found!",
-                this);
-            Debug.Assert(_resultLabel != null, "[MissionResultUIController] 'result-label' element not found!", this);
+            if (_overlay == null || _resultLabel == null)
+                throw new InvalidOperationException(
+                    "[MissionResultUIController] Mission result elements missing in UXML.");
             _isBound = true;
         }
 

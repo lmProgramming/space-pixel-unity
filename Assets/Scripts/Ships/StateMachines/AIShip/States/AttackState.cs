@@ -89,7 +89,8 @@ namespace Ships.StateMachines.AIShip.States
                 return;
             }
 
-            Debug.Assert(NavigationFollower != null, "NavigationHelper != null");
+            if (NavigationFollower == null)
+                throw new InvalidOperationException("[AttackState] NavigationFollower is required.");
 
             NavigationFollower.UpdatePath(stateMachine, targetPosition);
             NavigationFollower.FollowPath(stateMachine);

@@ -19,7 +19,6 @@ using Ships.Modules;
 using Ships.Systems.Gimbal;
 using Ships.Systems.Resources;
 using UnityEngine;
-using UnityEngine.Assertions;
 using Zenject;
 using ZLinq;
 
@@ -101,18 +100,24 @@ namespace Ships
             _controlAllocator = new ControlAllocator();
             _sasTurnInputResolver = new SASTurnInputResolver();
 
-            Assert.IsNotNull(ResourceManager, "ResourceManager != null");
-            Assert.IsNotNull(_moduleConnectionFactory, "_moduleConnectionFactory != null");
-            Assert.IsNotNull(_engineDirectionSolver, "_engineDirectionSolver != null");
-            Assert.IsNotNull(_controlAllocator, "_controlAllocator != null");
-            Assert.IsNotNull(_sasTurnInputResolver, "_sasTurnInputResolver != null");
+            if (ResourceManager == null)
+                throw new UnityException("[Ship] ResourceManager is required.");
+            if (_moduleConnectionFactory == null)
+                throw new UnityException("[Ship] IModuleConnectionFactory is required.");
+            if (_engineDirectionSolver == null)
+                throw new InvalidOperationException("[Ship] EngineDirectionSolver failed to initialize.");
+            if (_controlAllocator == null)
+                throw new InvalidOperationException("[Ship] ControlAllocator failed to initialize.");
+            if (_sasTurnInputResolver == null)
+                throw new InvalidOperationException("[Ship] SASTurnInputResolver failed to initialize.");
         }
 
         protected virtual void Start()
         {
             CommandModule ??= GetComponentInChildren<Command>();
 
-            Assert.IsNotNull(CommandModule, "CommandModule != null");
+            if (CommandModule == null)
+                throw new UnityException("[Ship] CommandModule is required.");
 
             InitializeModules();
             _sasTurnInputResolver.CaptureDesiredHeading(GetCurrentHeadingDegrees());
@@ -269,7 +274,8 @@ namespace Ships
         public void SetTeam(ITeam newTeam)
         {
             team = newTeam as Team;
-            Assert.IsNotNull(team, "newTeam must be of type Team");
+            if (team == null)
+                throw new ArgumentException("[Ship] newTeam must be of type Team.");
             gameObject.layer = team.Layer;
             transform.SetLayerAllChildren(team.Layer);
         }
@@ -510,8 +516,10 @@ namespace Ships
             turnInput = Mathf.Clamp(turnInput, -1f, 1f);
 
             var selfRigidbody = CommandModule.PixelatedRigidbody?.Rigidbody;
-            Assert.IsNotNull(selfRigidbody, "CommandModule.PixelatedRigidbody.Rigidbody != null");
-            Assert.IsNotNull(CommandModule.Transform, "CommandModule.Transform != null");
+            if (selfRigidbody == null)
+                throw new InvalidOperationException("[Ship] CommandModule.PixelatedRigidbody.Rigidbody is required.");
+            if (CommandModule.Transform == null)
+                throw new InvalidOperationException("[Ship] CommandModule.Transform is required.");
 
             var engines = Engines;
             if (engines.Count == 0) return false;

@@ -267,14 +267,14 @@ namespace Ships.Modules
             {
                 var nozzle = CreateNozzleShell(nozzleSnapshot);
 
+                if (!nozzle)
+                    throw new UnityException(
+                        $"[Engine] Nozzle child '{nozzleSnapshot.name}' has no PixelatedRigidbody.");
+
                 var nozzleTransform = nozzle.transform;
                 if (!nozzleTransform)
                     throw new UnityException(
                         $"[Engine] Missing nozzle child '{nozzleSnapshot.name}' during snapshot restore.");
-
-                if (!nozzle)
-                    throw new UnityException(
-                        $"[Engine] Nozzle child '{nozzleSnapshot.name}' has no PixelatedRigidbody.");
 
                 nozzle.RestoreFromSnapshot(nozzleSnapshot, contentCatalog);
                 nozzleTransform.gameObject.SetActive(true);

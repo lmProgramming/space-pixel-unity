@@ -4,7 +4,6 @@ using Core.Ships;
 using Core.Ships.Snapshots.Module.StandaloneModuleSystemData;
 using Ships.Modules;
 using UnityEngine;
-using UnityEngine.Assertions;
 
 namespace Ships.Systems.Standalone
 {
@@ -31,8 +30,10 @@ namespace Ships.Systems.Standalone
 
         private void Apply(Rigidbody2D commandRigidbody, float multiplier)
         {
-            Assert.IsNotNull(commandRigidbody, "commandRigidbody != null");
-            Assert.IsNotNull(settings, "settings != null");
+            if (commandRigidbody == null)
+                throw new InvalidOperationException("[ReactionWheelStabilizer] commandRigidbody is required.");
+            if (settings == null)
+                throw new UnityException("[ReactionWheelStabilizer] settings must be assigned.");
 
             var angularVelocity = commandRigidbody.angularVelocity;
             if (Mathf.Abs(angularVelocity) <= settings.angularVelocityDeadZoneDegreesPerSecond)

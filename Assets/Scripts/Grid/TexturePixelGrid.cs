@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Core.Grid;
 using LMPro;
 using LMPro.DataStructures;
 using Unity.Collections;
 using UnityEngine;
-using UnityEngine.Assertions;
 using ZLinq;
 
 namespace Grid
@@ -156,7 +156,8 @@ namespace Grid
             SetPixel(point, Color.clear);
             PixelCount--;
 
-            Assert.IsTrue(PixelCount >= 0, "Pixel count went below zero. This should not happen.");
+            if (PixelCount < 0)
+                throw new InvalidOperationException("[TexturePixelGrid] Pixel count went below zero.");
         }
 
         public void RemovePixels(IEnumerable<Vector2Int> points)
@@ -166,7 +167,8 @@ namespace Grid
             ApplyPixels();
             PixelCount -= pointsList.Count;
 
-            Assert.IsTrue(PixelCount >= 0, "Pixel count went below zero. This should not happen.");
+            if (PixelCount < 0)
+                throw new InvalidOperationException("[TexturePixelGrid] Pixel count went below zero.");
         }
     }
 }
