@@ -6,6 +6,7 @@ namespace Core.Services
     {
         Vector2 WorldPointerPosition { get; }
         bool IsPointerOverUI { get; }
+        bool IsTextInputFocused { get; }
         bool IsPaused { get; }
         GameObject ObjectUnderPointer { get; }
 

@@ -12,8 +12,10 @@ namespace Services.GameInput
         [SerializeField] private float maxTimeBetweenDoubleClicks = 0.5f;
 
         private readonly HashSet<object> _hoveredUiElements = new();
+        private readonly HashSet<object> _focusedTextInputs = new();
 
         [Inject] private PointerOverUiEventChannel _pointerOverUiChannel;
+        [Inject] private TextInputFocusEventChannel _textInputFocusChannel;
         [Inject] private PauseStateEventChannel _pauseStateChannel;
 
         private UnityEngine.Camera _mainCamera;
@@ -39,6 +41,7 @@ namespace Services.GameInput
         public int HeldUiElementCount { get; private set; }
 
         public bool IsPointerOverUI => _hoveredUiElements.Count > 0;
+        public bool IsTextInputFocused => _focusedTextInputs.Count > 0;
         public bool IsPaused { get; private set; }
 
         public bool CanControlShip => !IsPaused;
@@ -47,14 +50,17 @@ namespace Services.GameInput
         private void OnEnable()
         {
             _pointerOverUiChannel.Register(OnPointerOverUiChanged);
+            _textInputFocusChannel.Register(OnTextInputFocusChanged);
             _pauseStateChannel.Register(OnPauseStateChanged);
         }
 
         private void OnDisable()
         {
             _pointerOverUiChannel.Unregister(OnPointerOverUiChanged);
+            _textInputFocusChannel.Unregister(OnTextInputFocusChanged);
             _pauseStateChannel.Unregister(OnPauseStateChanged);
             _hoveredUiElements.Clear();
+            _focusedTextInputs.Clear();
         }
 
         private void Update()
@@ -116,6 +122,17 @@ namespace Services.GameInput
                 _hoveredUiElements.Add(data.Element);
             else
                 _hoveredUiElements.Remove(data.Element);
+        }
+
+        private void OnTextInputFocusChanged(TextInputFocusData data)
+        {
+            if (data.Source == null)
+                return;
+
+            if (data.IsFocused)
+                _focusedTextInputs.Add(data.Source);
+            else
+                _focusedTextInputs.Remove(data.Source);
         }
 
         private static bool JustClicked => Input.GetMouseButtonDown(0) ||

@@ -15,6 +15,7 @@ namespace Context
         [SerializeField] private ScriptableObject gameContentCatalog;
         [SerializeField] private ScriptableObject skirmishSnapshotCatalog;
         [SerializeField] private PointerOverUiEventChannel pointerOverUiChannel;
+        [SerializeField] private TextInputFocusEventChannel textInputFocusChannel;
         [SerializeField] private PauseStateEventChannel pauseStateChannel;
         [SerializeField] private ShootingEventChannel shootingEventChannel;
 
@@ -22,6 +23,9 @@ namespace Context
         {
             if (pointerOverUiChannel == null)
                 throw new UnityException("[GameProjectInstaller] Pointer Over UI event channel must be assigned.");
+
+            if (textInputFocusChannel == null)
+                throw new UnityException("[GameProjectInstaller] Text Input Focus event channel must be assigned.");
 
             if (pauseStateChannel == null)
                 throw new UnityException("[GameProjectInstaller] Pause State event channel must be assigned.");
@@ -59,6 +63,10 @@ namespace Context
 
             Container.Bind<PointerOverUiEventChannel>()
                 .FromInstance(pointerOverUiChannel)
+                .AsSingle();
+
+            Container.Bind<TextInputFocusEventChannel>()
+                .FromInstance(textInputFocusChannel)
                 .AsSingle();
 
             Container.Bind<PauseStateEventChannel>()
