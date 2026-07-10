@@ -129,6 +129,10 @@
     flex-grow: 1;
 }
 
+.ds-root.ds-root--transparent {
+    background-color: rgba(0, 0, 0, 0);
+}
+
 .ds-root--transparent {
     background-color: rgba(0, 0, 0, 0);
 }

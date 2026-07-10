@@ -1,0 +1,5 @@
+/* Keeps world-space PanelRenderer/UIDocument panels from painting over the scene.
+   Loaded via UnityDefaultRuntimeTheme.tss on the shared Panel Settings asset. */
+#PanelSettings {
+    background-color: rgba(0, 0, 0, 0);
+}

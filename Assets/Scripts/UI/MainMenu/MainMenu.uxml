@@ -2,7 +2,7 @@
     <Style src="project://database/Assets/DesignSystem/Resources/UI/Styles/DesignSystem/DesignSystem.uss"/>
     <ui:Template name="settingsOverlayTemplate" src="project://database/Assets/Scripts/UI/Common/SettingsOverlay.uxml"/>
 
-    <ui:VisualElement name="main-menu-root" class="ds-root"
+    <ui:VisualElement name="main-menu-root" class="ds-root ds-root--transparent"
                       style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; align-items: center; justify-content: center;">
         <ui:VisualElement name="main-menu-panel" class="ds-modal" style="width: 520px; max-width: 520px;">
             <ui:Label text="Space Pixel" class="ds-h1" style="unity-text-align: middle-center; margin-bottom: 4px;"/>

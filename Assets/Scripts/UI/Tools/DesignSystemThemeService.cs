@@ -17,7 +17,7 @@ namespace UI.Tools
     /// </summary>
     public static class DesignSystemThemeService
     {
-        public const string DefaultProvider = "Design System default";
+        public const string DefaultProvider = "Default theme";
 
         private const string ThemeLightClass = "theme-light";
         private const string DsRootClass = "ds-root";
@@ -74,6 +74,7 @@ namespace UI.Tools
             root.schedule.Execute(() =>
             {
                 EnsureStylesheetsOnRoot(root);
+                EnsureTransparentPanelRoot(root);
                 DesignSystemRuntime.EnsureToggleKnobs(root);
 
                 if (!_globalRestoreStarted)
@@ -112,6 +113,7 @@ namespace UI.Tools
                 _activeCodigrateMap = null;
                 CodigrateThemeApplier.RevertAll();
                 ApplyLightClassEverywhere(IsLightTheme);
+                EnsureTransparentGameOverlayRoots();
                 return;
             }
 
@@ -128,6 +130,7 @@ namespace UI.Tools
             if (!HasSavedCodigrateProvider())
             {
                 ApplyLightClassEverywhere(IsLightTheme);
+                EnsureTransparentGameOverlayRoots();
                 return;
             }
 
@@ -203,6 +206,8 @@ namespace UI.Tools
             if (IsCodigrateActive && _activeCodigrateMap != null)
                 foreach (var themeRoot in CollectThemeRootsInTree(documentRoot))
                     CodigrateThemeApplier.ApplyWithoutRevert(themeRoot, _activeCodigrateMap);
+            else
+                EnsureTransparentPanelRoot(documentRoot);
         }
 
         private static void EnsureStylesheetsOnRoot(VisualElement root)
@@ -226,6 +231,31 @@ namespace UI.Tools
             _popupSheet ??= Resources.Load<StyleSheet>(PopupSheetResource);
             if (_popupSheet != null && !panelRoot.styleSheets.Contains(_popupSheet))
                 panelRoot.styleSheets.Add(_popupSheet);
+        }
+
+        private static void EnsureTransparentPanelRoot(VisualElement documentRoot)
+        {
+            var panelRoot = documentRoot.panel?.visualTree;
+            if (panelRoot == null || panelRoot == documentRoot)
+                return;
+
+            panelRoot.style.backgroundColor = Color.clear;
+        }
+
+        private static void EnsureTransparentGameOverlayRoots()
+        {
+            foreach (var documentRoot in TrackedVisualTreeRoots)
+            {
+                if (documentRoot == null)
+                    continue;
+
+                EnsureTransparentPanelRoot(documentRoot);
+
+                documentRoot.Query(className: "ds-root--transparent").ForEach(element =>
+                {
+                    element.style.backgroundColor = Color.clear;
+                });
+            }
         }
 
         private static void ApplyLightClassEverywhere(bool light)
