@@ -153,22 +153,23 @@ namespace Grid
 
         public void RemovePixelAt(Vector2Int point)
         {
+            if (PixelCount <= 0)
+                throw new InvalidOperationException("[TexturePixelGrid] Pixel count would go below zero.");
+
             SetPixel(point, Color.clear);
             PixelCount--;
-
-            if (PixelCount < 0)
-                throw new InvalidOperationException("[TexturePixelGrid] Pixel count went below zero.");
         }
 
         public void RemovePixels(IEnumerable<Vector2Int> points)
         {
             var pointsList = points.AsValueEnumerable().ToList();
+
+            if (PixelCount <= pointsList.Count)
+                throw new InvalidOperationException("[TexturePixelGrid] Pixel count would go below zero.");
+
             foreach (var point in pointsList) SetPixelNoApply(point, Color.clear);
             ApplyPixels();
             PixelCount -= pointsList.Count;
-
-            if (PixelCount < 0)
-                throw new InvalidOperationException("[TexturePixelGrid] Pixel count went below zero.");
         }
     }
 }

@@ -1,4 +1,4 @@
-using System.IO;
+using System;
 using System.Runtime.CompilerServices;
 using AI.EasyState;
 using Core.Ships;
@@ -75,7 +75,7 @@ namespace Ships
                 return;
 
             if (!_aiShipStateMachine.Target.HasValue)
-                throw new InvalidDataException("Target is null");
+                throw new InvalidOperationException("[AIShip] Target is null");
             ComputeNavigationInputs(_aiShipStateMachine.Target.Value);
         }
 
