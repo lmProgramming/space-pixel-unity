@@ -3,11 +3,9 @@ using Core.Constants;
 using Core.Services;
 using Core.Ships;
 using Core.Ships.Module;
-using Core.Ships.Snapshots.Module;
 using Core.Ships.Snapshots.Module.ModuleData;
 using Core.Ships.Snapshots.PixelatedRigidbody;
 using LMPro.External.ReadOnly;
-using Pixelation;
 using Ships.Systems.Gimbal;
 using UnityEngine;
 using Zenject;
@@ -30,7 +28,6 @@ namespace Ships.Modules
         [ReadOnly] [field: SerializeField] private float CurrentThrusterAngle { get; set; }
 
         private List<Nozzle> _nozzles = new();
-        private List<PixelatedRigidbodySnapshot> _pendingNozzleSnapshots = new();
 
         [Inject] private IPixelatedRigidbodyFactory _pixelatedRigidbodyFactory;
 
@@ -117,13 +114,6 @@ namespace Ships.Modules
             var clampedTarget = ClampTargetGimbalAngle(targetAngle);
             var maxStep = GetGimbalStepSize(clampedTarget, deltaTime);
             CurrentThrusterAngle = Mathf.MoveTowardsAngle(CurrentThrusterAngle, clampedTarget, maxStep);
-        }
-
-        public override void RestoreFromSnapshot(ModuleSnapshot snapshot, IGameContentCatalog contentCatalog)
-        {
-            base.RestoreFromSnapshot(snapshot, contentCatalog);
-
-            RestorePendingNozzleSnapshots(contentCatalog);
         }
 
         private void RegisterNozzles()
@@ -239,16 +229,15 @@ namespace Ships.Modules
             maxGimbalAngle = data.maxGimbalAngle;
             gimbalSpeed = data.gimbalSpeed;
 
-            _pendingNozzleSnapshots =
+            var pixelatedRigidbodySnapshots =
                 data.nozzles?.AsValueEnumerable().ToList() ?? new List<PixelatedRigidbodySnapshot>();
 
             ClearExistingNozzleChildren();
 
-            foreach (var nozzleSnapshot in _pendingNozzleSnapshots)
-                CreateNozzleShell(nozzleSnapshot);
+            RestorePendingNozzleSnapshots(pixelatedRigidbodySnapshots, contentCatalog);
         }
 
-        private void CreateNozzleShell(PixelatedRigidbodySnapshot nozzleSnapshot)
+        private Nozzle CreateNozzleShell(PixelatedRigidbodySnapshot nozzleSnapshot)
         {
             if (nozzleSnapshot.rigidbodyType != PixelatedRigidbodyType.Nozzle)
                 throw new UnityException(
@@ -258,34 +247,38 @@ namespace Ships.Modules
                 ? nozzleSnapshot.rigidbodyType.ToString()
                 : nozzleSnapshot.name;
 
-            _pixelatedRigidbodyFactory.CreatePixelatedRigidbodyShell(
+            var nozzle = _pixelatedRigidbodyFactory.CreatePixelatedRigidbodyShell(
                     transform,
                     childName,
                     nozzleSnapshot.localPosition,
                     nozzleSnapshot.localRotation,
                     RigidbodyType2D.Kinematic)
-                .WithPixelatedRigidbody<Nozzle>();
+                .AsDisabledGameObject()
+                .WithPixelatedRigidbody<Nozzle>()
+                .PixelatedRigidbody;
+
+            return nozzle as Nozzle;
         }
 
-        private void RestorePendingNozzleSnapshots(IGameContentCatalog contentCatalog)
+        private void RestorePendingNozzleSnapshots(List<PixelatedRigidbodySnapshot> pixelatedRigidbodySnapshots,
+            IGameContentCatalog contentCatalog)
         {
-            foreach (var snapshot in _pendingNozzleSnapshots)
+            foreach (var nozzleSnapshot in pixelatedRigidbodySnapshots)
             {
-                var nozzleTransform = transform.Find(snapshot.name);
+                var nozzle = CreateNozzleShell(nozzleSnapshot);
+
+                var nozzleTransform = nozzle.transform;
                 if (!nozzleTransform)
                     throw new UnityException(
-                        $"[Engine] Missing nozzle child '{snapshot.name}' during snapshot restore.");
+                        $"[Engine] Missing nozzle child '{nozzleSnapshot.name}' during snapshot restore.");
 
-                var pixelatedRigidbody = nozzleTransform.GetComponent<PixelatedRigidbody>();
-                if (!pixelatedRigidbody)
+                if (!nozzle)
                     throw new UnityException(
-                        $"[Engine] Nozzle child '{snapshot.name}' has no PixelatedRigidbody.");
+                        $"[Engine] Nozzle child '{nozzleSnapshot.name}' has no PixelatedRigidbody.");
 
-                pixelatedRigidbody.RestoreFromSnapshot(snapshot, contentCatalog);
-                pixelatedRigidbody.Setup(forceSetup: true, recalculateColliders: true);
+                nozzle.RestoreFromSnapshot(nozzleSnapshot, contentCatalog);
+                nozzleTransform.gameObject.SetActive(true);
             }
-
-            _pendingNozzleSnapshots.Clear();
 
             RegisterNozzles();
         }

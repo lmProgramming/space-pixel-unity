@@ -70,9 +70,18 @@ namespace Services
 
         public GameObject GameObject { get; }
 
-        public T WithPixelatedRigidbody<T>() where T : Component, IPixelatedRigidbody
+        public IPixelatedRigidbody PixelatedRigidbody { get; private set; }
+
+        public IPixelatedRigidbodyShellBuilder AsDisabledGameObject()
         {
-            return _container.InstantiateComponent<T>(GameObject);
+            GameObject.SetActive(false);
+            return this;
+        }
+
+        public IPixelatedRigidbodyShellBuilder WithPixelatedRigidbody<T>() where T : Component, IPixelatedRigidbody
+        {
+            PixelatedRigidbody = _container.InstantiateComponent<T>(GameObject);
+            return this;
         }
     }
 }

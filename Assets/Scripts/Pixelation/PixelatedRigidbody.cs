@@ -59,7 +59,8 @@ namespace Pixelation
         {
             Rigidbody = GetComponent<Rigidbody2D>();
 
-            Setup();
+            if (!_isSetup)
+                Setup();
         }
 
         private void Start()
