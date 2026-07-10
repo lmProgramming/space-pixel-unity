@@ -1,4 +1,5 @@
 using System;
+using LMPro.External.IsAlive;
 using Ships;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -37,7 +38,7 @@ namespace ShipFactory.UI.ToolkitComponents
 
         public void Refresh(Ship ship)
         {
-            if (!ship || !ship.ResourceManager)
+            if (!ship || !ship.ResourceManager.IsAlive())
             {
                 _shipResourcesPanel.style.display = DisplayStyle.None;
                 return;

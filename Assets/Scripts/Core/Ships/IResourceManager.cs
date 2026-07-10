@@ -1,6 +1,10 @@
-namespace Ships.Systems.Resources
+using System.Collections.Generic;
+using Core.Ships.Module;
+using LMPro.External.IsAlive;
+
+namespace Core.Ships
 {
-    public interface IResourceManager
+    public interface IResourceManager : IHasAliveCheck
     {
         float EnergyEfficiency { get; }
         float Energy { get; }
@@ -9,5 +13,7 @@ namespace Ships.Systems.Resources
         float EnergyProduction { get; }
         int CrewCapacity { get; }
         int Crew { get; }
+        void Recalculate(IReadOnlyList<IModule> modules);
+        void UpdateEnergy();
     }
 }

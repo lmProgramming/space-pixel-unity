@@ -37,7 +37,7 @@ namespace Ships
         [SerializeField]
         private Team team;
 
-        [Header("SAS")] [SerializeField] private SasTurnInputSettings sasTurnInputSettings;
+        [Header("SAS")] [SerializeField] private SASTurnInputSettings sasTurnInputSettings;
 
         [Header("Control Allocator")]
         [SerializeField] private int allocatorIterations = 14;
@@ -70,7 +70,7 @@ namespace Ships
 
         private Action<IPixelated> _onCommandModuleNoPixelsLeft;
 
-        private SasTurnInputResolver _sasTurnInputResolver;
+        private SASTurnInputResolver _sasTurnInputResolver;
 
         [InjectOptional] private SceneContextRegistry _sceneContextRegistry;
 
@@ -90,8 +90,6 @@ namespace Ships
             set => _moduleConnectionFactory = value;
         }
 
-        public ResourceManager ResourceManager { get; private set; }
-
         public int CrewMissingCount =>
             ModuleGraph.GetAllNodes().AsValueEnumerable().Sum(module => module.CrewMissingCount);
 
@@ -101,7 +99,7 @@ namespace Ships
             _moduleConnectionFactory = GetComponent<IModuleConnectionFactory>();
             _engineDirectionSolver = new EngineDirectionSolver();
             _controlAllocator = new ControlAllocator();
-            _sasTurnInputResolver = new SasTurnInputResolver();
+            _sasTurnInputResolver = new SASTurnInputResolver();
 
             Assert.IsNotNull(ResourceManager, "ResourceManager != null");
             Assert.IsNotNull(_moduleConnectionFactory, "_moduleConnectionFactory != null");
@@ -153,6 +151,8 @@ namespace Ships
                 CommandModule.PixelatedRigidbody.OnNoPixelsLeft -= _onCommandModuleNoPixelsLeft;
         }
 
+        public IResourceManager ResourceManager { get; private set; }
+
         public List<IWeapon> Weapons =>
             _modulesDictionary[ModuleType.Weapon].AsValueEnumerable().Cast<IWeapon>().Where(e => e.IsAliveEnabled())
                 .ToList();
@@ -163,7 +163,7 @@ namespace Ships
 
         public string Name => transform.name;
         public IReadOnlyList<IModule> AllModules => _allModulesCache;
-        public virtual bool IsSasOn => false;
+        public virtual bool IsSASOn => false;
 
         public float GeneralEfficiency => Math.Max(0.01f, ResourceManager.EnergyEfficiency);
 
@@ -635,7 +635,7 @@ namespace Ships
         }
 
 #if UNITY_INCLUDE_TESTS
-        internal void SetSasDesiredHeadingForTesting(float headingDegrees)
+        internal void SetSASDesiredHeadingForTesting(float headingDegrees)
         {
             _sasTurnInputResolver.CaptureDesiredHeading(headingDegrees);
         }
@@ -666,7 +666,7 @@ namespace Ships
             allocatorRegularization = regularization;
         }
 
-        internal void ConfigureSasSettingsForTesting(SasTurnInputSettings sasSettings)
+        internal void ConfigureSASSettingsForTesting(SASTurnInputSettings sasSettings)
         {
             sasTurnInputSettings = sasSettings;
         }

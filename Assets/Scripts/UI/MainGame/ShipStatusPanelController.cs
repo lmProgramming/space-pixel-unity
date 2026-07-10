@@ -1,5 +1,4 @@
 using System;
-using System.Resources;
 using Core.Constants;
 using Core.Ships;
 using Events.UI;
@@ -64,9 +63,9 @@ namespace UI.MainGame
             SetMainHudVisible(true);
 
             UpdateSpeedDisplay();
-            UpdateSasDisplay();
+            UpdateSASDisplay();
 
-            if (!_playerShip.ResourceManager)
+            if (!_playerShip.ResourceManager.IsAlive())
             {
                 SetShipStatusBlockVisible(false);
                 return;
@@ -110,7 +109,7 @@ namespace UI.MainGame
 
             _root = root;
             CacheUIReferences();
-            RegisterSasToggle();
+            RegisterSASToggle();
             RegisterUiPointerBlockers();
             _isBound = true;
         }
@@ -120,7 +119,7 @@ namespace UI.MainGame
             if (!_isBound)
                 return;
 
-            UnregisterSasToggle();
+            UnregisterSASToggle();
 
             _mainHudRoot = null;
             _sasCluster = null;
@@ -170,29 +169,29 @@ namespace UI.MainGame
             _uiPointerTracker.Track(element);
         }
 
-        private void RegisterSasToggle()
+        private void RegisterSASToggle()
         {
             if (_sasToggle == null)
                 return;
 
-            _sasToggle.RegisterValueChangedCallback(OnSasToggleChanged);
+            _sasToggle.RegisterValueChangedCallback(OnSASToggleChanged);
         }
 
-        private void UnregisterSasToggle()
+        private void UnregisterSASToggle()
         {
             if (_sasToggle == null)
                 return;
 
-            _sasToggle.UnregisterValueChangedCallback(OnSasToggleChanged);
+            _sasToggle.UnregisterValueChangedCallback(OnSASToggleChanged);
         }
 
-        private void OnSasToggleChanged(ChangeEvent<bool> evt)
+        private void OnSASToggleChanged(ChangeEvent<bool> evt)
         {
-            if (_sasSyncing || _playerShip is not PlayerShip playerShipTyped)
+            if (_sasSyncing || _playerShip is not ISAS playerShipTyped)
                 return;
-            if (playerShipTyped.IsSasOn == evt.newValue)
+            if (playerShipTyped.IsSASOn == evt.newValue)
                 return;
-            playerShipTyped.ToggleSas();
+            playerShipTyped.ToggleSAS();
         }
 
         private void SetMainHudVisible(bool visible)
@@ -217,11 +216,9 @@ namespace UI.MainGame
             _speedValueLabel.text = magnitude.ToString("F1");
         }
 
-        private void UpdateSasDisplay()
+        private void UpdateSASDisplay()
         {
-            var playerShipTyped = _playerShip as PlayerShip;
-
-            if (!playerShipTyped)
+            if (_playerShip is not ISAS playerShipTyped)
             {
                 if (_sasCluster != null)
                     _sasCluster.style.display = DisplayStyle.None;
@@ -235,11 +232,11 @@ namespace UI.MainGame
                 return;
 
             _sasSyncing = true;
-            _sasToggle.SetValueWithoutNotify(playerShipTyped.IsSasOn);
+            _sasToggle.SetValueWithoutNotify(playerShipTyped!.IsSASOn);
             _sasSyncing = false;
         }
 
-        private void UpdateEnergyDisplay(ResourceManager resourceManager)
+        private void UpdateEnergyDisplay(IResourceManager resourceManager)
         {
             var energy = resourceManager.Energy;
             var energyCapacity = resourceManager.EnergyCapacity;
@@ -286,7 +283,7 @@ namespace UI.MainGame
             _shipStatusPanel.EnableInClassList("energy-draining", !isCritical && netEnergy < -0.1f);
         }
 
-        private void UpdateCrewDisplay(ResourceManager resourceManager)
+        private void UpdateCrewDisplay(IResourceManager resourceManager)
         {
             if (_crewCountLabel != null)
                 _crewCountLabel.text = resourceManager.Crew.ToString();
@@ -304,11 +301,6 @@ namespace UI.MainGame
 
             if (_energyBarGlow != null)
                 _energyBarGlow.style.height = Length.Percent(_currentEnergyBarHeight);
-        }
-
-        public void SetPlayerShip(Ship ship)
-        {
-            _playerShip = ship;
         }
     }
 }

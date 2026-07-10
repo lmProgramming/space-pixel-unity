@@ -1,10 +1,11 @@
 using Core.Services;
+using Core.Ships;
 using UnityEngine;
 using Zenject;
 
 namespace Ships
 {
-    public class PlayerShip : Ship
+    public class PlayerShip : Ship, ISAS
     {
         [SerializeField] private float speedMultiplier;
 
@@ -14,15 +15,15 @@ namespace Ships
 
         [Inject] private IGameInput _gameInput;
 
-        public override bool IsSasOn => sasEnabled;
-
         protected override void Start()
         {
             base.Start();
             foreach (var module in AllModules) module.Transform!.tag = "Player";
         }
 
-        public void ToggleSas()
+        public override bool IsSASOn => sasEnabled;
+
+        public void ToggleSAS()
         {
             sasEnabled = !sasEnabled;
         }
@@ -33,7 +34,7 @@ namespace Ships
                 return;
 
             if (Input.GetKeyDown(sasToggleKey))
-                ToggleSas();
+                ToggleSAS();
 
             PendingForwardInput = Input.GetAxis("Vertical") * speedMultiplier;
             PendingHorizontalInput = Input.GetAxis("Horizontal") * speedMultiplier;

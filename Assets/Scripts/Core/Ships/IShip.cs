@@ -19,9 +19,10 @@ namespace Core.Ships
         float CaptainMultiplier { get; }
         string Name { get; }
         IReadOnlyList<IModule> AllModules { get; }
-        bool IsSasOn { get; }
+        public bool IsSASOn { get; }
         List<IWeapon> Weapons { get; }
         List<IEngine> Engines { get; }
+        IResourceManager ResourceManager { get; }
         Vector2 GetPosition();
         void OnModuleConnectionLost(IModule module);
         void ManualAddModule(IModule module);

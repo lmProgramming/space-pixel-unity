@@ -25,7 +25,7 @@ namespace Ships.Systems.Standalone
 
         private void FixedUpdate()
         {
-            if (_module.Ship.IsSasOn)
+            if (_module.Ship.IsSASOn)
                 Apply(_module.PixelatedRigidbody.Rigidbody, _initialMass * _module.ActualEfficiency);
         }
 
