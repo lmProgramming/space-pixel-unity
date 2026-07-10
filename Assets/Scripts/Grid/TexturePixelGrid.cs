@@ -164,7 +164,7 @@ namespace Grid
         {
             var pointsList = points.AsValueEnumerable().ToList();
 
-            if (PixelCount <= pointsList.Count)
+            if (PixelCount < pointsList.Count)
                 throw new InvalidOperationException("[TexturePixelGrid] Pixel count would go below zero.");
 
             foreach (var point in pointsList) SetPixelNoApply(point, Color.clear);
