@@ -72,11 +72,27 @@ Use NSubstitute for mocking dependencies
 
 This section is durable guidance for cloud agents running in the headless VM (the update script already ran).
 
-### The Unity game cannot be run/built/tested in the cloud VM
+### Running Unity tests / builds headlessly (Docker + license secrets)
 
-- This is a Unity `6000.5.1f1` game. The **Unity Editor is NOT installed** in the cloud VM and is not part of the update script (it is a multi-GB system dependency that also requires a Unity license). Cloud agents therefore cannot open the project, enter Play mode, build a player, or run the Unity Test Framework tests (EditMode/PlayMode) headlessly.
-- Tests run only in **CI**: `.github/workflows/tests.yml` uses `game-ci/unity-test-runner` inside `unityci/editor:ubuntu-6000.5.1f1-base-3` and needs the `UNITY_LICENSE`, `UNITY_EMAIL`, `UNITY_PASSWORD` repo secrets. Reproducing this locally requires Docker + those same secrets.
-- Do not try to compile the C# assemblies standalone (`dotnet`/`mono`): they depend on `UnityEngine` and are only compiled by the Unity Editor. Verify Unity C# changes by reasoning + CI; the human runs the Editor locally (see the Testing section above).
+Headless EditMode/PlayMode tests and a Linux player build ARE possible in the cloud VM via the GameCI editor image + a Unity license. This is a **heavy one-time setup that is intentionally NOT in the update script** (10.8 GB image + Docker daemon + .NET SDK). If a fresh VM lacks it, reinstall: Docker (dind, `storage-driver: fuse-overlayfs` with `features.containerd-snapshotter: false` on Docker 29+, iptables-legacy), `dotnet-sdk-8.0`, then `docker pull unityci/editor:ubuntu-6000.5.1f1-linux-il2cpp-3` (editor `6000.5.1f1`, includes `LinuxStandaloneSupport`). Start the daemon before use: `sudo dockerd &`.
+
+- **Requires the Unity license secrets** `UNITY_LICENSE` + `UNITY_EMAIL` + `UNITY_PASSWORD` (same as CI). `UNITY_LICENSE` holds the Personal `.ulf` file contents; activation = writing it into the editor's license dir. Without them the editor launches but stops at `No valid Unity Editor license found`.
+- **Run EditMode tests** (swap `EditMode`→`PlayMode` for play tests; CI runs both via `testMode: all`):
+  ```bash
+  sudo docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp -e UNITY_LICENSE \
+    -v "$PWD":/project -w /project unityci/editor:ubuntu-6000.5.1f1-linux-il2cpp-3 \
+    bash -lc 'mkdir -p /tmp/.local/share/unity3d/Unity && printf "%s" "$UNITY_LICENSE" > /tmp/.local/share/unity3d/Unity/Unity_lic.ulf && \
+      unity-editor -projectPath /project -runTests -testPlatform EditMode -testResults /project/editmode-results.xml -logFile /dev/stdout'
+  ```
+- **Build a Linux player** (default active scenes; no custom build method exists in-repo):
+  ```bash
+  sudo docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp -e UNITY_LICENSE \
+    -v "$PWD":/project -w /project unityci/editor:ubuntu-6000.5.1f1-linux-il2cpp-3 \
+    bash -lc 'mkdir -p /tmp/.local/share/unity3d/Unity && printf "%s" "$UNITY_LICENSE" > /tmp/.local/share/unity3d/Unity/Unity_lic.ulf && \
+      unity-editor -projectPath /project -quit -buildLinux64Player /project/Builds/SpacePixels.x86_64 -logFile /dev/stdout'
+  ```
+- The canonical path is still **CI** (`.github/workflows/tests.yml`, `game-ci/unity-test-runner`, image `...-base-3`). Running tests compiles all game + test assemblies, so it also validates that C# changes compile. The interactive game GUI cannot be meaningfully *played* headlessly (no display) — use batchmode tests/builds instead.
+- Host `.NET SDK` (`dotnet`) is installed but the game's C# is compiled **only by Unity** (assemblies depend on `UnityEngine`); do not expect `dotnet build` on the generated `.csproj`/`.sln` to reflect a real build.
 
 ### What IS runnable in the cloud VM: the Python asset tooling under `python/`
 
