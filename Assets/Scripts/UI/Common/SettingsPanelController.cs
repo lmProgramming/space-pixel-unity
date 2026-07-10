@@ -113,7 +113,7 @@ namespace UI.Common
             var fetchGeneration = ++_codigrateFetchGeneration;
             CodigrateThemeProvider.FetchList((list, error) =>
             {
-                if (fetchGeneration != _codigrateFetchGeneration || !_isBound)
+                if (fetchGeneration != _codigrateFetchGeneration)
                     return;
 
                 if (error != null || list == null)
