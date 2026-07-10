@@ -67,3 +67,22 @@ Tests are in AssemblyFolder/Tests in its own assembly
 To allow tests to see private methods/fields, add [assembly: InternalsVisibleTo("AssemblyName.Tests")]. Then create new properties `internal InternalXYZ => XYZ` or methods like XYZForTesting
 A similar pattern can be done to get access to private fields in Editor inspector extensions
 Use NSubstitute for mocking dependencies
+
+## Cursor Cloud specific instructions
+
+This section is durable guidance for cloud agents running in the headless VM (the update script already ran).
+
+### The Unity game cannot be run/built/tested in the cloud VM
+
+- This is a Unity `6000.5.1f1` game. The **Unity Editor is NOT installed** in the cloud VM and is not part of the update script (it is a multi-GB system dependency that also requires a Unity license). Cloud agents therefore cannot open the project, enter Play mode, build a player, or run the Unity Test Framework tests (EditMode/PlayMode) headlessly.
+- Tests run only in **CI**: `.github/workflows/tests.yml` uses `game-ci/unity-test-runner` inside `unityci/editor:ubuntu-6000.5.1f1-base-3` and needs the `UNITY_LICENSE`, `UNITY_EMAIL`, `UNITY_PASSWORD` repo secrets. Reproducing this locally requires Docker + those same secrets.
+- Do not try to compile the C# assemblies standalone (`dotnet`/`mono`): they depend on `UnityEngine` and are only compiled by the Unity Editor. Verify Unity C# changes by reasoning + CI; the human runs the Editor locally (see the Testing section above).
+
+### What IS runnable in the cloud VM: the Python asset tooling under `python/`
+
+`pillow` and `requests` are installed system-wide by the update script. Both tools use paths relative to the current working directory, so run them from the directories noted below.
+
+- **`python/sprite_generator`** (procedural pixel-ship sprite PNGs): run from `python/` with
+  `python3 -c "from sprite_generator.pipeline import run_pipeline; run_pipeline()"`.
+  It reads `sprite_generator/raw_sprites.txt` (gitignored — you must create it: a line ending in `.txt` names a sprite, followed by rows of digits `0`–`7`), writes parsed per-sprite files to `sprite_generator/inputs/`, and outputs PNGs to `Assets/Sprites/Generated/New/`. Path quirk: the output dir is relative to CWD, so running from `python/` writes to `python/Assets/...`, not the repo-root `Assets/`; `cd` to repo root (or adjust) if you want the real assets folder. Faction/armor palette is chosen by filename (`enemy` / `_armor` substrings).
+- **`python/icon_downloader`** (Design System Material Symbols icons): run from `python/icon_downloader/` with `python3 main.py`. Needs network access to `https://api.iconify.design`; writes SVGs into `Assets/DesignSystem/Resources/Textures/Icons/` and appends rules to `Icons.uss` (edits tracked files — review before committing).
