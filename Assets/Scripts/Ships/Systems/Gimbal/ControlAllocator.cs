@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Ships.Modules;
+using Core.Ships.Module;
 using UnityEngine;
 using ZLinq;
 
@@ -7,7 +7,7 @@ namespace Ships.Systems.Gimbal
 {
     public class ControlAllocator
     {
-        public static float[] AllocateControlInputs(IReadOnlyList<Engine> engines,
+        public static float[] AllocateControlInputs(IReadOnlyList<IEngine> engines,
             IReadOnlyList<Vector2> desiredDirections,
             Vector2 centerOfMass, Vector2 forward, float forwardInput, float horizontalInput, float turnInput,
             float maxLeverArm,

@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Ships.Modules;
+using Core.Ships.Module;
 using UnityEngine;
 using ZLinq;
 
@@ -7,7 +7,7 @@ namespace Ships.Systems.Gimbal
 {
     public class EngineDirectionSolver
     {
-        public static float GetMaxLeverArmLength(IEnumerable<Engine> engines, Vector2 centerOfMass)
+        public static float GetMaxLeverArmLength(IEnumerable<IEngine> engines, Vector2 centerOfMass)
         {
             var maxLeverArm = engines.AsValueEnumerable().Select(engine => engine.WorldThrustPoint - centerOfMass)
                 .Aggregate(0f, (current, lever) => Mathf.Max(current, lever.magnitude));
@@ -21,7 +21,7 @@ namespace Ships.Systems.Gimbal
         }
 
         public static Vector2 GetDesiredEngineDirection(Vector2 shipForward, Vector2 centerOfMass, float maxLeverArm,
-            Engine engine, float forwardInput, float horizontalInput, float turnInput)
+            IEngine engine, float forwardInput, float horizontalInput, float turnInput)
         {
             var lever = engine.WorldThrustPoint - centerOfMass;
             var rotationalDirection = new Vector2(-lever.y, lever.x) / maxLeverArm;
@@ -29,7 +29,7 @@ namespace Ships.Systems.Gimbal
                    rotationalDirection * turnInput;
         }
 
-        public static float EstimateNetTorqueForTurnInput(IReadOnlyList<Engine> engines, Vector2 shipForward,
+        public static float EstimateNetTorqueForTurnInput(IReadOnlyList<IEngine> engines, Vector2 shipForward,
             Vector2 centerOfMass, float maxLeverArm, float forwardInput, float horizontalInput, float turnInput)
         {
             return (from engine in engines.AsValueEnumerable()

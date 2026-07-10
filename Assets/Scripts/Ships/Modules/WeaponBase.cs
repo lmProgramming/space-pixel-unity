@@ -1,6 +1,6 @@
 using System;
-using Core.Gameplay.Combat;
 using Core.Ships;
+using Core.Ships.Module;
 using UnityEngine;
 
 namespace Ships.Modules

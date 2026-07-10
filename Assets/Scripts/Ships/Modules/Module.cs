@@ -5,6 +5,7 @@ using Core.Constants;
 using Core.Pixelation;
 using Core.Services;
 using Core.Ships;
+using Core.Ships.Module;
 using Core.Ships.Snapshots.Module;
 using Core.Ships.Snapshots.Module.StandaloneModuleSystemData;
 using LMPro;

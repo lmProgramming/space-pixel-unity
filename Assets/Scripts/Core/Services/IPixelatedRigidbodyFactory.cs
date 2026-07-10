@@ -1,4 +1,5 @@
 using Core.Pixelation;
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Core.Services
@@ -17,6 +18,11 @@ namespace Core.Services
     {
         GameObject GameObject { get; }
 
-        T WithPixelatedRigidbody<T>() where T : Component, IPixelatedRigidbody;
+        [CanBeNull]
+        IPixelatedRigidbody PixelatedRigidbody { get; }
+
+        IPixelatedRigidbodyShellBuilder AsDisabledGameObject();
+
+        IPixelatedRigidbodyShellBuilder WithPixelatedRigidbody<T>() where T : Component, IPixelatedRigidbody;
     }
 }

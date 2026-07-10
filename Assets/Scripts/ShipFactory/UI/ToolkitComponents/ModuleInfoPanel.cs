@@ -1,5 +1,5 @@
 using System;
-using Core.Ships;
+using Core.Ships.Module;
 using UnityEngine;
 using UnityEngine.UIElements;
 using Resources = Core.Ships.Resources;
@@ -133,7 +133,7 @@ namespace ShipFactory.UI.ToolkitComponents
         private void ToggleCollapsed()
         {
             _isCollapsed = !_isCollapsed;
-            ApplyCollapsedVisualState(animate: true);
+            ApplyCollapsedVisualState(true);
         }
 
         private void ApplyCollapsedVisualState(bool animate = false)

@@ -243,7 +243,7 @@ namespace Ships.Tests.TestHelpers.Factories
             var ship = WireShip<MovableShipTestProxy>(initializeModules);
             EnsureAllModulesWired(ship).Forget();
 
-            ship.ConfigureSasSettingsForTesting(new SasTurnInputSettings());
+            ship.ConfigureSASSettingsForTesting(new SASTurnInputSettings());
 
             return ship;
         }
@@ -253,7 +253,7 @@ namespace Ships.Tests.TestHelpers.Factories
             var ship = WireShip<ShipTestProxy>(false);
             EnsureAllModulesWired(ship).Forget();
 
-            ship.ConfigureSasSettingsForTesting(new SasTurnInputSettings());
+            ship.ConfigureSASSettingsForTesting(new SASTurnInputSettings());
 
             return new ShipWithEnginesResult<ShipTestProxy> { Ship = ship, Engines = new List<Engine>(_engines) };
         }

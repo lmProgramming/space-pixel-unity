@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Core.Gameplay.EasyTeam;
+using Core.Ships.Module;
 using Core.Snapshot;
 using LMPro.DataStructures.Graph;
 using LMPro.External.IsAlive;
@@ -18,7 +19,10 @@ namespace Core.Ships
         float CaptainMultiplier { get; }
         string Name { get; }
         IReadOnlyList<IModule> AllModules { get; }
-        bool IsSasOn { get; }
+        public bool IsSASOn { get; }
+        List<IWeapon> Weapons { get; }
+        List<IEngine> Engines { get; }
+        IResourceManager ResourceManager { get; }
         Vector2 GetPosition();
         void OnModuleConnectionLost(IModule module);
         void ManualAddModule(IModule module);

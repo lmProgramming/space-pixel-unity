@@ -8,7 +8,6 @@ using Core.Ships.Snapshots.Module.ModuleData;
 using Events.Gameplay.Shooting;
 using LMPro;
 using UnityEngine;
-using UnityEngine.Assertions;
 using Zenject;
 using ZLinq;
 
@@ -52,7 +51,8 @@ namespace Ships.Modules
             _reloadTimer.OnReady += HandleReady;
             _reloadTimer.OnNotReady += HandleNotReady;
 
-            Assert.IsTrue(projectileSpawnPoints.Count > 0, "Projectile spawn points must be assigned.");
+            if (projectileSpawnPoints.Count == 0)
+                throw new UnityException("[Cannon] Projectile spawn points must be assigned.");
         }
 
         public void Update()

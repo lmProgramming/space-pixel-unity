@@ -12,10 +12,10 @@ namespace Ships.Tests
     public class ShipGameplayMovementTests : ShipTestBase
     {
         private const float MovementSimulationSeconds = 2f;
-        private const float SasSettleSeconds = 5f;
+        private const float SASSettleSeconds = 5f;
         private const float MinForwardDistance = 1f;
         private const float MinTurnDegrees = 5f;
-        private const float SasHeadingOffsetDegrees = 45f;
+        private const float SASHeadingOffsetDegrees = 45f;
 
         [UnityTest]
         public IEnumerator Ship_MovesForward_WhenInstructedToMoveForward()
@@ -28,7 +28,7 @@ namespace Ships.Tests
 
             ship.ForwardInput = 1f;
             ship.TurnInput = 0f;
-            ship.SasEnabled = false;
+            ship.SASEnabled = false;
 
             yield return Utils.SimulateForSeconds(MovementSimulationSeconds);
 
@@ -45,7 +45,7 @@ namespace Ships.Tests
 
             ship.ForwardInput = 0f;
             ship.TurnInput = -1f;
-            ship.SasEnabled = false;
+            ship.SASEnabled = false;
 
             var heading = new HeadingChangeAccumulator(ship);
             yield return Utils.SimulateForSeconds(MovementSimulationSeconds, heading.Sample);
@@ -62,7 +62,7 @@ namespace Ships.Tests
 
             ship.ForwardInput = 0f;
             ship.TurnInput = 1f;
-            ship.SasEnabled = false;
+            ship.SASEnabled = false;
 
             var heading = new HeadingChangeAccumulator(ship);
             yield return Utils.SimulateForSeconds(MovementSimulationSeconds, heading.Sample);
@@ -72,29 +72,29 @@ namespace Ships.Tests
         }
 
         [UnityTest]
-        public IEnumerator Ship_SasReachesWithinOnePercentOfDesiredHeading_AfterFiveSeconds()
+        public IEnumerator Ship_SASReachesWithinOnePercentOfDesiredHeading_AfterFiveSeconds()
         {
             var ship = CreateReadyShip();
             yield return WaitForLifecycle();
 
             ship.ForwardInput = 0f;
             ship.TurnInput = 0f;
-            ship.SasEnabled = true;
+            ship.SASEnabled = true;
 
-            yield return Utils.SimulateForSeconds(SasSettleSeconds);
+            yield return Utils.SimulateForSeconds(SASSettleSeconds);
 
             var headingBeforeTargetChange = ship.GetHeadingDegreesForTesting();
-            var targetHeading = headingBeforeTargetChange + SasHeadingOffsetDegrees;
-            ship.SetSasDesiredHeadingForTesting(targetHeading);
+            var targetHeading = headingBeforeTargetChange + SASHeadingOffsetDegrees;
+            ship.SetSASDesiredHeadingForTesting(targetHeading);
 
-            yield return Utils.SimulateForSeconds(SasSettleSeconds);
+            yield return Utils.SimulateForSeconds(SASSettleSeconds);
 
             var headingError = Mathf.Abs(Mathf.DeltaAngle(ship.GetHeadingDegreesForTesting(), targetHeading));
-            var allowedError = Mathf.Abs(SasHeadingOffsetDegrees) * 0.02f;
+            var allowedError = Mathf.Abs(SASHeadingOffsetDegrees) * 0.02f;
 
             Assert.That(headingError, Is.LessThanOrEqualTo(allowedError),
                 () =>
-                    $"SAS heading error {headingError:F3}° exceeded 1% tolerance ({allowedError:F3}°) for a {SasHeadingOffsetDegrees}° target.");
+                    $"SAS heading error {headingError:F3}° exceeded 1% tolerance ({allowedError:F3}°) for a {SASHeadingOffsetDegrees}° target.");
         }
 
         private MovableShipTestProxy CreateReadyShip()

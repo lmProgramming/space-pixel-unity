@@ -1,4 +1,4 @@
-using Core.Ships;
+using Core.Ships.Module;
 using UnityEngine;
 
 namespace ShipFactory

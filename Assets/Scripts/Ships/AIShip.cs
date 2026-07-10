@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.CompilerServices;
 using AI.EasyState;
 using Core.Ships;
@@ -6,7 +7,6 @@ using Ships.StateMachines.AIShip;
 using Ships.StateMachines.AIShip.States;
 using Ships.Systems.Sensing;
 using UnityEngine;
-using UnityEngine.Assertions;
 
 [assembly: InternalsVisibleTo("E2E")]
 
@@ -30,7 +30,7 @@ namespace Ships
 
         public static float SightRange => 2000f;
         private ShipSensing Sensing { get; set; }
-        public override bool IsSasOn => true;
+        public override bool IsSASOn => true;
 
 #if UNITY_INCLUDE_TESTS
         internal float InternalStopDistance
@@ -46,8 +46,10 @@ namespace Ships
             _aiShipStateMachine = GetComponent<AIShipStateMachine>();
             Sensing = GetComponent<ShipSensing>();
 
-            Assert.IsNotNull(Sensing, "Sensing != null");
-            Assert.IsNotNull(_aiShipStateMachine, "_aiShipStateMachine != null");
+            if (Sensing == null)
+                throw new UnityException("[AIShip] ShipSensing is required.");
+            if (_aiShipStateMachine == null)
+                throw new UnityException("[AIShip] AIShipStateMachine is required.");
 
             InitializeStateMachines();
         }
@@ -72,7 +74,8 @@ namespace Ships
             if (!_aiShipStateMachine.ShouldMove)
                 return;
 
-            Debug.Assert(_aiShipStateMachine.Target.HasValue);
+            if (!_aiShipStateMachine.Target.HasValue)
+                throw new InvalidOperationException("[AIShip] Target is null");
             ComputeNavigationInputs(_aiShipStateMachine.Target.Value);
         }
 

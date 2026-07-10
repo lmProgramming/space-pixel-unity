@@ -6,6 +6,7 @@ using Core.Gameplay.EasyTeam;
 using Core.Pixelation;
 using Core.Services;
 using Core.Ships;
+using Core.Ships.Module;
 using Cysharp.Threading.Tasks;
 using Events.Gameplay.Ship;
 using Gameplay.EasyTeam;
@@ -18,7 +19,6 @@ using Ships.Modules;
 using Ships.Systems.Gimbal;
 using Ships.Systems.Resources;
 using UnityEngine;
-using UnityEngine.Assertions;
 using Zenject;
 using ZLinq;
 
@@ -36,7 +36,7 @@ namespace Ships
         [SerializeField]
         private Team team;
 
-        [Header("SAS")] [SerializeField] private SasTurnInputSettings sasTurnInputSettings;
+        [Header("SAS")] [SerializeField] private SASTurnInputSettings sasTurnInputSettings;
 
         [Header("Control Allocator")]
         [SerializeField] private int allocatorIterations = 14;
@@ -69,7 +69,7 @@ namespace Ships
 
         private Action<IPixelated> _onCommandModuleNoPixelsLeft;
 
-        private SasTurnInputResolver _sasTurnInputResolver;
+        private SASTurnInputResolver _sasTurnInputResolver;
 
         [InjectOptional] private SceneContextRegistry _sceneContextRegistry;
 
@@ -89,16 +89,6 @@ namespace Ships
             set => _moduleConnectionFactory = value;
         }
 
-        public List<WeaponBase> Weapons =>
-            _modulesDictionary[ModuleType.Weapon].AsValueEnumerable().Cast<WeaponBase>().Where(e => e.IsAliveEnabled())
-                .ToList();
-
-        public List<Engine> Engines =>
-            _modulesDictionary[ModuleType.Engine].AsValueEnumerable().Cast<Engine>().Where(e => e.IsAliveEnabled())
-                .ToList();
-
-        public ResourceManager ResourceManager { get; private set; }
-
         public int CrewMissingCount =>
             ModuleGraph.GetAllNodes().AsValueEnumerable().Sum(module => module.CrewMissingCount);
 
@@ -108,20 +98,26 @@ namespace Ships
             _moduleConnectionFactory = GetComponent<IModuleConnectionFactory>();
             _engineDirectionSolver = new EngineDirectionSolver();
             _controlAllocator = new ControlAllocator();
-            _sasTurnInputResolver = new SasTurnInputResolver();
+            _sasTurnInputResolver = new SASTurnInputResolver();
 
-            Assert.IsNotNull(ResourceManager, "ResourceManager != null");
-            Assert.IsNotNull(_moduleConnectionFactory, "_moduleConnectionFactory != null");
-            Assert.IsNotNull(_engineDirectionSolver, "_engineDirectionSolver != null");
-            Assert.IsNotNull(_controlAllocator, "_controlAllocator != null");
-            Assert.IsNotNull(_sasTurnInputResolver, "_sasTurnInputResolver != null");
+            if (ResourceManager == null)
+                throw new UnityException("[Ship] ResourceManager is required.");
+            if (_moduleConnectionFactory == null)
+                throw new UnityException("[Ship] IModuleConnectionFactory is required.");
+            if (_engineDirectionSolver == null)
+                throw new InvalidOperationException("[Ship] EngineDirectionSolver failed to initialize.");
+            if (_controlAllocator == null)
+                throw new InvalidOperationException("[Ship] ControlAllocator failed to initialize.");
+            if (_sasTurnInputResolver == null)
+                throw new InvalidOperationException("[Ship] SASTurnInputResolver failed to initialize.");
         }
 
         protected virtual void Start()
         {
             CommandModule ??= GetComponentInChildren<Command>();
 
-            Assert.IsNotNull(CommandModule, "CommandModule != null");
+            if (CommandModule == null)
+                throw new UnityException("[Ship] CommandModule is required.");
 
             InitializeModules();
             _sasTurnInputResolver.CaptureDesiredHeading(GetCurrentHeadingDegrees());
@@ -160,9 +156,19 @@ namespace Ships
                 CommandModule.PixelatedRigidbody.OnNoPixelsLeft -= _onCommandModuleNoPixelsLeft;
         }
 
+        public IResourceManager ResourceManager { get; private set; }
+
+        public List<IWeapon> Weapons =>
+            _modulesDictionary[ModuleType.Weapon].AsValueEnumerable().Cast<IWeapon>().Where(e => e.IsAliveEnabled())
+                .ToList();
+
+        public List<IEngine> Engines =>
+            _modulesDictionary[ModuleType.Engine].AsValueEnumerable().Cast<IEngine>().Where(e => e.IsAliveEnabled())
+                .ToList();
+
         public string Name => transform.name;
         public IReadOnlyList<IModule> AllModules => _allModulesCache;
-        public virtual bool IsSasOn => false;
+        public virtual bool IsSASOn => false;
 
         public float GeneralEfficiency => Math.Max(0.01f, ResourceManager.EnergyEfficiency);
 
@@ -268,7 +274,8 @@ namespace Ships
         public void SetTeam(ITeam newTeam)
         {
             team = newTeam as Team;
-            Assert.IsNotNull(team, "newTeam must be of type Team");
+            if (team == null)
+                throw new ArgumentException("[Ship] newTeam must be of type Team.");
             gameObject.layer = team.Layer;
             transform.SetLayerAllChildren(team.Layer);
         }
@@ -509,8 +516,10 @@ namespace Ships
             turnInput = Mathf.Clamp(turnInput, -1f, 1f);
 
             var selfRigidbody = CommandModule.PixelatedRigidbody?.Rigidbody;
-            Assert.IsNotNull(selfRigidbody, "CommandModule.PixelatedRigidbody.Rigidbody != null");
-            Assert.IsNotNull(CommandModule.Transform, "CommandModule.Transform != null");
+            if (selfRigidbody == null)
+                throw new InvalidOperationException("[Ship] CommandModule.PixelatedRigidbody.Rigidbody is required.");
+            if (CommandModule.Transform == null)
+                throw new InvalidOperationException("[Ship] CommandModule.Transform is required.");
 
             var engines = Engines;
             if (engines.Count == 0) return false;
@@ -548,7 +557,7 @@ namespace Ships
 
                 if (!engine.Transform)
                 {
-                    Debug.LogWarning($"[Ship] Engine {engine.name} has null Transform. Skipping thruster rotation.",
+                    Debug.LogWarning("[Ship] Engine has null Transform. Skipping thruster rotation.",
                         this);
                     desiredDirectionPerEngine[i] = Vector2.zero;
                     engine.SetCurrentThrust(0f);
@@ -634,7 +643,7 @@ namespace Ships
         }
 
 #if UNITY_INCLUDE_TESTS
-        internal void SetSasDesiredHeadingForTesting(float headingDegrees)
+        internal void SetSASDesiredHeadingForTesting(float headingDegrees)
         {
             _sasTurnInputResolver.CaptureDesiredHeading(headingDegrees);
         }
@@ -665,7 +674,7 @@ namespace Ships
             allocatorRegularization = regularization;
         }
 
-        internal void ConfigureSasSettingsForTesting(SasTurnInputSettings sasSettings)
+        internal void ConfigureSASSettingsForTesting(SASTurnInputSettings sasSettings)
         {
             sasTurnInputSettings = sasSettings;
         }

@@ -206,7 +206,7 @@ namespace E2E
             Container.InjectGameObject(shipGo);
             shipGo.SetActive(true);
 
-            ship.ConfigureSasSettingsForTesting(new SasTurnInputSettings());
+            ship.ConfigureSASSettingsForTesting(new SASTurnInputSettings());
 
             ship.SetTeam(team);
             ship.SetNavigationSize(15);

@@ -1,10 +1,10 @@
 using System.Collections.Generic;
-using Ships.Modules;
+using Core.Ships.Module;
 using UnityEngine;
 
 namespace Ships.Systems.Gimbal
 {
-    public class SasTurnInputResolver
+    public class SASTurnInputResolver
     {
         private float _desiredHeadingDegrees;
         private bool _hasDesiredHeading;
@@ -18,8 +18,8 @@ namespace Ships.Systems.Gimbal
 
         public float ResolveTurnInput(float requestedTurnInput, float forwardInput, float horizontalInput,
             Rigidbody2D selfRigidbody,
-            float currentHeadingDegrees, IReadOnlyList<Engine> engines, Vector2 shipForward, Vector2 centerOfMass,
-            float maxLeverArm, SasTurnInputSettings settings)
+            float currentHeadingDegrees, IReadOnlyList<IEngine> engines, Vector2 shipForward, Vector2 centerOfMass,
+            float maxLeverArm, SASTurnInputSettings settings)
         {
             UpdateDesiredHeadingOnTurnRelease(requestedTurnInput, currentHeadingDegrees, settings);
 
@@ -39,7 +39,7 @@ namespace Ships.Systems.Gimbal
         }
 
         private void UpdateDesiredHeadingOnTurnRelease(float requestedTurnInput, float currentHeadingDegrees,
-            SasTurnInputSettings settings)
+            SASTurnInputSettings settings)
         {
             CaptureCurrentHeadingIfNeeded(currentHeadingDegrees);
 
@@ -51,7 +51,7 @@ namespace Ships.Systems.Gimbal
         }
 
         private float GetHeadingHoldTurnInput(float requestedTurnInput, Rigidbody2D selfRigidbody,
-            float currentHeadingDegrees, SasTurnInputSettings settings)
+            float currentHeadingDegrees, SASTurnInputSettings settings)
         {
             if (Mathf.Abs(requestedTurnInput) > settings.TurnReleaseThreshold)
                 return requestedTurnInput;
@@ -78,7 +78,7 @@ namespace Ships.Systems.Gimbal
         }
 
         private static bool IsMovementInputIdle(float forwardInput, float horizontalInput,
-            SasTurnInputSettings settings)
+            SASTurnInputSettings settings)
         {
             return Mathf.Abs(forwardInput) <= settings.MovementInputDeadZone &&
                    Mathf.Abs(horizontalInput) <= settings.MovementInputDeadZone;
@@ -92,8 +92,8 @@ namespace Ships.Systems.Gimbal
         }
 
         private static float CalculateThrustCompensationTurnInput(float forwardInput, float horizontalInput,
-            IReadOnlyList<Engine> engines,
-            Vector2 shipForward, Vector2 centerOfMass, float maxLeverArm, SasTurnInputSettings settings)
+            IReadOnlyList<IEngine> engines,
+            Vector2 shipForward, Vector2 centerOfMass, float maxLeverArm, SASTurnInputSettings settings)
         {
             if (engines.Count == 0)
                 return 0f;

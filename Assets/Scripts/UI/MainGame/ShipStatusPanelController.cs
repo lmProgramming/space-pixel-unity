@@ -1,20 +1,19 @@
 using System;
+using Core.Constants;
+using Core.Ships;
 using Events.UI;
-using Ships;
-using Ships.Systems.Resources;
+using LMPro.External.IsAlive;
 using UI.Common;
 using UnityEngine;
 using UnityEngine.UIElements;
+using Zenject;
 
 namespace UI.MainGame
 {
+    [RequireComponent(typeof(PanelRenderer))]
     public class ShipStatusPanelController : MonoBehaviour
     {
         [Header("References")]
-        [SerializeField] private Ship playerShip;
-
-        [SerializeField] private UIDocument uiDocument;
-
         [SerializeField] private PointerOverUiEventChannel pointerOverUiChannel;
 
         [Header("Animation Settings")]
@@ -27,36 +26,35 @@ namespace UI.MainGame
         private VisualElement _energyBarFill;
         private VisualElement _energyBarGlow;
         private Label _energyFlowLabel;
+        private bool _isBound;
         private VisualElement _mainHudRoot;
-        private bool _pointerBlockersRegistered;
 
+        private PanelRenderer _panelRenderer;
+
+        [Inject(Id = Constants.PlayerShipId)] private IShip _playerShip;
         private VisualElement _root;
         private VisualElement _sasCluster;
-        private bool _sasHandlersRegistered;
         private bool _sasSyncing;
         private Toggle _sasToggle;
         private VisualElement _shipStatusPanel;
         private Label _speedValueLabel;
         private float _targetEnergyBarHeight;
         private UiPointerTracker _uiPointerTracker;
+        private int _uiVersion = -1;
 
         private void Awake()
         {
-            if (uiDocument == null)
-                uiDocument = GetComponent<UIDocument>();
+            _panelRenderer = GetComponent<PanelRenderer>();
+            if (_panelRenderer == null)
+                throw new UnityException("[ShipStatusPanelController] PanelRenderer is required.");
         }
 
         private void Update()
         {
-            if (_mainHudRoot == null && uiDocument && uiDocument.rootVisualElement != null)
-            {
-                _root = uiDocument.rootVisualElement;
-                CacheUIReferences();
-                RegisterSasToggle();
-                RegisterUiPointerBlockers();
-            }
+            if (!_isBound)
+                return;
 
-            if (!playerShip)
+            if (!_playerShip.IsAlive())
             {
                 SetMainHudVisible(false);
                 return;
@@ -65,9 +63,9 @@ namespace UI.MainGame
             SetMainHudVisible(true);
 
             UpdateSpeedDisplay();
-            UpdateSasDisplay();
+            UpdateSASDisplay();
 
-            if (!playerShip.ResourceManager)
+            if (!_playerShip.ResourceManager.IsAlive())
             {
                 SetShipStatusBlockVisible(false);
                 return;
@@ -75,7 +73,7 @@ namespace UI.MainGame
 
             SetShipStatusBlockVisible(true);
 
-            var resourceManager = playerShip.ResourceManager;
+            var resourceManager = _playerShip.ResourceManager;
             UpdateEnergyDisplay(resourceManager);
             UpdateCrewDisplay(resourceManager);
             AnimateBars();
@@ -83,18 +81,58 @@ namespace UI.MainGame
 
         private void OnEnable()
         {
-            if (uiDocument == null || uiDocument.rootVisualElement == null)
-                return;
-
-            _root = uiDocument.rootVisualElement;
-            CacheUIReferences();
-            RegisterSasToggle();
-            RegisterUiPointerBlockers();
+            _panelRenderer.RegisterUIReloadCallback(OnUIReload);
         }
 
         private void OnDisable()
         {
-            UnregisterSasToggle();
+            _panelRenderer.UnregisterUIReloadCallback(OnUIReload);
+            UnbindUi();
+        }
+
+        private void OnUIReload(PanelRenderer renderer, VisualElement root, int version)
+        {
+            if (version == _uiVersion && _isBound)
+                return;
+
+            if (version != _uiVersion)
+                UnbindUi();
+
+            _uiVersion = version;
+            BindUi(root);
+        }
+
+        private void BindUi(VisualElement root)
+        {
+            if (_isBound || root == null)
+                return;
+
+            _root = root;
+            CacheUIReferences();
+            RegisterSASToggle();
+            RegisterUiPointerBlockers();
+            _isBound = true;
+        }
+
+        private void UnbindUi()
+        {
+            if (!_isBound)
+                return;
+
+            UnregisterSASToggle();
+
+            _mainHudRoot = null;
+            _sasCluster = null;
+            _shipStatusPanel = null;
+            _energyBarFill = null;
+            _energyBarGlow = null;
+            _energyFlowLabel = null;
+            _crewCountLabel = null;
+            _speedValueLabel = null;
+            _sasToggle = null;
+            _root = null;
+            _uiPointerTracker = null;
+            _isBound = false;
         }
 
         private void CacheUIReferences()
@@ -112,10 +150,7 @@ namespace UI.MainGame
 
         private void RegisterUiPointerBlockers()
         {
-            if (_pointerBlockersRegistered || _root == null)
-                return;
-
-            if (pointerOverUiChannel == null)
+            if (!pointerOverUiChannel)
                 throw new InvalidOperationException(
                     "[ShipStatusPanelController] Pointer Over UI event channel is not assigned. " +
                     "Assign the SAME PointerOverUiEventChannel asset that is set on GameProjectInstaller.");
@@ -126,8 +161,6 @@ namespace UI.MainGame
             TrackPointerBlocker("hud-sas-cluster");
             TrackPointerBlocker("ship-status-panel");
             TrackPointerBlocker("speed-readout");
-
-            _pointerBlockersRegistered = true;
         }
 
         private void TrackPointerBlocker(string elementName)
@@ -136,31 +169,29 @@ namespace UI.MainGame
             _uiPointerTracker.Track(element);
         }
 
-        private void RegisterSasToggle()
+        private void RegisterSASToggle()
         {
-            if (_sasHandlersRegistered || _sasToggle == null)
+            if (_sasToggle == null)
                 return;
 
-            _sasToggle.RegisterValueChangedCallback(OnSasToggleChanged);
-            _sasHandlersRegistered = true;
+            _sasToggle.RegisterValueChangedCallback(OnSASToggleChanged);
         }
 
-        private void UnregisterSasToggle()
+        private void UnregisterSASToggle()
         {
-            if (!_sasHandlersRegistered || _sasToggle == null)
+            if (_sasToggle == null)
                 return;
 
-            _sasToggle.UnregisterValueChangedCallback(OnSasToggleChanged);
-            _sasHandlersRegistered = false;
+            _sasToggle.UnregisterValueChangedCallback(OnSASToggleChanged);
         }
 
-        private void OnSasToggleChanged(ChangeEvent<bool> evt)
+        private void OnSASToggleChanged(ChangeEvent<bool> evt)
         {
-            if (_sasSyncing || playerShip is not PlayerShip playerShipTyped)
+            if (_sasSyncing || _playerShip is not ISAS playerShipTyped)
                 return;
-            if (playerShipTyped.IsSasOn == evt.newValue)
+            if (playerShipTyped.IsSASOn == evt.newValue)
                 return;
-            playerShipTyped.ToggleSas();
+            playerShipTyped.ToggleSAS();
         }
 
         private void SetMainHudVisible(bool visible)
@@ -180,16 +211,14 @@ namespace UI.MainGame
             if (_speedValueLabel == null)
                 return;
 
-            var rb = playerShip.CommandModule?.PixelatedRigidbody?.Rigidbody;
+            var rb = _playerShip.CommandModule?.PixelatedRigidbody?.Rigidbody;
             var magnitude = rb ? rb.linearVelocity.magnitude : 0f;
             _speedValueLabel.text = magnitude.ToString("F1");
         }
 
-        private void UpdateSasDisplay()
+        private void UpdateSASDisplay()
         {
-            var playerShipTyped = playerShip as PlayerShip;
-
-            if (!playerShipTyped)
+            if (_playerShip is not ISAS playerShipTyped)
             {
                 if (_sasCluster != null)
                     _sasCluster.style.display = DisplayStyle.None;
@@ -203,11 +232,11 @@ namespace UI.MainGame
                 return;
 
             _sasSyncing = true;
-            _sasToggle.SetValueWithoutNotify(playerShipTyped.IsSasOn);
+            _sasToggle.SetValueWithoutNotify(playerShipTyped!.IsSASOn);
             _sasSyncing = false;
         }
 
-        private void UpdateEnergyDisplay(ResourceManager resourceManager)
+        private void UpdateEnergyDisplay(IResourceManager resourceManager)
         {
             var energy = resourceManager.Energy;
             var energyCapacity = resourceManager.EnergyCapacity;
@@ -254,7 +283,7 @@ namespace UI.MainGame
             _shipStatusPanel.EnableInClassList("energy-draining", !isCritical && netEnergy < -0.1f);
         }
 
-        private void UpdateCrewDisplay(ResourceManager resourceManager)
+        private void UpdateCrewDisplay(IResourceManager resourceManager)
         {
             if (_crewCountLabel != null)
                 _crewCountLabel.text = resourceManager.Crew.ToString();
@@ -272,11 +301,6 @@ namespace UI.MainGame
 
             if (_energyBarGlow != null)
                 _energyBarGlow.style.height = Length.Percent(_currentEnergyBarHeight);
-        }
-
-        public void SetPlayerShip(Ship ship)
-        {
-            playerShip = ship;
         }
     }
 }

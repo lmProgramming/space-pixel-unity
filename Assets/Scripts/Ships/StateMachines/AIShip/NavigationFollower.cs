@@ -1,8 +1,8 @@
+using System;
 using System.Collections.Generic;
 using Core.Pixelation;
 using JetBrains.Annotations;
 using UnityEngine;
-using UnityEngine.Assertions;
 using ZLinq;
 
 namespace Ships.StateMachines.AIShip
@@ -88,7 +88,9 @@ namespace Ships.StateMachines.AIShip
         private Vector2 InterpolateNextWaypoints(Vector2 waypoint,
             float distanceToWaypoint)
         {
-            Assert.IsNotNull(_path);
+            if (_path == null)
+                throw new InvalidOperationException("[NavigationFollower] Path is required.");
+
             var nextWaypoint = _path[_currentWaypointIndex + 1];
 
             var distanceToNextWaypoint = Vector2.Distance(_ship.GetPosition(), nextWaypoint);

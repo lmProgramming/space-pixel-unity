@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Ships.Systems.Gimbal
 {
     [Serializable]
-    public class SasTurnInputSettings
+    public class SASTurnInputSettings
     {
         [field: SerializeField] public float TurnReleaseThreshold { get; private set; } = 0.05f;
         [field: SerializeField] public float MovementInputDeadZone { get; private set; } = 0.05f;

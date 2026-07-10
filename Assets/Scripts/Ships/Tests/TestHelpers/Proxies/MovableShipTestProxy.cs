@@ -7,7 +7,7 @@ namespace Ships.Tests.TestHelpers.Proxies
         public float ForwardInput { get; set; }
         public float HorizontalInput { get; set; }
         public float TurnInput { get; set; }
-        public bool SasEnabled { get; set; }
+        public bool SASEnabled { get; set; }
 
         protected override void ReadMovementInput()
         {
@@ -20,7 +20,7 @@ namespace Ships.Tests.TestHelpers.Proxies
         {
             MarkEnginesActivity(ApplyEngineForces(PendingForwardInput, PendingHorizontalInput, PendingTurnInput,
                 Time.fixedDeltaTime,
-                SasEnabled));
+                SASEnabled));
         }
     }
 }
