@@ -288,7 +288,8 @@ namespace DesignSystem.Showcase.Runtime
             // descendant picks up the new primary text colour for free —
             // except where a more-specific rule (or our own pass below) sets
             // a different value.
-            Stamp(root, TouchedProperty.Background, map.Bg);
+            if (!root.ClassListContains("ds-root--transparent")) Stamp(root, TouchedProperty.Background, map.Bg);
+
             Stamp(root, TouchedProperty.Color, map.TextPrimary);
 
             // Default `.ds-icon` tint baseline (Icons.uss line 31:

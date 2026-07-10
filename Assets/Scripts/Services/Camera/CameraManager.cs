@@ -46,6 +46,9 @@ namespace Services.Camera
             if (!updateCamera)
                 return;
 
+            if (!_gameInput.CanControlCamera)
+                return;
+
             if (objectToFollow)
                 FollowObject();
             else
@@ -107,9 +110,11 @@ namespace Services.Camera
         {
             if (IsMobile) return Input.touchCount > 0 && !_gameInput.IsPointerOverUI;
 
+            var keyboardInputBlocked = _gameInput.IsTextInputFocused;
+
             return (Input.GetMouseButton(0) && !_gameInput.IsPointerOverUI) ||
-                   Input.GetAxis("Horizontal") != 0 ||
-                   Input.GetAxis("Vertical") != 0;
+                   (!keyboardInputBlocked && Input.GetAxis("Horizontal") != 0) ||
+                   (!keyboardInputBlocked && Input.GetAxis("Vertical") != 0);
         }
 
         private static Vector2 GetMobileDragDelta()
@@ -126,6 +131,9 @@ namespace Services.Camera
         private Vector2 GetDesktopDragDelta()
         {
             if (Input.GetMouseButton(0)) return _previousMousePosition - (Vector2)Input.mousePosition;
+
+            if (_gameInput.IsTextInputFocused)
+                return Vector2.zero;
 
             var x = Input.GetAxis("Horizontal") * keySpeed;
             var y = Input.GetAxis("Vertical") * keySpeed;

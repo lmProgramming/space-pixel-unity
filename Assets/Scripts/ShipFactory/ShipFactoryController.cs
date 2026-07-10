@@ -53,6 +53,9 @@ namespace ShipFactory
         [Inject]
         private PointerOverUiEventChannel _pointerOverUiChannel;
 
+        [Inject]
+        private TextInputFocusEventChannel _textInputFocusChannel;
+
         private Button _quitButton;
         private Button _resumeButton;
         private VisualElement _root;
@@ -61,6 +64,7 @@ namespace ShipFactory
         private SettingsPanelController _settingsPanelController;
 
         private TextField _shipNameField;
+        private TextInputFocusTracker _textInputFocusTracker;
 
         [Inject]
         private IShipSnapshotService _snapshotService;
@@ -147,6 +151,8 @@ namespace ShipFactory
 
             BindPauseUi(root);
             RegisterCameraDragPointerBlockers(root);
+            _textInputFocusTracker = new TextInputFocusTracker(_textInputFocusChannel);
+            _textInputFocusTracker.Track(_shipNameField);
             _isBound = true;
         }
 
@@ -180,6 +186,9 @@ namespace ShipFactory
                 _canvasController.OnInputLockChanged -= OnCanvasInputLockChanged;
                 _canvasController.Dispose();
             }
+
+            _textInputFocusTracker?.Release(_shipNameField);
+            _textInputFocusTracker = null;
 
             _canvasContainer = null;
             _canvasController = null;
@@ -329,7 +338,7 @@ namespace ShipFactory
         private void HandleRotationInput()
         {
             if (_isPaused || _canvasController == null) return;
-            if (_shipNameField.focusController?.focusedElement == _shipNameField) return;
+            if (_gameInput.IsTextInputFocused) return;
             if (!Input.GetKeyDown(KeyCode.R)) return;
 
             var counterClockwise = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
