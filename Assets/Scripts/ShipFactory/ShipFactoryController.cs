@@ -281,7 +281,8 @@ namespace ShipFactory
             _settingsButton = root.Q<Button>(SharedUiElementNames.Pause.SettingsButton);
             _quitButton = root.Q<Button>(SharedUiElementNames.Pause.QuitButton);
 
-            if (title == null || _resumeButton == null || _settingsButton == null || _quitButton == null)
+            if (title == null || _resumeButton == null || _settingsButton == null || _quitButton == null ||
+                _pauseOverlay == null)
                 throw new InvalidOperationException(
                     "[ShipFactoryController] Pause elements missing in ShipFactory UXML.");
 
