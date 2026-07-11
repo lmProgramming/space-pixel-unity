@@ -5,7 +5,9 @@ using Core.Services;
 using Events.Camera;
 using Events.UI;
 using ShipFactory.Serialization;
+using ShipFactory.UI.Views.ShipLibrary;
 using Ships;
+using UI;
 using UI.Common;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -14,7 +16,7 @@ using Zenject;
 
 namespace ShipFactory
 {
-    public class ShipFactoryController : MonoBehaviour
+    public class ShipFactoryController : PanelRendererBase
     {
         private const string CanvasContainerName = "canvas-container";
         private const string SnapshotExtension = ".json";
@@ -23,13 +25,16 @@ namespace ShipFactory
         private static readonly object UiHoverBlocker = new();
         private static readonly object UiPointerDownBlocker = new();
 
+        [Header("Controllers")]
+        [SerializeField] private ShipLibraryController libraryController;
+
         [SerializeField]
         private ShipModuleCatalog shipModuleCatalog;
 
-        [SerializeField] private Ship initialShip;
-
         [SerializeField] private string snapshotFolderName = "ShipSnapshots";
         [SerializeField] private CameraResetRequestEventChannel cameraResetRequestEventChannel;
+
+        [SerializeField] private Ship initialShip;
         private Camera _camera;
         private VisualElement _canvasContainer;
 
@@ -39,7 +44,6 @@ namespace ShipFactory
         private IGameInput _gameInput;
 
         private GameObject _gameObjectUnderPointer;
-        private bool _isBound;
         private bool _isModuleDragBlockingCamera;
         private bool _isPaused;
         private bool _isUiHoverBlockingCamera;
@@ -48,7 +52,6 @@ namespace ShipFactory
         private Button _loadShipButton;
         private ModulePaletteController _paletteController;
 
-        private PanelRenderer _panelRenderer;
         private VisualElement _pauseOverlay;
         private VisualElement _pauseOverlayHost;
 
@@ -72,15 +75,13 @@ namespace ShipFactory
 
         private TextInputFocusTracker _textInputFocusTracker;
 
-        private int _uiVersion = -1;
-
-        private void Awake()
+        protected override void Awake()
         {
-            _panelRenderer = GetComponent<PanelRenderer>();
+            base.Awake();
             _camera = Camera.main;
 
-            if (_panelRenderer == null)
-                throw new UnityException("[ShipFactoryController] PanelRenderer is required.");
+            if (libraryController == null)
+                throw new UnityException("[ShipFactoryController] ShipLibraryController is required.");
 
             if (shipModuleCatalog == null)
                 Debug.LogError($"[ShipFactoryController] {nameof(ShipModuleCatalog)} is not assigned!", this);
@@ -95,35 +96,15 @@ namespace ShipFactory
             HandleRotationInput();
         }
 
-        private void OnEnable()
+        protected override void OnDisable()
         {
-            _panelRenderer.RegisterUIReloadCallback(OnUIReload);
-        }
-
-        private void OnDisable()
-        {
-            _panelRenderer.UnregisterUIReloadCallback(OnUIReload);
+            base.OnDisable();
             SetPaused(false);
-            UnbindUi();
         }
 
-        private void OnUIReload(PanelRenderer renderer, VisualElement root, int version)
+        protected override void BindUiCore(
+            VisualElement root)
         {
-            if (version == _uiVersion && _isBound)
-                return;
-
-            if (version != _uiVersion)
-                UnbindUi();
-
-            _uiVersion = version;
-            BindUi(root);
-        }
-
-        private void BindUi(VisualElement root)
-        {
-            if (_isBound || root == null)
-                return;
-
             if (cameraResetRequestEventChannel == null)
                 throw new InvalidOperationException(
                     "[ShipFactoryController] CameraResetRequestEventChannel is not assigned!");
@@ -158,18 +139,58 @@ namespace ShipFactory
             RegisterCameraDragPointerBlockers(root);
             _textInputFocusTracker = new TextInputFocusTracker(_textInputFocusChannel);
             _textInputFocusTracker.Track(_shipNameField);
-            _isBound = true;
         }
 
         private void ShowSnapshotLibrary()
         {
+            var snapshotFolderPath = Path.Combine(Application.persistentDataPath, snapshotFolderName);
+
+            libraryController.CloseClicked -= HideSnapshotLibrary;
+            libraryController.SnapshotSelected -= LoadSnapshotFromLibrary;
+            libraryController.CloseClicked += HideSnapshotLibrary;
+            libraryController.SnapshotSelected += LoadSnapshotFromLibrary;
+            libraryController.Show(snapshotFolderPath);
         }
 
-        private void UnbindUi()
+        private void HideSnapshotLibrary()
         {
-            if (!_isBound)
-                return;
+            libraryController.gameObject.SetActive(false);
+            libraryController.CloseClicked -= HideSnapshotLibrary;
+            libraryController.SnapshotSelected -= LoadSnapshotFromLibrary;
+        }
 
+        private void LoadSnapshotFromLibrary(
+            string snapshotPath)
+        {
+            if (initialShip == null) throw new InvalidOperationException("No ship assigned to ShipFactory.");
+
+            try
+            {
+                var snapshot = _snapshotService.LoadSnapshotFromFile(snapshotPath);
+                if (snapshot == null)
+                {
+                    _canvasController.ShowErrorMessage("Failed to load the selected ship snapshot.");
+                    return;
+                }
+
+                _snapshotService.ApplySnapshot(initialShip, snapshot);
+                _shipNameField.value = string.IsNullOrWhiteSpace(snapshot.shipName)
+                    ? DefaultShipName
+                    : snapshot.shipName;
+                _canvasController.RefreshShipResourcesPanel();
+                HideSnapshotLibrary();
+            }
+            catch (Exception exception)
+            {
+                Debug.LogError(
+                    $"[ShipFactoryController] Failed to load snapshot '{snapshotPath}'.\n{exception}",
+                    this);
+                _canvasController.ShowErrorMessage("Failed to load the selected ship snapshot.");
+            }
+        }
+
+        protected override void UnbindUiCore()
+        {
             SetModuleDragPointerBlock(false);
             SetUiHoverBlock(false);
             SetUiPointerDownBlock(false);
@@ -180,6 +201,8 @@ namespace ShipFactory
 
             if (_saveShipButton != null)
                 _saveShipButton.clicked -= SaveSnapshot;
+            if (_loadShipButton != null)
+                _loadShipButton.clicked -= ShowSnapshotLibrary;
 
             if (_paletteController != null)
             {
@@ -205,7 +228,6 @@ namespace ShipFactory
             _shipNameField = null;
             _saveShipButton = null;
             _root = null;
-            _isBound = false;
         }
 
         private void SaveSnapshot()

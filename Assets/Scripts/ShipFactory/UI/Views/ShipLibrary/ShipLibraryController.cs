@@ -1,4 +1,8 @@
+using System;
+using System.Collections.Generic;
+using Core.Services;
 using UI.MVCVM;
+using Zenject;
 
 namespace ShipFactory.UI.Views.ShipLibrary
 {
@@ -8,18 +12,73 @@ namespace ShipFactory.UI.Views.ShipLibrary
             ShipLibraryView,
             ShipLibraryViewModel>
     {
-        public ShipLibraryController(
-            ShipLibraryModel model,
-            ShipLibraryView view)
-            : base(model, view)
+        [Inject]
+        private IShipSnapshotService _snapshotService;
+
+        protected override void Awake()
         {
+            base.Awake();
+            View.CloseClicked += OnViewCloseClicked;
+            View.LoadClicked += OnViewLoadClicked;
         }
 
-        protected override ShipLibraryViewModel
-            CreateViewModel(
-                ShipLibraryModel model)
+        public event Action CloseClicked;
+
+        public event Action<string> SnapshotSelected;
+
+        public void Show(
+            string snapshotFolderPath)
         {
-            return new ShipLibraryViewModel();
+            if (string.IsNullOrWhiteSpace(snapshotFolderPath))
+                throw new ArgumentException("Snapshot folder path is required.", nameof(snapshotFolderPath));
+
+            gameObject.SetActive(true);
+            Model.SetShipEntries(CreateEntries(snapshotFolderPath));
+        }
+
+        protected override ShipLibraryModel CreateModel()
+        {
+            return new ShipLibraryModel();
+        }
+
+        protected override ShipLibraryView CreateView()
+        {
+            return new ShipLibraryView();
+        }
+
+        protected override ShipLibraryViewModel CreateViewModel(
+            ShipLibraryModel model)
+        {
+            return new ShipLibraryViewModel(model.Entries);
+        }
+
+        private IReadOnlyList<ShipLibraryEntry> CreateEntries(
+            string snapshotFolderPath)
+        {
+            var snapshots = _snapshotService.GetSavedSnapshots(snapshotFolderPath);
+            var entries = new ShipLibraryEntry[snapshots.Count];
+
+            for (var index = 0; index < snapshots.Count; index++)
+            {
+                var snapshot = snapshots[index];
+                entries[index] = new ShipLibraryEntry(
+                    snapshot.DisplayName,
+                    snapshot.FilePath,
+                    null);
+            }
+
+            return entries;
+        }
+
+        private void OnViewCloseClicked()
+        {
+            CloseClicked?.Invoke();
+        }
+
+        private void OnViewLoadClicked(
+            string snapshotPath)
+        {
+            SnapshotSelected?.Invoke(snapshotPath);
         }
     }
 }

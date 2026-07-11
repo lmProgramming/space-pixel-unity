@@ -7,6 +7,6 @@ namespace Core.Constants
     {
         public const string PlayerShipId = "PlayerShip";
 
-        public static string DefaultSaveFolder = Path.Combine(Application.persistentDataPath, "ShipSnapshots");
+        public static readonly string DefaultSaveFolder = Path.Combine(Application.persistentDataPath, "ShipSnapshots");
     }
 }
