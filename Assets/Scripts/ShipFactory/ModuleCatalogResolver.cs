@@ -1,0 +1,40 @@
+using System;
+using Core.Ships;
+using UnityEngine;
+
+namespace ShipFactory
+{
+    public static class ModuleCatalogResolver
+    {
+        public static ShipModuleSO ResolveModuleSO(GameObject moduleInstance, ShipModuleCatalog catalog)
+        {
+            if (!moduleInstance)
+                throw new ArgumentNullException(nameof(moduleInstance));
+            if (!catalog)
+                throw new ArgumentNullException(nameof(catalog));
+
+            var archetypeId = GetRequiredArchetypeId(moduleInstance);
+
+            if (!catalog.TryGetModuleSO(archetypeId, out var moduleSO) || !moduleSO)
+                throw new InvalidOperationException(
+                    $"[ShipFactory] Module '{moduleInstance.name}' archetype '{archetypeId}' was not found in {nameof(ShipModuleCatalog)}.");
+
+            return moduleSO;
+        }
+
+        private static string GetRequiredArchetypeId(GameObject moduleInstance)
+        {
+            var archetypeSource = moduleInstance.GetComponent<IHasModuleArchetypeId>();
+            if (archetypeSource != null && !string.IsNullOrWhiteSpace(archetypeSource.ModuleArchetypeId))
+                return archetypeSource.ModuleArchetypeId;
+
+            var identity = moduleInstance.GetComponent<GameObjectInstanceIdentity>();
+            if (identity && !string.IsNullOrWhiteSpace(identity.ArchetypeId))
+                return identity.ArchetypeId;
+
+            throw new InvalidOperationException(
+                $"[ShipFactory] Module '{moduleInstance.name}' is missing archetype metadata. " +
+                $"Assign {nameof(ShipModuleSOContainer)} or set {nameof(GameObjectInstanceIdentity)}.{nameof(GameObjectInstanceIdentity.ArchetypeId)}.");
+        }
+    }
+}
