@@ -4,11 +4,11 @@ using UnityEngine.UIElements;
 namespace UI
 {
     [RequireComponent(typeof(PanelRenderer))]
-    public abstract class PanelRendererBase : MonoBehaviour
+    public abstract class PanelRendererBase : MonoBehaviour, IPanelRenderable
     {
-        private int _uiVersion = -1;
+        private PanelRendererLifecycle _lifecycle;
 
-        protected bool IsUiBound { get; private set; }
+        protected bool IsUiBound => _lifecycle.IsBound;
 
         protected PanelRenderer PanelRenderer { get; private set; }
 
@@ -17,44 +17,38 @@ namespace UI
             PanelRenderer = GetComponent<PanelRenderer>();
             if (PanelRenderer == null)
                 throw new UnityException($"[{GetType().Name}] {nameof(PanelRenderer)} is required.");
+
+            _lifecycle = new PanelRendererLifecycle(PanelRenderer, this, this);
         }
 
         protected virtual void OnEnable()
         {
-            PanelRenderer.RegisterUIReloadCallback(OnUIReload);
+            _lifecycle.OnHostEnabled();
         }
 
         protected virtual void OnDisable()
         {
-            PanelRenderer.UnregisterUIReloadCallback(OnUIReload);
-            UnbindUi();
+            _lifecycle.OnHostDisabled();
         }
 
-        protected virtual void OnUIReload(
-            PanelRenderer renderer,
-            VisualElement root,
-            int version)
+        protected virtual void OnDestroy()
         {
-            if (version == _uiVersion && IsUiBound)
-                return;
-
-            if (version != _uiVersion)
-                UnbindUi();
-
-            _uiVersion = version;
-            BindUi(root);
+            _lifecycle.Unregister();
         }
 
-        private void BindUi(
+        void IPanelRenderable.BindUI(
             VisualElement root)
         {
-            if (IsUiBound || root == null)
-                return;
-
             BeforeBindUi(root);
             BindUiCore(root);
             AfterBindUi(root);
-            IsUiBound = true;
+        }
+
+        void IPanelRenderable.UnbindUI()
+        {
+            BeforeUnbindUi();
+            UnbindUiCore();
+            AfterUnbindUi();
         }
 
         protected virtual void BeforeBindUi(
@@ -68,17 +62,6 @@ namespace UI
         protected virtual void AfterBindUi(
             VisualElement root)
         {
-        }
-
-        private void UnbindUi()
-        {
-            if (!IsUiBound)
-                return;
-
-            BeforeUnbindUi();
-            UnbindUiCore();
-            AfterUnbindUi();
-            IsUiBound = false;
         }
 
         protected virtual void BeforeUnbindUi()

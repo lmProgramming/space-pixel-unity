@@ -129,19 +129,20 @@ using System;
 namespace {_namespaceName} 
 {{
     public class {_screenName}View 
-        : IView<{_screenName}ViewModel>
+        : View<{_screenName}ViewModel>
     {{
-        private readonly VisualElement root;
-
         public event Action CloseClicked;
 
-        public {_screenName}View(
+        public override void BindUI(
             VisualElement root)
         {{
-            this.root = root;
         }}
 
-        public void SetData(
+        public override void UnbindUI()
+        {{
+        }}
+
+        public override void SetData(
             {_screenName}ViewModel viewModel)
         {{
         }}
@@ -166,14 +167,17 @@ namespace {_namespaceName}
             {_screenName}View,
             {_screenName}ViewModel>
     {{
-        public {_screenName}Controller(
-            {_screenName}Model model,
-            {_screenName}View view)
-            : base(model, view)
+        protected override {_screenName}Model CreateModel()
         {{
+            return new {_screenName}Model();
         }}
 
-        protected override {_screenName}ViewModel 
+        protected override {_screenName}View CreateView()
+        {{
+            return new {_screenName}View();
+        }}
+
+        protected override {_screenName}ViewModel
             CreateViewModel(
                 {_screenName}Model model)
         {{
