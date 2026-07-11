@@ -1,0 +1,187 @@
+using System.IO;
+using UnityEditor;
+using UnityEngine;
+
+namespace Editor.ToolsExtensions
+{
+    public class UIToolkitMVCVMGenerator : EditorWindow
+    {
+        private string _namespaceName = "UI.Screens";
+        private string _screenName = "NewScreen";
+
+        private void OnGUI()
+        {
+            _screenName = EditorGUILayout.TextField(
+                "Screen Name",
+                _screenName);
+
+            _namespaceName = EditorGUILayout.TextField(
+                "Namespace",
+                _namespaceName);
+
+            GUILayout.Space(20);
+
+            if (GUILayout.Button("Create")) Generate();
+        }
+
+        [MenuItem("Tools/UI Toolkit/Create MVCVM Screen")]
+        private static void Open()
+        {
+            GetWindow<UIToolkitMVCVMGenerator>(
+                "UI Screen Generator");
+        }
+
+        private void Generate()
+        {
+            var folder =
+                $"Assets/Scripts/{_namespaceName.Replace(".", "/")}";
+
+            Directory.CreateDirectory(folder);
+
+            CreateUxml(folder);
+            CreateUss(folder);
+
+            CreateModel(folder);
+            CreateViewModel(folder);
+            CreateView(folder);
+            CreateController(folder);
+
+            AssetDatabase.Refresh();
+
+            Debug.Log(
+                $"Created UI Toolkit MVCVM screen: {_screenName}");
+        }
+
+        private static void CreateFile(
+            string folder,
+            string filename,
+            string content)
+        {
+            File.WriteAllText(
+                $"{folder}/{filename}",
+                content);
+        }
+
+        private void CreateUxml(string folder)
+        {
+            CreateFile(
+                folder,
+                $"{_screenName}.uxml",
+                @"<ui:UXML xmlns:ui=""UnityEngine.UIElements"" xsi=""http://www.w3.org/2001/XMLSchema-instance""
+         noNamespaceSchemaLocation=""../../../../UIElementsSchema/UIElements.xsd"" editor-extension-mode=""False"">
+    <Style src=""project://database/Assets/DesignSystem/Resources/UI/Styles/DesignSystem/DesignSystem.uss?fileID=7433441132597879392&amp;guid=2fe121bab235f2a4f8cbc07737f87fe2&amp;type=3#DesignSystem""/>
+    <ui:VisualElement class=""ds-root"">
+    </ui:VisualElement>
+</ui:UXML>");
+        }
+
+        private void CreateUss(string folder)
+        {
+            CreateFile(
+                folder,
+                $"{_screenName}.uss",
+                @"
+");
+        }
+
+        private void CreateModel(string folder)
+        {
+            CreateFile(
+                folder,
+                $"{_screenName}Model.cs",
+                $@"using UI.MVCVM;
+
+namespace {_namespaceName} 
+{{
+    public class {_screenName}Model : ObservableModel
+    {{
+    }}
+}}
+");
+        }
+
+        private void CreateViewModel(string folder)
+        {
+            CreateFile(
+                folder,
+                $"{_screenName}ViewModel.cs",
+                $@"using UI.MVCVM;
+
+namespace {_namespaceName} 
+{{
+    public class {_screenName}ViewModel
+    {{
+    }}
+}}
+");
+        }
+
+
+        private void CreateView(string folder)
+        {
+            CreateFile(
+                folder,
+                $"{_screenName}View.cs",
+                $@"using UI.MVCVM;
+using UnityEngine.UIElements;
+using System;
+
+namespace {_namespaceName} 
+{{
+    public class {_screenName}View 
+        : IView<{_screenName}ViewModel>
+    {{
+        private readonly VisualElement root;
+
+        public event Action CloseClicked;
+
+        public {_screenName}View(
+            VisualElement root)
+        {{
+            this.root = root;
+        }}
+
+        public void SetData(
+            {_screenName}ViewModel viewModel)
+        {{
+        }}
+    }}
+}}
+");
+        }
+
+
+        private void CreateController(string folder)
+        {
+            CreateFile(
+                folder,
+                $"{_screenName}Controller.cs",
+                $@"using UI.MVCVM;
+
+namespace {_namespaceName} 
+{{
+    public class {_screenName}Controller 
+        : Controller<
+            {_screenName}Model,
+            {_screenName}View,
+            {_screenName}ViewModel>
+    {{
+        public {_screenName}Controller(
+            {_screenName}Model model,
+            {_screenName}View view)
+            : base(model, view)
+        {{
+        }}
+
+        protected override {_screenName}ViewModel 
+            CreateViewModel(
+                {_screenName}Model model)
+        {{
+            return new {_screenName}ViewModel();
+        }}
+    }}
+}}
+");
+        }
+    }
+}
