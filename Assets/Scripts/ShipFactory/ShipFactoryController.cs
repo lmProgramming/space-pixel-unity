@@ -84,7 +84,10 @@ namespace ShipFactory
                 throw new UnityException("[ShipFactoryController] ShipLibraryController is required.");
 
             if (shipModuleCatalog == null)
-                Debug.LogError($"[ShipFactoryController] {nameof(ShipModuleCatalog)} is not assigned!", this);
+                throw new UnityException($"[ShipFactoryController] {nameof(ShipModuleCatalog)} is not assigned!");
+
+            if (initialShip != null)
+                initialShip.IsDesignMode = true;
         }
 
         private void Update()

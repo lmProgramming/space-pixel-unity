@@ -47,22 +47,14 @@ namespace Ships.Modules
 
         private Vector2 ThrustPoint => CalculateAverageThrustPoint();
 
-        public override ConcreteModuleType ConcreteType => ConcreteModuleType.Engine;
-
         protected override void Start()
         {
             base.Start();
 
             RegisterNozzles();
-        }
 
-        private void Update()
-        {
-            currentThrustRatio = CurrentThrustRatioForTesting;
-            currentGimbalAngleForDebug = CurrentThrusterAngle;
-            desiredGimbalAngleForDebug = DesiredGimbalAngleForTesting;
-
-            ApplyNozzleVisuals();
+            if (IsDesignMode)
+                SuppressNozzleExhaustForDesignMode();
         }
 
         protected override void OnDestroy()
@@ -75,6 +67,8 @@ namespace Ships.Modules
 
             base.OnDestroy();
         }
+
+        public override ConcreteModuleType ConcreteType => ConcreteModuleType.Engine;
 
         public override ModuleType Type => ModuleType.Engine;
 
@@ -93,6 +87,13 @@ namespace Ships.Modules
 
         public void SetActive(bool active)
         {
+            if (IsDesignMode)
+            {
+                IsActive = false;
+                SuppressNozzleExhaustParticles();
+                return;
+            }
+
             IsActive = active;
         }
 
@@ -114,6 +115,30 @@ namespace Ships.Modules
             var clampedTarget = ClampTargetGimbalAngle(targetAngle);
             var maxStep = GetGimbalStepSize(clampedTarget, deltaTime);
             CurrentThrusterAngle = Mathf.MoveTowardsAngle(CurrentThrusterAngle, clampedTarget, maxStep);
+        }
+
+        protected override void UpdateModule()
+        {
+            currentThrustRatio = CurrentThrustRatioForTesting;
+            currentGimbalAngleForDebug = CurrentThrusterAngle;
+            desiredGimbalAngleForDebug = DesiredGimbalAngleForTesting;
+
+            ApplyNozzleVisuals();
+        }
+
+        internal void SuppressNozzleExhaustForDesignMode()
+        {
+            IsActive = false;
+            SuppressNozzleExhaustParticles();
+        }
+
+        private void SuppressNozzleExhaustParticles()
+        {
+            if (_nozzles == null || _nozzles.Count == 0)
+                _nozzles = GetComponentsInChildren<Nozzle>().AsValueEnumerable().ToList();
+
+            foreach (var nozzle in _nozzles.AsValueEnumerable().Where(nozzle => nozzle))
+                nozzle.SuppressExhaust();
         }
 
         private void RegisterNozzles()
@@ -168,6 +193,12 @@ namespace Ships.Modules
 
         private void ApplyNozzleVisuals()
         {
+            if (IsDesignMode)
+            {
+                SuppressNozzleExhaustForDesignMode();
+                return;
+            }
+
             var visualizedThrustRatio = currentThrustRatio;
             var visualizedThrustAngle = CurrentThrusterAngle;
             var visualizedIsActive = IsActive;
@@ -281,6 +312,9 @@ namespace Ships.Modules
             }
 
             RegisterNozzles();
+
+            if (IsDesignMode)
+                SuppressNozzleExhaustForDesignMode();
         }
 
         private void ClearExistingNozzleChildren()

@@ -9,6 +9,8 @@ namespace Ships.Tests.TestHelpers.Proxies
         public float TurnInput { get; set; }
         public bool SASEnabled { get; set; }
 
+        public override bool IsSASOn => SASEnabled;
+
         protected override void ReadMovementInput()
         {
             PendingForwardInput = ForwardInput;
