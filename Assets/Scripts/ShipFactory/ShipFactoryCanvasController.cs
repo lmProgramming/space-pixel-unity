@@ -11,6 +11,7 @@ using ShipFactory.UI.ToolkitComponents;
 using Ships;
 using UnityEngine;
 using UnityEngine.UIElements;
+using Zenject;
 using ZLinq;
 using Object = UnityEngine.Object;
 
@@ -24,6 +25,7 @@ namespace ShipFactory
         private readonly ModuleInfoPanel _infoPanel;
 
         private readonly VisualElement _inputBlocker;
+        private readonly IInstantiator _instantiator;
         private readonly NotificationPopup _notificationPopup;
 
         private readonly OverlayManager _overlayManager;
@@ -46,9 +48,13 @@ namespace ShipFactory
         public ShipFactoryCanvasController(
             VisualElement root,
             IGameInput gameInput,
+            IInstantiator instantiator,
+            ShipModuleCatalog moduleCatalog,
             CameraResetRequestEventChannel cameraResetRequestEventChannel)
         {
             _gameInput = gameInput;
+            _instantiator = instantiator ?? throw new ArgumentNullException(nameof(instantiator));
+            var moduleCatalog1 = moduleCatalog ?? throw new ArgumentNullException(nameof(moduleCatalog));
             var canvasContainer = root.Q<VisualElement>("canvas-container");
             _inputBlocker = root.Q<VisualElement>("ship-factory-input-blocker");
 
@@ -67,7 +73,7 @@ namespace ShipFactory
             _infoPanel.OnRotateCounterClockwiseClicked += () => RotateActiveModule(-90);
 
             // 2. Initialize Managers
-            _overlayManager = new OverlayManager();
+            _overlayManager = new OverlayManager(moduleCatalog1);
             _animator = new DragAnimator(_overlayManager);
 
             // 3. Register Inputs
@@ -117,8 +123,13 @@ namespace ShipFactory
             _selectedModuleBundle = null;
             _hoveredPlacedBundle = null;
 
-            _overlayManager.RebuildFromShip(ship);
-            _resourcesPanel.Refresh(ship);
+            RebuildShipModules();
+        }
+
+        public void RebuildShipModules()
+        {
+            _overlayManager.RebuildFromShip(_ship);
+            _resourcesPanel.Refresh(_ship);
             RefreshInfoPanelFromCurrentContext();
         }
 
@@ -405,7 +416,7 @@ namespace ShipFactory
         [CanBeNull]
         private ShipModuleSOInstanceBundle InstantiateModule(ShipModuleSO shipModuleSO, Vector2 worldPosition)
         {
-            var instance = (GameObject)Object.Instantiate((Object)shipModuleSO.Prefab, _ship.transform);
+            var instance = _instantiator.InstantiatePrefab(shipModuleSO.Prefab, _ship.transform);
             var module = instance.GetComponent<IModule>();
 
             if (module == null)
@@ -423,8 +434,6 @@ namespace ShipFactory
             if (identity == null)
                 identity = instance.AddComponent<GameObjectInstanceIdentity>();
             identity.EnsureAssigned(InstanceOrigin.CatalogPrefab, shipModuleSO.ArchetypeId);
-
-            instance.GetComponent<Rigidbody2D>().simulated = false;
 
             return new ShipModuleSOInstanceBundle(instance, shipModuleSO, module);
         }

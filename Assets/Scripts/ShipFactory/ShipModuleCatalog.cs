@@ -21,7 +21,19 @@ namespace ShipFactory
 
         public bool TryGetModulePrefab(string archetypeId, out GameObject prefab)
         {
+            if (TryGetModuleSO(archetypeId, out var moduleSO))
+            {
+                prefab = moduleSO.Prefab;
+                return true;
+            }
+
             prefab = null;
+            return false;
+        }
+
+        public bool TryGetModuleSO(string archetypeId, out ShipModuleSO moduleSO)
+        {
+            moduleSO = null;
             if (string.IsNullOrWhiteSpace(archetypeId))
                 return false;
 
@@ -31,8 +43,8 @@ namespace ShipFactory
                      where string.Equals(shipModule.ArchetypeId, archetypeId, StringComparison.Ordinal)
                      select shipModule)
             {
-                prefab = shipModule.Prefab;
-                return prefab;
+                moduleSO = shipModule;
+                return true;
             }
 
             return false;

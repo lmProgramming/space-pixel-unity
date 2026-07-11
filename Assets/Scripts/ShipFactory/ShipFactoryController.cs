@@ -16,6 +16,7 @@ using Zenject;
 
 namespace ShipFactory
 {
+    [DefaultExecutionOrder(-100)]
     public class ShipFactoryController : PanelRendererBase
     {
         private const string CanvasContainerName = "canvas-container";
@@ -71,6 +72,9 @@ namespace ShipFactory
         private IShipSnapshotService _snapshotService;
 
         [Inject]
+        private IInstantiator _instantiator;
+
+        [Inject]
         private TextInputFocusEventChannel _textInputFocusChannel;
 
         private TextInputFocusTracker _textInputFocusTracker;
@@ -113,7 +117,8 @@ namespace ShipFactory
                     "[ShipFactoryController] CameraResetRequestEventChannel is not assigned!");
 
             _root = root;
-            _canvasController = new ShipFactoryCanvasController(root, _gameInput, cameraResetRequestEventChannel);
+            _canvasController = new ShipFactoryCanvasController(
+                root, _gameInput, _instantiator, shipModuleCatalog, cameraResetRequestEventChannel);
             _paletteController = new ModulePaletteController(root, shipModuleCatalog);
 
             _shipNameField = root.Q<TextField>("ship-name-field");
@@ -177,10 +182,11 @@ namespace ShipFactory
                 }
 
                 _snapshotService.ApplySnapshot(initialShip, snapshot);
+                initialShip.InitializeModules();
                 _shipNameField.value = string.IsNullOrWhiteSpace(snapshot.shipName)
                     ? DefaultShipName
                     : snapshot.shipName;
-                _canvasController.RefreshShipResourcesPanel();
+                _canvasController.RebuildShipModules();
                 HideSnapshotLibrary();
             }
             catch (Exception exception)

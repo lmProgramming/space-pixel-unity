@@ -20,6 +20,7 @@ namespace Core.Ships
         string Name { get; }
         IReadOnlyList<IModule> AllModules { get; }
         public bool IsSASOn { get; }
+        bool IsDesignMode { get; set; }
         List<IWeapon> Weapons { get; }
         List<IEngine> Engines { get; }
         IResourceManager ResourceManager { get; }
