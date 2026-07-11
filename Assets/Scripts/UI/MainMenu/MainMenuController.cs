@@ -14,8 +14,7 @@ using UnityEditor;
 
 namespace UI.MainMenu
 {
-    [RequireComponent(typeof(PanelRenderer))]
-    public class MainMenuController : MonoBehaviour
+    public class MainMenuController : PanelRendererBase
     {
         private const string SnapshotFolderName = "ShipSnapshots";
         private const float DefaultAsteroidCount = 6f;
@@ -28,8 +27,6 @@ namespace UI.MainMenu
         private Slider _enemyCountSlider;
         private Slider _friendlyCountSlider;
 
-        private bool _isBound;
-        private PanelRenderer _panelRenderer;
         private Button _quitButton;
         private Button _settingsButton;
         private SettingsPanelController _settingsPanelController;
@@ -39,41 +36,10 @@ namespace UI.MainMenu
         private VisualElement _shipSelectionOverlay;
         private Button _shipSelectLaunchButton;
         private Button _startButton;
-        private int _uiVersion = -1;
 
-        private void Awake()
+        protected override void BindUiCore(
+            VisualElement root)
         {
-            _panelRenderer = GetComponent<PanelRenderer>();
-        }
-
-        private void OnEnable()
-        {
-            _panelRenderer.RegisterUIReloadCallback(OnUIReload);
-        }
-
-        private void OnDisable()
-        {
-            _panelRenderer.UnregisterUIReloadCallback(OnUIReload);
-            UnbindMainMenuUi();
-        }
-
-        private void OnUIReload(PanelRenderer renderer, VisualElement root, int version)
-        {
-            if (version == _uiVersion && _isBound)
-                return;
-
-            if (version != _uiVersion)
-                UnbindMainMenuUi();
-
-            _uiVersion = version;
-            BindMainMenuUi(root);
-        }
-
-        private void BindMainMenuUi(VisualElement root)
-        {
-            if (_isBound || root == null)
-                return;
-
             _startButton = root.Q<Button>("start-button");
             _shipFactoryButton = root.Q<Button>("ship-factory-button");
             _settingsButton = root.Q<Button>("settings-button");
@@ -105,14 +71,10 @@ namespace UI.MainMenu
 
             DesignSystemThemeService.RegisterVisualTree(root);
             _settingsPanelController = new SettingsPanelController(root, true);
-            _isBound = true;
         }
 
-        private void UnbindMainMenuUi()
+        protected override void UnbindUiCore()
         {
-            if (!_isBound)
-                return;
-
             _settingsPanelController?.Unbind();
             _settingsPanelController = null;
 
@@ -137,7 +99,6 @@ namespace UI.MainMenu
             _asteroidCountSlider = null;
             _enemyCountSlider = null;
             _friendlyCountSlider = null;
-            _isBound = false;
         }
 
         private void OpenShipSelectionDialog()

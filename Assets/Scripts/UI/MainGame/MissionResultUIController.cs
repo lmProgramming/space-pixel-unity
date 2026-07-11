@@ -1,84 +1,52 @@
 using System;
 using Core.Services;
-using UnityEngine;
 using UnityEngine.UIElements;
 using Zenject;
 
 namespace UI.MainGame
 {
-    public class MissionResultUIController : MonoBehaviour
+    public class MissionResultUIController : PanelRendererBase
     {
-        private bool _isBound;
-
         [Inject]
         private IMissionService _missionService;
 
         private VisualElement _overlay;
-        private PanelRenderer _panelRenderer;
         private Label _resultLabel;
-        private int _uiVersion = -1;
 
-        private void Awake()
+        protected override void OnEnable()
         {
-            _panelRenderer = GetComponent<PanelRenderer>();
-            if (_panelRenderer == null)
-                throw new UnityException("[MissionResultUIController] PanelRenderer is required.");
-        }
-
-        private void OnEnable()
-        {
-            _panelRenderer.RegisterUIReloadCallback(OnUIReload);
+            base.OnEnable();
             _missionService.OnVictory += ShowVictory;
             _missionService.OnDefeat += ShowDefeat;
         }
 
-        private void OnDisable()
+        protected override void OnDisable()
         {
-            _panelRenderer.UnregisterUIReloadCallback(OnUIReload);
-            UnbindUi();
+            base.OnDisable();
             _missionService.OnVictory -= ShowVictory;
             _missionService.OnDefeat -= ShowDefeat;
         }
 
-        private void OnUIReload(PanelRenderer renderer, VisualElement root, int version)
+        protected override void BindUiCore(
+            VisualElement root)
         {
-            if (version == _uiVersion && _isBound)
-                return;
-
-            if (version != _uiVersion)
-                UnbindUi();
-
-            _uiVersion = version;
-            BindUi(root);
-        }
-
-        private void BindUi(VisualElement root)
-        {
-            if (_isBound || root == null)
-                return;
-
             _overlay = root.Q<VisualElement>("mission-result-overlay");
             _resultLabel = root.Q<Label>("result-label");
 
             if (_overlay == null || _resultLabel == null)
                 throw new InvalidOperationException(
                     "[MissionResultUIController] Mission result elements missing in UXML.");
-            _isBound = true;
         }
 
-        private void UnbindUi()
+        protected override void UnbindUiCore()
         {
-            if (!_isBound)
-                return;
-
             _overlay = null;
             _resultLabel = null;
-            _isBound = false;
         }
 
         private void ShowVictory()
         {
-            if (!_isBound)
+            if (!IsUiBound)
                 return;
 
             _resultLabel.text = "VICTORY";
@@ -89,7 +57,7 @@ namespace UI.MainGame
 
         private void ShowDefeat()
         {
-            if (!_isBound)
+            if (!IsUiBound)
                 return;
 
             _resultLabel.text = "DEFEAT";
