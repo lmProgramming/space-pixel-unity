@@ -2,9 +2,9 @@ using System;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace ShipFactory.UI.Runtime
+namespace UI.Common
 {
-    internal sealed class HoverMarqueeLabel
+    public class HoverMarqueeLabel
     {
         private const float PauseSeconds = 0.5f;
         private const float OverflowEpsilon = 3f;

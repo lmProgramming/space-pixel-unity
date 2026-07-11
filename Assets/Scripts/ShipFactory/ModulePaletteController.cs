@@ -1,7 +1,7 @@
 using System;
 using Core.Pixelation;
 using Core.Ships;
-using ShipFactory.UI.Runtime;
+using UI.Common;
 using UnityEngine;
 using UnityEngine.UIElements;
 

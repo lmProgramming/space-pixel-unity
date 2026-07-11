@@ -22,7 +22,7 @@
                 <ui:TextField name="ship-name-field" label="Name" value="Ship" class="ds-input top-bar__name-field"
                               max-length="32"/>
                 <ui:Button name="load-ship-button" class="ds-btn ds-btn--primary ds-btn--icon">
-                    <ui:VisualElement class="ds-icon ds-icon--load"/>
+                    <ui:VisualElement class="ds-icon ds-icon--folder-open"/>
                 </ui:Button>
                 <ui:Button name="save-ship-button" class="ds-btn ds-btn--primary ds-btn--icon">
                     <ui:VisualElement class="ds-icon ds-icon--save"/>

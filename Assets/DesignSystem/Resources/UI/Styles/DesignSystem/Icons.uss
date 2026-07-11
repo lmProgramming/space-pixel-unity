@@ -1124,7 +1124,6 @@
     background-image: resource("Textures/Icons/Material/android_camera");
 }
 
-.ds-icon--load {
-
+.ds-icon--folder-open {
     background-image: resource("Textures/Icons/Material/folder_open");
 }

@@ -44,6 +44,8 @@ namespace ShipFactory
         private bool _isPaused;
         private bool _isUiHoverBlockingCamera;
         private bool _isUiPointerDownBlockingCamera;
+
+        private Button _loadShipButton;
         private ModulePaletteController _paletteController;
 
         private PanelRenderer _panelRenderer;
@@ -53,9 +55,6 @@ namespace ShipFactory
         [Inject]
         private PointerOverUiEventChannel _pointerOverUiChannel;
 
-        [Inject]
-        private TextInputFocusEventChannel _textInputFocusChannel;
-
         private Button _quitButton;
         private Button _resumeButton;
         private VisualElement _root;
@@ -64,10 +63,14 @@ namespace ShipFactory
         private SettingsPanelController _settingsPanelController;
 
         private TextField _shipNameField;
-        private TextInputFocusTracker _textInputFocusTracker;
 
         [Inject]
         private IShipSnapshotService _snapshotService;
+
+        [Inject]
+        private TextInputFocusEventChannel _textInputFocusChannel;
+
+        private TextInputFocusTracker _textInputFocusTracker;
 
         private int _uiVersion = -1;
 
@@ -131,6 +134,7 @@ namespace ShipFactory
 
             _shipNameField = root.Q<TextField>("ship-name-field");
             _saveShipButton = root.Q<Button>("save-ship-button");
+            _loadShipButton = root.Q<Button>("load-ship-button");
 
             if (_shipNameField == null || _saveShipButton == null)
                 throw new InvalidOperationException("[ShipFactoryController] Save controls are missing in UXML.");
@@ -142,6 +146,7 @@ namespace ShipFactory
             _paletteController.OnModuleHoverStarted += OnPaletteModuleHoverStarted;
             _paletteController.OnModuleHoverEnded += OnPaletteModuleHoverEnded;
             _saveShipButton.clicked += SaveSnapshot;
+            _loadShipButton.clicked += ShowSnapshotLibrary;
 
             var initialName = initialShip != null ? initialShip.name : DefaultShipName;
             _shipNameField.value = initialName;
@@ -154,6 +159,10 @@ namespace ShipFactory
             _textInputFocusTracker = new TextInputFocusTracker(_textInputFocusChannel);
             _textInputFocusTracker.Track(_shipNameField);
             _isBound = true;
+        }
+
+        private void ShowSnapshotLibrary()
+        {
         }
 
         private void UnbindUi()

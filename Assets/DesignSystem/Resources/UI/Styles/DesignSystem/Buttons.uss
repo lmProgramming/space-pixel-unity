@@ -25,7 +25,6 @@
     -unity-text-align: middle-center;
     transition-property: background-color, color, scale, border-color;
     transition-duration: var(--transition-fast);
-    cursor: link; /* Unity treats this as a clickable */
 }
 
 .ds-btn:disabled {
