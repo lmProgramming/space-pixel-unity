@@ -125,7 +125,7 @@ namespace Core.Ships.Snapshots.PixelatedRigidbody.Internals
 
         public void RemovePixelAt(Vector2Int point)
         {
-            RemovePixel(point.x, point.y);
+            SetPixel(point, new Color32(0, 0, 0, 0));
         }
 
         public void RemovePixels(IEnumerable<Vector2Int> points)
@@ -168,20 +168,6 @@ namespace Core.Ships.Snapshots.PixelatedRigidbody.Internals
         public void ApplyPixels()
         {
             // Snapshot has no Texture2D to apply changes to.
-        }
-
-        public void SetPixel(int x, int y, Color32 color)
-        {
-            if (x < 0 || x >= Width || y < 0 || y >= Height)
-                return;
-            if (pixels == null || pixels.Length != Width * Height)
-                return;
-            pixels[y * Width + x] = color;
-        }
-
-        public void RemovePixel(int x, int y)
-        {
-            SetPixel(x, y, new Color32(0, 0, 0, 0));
         }
 
         public List<Vector2Int> GetAllNonTransparentPixelPositions()

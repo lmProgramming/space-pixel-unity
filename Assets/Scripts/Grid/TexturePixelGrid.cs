@@ -6,6 +6,7 @@ using LMPro.DataStructures;
 using Unity.Collections;
 using UnityEngine;
 using ZLinq;
+using Object = UnityEngine.Object;
 
 namespace Grid
 {
@@ -13,7 +14,6 @@ namespace Grid
     {
         private readonly SpriteRenderer _spriteRenderer;
         private Sprite _internalSprite;
-        private Texture2D _internalTexture;
 
         public TexturePixelGrid(SpriteRenderer spriteRenderer)
         {
@@ -114,6 +114,9 @@ namespace Grid
 
         public void SetTextureFromColors(Color32[] colors, int newWidth, int newHeight)
         {
+            if (Texture) Object.DestroyImmediate(Texture);
+            if (_internalSprite) Object.DestroyImmediate(_internalSprite);
+
             Texture = new Texture2D(newWidth, newHeight, TextureFormat.ARGB32, false)
             {
                 filterMode = FilterMode.Point

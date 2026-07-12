@@ -7,7 +7,6 @@ using UnityEditor;
 using UnityEngine;
 using Zenject;
 using ZLinq;
-using Object = UnityEngine.Object;
 
 namespace Editor.InspectorExtensions
 {
@@ -74,7 +73,6 @@ namespace Editor.InspectorExtensions
             AssetDatabase.Refresh();
 
             Debug.Log($"[ShipSnapshotEditor] Snapshot saved to: {fullPath}");
-            EditorGUIUtility.PingObject(AssetDatabase.LoadAssetAtPath<Object>(fullPath));
         }
 
         private void LoadSnapshotOntoShip(Ship ship)

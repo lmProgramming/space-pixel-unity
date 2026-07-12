@@ -211,39 +211,6 @@ namespace Ships.Tests.TestHelpers.Factories
             return this;
         }
 
-        public ShipTestBuilder WithCustomBasicModule(
-            string name,
-            Vector2 localPosition,
-            int width,
-            int height,
-            float rotationZ = 0f,
-            Resources resources = default,
-            Color32[,] colors = null)
-        {
-            var moduleGo = ModuleFactory.CreateModuleBase(
-                name,
-                _shipGo.transform,
-                localPosition,
-                rotationZ,
-                _container,
-                _createdObjects,
-                width,
-                height);
-
-            if (colors != null)
-                moduleGo.GetComponent<PixelatedRigidbody>().SetTextureFromColors(colors);
-
-            var basic = ModuleFactory.AddBasicComponent(moduleGo);
-            basic.SetResources(resources);
-
-            var identity = moduleGo.AddComponent<GameObjectInstanceIdentity>();
-            identity.EnsureAssigned(InstanceOrigin.Custom);
-
-            RegisterOtherModule(basic);
-
-            return this;
-        }
-
         public ShipTestBuilder WithInstantiatedModule(string name, GameObject modulePrefab, Vector2 localPosition,
             string archetypeId,
             int pixelSize)

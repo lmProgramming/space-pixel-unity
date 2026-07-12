@@ -43,11 +43,12 @@ namespace Services
             if (snapshot == null)
                 throw new ArgumentNullException(nameof(snapshot));
 
+            if (string.IsNullOrWhiteSpace(snapshot.shipName) ||
+                snapshot.shipName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
+                throw new ArgumentException("Snapshot ship name is invalid.", nameof(snapshot));
+
             var filePath = Path.Combine(Constants.ShipSnapshotsFolder,
                 $"{snapshot.shipName}{Constants.ShipSnapshotExtension}");
-
-            if (string.IsNullOrWhiteSpace(filePath))
-                throw new ArgumentException("Snapshot file path is required.", nameof(filePath));
 
             var directoryPath = Path.GetDirectoryName(filePath);
             if (!string.IsNullOrWhiteSpace(directoryPath))
