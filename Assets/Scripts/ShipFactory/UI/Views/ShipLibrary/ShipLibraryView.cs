@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using UI.MVCVM;
 using UnityEngine.UIElements;
 
@@ -12,29 +13,42 @@ namespace ShipFactory.UI.Views.ShipLibrary
         private readonly List<(VisualElement element, EventCallback<ClickEvent> callback)> _entryClickCallbacks = new();
 
         private Button _closeButton;
+        private Button _deleteButton;
         private VisualElement _grid;
         private Button _loadButton;
         private int? _selectedSnapshotIndex;
         private Label _statusLabel;
         private ShipLibraryViewModel _viewModel;
 
+        [CanBeNull]
+        private ShipLibraryEntry SelectedEntry =>
+            _selectedSnapshotIndex.HasValue && _selectedSnapshotIndex < _viewModel.Entries.Count &&
+            _selectedSnapshotIndex >= 0
+                ? _viewModel.Entries[_selectedSnapshotIndex.Value]
+                : null;
+
         public event Action CloseClicked;
 
         public event Action<string> LoadClicked;
+
+        public event Action<string> DeleteClicked;
 
         public override void BindUI(
             VisualElement root)
         {
             _closeButton = root.Q<Button>("ship-library-close-button");
             _loadButton = root.Q<Button>("ship-library-load-button");
+            _deleteButton = root.Q<Button>("ship-library-delete-button");
             _statusLabel = root.Q<Label>("ship-library-status-label");
             _grid = root.Q<VisualElement>("ship-library-grid");
 
-            if (_closeButton == null || _loadButton == null || _statusLabel == null || _grid == null)
+            if (_closeButton == null || _loadButton == null || _deleteButton == null || _statusLabel == null ||
+                _grid == null)
                 throw new InvalidOperationException("[ShipLibraryView] Required controls are missing in UXML.");
 
             _closeButton.clicked += OnCloseClicked;
             _loadButton.clicked += OnLoadClicked;
+            _deleteButton.clicked += OnDeleteClicked;
             Render();
         }
 
@@ -44,11 +58,14 @@ namespace ShipFactory.UI.Views.ShipLibrary
                 _closeButton.clicked -= OnCloseClicked;
             if (_loadButton != null)
                 _loadButton.clicked -= OnLoadClicked;
+            if (_deleteButton != null)
+                _deleteButton.clicked -= OnDeleteClicked;
 
             ClearEntryCards();
 
             _closeButton = null;
             _loadButton = null;
+            _deleteButton = null;
             _statusLabel = null;
             _grid = null;
         }
@@ -135,6 +152,7 @@ namespace ShipFactory.UI.Views.ShipLibrary
                 _entryCards[index].EnableInClassList("is-selected", index == _selectedSnapshotIndex);
 
             _loadButton.SetEnabled(_selectedSnapshotIndex.HasValue);
+            _deleteButton.SetEnabled(_selectedSnapshotIndex.HasValue);
         }
 
         private void OnCloseClicked()
@@ -144,11 +162,20 @@ namespace ShipFactory.UI.Views.ShipLibrary
 
         private void OnLoadClicked()
         {
-            if (_viewModel == null || !_selectedSnapshotIndex.HasValue ||
-                _selectedSnapshotIndex >= _viewModel.Entries.Count)
+            var selectedEntry = SelectedEntry;
+            if (selectedEntry == null)
                 return;
 
-            LoadClicked?.Invoke(_viewModel.Entries[_selectedSnapshotIndex.Value].FilePath);
+            LoadClicked?.Invoke(selectedEntry.FilePath);
+        }
+
+        private void OnDeleteClicked()
+        {
+            var selectedEntry = SelectedEntry;
+            if (selectedEntry == null)
+                return;
+
+            DeleteClicked?.Invoke(selectedEntry.FilePath);
         }
     }
 }

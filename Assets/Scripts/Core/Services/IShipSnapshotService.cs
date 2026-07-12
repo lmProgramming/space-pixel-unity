@@ -13,5 +13,7 @@ namespace Core.Services
 
         IReadOnlyList<SavedShipSnapshotDescriptor> GetSavedSnapshots(
             string folderPath = null);
+
+        void DeleteSnapshotFile(string snapshotPath);
     }
 }

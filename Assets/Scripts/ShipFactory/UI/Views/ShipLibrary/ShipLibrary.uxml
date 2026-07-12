@@ -18,6 +18,8 @@
                 </ui:ScrollView>
             </ui:VisualElement>
             <ui:VisualElement class="ds-modal__actions">
+                <ui:Button name="ship-library-delete-button" text="Delete Ship"
+                           class="ds-btn ds-btn--secondary ds-btn--danger"/>
                 <ui:Button name="ship-library-load-button" text="Load Ship" class="ds-btn ds-btn--primary"/>
             </ui:VisualElement>
         </ui:VisualElement>

@@ -21,6 +21,7 @@ namespace ShipFactory.UI.Views.ShipLibrary
 
             View.CloseClicked += OnViewCloseClicked;
             View.LoadClicked += OnViewLoadClicked;
+            View.DeleteClicked += OnViewDeleteClicked;
         }
 
         protected override void OnDisable()
@@ -29,11 +30,14 @@ namespace ShipFactory.UI.Views.ShipLibrary
 
             View.CloseClicked -= OnViewCloseClicked;
             View.LoadClicked -= OnViewLoadClicked;
+            View.DeleteClicked -= OnViewDeleteClicked;
         }
 
         public event Action CloseClicked;
 
         public event Action<string> SnapshotSelected;
+
+        public event Action<string> SnapshotDeleted;
 
         public void Show(
             string snapshotFolderPath)
@@ -84,10 +88,14 @@ namespace ShipFactory.UI.Views.ShipLibrary
             CloseClicked?.Invoke();
         }
 
-        private void OnViewLoadClicked(
-            string snapshotPath)
+        private void OnViewLoadClicked(string snapshotPath)
         {
             SnapshotSelected?.Invoke(snapshotPath);
+        }
+
+        private void OnViewDeleteClicked(string snapshotPath)
+        {
+            SnapshotDeleted?.Invoke(snapshotPath);
         }
     }
 }

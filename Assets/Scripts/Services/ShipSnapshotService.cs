@@ -78,5 +78,10 @@ namespace Services
 
             return descriptors;
         }
+
+        public void DeleteSnapshotFile(string snapshotPath)
+        {
+            File.Delete(snapshotPath);
+        }
     }
 }

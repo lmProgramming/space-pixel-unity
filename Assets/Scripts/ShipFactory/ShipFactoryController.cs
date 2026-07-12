@@ -45,6 +45,10 @@ namespace ShipFactory
         private IGameInput _gameInput;
 
         private GameObject _gameObjectUnderPointer;
+
+        [Inject]
+        private IInstantiator _instantiator;
+
         private bool _isModuleDragBlockingCamera;
         private bool _isPaused;
         private bool _isUiHoverBlockingCamera;
@@ -70,9 +74,6 @@ namespace ShipFactory
 
         [Inject]
         private IShipSnapshotService _snapshotService;
-
-        [Inject]
-        private IInstantiator _instantiator;
 
         [Inject]
         private TextInputFocusEventChannel _textInputFocusChannel;
@@ -153,22 +154,27 @@ namespace ShipFactory
         {
             var snapshotFolderPath = Path.Combine(Application.persistentDataPath, snapshotFolderName);
 
-            libraryController.CloseClicked -= HideSnapshotLibrary;
-            libraryController.SnapshotSelected -= LoadSnapshotFromLibrary;
+            UnBindSnapshotLibrary();
             libraryController.CloseClicked += HideSnapshotLibrary;
             libraryController.SnapshotSelected += LoadSnapshotFromLibrary;
+            libraryController.SnapshotDeleted += LibraryControllerOnSnapshotDeleted;
             libraryController.Show(snapshotFolderPath);
         }
 
         private void HideSnapshotLibrary()
         {
             libraryController.gameObject.SetActive(false);
-            libraryController.CloseClicked -= HideSnapshotLibrary;
-            libraryController.SnapshotSelected -= LoadSnapshotFromLibrary;
+            UnBindSnapshotLibrary();
         }
 
-        private void LoadSnapshotFromLibrary(
-            string snapshotPath)
+        private void UnBindSnapshotLibrary()
+        {
+            libraryController.CloseClicked -= HideSnapshotLibrary;
+            libraryController.SnapshotSelected -= LoadSnapshotFromLibrary;
+            libraryController.SnapshotDeleted -= LibraryControllerOnSnapshotDeleted;
+        }
+
+        private void LoadSnapshotFromLibrary(string snapshotPath)
         {
             if (initialShip == null) throw new InvalidOperationException("No ship assigned to ShipFactory.");
 
@@ -196,6 +202,12 @@ namespace ShipFactory
                     this);
                 _canvasController.ShowErrorMessage("Failed to load the selected ship snapshot.");
             }
+        }
+
+        private void LibraryControllerOnSnapshotDeleted(string snapshotPath)
+        {
+            _snapshotService.DeleteSnapshotFile(snapshotPath);
+            _canvasController.ShowInfoMessage($"Deleted snapshot '{Path.GetFileNameWithoutExtension(snapshotPath)}'.");
         }
 
         protected override void UnbindUiCore()
