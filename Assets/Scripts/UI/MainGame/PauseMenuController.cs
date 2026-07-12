@@ -9,16 +9,13 @@ using UnityEngine.UIElements;
 
 namespace UI.MainGame
 {
-    [RequireComponent(typeof(PanelRenderer))]
-    public class PauseMenuController : MonoBehaviour
+    public class PauseMenuController : PanelRendererBase
     {
         [SerializeField] private PointerOverUiEventChannel pointerOverUiChannel;
 
         [SerializeField] private PauseStateEventChannel pauseStateChannel;
 
-        private bool _isBound;
         private bool _isPaused;
-        private PanelRenderer _panelRenderer;
         private VisualElement _pauseOverlay;
         private VisualElement _pauseOverlayHost;
         private Button _quitButton;
@@ -27,14 +24,6 @@ namespace UI.MainGame
         private Button _settingsButton;
         private SettingsPanelController _settingsPanelController;
         private UiPointerTracker _uiPointerTracker;
-        private int _uiVersion = -1;
-
-        private void Awake()
-        {
-            _panelRenderer = GetComponent<PanelRenderer>();
-            if (_panelRenderer == null)
-                throw new UnityException("[PauseMenuController] PanelRenderer is required.");
-        }
 
         private void LateUpdate()
         {
@@ -50,35 +39,15 @@ namespace UI.MainGame
             SetPaused(!_isPaused);
         }
 
-        private void OnEnable()
+        protected override void OnDisable()
         {
-            _panelRenderer.RegisterUIReloadCallback(OnUIReload);
-        }
-
-        private void OnDisable()
-        {
-            _panelRenderer.UnregisterUIReloadCallback(OnUIReload);
-            UnbindUi();
+            base.OnDisable();
             SetPaused(false);
         }
 
-        private void OnUIReload(PanelRenderer renderer, VisualElement root, int version)
+        protected override void BindUiCore(
+            VisualElement root)
         {
-            if (version == _uiVersion && _isBound)
-                return;
-
-            if (version != _uiVersion)
-                UnbindUi();
-
-            _uiVersion = version;
-            BindUi(root);
-        }
-
-        private void BindUi(VisualElement root)
-        {
-            if (_isBound || root == null)
-                return;
-
             _root = root;
             _pauseOverlay = root.Q<VisualElement>(SharedUiElementNames.Pause.Overlay);
             _pauseOverlayHost = root.Q<VisualElement>(SharedUiElementNames.Pause.OverlayHost);
@@ -102,14 +71,10 @@ namespace UI.MainGame
 
             _settingsPanelController = new SettingsPanelController(root, false);
             RegisterUiPointerBlockers();
-            _isBound = true;
         }
 
-        private void UnbindUi()
+        protected override void UnbindUiCore()
         {
-            if (!_isBound)
-                return;
-
             _settingsPanelController?.Unbind();
             _settingsPanelController = null;
 
@@ -124,7 +89,6 @@ namespace UI.MainGame
             _quitButton = null;
             _root = null;
             _uiPointerTracker = null;
-            _isBound = false;
         }
 
         private void RegisterUiPointerBlockers()

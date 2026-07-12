@@ -7,6 +7,10 @@ namespace Core.Constants
     {
         public const string PlayerShipId = "PlayerShip";
 
-        public static string DefaultSaveFolder = Path.Combine(Application.persistentDataPath, "ShipSnapshots");
+        public const string ShipSnapshotExtension = ".json";
+        public const string ShipSnapshotIconExtension = ".png";
+
+        public static readonly string ShipSnapshotsFolder =
+            Path.Combine(Application.persistentDataPath, "ShipSnapshots");
     }
 }

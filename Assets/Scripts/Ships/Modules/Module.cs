@@ -66,7 +66,7 @@ namespace Ships.Modules
             PixelatedRigidbody.CurrentPixelCount <
             PixelatedRigidbody.StartPixelCount * GameplayConstants.ModuleDestroyedBelowPixelRatio;
 
-        public virtual ConcreteModuleType ConcreteType { get; protected set; } = ConcreteModuleType.Basic;
+        protected bool IsDesignMode => Ship is { IsDesignMode: true };
 
         protected virtual void Awake()
         {
@@ -80,6 +80,13 @@ namespace Ships.Modules
                 PixelatedRigidbody.OnPixelsLost += CheckCohesion;
             else
                 Debug.LogError("PixelatedRigidbody not found on Module!", this);
+        }
+
+        private void Update()
+        {
+            if (IsDesignMode) return;
+
+            UpdateModule();
         }
 
         protected virtual void OnDestroy()
@@ -110,6 +117,8 @@ namespace Ships.Modules
                              PixelatedRigidbody.LocalToWorldPoint(localPixelPos))) Gizmos.DrawCube(worldPos, gizmoSize);
             }
         }
+
+        public virtual ConcreteModuleType ConcreteType { get; protected set; } = ConcreteModuleType.Basic;
 
         public IShip Ship { get; protected set; }
         public Collider2D Collider2D => PixelatedRigidbody.Collider2D;
@@ -238,13 +247,17 @@ namespace Ships.Modules
                 identity.EnsureAssigned(identity.Origin, identity.ArchetypeId);
             }
 
+            var archetypeId = ResolveArchetypeIdForSnapshot(identity);
+            if (!string.IsNullOrWhiteSpace(archetypeId) && string.IsNullOrWhiteSpace(identity.ArchetypeId))
+                identity.EnsureAssigned(InstanceOrigin.CatalogPrefab, archetypeId);
+
             var moduleSnapshot = new ModuleSnapshot
             {
                 instanceId = identity.InstanceId,
                 moduleName = Transform.name,
                 concreteModuleType = ConcreteType,
                 origin = identity.Origin,
-                archetypeId = identity.ArchetypeId,
+                archetypeId = archetypeId,
                 localPosition = Transform.localPosition,
                 localRotation = Transform.localRotation,
                 resources = Resources,
@@ -272,6 +285,26 @@ namespace Ships.Modules
         public void SetResources(Resources newResources)
         {
             Resources = newResources;
+        }
+
+        protected virtual void UpdateModule()
+        {
+        }
+
+        private string ResolveArchetypeIdForSnapshot(GameObjectInstanceIdentity identity)
+        {
+            if (!string.IsNullOrWhiteSpace(identity.ArchetypeId))
+                return identity.ArchetypeId;
+
+            if (!Transform)
+                throw new UnityException(
+                    "[Module] Transform null in ResolveArchetypeIdForSnapshot. This should never happen.");
+
+            var archetypeSource = Transform.GetComponent<IHasModuleArchetypeId>();
+            if (archetypeSource != null && !string.IsNullOrWhiteSpace(archetypeSource.ModuleArchetypeId))
+                return archetypeSource.ModuleArchetypeId;
+
+            return string.Empty;
         }
 
         private void RestoreSystems(StandaloneModuleSystemData[] systemData, IGameContentCatalog contentCatalog)

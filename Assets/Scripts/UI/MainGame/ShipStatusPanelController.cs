@@ -10,8 +10,7 @@ using Zenject;
 
 namespace UI.MainGame
 {
-    [RequireComponent(typeof(PanelRenderer))]
-    public class ShipStatusPanelController : MonoBehaviour
+    public class ShipStatusPanelController : PanelRendererBase
     {
         [Header("References")]
         [SerializeField] private PointerOverUiEventChannel pointerOverUiChannel;
@@ -26,10 +25,7 @@ namespace UI.MainGame
         private VisualElement _energyBarFill;
         private VisualElement _energyBarGlow;
         private Label _energyFlowLabel;
-        private bool _isBound;
         private VisualElement _mainHudRoot;
-
-        private PanelRenderer _panelRenderer;
 
         [Inject(Id = Constants.PlayerShipId)] private IShip _playerShip;
         private VisualElement _root;
@@ -40,18 +36,10 @@ namespace UI.MainGame
         private Label _speedValueLabel;
         private float _targetEnergyBarHeight;
         private UiPointerTracker _uiPointerTracker;
-        private int _uiVersion = -1;
-
-        private void Awake()
-        {
-            _panelRenderer = GetComponent<PanelRenderer>();
-            if (_panelRenderer == null)
-                throw new UnityException("[ShipStatusPanelController] PanelRenderer is required.");
-        }
 
         private void Update()
         {
-            if (!_isBound)
+            if (!IsUiBound)
                 return;
 
             if (!_playerShip.IsAlive())
@@ -79,46 +67,17 @@ namespace UI.MainGame
             AnimateBars();
         }
 
-        private void OnEnable()
+        protected override void BindUiCore(
+            VisualElement root)
         {
-            _panelRenderer.RegisterUIReloadCallback(OnUIReload);
-        }
-
-        private void OnDisable()
-        {
-            _panelRenderer.UnregisterUIReloadCallback(OnUIReload);
-            UnbindUi();
-        }
-
-        private void OnUIReload(PanelRenderer renderer, VisualElement root, int version)
-        {
-            if (version == _uiVersion && _isBound)
-                return;
-
-            if (version != _uiVersion)
-                UnbindUi();
-
-            _uiVersion = version;
-            BindUi(root);
-        }
-
-        private void BindUi(VisualElement root)
-        {
-            if (_isBound || root == null)
-                return;
-
             _root = root;
             CacheUIReferences();
             RegisterSASToggle();
             RegisterUiPointerBlockers();
-            _isBound = true;
         }
 
-        private void UnbindUi()
+        protected override void UnbindUiCore()
         {
-            if (!_isBound)
-                return;
-
             UnregisterSASToggle();
 
             _mainHudRoot = null;
@@ -132,7 +91,6 @@ namespace UI.MainGame
             _sasToggle = null;
             _root = null;
             _uiPointerTracker = null;
-            _isBound = false;
         }
 
         private void CacheUIReferences()

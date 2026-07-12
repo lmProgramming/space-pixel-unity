@@ -7,7 +7,6 @@ using UnityEditor;
 using UnityEngine;
 using Zenject;
 using ZLinq;
-using Object = UnityEngine.Object;
 
 namespace Editor.InspectorExtensions
 {
@@ -41,7 +40,7 @@ namespace Editor.InspectorExtensions
             if (!GUILayout.Button("Open Snapshots Folder")) return;
 
             EnsureSnapshotFolderExists();
-            EditorUtility.RevealInFinder(Constants.DefaultSaveFolder);
+            EditorUtility.RevealInFinder(Constants.ShipSnapshotsFolder);
         }
 
         private void CaptureAndSaveSnapshot(Ship ship)
@@ -67,14 +66,13 @@ namespace Editor.InspectorExtensions
 
             var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
             var sanitizedName = SanitizeFileName(ship.name);
-            var filename = $"{sanitizedName}_{timestamp}.json";
-            var fullPath = Path.Combine(Constants.DefaultSaveFolder, filename);
+            var filename = $"{sanitizedName}_{timestamp}{Constants.ShipSnapshotExtension}";
+            var fullPath = Path.Combine(Constants.ShipSnapshotsFolder, filename);
 
             File.WriteAllText(fullPath, json);
             AssetDatabase.Refresh();
 
             Debug.Log($"[ShipSnapshotEditor] Snapshot saved to: {fullPath}");
-            EditorGUIUtility.PingObject(AssetDatabase.LoadAssetAtPath<Object>(fullPath));
         }
 
         private void LoadSnapshotOntoShip(Ship ship)
@@ -87,7 +85,7 @@ namespace Editor.InspectorExtensions
 
             ProjectContext.Instance.Container.Inject(this);
 
-            var path = EditorUtility.OpenFilePanel("Load Ship Snapshot", Constants.DefaultSaveFolder, "json");
+            var path = EditorUtility.OpenFilePanel("Load Ship Snapshot", Constants.ShipSnapshotsFolder, "json");
 
             if (string.IsNullOrEmpty(path)) return;
 
@@ -105,7 +103,8 @@ namespace Editor.InspectorExtensions
 
         private static void EnsureSnapshotFolderExists()
         {
-            if (!Directory.Exists(Constants.DefaultSaveFolder)) Directory.CreateDirectory(Constants.DefaultSaveFolder);
+            if (!Directory.Exists(Constants.ShipSnapshotsFolder))
+                Directory.CreateDirectory(Constants.ShipSnapshotsFolder);
         }
 
         private static string SanitizeFileName(string name)

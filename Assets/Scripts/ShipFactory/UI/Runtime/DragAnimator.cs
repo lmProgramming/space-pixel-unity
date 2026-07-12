@@ -1,6 +1,8 @@
 using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using ShipFactory.Helpers;
+using ShipFactory.Models;
 using UnityEngine;
 
 namespace ShipFactory.UI.Runtime
@@ -30,7 +32,7 @@ namespace ShipFactory.UI.Runtime
         public Vector2 CalculateOffScreenBottomPosition(float worldX)
         {
             if (!_cam) return Snapper.SnapToGrid(new Vector2(worldX, -100f));
-            
+
             var viewportBottom = _cam.ViewportToWorldPoint(new Vector3(0.5f, -0.15f, _cam.nearClipPlane));
             return Snapper.SnapToGrid(new Vector2(worldX, viewportBottom.y));
         }

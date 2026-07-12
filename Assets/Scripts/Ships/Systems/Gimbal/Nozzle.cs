@@ -3,6 +3,7 @@ using Core.Services;
 using Core.Ships;
 using Core.Ships.Snapshots.PixelatedRigidbody;
 using Pixelation;
+using Ships.Modules;
 using UnityEngine;
 
 namespace Ships.Systems.Gimbal
@@ -17,6 +18,8 @@ namespace Ships.Systems.Gimbal
 
         public Vector3 RestLocalPosition { get; private set; }
 
+        private bool IsDesignMode => GetComponentInParent<Module>()?.Ship is { IsDesignMode: true };
+
         protected override void Awake()
         {
             base.Awake();
@@ -30,6 +33,8 @@ namespace Ships.Systems.Gimbal
         private void Start()
         {
             EnsureExhaustParticlesInitialized();
+            if (IsDesignMode)
+                SuppressExhaust();
         }
 
         protected override void OnDestroy()
@@ -51,6 +56,12 @@ namespace Ships.Systems.Gimbal
 
         public void ApplyExhaustVisuals(float currentThrustRatio, bool isActive)
         {
+            if (IsDesignMode)
+            {
+                SuppressExhaust();
+                return;
+            }
+
             var thrustRatio = Mathf.Pow(isActive ? currentThrustRatio : 0f, 2);
 
             EnsureExhaustParticlesInitialized();
@@ -62,6 +73,25 @@ namespace Ships.Systems.Gimbal
 
             var main = _exhaustParticles.main;
             main.startSpeedMultiplier = _exhaustBaseStartSpeedMultiplier * thrustRatio;
+        }
+
+        public void SuppressExhaust()
+        {
+            if (!_exhaustParticles)
+                _exhaustParticles = GetComponentInChildren<ParticleSystem>();
+
+            if (!_exhaustParticles)
+                return;
+
+            _exhaustParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+
+            var emission = _exhaustParticles.emission;
+            emission.enabled = false;
+            emission.rateOverTimeMultiplier = 0f;
+            emission.rateOverDistanceMultiplier = 0f;
+
+            var main = _exhaustParticles.main;
+            main.startSpeedMultiplier = 0f;
         }
 
         private void EnsureExhaustParticlesInitialized()
@@ -116,6 +146,10 @@ namespace Ships.Systems.Gimbal
 
             var newGo = Instantiate(prefab, transform);
             newGo.transform.localPosition = typeData.particleEffectPosition;
+
+            EnsureExhaustParticlesInitialized();
+            if (IsDesignMode)
+                SuppressExhaust();
         }
 
         protected override PixelatedRigidbodyType GetSnapshotRigidbodyType()

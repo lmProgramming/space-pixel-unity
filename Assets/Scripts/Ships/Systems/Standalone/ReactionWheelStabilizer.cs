@@ -13,19 +13,16 @@ namespace Ships.Systems.Standalone
         [SerializeField] private ReactionWheelSettings settings;
 
         private float _initialMass;
-        private Module _module;
 
         private void Start()
         {
-            _module = GetComponent<Module>();
-
-            _initialMass = _module.PixelatedRigidbody.Rigidbody.mass;
+            _initialMass = Module.PixelatedRigidbody.Rigidbody.mass;
         }
 
-        private void FixedUpdate()
+        protected override void TickStandaloneSystem()
         {
-            if (_module.Ship.IsSASOn)
-                Apply(_module.PixelatedRigidbody.Rigidbody, _initialMass * _module.ActualEfficiency);
+            if (Module.Ship.IsSASOn)
+                Apply(Module.PixelatedRigidbody.Rigidbody, _initialMass * Module.ActualEfficiency);
         }
 
         private void Apply(Rigidbody2D commandRigidbody, float multiplier)

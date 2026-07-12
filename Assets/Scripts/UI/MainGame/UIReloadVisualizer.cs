@@ -11,62 +11,23 @@ using ZLinq;
 
 namespace UI.MainGame
 {
-    [RequireComponent(typeof(PanelRenderer))]
-    public class UIReloadVisualizer : MonoBehaviour
+    public class UIReloadVisualizer : PanelRendererBase
     {
-        private bool _isBound;
         private Dictionary<IWeapon, Action> _onNotReadyActions;
         private Dictionary<IWeapon, Action> _onReadyActions;
-        private PanelRenderer _panelRenderer;
         [Inject(Id = Constants.PlayerShipId)] private IShip _playerShip;
-        private int _uiVersion = -1;
         private VisualElement _weaponQueue;
         private Dictionary<IWeapon, VisualElement> _weaponSlotDictionary;
 
-        private void Awake()
+        protected override void BindUiCore(
+            VisualElement root)
         {
-            _panelRenderer = GetComponent<PanelRenderer>();
-            if (_panelRenderer == null)
-                throw new UnityException("[UIReloadVisualizer] PanelRenderer is required.");
-        }
-
-        private void OnEnable()
-        {
-            _panelRenderer.RegisterUIReloadCallback(OnUIReload);
-        }
-
-        private void OnDisable()
-        {
-            _panelRenderer.UnregisterUIReloadCallback(OnUIReload);
-            UnbindUi();
-        }
-
-        private void OnUIReload(PanelRenderer renderer, VisualElement root, int version)
-        {
-            if (version == _uiVersion && _isBound)
-                return;
-
-            if (version != _uiVersion)
-                UnbindUi();
-
-            _uiVersion = version;
-            BindUi(root);
-        }
-
-        private void BindUi(VisualElement root)
-        {
-            if (_isBound || root == null)
-                return;
-
-            if (!ValidateSetup())
-                return;
+            ValidateSetup();
 
             _weaponQueue = root.Q<ChildAnnotator>("weapon-queue");
             if (_weaponQueue == null)
-            {
-                Debug.LogError("weapon-queue VisualElement not found on HUD PanelRenderer.", this);
-                return;
-            }
+                throw new InvalidOperationException(
+                    "[UIReloadVisualizer] weapon-queue VisualElement is missing in UXML.");
 
             _weaponSlotDictionary = new Dictionary<IWeapon, VisualElement>();
             _onReadyActions = new Dictionary<IWeapon, Action>();
@@ -74,7 +35,7 @@ namespace UI.MainGame
 
             var weapons = _playerShip.Weapons;
             if (weapons == null)
-                return;
+                throw new InvalidOperationException("[UIReloadVisualizer] Player ship weapons are required.");
 
             foreach (var weapon in weapons)
             {
@@ -99,14 +60,10 @@ namespace UI.MainGame
 
             SortAllSlots();
             RefreshWeaponQueueChildClasses();
-            _isBound = true;
         }
 
-        private void UnbindUi()
+        protected override void UnbindUiCore()
         {
-            if (!_isBound && _weaponSlotDictionary == null)
-                return;
-
             UnsubscribeWeaponEvents();
             ClearWeaponQueueSlots();
 
@@ -114,7 +71,6 @@ namespace UI.MainGame
             _weaponSlotDictionary = null;
             _onReadyActions = null;
             _onNotReadyActions = null;
-            _isBound = false;
         }
 
         private void UnsubscribeWeaponEvents()
@@ -143,7 +99,7 @@ namespace UI.MainGame
 
         private void HandleWeaponStateChange(IWeapon weapon, bool becameReady)
         {
-            if (!_isBound || _weaponSlotDictionary == null ||
+            if (!IsUiBound || _weaponSlotDictionary == null ||
                 !_weaponSlotDictionary.TryGetValue(weapon, out var slot) || slot == null)
             {
                 Debug.LogWarning($"Weapon slot not found for {weapon} during state change.", this);
@@ -227,22 +183,13 @@ namespace UI.MainGame
             return slot;
         }
 
-        private bool ValidateSetup()
+        private void ValidateSetup()
         {
-            var isValid = true;
             if (_playerShip == null)
-            {
-                Debug.LogError("Player Ship reference not set on UIReloadVisualizer.", this);
-                isValid = false;
-            }
+                throw new InvalidOperationException("[UIReloadVisualizer] Player ship reference is required.");
 
-            if (_panelRenderer == null)
-            {
-                Debug.LogError("PanelRenderer not set on UIReloadVisualizer.", this);
-                isValid = false;
-            }
-
-            return isValid;
+            if (PanelRenderer == null)
+                throw new InvalidOperationException("[UIReloadVisualizer] PanelRenderer is required.");
         }
     }
 }

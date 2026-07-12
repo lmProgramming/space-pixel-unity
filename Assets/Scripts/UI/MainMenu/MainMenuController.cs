@@ -1,23 +1,23 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using Core.Constants;
+using Core.Services;
+using Core.Ships;
 using Core.State;
 using UI.Common;
 using UI.Tools;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
+using Zenject;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
 
 namespace UI.MainMenu
 {
-    [RequireComponent(typeof(PanelRenderer))]
-    public class MainMenuController : MonoBehaviour
+    public class MainMenuController : PanelRendererBase
     {
-        private const string SnapshotFolderName = "ShipSnapshots";
         private const float DefaultAsteroidCount = 6f;
         private const float DefaultEnemyShipCount = 0f;
         private const float DefaultFriendlyShipCount = 0f;
@@ -28,8 +28,6 @@ namespace UI.MainMenu
         private Slider _enemyCountSlider;
         private Slider _friendlyCountSlider;
 
-        private bool _isBound;
-        private PanelRenderer _panelRenderer;
         private Button _quitButton;
         private Button _settingsButton;
         private SettingsPanelController _settingsPanelController;
@@ -38,42 +36,21 @@ namespace UI.MainMenu
         private Button _shipSelectCancelButton;
         private VisualElement _shipSelectionOverlay;
         private Button _shipSelectLaunchButton;
+
+        [Inject]
+        private IShipSnapshotRepository _snapshotRepository;
+
         private Button _startButton;
-        private int _uiVersion = -1;
 
-        private void Awake()
+        private void Start()
         {
-            _panelRenderer = GetComponent<PanelRenderer>();
+            if (_snapshotRepository == null)
+                throw new InvalidOperationException("[MainMenuController] Snapshot repository is not initialized.");
         }
 
-        private void OnEnable()
+        protected override void BindUiCore(
+            VisualElement root)
         {
-            _panelRenderer.RegisterUIReloadCallback(OnUIReload);
-        }
-
-        private void OnDisable()
-        {
-            _panelRenderer.UnregisterUIReloadCallback(OnUIReload);
-            UnbindMainMenuUi();
-        }
-
-        private void OnUIReload(PanelRenderer renderer, VisualElement root, int version)
-        {
-            if (version == _uiVersion && _isBound)
-                return;
-
-            if (version != _uiVersion)
-                UnbindMainMenuUi();
-
-            _uiVersion = version;
-            BindMainMenuUi(root);
-        }
-
-        private void BindMainMenuUi(VisualElement root)
-        {
-            if (_isBound || root == null)
-                return;
-
             _startButton = root.Q<Button>("start-button");
             _shipFactoryButton = root.Q<Button>("ship-factory-button");
             _settingsButton = root.Q<Button>("settings-button");
@@ -105,14 +82,10 @@ namespace UI.MainMenu
 
             DesignSystemThemeService.RegisterVisualTree(root);
             _settingsPanelController = new SettingsPanelController(root, true);
-            _isBound = true;
         }
 
-        private void UnbindMainMenuUi()
+        protected override void UnbindUiCore()
         {
-            if (!_isBound)
-                return;
-
             _settingsPanelController?.Unbind();
             _settingsPanelController = null;
 
@@ -137,17 +110,18 @@ namespace UI.MainMenu
             _asteroidCountSlider = null;
             _enemyCountSlider = null;
             _friendlyCountSlider = null;
-            _isBound = false;
         }
 
         private void OpenShipSelectionDialog()
         {
+            _snapshotRepository.Model.Changed += OnSnapshotCatalogChanged;
             RefreshShipSnapshots();
             _shipSelectionOverlay.style.display = DisplayStyle.Flex;
         }
 
         private void CloseShipSelectionDialog()
         {
+            _snapshotRepository.Model.Changed -= OnSnapshotCatalogChanged;
             _shipSelectionOverlay.style.display = DisplayStyle.None;
         }
 
@@ -191,18 +165,31 @@ namespace UI.MainMenu
             SceneManager.LoadScene(SceneNames.MainGame);
         }
 
+        private void OnSnapshotCatalogChanged()
+        {
+            if (_shipSelectionOverlay == null ||
+                _shipSelectionOverlay.style.display == DisplayStyle.None)
+                return;
+
+            ApplySnapshotsToDropdown(_snapshotRepository.Model.Snapshots);
+        }
+
         private void RefreshShipSnapshots()
+        {
+            ApplySnapshotsToDropdown(_snapshotRepository.Model.Snapshots);
+        }
+
+        private void ApplySnapshotsToDropdown(
+            IReadOnlyList<SavedShipSnapshotDescriptor> snapshots)
         {
             _snapshotDisplayNames.Clear();
             _snapshotFilePaths.Clear();
 
-            var snapshotDirectory = Path.Combine(Application.persistentDataPath, SnapshotFolderName);
-            if (Directory.Exists(snapshotDirectory))
-                foreach (var filePath in Directory.GetFiles(snapshotDirectory, "*.json"))
-                {
-                    _snapshotDisplayNames.Add(Path.GetFileNameWithoutExtension(filePath));
-                    _snapshotFilePaths.Add(filePath);
-                }
+            foreach (var snapshot in snapshots)
+            {
+                _snapshotDisplayNames.Add(snapshot.DisplayName);
+                _snapshotFilePaths.Add(snapshot.FilePath);
+            }
 
             if (_snapshotDisplayNames.Count == 0)
             {

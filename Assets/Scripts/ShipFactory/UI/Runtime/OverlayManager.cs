@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using Core.Ships.Module;
+using ShipFactory.Helpers;
+using ShipFactory.Models;
 using Ships;
 using UnityEngine;
 using ZLinq;
@@ -13,13 +15,19 @@ namespace ShipFactory.UI.Runtime
         private const int OverlaySortingOrder = 100;
         private const int DraggedOverlaySortingOrder = OverlaySortingOrder + 1;
         private readonly Dictionary<ShipModuleSOInstanceBundle, ModuleOverlay> _bundleToOverlay = new();
+        private readonly ShipModuleCatalog _catalog;
         private readonly Transform _overlayRoot = new GameObject("ModuleOverlays").transform;
+
+        public OverlayManager(ShipModuleCatalog moduleCatalog)
+        {
+            _catalog = moduleCatalog ?? throw new ArgumentNullException(nameof(moduleCatalog));
+        }
 
         public IEnumerable<ShipModuleSOInstanceBundle> AllBundles => _bundleToOverlay.Keys;
 
         public void Dispose()
         {
-            if (_overlayRoot != null)
+            if (_overlayRoot)
                 Object.Destroy(_overlayRoot.gameObject);
         }
 
@@ -33,7 +41,7 @@ namespace ShipFactory.UI.Runtime
         {
             if (!_bundleToOverlay.TryGetValue(bundle, out var overlay)) return;
 
-            if (overlay != null) Object.Destroy(overlay.gameObject);
+            if (overlay) Object.Destroy(overlay.gameObject);
             _bundleToOverlay.Remove(bundle);
         }
 
@@ -49,18 +57,19 @@ namespace ShipFactory.UI.Runtime
         {
             DestroyAllOverlays();
 
-            if (ship == null) return;
+            if (!ship) return;
+
+            if (!_catalog)
+                throw new InvalidOperationException(
+                    "[ShipFactoryOverlayManager] ShipModuleCatalog is required before rebuilding overlays.");
 
             foreach (Transform child in ship.gameObject.transform)
             {
-                var container = child.GetComponent<ShipModuleSOContainer>();
                 var module = child.GetComponent<IModule>();
+                if (module == null) continue;
 
-                if (container == null || container.Module == null || module == null)
-                    throw new InvalidOperationException(
-                        "[ShipFactoryOverlayManager] Ship child is missing module setup.");
-
-                CreateOverlay(new ShipModuleSOInstanceBundle(child.gameObject, container.Module, module));
+                var moduleSO = ModuleCatalogResolver.ResolveModuleSO(child.gameObject, _catalog);
+                CreateOverlay(new ShipModuleSOInstanceBundle(child.gameObject, moduleSO, module));
             }
         }
 

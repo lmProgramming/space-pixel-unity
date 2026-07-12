@@ -122,11 +122,14 @@ namespace Ships
             InitializeModules();
             _sasTurnInputResolver.CaptureDesiredHeading(GetCurrentHeadingDegrees());
 
-            UpdateResourcesLoop().Forget();
+            if (!IsDesignMode)
+                UpdateResourcesLoop().Forget();
         }
 
         protected virtual void Update()
         {
+            if (IsDesignMode) return;
+
             ReadMovementInput();
             HandleWeapons();
             ResourceManager.UpdateEnergy();
@@ -134,16 +137,22 @@ namespace Ships
 
         private void FixedUpdate()
         {
+            if (IsDesignMode) return;
+
             ApplyMovementPhysics();
         }
 
         private void OnEnable()
         {
+            if (IsDesignMode) return;
+
             ShipService.RegisterShip(this);
         }
 
         private void OnDisable()
         {
+            if (IsDesignMode) return;
+
             ShipService.UnregisterShip(this);
         }
 
@@ -169,6 +178,7 @@ namespace Ships
         public string Name => transform.name;
         public IReadOnlyList<IModule> AllModules => _allModulesCache;
         public virtual bool IsSASOn => false;
+        public bool IsDesignMode { get; set; }
 
         public float GeneralEfficiency => Math.Max(0.01f, ResourceManager.EnergyEfficiency);
 
@@ -458,6 +468,24 @@ namespace Ships
                 .ToArray();
 
             ResourceManager.Recalculate(_allModulesCache);
+
+            if (IsDesignMode)
+                ConfigureModulesForDesignMode();
+        }
+
+        private void ConfigureModulesForDesignMode()
+        {
+            foreach (var module in _allModulesCache)
+            {
+                var rigidbody = module.PixelatedRigidbody?.Rigidbody;
+                if (rigidbody != null)
+                    rigidbody.simulated = false;
+
+                if (module is Engine engine)
+                    engine.SuppressNozzleExhaustForDesignMode();
+            }
+
+            MarkEnginesActivity(false);
         }
 
         protected virtual void ReadMovementInput()

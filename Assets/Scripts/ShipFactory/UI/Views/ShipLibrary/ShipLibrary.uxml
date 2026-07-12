@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML
+        xmlns:ui="UnityEngine.UIElements"
+>
+    <Style src="project://database/Assets/DesignSystem/Resources/UI/Styles/DesignSystem/DesignSystem.uss?fileID=7433441132597879392&amp;guid=2fe121bab235f2a4f8cbc07737f87fe2&amp;type=3#DesignSystem"/>
+    <ui:VisualElement class="ds-root ds-backdrop">
+        <ui:VisualElement class="ds-modal" style="width: 900px; max-width: 100%; margin: auto;">
+            <ui:VisualElement class="ds-modal__header">
+                <ui:Label class="ds-modal__title" text="Ship Library"/>
+                <ui:Button name="ship-library-close-button" class="ds-modal__close">
+                    <ui:VisualElement class="ds-icon ds-icon--sm ds-icon--close"/>
+                </ui:Button>
+            </ui:VisualElement>
+            <ui:VisualElement class="ds-modal__body">
+                <ui:Label name="ship-library-status-label" class="ds-caption"/>
+                <ui:ScrollView mode="Vertical" style="max-height: 360px; margin-top: 8px;">
+                    <ui:VisualElement name="ship-library-grid" class="ds-grid"/>
+                </ui:ScrollView>
+            </ui:VisualElement>
+            <ui:VisualElement class="ds-modal__actions">
+                <ui:Button name="ship-library-delete-button" text="Delete Ship"
+                           class="ds-btn ds-btn--secondary ds-btn--danger"/>
+                <ui:Button name="ship-library-load-button" text="Load Ship" class="ds-btn ds-btn--primary"/>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

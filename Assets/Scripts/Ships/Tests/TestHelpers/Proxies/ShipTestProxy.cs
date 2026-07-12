@@ -5,5 +5,10 @@ namespace Ships.Tests.TestHelpers.Proxies
         protected override void ApplyMovementPhysics()
         {
         }
+
+        public void RunUpdateForTesting()
+        {
+            Update();
+        }
     }
 }

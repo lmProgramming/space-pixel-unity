@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using Core.Ships.Module;
 using NSubstitute;
 using NUnit.Framework;
+using ShipFactory.Helpers;
+using ShipFactory.Models;
 using UnityEngine;
 using ZLinq;
 using Object = UnityEngine.Object;

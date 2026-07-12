@@ -61,6 +61,10 @@ namespace Context
                 .To<ShipSnapshotService>()
                 .AsSingle();
 
+            Container.Bind<IShipSnapshotRepository>()
+                .To<ShipSnapshotRepository>()
+                .AsSingle();
+
             Container.Bind<PointerOverUiEventChannel>()
                 .FromInstance(pointerOverUiChannel)
                 .AsSingle();

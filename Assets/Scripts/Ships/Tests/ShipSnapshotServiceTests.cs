@@ -92,7 +92,7 @@ namespace Ships.Tests
             var moduleSnapshot = snapshot.modules[1];
             moduleSnapshot.origin = InstanceOrigin.Custom;
             moduleSnapshot.archetypeId = string.Empty;
-            moduleSnapshot.pixelatedRigidbody.colorGrid.RemovePixel(0, 0);
+            moduleSnapshot.pixelatedRigidbody.colorGrid.RemovePixelAt(new Vector2Int(0, 0));
 
             _service.ApplySnapshot(ship, snapshot);
             ship.InitializeModules();

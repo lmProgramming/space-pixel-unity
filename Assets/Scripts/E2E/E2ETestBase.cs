@@ -11,7 +11,7 @@ using Gameplay.EasyTeam;
 using Instantiation;
 using NUnit.Framework;
 using Services;
-using ShipFactory;
+using ShipFactory.Models;
 using Ships;
 using Ships.ModuleConnection;
 using Ships.Modules;

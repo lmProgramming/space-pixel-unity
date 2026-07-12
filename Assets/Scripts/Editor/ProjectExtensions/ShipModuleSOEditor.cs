@@ -1,7 +1,7 @@
 using System;
 using System.Reflection;
 using Pixelation;
-using ShipFactory;
+using ShipFactory.Models;
 using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;

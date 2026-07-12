@@ -1,0 +1,15 @@
+/* ============================================================================
+   LAYOUT
+   Reusable layout primitives for grids and spaced stacks.
+   ============================================================================ */
+
+.ds-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+    display: flex;
+}
+
+.ds-grid__item {
+    margin-bottom: var(--space-3);
+    margin-right: var(--space-3);
+}

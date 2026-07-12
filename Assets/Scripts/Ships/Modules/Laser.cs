@@ -67,11 +67,6 @@ namespace Ships.Modules
             _reloadTimer.OnNotReady += HandleNotReady;
         }
 
-        private void Update()
-        {
-            _reloadTimer.Progress(Time.deltaTime * ActualEfficiency);
-        }
-
         protected override void OnDestroy()
         {
             StopFiringCleanup();
@@ -81,6 +76,11 @@ namespace Ships.Modules
             _reloadTimer.OnNotReady -= HandleNotReady;
 
             base.OnDestroy();
+        }
+
+        protected override void UpdateModule()
+        {
+            _reloadTimer.Progress(Time.deltaTime * ActualEfficiency);
         }
 
         public override void Shoot()
