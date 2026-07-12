@@ -96,9 +96,9 @@ namespace Grid
 
         public Texture2D Texture { get; private set; }
 
-        public void SetTextureFromColors(NativeArray<Color32> colors, int width, int height)
+        public void SetTextureFromColors(NativeArray<Color32> colors, int newWidth, int newHeight)
         {
-            Texture = new Texture2D(width, height, TextureFormat.ARGB32, false)
+            Texture = new Texture2D(newWidth, newHeight, TextureFormat.ARGB32, false)
             {
                 filterMode = FilterMode.Point
             };
@@ -106,15 +106,15 @@ namespace Grid
             Texture.SetPixelData(colors, 0);
             Texture.Apply();
 
-            _internalSprite = Sprite.Create(Texture, new Rect(0, 0, width, height),
+            _internalSprite = Sprite.Create(Texture, new Rect(0, 0, newWidth, newHeight),
                 new Vector2(0.5f, 0.5f), 1);
 
             PixelCount = colors.AsValueEnumerable().Count(c => c.a > 0);
         }
 
-        public void SetTextureFromColors(Color32[] colors, int width, int height)
+        public void SetTextureFromColors(Color32[] colors, int newWidth, int newHeight)
         {
-            Texture = new Texture2D(width, height, TextureFormat.ARGB32, false)
+            Texture = new Texture2D(newWidth, newHeight, TextureFormat.ARGB32, false)
             {
                 filterMode = FilterMode.Point
             };
@@ -122,7 +122,7 @@ namespace Grid
             Texture.SetPixels32(colors);
             Texture.Apply();
 
-            _internalSprite = Sprite.Create(Texture, new Rect(0, 0, width, height),
+            _internalSprite = Sprite.Create(Texture, new Rect(0, 0, newWidth, newHeight),
                 new Vector2(0.5f, 0.5f), 1);
 
             PixelCount = colors.AsValueEnumerable().Count(c => c.a > 0);

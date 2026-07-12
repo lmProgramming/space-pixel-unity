@@ -269,7 +269,7 @@ namespace Pixelation
             {
                 var pos = new Vector2Int(x, y);
                 if (TexturePixelGrid.IsPixel(pos))
-                    snapshot.colorGrid.SetPixel(x, y, TexturePixelGrid.GetValue(pos));
+                    snapshot.colorGrid.SetPixel(pos, TexturePixelGrid.GetValue(pos));
             }
 
             return snapshot;
@@ -402,16 +402,16 @@ namespace Pixelation
 
         private void RestoreColorGridFromSnapshot(PixelGridSnapshot colorGrid)
         {
-            if (colorGrid == null || colorGrid.width == 0 || colorGrid.height == 0)
+            if (colorGrid == null || colorGrid.Width == 0 || colorGrid.Height == 0)
                 throw new UnityException(
                     $"[PixelatedRigidbody] '{name}' has no pixel data in snapshot. " +
                     "Re-capture the snapshot — empty color grids are not supported.");
 
-            var colors = new Color32[colorGrid.width, colorGrid.height];
+            var colors = new Color32[colorGrid.Width, colorGrid.Height];
 
-            for (var y = 0; y < colorGrid.height; y++)
-            for (var x = 0; x < colorGrid.width; x++)
-                colors[x, y] = colorGrid.GetPixel(x, y);
+            for (var y = 0; y < colorGrid.Height; y++)
+            for (var x = 0; x < colorGrid.Width; x++)
+                colors[x, y] = colorGrid.GetValue(new Vector2Int(x, y));
 
             SetTextureFromColors(colors);
         }

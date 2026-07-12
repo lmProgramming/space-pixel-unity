@@ -73,7 +73,7 @@ namespace ShipFactory.UI.Views.ShipLibrary
                 entries[index] = new ShipLibraryEntry(
                     snapshot.DisplayName,
                     snapshot.FilePath,
-                    null);
+                    snapshot.PreviewSprite);
             }
 
             return entries;

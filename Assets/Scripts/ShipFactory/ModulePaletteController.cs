@@ -31,7 +31,7 @@ namespace ShipFactory
 
         public ModulePaletteController(VisualElement root, ShipModuleCatalog library)
         {
-            if (library == null)
+            if (!library)
                 throw new ArgumentNullException(nameof(library),
                     "[ModulePaletteController] ShipModuleCatalog library must be assigned!");
 
@@ -113,7 +113,7 @@ namespace ShipFactory
 
             var pixelatedRigidbody = moduleSO.Prefab.GetComponent<IPixelatedSprite>();
             var sprite = pixelatedRigidbody?.GetSprite();
-            if (sprite != null)
+            if (sprite)
             {
                 var spriteImage = new Image { sprite = sprite, scaleMode = ScaleMode.ScaleToFit };
                 spriteImage.AddToClassList(CardSpriteClass);

@@ -162,6 +162,37 @@ namespace Ships.Tests.TestHelpers.Factories
             return this;
         }
 
+        public ShipTestBuilder WithCustomCommandModule(
+            Vector2 localPosition,
+            int width,
+            int height,
+            float rotationZ = 0f,
+            Color32[,] colors = null)
+        {
+            var commandGo = ModuleFactory.CreateModuleBase(
+                "Command",
+                _shipGo.transform,
+                localPosition,
+                rotationZ,
+                _container,
+                _createdObjects,
+                width,
+                height);
+
+            if (colors != null)
+                commandGo.GetComponent<PixelatedRigidbody>().SetTextureFromColors(colors);
+
+            var command = ModuleFactory.AddCommandModuleComponent(commandGo);
+            command.SetResources(new Resources(0, 0, 0, 0, 0));
+
+            var identity = commandGo.AddComponent<GameObjectInstanceIdentity>();
+            identity.EnsureAssigned(InstanceOrigin.Custom);
+
+            RegisterCommand(command);
+
+            return this;
+        }
+
         public ShipTestBuilder WithCustomEngine(Vector2 localPosition, int width, int height, Resources resources)
         {
             var engineGo = ModuleFactory.CreateModuleBase("Engine", _shipGo.transform, localPosition, 0f, _container,
@@ -176,6 +207,39 @@ namespace Ships.Tests.TestHelpers.Factories
             identity.EnsureAssigned(InstanceOrigin.Custom);
 
             RegisterOtherModule(engine);
+
+            return this;
+        }
+
+        public ShipTestBuilder WithCustomBasicModule(
+            string name,
+            Vector2 localPosition,
+            int width,
+            int height,
+            float rotationZ = 0f,
+            Resources resources = default,
+            Color32[,] colors = null)
+        {
+            var moduleGo = ModuleFactory.CreateModuleBase(
+                name,
+                _shipGo.transform,
+                localPosition,
+                rotationZ,
+                _container,
+                _createdObjects,
+                width,
+                height);
+
+            if (colors != null)
+                moduleGo.GetComponent<PixelatedRigidbody>().SetTextureFromColors(colors);
+
+            var basic = ModuleFactory.AddBasicComponent(moduleGo);
+            basic.SetResources(resources);
+
+            var identity = moduleGo.AddComponent<GameObjectInstanceIdentity>();
+            identity.EnsureAssigned(InstanceOrigin.Custom);
+
+            RegisterOtherModule(basic);
 
             return this;
         }
@@ -225,6 +289,8 @@ namespace Ships.Tests.TestHelpers.Factories
         public ShipLayoutResult BuildLayoutResult(bool initializeModules = false)
         {
             var ship = WireShip<Ship>(initializeModules);
+            EnsureAllModulesWired(ship).Forget();
+
             return new ShipLayoutResult
             {
                 Ship = ship,
@@ -235,7 +301,10 @@ namespace Ships.Tests.TestHelpers.Factories
 
         public Ship Build(bool initializeModules = false)
         {
-            return WireShip<Ship>(initializeModules);
+            var ship = WireShip<Ship>(initializeModules);
+            EnsureAllModulesWired(ship).Forget();
+
+            return ship;
         }
 
         public MovableShipTestProxy BuildMovableProxy(bool initializeModules = false)
@@ -272,6 +341,8 @@ namespace Ships.Tests.TestHelpers.Factories
         public CommandWithEngineResult BuildCommandWithEngineResult()
         {
             var ship = WireShip<Ship>(false);
+            EnsureAllModulesWired(ship).Forget();
+
             return new CommandWithEngineResult
             {
                 Ship = ship,

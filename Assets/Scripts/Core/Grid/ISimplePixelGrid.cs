@@ -6,8 +6,8 @@ namespace Core.Grid
 {
     public interface ISimplePixelGrid : IGrid<Color32>
     {
-        void SetTextureFromColors(NativeArray<Color32> colors, int width, int height);
-        void SetTextureFromColors(Color32[] colors, int width, int height);
+        void SetTextureFromColors(NativeArray<Color32> colors, int newWidth, int newHeight);
+        void SetTextureFromColors(Color32[] colors, int newWidth, int newHeight);
         void SetTextureFromColors(Color32[,] colors);
         void SetPixel(Vector2Int point, Color32 color);
         bool IsPixel(Vector2Int point);

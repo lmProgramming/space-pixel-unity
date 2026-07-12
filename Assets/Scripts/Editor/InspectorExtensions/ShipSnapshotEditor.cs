@@ -67,7 +67,7 @@ namespace Editor.InspectorExtensions
 
             var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
             var sanitizedName = SanitizeFileName(ship.name);
-            var filename = $"{sanitizedName}_{timestamp}.json";
+            var filename = $"{sanitizedName}_{timestamp}{Constants.ShipSnapshotExtension}";
             var fullPath = Path.Combine(Constants.ShipSnapshotsFolder, filename);
 
             File.WriteAllText(fullPath, json);

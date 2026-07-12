@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using JetBrains.Annotations;
 using UI.MVCVM;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace ShipFactory.UI.Views.ShipLibrary
@@ -110,7 +111,10 @@ namespace ShipFactory.UI.Views.ShipLibrary
             var image = new VisualElement();
             image.AddToClassList("ds-item-card__image");
             if (entry.PreviewSprite)
-                image.style.backgroundImage = new StyleBackground(entry.PreviewSprite);
+            {
+                var spriteImage = new Image { sprite = entry.PreviewSprite, scaleMode = ScaleMode.ScaleToFit };
+                image.Add(spriteImage);
+            }
 
             var titleRow = new VisualElement();
             titleRow.AddToClassList("ds-item-card__title-row");

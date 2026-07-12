@@ -97,7 +97,7 @@ namespace Ships.Tests.TestHelpers.Factories
             return CreateSolidPixelGrid(width, height, new Color32(100, 100, 100, 255));
         }
 
-        private static Color32[,] CreateSolidPixelGrid(int width, int height, Color32 color)
+        public static Color32[,] CreateSolidPixelGrid(int width, int height, Color32 color)
         {
             var colors = new Color32[width, height];
 
