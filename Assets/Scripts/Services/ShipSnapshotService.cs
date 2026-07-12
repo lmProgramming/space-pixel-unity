@@ -1,7 +1,4 @@
-using System;
-using System.Collections.Generic;
 using System.IO;
-using Core.Constants;
 using Core.Services;
 using Core.Ships;
 using LMPro.External.IsAlive;
@@ -54,34 +51,6 @@ namespace Services
             var snapshot = JsonUtility.FromJson<ShipSnapshot>(json);
 
             return snapshot;
-        }
-
-        public IReadOnlyList<SavedShipSnapshotDescriptor> GetSavedSnapshots(
-            string folderPath = null)
-        {
-            folderPath ??= Constants.DefaultSaveFolder;
-
-            if (!Directory.Exists(folderPath))
-                return Array.Empty<SavedShipSnapshotDescriptor>();
-
-            var snapshotPaths = Directory.GetFiles(folderPath, "*.json");
-            Array.Sort(snapshotPaths, StringComparer.OrdinalIgnoreCase);
-
-            var descriptors = new SavedShipSnapshotDescriptor[snapshotPaths.Length];
-            for (var index = 0; index < snapshotPaths.Length; index++)
-            {
-                var snapshotPath = snapshotPaths[index];
-                descriptors[index] = new SavedShipSnapshotDescriptor(
-                    Path.GetFileNameWithoutExtension(snapshotPath),
-                    snapshotPath);
-            }
-
-            return descriptors;
-        }
-
-        public void DeleteSnapshotFile(string snapshotPath)
-        {
-            File.Delete(snapshotPath);
         }
     }
 }

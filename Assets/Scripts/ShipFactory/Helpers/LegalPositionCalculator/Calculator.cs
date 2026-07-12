@@ -1,8 +1,9 @@
 using System.Collections.Generic;
 using Core.Ships;
 using UnityEngine;
+using ZLinq;
 
-namespace ShipFactory.LegalPositionCalculator
+namespace ShipFactory.Helpers.LegalPositionCalculator
 {
     public enum PositionLegality
     {
@@ -16,7 +17,7 @@ namespace ShipFactory.LegalPositionCalculator
     {
         private const float EdgeEpsilon = 0.001f;
 
-        public static PositionLegality CalculateLegalityPosition(ShipModuleSOInstanceBundle bundleToCheck,
+        public static PositionLegality CalculatePositionLegality(ShipModuleSOInstanceBundle bundleToCheck,
             IEnumerable<ShipModuleSOInstanceBundle> placedElements)
         {
             var allBundles = new List<ShipModuleSOInstanceBundle>(placedElements);
@@ -24,10 +25,9 @@ namespace ShipFactory.LegalPositionCalculator
 
             var hasAnyTouch = false;
 
-            foreach (var placedElement in allBundles)
+            foreach (var placedElement in allBundles.AsValueEnumerable()
+                         .Where(placedElement => placedElement != bundleToCheck))
             {
-                if (placedElement == bundleToCheck) continue;
-
                 var (otherLeftBottomPos, otherRightTop) = GetBottomLeftAndTopRightPositions(placedElement);
 
                 if (Overlap(leftBottomPos, rightTop, otherLeftBottomPos, otherRightTop))
@@ -111,11 +111,7 @@ namespace ShipFactory.LegalPositionCalculator
                 }
             }
 
-            for (var i = 0; i < visited.Length; i++)
-                if (!visited[i])
-                    return false;
-
-            return true;
+            return visited.AsValueEnumerable().All(t => t);
         }
     }
 }

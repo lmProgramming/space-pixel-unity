@@ -5,7 +5,8 @@ using Core.Ships;
 using Core.Ships.Module;
 using Events.Camera;
 using JetBrains.Annotations;
-using ShipFactory.LegalPositionCalculator;
+using ShipFactory.Helpers;
+using ShipFactory.Helpers.LegalPositionCalculator;
 using ShipFactory.UI.Runtime;
 using ShipFactory.UI.ToolkitComponents;
 using Ships;
@@ -314,7 +315,7 @@ namespace ShipFactory
 
         private void HandleDragRelease()
         {
-            var legality = Calculator.CalculateLegalityPosition(_draggedModuleBundle, _overlayManager.AllBundles);
+            var legality = Calculator.CalculatePositionLegality(_draggedModuleBundle, _overlayManager.AllBundles);
             if (legality == PositionLegality.Correct)
             {
                 FinishActiveDrag();
@@ -409,7 +410,7 @@ namespace ShipFactory
                 .Where(bundle => bundle != bundleToRemove).ToList();
 
             return remainingBundles.Count > 1 && remainingBundles.AsValueEnumerable()
-                .Select(bundle => Calculator.CalculateLegalityPosition(bundle, remainingBundles))
+                .Select(bundle => Calculator.CalculatePositionLegality(bundle, remainingBundles))
                 .Any(legality => legality != PositionLegality.Correct);
         }
 
@@ -473,7 +474,7 @@ namespace ShipFactory
                 return;
             }
 
-            var legality = Calculator.CalculateLegalityPosition(bundle, _overlayManager.AllBundles);
+            var legality = Calculator.CalculatePositionLegality(bundle, _overlayManager.AllBundles);
             if (legality == PositionLegality.Correct) return;
 
             bundle.Instance.transform.localRotation = previousRotation;
@@ -518,7 +519,7 @@ namespace ShipFactory
 
         private void RefreshDraggedModuleLegalityOverlay()
         {
-            var legality = Calculator.CalculateLegalityPosition(_draggedModuleBundle, _overlayManager.AllBundles);
+            var legality = Calculator.CalculatePositionLegality(_draggedModuleBundle, _overlayManager.AllBundles);
             var color = legality switch
             {
                 PositionLegality.InsideOther => ModuleOverlay.InsideOtherColor,

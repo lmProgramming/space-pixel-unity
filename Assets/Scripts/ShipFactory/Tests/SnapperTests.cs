@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using ShipFactory.Helpers;
 using UnityEngine;
 
 namespace ShipFactory.Tests

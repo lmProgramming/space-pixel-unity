@@ -4,7 +4,6 @@ using Core.Constants;
 using Core.Services;
 using Events.Camera;
 using Events.UI;
-using ShipFactory.Serialization;
 using ShipFactory.UI.Views.ShipLibrary;
 using Ships;
 using UI;
@@ -20,7 +19,6 @@ namespace ShipFactory
     public class ShipFactoryController : PanelRendererBase
     {
         private const string CanvasContainerName = "canvas-container";
-        private const string SnapshotExtension = ".json";
         private const string DefaultShipName = "Ship";
         private static readonly object ModuleDragPointerBlocker = new();
         private static readonly object UiHoverBlocker = new();
@@ -32,7 +30,6 @@ namespace ShipFactory
         [SerializeField]
         private ShipModuleCatalog shipModuleCatalog;
 
-        [SerializeField] private string snapshotFolderName = "ShipSnapshots";
         [SerializeField] private CameraResetRequestEventChannel cameraResetRequestEventChannel;
 
         [SerializeField] private Ship initialShip;
@@ -71,6 +68,8 @@ namespace ShipFactory
         private SettingsPanelController _settingsPanelController;
 
         private TextField _shipNameField;
+
+        [Inject] private IShipSnapshotRepository _shipSnapshotRepository;
 
         [Inject]
         private IShipSnapshotService _snapshotService;
@@ -152,13 +151,11 @@ namespace ShipFactory
 
         private void ShowSnapshotLibrary()
         {
-            var snapshotFolderPath = Path.Combine(Application.persistentDataPath, snapshotFolderName);
-
             UnBindSnapshotLibrary();
             libraryController.CloseClicked += HideSnapshotLibrary;
             libraryController.SnapshotSelected += LoadSnapshotFromLibrary;
-            libraryController.SnapshotDeleted += LibraryControllerOnSnapshotDeleted;
-            libraryController.Show(snapshotFolderPath);
+            libraryController.SnapshotDeleted += OnSnapshotDeleted;
+            libraryController.Show();
         }
 
         private void HideSnapshotLibrary()
@@ -171,7 +168,7 @@ namespace ShipFactory
         {
             libraryController.CloseClicked -= HideSnapshotLibrary;
             libraryController.SnapshotSelected -= LoadSnapshotFromLibrary;
-            libraryController.SnapshotDeleted -= LibraryControllerOnSnapshotDeleted;
+            libraryController.SnapshotDeleted -= OnSnapshotDeleted;
         }
 
         private void LoadSnapshotFromLibrary(string snapshotPath)
@@ -204,9 +201,8 @@ namespace ShipFactory
             }
         }
 
-        private void LibraryControllerOnSnapshotDeleted(string snapshotPath)
+        private void OnSnapshotDeleted(string snapshotPath)
         {
-            _snapshotService.DeleteSnapshotFile(snapshotPath);
             _canvasController.ShowInfoMessage($"Deleted snapshot '{Path.GetFileNameWithoutExtension(snapshotPath)}'.");
         }
 
@@ -263,24 +259,21 @@ namespace ShipFactory
                 ? DefaultShipName
                 : _shipNameField.value.Trim();
 
-            var snapshotFolderPath = Path.Combine(Application.persistentDataPath, snapshotFolderName);
-            Directory.CreateDirectory(snapshotFolderPath);
-
-            var existingNamePredicate = new Func<string, bool>(candidateName =>
-            {
-                var candidateFileName = SnapshotNameUtility.SanitizeFileName(candidateName) + SnapshotExtension;
-                var candidatePath = Path.Combine(snapshotFolderPath, candidateFileName);
-                return File.Exists(candidatePath);
-            });
-
-            if (existingNamePredicate(requestedName))
-            {
-                var suggestedCopyName = SnapshotNameUtility.GetNextCopyName(requestedName, existingNamePredicate);
-                _shipNameField.value = suggestedCopyName;
-                _canvasController.ShowWarningMessage(
-                    $"'{requestedName}' already exists. Suggested copy name: '{suggestedCopyName}'.");
-                return;
-            }
+            // var existingNamePredicate = new Func<string, bool>(candidateName =>
+            // {
+            //     var candidateFileName = SnapshotNameUtility.SanitizeFileName(candidateName) + SnapshotExtension;
+            //     var candidatePath = Path.Combine(snapshotFolderPath, candidateFileName);
+            //     return File.Exists(candidatePath);
+            // });
+            //
+            // if (existingNamePredicate(requestedName))
+            // {
+            //     var suggestedCopyName = SnapshotNameUtility.GetNextCopyName(requestedName, existingNamePredicate);
+            //     _shipNameField.value = suggestedCopyName;
+            //     _canvasController.ShowWarningMessage(
+            //         $"'{requestedName}' already exists. Suggested copy name: '{suggestedCopyName}'.");
+            //     return;
+            // }
 
             var snapshot = _snapshotService.CaptureSnapshot(initialShip);
             if (snapshot == null)
@@ -290,15 +283,11 @@ namespace ShipFactory
             }
 
             snapshot.shipName = requestedName;
-            var json = JsonUtility.ToJson(snapshot, true);
 
-            var sanitizedName = SnapshotNameUtility.SanitizeFileName(requestedName);
-            var outputPath = Path.Combine(snapshotFolderPath, sanitizedName + SnapshotExtension);
-
-            File.WriteAllText(outputPath, json);
+            _shipSnapshotRepository.SaveSnapshot(snapshot);
 
             _canvasController.ShowInfoMessage($"Saved snapshot '{requestedName}'.");
-            Debug.Log($"[ShipFactoryController] Snapshot saved to: {outputPath}");
+            Debug.Log("[ShipFactoryController] Snapshot saved.");
         }
 
         private void OnCanvasInputLockChanged(bool isLocked)

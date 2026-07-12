@@ -89,7 +89,7 @@ namespace Editor.ToolsExtensions
             CreateFile(
                 folder,
                 $"{_screenName}Model.cs",
-                $@"using UI.MVCVM;
+                $@"using Core.MVCVM;
 
 namespace {_namespaceName} 
 {{

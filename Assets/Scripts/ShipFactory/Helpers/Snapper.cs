@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace ShipFactory
+namespace ShipFactory.Helpers
 {
     public static class Snapper
     {

@@ -3,7 +3,7 @@ using Core.Ships;
 using Core.Ships.Module;
 using NSubstitute;
 using NUnit.Framework;
-using ShipFactory.LegalPositionCalculator;
+using ShipFactory.Helpers.LegalPositionCalculator;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -30,7 +30,7 @@ namespace ShipFactory.Tests.LegalPositionCalculator
             var command = CreateBundle("Command", ModuleType.Command, Vector2.zero, new Vector2Int(2, 2));
             var overlap = CreateBundle("Overlap", ModuleType.Resources, Vector2.zero, new Vector2Int(2, 2));
 
-            var legality = Calculator.CalculateLegalityPosition(overlap, new[] { command, overlap });
+            var legality = Calculator.CalculatePositionLegality(overlap, new[] { command, overlap });
 
             Assert.That(legality, Is.EqualTo(PositionLegality.InsideOther));
         }
@@ -41,7 +41,7 @@ namespace ShipFactory.Tests.LegalPositionCalculator
             var command = CreateBundle("Command", ModuleType.Command, Vector2.zero, new Vector2Int(2, 2));
             var isolated = CreateBundle("Isolated", ModuleType.Resources, new Vector2(10f, 0f), new Vector2Int(2, 2));
 
-            var legality = Calculator.CalculateLegalityPosition(isolated, new[] { command, isolated });
+            var legality = Calculator.CalculatePositionLegality(isolated, new[] { command, isolated });
 
             Assert.That(legality, Is.EqualTo(PositionLegality.OutsideShip));
         }
@@ -53,7 +53,7 @@ namespace ShipFactory.Tests.LegalPositionCalculator
             var middle = CreateBundle("B", ModuleType.Resources, new Vector2(2f, 0f), new Vector2Int(2, 2));
             var tail = CreateBundle("C", ModuleType.Engine, new Vector2(4f, 0f), new Vector2Int(2, 2));
 
-            var legality = Calculator.CalculateLegalityPosition(middle, new[] { command, middle, tail });
+            var legality = Calculator.CalculatePositionLegality(middle, new[] { command, middle, tail });
 
             Assert.That(legality, Is.EqualTo(PositionLegality.Correct));
         }
@@ -65,7 +65,7 @@ namespace ShipFactory.Tests.LegalPositionCalculator
             var movedMiddle = CreateBundle("B", ModuleType.Resources, new Vector2(-2f, 0f), new Vector2Int(2, 2));
             var tail = CreateBundle("C", ModuleType.Engine, new Vector2(4f, 0f), new Vector2Int(2, 2));
 
-            var legality = Calculator.CalculateLegalityPosition(movedMiddle, new[] { command, movedMiddle, tail });
+            var legality = Calculator.CalculatePositionLegality(movedMiddle, new[] { command, movedMiddle, tail });
 
             Assert.That(legality, Is.EqualTo(PositionLegality.DisconnectsShip));
         }
@@ -80,8 +80,8 @@ namespace ShipFactory.Tests.LegalPositionCalculator
                 CreateBundle("Rotated", ModuleType.Engine, new Vector2(0f, 3f), new Vector2Int(4, 2), 90f);
 
             var unrotatedLegality =
-                Calculator.CalculateLegalityPosition(unrotatedAbove, new[] { command, unrotatedAbove });
-            var rotatedLegality = Calculator.CalculateLegalityPosition(rotatedAbove, new[] { command, rotatedAbove });
+                Calculator.CalculatePositionLegality(unrotatedAbove, new[] { command, unrotatedAbove });
+            var rotatedLegality = Calculator.CalculatePositionLegality(rotatedAbove, new[] { command, rotatedAbove });
 
             Assert.That(unrotatedLegality, Is.EqualTo(PositionLegality.OutsideShip));
             Assert.That(rotatedLegality, Is.EqualTo(PositionLegality.Correct));
@@ -93,7 +93,7 @@ namespace ShipFactory.Tests.LegalPositionCalculator
             var command = CreateBundle("Command", ModuleType.Command, new Vector2(12f, 12f), new Vector2Int(24, 24));
             var adjacent = CreateBundle("Adjacent", ModuleType.Engine, new Vector2(36f, 12f), new Vector2Int(24, 24));
 
-            var legality = Calculator.CalculateLegalityPosition(adjacent, new[] { command, adjacent });
+            var legality = Calculator.CalculatePositionLegality(adjacent, new[] { command, adjacent });
 
             Assert.That(legality, Is.EqualTo(PositionLegality.Correct));
         }
@@ -105,7 +105,7 @@ namespace ShipFactory.Tests.LegalPositionCalculator
             var rotatedOverlap = CreateBundle("RotatedOverlap", ModuleType.Resources, new Vector2(1f, 1f),
                 new Vector2Int(4, 2), 90f);
 
-            var legality = Calculator.CalculateLegalityPosition(rotatedOverlap, new[] { command, rotatedOverlap });
+            var legality = Calculator.CalculatePositionLegality(rotatedOverlap, new[] { command, rotatedOverlap });
 
             Assert.That(legality, Is.EqualTo(PositionLegality.InsideOther));
         }
@@ -116,7 +116,7 @@ namespace ShipFactory.Tests.LegalPositionCalculator
             var command = CreateBundle("Command", ModuleType.Command, new Vector2(12f, 12f), new Vector2Int(24, 24));
             var cornerTouch = CreateBundle("Corner", ModuleType.Engine, new Vector2(36f, 36f), new Vector2Int(24, 24));
 
-            var legality = Calculator.CalculateLegalityPosition(cornerTouch, new[] { command, cornerTouch });
+            var legality = Calculator.CalculatePositionLegality(cornerTouch, new[] { command, cornerTouch });
 
             Assert.That(legality, Is.EqualTo(PositionLegality.OutsideShip));
         }
@@ -131,7 +131,7 @@ namespace ShipFactory.Tests.LegalPositionCalculator
             var cornerTouch = CreateBundle("Corner", ModuleType.Engine, new Vector2(32f, 36f), new Vector2Int(24, 16),
                 rotationZ);
 
-            var legality = Calculator.CalculateLegalityPosition(cornerTouch, new[] { command, cornerTouch });
+            var legality = Calculator.CalculatePositionLegality(cornerTouch, new[] { command, cornerTouch });
 
             Assert.That(legality, Is.EqualTo(PositionLegality.OutsideShip));
         }
@@ -146,7 +146,7 @@ namespace ShipFactory.Tests.LegalPositionCalculator
             var adjacent = CreateBundle("Adjacent", ModuleType.Engine, new Vector2(36f, 12f), new Vector2Int(24, 24),
                 rotationZ);
 
-            var legality = Calculator.CalculateLegalityPosition(adjacent, new[] { command, adjacent });
+            var legality = Calculator.CalculatePositionLegality(adjacent, new[] { command, adjacent });
 
             Assert.That(legality, Is.EqualTo(PositionLegality.Correct));
         }
@@ -158,7 +158,7 @@ namespace ShipFactory.Tests.LegalPositionCalculator
             var adjacent = CreateBundle("Adjacent", ModuleType.Engine, new Vector2(32f, 12f), new Vector2Int(24, 16),
                 90f);
 
-            var legality = Calculator.CalculateLegalityPosition(adjacent, new[] { command, adjacent });
+            var legality = Calculator.CalculatePositionLegality(adjacent, new[] { command, adjacent });
 
             Assert.That(legality, Is.EqualTo(PositionLegality.Correct));
         }
@@ -178,7 +178,7 @@ namespace ShipFactory.Tests.LegalPositionCalculator
             Vector2Int dimensions, float rotationZ)
         {
             var adjacent = CreateBundle("Adjacent", ModuleType.Engine, worldPosition, dimensions, rotationZ);
-            var legality = Calculator.CalculateLegalityPosition(adjacent, new[] { command, adjacent });
+            var legality = Calculator.CalculatePositionLegality(adjacent, new[] { command, adjacent });
             Assert.That(legality, Is.EqualTo(PositionLegality.Correct));
         }
 

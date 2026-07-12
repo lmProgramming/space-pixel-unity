@@ -1,6 +1,6 @@
 using System;
 
-namespace UI.MVCVM
+namespace Core.MVCVM
 {
     public abstract class ObservableModel
     {

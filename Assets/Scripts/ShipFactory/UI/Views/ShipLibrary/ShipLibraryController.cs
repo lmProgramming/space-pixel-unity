@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using Core.Services;
+using Core.Ships;
+using Core.ShipSnapshots;
 using UI.MVCVM;
 using Zenject;
 
@@ -8,12 +10,12 @@ namespace ShipFactory.UI.Views.ShipLibrary
 {
     public class ShipLibraryController
         : Controller<
-            ShipLibraryModel,
+            ShipSnapshotCatalogModel,
             ShipLibraryView,
             ShipLibraryViewModel>
     {
         [Inject]
-        private IShipSnapshotService _snapshotService;
+        private IShipSnapshotRepository _snapshotRepository;
 
         protected override void OnEnable()
         {
@@ -39,19 +41,14 @@ namespace ShipFactory.UI.Views.ShipLibrary
 
         public event Action<string> SnapshotDeleted;
 
-        public void Show(
-            string snapshotFolderPath)
+        public void Show()
         {
-            if (string.IsNullOrWhiteSpace(snapshotFolderPath))
-                throw new ArgumentException("Snapshot folder path is required.", nameof(snapshotFolderPath));
-
             gameObject.SetActive(true);
-            Model.SetShipEntries(CreateEntries(snapshotFolderPath));
         }
 
-        protected override ShipLibraryModel CreateModel()
+        protected override ShipSnapshotCatalogModel CreateModel()
         {
-            return new ShipLibraryModel();
+            return _snapshotRepository.Model;
         }
 
         protected override ShipLibraryView CreateView()
@@ -60,15 +57,14 @@ namespace ShipFactory.UI.Views.ShipLibrary
         }
 
         protected override ShipLibraryViewModel CreateViewModel(
-            ShipLibraryModel model)
+            ShipSnapshotCatalogModel model)
         {
-            return new ShipLibraryViewModel(model.Entries);
+            return new ShipLibraryViewModel(CreateEntries(model.Snapshots));
         }
 
-        private IReadOnlyList<ShipLibraryEntry> CreateEntries(
-            string snapshotFolderPath)
+        private static IReadOnlyList<ShipLibraryEntry> CreateEntries(
+            IReadOnlyList<SavedShipSnapshotDescriptor> snapshots)
         {
-            var snapshots = _snapshotService.GetSavedSnapshots(snapshotFolderPath);
             var entries = new ShipLibraryEntry[snapshots.Count];
 
             for (var index = 0; index < snapshots.Count; index++)
@@ -95,6 +91,7 @@ namespace ShipFactory.UI.Views.ShipLibrary
 
         private void OnViewDeleteClicked(string snapshotPath)
         {
+            _snapshotRepository.DeleteSnapshot(snapshotPath);
             SnapshotDeleted?.Invoke(snapshotPath);
         }
     }
