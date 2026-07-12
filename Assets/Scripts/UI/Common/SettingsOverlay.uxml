@@ -1,35 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
 <ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
-    <ui:VisualElement name="settings-overlay" class="ds-backdrop" style="display: none;">
-        <ui:VisualElement name="settings-dialog" class="ds-dialog" style="width: 680px; max-width: 85%;">
-            <ui:Label name="settings-title" text="Settings" class="ds-dialog__title" style="margin-bottom: 16px;"/>
+    <Style src="project://database/Assets/DesignSystem/Resources/UI/Styles/DesignSystem/DesignSystem.uss"/>
+    <ui:VisualElement class="ds-root ds-root--transparent" picking-mode="Ignore"
+                      style="position: absolute; left: 0; right: 0; top: 0; bottom: 0;">
+        <ui:VisualElement name="settings-overlay" class="ds-backdrop" style="display: none;">
+            <ui:VisualElement name="settings-dialog" class="ds-dialog" style="width: 680px; max-width: 85%;">
+                <ui:Label name="settings-title" text="Settings" class="ds-dialog__title" style="margin-bottom: 16px;"/>
 
-            <ui:VisualElement class="ds-section" style="width: 100%">
-                <ui:Label text="Sound" class="ds-section__title" style="margin-bottom: 0;"/>
-                <ui:Label text="Master Volume" class="ds-body-2" style="margin-bottom: 2px;"/>
-                <ui:Slider name="settings-master-slider" low-value="0" high-value="1" show-input-field="true"
-                           class="ds-slider" style="margin-bottom: 10px; width: 100%;"/>
-                <ui:Label text="Music Volume" class="ds-body-2" style="margin-bottom: 2px;"/>
-                <ui:Slider name="settings-music-slider" low-value="0" high-value="1" show-input-field="true"
-                           class="ds-slider" style="margin-bottom: 10px; width: 100%;"/>
-                <ui:Label text="Effects Volume" class="ds-body-2" style="margin-bottom: 2px;"/>
-                <ui:Slider name="settings-effects-slider" low-value="0" high-value="1" show-input-field="true"
-                           class="ds-slider" style="width: 100%; margin-bottom: 14px;"/>
-            </ui:VisualElement>
-
-            <ui:VisualElement class="ds-section" style="width: 100%;">
-                <ui:Label class="ds-section__title" text="Theme" style="margin-bottom: 0;"/>
-                <ui:VisualElement class="ds-row" style="width: 100%;">
-                    <ui:DropdownField name="theme-provider-dropdown" choices="Design System default" index="0"
-                                      class="ds-dropdown" style="flex-grow: 1;"/>
-                    <ui:VisualElement class="ds-icon ds-icon--xs ds-icon--sun"
-                                      style="margin-left: 12px; margin-right: 6px;"/>
-                    <ui:Toggle name="theme-toggle" class="ds-toggle">
-                        <ui:VisualElement class="ds-toggle__knob"/>
-                    </ui:Toggle>
+                <ui:VisualElement class="ds-section" style="width: 100%">
+                    <ui:Label text="Sound" class="ds-section__title" style="margin-bottom: 0;"/>
+                    <ui:Label text="Master Volume" class="ds-body-2" style="margin-bottom: 2px;"/>
+                    <ui:Slider name="settings-master-slider" low-value="0" high-value="1" show-input-field="true"
+                               class="ds-slider" style="margin-bottom: 10px; width: 100%;"/>
+                    <ui:Label text="Music Volume" class="ds-body-2" style="margin-bottom: 2px;"/>
+                    <ui:Slider name="settings-music-slider" low-value="0" high-value="1" show-input-field="true"
+                               class="ds-slider" style="margin-bottom: 10px; width: 100%;"/>
+                    <ui:Label text="Effects Volume" class="ds-body-2" style="margin-bottom: 2px;"/>
+                    <ui:Slider name="settings-effects-slider" low-value="0" high-value="1" show-input-field="true"
+                               class="ds-slider" style="width: 100%; margin-bottom: 14px;"/>
                 </ui:VisualElement>
-            </ui:VisualElement>
-            <ui:VisualElement class="ds-dialog__actions" style="margin-top: 16px;">
-                <ui:Button name="settings-close-button" text="Close" class="ds-btn ds-btn--secondary"/>
+
+                <ui:VisualElement class="ds-section" style="width: 100%;">
+                    <ui:Label class="ds-section__title" text="Theme" style="margin-bottom: 0;"/>
+                    <ui:VisualElement class="ds-row" style="width: 100%;">
+                        <ui:DropdownField name="theme-provider-dropdown" choices="Design System default" index="0"
+                                          class="ds-dropdown" style="flex-grow: 1;"/>
+                        <ui:VisualElement class="ds-icon ds-icon--xs ds-icon--sun"
+                                          style="margin-left: 12px; margin-right: 6px;"/>
+                        <ui:Toggle name="theme-toggle" class="ds-toggle">
+                            <ui:VisualElement class="ds-toggle__knob"/>
+                        </ui:Toggle>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement class="ds-dialog__actions" style="margin-top: 16px;">
+                    <ui:Button name="settings-close-button" text="Close" class="ds-btn ds-btn--secondary"/>
+                </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>

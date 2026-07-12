@@ -3,79 +3,50 @@ using System.Collections.Generic;
 using Core.Constants;
 using DesignSystem.Runtime;
 using DesignSystem.Showcase.Runtime;
+using Events.UI;
 using UI.Tools;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace UI.Common
 {
-    public class SettingsPanelController
+    public class SettingsOverlayController : PanelRendererBase
     {
-        private readonly VisualElement _backdrop;
+        [SerializeField] private bool isMainMenu;
+        [SerializeField] private PointerOverUiEventChannel pointerOverUiChannel;
 
-        private readonly Button _closeButton;
-        private readonly Slider _effectsSlider;
-        private readonly Slider _masterSlider;
-        private readonly Slider _musicSlider;
-        private readonly VisualElement _overlayHost;
-        private readonly DropdownField _themeProviderDropdown;
-        private readonly Toggle _themeToggle;
+        private VisualElement _backdrop;
+        private Button _closeButton;
         private int _codigrateFetchGeneration;
-        private bool _isBound;
+        private Slider _effectsSlider;
+        private Slider _masterSlider;
+        private Slider _musicSlider;
         private bool _suppressPersist;
+        private DropdownField _themeProviderDropdown;
+        private Toggle _themeToggle;
+        private UiPointerTracker _uiPointerTracker;
 
-        public SettingsPanelController(VisualElement parent, bool isMainMenu, string title = "Settings")
+        public bool IsOpen => _backdrop != null && _backdrop.style.display == DisplayStyle.Flex;
+
+        protected override void BindUiCore(VisualElement root)
         {
-            if (parent == null)
-                throw new ArgumentNullException(nameof(parent));
-
-            _overlayHost = parent.Q<VisualElement>(SharedUiElementNames.Settings.OverlayHost);
-            _backdrop = parent.Q<VisualElement>(SharedUiElementNames.Settings.Overlay);
-            var titleLabel = parent.Q<Label>(SharedUiElementNames.Settings.Title);
-            _masterSlider = parent.Q<Slider>(SharedUiElementNames.Settings.MasterSlider);
-            _musicSlider = parent.Q<Slider>(SharedUiElementNames.Settings.MusicSlider);
-            _effectsSlider = parent.Q<Slider>(SharedUiElementNames.Settings.EffectsSlider);
-            _closeButton = parent.Q<Button>(SharedUiElementNames.Settings.CloseButton);
-            _themeToggle = parent.Q<Toggle>("theme-toggle");
-            _themeProviderDropdown = parent.Q<DropdownField>("theme-provider-dropdown");
+            _backdrop = root.Q<VisualElement>(SharedUiElementNames.Settings.Overlay);
+            var titleLabel = root.Q<Label>(SharedUiElementNames.Settings.Title);
+            _masterSlider = root.Q<Slider>(SharedUiElementNames.Settings.MasterSlider);
+            _musicSlider = root.Q<Slider>(SharedUiElementNames.Settings.MusicSlider);
+            _effectsSlider = root.Q<Slider>(SharedUiElementNames.Settings.EffectsSlider);
+            _closeButton = root.Q<Button>(SharedUiElementNames.Settings.CloseButton);
+            _themeToggle = root.Q<Toggle>("theme-toggle");
+            _themeProviderDropdown = root.Q<DropdownField>("theme-provider-dropdown");
 
             if (titleLabel == null || _masterSlider == null || _musicSlider == null || _effectsSlider == null ||
                 _closeButton == null || _backdrop == null)
                 throw new InvalidOperationException(
-                    "[SettingsPanelController] Required settings elements are missing in UIDocument.");
+                    "[SettingsOverlayController] Required settings elements are missing in UXML.");
 
-            titleLabel.text = isMainMenu ? $"{title} (Main Menu)" : title;
-            Bind(parent);
-        }
-
-        public bool IsOpen => _backdrop.style.display == DisplayStyle.Flex;
-
-        public void Unbind()
-        {
-            if (!_isBound)
-                return;
-
-            _codigrateFetchGeneration++;
-            _closeButton.clicked -= Hide;
-            _masterSlider.UnregisterValueChangedCallback(OnMasterVolumeChanged);
-            _musicSlider.UnregisterValueChangedCallback(OnMusicVolumeChanged);
-            _effectsSlider.UnregisterValueChangedCallback(OnEffectsVolumeChanged);
-            _themeToggle?.UnregisterValueChangedCallback(OnThemeToggleChanged);
-            _themeProviderDropdown?.UnregisterValueChangedCallback(OnThemeProviderChanged);
-            Hide();
-            _isBound = false;
-        }
-
-        private void Bind(VisualElement parent)
-        {
-            if (_isBound)
-                return;
-
-            DesignSystemThemeService.RegisterVisualTree(parent);
-            DesignSystemRuntime.EnsureToggleKnobs(parent);
-
-            if (_overlayHost != null)
-                _overlayHost.style.display = DisplayStyle.None;
+            titleLabel.text = isMainMenu ? "Settings (Main Menu)" : "Settings";
+            DesignSystemThemeService.RegisterVisualTree(root);
+            DesignSystemRuntime.EnsureToggleKnobs(root);
             _backdrop.style.display = DisplayStyle.None;
 
             _closeButton.clicked += Hide;
@@ -85,7 +56,58 @@ namespace UI.Common
             WireThemeToggle();
             WireThemeProvider();
             LoadFromPlayerPrefs();
-            _isBound = true;
+
+            if (pointerOverUiChannel != null)
+            {
+                _uiPointerTracker = new UiPointerTracker(pointerOverUiChannel);
+                _uiPointerTracker.Track(_backdrop);
+            }
+        }
+
+        protected override void UnbindUiCore()
+        {
+            _codigrateFetchGeneration++;
+            if (_closeButton != null)
+                _closeButton.clicked -= Hide;
+            _masterSlider?.UnregisterValueChangedCallback(OnMasterVolumeChanged);
+            _musicSlider?.UnregisterValueChangedCallback(OnMusicVolumeChanged);
+            _effectsSlider?.UnregisterValueChangedCallback(OnEffectsVolumeChanged);
+            _themeToggle?.UnregisterValueChangedCallback(OnThemeToggleChanged);
+            _themeProviderDropdown?.UnregisterValueChangedCallback(OnThemeProviderChanged);
+            Hide();
+
+            _backdrop = null;
+            _closeButton = null;
+            _masterSlider = null;
+            _musicSlider = null;
+            _effectsSlider = null;
+            _themeToggle = null;
+            _themeProviderDropdown = null;
+            _uiPointerTracker = null;
+        }
+
+        public void Hide()
+        {
+            if (_backdrop == null)
+                return;
+
+            _backdrop.style.display = DisplayStyle.None;
+            _uiPointerTracker?.Release(_backdrop);
+        }
+
+        public void Toggle()
+        {
+            if (IsOpen)
+                Hide();
+            else
+                Show();
+        }
+
+        private void Show()
+        {
+            LoadFromPlayerPrefs();
+            DesignSystemRuntime.EnsureToggleKnobs(_backdrop);
+            _backdrop.style.display = DisplayStyle.Flex;
         }
 
         private void SyncThemeToggleState()
@@ -118,7 +140,7 @@ namespace UI.Common
 
                 if (error != null || list == null)
                 {
-                    Debug.LogWarning($"[SettingsPanelController] Codigrate list load failed: {error}");
+                    Debug.LogWarning($"[SettingsOverlayController] Codigrate list load failed: {error}");
                     return;
                 }
 
@@ -141,30 +163,6 @@ namespace UI.Common
 
             DesignSystemThemeService.SetThemeProvider(evt.newValue);
             SyncThemeToggleState();
-        }
-
-        private void Show()
-        {
-            LoadFromPlayerPrefs();
-            DesignSystemRuntime.EnsureToggleKnobs(_backdrop);
-            if (_overlayHost != null)
-                _overlayHost.style.display = DisplayStyle.Flex;
-            _backdrop.style.display = DisplayStyle.Flex;
-        }
-
-        public void Hide()
-        {
-            _backdrop.style.display = DisplayStyle.None;
-            if (_overlayHost != null)
-                _overlayHost.style.display = DisplayStyle.None;
-        }
-
-        public void Toggle()
-        {
-            if (IsOpen)
-                Hide();
-            else
-                Show();
         }
 
         private void LoadFromPlayerPrefs()

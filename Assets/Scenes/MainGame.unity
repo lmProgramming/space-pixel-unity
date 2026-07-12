@@ -199,7 +199,8 @@ Transform:
   m_Children:
   - {fileID: 938120423}
   - {fileID: 2070891737}
-  - {fileID: 731135735}
+  - {fileID: 798413489}
+  - {fileID: 1136623632}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &351339372
@@ -608,7 +609,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &731135734
+--- !u!1 &798413488
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -616,52 +617,55 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 731135735}
-  - component: {fileID: 731135737}
-  - component: {fileID: 731135738}
+  - component: {fileID: 798413489}
+  - component: {fileID: 798413491}
+  - component: {fileID: 798413490}
   m_Layer: 0
-  m_Name: PauseMenu
+  m_Name: PauseOverlay
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &731135735
+--- !u!4 &798413489
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 731135734}
+  m_GameObject: {fileID: 798413488}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: -62.27538, y: 10.22257, z: 0}
+  m_LocalScale: {x: 15, y: 15, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 256191738}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &731135737
+--- !u!114 &798413490
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 731135734}
+  m_GameObject: {fileID: 798413488}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 92e0c8584fe746a1b4db31f42f6b8eb8, type: 3}
+  m_Script: {fileID: 11500000, guid: 0698006a74be854e1bf5702fc185a220, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: UI::UI.MainGame.PauseMenuController
+  m_EditorClassIdentifier: UI::UI.Common.PauseOverlayController
+  pauseTitle: Paused
+  settingsOverlay: {fileID: 1136623633}
   pointerOverUiChannel: {fileID: 11400000, guid: fe59adb565b6e2758b87bd8eda75cff1, type: 2}
   pauseStateChannel: {fileID: 11400000, guid: 74f53e084322486ddb6ba9576741f3e3, type: 2}
---- !u!1931382934 &731135738
+  handleEscapeInput: 1
+--- !u!1931382934 &798413491
 PanelRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 731135734}
+  m_GameObject: {fileID: 798413488}
   m_Enabled: 1
   m_CastShadows: 0
   m_ReceiveShadows: 0
@@ -701,11 +705,11 @@ PanelRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 2
+  m_SortingOrder: 10
   m_MaskInteraction: 0
   serializedVersion: 1
   m_PanelSettings: {fileID: 11400000, guid: bdbe1f2b7f606d8bca72704a6c95444a, type: 2}
-  sourceAsset: {fileID: 9197481963319205126, guid: e3e0cc16574c4527819a5593fb1c692e, type: 3}
+  sourceAsset: {fileID: 9197481963319205126, guid: 3518e280bc7f5f6f2a6de1531789e1fa, type: 3}
   m_ParentUI: {fileID: 0}
   m_WorldSpaceSizeMode: 1
   m_WorldSpaceWidth: 1920
@@ -1059,7 +1063,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d4db864dd9a8864048571eb660fac608, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game.UI::UI.Main.ShipStatusPanelController
-  playerShip: {fileID: 4229628396879989915}
   pointerOverUiChannel: {fileID: 11400000, guid: fe59adb565b6e2758b87bd8eda75cff1, type: 2}
   barAnimationSpeed: 5
   criticalEnergyThreshold: 0.2
@@ -1179,6 +1182,111 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1998466619}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1136623631
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1136623632}
+  - component: {fileID: 1136623634}
+  - component: {fileID: 1136623633}
+  m_Layer: 0
+  m_Name: SettingsOverlay
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1136623632
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1136623631}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -62.27538, y: 10.22257, z: 0}
+  m_LocalScale: {x: 15, y: 15, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 256191738}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1136623633
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1136623631}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ba93c0ac3f52e386a664db487d3e6b1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UI::UI.Common.SettingsOverlayController
+  isMainMenu: 0
+  pointerOverUiChannel: {fileID: 11400000, guid: fe59adb565b6e2758b87bd8eda75cff1, type: 2}
+--- !u!1931382934 &1136623634
+PanelRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1136623631}
+  m_Enabled: 1
+  m_CastShadows: 0
+  m_ReceiveShadows: 0
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 0
+  m_ReflectionProbeUsage: 0
+  m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 0}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 11
+  m_MaskInteraction: 0
+  serializedVersion: 1
+  m_PanelSettings: {fileID: 11400000, guid: bdbe1f2b7f606d8bca72704a6c95444a, type: 2}
+  sourceAsset: {fileID: 9197481963319205126, guid: a36139ec093685a258bd109ca9a06599, type: 3}
+  m_ParentUI: {fileID: 0}
+  m_WorldSpaceSizeMode: 1
+  m_WorldSpaceWidth: 1920
+  m_WorldSpaceHeight: 1080
+  m_PivotReferenceSize: 0
+  m_Pivot: 0
+  m_Position: 0
 --- !u!213 &1165100214
 Sprite:
   serializedVersion: 2

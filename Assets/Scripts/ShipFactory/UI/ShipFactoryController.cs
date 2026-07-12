@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using Core.Constants;
 using Core.Services;
 using Events.Camera;
 using Events.UI;
@@ -11,7 +10,6 @@ using Ships;
 using UI;
 using UI.Common;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 using Zenject;
 
@@ -35,6 +33,8 @@ namespace ShipFactory.UI
         [SerializeField]
         private NotificationView notificationView;
 
+        [SerializeField] private PauseOverlayController pauseOverlay;
+
         [SerializeField] private CameraResetRequestEventChannel cameraResetRequestEventChannel;
 
         [SerializeField] private Ship initialShip;
@@ -53,25 +53,17 @@ namespace ShipFactory.UI
         private IInstantiator _instantiator;
 
         private bool _isModuleDragBlockingCamera;
-        private bool _isPaused;
         private bool _isUiHoverBlockingCamera;
         private bool _isUiPointerDownBlockingCamera;
 
         private Button _loadShipButton;
         private ModulePaletteController _paletteController;
 
-        private VisualElement _pauseOverlay;
-        private VisualElement _pauseOverlayHost;
-
         [Inject]
         private PointerOverUiEventChannel _pointerOverUiChannel;
 
-        private Button _quitButton;
-        private Button _resumeButton;
         private VisualElement _root;
         private Button _saveShipButton;
-        private Button _settingsButton;
-        private SettingsPanelController _settingsPanelController;
 
         private TextField _shipNameField;
 
@@ -96,8 +88,24 @@ namespace ShipFactory.UI
             if (shipModuleCatalog == null)
                 throw new UnityException($"[ShipFactoryController] {nameof(ShipModuleCatalog)} is not assigned!");
 
+            if (pauseOverlay == null)
+                throw new UnityException("[ShipFactoryController] PauseOverlayController is required.");
+
             if (initialShip != null)
                 initialShip.IsDesignMode = true;
+        }
+
+        protected override void OnEnable()
+        {
+            base.OnEnable();
+            pauseOverlay.PauseChanged += OnPauseChanged;
+        }
+
+        protected override void OnDisable()
+        {
+            OnPauseChanged(false);
+            pauseOverlay.PauseChanged -= OnPauseChanged;
+            base.OnDisable();
         }
 
         private void Update()
@@ -105,14 +113,7 @@ namespace ShipFactory.UI
             SetModuleDragPointerBlock(_canvasController?.IsDraggingModule == true);
             _canvasController?.RefreshShipResourcesPanel();
             _canvasController?.RefreshCameraInfoPanel(_camera);
-            HandlePauseInput();
             HandleRotationInput();
-        }
-
-        protected override void OnDisable()
-        {
-            base.OnDisable();
-            SetPaused(false);
         }
 
         protected override void BindUiCore(
@@ -151,7 +152,6 @@ namespace ShipFactory.UI
             if (initialShip)
                 _canvasController.SetShip(initialShip);
 
-            BindPauseUi(root);
             RegisterCameraDragPointerBlockers(root);
             _textInputFocusTracker = new TextInputFocusTracker(_textInputFocusChannel);
             _textInputFocusTracker.Track(_shipNameField);
@@ -228,7 +228,6 @@ namespace ShipFactory.UI
             SetUiPointerDownBlock(false);
             ReleaseGameObjectPointerBlocking();
 
-            UnbindPauseUi();
             UnregisterCameraDragPointerBlockers(_root);
 
             if (_saveShipButton != null)
@@ -331,108 +330,20 @@ namespace ShipFactory.UI
             _canvasController.HidePaletteModuleInfo(moduleSO);
         }
 
-        private void BindPauseUi(VisualElement root)
+        private void OnPauseChanged(bool paused)
         {
-            _pauseOverlay = root.Q<VisualElement>(SharedUiElementNames.Pause.Overlay);
-            _pauseOverlayHost = root.Q<VisualElement>(SharedUiElementNames.Pause.OverlayHost);
-            var title = root.Q<Label>(SharedUiElementNames.Pause.Title);
-            _resumeButton = root.Q<Button>(SharedUiElementNames.Pause.ResumeButton);
-            _settingsButton = root.Q<Button>(SharedUiElementNames.Pause.SettingsButton);
-            _quitButton = root.Q<Button>(SharedUiElementNames.Pause.QuitButton);
-
-            if (title == null || _resumeButton == null || _settingsButton == null || _quitButton == null ||
-                _pauseOverlay == null)
-                throw new InvalidOperationException(
-                    "[ShipFactoryController] Pause elements missing in ShipFactory UXML.");
-
-            title.text = "Ship Factory Paused";
-            if (_pauseOverlayHost != null)
-                _pauseOverlayHost.style.display = DisplayStyle.None;
-            _pauseOverlay.style.display = DisplayStyle.None;
-
-            _resumeButton.clicked += OnResumeClicked;
-            _settingsButton.clicked += OnSettingsClicked;
-            _quitButton.clicked += QuitToMainMenu;
-            _settingsPanelController = new SettingsPanelController(root, false);
-        }
-
-        private void UnbindPauseUi()
-        {
-            _settingsPanelController?.Unbind();
-            _settingsPanelController = null;
-
-            if (_resumeButton != null)
-                _resumeButton.clicked -= OnResumeClicked;
-            if (_settingsButton != null)
-                _settingsButton.clicked -= OnSettingsClicked;
-            if (_quitButton != null)
-                _quitButton.clicked -= QuitToMainMenu;
-
-            _pauseOverlay = null;
-            _pauseOverlayHost = null;
-            _resumeButton = null;
-            _settingsButton = null;
-            _quitButton = null;
-        }
-
-        private void OnResumeClicked()
-        {
-            SetPaused(false);
-        }
-
-        private void OnSettingsClicked()
-        {
-            _settingsPanelController?.Toggle();
+            _canvasController?.SetExternalInputLock(paused);
+            _paletteController?.SetInputLocked(paused);
         }
 
         private void HandleRotationInput()
         {
-            if (_isPaused || _canvasController == null) return;
+            if (pauseOverlay.IsPaused || _canvasController == null) return;
             if (_gameInput.IsTextInputFocused) return;
             if (!Input.GetKeyDown(KeyCode.R)) return;
 
             var counterClockwise = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
             _canvasController.RotateActiveModule(counterClockwise ? -90 : 90);
-        }
-
-        private void HandlePauseInput()
-        {
-            if (!Input.GetKeyDown(KeyCode.Escape))
-                return;
-
-            if (_settingsPanelController != null && _settingsPanelController.IsOpen)
-            {
-                _settingsPanelController.Hide();
-                return;
-            }
-
-            SetPaused(!_isPaused);
-        }
-
-        private void SetPaused(bool paused)
-        {
-            if (_isPaused == paused)
-                return;
-
-            _isPaused = paused;
-            Time.timeScale = paused ? 0f : 1f;
-
-            if (_pauseOverlayHost != null)
-                _pauseOverlayHost.style.display = paused ? DisplayStyle.Flex : DisplayStyle.None;
-            if (_pauseOverlay != null)
-                _pauseOverlay.style.display = paused ? DisplayStyle.Flex : DisplayStyle.None;
-
-            _canvasController?.SetExternalInputLock(paused);
-            _paletteController?.SetInputLocked(paused);
-
-            if (!paused && _settingsPanelController != null && _settingsPanelController.IsOpen)
-                _settingsPanelController.Hide();
-        }
-
-        private static void QuitToMainMenu()
-        {
-            Time.timeScale = 1f;
-            SceneManager.LoadScene(SceneNames.MainMenu);
         }
 
         private void RegisterCameraDragPointerBlockers(VisualElement root)

@@ -1,6 +1,5 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
     <Style src="project://database/Assets/DesignSystem/Resources/UI/Styles/DesignSystem/DesignSystem.uss"/>
-    <ui:Template name="settingsOverlayTemplate" src="project://database/Assets/Scripts/UI/Common/SettingsOverlay.uxml"/>
 
     <ui:VisualElement name="main-menu-root" class="ds-root ds-root--transparent"
                       style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; align-items: center; justify-content: center;">
@@ -39,12 +38,6 @@
                     <ui:Button name="ship-select-launch-button" text="Launch" class="ds-btn ds-btn--primary"/>
                 </ui:VisualElement>
             </ui:VisualElement>
-        </ui:VisualElement>
-
-        <ui:VisualElement name="settings-overlay-host"
-                          style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; display: none;">
-            <ui:Instance template="settingsOverlayTemplate"
-                         style="position: absolute; left: 0; right: 0; top: 0; bottom: 0;"/>
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

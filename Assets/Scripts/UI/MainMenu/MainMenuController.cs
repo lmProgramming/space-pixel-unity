@@ -30,7 +30,7 @@ namespace UI.MainMenu
 
         private Button _quitButton;
         private Button _settingsButton;
-        private SettingsPanelController _settingsPanelController;
+        [SerializeField] private SettingsOverlayController settingsOverlay;
         private DropdownField _shipDropdown;
         private Button _shipFactoryButton;
         private Button _shipSelectCancelButton;
@@ -81,14 +81,14 @@ namespace UI.MainMenu
             ConfigureCountSlider(_friendlyCountSlider, DefaultFriendlyShipCount, OnFriendlyCountSliderChanged);
 
             DesignSystemThemeService.RegisterVisualTree(root);
-            _settingsPanelController = new SettingsPanelController(root, true);
+
+            if (settingsOverlay == null)
+                throw new InvalidOperationException(
+                    "[MainMenuController] SettingsOverlayController is not assigned.");
         }
 
         protected override void UnbindUiCore()
         {
-            _settingsPanelController?.Unbind();
-            _settingsPanelController = null;
-
             _startButton.clicked -= OpenShipSelectionDialog;
             _shipFactoryButton.clicked -= OpenShipFactory;
             _settingsButton.clicked -= OpenSettings;
@@ -132,7 +132,7 @@ namespace UI.MainMenu
 
         private void OpenSettings()
         {
-            _settingsPanelController.Toggle();
+            settingsOverlay.Toggle();
         }
 
         private static void QuitGame()
