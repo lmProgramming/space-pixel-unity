@@ -6,11 +6,10 @@
 .ds-grid {
     flex-direction: row;
     flex-wrap: wrap;
-    align-items: flex-start;
-    align-content: flex-start;
+    display: flex;
 }
 
 .ds-grid__item {
-    margin-right: var(--space-3);
     margin-bottom: var(--space-3);
+    margin-right: var(--space-3);
 }

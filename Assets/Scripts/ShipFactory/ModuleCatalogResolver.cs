@@ -24,13 +24,13 @@ namespace ShipFactory
 
         private static string GetRequiredArchetypeId(GameObject moduleInstance)
         {
-            var archetypeSource = moduleInstance.GetComponent<IHasModuleArchetypeId>();
-            if (archetypeSource != null && !string.IsNullOrWhiteSpace(archetypeSource.ModuleArchetypeId))
-                return archetypeSource.ModuleArchetypeId;
-
             var identity = moduleInstance.GetComponent<GameObjectInstanceIdentity>();
             if (identity && !string.IsNullOrWhiteSpace(identity.ArchetypeId))
                 return identity.ArchetypeId;
+
+            var archetypeSource = moduleInstance.GetComponent<IHasModuleArchetypeId>();
+            if (archetypeSource != null && !string.IsNullOrWhiteSpace(archetypeSource.ModuleArchetypeId))
+                return archetypeSource.ModuleArchetypeId;
 
             throw new InvalidOperationException(
                 $"[ShipFactory] Module '{moduleInstance.name}' is missing archetype metadata. " +

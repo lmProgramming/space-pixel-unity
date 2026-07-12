@@ -47,6 +47,8 @@ namespace Ships.Modules
 
         private Vector2 ThrustPoint => CalculateAverageThrustPoint();
 
+        public override ConcreteModuleType ConcreteType => ConcreteModuleType.Engine;
+
         protected override void Start()
         {
             base.Start();
@@ -67,8 +69,6 @@ namespace Ships.Modules
 
             base.OnDestroy();
         }
-
-        public override ConcreteModuleType ConcreteType => ConcreteModuleType.Engine;
 
         public override ModuleType Type => ModuleType.Engine;
 
@@ -119,7 +119,6 @@ namespace Ships.Modules
 
         protected override void UpdateModule()
         {
-            currentThrustRatio = CurrentThrustRatioForTesting;
             currentGimbalAngleForDebug = CurrentThrusterAngle;
             desiredGimbalAngleForDebug = DesiredGimbalAngleForTesting;
 

@@ -15,11 +15,20 @@ namespace ShipFactory.UI.Views.ShipLibrary
         [Inject]
         private IShipSnapshotService _snapshotService;
 
-        protected override void Awake()
+        protected override void OnEnable()
         {
-            base.Awake();
+            base.OnEnable();
+
             View.CloseClicked += OnViewCloseClicked;
             View.LoadClicked += OnViewLoadClicked;
+        }
+
+        protected override void OnDisable()
+        {
+            base.OnDisable();
+
+            View.CloseClicked -= OnViewCloseClicked;
+            View.LoadClicked -= OnViewLoadClicked;
         }
 
         public event Action CloseClicked;
