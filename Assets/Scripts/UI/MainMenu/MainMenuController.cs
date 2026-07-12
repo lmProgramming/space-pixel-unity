@@ -42,6 +42,12 @@ namespace UI.MainMenu
 
         private Button _startButton;
 
+        private void Start()
+        {
+            if (_snapshotRepository == null)
+                throw new InvalidOperationException("[MainMenuController] Snapshot repository is not initialized.");
+        }
+
         protected override void BindUiCore(
             VisualElement root)
         {
@@ -92,7 +98,6 @@ namespace UI.MainMenu
             _asteroidCountSlider.UnregisterValueChangedCallback(OnAsteroidCountSliderChanged);
             _enemyCountSlider.UnregisterValueChangedCallback(OnEnemyCountSliderChanged);
             _friendlyCountSlider.UnregisterValueChangedCallback(OnFriendlyCountSliderChanged);
-            _snapshotRepository.Model.Changed -= OnSnapshotCatalogChanged;
 
             _startButton = null;
             _shipFactoryButton = null;

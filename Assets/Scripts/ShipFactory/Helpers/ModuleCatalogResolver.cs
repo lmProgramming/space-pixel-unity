@@ -1,8 +1,9 @@
 using System;
 using Core.Ships;
+using ShipFactory.Models;
 using UnityEngine;
 
-namespace ShipFactory
+namespace ShipFactory.Helpers
 {
     public static class ModuleCatalogResolver
     {

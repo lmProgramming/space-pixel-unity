@@ -1,11 +1,12 @@
 using System;
 using Core.Pixelation;
 using Core.Ships;
+using ShipFactory.Models;
 using UI.Common;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace ShipFactory
+namespace ShipFactory.UI
 {
     public class ModulePaletteController
     {

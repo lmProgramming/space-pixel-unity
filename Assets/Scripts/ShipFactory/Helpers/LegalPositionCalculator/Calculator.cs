@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Core.Ships;
+using ShipFactory.Models;
 using UnityEngine;
 using ZLinq;
 

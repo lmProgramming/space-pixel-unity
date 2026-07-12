@@ -175,12 +175,6 @@
         <!-- Ghost element for drag preview (hidden by default, moved to top level) -->
         <ui:VisualElement name="drag-ghost" class="drag-ghost hidden" picking-mode="Ignore"/>
 
-        <!-- Popup feedback for actions like blocked delete attempts -->
-        <ui:VisualElement name="action-popup" class="action-popup ds-toast">
-            <ui:VisualElement name="action-popup-icon" class="ds-icon ds-icon--sm ds-toast__icon"/>
-            <ui:Label text="" name="action-popup-label" class="ds-toast__message"/>
-        </ui:VisualElement>
-
         <ui:VisualElement name="pause-overlay-host"
                           style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; display: none;">
             <ui:Instance template="pauseOverlayTemplate"

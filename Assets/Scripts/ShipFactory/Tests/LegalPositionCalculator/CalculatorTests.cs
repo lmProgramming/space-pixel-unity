@@ -4,6 +4,7 @@ using Core.Ships.Module;
 using NSubstitute;
 using NUnit.Framework;
 using ShipFactory.Helpers.LegalPositionCalculator;
+using ShipFactory.Models;
 using UnityEngine;
 using Object = UnityEngine.Object;
 

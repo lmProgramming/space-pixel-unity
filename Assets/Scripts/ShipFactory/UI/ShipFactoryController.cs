@@ -4,6 +4,8 @@ using Core.Constants;
 using Core.Services;
 using Events.Camera;
 using Events.UI;
+using ShipFactory.Models;
+using ShipFactory.UI.Views.Notification;
 using ShipFactory.UI.Views.ShipLibrary;
 using Ships;
 using UI;
@@ -13,7 +15,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 using Zenject;
 
-namespace ShipFactory
+namespace ShipFactory.UI
 {
     [DefaultExecutionOrder(-100)]
     public class ShipFactoryController : PanelRendererBase
@@ -29,6 +31,9 @@ namespace ShipFactory
 
         [SerializeField]
         private ShipModuleCatalog shipModuleCatalog;
+
+        [SerializeField]
+        private NotificationView notificationView;
 
         [SerializeField] private CameraResetRequestEventChannel cameraResetRequestEventChannel;
 
@@ -112,20 +117,20 @@ namespace ShipFactory
         protected override void BindUiCore(
             VisualElement root)
         {
-            if (cameraResetRequestEventChannel == null)
+            if (!cameraResetRequestEventChannel)
                 throw new InvalidOperationException(
                     "[ShipFactoryController] CameraResetRequestEventChannel is not assigned!");
 
             _root = root;
             _canvasController = new ShipFactoryCanvasController(
-                root, _gameInput, _instantiator, shipModuleCatalog, cameraResetRequestEventChannel);
+                root, notificationView, _gameInput, _instantiator, shipModuleCatalog, cameraResetRequestEventChannel);
             _paletteController = new ModulePaletteController(root, shipModuleCatalog);
 
             _shipNameField = root.Q<TextField>("ship-name-field");
             _saveShipButton = root.Q<Button>("save-ship-button");
             _loadShipButton = root.Q<Button>("load-ship-button");
 
-            if (_shipNameField == null || _saveShipButton == null)
+            if (_shipNameField == null || _saveShipButton == null || _loadShipButton == null)
                 throw new InvalidOperationException("[ShipFactoryController] Save controls are missing in UXML.");
 
             _paletteController.OnModuleDragStarted += OnModuleDragStarted;
@@ -137,10 +142,10 @@ namespace ShipFactory
             _saveShipButton.clicked += SaveSnapshot;
             _loadShipButton.clicked += ShowSnapshotLibrary;
 
-            var initialName = initialShip != null ? initialShip.name : DefaultShipName;
+            var initialName = initialShip ? initialShip.name : DefaultShipName;
             _shipNameField.value = initialName;
 
-            if (initialShip != null)
+            if (initialShip)
                 _canvasController.SetShip(initialShip);
 
             BindPauseUi(root);

@@ -151,6 +151,8 @@ namespace Ships
 
         private void OnDisable()
         {
+            if (IsDesignMode) return;
+
             ShipService.UnregisterShip(this);
         }
 

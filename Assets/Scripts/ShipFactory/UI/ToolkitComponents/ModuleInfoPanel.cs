@@ -1,5 +1,6 @@
 using System;
 using Core.Ships.Module;
+using ShipFactory.Models;
 using UnityEngine;
 using UnityEngine.UIElements;
 using Resources = Core.Ships.Resources;

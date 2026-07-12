@@ -1,7 +1,8 @@
 using System;
+using UI;
 using UnityEngine.UIElements;
 
-namespace ShipFactory.UI.ToolkitComponents
+namespace ShipFactory.UI.Views.Notification
 {
     public enum PopupLevel
     {
@@ -10,18 +11,18 @@ namespace ShipFactory.UI.ToolkitComponents
         Error
     }
 
-    public class NotificationPopup
+    public class NotificationView : PanelRendererBase
     {
         private const string ToastInfoClassName = "ds-toast--info";
         private const string ToastWarningClassName = "ds-toast--warning";
         private const string ToastDangerClassName = "ds-toast--danger";
 
-        private readonly VisualElement _actionPopup;
-        private readonly VisualElement _actionPopupIcon;
-        private readonly Label _actionPopupLabel;
+        private VisualElement _actionPopup;
+        private VisualElement _actionPopupIcon;
+        private Label _actionPopupLabel;
         private IVisualElementScheduledItem _hideJob;
 
-        public NotificationPopup(VisualElement root)
+        protected override void BindUiCore(VisualElement root)
         {
             _actionPopup = root.Q<VisualElement>("action-popup");
             _actionPopupIcon = root.Q<VisualElement>("action-popup-icon");
@@ -30,6 +31,13 @@ namespace ShipFactory.UI.ToolkitComponents
             if (_actionPopup == null || _actionPopupIcon == null || _actionPopupLabel == null)
                 throw new InvalidOperationException(
                     "[ShipFactoryNotificationPopup] Required action popup elements are missing in UXML!");
+        }
+
+        protected override void UnbindUiCore()
+        {
+            _actionPopup = null;
+            _actionPopupIcon = null;
+            _actionPopupLabel = null;
         }
 
         public void Show(string message, PopupLevel level = PopupLevel.Info)

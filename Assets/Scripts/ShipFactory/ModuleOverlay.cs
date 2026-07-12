@@ -1,3 +1,4 @@
+using ShipFactory.Models;
 using UnityEngine;
 
 namespace ShipFactory

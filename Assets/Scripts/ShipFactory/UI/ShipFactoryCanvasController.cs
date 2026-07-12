@@ -7,8 +7,10 @@ using Events.Camera;
 using JetBrains.Annotations;
 using ShipFactory.Helpers;
 using ShipFactory.Helpers.LegalPositionCalculator;
+using ShipFactory.Models;
 using ShipFactory.UI.Runtime;
 using ShipFactory.UI.ToolkitComponents;
+using ShipFactory.UI.Views.Notification;
 using Ships;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -16,7 +18,7 @@ using Zenject;
 using ZLinq;
 using Object = UnityEngine.Object;
 
-namespace ShipFactory
+namespace ShipFactory.UI
 {
     public class ShipFactoryCanvasController : IDisposable
     {
@@ -27,7 +29,7 @@ namespace ShipFactory
 
         private readonly VisualElement _inputBlocker;
         private readonly IInstantiator _instantiator;
-        private readonly NotificationPopup _notificationPopup;
+        private readonly NotificationView _notificationView;
 
         private readonly OverlayManager _overlayManager;
         private readonly ResourcesPanel _resourcesPanel;
@@ -48,6 +50,7 @@ namespace ShipFactory
 
         public ShipFactoryCanvasController(
             VisualElement root,
+            NotificationView notificationView,
             IGameInput gameInput,
             IInstantiator instantiator,
             ShipModuleCatalog moduleCatalog,
@@ -56,6 +59,8 @@ namespace ShipFactory
             _gameInput = gameInput;
             _instantiator = instantiator ?? throw new ArgumentNullException(nameof(instantiator));
             var moduleCatalog1 = moduleCatalog ?? throw new ArgumentNullException(nameof(moduleCatalog));
+            _notificationView = notificationView ?? throw new ArgumentNullException(nameof(notificationView));
+
             var canvasContainer = root.Q<VisualElement>("canvas-container");
             _inputBlocker = root.Q<VisualElement>("ship-factory-input-blocker");
 
@@ -64,7 +69,6 @@ namespace ShipFactory
                     "[ShipFactoryCanvasController] canvas-container not found in UXML!");
 
             // 1. Initialize Sub-Panels
-            _notificationPopup = new NotificationPopup(root);
             _resourcesPanel = new ResourcesPanel(root);
             _infoPanel = new ModuleInfoPanel(root);
             _cameraInfoPanel = new CameraInfoPanel(root, cameraResetRequestEventChannel);
@@ -104,17 +108,17 @@ namespace ShipFactory
 
         public void ShowInfoMessage(string message)
         {
-            _notificationPopup.Show(message);
+            _notificationView.Show(message);
         }
 
         public void ShowWarningMessage(string message)
         {
-            _notificationPopup.Show(message, PopupLevel.Warning);
+            _notificationView.Show(message, PopupLevel.Warning);
         }
 
         public void ShowErrorMessage(string message)
         {
-            _notificationPopup.Show(message, PopupLevel.Error);
+            _notificationView.Show(message, PopupLevel.Error);
         }
 
         public void SetShip(Ship ship)

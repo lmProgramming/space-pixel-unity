@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ui:UXML
-        xmlns:ui="UnityEngine.UIElements" xmlns:uic="../../../../UIElementsSchema/UIElements.xsd"
->
+        xmlns:ui="UnityEngine.UIElements" xmlns:uic="UI.Common">
     <Style src="project://database/Assets/DesignSystem/Resources/UI/Styles/DesignSystem/DesignSystem.uss"/>
     <Style src="ShipStatusPanel.uss"/>
 

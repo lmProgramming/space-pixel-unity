@@ -5,7 +5,7 @@ using Core.Ships;
 using UnityEngine;
 using ZLinq;
 
-namespace ShipFactory
+namespace ShipFactory.Models
 {
     [CreateAssetMenu(fileName = nameof(ShipModuleCatalog), menuName = "Ship Factory/" + nameof(ShipModuleCatalog))]
     public class ShipModuleCatalog : ScriptableObject, IShipModuleCatalog

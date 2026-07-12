@@ -1,7 +1,7 @@
 using Core.Ships.Module;
 using UnityEngine;
 
-namespace ShipFactory
+namespace ShipFactory.Models
 {
     public class ShipModuleSOInstanceBundle
     {

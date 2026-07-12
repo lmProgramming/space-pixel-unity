@@ -1,7 +1,7 @@
 using Core.Ships;
 using UnityEngine;
 
-namespace ShipFactory
+namespace ShipFactory.Models
 {
     public class ShipModuleSOContainer : MonoBehaviour, IHasModuleArchetypeId
     {

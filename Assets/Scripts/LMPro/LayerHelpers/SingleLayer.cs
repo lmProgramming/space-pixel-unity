@@ -1,13 +1,11 @@
 using System;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace LMPro.LayerHelpers
 {
     [Serializable]
     public struct SingleLayer
     {
-        [FormerlySerializedAs("_layerIndex")]
         [SerializeField]
         private int layerIndex;
 

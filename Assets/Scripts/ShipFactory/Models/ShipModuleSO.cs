@@ -3,7 +3,7 @@ using UnityEngine;
 
 [assembly: InternalsVisibleTo("ShipFactory.Tests")]
 
-namespace ShipFactory
+namespace ShipFactory.Models
 {
     [CreateAssetMenu(fileName = "ShipModuleSO", menuName = "Ship Factory/ShipModuleSO")]
     public class ShipModuleSO : ScriptableObject

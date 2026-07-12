@@ -68,9 +68,7 @@ namespace UI
         {
         }
 
-        protected virtual void UnbindUiCore()
-        {
-        }
+        protected abstract void UnbindUiCore();
 
         protected virtual void AfterUnbindUi()
         {
