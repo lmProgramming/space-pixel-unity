@@ -9,6 +9,8 @@ namespace Core.Services
 
         void SaveSnapshot(ShipSnapshot snapshot);
 
+        bool SnapshotExists(string shipName);
+
         void DeleteSnapshot(string filePath);
     }
 }

@@ -12,6 +12,7 @@ using ShipFactory.UI.Runtime;
 using ShipFactory.UI.ToolkitComponents;
 using ShipFactory.UI.Views.Notification;
 using Ships;
+using UI.Elements;
 using UnityEngine;
 using UnityEngine.UIElements;
 using Zenject;

@@ -42,6 +42,7 @@ namespace ShipFactory.UI
         private VisualElement _canvasContainer;
 
         private ShipFactoryCanvasController _canvasController;
+        private (bool needToShow, string shipName) _duplicateShipNameWarning;
 
         [Inject]
         private IGameInput _gameInput;
@@ -145,6 +146,8 @@ namespace ShipFactory.UI
             var initialName = initialShip ? initialShip.name : DefaultShipName;
             _shipNameField.value = initialName;
 
+            _shipNameField.RegisterValueChangedCallback(OnShipNameChanged);
+
             if (initialShip)
                 _canvasController.SetShip(initialShip);
 
@@ -152,6 +155,11 @@ namespace ShipFactory.UI
             RegisterCameraDragPointerBlockers(root);
             _textInputFocusTracker = new TextInputFocusTracker(_textInputFocusChannel);
             _textInputFocusTracker.Track(_shipNameField);
+        }
+
+        private void OnShipNameChanged(ChangeEvent<string> evt)
+        {
+            _duplicateShipNameWarning = (true, evt.newValue);
         }
 
         private void ShowSnapshotLibrary()
@@ -191,11 +199,13 @@ namespace ShipFactory.UI
 
                 _snapshotService.ApplySnapshot(initialShip, snapshot);
                 initialShip.InitializeModules();
-                _shipNameField.value = string.IsNullOrWhiteSpace(snapshot.shipName)
+                _shipNameField.SetValueWithoutNotify(string.IsNullOrWhiteSpace(snapshot.shipName)
                     ? DefaultShipName
-                    : snapshot.shipName;
+                    : snapshot.shipName);
                 _canvasController.RebuildShipModules();
                 HideSnapshotLibrary();
+
+                _duplicateShipNameWarning = (false, snapshot.shipName);
             }
             catch (Exception exception)
             {
@@ -241,6 +251,8 @@ namespace ShipFactory.UI
                 _canvasController.Dispose();
             }
 
+            _shipNameField.UnregisterValueChangedCallback(OnShipNameChanged);
+
             _textInputFocusTracker?.Release(_shipNameField);
             _textInputFocusTracker = null;
 
@@ -264,21 +276,13 @@ namespace ShipFactory.UI
                 ? DefaultShipName
                 : _shipNameField.value.Trim();
 
-            // var existingNamePredicate = new Func<string, bool>(candidateName =>
-            // {
-            //     var candidateFileName = SnapshotNameUtility.SanitizeFileName(candidateName) + SnapshotExtension;
-            //     var candidatePath = Path.Combine(snapshotFolderPath, candidateFileName);
-            //     return File.Exists(candidatePath);
-            // });
-            //
-            // if (existingNamePredicate(requestedName))
-            // {
-            //     var suggestedCopyName = SnapshotNameUtility.GetNextCopyName(requestedName, existingNamePredicate);
-            //     _shipNameField.value = suggestedCopyName;
-            //     _canvasController.ShowWarningMessage(
-            //         $"'{requestedName}' already exists. Suggested copy name: '{suggestedCopyName}'.");
-            //     return;
-            // }
+            if (_shipSnapshotRepository.SnapshotExists(requestedName)
+                && (_duplicateShipNameWarning.needToShow || _duplicateShipNameWarning.shipName != requestedName))
+            {
+                _canvasController.ShowWarningMessage("This ships already exists! Select save again to overwrite it.");
+                _duplicateShipNameWarning = (false, requestedName);
+                return;
+            }
 
             var snapshot = _snapshotService.CaptureSnapshot(initialShip);
             if (snapshot == null)

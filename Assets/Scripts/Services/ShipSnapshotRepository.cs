@@ -23,6 +23,17 @@ namespace Services
 
         public ShipSnapshotCatalogModel Model { get; }
 
+        public bool SnapshotExists(string shipName)
+        {
+            if (string.IsNullOrWhiteSpace(shipName) ||
+                shipName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
+                throw new ArgumentException("Snapshot ship name is invalid.", nameof(shipName));
+
+            var filePath = FilePathForShipName(shipName);
+
+            return File.Exists(filePath);
+        }
+
         public void DeleteSnapshot(
             string filePath)
         {
@@ -47,8 +58,7 @@ namespace Services
                 snapshot.shipName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
                 throw new ArgumentException("Snapshot ship name is invalid.", nameof(snapshot));
 
-            var filePath = Path.Combine(Constants.ShipSnapshotsFolder,
-                $"{snapshot.shipName}{Constants.ShipSnapshotExtension}");
+            var filePath = FilePathForShipName(snapshot.shipName);
 
             var directoryPath = Path.GetDirectoryName(filePath);
             if (!string.IsNullOrWhiteSpace(directoryPath))
@@ -69,9 +79,14 @@ namespace Services
                 File.Delete(iconPath);
         }
 
+        private static string FilePathForShipName(string shipName)
+        {
+            return Path.Combine(Constants.ShipSnapshotsFolder, $"{shipName}{Constants.ShipSnapshotExtension}");
+        }
+
         private static string GetShipSnapshotIconPath(string shipName)
         {
-            return Path.Combine(Constants.ShipSnapshotsFolder, shipName + Constants.ShipSnapshotIconExtension);
+            return Path.Combine(Constants.ShipSnapshotsFolder, $"{shipName}{Constants.ShipSnapshotIconExtension}");
         }
 
         private void Refresh()
