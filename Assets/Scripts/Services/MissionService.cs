@@ -1,9 +1,7 @@
 using System;
-using Core.Constants;
 using Core.Gameplay.EasyTeam;
-using Core.Pixelation;
 using Core.Services;
-using Core.Ships;
+using Events.Game;
 using UnityEngine;
 using Zenject;
 using ZLinq;
@@ -12,37 +10,33 @@ namespace Services
 {
     public class MissionService : MonoBehaviour, IMissionService
     {
+        [Inject] private IActivePlayerShipProvider _activePlayerShipProvider;
+        [Inject] private BattleDefeatEventChannel _battleDefeatEventChannel;
+
+        [Inject] private BattleVictoryEventChannel _battleVictoryEventChannel;
         private bool _missionOver;
 
-        [Inject(Id = Constants.PlayerShipId)]
-        private IShip _playerShip;
-
         private ITeam _playerTeam;
-
-        [Inject]
-        private IShipService _shipService;
+        [Inject] private IShipService _shipService;
 
         private void Start()
         {
-            _playerTeam = _playerShip.Team;
+            if (_activePlayerShipProvider.ActiveShip == null)
+                throw new UnityException("[MissionService] Active player ship is not set.");
+
+            _playerTeam = _activePlayerShipProvider.ActiveShip.Team;
         }
 
         private void Update()
         {
-            if (_missionOver) return;
-            if (AllEnemiesDestroyed()) TriggerVictory();
-        }
+            if (_missionOver)
+                return;
 
-        private void OnEnable()
-        {
-            if (_playerShip?.CommandModule?.PixelatedRigidbody == null) return;
-            _playerShip.CommandModule.PixelatedRigidbody.OnNoPixelsLeft += HandlePlayerDestroyed;
-        }
+            if (AllEnemiesDestroyed())
+                TriggerVictory();
 
-        private void OnDisable()
-        {
-            if (_playerShip?.CommandModule?.PixelatedRigidbody == null) return;
-            _playerShip.CommandModule.PixelatedRigidbody.OnNoPixelsLeft -= HandlePlayerDestroyed;
+            if (AllAlliesDestroyed())
+                TriggerDefeat();
         }
 
         public event Action OnVictory;
@@ -53,19 +47,25 @@ namespace Services
             return !_shipService.GetEnemyShipsOf(_playerTeam).AsValueEnumerable().Any();
         }
 
+        private bool AllAlliesDestroyed()
+        {
+            return !_shipService.GetAlliedShipsOf(_playerTeam).AsValueEnumerable().Any();
+        }
+
         private void TriggerVictory()
         {
             _missionOver = true;
             Debug.Log("[MissionService] Victory!");
             OnVictory?.Invoke();
+            _battleVictoryEventChannel.Raise();
         }
 
-        private void HandlePlayerDestroyed(IPixelated _)
+        private void TriggerDefeat()
         {
-            if (_missionOver) return;
             _missionOver = true;
             Debug.Log("[MissionService] Defeat!");
             OnDefeat?.Invoke();
+            _battleDefeatEventChannel.Raise();
         }
     }
 }

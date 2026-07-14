@@ -231,7 +231,7 @@ namespace Pixelation
             return position;
         }
 
-        public event Action<IPixelated> OnNoPixelsLeft;
+        public event Action<IPixelatedRigidbody> Destroyed;
 
         public event Action<List<Vector2Int>, PixelLoseReason> OnPixelsLost;
 
@@ -289,7 +289,7 @@ namespace Pixelation
 
         public virtual void NoPixelsLeft()
         {
-            OnNoPixelsLeft?.Invoke(this);
+            Destroyed?.Invoke(this);
             Destroy(gameObject);
         }
 

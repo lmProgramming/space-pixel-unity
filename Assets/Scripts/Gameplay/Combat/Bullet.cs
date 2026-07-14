@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using Core.Constants;
+using Core.Pixelation;
 using Cysharp.Threading.Tasks;
 using Pixelation;
 using UnityEngine;
@@ -19,14 +21,29 @@ namespace Gameplay.Combat
             base.Awake();
 
             DelayedFadeOutAsync().Forget();
-
-            OnPixelsLost += (_, _) => SetLayer(PhysicsLayers.Default);
         }
 
-        protected override void OnDestroy()
+        private void OnEnable()
         {
-            base.OnDestroy();
+            OnPixelsLost += OnOnPixelsLost;
 
+            Destroyed += HandleDestroy;
+        }
+
+        private void OnDisable()
+        {
+            OnPixelsLost -= OnOnPixelsLost;
+
+            Destroyed -= HandleDestroy;
+        }
+
+        private void OnOnPixelsLost(List<Vector2Int> vector2Ints, PixelLoseReason pixelLoseReason)
+        {
+            SetLayer(PhysicsLayers.Default);
+        }
+
+        private void HandleDestroy(IPixelated obj)
+        {
             var results = new Collider2D[5];
             Physics2D.OverlapCircle(transform.position, PushAwayRadius, ContactFilter2D.noFilter, results);
 

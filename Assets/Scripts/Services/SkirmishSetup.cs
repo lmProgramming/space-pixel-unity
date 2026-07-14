@@ -4,12 +4,13 @@ using Zenject;
 
 namespace Services
 {
+    [DefaultExecutionOrder(-100)]
     public class SkirmishSetup : MonoBehaviour
     {
         [Inject]
         private ISkirmishSpawner _skirmishSpawner;
 
-        private void Start()
+        private void Awake()
         {
             _skirmishSpawner.SpawnFromSaveState();
         }
