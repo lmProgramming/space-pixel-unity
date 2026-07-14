@@ -1,11 +1,8 @@
-using Core.Constants;
 using Core.Gameplay.Sound;
 using Core.Services;
-using Core.Ships;
 using Events.Gameplay.Collision;
 using Services;
 using Services.Sound;
-using Ships;
 using UnityEngine;
 using Zenject;
 
@@ -27,8 +24,6 @@ namespace Context
         [SerializeField] private NavigationService navigationService;
         [SerializeField] private MissionService missionService;
         [SerializeField] private SkirmishSpawner skirmishSpawner;
-
-        [SerializeField] private PlayerShip playerShip;
 
         public override void InstallBindings()
         {
@@ -72,9 +67,18 @@ namespace Context
                 .FromInstance(skirmishSpawner)
                 .AsSingle();
 
-            Container.Bind<IShip>()
-                .WithId(Constants.PlayerShipId)
-                .FromInstance(playerShip)
+            Container.Bind<IActivePlayerShipProvider>()
+                .To<ActivePlayerShipProvider>()
+                .AsSingle();
+
+            Container.Bind<FreeModeBattleSpawnConfigurationProvider>()
+                .AsSingle();
+
+            Container.Bind<ProgressionBattleSpawnConfigurationProvider>()
+                .AsSingle();
+
+            Container.Bind<IBattleSpawnConfigurationProvider>()
+                .To<BattleSpawnConfigurationProvider>()
                 .AsSingle();
 
             Container.Bind<IPixelatedRigidbodyFactory>()

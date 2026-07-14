@@ -18,6 +18,8 @@ namespace Context
         [SerializeField] private TextInputFocusEventChannel textInputFocusChannel;
         [SerializeField] private PauseStateEventChannel pauseStateChannel;
         [SerializeField] private ShootingEventChannel shootingEventChannel;
+        [SerializeField] private BattleVictoryEventChannel battleVictoryEventChannel;
+        [SerializeField] private BattleDefeatEventChannel battleDefeatEventChannel;
 
         public override void InstallBindings()
         {
@@ -45,6 +47,12 @@ namespace Context
             if (shootingEventChannel == null)
                 throw new UnityException("[GameProjectInstaller] Shooting event channel must be assigned.");
 
+            if (battleVictoryEventChannel == null)
+                throw new UnityException("[GameProjectInstaller] Battle victory event channel must be assigned.");
+
+            if (battleDefeatEventChannel == null)
+                throw new UnityException("[GameProjectInstaller] Battle defeat event channel must be assigned.");
+
             Container.Bind<IShipModuleCatalog>()
                 .FromInstance(typedShipModuleCatalog)
                 .AsSingle();
@@ -65,6 +73,10 @@ namespace Context
                 .To<ShipSnapshotRepository>()
                 .AsSingle();
 
+            Container.Bind<IProgressionRepository>()
+                .To<ProgressionRepository>()
+                .AsSingle();
+
             Container.Bind<PointerOverUiEventChannel>()
                 .FromInstance(pointerOverUiChannel)
                 .AsSingle();
@@ -79,6 +91,14 @@ namespace Context
 
             Container.Bind<ShootingEventChannel>()
                 .FromInstance(shootingEventChannel)
+                .AsSingle();
+
+            Container.Bind<BattleVictoryEventChannel>()
+                .FromInstance(battleVictoryEventChannel)
+                .AsSingle();
+
+            Container.Bind<BattleDefeatEventChannel>()
+                .FromInstance(battleDefeatEventChannel)
                 .AsSingle();
 
             Container.Bind<IGameInput>()

@@ -1,4 +1,5 @@
-﻿using Ships;
+﻿using Core.Ships;
+using Ships;
 using Ships.Modules;
 using UnityEditor;
 using UnityEngine;
@@ -43,6 +44,18 @@ namespace Editor.ToolsExtensions
             ChangeShip<AIShip>(command.context as Ship);
         }
 
+        [MenuItem("CONTEXT/Ship/Change to Ship")]
+        private static void ChangeToShip(MenuCommand command)
+        {
+            ChangeShip<Ship>(command.context as Ship);
+        }
+
+        [MenuItem("CONTEXT/Ship/Change to Design Ship")]
+        private static void ChangeToDesignShip(MenuCommand command)
+        {
+            ChangeShip<DesignShip>(command.context as Ship);
+        }
+
         [MenuItem("CONTEXT/Ship/Change to Player Ship")]
         private static void ChangeToPlayerShip(MenuCommand command)
         {
@@ -66,7 +79,7 @@ namespace Editor.ToolsExtensions
             JsonUtility.FromJsonOverwrite(oldValues, newComponent);
         }
 
-        private static void ChangeShip<TNew>(Ship oldShip) where TNew : Ship
+        private static void ChangeShip<TNew>(Ship oldShip) where TNew : Component, IShip
         {
             if (oldShip == null) return;
 

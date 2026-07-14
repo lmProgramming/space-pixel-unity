@@ -14,12 +14,10 @@ GameObject:
   - component: {fileID: 8956799424400509771}
   - component: {fileID: 2834958037352223239}
   - component: {fileID: 783425818236571938}
-  - component: {fileID: 1929800421172947638}
-  - component: {fileID: 7212375899802020741}
-  - component: {fileID: 154214562210573461}
-  - component: {fileID: 2234408972828058361}
+  - component: {fileID: 3476154451988763608}
+  - component: {fileID: 3250268804024418054}
   m_Layer: 7
-  m_Name: AIShipShellEnemy
+  m_Name: ShipShell
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -117,7 +115,7 @@ MonoBehaviour:
   unityEvent:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &1929800421172947638
+--- !u!114 &3476154451988763608
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -126,55 +124,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 7092472564742756392}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8306ff83506c4050b5621d460b1a7dfb, type: 3}
+  m_Script: {fileID: 11500000, guid: ca2084538397de84187ef625732233bb, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Game.Ships::Ships.ShipSensing
-  obstacleMask:
-    serializedVersion: 2
-    m_Bits: 0
-  losBlockersMask:
-    serializedVersion: 2
-    m_Bits: 0
-  shipMask:
-    serializedVersion: 2
-    m_Bits: 0
-  useDefaultMasks: 1
-  forwardSenseRange: 18
-  forwardSenseAngles:
-  - 0
-  - 15
-  - -15
-  - 30
-  - -30
-  useCircleCast: 0
-  circleCastRadius: 0.6
-  losMaxDistance: 200
---- !u!114 &7212375899802020741
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7092472564742756392}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4bc27b73aee54799bad9239b6a29c5c4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Game.Ships::Ships.StateMachines.Behaviour.BehaviourStateMachine
-  currentStateNameDebug: 
-  currentStateDataDebug: 
---- !u!114 &154214562210573461
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7092472564742756392}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2a1eda6d5f4c1594c86a1d39cfc2d3fa, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Game.Ships::Ships.AIShip
+  m_EditorClassIdentifier: Ships::Ships.Ship
   team: {fileID: 0}
   sasTurnInputSettings:
     <TurnReleaseThreshold>k__BackingField: 0.05
@@ -194,13 +146,8 @@ MonoBehaviour:
   allocatorForceWeight: 1
   allocatorTorqueWeight: 0.4
   allocatorRegularization: 0.02
-  speedMultiplier: 1
-  rotationMultiplier: 1
-  stopDistance: 1.5
-  minThrustAlignment: 0.1
-  avoidanceWeight: 1.2
-  navigationSize: 1
---- !u!114 &2234408972828058361
+  <IsDesignMode>k__BackingField: 0
+--- !u!114 &3250268804024418054
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -211,6 +158,6 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 51beb7d3839b46ae91fd236d4f53e511, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Game.Ships::Ships.ShipCrewAssigner
+  m_EditorClassIdentifier: Ships::Ships.ShipCrewAssigner
   crewMembers: []
   generateMissingCrewMembers: 1

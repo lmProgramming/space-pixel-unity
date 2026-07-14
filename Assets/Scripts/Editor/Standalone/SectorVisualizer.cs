@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using Core.Services;
 using Services;
 using UnityEngine;
+using Zenject;
 
 [assembly: InternalsVisibleTo("E2E")]
 
@@ -15,10 +16,10 @@ namespace Editor.Standalone
         [SerializeField] private bool showGrid = true;
         [SerializeField] private float gizmoZ;
 
-        [HideInInspector] public bool showSectorOverlay;
+        [Inject]
+        private INavigationService _navigationService;
 
-        [SerializeField]
-        private NavigationService navigationService;
+        private NavigationService NavigationServiceImpl => _navigationService as NavigationService;
 
         private Camera _camera;
 
@@ -29,11 +30,11 @@ namespace Editor.Standalone
 
         private void OnDrawGizmos()
         {
-            var sectorSize = navigationService.InternalSectorSize;
+            var sectorSize = NavigationServiceImpl.InternalSectorSize;
             if (sectorSize <= 0) return;
 
-            var cache = navigationService.InternalCache;
-            var cacheDuration = navigationService.InternalCacheDuration;
+            var cache = NavigationServiceImpl.InternalCache;
+            var cacheDuration = NavigationServiceImpl.InternalCacheDuration;
 
             if (showGrid && _camera) DrawGrid(cache, sectorSize, cacheDuration);
         }
@@ -87,7 +88,7 @@ namespace Editor.Standalone
 
         public void RecalculateSectorGrid()
         {
-            var sectorSize = navigationService.InternalSectorSize;
+            var sectorSize = NavigationServiceImpl.InternalSectorSize;
             var camPos = _camera.transform.position;
 
             var originX = Mathf.Floor(camPos.x / sectorSize) * sectorSize;
@@ -99,18 +100,16 @@ namespace Editor.Standalone
             for (var row = -halfCount; row < halfCount; row++)
                 keys.Add(new Vector2(originX + col * sectorSize, originY + row * sectorSize));
 
-            navigationService.ClearCacheEntries(keys);
+            NavigationServiceImpl.ClearCacheEntries(keys);
 
             foreach (var key in keys)
-                navigationService.GetSectorResult(new Vector3(key.x + sectorSize * 0.5f, key.y + sectorSize * 0.5f));
-
-            showSectorOverlay = true;
+                _navigationService.GetSectorResult(new Vector3(key.x + sectorSize * 0.5f, key.y + sectorSize * 0.5f));
         }
 
-        internal NavigationService InternalNavigationService
+        internal INavigationService InternalNavigationService
         {
-            get => navigationService;
-            set => navigationService = value;
+            get => _navigationService;
+            set => _navigationService = value;
         }
 #endif
     }
