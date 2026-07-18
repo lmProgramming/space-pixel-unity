@@ -81,5 +81,5 @@ MonoBehaviour:
   textInputFocusChannel: {fileID: 11400000, guid: 7d7c50038550a47ada15334cf9960875, type: 2}
   pauseStateChannel: {fileID: 11400000, guid: 74f53e084322486ddb6ba9576741f3e3, type: 2}
   shootingEventChannel: {fileID: 11400000, guid: 17adcbea821a7aa3bb4aafc76131348b, type: 2}
-  battleVictoryEventChannel: {fileID: 11400000, guid: e33af3711594ca794bf281365938411d, type: 2}
-  battleDefeatEventChannel: {fileID: 11400000, guid: 1d8db3c3a94e8e9e3820c6a756f6cb28, type: 2}
+  gameplayConstants: {fileID: 11400000, guid: 37f0afba1a50bc7e894e6ab17aa4512b, type: 2}
+  battleOverEventChannel: {fileID: 11400000, guid: e33af3711594ca794bf281365938411d, type: 2}

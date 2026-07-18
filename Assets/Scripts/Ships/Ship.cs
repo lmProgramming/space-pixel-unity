@@ -240,9 +240,8 @@ namespace Ships
 
             foreach (var module in existingModules)
             {
-                module.OnShipConnectionLost();
-                module.transform.SetParent(null, true);
-                Destroy(module.gameObject);
+                if (module)
+                    module.DestroyModule();
             }
         }
 
@@ -400,7 +399,7 @@ namespace Ships
             Destroy(gameObject);
         }
 
-        private void ReleaseSurvivingModulesAsJunk()
+        internal void ReleaseSurvivingModulesAsJunk()
         {
             var survivors = ModuleGraph.GetAllNodes().AsValueEnumerable()
                 .Where(module => module != CommandModule)
@@ -422,7 +421,8 @@ namespace Ships
             module.Transform.SetParent(_mapInfo.MapTransform);
             module.Transform.gameObject.layer = PhysicsLayers.Default;
 
-            if (module is Module concreteModule) concreteModule.OnShipConnectionLost();
+            if (module is Module concreteModule)
+                concreteModule.DetachAsJunkFromShip();
         }
 
         private async UniTaskVoid UpdateResourcesLoop()
@@ -465,23 +465,6 @@ namespace Ships
                 .ToArray();
 
             ResourceManager.Recalculate(_allModulesCache);
-
-            ConfigureModulesForDesignMode();
-        }
-
-        private void ConfigureModulesForDesignMode()
-        {
-            foreach (var module in _allModulesCache)
-            {
-                var rigidbody = module.PixelatedRigidbody?.Rigidbody;
-                if (rigidbody != null)
-                    rigidbody.simulated = false;
-
-                if (module is Engine engine)
-                    engine.SuppressNozzleExhaustForDesignMode();
-            }
-
-            MarkEnginesActivity(false);
         }
 
         protected virtual void ReadMovementInput()

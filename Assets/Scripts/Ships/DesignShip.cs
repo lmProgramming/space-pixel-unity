@@ -120,9 +120,8 @@ namespace Ships
 
             foreach (var module in existingModules)
             {
-                module.OnShipConnectionLost();
-                module.transform.SetParent(null, true);
-                Destroy(module.gameObject);
+                if (module)
+                    module.DestroyModule();
             }
         }
 

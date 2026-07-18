@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using ContourTracer;
+using Core.Constants;
 using Core.Grid;
 using Core.Pixelation;
 using Core.Services;
@@ -28,7 +29,8 @@ namespace Pixelation
         private bool _didCollide;
 
         public PixelCollisionHandler(ITexturePixelGrid grid, PixelatedRigidbody body, PolygonCollider2D collider,
-            CollisionEventChannelSO collisionEventChannel, IDebrisSpawner debrisSpawner)
+            CollisionEventChannelSO collisionEventChannel, IDebrisSpawner debrisSpawner,
+            GameplayConstants gameplayConstants)
         {
             _grid = grid;
             _body = body;
@@ -36,7 +38,7 @@ namespace Pixelation
             _collisionEventChannel = collisionEventChannel;
             _debrisSpawner = debrisSpawner;
 
-            _collisionResolver = new PhysicsCollision(this, _body);
+            _collisionResolver = new PhysicsCollision(this, _body, gameplayConstants);
 
             body.OnPixelsLost += PixelsLost;
         }

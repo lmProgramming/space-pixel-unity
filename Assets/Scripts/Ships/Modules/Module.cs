@@ -45,6 +45,10 @@ namespace Ships.Modules
         [Inject]
         private IEffectsSpawner _effectsSpawner;
 
+        private bool _hasTornDownConnectionsAndCrew;
+
+        [Inject] protected GameplayConstants GameplayConstants;
+
         protected List<CrewMember> AliveCrew { get; private set; }
 
         internal CrewSkillType MainSkillTypeForTesting
@@ -54,23 +58,20 @@ namespace Ships.Modules
 
         internal IReadOnlyDictionary<Module, List<Vector2Int>> ConnectionPoints => _connectionPoints;
 
-        public float ActualEfficiency => Ship.GeneralEfficiency * ModuleEfficiency;
+        public float ActualEfficiency => (Ship?.GeneralEfficiency ?? 1f) * ModuleEfficiency;
 
         private float PixelEfficiency =>
             Mathf.Pow((float)PixelatedRigidbody.CurrentPixelCount / PixelatedRigidbody.StartPixelCount, 2);
 
-#if UNITY_INCLUDE_TESTS
-        internal IShip ShipForTesting => Ship;
-#endif
-
         private bool IsBelowDestructionThreshold =>
             PixelatedRigidbody.CurrentPixelCount > 0 &&
             PixelatedRigidbody.CurrentPixelCount <
-            PixelatedRigidbody.StartPixelCount * GameplayConstants.ModuleDestroyedBelowPixelRatio;
+            PixelatedRigidbody.StartPixelCount *
+            GameplayConstants.moduleDestroyedWhenCurrentPixelRatioOfOriginalIsBelow;
 
         protected bool IsDesignMode => Ship is { IsDesignMode: true };
 
-        public virtual ConcreteModuleType ConcreteType { get; protected set; } = ConcreteModuleType.Basic;
+        protected virtual ConcreteModuleType ConcreteType { get; set; } = ConcreteModuleType.Basic;
 
         protected virtual void Awake()
         {
@@ -103,6 +104,11 @@ namespace Ships.Modules
             PixelatedRigidbody.Destroyed -= HandleDestroy;
         }
 
+        private void OnDestroy()
+        {
+            TearDownConnectionsAndCrew(false);
+        }
+
         private void OnDrawGizmosSelected()
         {
             if (PixelatedRigidbody == null || _connectionPoints == null) return;
@@ -122,7 +128,7 @@ namespace Ships.Modules
             }
         }
 
-        public IShip Ship { get; protected set; }
+        public IShip Ship { get; private set; }
         public Collider2D Collider2D => PixelatedRigidbody.Collider2D;
 
         public int AliveCrewCount => AliveCrew.Count;
@@ -187,8 +193,10 @@ namespace Ships.Modules
             if (CrewNeededCount == 0) return 1;
             if (assignedCrew.Count == 0) return 0;
 
+            var captainMultiplier = Ship?.CaptainMultiplier ?? 1f;
+
             return (1 - (float)CrewMissingCount / CrewNeededCount) *
-                   (1 + _crewAppropriateSkillSum * Ship.CaptainMultiplier * CrewSkillBonusPerLevel);
+                   (1 + _crewAppropriateSkillSum * captainMultiplier * CrewSkillBonusPerLevel);
         }
 
         public virtual float GetEnergyDraw()
@@ -289,14 +297,53 @@ namespace Ships.Modules
             Resources = newResources;
         }
 
+        /// <summary>
+        ///     Spawns detachment VFX while this module is still alive, then destroys the GameObject.
+        ///     Prefer this over Destroy(gameObject) - Unity complains about spawning explosions when being destroyed
+        /// </summary>
+        public void DestroyModule(bool spawnExplosions = true)
+        {
+            TearDownConnectionsAndCrew(spawnExplosions);
+            NotifyShipAndCleanupSystems();
+
+            if (!this || !gameObject) return;
+
+            transform.SetParent(null, true);
+            Destroy(gameObject);
+        }
+
         protected virtual void HandleDestroy(IPixelatedRigidbody pixelatedRigidbody)
         {
+            if (Ship is Ship concreteShip && ReferenceEquals(concreteShip.CommandModule, this))
+                concreteShip.ReleaseSurvivingModulesAsJunk();
+
+            TearDownConnectionsAndCrew(true);
+            OnShipConnectionLost();
+        }
+
+        private void TearDownConnectionsAndCrew(bool spawnExplosions)
+        {
+            if (_hasTornDownConnectionsAndCrew) return;
+            _hasTornDownConnectionsAndCrew = true;
+
             if (PixelatedRigidbody != null) PixelatedRigidbody.OnPixelsLost -= CheckCohesion;
 
-            DetachAllConnections();
+            DetachAllConnections(spawnExplosions);
             KillAllCrew();
+        }
 
-            OnShipConnectionLost();
+        private void NotifyShipAndCleanupSystems()
+        {
+            foreach (var standaloneSystem in _standaloneSystems) Destroy(standaloneSystem as Component);
+            _standaloneSystems.Clear();
+
+            if (Ship == null) return;
+
+            // Keep Ship set during the callback: DestroyShip / HandleModuleChange may still
+            // Recalculate this module while it remains in the cohesion graph.
+            var ship = Ship;
+            ship.OnModuleConnectionLost(this);
+            Ship = null;
         }
 
         protected virtual void UpdateModule()
@@ -381,16 +428,20 @@ namespace Ships.Modules
             OnCrewChange();
         }
 
-        public void OnShipConnectionLost()
+        private void OnShipConnectionLost()
         {
-            foreach (var standaloneSystem in _standaloneSystems) Destroy(standaloneSystem as Component);
-            _standaloneSystems.Clear();
-
+            NotifyShipAndCleanupSystems();
             Destroy(this);
+        }
 
-            if (Ship == null) return;
-            Ship?.OnModuleConnectionLost(this);
-            Ship = null;
+        /// <summary>
+        ///     Module is leaving the ship as junk: spawn detachment VFX while connection points still
+        ///     exist, then drop the Module component (PixelatedRigidbody remains).
+        /// </summary>
+        public void DetachAsJunkFromShip()
+        {
+            TearDownConnectionsAndCrew(true);
+            OnShipConnectionLost();
         }
 
         public void SetupConnections(Module otherModule, ref FixedJoint2D joint)
@@ -499,9 +550,10 @@ namespace Ships.Modules
         ///     gets destroyed re-anchors to the static world body at the origin, violently yanking and
         ///     spinning whatever it is attached to.
         /// </summary>
-        public void DetachAllConnections()
+        public void DetachAllConnections(bool spawnExplosions = true)
         {
-            SpawnExplosionsOnDetachment(_connectionPoints);
+            if (spawnExplosions)
+                SpawnExplosionsOnDetachment(_connectionPoints);
 
             foreach (var otherModule in new List<Module>(_connections.Keys))
             {
@@ -514,9 +566,13 @@ namespace Ships.Modules
 
         private void SpawnExplosionsOnDetachment(Dictionary<Module, List<Vector2Int>> connectionPoints)
         {
+            if (_effectsSpawner == null || PixelatedRigidbody == null) return;
+
+            var chance = GameplayConstants.chanceOfSpawningExplosionOnDetachingConnectionPoint;
+
             foreach (var worldPos in from allConnectionsPoints in connectionPoints.Values.AsValueEnumerable()
                      from worldPoint in allConnectionsPoints
-                     where Random.value < GameplayConstants.ChanceOfSpawningExplosionOnDetachingConnectionPoint
+                     where Random.value < chance
                      select PixelatedRigidbody.LocalToWorldPoint(worldPoint))
                 _effectsSpawner.SpawnExplosion(worldPos);
         }

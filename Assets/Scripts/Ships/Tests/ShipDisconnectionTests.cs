@@ -19,6 +19,13 @@ namespace Ships.Tests
     [TestFixture]
     public class ShipDisconnectionTests : ShipTestBase
     {
+        public override void SetUp()
+        {
+            base.SetUp();
+
+            GameplayConstants.moduleDestroyedWhenCurrentPixelRatioOfOriginalIsBelow = 0f;
+        }
+
         /// <summary>
         ///     Gets the connection points between two modules.
         /// </summary>
@@ -370,7 +377,6 @@ namespace Ships.Tests
             const int commandHeight = 10;
 
             var layout = ShipTestBuilder.CreateShip(Container, CreatedObjects)
-                .WithoutGameObjectInjection()
                 .WithCommand("Command", new Vector2((cannonWidth + commandWidth) / 2f, 0), commandWidth, commandHeight)
                 .WithTestModule("Cannon", Vector2.zero, cannonWidth, cannonHeight)
                 .BuildLayoutResult();
@@ -562,7 +568,6 @@ namespace Ships.Tests
             const int commandHeight = 10;
 
             var layout = ShipTestBuilder.CreateShip(Container, CreatedObjects)
-                .WithoutGameObjectInjection()
                 .WithCommand("Command", new Vector2((cannonWidth + commandWidth) / 2f, 0), commandWidth, commandHeight)
                 .WithTestModule("Cannon", Vector2.zero, cannonWidth, cannonHeight)
                 .BuildLayoutResult();
@@ -587,8 +592,8 @@ namespace Ships.Tests
 
             // --- Subscribe to events ---
             var pixelsLostEvents = new List<(List<Vector2Int> pixels, PixelLoseReason reason, int frame)>();
-            var currentFrame = 0;
-            var frameCur = currentFrame;
+            const int currentFrame = 0;
+            const int frameCur = currentFrame;
             cannonModule.PixelatedRigidbody.OnPixelsLost += (pixels, reason) =>
             {
                 pixelsLostEvents.Add((new List<Vector2Int>(pixels), reason, frameCur));
@@ -598,7 +603,7 @@ namespace Ships.Tests
             };
 
             // --- Build the 30 pixels to remove (x=12,13,14 × y=0..9) ---
-            var sliceStartX = cannonWidth - 4; // 12
+            const int sliceStartX = cannonWidth - 4; // 12
             var allSlicePixels = new List<Vector2Int>();
             for (var x = sliceStartX; x < sliceStartX + 3; x++)
             for (var y = 0; y < cannonHeight; y++)

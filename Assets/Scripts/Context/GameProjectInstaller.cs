@@ -1,5 +1,7 @@
+using Core.Constants;
 using Core.Services;
 using Events.Game;
+using Events.Game.BattleOver;
 using Events.Gameplay.Shooting;
 using Events.UI;
 using Services;
@@ -18,8 +20,10 @@ namespace Context
         [SerializeField] private TextInputFocusEventChannel textInputFocusChannel;
         [SerializeField] private PauseStateEventChannel pauseStateChannel;
         [SerializeField] private ShootingEventChannel shootingEventChannel;
-        [SerializeField] private BattleVictoryEventChannel battleVictoryEventChannel;
-        [SerializeField] private BattleDefeatEventChannel battleDefeatEventChannel;
+        [SerializeField] private GameplayConstants gameplayConstants;
+
+        [SerializeField]
+        private BattleOverEventChannel battleOverEventChannel;
 
         public override void InstallBindings()
         {
@@ -47,11 +51,8 @@ namespace Context
             if (shootingEventChannel == null)
                 throw new UnityException("[GameProjectInstaller] Shooting event channel must be assigned.");
 
-            if (battleVictoryEventChannel == null)
+            if (battleOverEventChannel == null)
                 throw new UnityException("[GameProjectInstaller] Battle victory event channel must be assigned.");
-
-            if (battleDefeatEventChannel == null)
-                throw new UnityException("[GameProjectInstaller] Battle defeat event channel must be assigned.");
 
             Container.Bind<IShipModuleCatalog>()
                 .FromInstance(typedShipModuleCatalog)
@@ -93,12 +94,8 @@ namespace Context
                 .FromInstance(shootingEventChannel)
                 .AsSingle();
 
-            Container.Bind<BattleVictoryEventChannel>()
-                .FromInstance(battleVictoryEventChannel)
-                .AsSingle();
-
-            Container.Bind<BattleDefeatEventChannel>()
-                .FromInstance(battleDefeatEventChannel)
+            Container.Bind<BattleOverEventChannel>()
+                .FromInstance(battleOverEventChannel)
                 .AsSingle();
 
             Container.Bind<IGameInput>()
@@ -107,6 +104,10 @@ namespace Context
                 .WithGameObjectName("GameInput")
                 .AsSingle()
                 .NonLazy();
+
+            Container.Bind<GameplayConstants>()
+                .FromInstance(gameplayConstants)
+                .AsSingle();
         }
     }
 }

@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using Core.Constants;
 using Core.Services;
 using Events.Gameplay.Collision;
 using Events.Gameplay.Ship;
@@ -11,7 +13,8 @@ namespace Ships.Tests.TestHelpers.Fixtures
 {
     public static class TestContainerFactory
     {
-        public static DiContainer CreateTestContainer()
+        public static DiContainer CreateTestContainer(
+            ICollection<GameObject> createdObjects = null)
         {
             var container = new DiContainer();
 
@@ -30,7 +33,10 @@ namespace Ships.Tests.TestHelpers.Fixtures
             var projectilesSpawner = Substitute.For<IProjectilesSpawner>();
             container.Bind<IProjectilesSpawner>().FromInstance(projectilesSpawner).AsSingle();
 
-            var shipInitializeModulesEventChannel = Substitute.For<ShipInitializeModulesEventChannel>();
+            var shipInitializeModulesEventChannelGo = new GameObject(nameof(ShipInitializeModulesEventChannel));
+            createdObjects?.Add(shipInitializeModulesEventChannelGo);
+            var shipInitializeModulesEventChannel =
+                shipInitializeModulesEventChannelGo.AddComponent<ShipInitializeModulesEventChannel>();
             container.Bind<ShipInitializeModulesEventChannel>().FromInstance(shipInitializeModulesEventChannel)
                 .AsSingle();
 
@@ -47,11 +53,15 @@ namespace Ships.Tests.TestHelpers.Fixtures
             var moduleRestoreFactory = Substitute.For<IModuleRestoreFactory>();
             container.Bind<IModuleRestoreFactory>().FromInstance(moduleRestoreFactory).AsSingle();
 
-            var shootingEventChannel = Substitute.For<ShootingEventChannel>();
+            var shootingEventChannel = ScriptableObject.CreateInstance<ShootingEventChannel>();
             container.Bind<ShootingEventChannel>().FromInstance(shootingEventChannel).AsSingle();
 
             var effectsSpawner = Substitute.For<IEffectsSpawner>();
             container.Bind<IEffectsSpawner>().FromInstance(effectsSpawner).AsSingle();
+
+            container.Bind<GameplayConstants>()
+                .FromScriptableObjectResource("Tests/GameplayConstants")
+                .AsSingle();
 
             return container;
         }

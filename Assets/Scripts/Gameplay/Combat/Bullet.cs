@@ -5,6 +5,7 @@ using Core.Pixelation;
 using Cysharp.Threading.Tasks;
 using Pixelation;
 using UnityEngine;
+using Zenject;
 
 namespace Gameplay.Combat
 {
@@ -15,6 +16,8 @@ namespace Gameplay.Combat
 
         private const float FadeOutTime = 2f;
         private const float LifeTime = 2f;
+
+        [Inject] private GameplayConstants _gameplayConstants;
 
         protected override void Awake()
         {
@@ -64,9 +67,9 @@ namespace Gameplay.Combat
                 var token = this.GetCancellationTokenOnDestroy();
 
                 await UniTask.Delay(
-                    TimeSpan.FromSeconds(LifeTime * GameplayConstants.CannonProjectileLifetimeMultiplier),
+                    TimeSpan.FromSeconds(LifeTime * _gameplayConstants.cannonProjectileLifetimeMultiplier),
                     cancellationToken: token);
-                await FadeOutAndDestroy(FadeOutTime * GameplayConstants.CannonProjectileLifetimeMultiplier);
+                await FadeOutAndDestroy(FadeOutTime * _gameplayConstants.cannonProjectileLifetimeMultiplier);
             }
             catch (OperationCanceledException)
             {

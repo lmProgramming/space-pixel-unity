@@ -45,7 +45,7 @@ namespace Ships.Modules
 
         private ManualTimer _reloadTimer;
 
-        public override ConcreteModuleType ConcreteType => ConcreteModuleType.Laser;
+        protected override ConcreteModuleType ConcreteType => ConcreteModuleType.Laser;
 
         protected override void Awake()
         {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using Core.Constants;
 using Core.Grid;
 using Core.Pixelation;
 using Core.Services;
@@ -51,6 +52,8 @@ namespace Pixelation
         [Inject] private IDebrisSpawner _debrisSpawner;
 
         private bool _isSetup;
+
+        [Inject] protected GameplayConstants GameplayConstants;
         private HealthGrid HealthGrid { get; set; }
 
         private bool HasArmorMap => armorMap != null && armorMap.ToString() != "null";
@@ -457,7 +460,7 @@ namespace Pixelation
 
             if ((_collisionEventChannelSO && _debrisSpawner != null) || recalculateColliders)
                 CollisionHandler = new PixelCollisionHandler(TexturePixelGrid, this, GetComponent<PolygonCollider2D>(),
-                    _collisionEventChannelSO, _debrisSpawner);
+                    _collisionEventChannelSO, _debrisSpawner, GameplayConstants);
 
             if (colors is not null)
             {

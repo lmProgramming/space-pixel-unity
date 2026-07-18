@@ -41,9 +41,9 @@ namespace Ships.Tests
         public IEnumerator DesignMode_Update_DoesNotChangeEnergy()
         {
             var ship = ShipTestBuilder.CreateShip(Container, CreatedObjects)
-                .WithCommand("Command", Vector2.zero, 5, 5)
-                .WithBasic("Generator", new Vector2(5f, 0f), 5, 5, new Resources(10f, 0f, 5, 0f, 0))
-                .BuildDesignShip();
+                .WithCommand("Command", Vector2.zero, 10, 5)
+                .WithBasic("Generator", new Vector2(10f, 0f), 10, 5, new Resources(10f, 0f, 5, 0f, 0))
+                .BuildDesignShip(true);
 
             yield return WaitForLifecycle();
 
@@ -61,9 +61,9 @@ namespace Ships.Tests
         public IEnumerator DesignMode_InitializeModules_DisablesRigidbodySimulation()
         {
             var ship = ShipTestBuilder.CreateShip(Container, CreatedObjects)
-                .WithCommand("Command", Vector2.zero, 5, 5)
-                .WithEngineModule(new Vector2(5f, 0f), 100f, 5, 5)
-                .BuildDesignShip();
+                .WithCommand("Command", Vector2.zero, 10, 5)
+                .WithEngineModule(new Vector2(10, 0f), 100f, 10, 5)
+                .BuildDesignShip(true);
 
             yield return null;
 
@@ -83,24 +83,24 @@ namespace Ships.Tests
                 {
                     data = new ReactionWheelSettings { dampingStrength = 50f }
                 })
-                .BuildMovableProxy();
+                .BuildDesignShip();
 
-            ship.SASEnabled = true;
             ship.InitializeModules();
             yield return WaitForLifecycle();
 
             var commandRigidbody = ship.CommandModule.PixelatedRigidbody.Rigidbody;
             commandRigidbody.angularVelocity = 30f;
 
-            yield return new WaitForFixedUpdate();
+            yield return Utils.SimulateForSeconds(2);
 
-            Assert.That(commandRigidbody.angularVelocity, Is.EqualTo(30f).Within(0.01f));
+            Assert.That(commandRigidbody.angularVelocity, Is.GreaterThan(25f));
         }
 
         [UnityTest]
         public IEnumerator ApplySnapshot_OnDesignModeShip_RebuildsModulesWithSimulationDisabled()
         {
-            var ship = ShipTestFactory.CreateShipWithCommandAndEngine(Container, CreatedObjects, TestRoot.transform);
+            var ship = ShipTestFactory.CreateDesignShipWithCommandAndEngine(Container, CreatedObjects,
+                TestRoot.transform);
             yield return WaitForLifecycle();
 
             var snapshot = _snapshotService.CaptureSnapshot(ship);

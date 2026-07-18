@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using Core.Constants;
+using Core.Services;
 using Core.Ships;
 using NUnit.Framework;
 using UnityEngine;
@@ -13,14 +15,17 @@ namespace Ships.Tests.TestHelpers.Fixtures
     {
         protected readonly List<GameObject> CreatedObjects = new();
         protected DiContainer Container;
+        protected IEffectsSpawner EffectsSpawner;
         protected GameObject TestRoot;
+        protected GameplayConstants GameplayConstants => Container.Resolve<GameplayConstants>();
 
         [SetUp]
         public virtual void SetUp()
         {
             TestRoot = new GameObject("TestRoot");
             CreatedObjects.Add(TestRoot);
-            Container = TestContainerFactory.CreateTestContainer();
+            Container = TestContainerFactory.CreateTestContainer(CreatedObjects);
+            EffectsSpawner = Container.Resolve<IEffectsSpawner>();
         }
 
         [TearDown]

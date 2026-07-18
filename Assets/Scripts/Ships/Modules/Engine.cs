@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Core.Constants;
 using Core.Pixelation;
 using Core.Services;
 using Core.Ships;
@@ -49,7 +48,7 @@ namespace Ships.Modules
 
         private Vector2 ThrustPoint => CalculateAverageThrustPoint();
 
-        public override ConcreteModuleType ConcreteType => ConcreteModuleType.Engine;
+        protected override ConcreteModuleType ConcreteType => ConcreteModuleType.Engine;
 
         protected override void Start()
         {
@@ -63,7 +62,7 @@ namespace Ships.Modules
 
         public override ModuleType Type => ModuleType.Engine;
 
-        public float MaxThrust => maxThrust * ActualEfficiency * GameplayConstants.EngineThrustEfficiencyMultiplier;
+        public float MaxThrust => maxThrust * ActualEfficiency * GameplayConstants.engineThrustEfficiencyMultiplier;
 
         public Vector2 WorldThrustPoint => transform.TransformPoint(ThrustPoint);
 
@@ -228,7 +227,7 @@ namespace Ships.Modules
             if (Mathf.Abs(clampedTarget) > Mathf.Epsilon || Mathf.Abs(CurrentThrusterAngle) <= Mathf.Epsilon)
                 return maxStep;
 
-            return maxStep * GameplayConstants.NozzleGoingBackToRestRotationMultiplierSpeed;
+            return maxStep * GameplayConstants.nozzleGoingBackToRestRotationMultiplierSpeed;
         }
 
         protected override string CaptureTypePayloadJson(IGameContentCatalog contentCatalog)
