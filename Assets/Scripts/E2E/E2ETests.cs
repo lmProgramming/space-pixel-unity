@@ -69,7 +69,7 @@ namespace E2E
             var team2 = CreateTeam("Team2", PhysicsLayers.Enemy);
 
             var ship1 = CreateAIShip("Ship1", team1, Vector2.zero, true, false);
-            var ship2 = CreateAIShip("Ship2", team2, new Vector2(25f, -25f), true, false);
+            var ship2 = CreateAIShip("Ship2", team2, new Vector2(0f, 5f), true, false);
 
             yield return WaitForLifecycle();
 

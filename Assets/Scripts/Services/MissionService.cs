@@ -1,7 +1,7 @@
 using System;
 using Core.Gameplay.EasyTeam;
 using Core.Services;
-using Events.Game;
+using Events.Game.BattleOver;
 using UnityEngine;
 using Zenject;
 using ZLinq;
@@ -11,9 +11,8 @@ namespace Services
     public class MissionService : MonoBehaviour, IMissionService
     {
         [Inject] private IActivePlayerShipProvider _activePlayerShipProvider;
-        [Inject] private BattleDefeatEventChannel _battleDefeatEventChannel;
 
-        [Inject] private BattleVictoryEventChannel _battleVictoryEventChannel;
+        [Inject] private BattleOverEventChannel _battleOverEventChannel;
         private bool _missionOver;
 
         private ITeam _playerTeam;
@@ -57,7 +56,10 @@ namespace Services
             _missionOver = true;
             Debug.Log("[MissionService] Victory!");
             OnVictory?.Invoke();
-            _battleVictoryEventChannel.Raise();
+            _battleOverEventChannel.Raise(new BattleOverData
+            {
+                Result = BattleResult.FriendlyWin
+            });
         }
 
         private void TriggerDefeat()
@@ -65,7 +67,10 @@ namespace Services
             _missionOver = true;
             Debug.Log("[MissionService] Defeat!");
             OnDefeat?.Invoke();
-            _battleDefeatEventChannel.Raise();
+            _battleOverEventChannel.Raise(new BattleOverData
+            {
+                Result = BattleResult.EnemyWin
+            });
         }
     }
 }

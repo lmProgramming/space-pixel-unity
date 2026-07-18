@@ -14,7 +14,6 @@ namespace UI.Components.Notification
 
         protected override void UnbindUiCore()
         {
-            _notificationContainer = null;
         }
 
         public void Show(string message, PopupLevel level = PopupLevel.Info)

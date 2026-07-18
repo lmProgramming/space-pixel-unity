@@ -276,14 +276,6 @@ namespace ShipFactory.UI
             _shipNameField.UnregisterValueChangedCallback(OnShipNameChanged);
 
             _textInputFocusTracker?.Release(_shipNameField);
-            _textInputFocusTracker = null;
-
-            _canvasContainer = null;
-            _canvasController = null;
-            _paletteController = null;
-            _shipNameField = null;
-            _saveShipButton = null;
-            _root = null;
         }
 
         private void SaveSnapshot()

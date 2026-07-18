@@ -75,15 +75,6 @@ namespace UI.Common
             _themeToggle?.UnregisterValueChangedCallback(OnThemeToggleChanged);
             _themeProviderDropdown?.UnregisterValueChangedCallback(OnThemeProviderChanged);
             Hide();
-
-            _backdrop = null;
-            _closeButton = null;
-            _masterSlider = null;
-            _musicSlider = null;
-            _effectsSlider = null;
-            _themeToggle = null;
-            _themeProviderDropdown = null;
-            _uiPointerTracker = null;
         }
 
         public void Hide()

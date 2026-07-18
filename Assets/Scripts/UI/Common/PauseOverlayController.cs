@@ -29,7 +29,7 @@ namespace UI.Common
             if (!handleEscapeInput || !Input.GetKeyDown(KeyCode.Escape))
                 return;
 
-            if (settingsOverlay != null && settingsOverlay.IsOpen)
+            if (settingsOverlay && settingsOverlay.IsOpen)
             {
                 settingsOverlay.Hide();
                 return;
@@ -65,7 +65,7 @@ namespace UI.Common
             _settingsButton.clicked += OnSettingsClicked;
             _quitButton.clicked += QuitToMainMenu;
 
-            if (pointerOverUiChannel != null)
+            if (pointerOverUiChannel)
             {
                 _uiPointerTracker = new UiPointerTracker(pointerOverUiChannel);
                 _uiPointerTracker.Track(_pauseOverlay);
@@ -77,12 +77,6 @@ namespace UI.Common
             _resumeButton.clicked -= OnResumeClicked;
             _settingsButton.clicked -= OnSettingsClicked;
             _quitButton.clicked -= QuitToMainMenu;
-
-            _pauseOverlay = null;
-            _resumeButton = null;
-            _settingsButton = null;
-            _quitButton = null;
-            _uiPointerTracker = null;
         }
 
         private void OnResumeClicked()
@@ -95,7 +89,7 @@ namespace UI.Common
             settingsOverlay?.Toggle();
         }
 
-        public void SetPaused(bool paused)
+        private void SetPaused(bool paused)
         {
             if (IsPaused == paused)
                 return;
@@ -111,7 +105,7 @@ namespace UI.Common
 
             if (!paused)
             {
-                if (settingsOverlay != null && settingsOverlay.IsOpen)
+                if (settingsOverlay && settingsOverlay.IsOpen)
                     settingsOverlay.Hide();
 
                 _uiPointerTracker?.Release(_pauseOverlay);
