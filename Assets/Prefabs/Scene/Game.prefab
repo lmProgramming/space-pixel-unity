@@ -133,7 +133,6 @@ GameObject:
   m_Component:
   - component: {fileID: 91739786414291168}
   - component: {fileID: 42750044799143377}
-  - component: {fileID: 6660687922479615605}
   m_Layer: 0
   m_Name: FreeModeBattleResolutionHandler
   m_TagString: Untagged
@@ -169,19 +168,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UI::UI.Progression.FreeModeBattleResolutionHandler
   missionResultUi: {fileID: 0}
---- !u!114 &6660687922479615605
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1531846106618602201}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dca18dff0ea413fd3b60c79c4fc6f918, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UI::UI.Progression.ProgressionBattleResolutionHandler
-  progressionGameOverController: {fileID: 0}
 --- !u!1 &1696737034756950474
 GameObject:
   m_ObjectHideFlags: 0
@@ -601,7 +587,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5494529849481706430}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 553215e9bb674350ae2cbb925cd92998, type: 3}
   m_Name: 
@@ -1115,6 +1101,14 @@ PrefabInstance:
       propertyPath: projectilesSpawner
       value: 
       objectReference: {fileID: 2585479794438263957}
+    - target: {fileID: 2029778059734102207, guid: 17371dd093b1ba2c5bb0965847c3c405, type: 3}
+      propertyPath: moduleRestoreFactory
+      value: 
+      objectReference: {fileID: 962074348792692998}
+    - target: {fileID: 2029778059734102207, guid: 17371dd093b1ba2c5bb0965847c3c405, type: 3}
+      propertyPath: pixelatedRigidbodyFactory
+      value: 
+      objectReference: {fileID: 7239160791304327551}
     - target: {fileID: 5515476119549963838, guid: 17371dd093b1ba2c5bb0965847c3c405, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
