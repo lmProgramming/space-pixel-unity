@@ -1,5 +1,5 @@
 using System;
-using Core.Constants;
+using Core.Services;
 using Core.Ships;
 using Events.UI;
 using LMPro.External.IsAlive;
@@ -8,7 +8,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using Zenject;
 
-namespace UI.MainGame
+namespace UI.Scenes.MainGame.Views.ShipStatus
 {
     public class ShipStatusPanelController : PanelRendererBase
     {
@@ -19,6 +19,8 @@ namespace UI.MainGame
         [SerializeField] private float barAnimationSpeed = 8f;
 
         [SerializeField] private float criticalEnergyThreshold = 0.2f;
+
+        [Inject] private IActivePlayerShipProvider _activePlayerShipProvider;
         private Label _crewCountLabel;
 
         private float _currentEnergyBarHeight;
@@ -26,8 +28,6 @@ namespace UI.MainGame
         private VisualElement _energyBarGlow;
         private Label _energyFlowLabel;
         private VisualElement _mainHudRoot;
-
-        [Inject(Id = Constants.PlayerShipId)] private IShip _playerShip;
         private VisualElement _root;
         private VisualElement _sasCluster;
         private bool _sasSyncing;
@@ -42,7 +42,7 @@ namespace UI.MainGame
             if (!IsUiBound)
                 return;
 
-            if (!_playerShip.IsAlive())
+            if (_activePlayerShipProvider.ActiveShip == null || !_activePlayerShipProvider.ActiveShip.IsAlive())
             {
                 SetMainHudVisible(false);
                 return;
@@ -53,7 +53,7 @@ namespace UI.MainGame
             UpdateSpeedDisplay();
             UpdateSASDisplay();
 
-            if (!_playerShip.ResourceManager.IsAlive())
+            if (!_activePlayerShipProvider.ActiveShip.ResourceManager.IsAlive())
             {
                 SetShipStatusBlockVisible(false);
                 return;
@@ -61,7 +61,7 @@ namespace UI.MainGame
 
             SetShipStatusBlockVisible(true);
 
-            var resourceManager = _playerShip.ResourceManager;
+            var resourceManager = _activePlayerShipProvider.ActiveShip.ResourceManager;
             UpdateEnergyDisplay(resourceManager);
             UpdateCrewDisplay(resourceManager);
             AnimateBars();
@@ -79,18 +79,6 @@ namespace UI.MainGame
         protected override void UnbindUiCore()
         {
             UnregisterSASToggle();
-
-            _mainHudRoot = null;
-            _sasCluster = null;
-            _shipStatusPanel = null;
-            _energyBarFill = null;
-            _energyBarGlow = null;
-            _energyFlowLabel = null;
-            _crewCountLabel = null;
-            _speedValueLabel = null;
-            _sasToggle = null;
-            _root = null;
-            _uiPointerTracker = null;
         }
 
         private void CacheUIReferences()
@@ -137,15 +125,12 @@ namespace UI.MainGame
 
         private void UnregisterSASToggle()
         {
-            if (_sasToggle == null)
-                return;
-
-            _sasToggle.UnregisterValueChangedCallback(OnSASToggleChanged);
+            _sasToggle?.UnregisterValueChangedCallback(OnSASToggleChanged);
         }
 
         private void OnSASToggleChanged(ChangeEvent<bool> evt)
         {
-            if (_sasSyncing || _playerShip is not ISAS playerShipTyped)
+            if (_sasSyncing || _activePlayerShipProvider.ActiveShip is not ISAS playerShipTyped)
                 return;
             if (playerShipTyped.IsSASOn == evt.newValue)
                 return;
@@ -169,14 +154,14 @@ namespace UI.MainGame
             if (_speedValueLabel == null)
                 return;
 
-            var rb = _playerShip.CommandModule?.PixelatedRigidbody?.Rigidbody;
+            var rb = _activePlayerShipProvider.ActiveShip.CommandModule?.PixelatedRigidbody?.Rigidbody;
             var magnitude = rb ? rb.linearVelocity.magnitude : 0f;
             _speedValueLabel.text = magnitude.ToString("F1");
         }
 
         private void UpdateSASDisplay()
         {
-            if (_playerShip is not ISAS playerShipTyped)
+            if (_activePlayerShipProvider.ActiveShip is not ISAS playerShipTyped)
             {
                 if (_sasCluster != null)
                     _sasCluster.style.display = DisplayStyle.None;

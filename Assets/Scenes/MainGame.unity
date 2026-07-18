@@ -166,6 +166,7 @@ MonoBehaviour:
   onlyShowInCameraView: 0
   showGrid: 1
   gizmoZ: 0
+  navigationService: {fileID: 2136454675}
 --- !u!1 &143359935
 GameObject:
   m_ObjectHideFlags: 0
@@ -2573,22 +2574,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Game
       objectReference: {fileID: 0}
-    - target: {fileID: 3649247923024009351, guid: cf3e414adef6859f2af6ac1a62b52293, type: 3}
-      propertyPath: m_Enabled
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4648251575334767366, guid: cf3e414adef6859f2af6ac1a62b52293, type: 3}
-      propertyPath: m_Enabled
+    - target: {fileID: 3998940078788761042, guid: cf3e414adef6859f2af6ac1a62b52293, type: 3}
+      propertyPath: validateAll
       value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 6145660219218113356, guid: cf3e414adef6859f2af6ac1a62b52293, type: 3}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6660687922479615605, guid: cf3e414adef6859f2af6ac1a62b52293, type: 3}
-      propertyPath: progressionGameOverController
-      value: 
-      objectReference: {fileID: 143359937}
     - target: {fileID: 7967597326353789627, guid: cf3e414adef6859f2af6ac1a62b52293, type: 3}
       propertyPath: missionResultUi
       value: 
@@ -2597,10 +2586,6 @@ PrefabInstance:
       propertyPath: enemyTeam
       value: 
       objectReference: {fileID: 133733233019135677}
-    - target: {fileID: 8678225184202570128, guid: cf3e414adef6859f2af6ac1a62b52293, type: 3}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 8678225184202570128, guid: cf3e414adef6859f2af6ac1a62b52293, type: 3}
       propertyPath: spawnArea
       value: 
@@ -2622,6 +2607,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: cf3e414adef6859f2af6ac1a62b52293, type: 3}
+--- !u!114 &2136454675 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4609121225305850912, guid: cf3e414adef6859f2af6ac1a62b52293, type: 3}
+  m_PrefabInstance: {fileID: 2136454674}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e28a7199439d460d9f875803a7165745, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game.Services::Services.SectorService
 --- !u!114 &133733233019135677
 MonoBehaviour:
   m_ObjectHideFlags: 0

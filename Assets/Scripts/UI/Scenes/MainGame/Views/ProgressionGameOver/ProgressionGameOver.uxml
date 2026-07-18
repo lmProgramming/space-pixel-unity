@@ -1,0 +1,15 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/DesignSystem/Resources/UI/Styles/DesignSystem/DesignSystem.uss"/>
+    <ui:VisualElement name="progression-game-over-overlay" class="ds-root ds-backdrop">
+        <ui:VisualElement class="ds-modal" style="width: 520px; max-width: 520px;">
+            <ui:Label name="progression-game-over-title" text="Game Over" class="ds-h1"
+                      style="unity-text-align: middle-center; margin-bottom: 12px;"/>
+            <ui:Label name="progression-game-over-credits" text="Credits: 0" class="ds-body-1"
+                      style="unity-text-align: middle-center; margin-bottom: 8px;"/>
+            <ui:Label name="progression-game-over-enemies-killed" text="Enemies killed: 0" class="ds-body-1"
+                      style="unity-text-align: middle-center; margin-bottom: 24px;"/>
+            <ui:Button name="progression-game-over-main-menu-button" text="Main Menu"
+                       class="ds-btn ds-btn--primary ds-btn--block"/>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

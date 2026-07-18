@@ -1,34 +1,15 @@
 using System;
-using Core.Services;
+using UI.Common;
 using UnityEngine.UIElements;
-using Zenject;
 
-namespace UI.MainGame
+namespace UI.Scenes.MainGame.Views.MissionResult
 {
     public class MissionResultUIController : PanelRendererBase
     {
-        [Inject]
-        private IMissionService _missionService;
-
         private VisualElement _overlay;
         private Label _resultLabel;
 
-        protected override void OnEnable()
-        {
-            base.OnEnable();
-            _missionService.OnVictory += ShowVictory;
-            _missionService.OnDefeat += ShowDefeat;
-        }
-
-        protected override void OnDisable()
-        {
-            base.OnDisable();
-            _missionService.OnVictory -= ShowVictory;
-            _missionService.OnDefeat -= ShowDefeat;
-        }
-
-        protected override void BindUiCore(
-            VisualElement root)
+        protected override void BindUiCore(VisualElement root)
         {
             _overlay = root.Q<VisualElement>("mission-result-overlay");
             _resultLabel = root.Q<Label>("result-label");
@@ -38,13 +19,7 @@ namespace UI.MainGame
                     "[MissionResultUIController] Mission result elements missing in UXML.");
         }
 
-        protected override void UnbindUiCore()
-        {
-            _overlay = null;
-            _resultLabel = null;
-        }
-
-        private void ShowVictory()
+        public void ShowVictory()
         {
             if (!IsUiBound)
                 return;
@@ -55,7 +30,7 @@ namespace UI.MainGame
             _overlay.RemoveFromClassList("hidden");
         }
 
-        private void ShowDefeat()
+        public void ShowDefeat()
         {
             if (!IsUiBound)
                 return;

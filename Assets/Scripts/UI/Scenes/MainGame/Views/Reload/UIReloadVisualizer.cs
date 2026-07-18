@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Core.Constants;
-using Core.Ships;
+using Core.Services;
 using Core.Ships.Module;
 using UI.Common;
 using UnityEngine;
@@ -9,13 +8,13 @@ using UnityEngine.UIElements;
 using Zenject;
 using ZLinq;
 
-namespace UI.MainGame
+namespace UI.Scenes.MainGame.Views.Reload
 {
     public class UIReloadVisualizer : PanelRendererBase
     {
+        [Inject] private IActivePlayerShipProvider _activePlayerShipProvider;
         private Dictionary<IWeapon, Action> _onNotReadyActions;
         private Dictionary<IWeapon, Action> _onReadyActions;
-        [Inject(Id = Constants.PlayerShipId)] private IShip _playerShip;
         private VisualElement _weaponQueue;
         private Dictionary<IWeapon, VisualElement> _weaponSlotDictionary;
 
@@ -33,7 +32,11 @@ namespace UI.MainGame
             _onReadyActions = new Dictionary<IWeapon, Action>();
             _onNotReadyActions = new Dictionary<IWeapon, Action>();
 
-            var weapons = _playerShip.Weapons;
+            var playerShip = _activePlayerShipProvider.ActiveShip;
+            if (playerShip == null)
+                throw new InvalidOperationException("[UIReloadVisualizer] Active player ship is not set.");
+
+            var weapons = playerShip.Weapons;
             if (weapons == null)
                 throw new InvalidOperationException("[UIReloadVisualizer] Player ship weapons are required.");
 
@@ -66,11 +69,6 @@ namespace UI.MainGame
         {
             UnsubscribeWeaponEvents();
             ClearWeaponQueueSlots();
-
-            _weaponQueue = null;
-            _weaponSlotDictionary = null;
-            _onReadyActions = null;
-            _onNotReadyActions = null;
         }
 
         private void UnsubscribeWeaponEvents()
@@ -185,8 +183,8 @@ namespace UI.MainGame
 
         private void ValidateSetup()
         {
-            if (_playerShip == null)
-                throw new InvalidOperationException("[UIReloadVisualizer] Player ship reference is required.");
+            if (_activePlayerShipProvider.ActiveShip == null)
+                throw new InvalidOperationException("[UIReloadVisualizer] Active player ship is not set.");
 
             if (PanelRenderer == null)
                 throw new InvalidOperationException("[UIReloadVisualizer] PanelRenderer is required.");
