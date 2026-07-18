@@ -1,44 +1,39 @@
 using System;
+using Core.Ships;
 using LMPro.External.IsAlive;
-using Ships;
 using UnityEngine;
 using UnityEngine.UIElements;
+using Resources = UnityEngine.Resources;
 
-namespace ShipFactory.UI.ToolkitComponents
+namespace UI.Components
 {
-    public class ResourcesPanel
+    [UxmlElement]
+    public partial class ResourcesPanel : VisualElement
     {
-        private readonly VisualElement _shipResourceCrewBufferFill;
-        private readonly VisualElement _shipResourceCrewFill;
-        private readonly Label _shipResourceCrewValueLabel;
-        private readonly VisualElement _shipResourceEnergyBufferFill;
-        private readonly VisualElement _shipResourceEnergyFill;
-        private readonly Label _shipResourceEnergyValueLabel;
-        private readonly Label _shipResourcesEnergyStorageLabel;
-        private readonly VisualElement _shipResourcesPanel;
+        private VisualElement _shipResourceCrewBufferFill;
+        private VisualElement _shipResourceCrewFill;
+        private Label _shipResourceCrewValueLabel;
+        private VisualElement _shipResourceEnergyBufferFill;
+        private VisualElement _shipResourceEnergyFill;
+        private Label _shipResourceEnergyValueLabel;
+        private Label _shipResourcesEnergyStorageLabel;
+        private VisualElement _shipResourcesPanel;
 
-        public ResourcesPanel(VisualElement root)
+        public ResourcesPanel()
         {
-            _shipResourcesPanel = root.Q<VisualElement>("ship-resources-panel");
-            _shipResourcesEnergyStorageLabel = root.Q<Label>("ship-resource-energy-storage");
-            _shipResourceEnergyValueLabel = root.Q<Label>("ship-resource-energy-value");
-            _shipResourceCrewValueLabel = root.Q<Label>("ship-resource-crew-value");
-            _shipResourceEnergyFill = root.Q<VisualElement>("ship-resource-energy-fill");
-            _shipResourceEnergyBufferFill = root.Q<VisualElement>("ship-resource-energy-buffer-fill");
-            _shipResourceCrewFill = root.Q<VisualElement>("ship-resource-crew-fill");
-            _shipResourceCrewBufferFill = root.Q<VisualElement>("ship-resource-crew-buffer-fill");
-
-            if (_shipResourcesPanel == null || _shipResourcesEnergyStorageLabel == null ||
-                _shipResourceEnergyValueLabel == null || _shipResourceCrewValueLabel == null ||
-                _shipResourceEnergyFill == null || _shipResourceEnergyBufferFill == null ||
-                _shipResourceCrewFill == null || _shipResourceCrewBufferFill == null)
+            var asset = Resources.Load<VisualTreeAsset>("UI/ResourcesPanel");
+            if (!asset)
                 throw new InvalidOperationException(
-                    "[ShipFactoryResourcesPanel] Required resources panel elements are missing in UXML!");
+                    "[ResourcesPanel] VisualTreeAsset 'UI/ResourcesPanel' was not found in Resources.");
+
+            asset.CloneTree(this);
+
+            CacheElements();
         }
 
-        public void Refresh(Ship ship)
+        public void Refresh(IShip ship)
         {
-            if (!ship || !ship.ResourceManager.IsAlive())
+            if (!ship.IsAlive() || !ship.ResourceManager.IsAlive())
             {
                 _shipResourcesPanel.style.display = DisplayStyle.None;
                 return;
@@ -52,9 +47,7 @@ namespace ShipFactory.UI.ToolkitComponents
             var netEnergyFormatted = netEnergy >= 0 ? $"+{netEnergy:0.#}" : $"{netEnergy:0.#}";
 
             _shipResourcesEnergyStorageLabel.text = $"{rm.EnergyCapacity:0.#} cap";
-
-            _shipResourceEnergyValueLabel.text =
-                $"{netEnergyFormatted} net";
+            _shipResourceEnergyValueLabel.text = $"{netEnergyFormatted} net";
             _shipResourceCrewValueLabel.text = $"{rm.Crew}/{rm.CrewCapacity}";
 
             ApplySegmentedResourceBar(
@@ -70,6 +63,25 @@ namespace ShipFactory.UI.ToolkitComponents
                 rm.Crew,
                 rm.CrewCapacity,
                 new Color(80f / 255f, 172f / 255f, 250f / 255f));
+        }
+
+        private void CacheElements()
+        {
+            _shipResourcesPanel = this.Q<VisualElement>("ship-resources-panel");
+            _shipResourcesEnergyStorageLabel = this.Q<Label>("ship-resource-energy-storage");
+            _shipResourceEnergyValueLabel = this.Q<Label>("ship-resource-energy-value");
+            _shipResourceCrewValueLabel = this.Q<Label>("ship-resource-crew-value");
+            _shipResourceEnergyFill = this.Q<VisualElement>("ship-resource-energy-fill");
+            _shipResourceEnergyBufferFill = this.Q<VisualElement>("ship-resource-energy-buffer-fill");
+            _shipResourceCrewFill = this.Q<VisualElement>("ship-resource-crew-fill");
+            _shipResourceCrewBufferFill = this.Q<VisualElement>("ship-resource-crew-buffer-fill");
+
+            if (_shipResourcesPanel == null || _shipResourcesEnergyStorageLabel == null ||
+                _shipResourceEnergyValueLabel == null || _shipResourceCrewValueLabel == null ||
+                _shipResourceEnergyFill == null || _shipResourceEnergyBufferFill == null ||
+                _shipResourceCrewFill == null || _shipResourceCrewBufferFill == null)
+                throw new InvalidOperationException(
+                    "[ResourcesPanel] Required resources panel elements are missing in UXML.");
         }
 
         private static void ApplySegmentedResourceBar(

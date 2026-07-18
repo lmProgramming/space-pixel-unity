@@ -53,7 +53,7 @@ namespace ShipFactory.UI.Runtime
             _bundleToOverlay.Clear();
         }
 
-        public void RebuildFromShip(Ship ship)
+        public void RebuildFromShip(DesignShip ship)
         {
             DestroyAllOverlays();
 

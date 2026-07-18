@@ -26,7 +26,7 @@ namespace ShipFactory.UI.ToolkitComponents
                 throw new InvalidOperationException(
                     "[ShipFactoryCameraInfo] Required camera info elements are missing in UXML!");
 
-            _cameraResetButton.clicked += ResetCamera;
+            _cameraResetButton.clicked += RequestReset;
         }
 
         public void Update(Camera camera)
@@ -34,7 +34,7 @@ namespace ShipFactory.UI.ToolkitComponents
             _cameraPositionLabel.text = $"({camera.transform.position.x:0.0}, {camera.transform.position.y:0.0})";
         }
 
-        private void ResetCamera()
+        public void RequestReset()
         {
             _cameraResetRequestEventChannel.Raise();
         }

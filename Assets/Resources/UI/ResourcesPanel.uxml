@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ui:UXML xmlns:ui="UnityEngine.UIElements">
+<ui:UXML
+        xmlns:ui="UnityEngine.UIElements"
+
+>
+    <Style src="project://database/Assets/Resources/UI/ResourcesPanelStyles.uss"/>
+
     <ui:VisualElement name="ship-resources-panel" class="ds-card ship-resources-panel ds-col-gap">
         <ui:Label text="Ship Resources" class="ds-body-1"/>
         <ui:VisualElement class="ds-progress-row">
