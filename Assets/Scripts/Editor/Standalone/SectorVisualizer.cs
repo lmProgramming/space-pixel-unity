@@ -3,7 +3,6 @@ using System.Runtime.CompilerServices;
 using Core.Services;
 using Services;
 using UnityEngine;
-using Zenject;
 
 [assembly: InternalsVisibleTo("E2E")]
 
@@ -16,10 +15,8 @@ namespace Editor.Standalone
         [SerializeField] private bool showGrid = true;
         [SerializeField] private float gizmoZ;
 
-        [Inject]
-        private INavigationService _navigationService;
-
-        private NavigationService NavigationServiceImpl => _navigationService as NavigationService;
+        [SerializeField]
+        private NavigationService navigationService;
 
         private Camera _camera;
 
@@ -30,11 +27,11 @@ namespace Editor.Standalone
 
         private void OnDrawGizmos()
         {
-            var sectorSize = NavigationServiceImpl.InternalSectorSize;
+            var sectorSize = navigationService.InternalSectorSize;
             if (sectorSize <= 0) return;
 
-            var cache = NavigationServiceImpl.InternalCache;
-            var cacheDuration = NavigationServiceImpl.InternalCacheDuration;
+            var cache = navigationService.InternalCache;
+            var cacheDuration = navigationService.InternalCacheDuration;
 
             if (showGrid && _camera) DrawGrid(cache, sectorSize, cacheDuration);
         }
@@ -88,7 +85,7 @@ namespace Editor.Standalone
 
         public void RecalculateSectorGrid()
         {
-            var sectorSize = NavigationServiceImpl.InternalSectorSize;
+            var sectorSize = navigationService.InternalSectorSize;
             var camPos = _camera.transform.position;
 
             var originX = Mathf.Floor(camPos.x / sectorSize) * sectorSize;
@@ -100,16 +97,16 @@ namespace Editor.Standalone
             for (var row = -halfCount; row < halfCount; row++)
                 keys.Add(new Vector2(originX + col * sectorSize, originY + row * sectorSize));
 
-            NavigationServiceImpl.ClearCacheEntries(keys);
+            navigationService.ClearCacheEntries(keys);
 
             foreach (var key in keys)
-                _navigationService.GetSectorResult(new Vector3(key.x + sectorSize * 0.5f, key.y + sectorSize * 0.5f));
+                navigationService.GetSectorResult(new Vector3(key.x + sectorSize * 0.5f, key.y + sectorSize * 0.5f));
         }
 
         internal INavigationService InternalNavigationService
         {
-            get => _navigationService;
-            set => _navigationService = value;
+            get => navigationService;
+            set => navigationService = value as NavigationService;
         }
 #endif
     }

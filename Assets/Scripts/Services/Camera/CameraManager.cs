@@ -174,6 +174,12 @@ namespace Services.Camera
 
         public void ResetCamera()
         {
+            if (Vector3.SqrMagnitude(transform.position) < 0.01f)
+            {
+                transform.position = Vector3.zero;
+                return;
+            }
+
             Tween.Position(transform, Vector3.zero, 0.5f);
         }
     }
