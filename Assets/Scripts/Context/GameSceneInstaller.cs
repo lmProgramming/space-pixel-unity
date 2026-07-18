@@ -1,5 +1,6 @@
 using Core.Gameplay.Sound;
 using Core.Services;
+using Core.Services.Dummies;
 using Events.Gameplay.Collision;
 using Services;
 using Services.Sound;
@@ -13,59 +14,83 @@ namespace Context
         [Header("Event Channels")] [SerializeField]
         private CollisionEventChannelSO physicsCollisionChannelAsset;
 
-        [SerializeField]
-        private DebrisSpawner debrisSpawner;
-
+        [SerializeField] private DebrisSpawner debrisSpawner;
+        [SerializeField] private bool dummyDebrisSpawner;
         [SerializeField] private MapInfo mapInfo;
         [SerializeField] private ProjectilesSpawner projectilesSpawner;
+        [SerializeField] private bool dummyProjectileSpawner;
         [SerializeField] private ShipService shipService;
         [SerializeField] private SoundManager soundManager;
         [SerializeField] private EffectsSpawner effectSpawner;
         [SerializeField] private NavigationService navigationService;
         [SerializeField] private MissionService missionService;
         [SerializeField] private SkirmishSpawner skirmishSpawner;
+        [SerializeField] private PixelatedRigidbodyFactory pixelatedRigidbodyFactory;
+        [SerializeField] private ModuleRestoreFactory moduleRestoreFactory;
+
+        [SerializeField]
+        private bool validateAll;
 
         public override void InstallBindings()
         {
-            Container.Bind<CollisionEventChannelSO>()
-                .FromInstance(physicsCollisionChannelAsset)
-                .AsSingle();
+            if (validateAll)
+            {
+                if (!physicsCollisionChannelAsset)
+                    throw new UnityException($"Missing {nameof(physicsCollisionChannelAsset)}");
+                if (!debrisSpawner) throw new UnityException($"Missing {nameof(debrisSpawner)}");
+                if (!mapInfo) throw new UnityException($"Missing {nameof(mapInfo)}");
+                if (!projectilesSpawner) throw new UnityException($"Missing {nameof(projectilesSpawner)}");
+                if (!shipService) throw new UnityException($"Missing {nameof(shipService)}");
+                if (!soundManager) throw new UnityException($"Missing {nameof(soundManager)}");
+                if (!effectSpawner) throw new UnityException($"Missing {nameof(effectSpawner)}");
+                if (!navigationService) throw new UnityException($"Missing {nameof(navigationService)}");
+                if (!missionService) throw new UnityException($"Missing {nameof(missionService)}");
+                if (!skirmishSpawner) throw new UnityException($"Missing {nameof(skirmishSpawner)}");
+            }
 
-            Container.Bind<IDebrisSpawner>()
-                .FromInstance(debrisSpawner)
-                .AsSingle();
+            if (physicsCollisionChannelAsset)
+                Container.Bind<CollisionEventChannelSO>().FromInstance(physicsCollisionChannelAsset).AsSingle();
 
-            Container.Bind<IProjectilesSpawner>()
-                .FromInstance(projectilesSpawner)
-                .AsSingle();
+            if (debrisSpawner)
+                Container.Bind<IDebrisSpawner>().FromInstance(debrisSpawner).AsSingle();
+            else if (dummyDebrisSpawner)
+                Container.Bind<IDebrisSpawner>().FromInstance(new DummyDebrisSpawner()).AsSingle();
 
-            Container.Bind<IMapInfo>()
-                .FromInstance(mapInfo)
-                .AsSingle();
+            if (projectilesSpawner)
+                Container.Bind<IProjectilesSpawner>().FromInstance(projectilesSpawner).AsSingle();
+            else if (dummyProjectileSpawner)
+                Container.Bind<IProjectilesSpawner>().FromInstance(new DummyProjectileSpawner()).AsSingle();
 
-            Container.Bind<IShipService>()
-                .FromInstance(shipService)
-                .AsSingle();
+            if (mapInfo)
+                Container.Bind<IMapInfo>().FromInstance(mapInfo).AsSingle();
 
-            Container.Bind<ISoundManager>()
-                .FromInstance(soundManager)
-                .AsSingle();
+            if (shipService)
+                Container.Bind<IShipService>().FromInstance(shipService).AsSingle();
 
-            Container.Bind<IEffectsSpawner>()
-                .FromInstance(effectSpawner)
-                .AsSingle();
+            if (soundManager)
+                Container.Bind<ISoundManager>().FromInstance(soundManager).AsSingle();
 
-            Container.Bind<INavigationService>()
-                .FromInstance(navigationService)
-                .AsSingle();
+            if (effectSpawner)
+                Container.Bind<IEffectsSpawner>().FromInstance(effectSpawner).AsSingle();
 
-            Container.Bind<IMissionService>()
-                .FromInstance(missionService)
-                .AsSingle();
+            if (navigationService)
+                Container.Bind<INavigationService>().FromInstance(navigationService).AsSingle();
 
-            Container.Bind<ISkirmishSpawner>()
-                .FromInstance(skirmishSpawner)
-                .AsSingle();
+            if (missionService)
+                Container.Bind<IMissionService>().FromInstance(missionService).AsSingle();
+
+            if (skirmishSpawner)
+                Container.Bind<ISkirmishSpawner>().FromInstance(skirmishSpawner).AsSingle();
+
+            if (pixelatedRigidbodyFactory)
+                Container.Bind<IPixelatedRigidbodyFactory>()
+                    .FromInstance(pixelatedRigidbodyFactory)
+                    .AsSingle();
+
+            if (moduleRestoreFactory)
+                Container.Bind<IModuleRestoreFactory>()
+                    .FromInstance(moduleRestoreFactory)
+                    .AsSingle();
 
             Container.Bind<IActivePlayerShipProvider>()
                 .To<ActivePlayerShipProvider>()
@@ -79,16 +104,6 @@ namespace Context
 
             Container.Bind<IBattleSpawnConfigurationProvider>()
                 .To<BattleSpawnConfigurationProvider>()
-                .AsSingle();
-
-            Container.Bind<IPixelatedRigidbodyFactory>()
-                .To<PixelatedRigidbodyFactory>()
-                .FromComponentInHierarchy()
-                .AsSingle();
-
-            Container.Bind<IModuleRestoreFactory>()
-                .To<ModuleRestoreFactory>()
-                .FromComponentInHierarchy()
                 .AsSingle();
         }
     }
