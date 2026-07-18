@@ -55,7 +55,7 @@ namespace Ships.Modules
                 throw new UnityException("[Cannon] Projectile spawn points must be assigned.");
         }
 
-        protected override void OnDestroy()
+        protected void OnDestroy()
         {
             _cts?.Cancel();
             _cts?.Dispose();
@@ -63,8 +63,6 @@ namespace Ships.Modules
             if (_reloadTimer == null) return;
             _reloadTimer.OnReady -= HandleReady;
             _reloadTimer.OnNotReady -= HandleNotReady;
-
-            base.OnDestroy();
         }
 
         protected override void UpdateModule()

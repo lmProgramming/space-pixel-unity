@@ -38,6 +38,8 @@ namespace Ships.Modules
         private readonly Dictionary<Module, List<Vector2Int>> _connectionPoints = new();
         private readonly Dictionary<Module, FixedJoint2D> _connections = new();
 
+        private readonly List<IStandaloneModuleSystem> _standaloneSystems = new();
+
         private float _crewAppropriateSkillSum;
 
         [Inject]
@@ -68,6 +70,8 @@ namespace Ships.Modules
 
         protected bool IsDesignMode => Ship is { IsDesignMode: true };
 
+        public virtual ConcreteModuleType ConcreteType { get; protected set; } = ConcreteModuleType.Basic;
+
         protected virtual void Awake()
         {
             EnsurePixelatedRigidbodyCached();
@@ -89,14 +93,14 @@ namespace Ships.Modules
             UpdateModule();
         }
 
-        protected virtual void OnDestroy()
+        private void OnEnable()
         {
-            if (PixelatedRigidbody != null) PixelatedRigidbody.OnPixelsLost -= CheckCohesion;
+            PixelatedRigidbody.Destroyed += HandleDestroy;
+        }
 
-            DetachAllConnections();
-            KillAllCrew();
-
-            OnShipConnectionLost();
+        private void OnDisable()
+        {
+            PixelatedRigidbody.Destroyed -= HandleDestroy;
         }
 
         private void OnDrawGizmosSelected()
@@ -117,8 +121,6 @@ namespace Ships.Modules
                              PixelatedRigidbody.LocalToWorldPoint(localPixelPos))) Gizmos.DrawCube(worldPos, gizmoSize);
             }
         }
-
-        public virtual ConcreteModuleType ConcreteType { get; protected set; } = ConcreteModuleType.Basic;
 
         public IShip Ship { get; protected set; }
         public Collider2D Collider2D => PixelatedRigidbody.Collider2D;
@@ -287,6 +289,16 @@ namespace Ships.Modules
             Resources = newResources;
         }
 
+        protected virtual void HandleDestroy(IPixelatedRigidbody pixelatedRigidbody)
+        {
+            if (PixelatedRigidbody != null) PixelatedRigidbody.OnPixelsLost -= CheckCohesion;
+
+            DetachAllConnections();
+            KillAllCrew();
+
+            OnShipConnectionLost();
+        }
+
         protected virtual void UpdateModule()
         {
         }
@@ -319,6 +331,7 @@ namespace Ships.Modules
                 };
 
                 var component = (IStandaloneModuleSystem)gameObject.AddComponent(systemType);
+                _standaloneSystems.Add(component);
                 component.RestoreFromSnapshot(system, contentCatalog);
             }
         }
@@ -370,6 +383,9 @@ namespace Ships.Modules
 
         public void OnShipConnectionLost()
         {
+            foreach (var standaloneSystem in _standaloneSystems) Destroy(standaloneSystem as Component);
+            _standaloneSystems.Clear();
+
             Destroy(this);
 
             if (Ship == null) return;

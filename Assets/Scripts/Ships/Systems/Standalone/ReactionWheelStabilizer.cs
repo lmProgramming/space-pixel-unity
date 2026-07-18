@@ -2,12 +2,10 @@ using System;
 using Core.Services;
 using Core.Ships;
 using Core.Ships.Snapshots.Module.StandaloneModuleSystemData;
-using Ships.Modules;
 using UnityEngine;
 
 namespace Ships.Systems.Standalone
 {
-    [RequireComponent(typeof(Module))]
     public class ReactionWheelStabilizer : StandaloneModuleSystem
     {
         [SerializeField] private ReactionWheelSettings settings;
@@ -27,7 +25,7 @@ namespace Ships.Systems.Standalone
 
         private void Apply(Rigidbody2D commandRigidbody, float multiplier)
         {
-            if (commandRigidbody == null)
+            if (!commandRigidbody)
                 throw new InvalidOperationException("[ReactionWheelStabilizer] commandRigidbody is required.");
             if (settings == null)
                 throw new UnityException("[ReactionWheelStabilizer] settings must be assigned.");

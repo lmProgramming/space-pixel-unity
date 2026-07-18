@@ -108,15 +108,14 @@ namespace Ships.Tests.TestHelpers.Factories
             return colors;
         }
 
-        public static T WireShip<T>(GameObject shipGo, DiContainer container) where T : Ship
+        public static T WireShip<T>(GameObject shipGo, DiContainer container) where T : Component, IShip
         {
-            var connectionFactory = shipGo.AddComponent<ModuleConnectionFactory>();
+            shipGo.AddComponent<ModuleConnectionFactory>();
             shipGo.AddComponent<ResourceManager>();
 
             shipGo.SetActive(false);
             var ship = shipGo.AddComponent<T>();
             container.Inject(ship);
-            ship.ModuleConnectionFactoryForTesting = connectionFactory;
             shipGo.SetActive(true);
 
             return ship;

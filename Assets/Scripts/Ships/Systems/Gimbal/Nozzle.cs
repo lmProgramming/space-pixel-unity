@@ -37,14 +37,6 @@ namespace Ships.Systems.Gimbal
                 SuppressExhaust();
         }
 
-        protected override void OnDestroy()
-        {
-            Destroyed?.Invoke(this);
-            base.OnDestroy();
-        }
-
-        public event Action<Nozzle> Destroyed;
-
         public void ApplyGimbalTransform(float gimbalAngleDegrees)
         {
             transform.localPosition = RestLocalPosition;

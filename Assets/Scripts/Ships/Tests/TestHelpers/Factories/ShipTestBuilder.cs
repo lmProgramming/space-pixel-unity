@@ -266,6 +266,14 @@ namespace Ships.Tests.TestHelpers.Factories
             };
         }
 
+        public DesignShip BuildDesignShip(bool initializeModules = false)
+        {
+            var ship = WireShip<DesignShip>(initializeModules);
+            EnsureAllModulesWired(ship).Forget();
+
+            return ship;
+        }
+
         public Ship Build(bool initializeModules = false)
         {
             var ship = WireShip<Ship>(initializeModules);
@@ -294,7 +302,7 @@ namespace Ships.Tests.TestHelpers.Factories
             return new ShipWithEnginesResult<ShipTestProxy> { Ship = ship, Engines = new List<Engine>(_engines) };
         }
 
-        private static async UniTask EnsureAllModulesWired(Ship ship)
+        private static async UniTask EnsureAllModulesWired<TShip>(TShip ship) where TShip : Component, IShip
         {
             await UniTask.Yield();
 
@@ -351,7 +359,7 @@ namespace Ships.Tests.TestHelpers.Factories
             return go;
         }
 
-        private T WireShip<T>(bool initializeModules) where T : Ship
+        private T WireShip<T>(bool initializeModules) where T : Component, IShip
         {
             var ship = ModuleFactory.WireShip<T>(_shipGo, _container);
             if (initializeModules)

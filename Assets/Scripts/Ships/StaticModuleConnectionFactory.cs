@@ -1,3 +1,4 @@
+using Core.Ships;
 using Ships.ModuleConnection;
 using Ships.Modules;
 using UnityEngine;
@@ -7,9 +8,9 @@ namespace Ships
 {
     public class StaticModuleConnectionFactory : MonoBehaviour, IModuleConnectionFactory
     {
-        public void ConnectModules(Ship ship)
+        public void ConnectModules(IShip ship, Transform shipTransform)
         {
-            var modules = ship.GetComponentsInChildren<Module>();
+            var modules = shipTransform.GetComponentsInChildren<Module>();
             var graph = ship.ModuleGraph;
             var commandModule = ship.CommandModule;
 

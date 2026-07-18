@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Core.Ships;
 using UnityEngine;
 using ZLinq;
 using Module = Ships.Modules.Module;
@@ -7,9 +8,9 @@ namespace Ships.ModuleConnection
 {
     public class ModuleConnectionFactory : MonoBehaviour, IModuleConnectionFactory
     {
-        public void ConnectModules(Ship ship)
+        public void ConnectModules(IShip ship, Transform shipTransform)
         {
-            var modules = GetModules(ship.transform);
+            var modules = GetModules(shipTransform);
 
             foreach (var module in modules) ship.ModuleGraph.AddNode(module);
 
@@ -39,7 +40,7 @@ namespace Ships.ModuleConnection
             WarnAboutIsolatedModules(ship, modules);
         }
 
-        private static void WarnAboutIsolatedModules(Ship ship, List<Module> modules)
+        private static void WarnAboutIsolatedModules(IShip ship, List<Module> modules)
         {
             var graph = ship.ModuleGraph;
 
@@ -48,7 +49,7 @@ namespace Ships.ModuleConnection
             foreach (var module in modules.AsValueEnumerable()
                          .Where(module => graph.GetConnectedNodes(module).Count == 0))
                 Debug.LogWarning(
-                    $"[ModuleConnectionFactory] Module '{module.name}' on ship '{ship.name}' has no graph edges " +
+                    $"[ModuleConnectionFactory] Module '{module.name}' on ship '{ship.Name}' has no graph edges " +
                     "after ConnectModules. It may be isolated from the rest of the ship.",
                     module);
         }

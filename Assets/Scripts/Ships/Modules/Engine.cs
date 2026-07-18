@@ -1,10 +1,12 @@
 using System.Collections.Generic;
 using Core.Constants;
+using Core.Pixelation;
 using Core.Services;
 using Core.Ships;
 using Core.Ships.Module;
 using Core.Ships.Snapshots.Module.ModuleData;
 using Core.Ships.Snapshots.PixelatedRigidbody;
+using LMPro.External.IsAlive;
 using LMPro.External.ReadOnly;
 using Ships.Systems.Gimbal;
 using UnityEngine;
@@ -59,17 +61,6 @@ namespace Ships.Modules
                 SuppressNozzleExhaustForDesignMode();
         }
 
-        protected override void OnDestroy()
-        {
-            if (_nozzles != null)
-                for (var i = _nozzles.Count - 1; i >= 0; i--)
-                    UnregisterNozzle(_nozzles[i]);
-
-            SetActive(false);
-
-            base.OnDestroy();
-        }
-
         public override ModuleType Type => ModuleType.Engine;
 
         public float MaxThrust => maxThrust * ActualEfficiency * GameplayConstants.EngineThrustEfficiencyMultiplier;
@@ -117,6 +108,17 @@ namespace Ships.Modules
             CurrentThrusterAngle = Mathf.MoveTowardsAngle(CurrentThrusterAngle, clampedTarget, maxStep);
         }
 
+        protected override void HandleDestroy(IPixelatedRigidbody pixelatedRigidbody)
+        {
+            if (_nozzles != null)
+                for (var i = _nozzles.Count - 1; i >= 0; i--)
+                    UnregisterNozzle(_nozzles[i]);
+
+            SetActive(false);
+
+            base.HandleDestroy(pixelatedRigidbody);
+        }
+
         protected override void UpdateModule()
         {
             currentGimbalAngleForDebug = CurrentThrusterAngle;
@@ -144,8 +146,7 @@ namespace Ships.Modules
         {
             _nozzles = GetComponentsInChildren<Nozzle>().AsValueEnumerable().ToList();
 
-            if (_nozzles.Count == 0)
-                throw new UnityException("[Engine] No Nozzles found");
+            if (_nozzles.Count == 0) Debug.LogWarning("[Engine] No Nozzles found");
 
             foreach (var nozzle in _nozzles)
                 RegisterNozzle(nozzle);
@@ -156,17 +157,17 @@ namespace Ships.Modules
             nozzle.Destroyed += OnNozzleDestroyed;
         }
 
-        private void UnregisterNozzle(Nozzle nozzle)
+        private void UnregisterNozzle(IPixelatedRigidbody nozzle)
         {
-            if (!nozzle) return;
+            if (!nozzle.IsAlive()) return;
 
             nozzle.Destroyed -= OnNozzleDestroyed;
         }
 
-        private void OnNozzleDestroyed(Nozzle nozzle)
+        private void OnNozzleDestroyed(IPixelatedRigidbody pixelated)
         {
-            UnregisterNozzle(nozzle);
-            _nozzles.Remove(nozzle);
+            UnregisterNozzle(pixelated);
+            _nozzles.Remove(pixelated as Nozzle);
         }
 
         private Vector2 CalculateAverageThrustPoint()

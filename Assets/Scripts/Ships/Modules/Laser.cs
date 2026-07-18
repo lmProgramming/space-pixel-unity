@@ -1,5 +1,6 @@
 using System;
 using System.Threading;
+using Core.Pixelation;
 using Core.Services;
 using Core.Ships;
 using Core.Ships.Snapshots.Module.ModuleData;
@@ -67,7 +68,7 @@ namespace Ships.Modules
             _reloadTimer.OnNotReady += HandleNotReady;
         }
 
-        protected override void OnDestroy()
+        protected override void HandleDestroy(IPixelatedRigidbody pixelatedRigidbody)
         {
             StopFiringCleanup();
 
@@ -75,7 +76,7 @@ namespace Ships.Modules
             _reloadTimer.OnReady -= HandleReady;
             _reloadTimer.OnNotReady -= HandleNotReady;
 
-            base.OnDestroy();
+            base.HandleDestroy(pixelatedRigidbody);
         }
 
         protected override void UpdateModule()

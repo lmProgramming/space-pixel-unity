@@ -43,17 +43,18 @@ namespace Ships.Tests
             var ship = ShipTestBuilder.CreateShip(Container, CreatedObjects)
                 .WithCommand("Command", Vector2.zero, 5, 5)
                 .WithBasic("Generator", new Vector2(5f, 0f), 5, 5, new Resources(10f, 0f, 5, 0f, 0))
-                .BuildWithEnginesResult();
+                .BuildDesignShip();
 
             yield return WaitForLifecycle();
 
-            ship.Ship.ResourceManager.UpdateEnergy();
-            var energyAfterTick = ship.Ship.ResourceManager.Energy;
+            ship.ResourceManager.UpdateEnergy();
+            var energyAfterTick = ship.ResourceManager.Energy;
 
-            ship.Ship.IsDesignMode = true;
-            ship.Ship.RunUpdateForTesting();
+            yield return null;
+            yield return null;
+            yield return null;
 
-            Assert.That(ship.Ship.ResourceManager.Energy, Is.EqualTo(energyAfterTick));
+            Assert.That(ship.ResourceManager.Energy, Is.EqualTo(energyAfterTick));
         }
 
         [UnityTest]
@@ -62,12 +63,11 @@ namespace Ships.Tests
             var ship = ShipTestBuilder.CreateShip(Container, CreatedObjects)
                 .WithCommand("Command", Vector2.zero, 5, 5)
                 .WithEngineModule(new Vector2(5f, 0f), 100f, 5, 5)
-                .BuildWithEnginesResult();
+                .BuildDesignShip();
 
             yield return null;
 
-            ship.Ship.IsDesignMode = true;
-            ship.Ship.InitializeModules();
+            ship.InitializeModules();
             yield return null;
 
             foreach (var engine in ship.Engines)
@@ -86,7 +86,6 @@ namespace Ships.Tests
                 .BuildMovableProxy();
 
             ship.SASEnabled = true;
-            ship.IsDesignMode = true;
             ship.InitializeModules();
             yield return WaitForLifecycle();
 
@@ -106,7 +105,6 @@ namespace Ships.Tests
 
             var snapshot = _snapshotService.CaptureSnapshot(ship);
 
-            ship.IsDesignMode = true;
             ship.DestroyAllModulesSilently();
             yield return null;
 
