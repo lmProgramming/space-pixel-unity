@@ -1,14 +1,16 @@
 using System;
 using System.IO;
+using Core.Gameplay.Sound;
 using Core.Services;
 using Events.Camera;
 using Events.UI;
 using ShipFactory.Models;
-using ShipFactory.UI.Views.Notification;
+using ShipFactory.UI.Runtime;
 using ShipFactory.UI.Views.ShipLibrary;
 using Ships;
-using UI;
 using UI.Common;
+using UI.Components.Notification;
+using UI.Components.OptionsPopup;
 using UnityEngine;
 using UnityEngine.UIElements;
 using Zenject;
@@ -20,12 +22,16 @@ namespace ShipFactory.UI
     {
         private const string CanvasContainerName = "canvas-container";
         private const string DefaultShipName = "Ship";
+        private const string ClearShipConfirmOptionId = "confirm";
+        private const string InfoAcknowledgeOptionId = "ok";
         private static readonly object ModuleDragPointerBlocker = new();
         private static readonly object UiHoverBlocker = new();
         private static readonly object UiPointerDownBlocker = new();
 
         [Header("Controllers")]
         [SerializeField] private ShipLibraryController libraryController;
+
+        [SerializeField] private OptionsPopupController optionsPopup;
 
         [SerializeField]
         private ShipModuleCatalog shipModuleCatalog;
@@ -37,7 +43,8 @@ namespace ShipFactory.UI
 
         [SerializeField] private CameraResetRequestEventChannel cameraResetRequestEventChannel;
 
-        [SerializeField] private Ship initialShip;
+        [SerializeField] private DesignShip initialShip;
+        [SerializeField] private ShipFactoryFeedback feedback;
         private Camera _camera;
         private VisualElement _canvasContainer;
 
@@ -58,6 +65,7 @@ namespace ShipFactory.UI
 
         private Button _loadShipButton;
         private ModulePaletteController _paletteController;
+        private Action<string> _pendingPopupOptionHandler;
 
         [Inject]
         private PointerOverUiEventChannel _pointerOverUiChannel;
@@ -72,6 +80,9 @@ namespace ShipFactory.UI
         [Inject]
         private IShipSnapshotService _snapshotService;
 
+        [Inject(Optional = true)]
+        private ISoundManager _soundManager;
+
         [Inject]
         private TextInputFocusEventChannel _textInputFocusChannel;
 
@@ -85,14 +96,22 @@ namespace ShipFactory.UI
             if (libraryController == null)
                 throw new UnityException("[ShipFactoryController] ShipLibraryController is required.");
 
+            if (optionsPopup == null)
+                throw new UnityException("[ShipFactoryController] OptionsPopupController is required.");
+
             if (shipModuleCatalog == null)
                 throw new UnityException($"[ShipFactoryController] {nameof(ShipModuleCatalog)} is not assigned!");
 
             if (pauseOverlay == null)
                 throw new UnityException("[ShipFactoryController] PauseOverlayController is required.");
+        }
 
-            if (initialShip != null)
-                initialShip.IsDesignMode = true;
+        private void Update()
+        {
+            SetModuleDragPointerBlock(_canvasController?.IsDraggingModule == true);
+            _canvasController?.RefreshShipResourcesPanel();
+            _canvasController?.RefreshCameraInfoPanel(_camera);
+            HandleRotationInput();
         }
 
         protected override void OnEnable()
@@ -108,14 +127,6 @@ namespace ShipFactory.UI
             base.OnDisable();
         }
 
-        private void Update()
-        {
-            SetModuleDragPointerBlock(_canvasController?.IsDraggingModule == true);
-            _canvasController?.RefreshShipResourcesPanel();
-            _canvasController?.RefreshCameraInfoPanel(_camera);
-            HandleRotationInput();
-        }
-
         protected override void BindUiCore(
             VisualElement root)
         {
@@ -124,8 +135,10 @@ namespace ShipFactory.UI
                     "[ShipFactoryController] CameraResetRequestEventChannel is not assigned!");
 
             _root = root;
+
             _canvasController = new ShipFactoryCanvasController(
-                root, notificationView, _gameInput, _instantiator, shipModuleCatalog, cameraResetRequestEventChannel);
+                root, notificationView, _gameInput, _instantiator, shipModuleCatalog, cameraResetRequestEventChannel,
+                feedback);
             _paletteController = new ModulePaletteController(root, shipModuleCatalog);
 
             _shipNameField = root.Q<TextField>("ship-name-field");
@@ -139,8 +152,11 @@ namespace ShipFactory.UI
             _paletteController.OnModuleDragFinished += OnModuleDragFinished;
             _canvasController.OnModuleDragFinished += OnModuleDragFinished;
             _canvasController.OnInputLockChanged += OnCanvasInputLockChanged;
+            _canvasController.OnShipCompositionChanged += OnShipCompositionChanged;
+            _canvasController.OnClearShipRequested += OnClearShipRequested;
             _paletteController.OnModuleHoverStarted += OnPaletteModuleHoverStarted;
             _paletteController.OnModuleHoverEnded += OnPaletteModuleHoverEnded;
+            _paletteController.OnBlockedPlacementClicked += OnBlockedPlacementClicked;
             _saveShipButton.clicked += SaveSnapshot;
             _loadShipButton.clicked += ShowSnapshotLibrary;
 
@@ -151,6 +167,8 @@ namespace ShipFactory.UI
 
             if (initialShip)
                 _canvasController.SetShip(initialShip);
+            else
+                SyncPaletteToShipState();
 
             RegisterCameraDragPointerBlockers(root);
             _textInputFocusTracker = new TextInputFocusTracker(_textInputFocusChannel);
@@ -241,14 +259,19 @@ namespace ShipFactory.UI
                 _paletteController.OnModuleDragFinished -= OnModuleDragFinished;
                 _paletteController.OnModuleHoverStarted -= OnPaletteModuleHoverStarted;
                 _paletteController.OnModuleHoverEnded -= OnPaletteModuleHoverEnded;
+                _paletteController.OnBlockedPlacementClicked -= OnBlockedPlacementClicked;
             }
 
             if (_canvasController != null)
             {
                 _canvasController.OnModuleDragFinished -= OnModuleDragFinished;
                 _canvasController.OnInputLockChanged -= OnCanvasInputLockChanged;
+                _canvasController.OnShipCompositionChanged -= OnShipCompositionChanged;
+                _canvasController.OnClearShipRequested -= OnClearShipRequested;
                 _canvasController.Dispose();
             }
+
+            ClearPendingPopupHandler();
 
             _shipNameField.UnregisterValueChangedCallback(OnShipNameChanged);
 
@@ -303,6 +326,18 @@ namespace ShipFactory.UI
             _paletteController.SetInputLocked(isLocked);
         }
 
+        private void OnShipCompositionChanged()
+        {
+            SyncPaletteToShipState();
+        }
+
+        private void SyncPaletteToShipState()
+        {
+            _paletteController.SyncToShipState(
+                _canvasController.ShipHasModules,
+                _canvasController.ShipHasCommandModule);
+        }
+
         private void OnModuleDragFinished()
         {
             _paletteController.FinishModuleDrag();
@@ -328,6 +363,71 @@ namespace ShipFactory.UI
         private void OnPaletteModuleHoverEnded(ShipModuleSO moduleSO)
         {
             _canvasController.HidePaletteModuleInfo(moduleSO);
+        }
+
+        private void OnClearShipRequested()
+        {
+            ShowOptionsPopup(
+                "Clear ship?",
+                "Deleting the command module removes the entire ship. This cannot be undone.",
+                OnClearShipPopupOptionSelected,
+                new OptionsPopupOption("cancel", "Cancel", OptionsPopupOptionStyle.Ghost),
+                new OptionsPopupOption(ClearShipConfirmOptionId, "Clear Ship", OptionsPopupOptionStyle.Danger));
+        }
+
+        private void OnBlockedPlacementClicked(string title, string description)
+        {
+            ShowOptionsPopup(
+                title,
+                description,
+                null,
+                new OptionsPopupOption(InfoAcknowledgeOptionId, "OK", OptionsPopupOptionStyle.Primary));
+        }
+
+        private void ShowOptionsPopup(
+            string title,
+            string description,
+            Action<string> optionHandler,
+            params OptionsPopupOption[] options)
+        {
+            ClearPendingPopupHandler();
+            _pendingPopupOptionHandler = optionHandler;
+
+            optionsPopup.gameObject.SetActive(true);
+            optionsPopup.OptionSelected += OnOptionsPopupOptionSelected;
+            optionsPopup.Closed += OnOptionsPopupClosed;
+            optionsPopup.Show(title, description, options);
+        }
+
+        private void OnOptionsPopupOptionSelected(string optionId)
+        {
+            var handler = _pendingPopupOptionHandler;
+            ClearPendingPopupHandler();
+            handler?.Invoke(optionId);
+        }
+
+        private void OnOptionsPopupClosed()
+        {
+            ClearPendingPopupHandler();
+        }
+
+        private void ClearPendingPopupHandler()
+        {
+            if (optionsPopup != null)
+            {
+                optionsPopup.OptionSelected -= OnOptionsPopupOptionSelected;
+                optionsPopup.Closed -= OnOptionsPopupClosed;
+            }
+
+            _pendingPopupOptionHandler = null;
+        }
+
+        private void OnClearShipPopupOptionSelected(string optionId)
+        {
+            if (optionId != ClearShipConfirmOptionId)
+                return;
+
+            _canvasController.ClearShip();
         }
 
         private void OnPauseChanged(bool paused)
