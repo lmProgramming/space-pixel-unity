@@ -1,8 +1,7 @@
-using UI;
-using UI.Elements;
+using UI.Common;
 using UnityEngine.UIElements;
 
-namespace ShipFactory.UI.Views.Notification
+namespace UI.Components.Notification
 {
     public class NotificationView : PanelRendererBase
     {

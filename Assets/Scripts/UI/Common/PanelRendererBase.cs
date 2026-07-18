@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace UI
+namespace UI.Common
 {
     [RequireComponent(typeof(PanelRenderer))]
     public abstract class PanelRendererBase : MonoBehaviour, IPanelRenderable
