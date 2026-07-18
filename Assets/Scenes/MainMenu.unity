@@ -445,6 +445,42 @@ PrefabInstance:
       propertyPath: m_Enabled
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3998940078788761042, guid: cf3e414adef6859f2af6ac1a62b52293, type: 3}
+      propertyPath: mapInfo
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 3998940078788761042, guid: cf3e414adef6859f2af6ac1a62b52293, type: 3}
+      propertyPath: shipService
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 3998940078788761042, guid: cf3e414adef6859f2af6ac1a62b52293, type: 3}
+      propertyPath: debrisSpawner
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 3998940078788761042, guid: cf3e414adef6859f2af6ac1a62b52293, type: 3}
+      propertyPath: missionService
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 3998940078788761042, guid: cf3e414adef6859f2af6ac1a62b52293, type: 3}
+      propertyPath: skirmishSpawner
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 3998940078788761042, guid: cf3e414adef6859f2af6ac1a62b52293, type: 3}
+      propertyPath: navigationService
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 3998940078788761042, guid: cf3e414adef6859f2af6ac1a62b52293, type: 3}
+      propertyPath: dummyDebrisSpawner
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3998940078788761042, guid: cf3e414adef6859f2af6ac1a62b52293, type: 3}
+      propertyPath: projectilesSpawner
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 3998940078788761042, guid: cf3e414adef6859f2af6ac1a62b52293, type: 3}
+      propertyPath: dummyProjectileSpawner
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4648251575334767366, guid: cf3e414adef6859f2af6ac1a62b52293, type: 3}
       propertyPath: m_Enabled
       value: 0
@@ -468,6 +504,14 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects:
     - {fileID: 7875241323743208151, guid: cf3e414adef6859f2af6ac1a62b52293, type: 3}
+    - {fileID: 6458119317797450693, guid: cf3e414adef6859f2af6ac1a62b52293, type: 3}
+    - {fileID: 3134857109803858339, guid: cf3e414adef6859f2af6ac1a62b52293, type: 3}
+    - {fileID: 2139498913904022255, guid: cf3e414adef6859f2af6ac1a62b52293, type: 3}
+    - {fileID: 5494529849481706430, guid: cf3e414adef6859f2af6ac1a62b52293, type: 3}
+    - {fileID: 6587261103141829026, guid: cf3e414adef6859f2af6ac1a62b52293, type: 3}
+    - {fileID: 6910225380903978702, guid: cf3e414adef6859f2af6ac1a62b52293, type: 3}
+    - {fileID: 6944570369148477847, guid: cf3e414adef6859f2af6ac1a62b52293, type: 3}
+    - {fileID: 3825032785639847380, guid: cf3e414adef6859f2af6ac1a62b52293, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: cf3e414adef6859f2af6ac1a62b52293, type: 3}
@@ -607,7 +651,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Game.UI::UI.Main.MainMenuController
   settingsOverlay: {fileID: 1456832618}
-  progressionNewCampaignController: {fileID: 2095039585}
+  newCampaignController: {fileID: 2095039585}
 --- !u!4 &1622572001
 Transform:
   m_ObjectHideFlags: 0
@@ -828,12 +872,24 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 6799016278290373035, guid: 1de7a1823d84d0b02a0b3dc3a726b2aa, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 6799016278290373035, guid: 1de7a1823d84d0b02a0b3dc3a726b2aa, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 6799016278290373035, guid: 1de7a1823d84d0b02a0b3dc3a726b2aa, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 6799016278290373035, guid: 1de7a1823d84d0b02a0b3dc3a726b2aa, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 4.64053
+      value: 800
       objectReference: {fileID: 0}
     - target: {fileID: 6799016278290373035, guid: 1de7a1823d84d0b02a0b3dc3a726b2aa, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.25308
+      value: 450
       objectReference: {fileID: 0}
     - target: {fileID: 6799016278290373035, guid: 1de7a1823d84d0b02a0b3dc3a726b2aa, type: 3}
       propertyPath: m_LocalPosition.z
@@ -841,19 +897,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6799016278290373035, guid: 1de7a1823d84d0b02a0b3dc3a726b2aa, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 1
+      value: 0.7071068
       objectReference: {fileID: 0}
     - target: {fileID: 6799016278290373035, guid: 1de7a1823d84d0b02a0b3dc3a726b2aa, type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6799016278290373035, guid: 1de7a1823d84d0b02a0b3dc3a726b2aa, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6799016278290373035, guid: 1de7a1823d84d0b02a0b3dc3a726b2aa, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0
+      value: -0.7071068
       objectReference: {fileID: 0}
     - target: {fileID: 6799016278290373035, guid: 1de7a1823d84d0b02a0b3dc3a726b2aa, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -865,7 +921,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6799016278290373035, guid: 1de7a1823d84d0b02a0b3dc3a726b2aa, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
+      value: -90
       objectReference: {fileID: 0}
     - target: {fileID: 9064932019615363452, guid: 1de7a1823d84d0b02a0b3dc3a726b2aa, type: 3}
       propertyPath: m_Name

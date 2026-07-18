@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="project://database/Assets/DesignSystem/Resources/UI/Styles/DesignSystem/DesignSystem.uss"/>
+    <ui:VisualElement class="ds-root ds-root--transparent"
+                      style="position: absolute; left: 0; right: 0; top: 0; bottom: 0;">
+        <ui:VisualElement style="flex-direction: row; flex-grow: 1; padding: 24px; gap: 16px;">
+            <ui:VisualElement style="width: 280px; flex-shrink: 0;">
+                <ui:Label text="Select Starting Ship" class="ds-h2" style="margin-bottom: 8px;"/>
+                <ui:ScrollView mode="Vertical" style="flex-grow: 1;">
+                    <ui:VisualElement name="progression-new-campaign-ship-list" class="ds-side-nav"/>
+                </ui:ScrollView>
+            </ui:VisualElement>
+            <ui:VisualElement style="flex-grow: 1; gap: 12px;">
+                <ui:TextField name="progression-new-campaign-name-field" label="Campaign Name"
+                              class="ds-input" max-length="48"/>
+                <ui:VisualElement name="progression-new-campaign-preview-container"
+                                  style="flex-grow: 1; min-height: 280px;"/>
+                <ui:VisualElement name="progression-new-campaign-resources-container"/>
+                <ui:VisualElement class="ds-row" style="justify-content: flex-end; gap: 8px;">
+                    <ui:Button name="progression-new-campaign-back-button" text="Back"
+                               class="ds-btn ds-btn--secondary"/>
+                    <ui:Button name="progression-new-campaign-start-button" text="Start Campaign"
+                               class="ds-btn ds-btn--primary"/>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
