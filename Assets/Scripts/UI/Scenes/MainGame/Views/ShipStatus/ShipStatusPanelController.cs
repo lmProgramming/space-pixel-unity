@@ -42,7 +42,9 @@ namespace UI.Scenes.MainGame.Views.ShipStatus
             if (!IsUiBound)
                 return;
 
-            if (_activePlayerShipProvider.ActiveShip == null || !_activePlayerShipProvider.ActiveShip.IsAlive())
+            if (!_activePlayerShipProvider.HasPlayerShip ||
+                _activePlayerShipProvider.ActiveShip == null ||
+                !_activePlayerShipProvider.ActiveShip.IsAlive())
             {
                 SetMainHudVisible(false);
                 return;

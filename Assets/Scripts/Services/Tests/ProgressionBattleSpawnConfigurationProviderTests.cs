@@ -31,7 +31,7 @@ namespace Services.Tests
             var provider = new ProgressionBattleSpawnConfigurationProvider(repository);
             var configuration = provider.GetConfiguration();
 
-            Assert.That(configuration.PlayerShipSnapshot.shipName, Is.EqualTo("Bravo"));
+            Assert.That(configuration.PlayerShipSnapshot!.shipName, Is.EqualTo("Bravo"));
             Assert.That(configuration.AllySnapshots, Has.Count.EqualTo(2));
             Assert.That(configuration.AllySnapshots[0].shipName, Is.EqualTo("Alpha"));
             Assert.That(configuration.AllySnapshots[1].shipName, Is.EqualTo("Charlie"));

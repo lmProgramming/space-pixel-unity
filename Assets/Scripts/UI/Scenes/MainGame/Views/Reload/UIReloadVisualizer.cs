@@ -21,6 +21,9 @@ namespace UI.Scenes.MainGame.Views.Reload
         protected override void BindUiCore(
             VisualElement root)
         {
+            if (!_activePlayerShipProvider.HasPlayerShip)
+                return;
+
             ValidateSetup();
 
             _weaponQueue = root.Q<ChildAnnotator>("weapon-queue");
@@ -33,9 +36,6 @@ namespace UI.Scenes.MainGame.Views.Reload
             _onNotReadyActions = new Dictionary<IWeapon, Action>();
 
             var playerShip = _activePlayerShipProvider.ActiveShip;
-            if (playerShip == null)
-                throw new InvalidOperationException("[UIReloadVisualizer] Active player ship is not set.");
-
             var weapons = playerShip.Weapons;
             if (weapons == null)
                 throw new InvalidOperationException("[UIReloadVisualizer] Player ship weapons are required.");
@@ -183,9 +183,6 @@ namespace UI.Scenes.MainGame.Views.Reload
 
         private void ValidateSetup()
         {
-            if (_activePlayerShipProvider.ActiveShip == null)
-                throw new InvalidOperationException("[UIReloadVisualizer] Active player ship is not set.");
-
             if (PanelRenderer == null)
                 throw new InvalidOperationException("[UIReloadVisualizer] PanelRenderer is required.");
         }

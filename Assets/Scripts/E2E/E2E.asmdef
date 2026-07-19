@@ -10,14 +10,10 @@
     "GUID:b588e3e7a964822d3a9d587848dfd885",
     "GUID:4d277b042cf7c0655ad4c5179de9f659",
     "GUID:aabd71ea39897b2ae8140353eda4f03e",
-    "GUID:6d323db75722c7d57873e2593dd897ee",
-    "GUID:6cf2dc15e3e78c31392a86636df9a412",
-    "GUID:714d0c92b67330b6f964bc28ee4a69c4",
     "GUID:34bdced8957d5654aa357c6c421984d1",
     "GUID:4369e8c3ba826540aa585f492422e269",
     "GUID:2e6b3daac871ce600a624bfc8b07b038",
-    "GUID:9faedef42030494289033ae820bca490",
-    "GUID:278f8862387a54432a13c656c4b658fa"
+    "GUID:714d0c92b67330b6f964bc28ee4a69c4"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],
@@ -25,8 +21,7 @@
   "overrideReferences": true,
   "precompiledReferences": [
     "nunit.framework.dll",
-    "ZLinq.dll",
-    "NSubstitute.dll"
+    "ZLinq.dll"
   ],
   "autoReferenced": false,
   "defineConstraints": [

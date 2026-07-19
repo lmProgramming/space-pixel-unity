@@ -70,6 +70,8 @@ namespace Pixelation
         {
             if (TexturePixelGrid == null || TexturePixelGrid.PixelCount == 0)
                 throw new InvalidDataException("TexturePixelGrid is null or has no pixels.");
+
+            EnsureCollisionHandler();
         }
 
         private void FixedUpdate()
@@ -305,6 +307,19 @@ namespace Pixelation
         {
             sprite = newSprite;
             Setup(forceSetup: true, recalculateColliders: true);
+        }
+
+        private void EnsureCollisionHandler()
+        {
+            if (CollisionHandler != null)
+                return;
+
+            if (!_collisionEventChannelSO || _debrisSpawner == null || TexturePixelGrid == null)
+                return;
+
+            CollisionHandler = new PixelCollisionHandler(TexturePixelGrid, this, GetComponent<PolygonCollider2D>(),
+                _collisionEventChannelSO, _debrisSpawner, GameplayConstants);
+            CollisionHandler.ForceRecalculateColliders();
         }
 
         private void ApplySpriteRenderedOptions(int sortingLayerID, int orderInLayer)

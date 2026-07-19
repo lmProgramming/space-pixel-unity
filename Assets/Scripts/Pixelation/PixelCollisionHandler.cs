@@ -132,7 +132,7 @@ namespace Pixelation
 
             var otherRb = collision.gameObject.GetComponent<PixelatedRigidbody>();
 
-            if (otherRb is null) return;
+            if (otherRb?.CollisionHandler is null) return;
 
             otherRb.CollisionHandler.ResolveCollision(_body, collision);
 

@@ -1,7 +1,9 @@
 using System;
+using Core.Constants;
 using Core.Gameplay.EasyTeam;
 using Core.Services;
 using Events.Game.BattleOver;
+using Gameplay.EasyTeam;
 using UnityEngine;
 using Zenject;
 using ZLinq;
@@ -13,17 +15,15 @@ namespace Services
         [Inject] private IActivePlayerShipProvider _activePlayerShipProvider;
 
         [Inject] private BattleOverEventChannel _battleOverEventChannel;
+        private bool _hadEnemies;
         private bool _missionOver;
 
-        private ITeam _playerTeam;
+        private ITeam _missionTeam;
         [Inject] private IShipService _shipService;
 
         private void Start()
         {
-            if (_activePlayerShipProvider.ActiveShip == null)
-                throw new UnityException("[MissionService] Active player ship is not set.");
-
-            _playerTeam = _activePlayerShipProvider.ActiveShip.Team;
+            TryBindMissionTeam();
         }
 
         private void Update()
@@ -31,7 +31,7 @@ namespace Services
             if (_missionOver)
                 return;
 
-            if (AllEnemiesDestroyed())
+            if (_hadEnemies && !AllEnemiesDestroyed())
                 TriggerVictory();
 
             if (AllAlliesDestroyed())
@@ -41,14 +41,33 @@ namespace Services
         public event Action OnVictory;
         public event Action OnDefeat;
 
-        private bool AllEnemiesDestroyed()
+        private void TryBindMissionTeam()
         {
-            return !_shipService.GetEnemyShipsOf(_playerTeam).AsValueEnumerable().Any();
+            if (_missionTeam != null) return;
+
+            if (_activePlayerShipProvider.HasPlayerShip)
+            {
+                _missionTeam = _activePlayerShipProvider.ActiveShip.Team;
+                return;
+            }
+
+            var friendlyShip = _shipService.GetShips().AsValueEnumerable()
+                .FirstOrDefault(ship =>
+                    ship.Team is Team team && team.Layer == PhysicsLayers.Friendly);
+
+            if (friendlyShip == null) return;
+
+            _missionTeam = friendlyShip.Team;
         }
 
         private bool AllAlliesDestroyed()
         {
-            return !_shipService.GetAlliedShipsOf(_playerTeam).AsValueEnumerable().Any();
+            return !_shipService.GetAlliedShipsOf(_missionTeam).AsValueEnumerable().Any();
+        }
+
+        private bool AllEnemiesDestroyed()
+        {
+            return !_shipService.GetEnemyShipsOf(_missionTeam).AsValueEnumerable().Any();
         }
 
         private void TriggerVictory()

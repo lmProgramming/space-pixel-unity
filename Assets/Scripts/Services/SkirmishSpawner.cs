@@ -53,7 +53,9 @@ namespace Services
             var spawnRect = spawnArea.GetSpawnRect();
             var reservations = new List<SkirmishSpawnPlacement.SpawnReservation>();
 
-            SpawnPlayer(configuration, spawnRect, reservations);
+            if (configuration.PlayerShipSnapshot != null)
+                SpawnPlayer(configuration, spawnRect, reservations);
+
             SpawnAsteroids(configuration.AsteroidCount, spawnRect, reservations);
             SpawnSnapshotShips(
                 configuration.AllySnapshots,
@@ -93,8 +95,7 @@ namespace Services
             if (ship == null)
                 throw new UnityException("[SkirmishSpawner] Spawned player ship shell does not have a Ship component.");
 
-            if (configuration.PlayerShipSnapshot != null)
-                _snapshotService.ApplySnapshot(ship, configuration.PlayerShipSnapshot);
+            _snapshotService.ApplySnapshot(ship, configuration.PlayerShipSnapshot);
 
             ship.SetTeam(friendlyTeam);
             ship.InitializeModules();

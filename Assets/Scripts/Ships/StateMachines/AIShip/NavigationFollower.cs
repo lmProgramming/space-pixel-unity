@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Core.Pixelation;
 using JetBrains.Annotations;
+using LMPro.External.IsAlive;
 using UnityEngine;
 using ZLinq;
 
@@ -57,9 +58,21 @@ namespace Ships.StateMachines.AIShip
             return result;
         }
 
+        private void FallbackToMovingTowardsTarget(AIShipStateMachine stateMachine)
+        {
+            if (_target != null && _target.IsAlive())
+                stateMachine.SetMovementTarget(_target.WorldWeightedCenter);
+        }
+
         public void FollowPath(AIShipStateMachine stateMachine)
         {
-            if (_path == null || _path.Count == 0) return;
+            // When A* fails (e.g. footprint too large for sector grid), still steer toward the target
+            // so local obstacle sensing can take over.
+            if (_path == null || _path.Count == 0)
+            {
+                FallbackToMovingTowardsTarget(stateMachine);
+                return;
+            }
 
             if (_currentWaypointIndex >= _path.Count)
             {
