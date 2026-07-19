@@ -2,6 +2,7 @@
 using Core.Constants;
 using Core.Pixelation;
 using UnityEngine;
+using Zenject;
 
 namespace Pixelation.CollisionResolver
 {
@@ -28,6 +29,10 @@ namespace Pixelation.CollisionResolver
             var damagePerPixel = totalDamage / pixelsToDamage.Count;
 
             return PixelatedRigidbody.DamagePixels(pixelsToDamage, damagePerPixel);
+        }
+
+        public class Factory : PlaceholderFactory<PixelCollisionHandler, IPixelatedRigidbody, PhysicsCollision>
+        {
         }
     }
 }

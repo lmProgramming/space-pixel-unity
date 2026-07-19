@@ -1,10 +1,14 @@
 using System.Collections.Generic;
 using Core.Constants;
+using Core.Grid;
+using Core.Pixelation;
 using Core.Services;
 using Events.Gameplay.Collision;
 using Events.Gameplay.Ship;
 using Events.Gameplay.Shooting;
 using NSubstitute;
+using Pixelation;
+using Pixelation.CollisionResolver;
 using Ships.Tests.TestHelpers.Mocks;
 using UnityEngine;
 using Zenject;
@@ -62,6 +66,15 @@ namespace Ships.Tests.TestHelpers.Fixtures
             container.Bind<GameplayConstants>()
                 .FromScriptableObjectResource("Tests/GameplayConstants")
                 .AsSingle();
+
+            container.BindFactory<ITexturePixelGrid, PixelatedRigidbody, PolygonCollider2D, PixelCollisionHandler,
+                PixelCollisionHandler.Factory>();
+
+            container
+                .BindFactory<PixelCollisionHandler, IPixelatedRigidbody, PhysicsCollision, PhysicsCollision.Factory>();
+
+            container.BindFactory<PixelCollisionHandler, IPixelatedRigidbody, DestroyCollidingPixel,
+                DestroyCollidingPixel.Factory>();
 
             return container;
         }

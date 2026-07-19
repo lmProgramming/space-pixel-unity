@@ -52,6 +52,7 @@ namespace Pixelation
         [Inject] private IDebrisSpawner _debrisSpawner;
 
         private bool _isSetup;
+        [Inject] private PixelCollisionHandler.Factory _pixelCollisionHandlerFactory;
 
         [Inject] protected GameplayConstants GameplayConstants;
         private HealthGrid HealthGrid { get; set; }
@@ -317,8 +318,12 @@ namespace Pixelation
             if (!_collisionEventChannelSO || _debrisSpawner == null || TexturePixelGrid == null)
                 return;
 
-            CollisionHandler = new PixelCollisionHandler(TexturePixelGrid, this, GetComponent<PolygonCollider2D>(),
-                _collisionEventChannelSO, _debrisSpawner, GameplayConstants);
+            if (_pixelCollisionHandlerFactory == null)
+                throw new UnityException(
+                    "[PixelatedRigidbody] PixelCollisionHandler.Factory is required.");
+
+            CollisionHandler = _pixelCollisionHandlerFactory.Create(
+                TexturePixelGrid, this, RequirePolygonCollider());
             CollisionHandler.ForceRecalculateColliders();
         }
 
@@ -474,8 +479,14 @@ namespace Pixelation
             TexturePixelGrid = new TexturePixelGrid(SpriteRenderer);
 
             if ((_collisionEventChannelSO && _debrisSpawner != null) || recalculateColliders)
-                CollisionHandler = new PixelCollisionHandler(TexturePixelGrid, this, GetComponent<PolygonCollider2D>(),
-                    _collisionEventChannelSO, _debrisSpawner, GameplayConstants);
+            {
+                if (_pixelCollisionHandlerFactory == null)
+                    throw new UnityException(
+                        "[PixelatedRigidbody] PixelCollisionHandler.Factory is required.");
+
+                CollisionHandler = _pixelCollisionHandlerFactory.Create(
+                    TexturePixelGrid, this, RequirePolygonCollider());
+            }
 
             if (colors is not null)
             {
@@ -561,6 +572,16 @@ namespace Pixelation
             Rigidbody = GetComponent<Rigidbody2D>();
             SpriteRenderer = GetComponent<SpriteRenderer>();
             Collider2D = GetComponent<Collider2D>();
+        }
+
+        private PolygonCollider2D RequirePolygonCollider()
+        {
+            var polygonCollider = Collider2D as PolygonCollider2D ?? GetComponent<PolygonCollider2D>();
+            if (!polygonCollider)
+                throw new UnityException(
+                    $"[PixelatedRigidbody] PolygonCollider2D is required on '{name}'.");
+
+            return polygonCollider;
         }
 
         public void CopyVelocity(IPixelatedRigidbody parentBody)

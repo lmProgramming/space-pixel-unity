@@ -1,11 +1,14 @@
 using Core.Constants;
 using Core.Services;
+using Events.Camera;
 using Events.Game;
 using Events.Game.BattleOver;
+using Events.Gameplay.Collision;
 using Events.Gameplay.Shooting;
 using Events.UI;
 using Services;
 using Services.GameInput;
+using ShipFactory.Models;
 using UnityEngine;
 using Zenject;
 
@@ -13,13 +16,20 @@ namespace Context
 {
     public class GameProjectInstaller : MonoInstaller
     {
-        [SerializeField] private ScriptableObject shipModuleCatalog;
-        [SerializeField] private ScriptableObject gameContentCatalog;
-        [SerializeField] private ScriptableObject skirmishSnapshotCatalog;
+        [Header("Channels")]
+        [SerializeField] private CollisionEventChannelSO physicsCollisionChannel;
+
+        [SerializeField] private CameraResetRequestEventChannel cameraResetRequestEventChannel;
         [SerializeField] private PointerOverUiEventChannel pointerOverUiChannel;
         [SerializeField] private TextInputFocusEventChannel textInputFocusChannel;
         [SerializeField] private PauseStateEventChannel pauseStateChannel;
         [SerializeField] private ShootingEventChannel shootingEventChannel;
+
+        [Header("SOs")]
+        [SerializeField] private ShipModuleCatalog shipModuleCatalog;
+
+        [SerializeField] private GameContentCatalog gameContentCatalog;
+        [SerializeField] private SkirmishSnapshotCatalog skirmishSnapshotCatalog;
         [SerializeField] private GameplayConstants gameplayConstants;
 
         [SerializeField]
@@ -53,6 +63,13 @@ namespace Context
 
             if (battleOverEventChannel == null)
                 throw new UnityException("[GameProjectInstaller] Battle victory event channel must be assigned.");
+
+            if (!cameraResetRequestEventChannel)
+                throw new UnityException(
+                    $"[ShipFactoryInstaller] {nameof(cameraResetRequestEventChannel)} must be assigned.");
+
+            if (!physicsCollisionChannel)
+                throw new UnityException($"Missing {nameof(physicsCollisionChannel)}");
 
             Container.Bind<IShipModuleCatalog>()
                 .FromInstance(typedShipModuleCatalog)
@@ -108,6 +125,13 @@ namespace Context
             Container.Bind<GameplayConstants>()
                 .FromInstance(gameplayConstants)
                 .AsSingle();
+
+            Container.Bind<CameraResetRequestEventChannel>()
+                .FromInstance(cameraResetRequestEventChannel)
+                .AsSingle();
+
+            if (physicsCollisionChannel)
+                Container.Bind<CollisionEventChannelSO>().FromInstance(physicsCollisionChannel).AsSingle();
         }
     }
 }

@@ -3,7 +3,6 @@ using System.Linq;
 using Core.Services;
 using Core.Ships;
 using Core.Ships.Module;
-using Events.Camera;
 using JetBrains.Annotations;
 using ShipFactory.Helpers;
 using ShipFactory.Helpers.LegalPositionCalculator;
@@ -53,17 +52,20 @@ namespace ShipFactory.UI
         public ShipFactoryCanvasController(
             VisualElement root,
             NotificationView notificationView,
+            ShipFactoryFeedback feedback,
             IGameInput gameInput,
             IInstantiator instantiator,
             ShipModuleCatalog moduleCatalog,
-            CameraResetRequestEventChannel cameraResetRequestEventChannel,
-            ShipFactoryFeedback feedback)
+            CameraInfoPanel.Factory cameraInfoPanelFactory)
         {
             _gameInput = gameInput;
             _instantiator = instantiator ?? throw new ArgumentNullException(nameof(instantiator));
             var moduleCatalog1 = moduleCatalog ?? throw new ArgumentNullException(nameof(moduleCatalog));
             _notificationView = notificationView ?? throw new ArgumentNullException(nameof(notificationView));
             _feedback = feedback ?? throw new ArgumentNullException(nameof(feedback));
+
+            if (cameraInfoPanelFactory == null)
+                throw new ArgumentNullException(nameof(cameraInfoPanelFactory));
 
             var canvasContainer = root.Q<VisualElement>("canvas-container");
             _inputBlocker = root.Q<VisualElement>("ship-factory-input-blocker");
@@ -76,7 +78,7 @@ namespace ShipFactory.UI
 
             _resourcesPanel = root.Q<ResourcesPanel>("resources-panel");
             _infoPanel = new ModuleInfoPanel(root);
-            _cameraInfoPanel = new CameraInfoPanel(root, cameraResetRequestEventChannel);
+            _cameraInfoPanel = cameraInfoPanelFactory.Create(root);
 
             _infoPanel.OnRemoveModuleClicked += RemoveSelectedModule;
             _infoPanel.OnRotateClockwiseClicked += () => RotateActiveModule(90);
@@ -645,6 +647,11 @@ namespace ShipFactory.UI
         public void RefreshCameraInfoPanel(Camera camera)
         {
             _cameraInfoPanel.Update(camera);
+        }
+
+        public class Factory : PlaceholderFactory<VisualElement, NotificationView, ShipFactoryFeedback,
+            ShipFactoryCanvasController>
+        {
         }
     }
 }

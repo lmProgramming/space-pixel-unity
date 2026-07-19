@@ -1,19 +1,24 @@
 using Core.Gameplay.Sound;
+using Core.Grid;
+using Core.Pixelation;
 using Core.Services;
 using Core.Services.Dummies;
-using Events.Gameplay.Collision;
+using Pixelation;
+using Pixelation.CollisionResolver;
 using Services;
 using Services.Sound;
+using ShipFactory.UI;
+using ShipFactory.UI.Runtime;
+using ShipFactory.UI.ToolkitComponents;
+using UI.Components.Notification;
 using UnityEngine;
+using UnityEngine.UIElements;
 using Zenject;
 
 namespace Context
 {
     public class GameSceneInstaller : MonoInstaller
     {
-        [Header("Event Channels")] [SerializeField]
-        private CollisionEventChannelSO physicsCollisionChannelAsset;
-
         [SerializeField] private DebrisSpawner debrisSpawner;
         [SerializeField] private bool dummyDebrisSpawner;
         [SerializeField] private MapInfo mapInfo;
@@ -35,8 +40,6 @@ namespace Context
         {
             if (validateAll)
             {
-                if (!physicsCollisionChannelAsset)
-                    throw new UnityException($"Missing {nameof(physicsCollisionChannelAsset)}");
                 if (!debrisSpawner) throw new UnityException($"Missing {nameof(debrisSpawner)}");
                 if (!mapInfo) throw new UnityException($"Missing {nameof(mapInfo)}");
                 if (!projectilesSpawner) throw new UnityException($"Missing {nameof(projectilesSpawner)}");
@@ -52,9 +55,6 @@ namespace Context
                 dummyDebrisSpawner ? new DummyDebrisSpawner() : debrisSpawner;
             IProjectilesSpawner actualProjectilesSpawner =
                 dummyProjectileSpawner ? new DummyProjectileSpawner() : projectilesSpawner;
-
-            if (physicsCollisionChannelAsset)
-                Container.Bind<CollisionEventChannelSO>().FromInstance(physicsCollisionChannelAsset).AsSingle();
 
             if (debrisSpawner)
                 Container.Bind<IDebrisSpawner>().FromInstance(actualDebrisSpawner).AsSingle();
@@ -93,6 +93,12 @@ namespace Context
                     .FromInstance(moduleRestoreFactory)
                     .AsSingle();
 
+            BindClasses();
+            BindFactories();
+        }
+
+        private void BindClasses()
+        {
             Container.Bind<IActivePlayerShipProvider>()
                 .To<ActivePlayerShipProvider>()
                 .AsSingle();
@@ -106,6 +112,25 @@ namespace Context
             Container.Bind<IBattleSpawnConfigurationProvider>()
                 .To<BattleSpawnConfigurationProvider>()
                 .AsSingle();
+        }
+
+        private void BindFactories()
+        {
+            Container.BindFactory<ITexturePixelGrid, PixelatedRigidbody, PolygonCollider2D, PixelCollisionHandler,
+                PixelCollisionHandler.Factory>();
+
+            Container
+                .BindFactory<PixelCollisionHandler, IPixelatedRigidbody, PhysicsCollision, PhysicsCollision.Factory>();
+
+            Container.BindFactory<PixelCollisionHandler, IPixelatedRigidbody, DestroyCollidingPixel,
+                DestroyCollidingPixel.Factory>();
+
+            Container.BindFactory<VisualElement, ModulePaletteController, ModulePaletteController.Factory>();
+
+            Container.BindFactory<VisualElement, CameraInfoPanel, CameraInfoPanel.Factory>();
+
+            Container.BindFactory<VisualElement, NotificationView, ShipFactoryFeedback, ShipFactoryCanvasController,
+                ShipFactoryCanvasController.Factory>();
         }
     }
 }

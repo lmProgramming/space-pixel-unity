@@ -1,6 +1,9 @@
+using UnityEngine;
+
 namespace Events.Camera
 {
-    public class CameraResetRequestEventChannel : EventChannelMB
+    [CreateAssetMenu(fileName = "CameraResetRequestEvent", menuName = "Events/Camera/CameraResetRequest")]
+    public class CameraResetRequestEventChannel : EventChannelSO
     {
     }
 }

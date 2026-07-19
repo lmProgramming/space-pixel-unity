@@ -49,7 +49,7 @@ namespace E2E
                 Object.DestroyImmediate(obj);
             CreatedObjects.Clear();
 
-            //DestroyEverythingExceptTestRunner();
+            DestroyEverythingExceptTestRunner();
             ResetSaveState();
 
             yield return null;
@@ -62,7 +62,7 @@ namespace E2E
         private IEnumerator LoadMainGame()
         {
             ConfigureEmptyFreeModeSaveState();
-            //DestroyEverythingExceptTestRunner();
+            DestroyEverythingExceptTestRunner();
 
             Assert.That(Application.CanStreamedLevelBeLoaded(SceneNames.MainGame),
                 $"Scene '{SceneNames.MainGame}' must be in Build Settings for E2E tests.");
@@ -320,6 +320,31 @@ namespace E2E
         private static void ResetSaveState()
         {
             ConfigureEmptyFreeModeSaveState();
+        }
+
+        private static void DestroyEverythingExceptTestRunner()
+        {
+            const string testRunnerGameObjectName = "Code-based tests runner";
+
+            var testRunner = GameObject.Find(testRunnerGameObjectName);
+            if (testRunner != null)
+                Object.DontDestroyOnLoad(testRunner);
+
+            for (var i = 0; i < SceneManager.sceneCount; i++)
+                foreach (var root in SceneManager.GetSceneAt(i).GetRootGameObjects())
+                    Object.DestroyImmediate(root);
+
+            if (!ProjectContext.HasInstance)
+            {
+                StaticContext.Clear();
+                return;
+            }
+
+            foreach (var root in ProjectContext.Instance.gameObject.scene.GetRootGameObjects())
+                if (root.name != testRunnerGameObjectName)
+                    Object.DestroyImmediate(root);
+
+            StaticContext.Clear();
         }
     }
 }

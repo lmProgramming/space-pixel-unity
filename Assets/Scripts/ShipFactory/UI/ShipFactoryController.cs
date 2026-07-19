@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Core.Gameplay.Sound;
 using Core.Services;
-using Events.Camera;
 using Events.UI;
 using ShipFactory.Models;
 using ShipFactory.UI.Runtime;
@@ -34,14 +33,9 @@ namespace ShipFactory.UI
         [SerializeField] private OptionsPopupController optionsPopup;
 
         [SerializeField]
-        private ShipModuleCatalog shipModuleCatalog;
-
-        [SerializeField]
         private NotificationView notificationView;
 
         [SerializeField] private PauseOverlayController pauseOverlay;
-
-        [SerializeField] private CameraResetRequestEventChannel cameraResetRequestEventChannel;
 
         [SerializeField] private DesignShip initialShip;
         [SerializeField] private ShipFactoryFeedback feedback;
@@ -49,6 +43,10 @@ namespace ShipFactory.UI
         private VisualElement _canvasContainer;
 
         private ShipFactoryCanvasController _canvasController;
+
+        [Inject]
+        private ShipFactoryCanvasController.Factory _canvasControllerFactory;
+
         private (bool needToShow, string shipName) _duplicateShipNameWarning;
 
         [Inject]
@@ -56,15 +54,16 @@ namespace ShipFactory.UI
 
         private GameObject _gameObjectUnderPointer;
 
-        [Inject]
-        private IInstantiator _instantiator;
-
         private bool _isModuleDragBlockingCamera;
         private bool _isUiHoverBlockingCamera;
         private bool _isUiPointerDownBlockingCamera;
 
         private Button _loadShipButton;
         private ModulePaletteController _paletteController;
+
+        [Inject]
+        private ModulePaletteController.Factory _paletteControllerFactory;
+
         private Action<string> _pendingPopupOptionHandler;
 
         [Inject]
@@ -99,8 +98,13 @@ namespace ShipFactory.UI
             if (optionsPopup == null)
                 throw new UnityException("[ShipFactoryController] OptionsPopupController is required.");
 
-            if (shipModuleCatalog == null)
-                throw new UnityException($"[ShipFactoryController] {nameof(ShipModuleCatalog)} is not assigned!");
+            if (_canvasControllerFactory == null)
+                throw new UnityException(
+                    "[ShipFactoryController] ShipFactoryCanvasController.Factory is required.");
+
+            if (_paletteControllerFactory == null)
+                throw new UnityException(
+                    "[ShipFactoryController] ModulePaletteController.Factory is required.");
 
             if (pauseOverlay == null)
                 throw new UnityException("[ShipFactoryController] PauseOverlayController is required.");
@@ -130,16 +134,10 @@ namespace ShipFactory.UI
         protected override void BindUiCore(
             VisualElement root)
         {
-            if (!cameraResetRequestEventChannel)
-                throw new InvalidOperationException(
-                    "[ShipFactoryController] CameraResetRequestEventChannel is not assigned!");
-
             _root = root;
 
-            _canvasController = new ShipFactoryCanvasController(
-                root, notificationView, _gameInput, _instantiator, shipModuleCatalog, cameraResetRequestEventChannel,
-                feedback);
-            _paletteController = new ModulePaletteController(root, shipModuleCatalog);
+            _canvasController = _canvasControllerFactory.Create(root, notificationView, feedback);
+            _paletteController = _paletteControllerFactory.Create(root);
 
             _shipNameField = root.Q<TextField>("ship-name-field");
             _saveShipButton = root.Q<Button>("save-ship-button");

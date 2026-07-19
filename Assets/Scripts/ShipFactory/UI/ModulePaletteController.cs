@@ -6,6 +6,7 @@ using ShipFactory.Models;
 using UI.Common;
 using UnityEngine;
 using UnityEngine.UIElements;
+using Zenject;
 
 namespace ShipFactory.UI
 {
@@ -225,6 +226,10 @@ namespace ShipFactory.UI
                 if (_draggingCard != card) return;
                 OnModuleDragFinished?.Invoke();
             });
+        }
+
+        public class Factory : PlaceholderFactory<VisualElement, ModulePaletteController>
+        {
         }
     }
 }

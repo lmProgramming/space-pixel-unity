@@ -2,6 +2,7 @@ using System;
 using Events.Camera;
 using UnityEngine;
 using UnityEngine.UIElements;
+using Zenject;
 
 namespace ShipFactory.UI.ToolkitComponents
 {
@@ -37,6 +38,10 @@ namespace ShipFactory.UI.ToolkitComponents
         public void RequestReset()
         {
             _cameraResetRequestEventChannel.Raise();
+        }
+
+        public class Factory : PlaceholderFactory<VisualElement, CameraInfoPanel>
+        {
         }
     }
 }

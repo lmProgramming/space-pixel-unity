@@ -225,10 +225,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: ShipFactory::ShipFactory.ShipFactoryController
   libraryController: {fileID: 1154439628}
   optionsPopup: {fileID: 1947081261}
-  shipModuleCatalog: {fileID: 11400000, guid: c7f8c73c057efe68c87d7df2ac599fd9, type: 2}
   notificationView: {fileID: 1889098462}
   pauseOverlay: {fileID: 1569039272}
-  cameraResetRequestEventChannel: {fileID: 2036902626}
   initialShip: {fileID: 821443517}
   feedback: {fileID: 184337451}
 --- !u!114 &184337451
@@ -323,17 +321,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &218396973 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 8033188784352906428, guid: eea6e871d7dd663b985d0e73e87b5b8b, type: 3}
-  m_PrefabInstance: {fileID: 1319159258}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b87386f5e87c402da0425f97c38c8370, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Game.Gameplay::Gameplay.EasyTeam.Team
 --- !u!1 &660530469
 GameObject:
   m_ObjectHideFlags: 0
@@ -492,7 +479,7 @@ GameObject:
   - component: {fileID: 821443514}
   - component: {fileID: 821443517}
   m_Layer: 0
-  m_Name: Player
+  m_Name: DesignShip
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -506,12 +493,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 821443504}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 16.28, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1927267001}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &821443509
 MonoBehaviour:
@@ -808,74 +795,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cbfec8939112b49cbaedc3d65352b06c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ShipFactory::ShipFactory.UI.Views.ShipLibrary.ShipLibraryController
---- !u!114 &1306719406 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 3629323190215071535, guid: c9fdcbb0df9d8753088130f6567e0059, type: 3}
-  m_PrefabInstance: {fileID: 1072941455}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c4dbe50d5bc653142bf2cbb73c5aa09b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!1001 &1319159258
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 3336393116021380522, guid: eea6e871d7dd663b985d0e73e87b5b8b, type: 3}
-      propertyPath: m_Name
-      value: Teams
-      objectReference: {fileID: 0}
-    - target: {fileID: 4528558758261202089, guid: eea6e871d7dd663b985d0e73e87b5b8b, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 34.15245
-      objectReference: {fileID: 0}
-    - target: {fileID: 4528558758261202089, guid: eea6e871d7dd663b985d0e73e87b5b8b, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: -9.48333
-      objectReference: {fileID: 0}
-    - target: {fileID: 4528558758261202089, guid: eea6e871d7dd663b985d0e73e87b5b8b, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4528558758261202089, guid: eea6e871d7dd663b985d0e73e87b5b8b, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4528558758261202089, guid: eea6e871d7dd663b985d0e73e87b5b8b, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4528558758261202089, guid: eea6e871d7dd663b985d0e73e87b5b8b, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4528558758261202089, guid: eea6e871d7dd663b985d0e73e87b5b8b, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4528558758261202089, guid: eea6e871d7dd663b985d0e73e87b5b8b, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4528558758261202089, guid: eea6e871d7dd663b985d0e73e87b5b8b, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4528558758261202089, guid: eea6e871d7dd663b985d0e73e87b5b8b, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: eea6e871d7dd663b985d0e73e87b5b8b, type: 3}
 --- !u!1 &1569039270
 GameObject:
   m_ObjectHideFlags: 0
@@ -1183,7 +1102,7 @@ PrefabInstance:
     - target: {fileID: 8678225184202570128, guid: cf3e414adef6859f2af6ac1a62b52293, type: 3}
       propertyPath: enemyTeam
       value: 
-      objectReference: {fileID: 2087266683}
+      objectReference: {fileID: 0}
     - target: {fileID: 8678225184202570128, guid: cf3e414adef6859f2af6ac1a62b52293, type: 3}
       propertyPath: m_Enabled
       value: 0
@@ -1191,7 +1110,7 @@ PrefabInstance:
     - target: {fileID: 8678225184202570128, guid: cf3e414adef6859f2af6ac1a62b52293, type: 3}
       propertyPath: friendlyTeam
       value: 
-      objectReference: {fileID: 218396973}
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
     - {fileID: 6944570369148477847, guid: cf3e414adef6859f2af6ac1a62b52293, type: 3}
@@ -1353,39 +1272,6 @@ PanelRenderer:
   m_PivotReferenceSize: 0
   m_Pivot: 0
   m_Position: 0
---- !u!1 &1927267000
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1927267001}
-  m_Layer: 0
-  m_Name: Factory
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1927267001
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1927267000}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 16.28, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 2036902625}
-  - {fileID: 821443507}
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1947081259
 GameObject:
   m_ObjectHideFlags: 0
@@ -1489,84 +1375,13 @@ PanelRenderer:
   m_PivotReferenceSize: 0
   m_Pivot: 0
   m_Position: 0
---- !u!1 &2036902624
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2036902625}
-  - component: {fileID: 2036902626}
-  m_Layer: 0
-  m_Name: Channels
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &2036902625
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2036902624}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -15.9293, y: -63.93035, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1927267001}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2036902626
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2036902624}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3c28c2ed02e9d2a99af9c6b6cad103e7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Events::Events.Camera.CameraResetRequestEventChannel
-  unityEvent:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1306719406}
-        m_TargetAssemblyTypeName: Services.Camera.CameraManager, Services
-        m_MethodName: ResetCamera
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
---- !u!114 &2087266683 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 5954686578939422986, guid: eea6e871d7dd663b985d0e73e87b5b8b, type: 3}
-  m_PrefabInstance: {fileID: 1319159258}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b87386f5e87c402da0425f97c38c8370, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Game.Gameplay::Gameplay.EasyTeam.Team
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 1629573552}
   - {fileID: 1072941455}
-  - {fileID: 1927267001}
   - {fileID: 1752454468}
-  - {fileID: 1319159258}
+  - {fileID: 821443507}
   - {fileID: 779531619}
   - {fileID: 216362540}
