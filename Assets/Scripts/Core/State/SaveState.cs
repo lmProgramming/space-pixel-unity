@@ -1,11 +1,7 @@
+using Core.Gameplay;
+
 namespace Core.State
 {
-    public enum GameSessionMode
-    {
-        FreeMode,
-        Progression
-    }
-
     public static class SaveState
     {
         public static GameSessionMode Mode { get; set; }

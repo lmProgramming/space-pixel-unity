@@ -1,10 +1,12 @@
 using System;
+using Core.Gameplay;
 using Core.Services;
 using Core.Ships;
 using Core.State;
 
 namespace Services
 {
+    // ReSharper disable once ClassNeverInstantiated.Global
     public class FreeModeBattleSpawnConfigurationProvider : IBattleSpawnConfigurationProvider
     {
         private readonly IShipSnapshotService _snapshotService;

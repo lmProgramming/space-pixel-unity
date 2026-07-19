@@ -48,18 +48,19 @@ namespace Context
                 if (!skirmishSpawner) throw new UnityException($"Missing {nameof(skirmishSpawner)}");
             }
 
+            IDebrisSpawner actualDebrisSpawner =
+                dummyDebrisSpawner ? new DummyDebrisSpawner() : debrisSpawner;
+            IProjectilesSpawner actualProjectilesSpawner =
+                dummyProjectileSpawner ? new DummyProjectileSpawner() : projectilesSpawner;
+
             if (physicsCollisionChannelAsset)
                 Container.Bind<CollisionEventChannelSO>().FromInstance(physicsCollisionChannelAsset).AsSingle();
 
             if (debrisSpawner)
-                Container.Bind<IDebrisSpawner>().FromInstance(debrisSpawner).AsSingle();
-            else if (dummyDebrisSpawner)
-                Container.Bind<IDebrisSpawner>().FromInstance(new DummyDebrisSpawner()).AsSingle();
+                Container.Bind<IDebrisSpawner>().FromInstance(actualDebrisSpawner).AsSingle();
 
             if (projectilesSpawner)
-                Container.Bind<IProjectilesSpawner>().FromInstance(projectilesSpawner).AsSingle();
-            else if (dummyProjectileSpawner)
-                Container.Bind<IProjectilesSpawner>().FromInstance(new DummyProjectileSpawner()).AsSingle();
+                Container.Bind<IProjectilesSpawner>().FromInstance(actualProjectilesSpawner).AsSingle();
 
             if (mapInfo)
                 Container.Bind<IMapInfo>().FromInstance(mapInfo).AsSingle();
