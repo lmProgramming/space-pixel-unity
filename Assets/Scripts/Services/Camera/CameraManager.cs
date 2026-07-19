@@ -1,4 +1,5 @@
 using Core.Services;
+using Events.Camera;
 using PrimeTween;
 using UnityEngine;
 using Zenject;
@@ -23,6 +24,8 @@ namespace Services.Camera
         [SerializeField] private bool canZoomOnUI;
 
         public bool updateCamera = true;
+
+        [Inject] private CameraResetRequestEventChannel _cameraResetRequestEventChannel;
         [Inject] private IGameInput _gameInput;
 
         private UnityEngine.Camera _mainCamera;
@@ -57,6 +60,16 @@ namespace Services.Camera
             ProcessZoom();
 
             if (!IsMobile) _previousMousePosition = Input.mousePosition;
+        }
+
+        private void OnEnable()
+        {
+            _cameraResetRequestEventChannel.Register(ResetCamera);
+        }
+
+        private void OnDisable()
+        {
+            _cameraResetRequestEventChannel.Unregister(ResetCamera);
         }
 
         private void FollowObject()

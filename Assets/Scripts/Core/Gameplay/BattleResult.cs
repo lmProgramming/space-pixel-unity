@@ -1,4 +1,4 @@
-namespace Events.Game.BattleOver
+namespace Core.Gameplay
 {
     public enum BattleResult
     {
