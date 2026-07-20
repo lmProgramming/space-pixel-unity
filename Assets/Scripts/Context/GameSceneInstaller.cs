@@ -56,10 +56,10 @@ namespace Context
             IProjectilesSpawner actualProjectilesSpawner =
                 dummyProjectileSpawner ? new DummyProjectileSpawner() : projectilesSpawner;
 
-            if (debrisSpawner)
+            if (debrisSpawner || dummyDebrisSpawner)
                 Container.Bind<IDebrisSpawner>().FromInstance(actualDebrisSpawner).AsSingle();
 
-            if (projectilesSpawner)
+            if (projectilesSpawner || dummyProjectileSpawner)
                 Container.Bind<IProjectilesSpawner>().FromInstance(actualProjectilesSpawner).AsSingle();
 
             if (mapInfo)

@@ -21,9 +21,6 @@ namespace UI.Scenes.MainGame.Views.MissionResult
 
         public void ShowVictory()
         {
-            if (!IsUiBound)
-                return;
-
             _resultLabel.text = "VICTORY";
             _resultLabel.RemoveFromClassList("defeat");
             _resultLabel.AddToClassList("victory");
@@ -32,9 +29,6 @@ namespace UI.Scenes.MainGame.Views.MissionResult
 
         public void ShowDefeat()
         {
-            if (!IsUiBound)
-                return;
-
             _resultLabel.text = "DEFEAT";
             _resultLabel.RemoveFromClassList("victory");
             _resultLabel.AddToClassList("defeat");

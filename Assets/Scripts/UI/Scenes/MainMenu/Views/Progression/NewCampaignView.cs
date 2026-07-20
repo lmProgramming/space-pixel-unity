@@ -5,11 +5,14 @@ using UI.Components;
 using UI.MVCVM;
 using UnityEngine;
 using UnityEngine.UIElements;
+using Resources = UnityEngine.Resources;
 
 namespace UI.Scenes.MainMenu.Views.Progression
 {
     public class NewCampaignView : View<NewCampaignViewModel>
     {
+        private const string ShipRowTemplatePath = "UI/ShipRowTemplate";
+
         private readonly List<(VisualElement element, EventCallback<ClickEvent> callback)> _shipClickCallbacks = new();
         private readonly List<VisualElement> _shipRows = new();
 
@@ -18,6 +21,7 @@ namespace UI.Scenes.MainMenu.Views.Progression
         private VisualElement _resourcesContainer;
         private int? _selectedShipIndex;
         private VisualElement _shipList;
+        private VisualTreeAsset _shipRowTemplate;
         private Button _startButton;
         private NewCampaignViewModel _viewModel;
 
@@ -33,7 +37,7 @@ namespace UI.Scenes.MainMenu.Views.Progression
 
         public event Action<string> CampaignNameChanged;
 
-        public override void BindUI(VisualElement root)
+        protected override void BindUiCore(VisualElement root)
         {
             _shipList = root.Q<VisualElement>("progression-new-campaign-ship-list");
             _campaignNameField = root.Q<TextField>("progression-new-campaign-name-field");
@@ -47,6 +51,13 @@ namespace UI.Scenes.MainMenu.Views.Progression
                 throw new InvalidOperationException(
                     "[ProgressionNewCampaignView] Required controls are missing in UXML.");
 
+            _shipRowTemplate = Resources.Load<VisualTreeAsset>(ShipRowTemplatePath);
+            if (!_shipRowTemplate)
+                throw new InvalidOperationException(
+                    $"[ProgressionNewCampaignView] VisualTreeAsset '{ShipRowTemplatePath}' was not found in Resources.");
+
+            ConfigureCampaignNameField();
+
             ResourcesPanel = new ResourcesPanel();
             _resourcesContainer.Add(ResourcesPanel);
 
@@ -57,7 +68,13 @@ namespace UI.Scenes.MainMenu.Views.Progression
             Render();
         }
 
-        public override void UnbindUI()
+        private void ConfigureCampaignNameField()
+        {
+            _campaignNameField.textEdition.placeholder = "e.g. Operation Starfall";
+            _campaignNameField.textEdition.hidePlaceholderOnFocus = true;
+        }
+
+        protected override void UnbindUiCore()
         {
             if (_backButton != null)
                 _backButton.clicked -= OnBackClicked;
@@ -69,7 +86,7 @@ namespace UI.Scenes.MainMenu.Views.Progression
         public override void SetData(NewCampaignViewModel viewModel)
         {
             _viewModel = viewModel ?? throw new ArgumentNullException(nameof(viewModel));
-            _selectedShipIndex = null;
+            _selectedShipIndex = viewModel.SelectedShipIndex;
             Render();
         }
 
@@ -90,29 +107,37 @@ namespace UI.Scenes.MainMenu.Views.Progression
 
         private void AddShipRow(SavedShipSnapshotDescriptor entry, int index)
         {
-            var row = new VisualElement();
-            row.AddToClassList("ds-nav-item");
+            var rowIndex = _shipList.childCount;
+            _shipRowTemplate.CloneTree(_shipList);
+            var row = _shipList[rowIndex].Q<VisualElement>("ship-row")
+                      ?? throw new InvalidOperationException(
+                          "[ProgressionNewCampaignView] 'ship-row' is missing in ShipRowTemplate.uxml.");
+
+            var icon = row.Q<Image>("ship-row-icon")
+                       ?? throw new InvalidOperationException(
+                           "[ProgressionNewCampaignView] 'ship-row-icon' is missing in ShipRowTemplate.uxml.");
+            var label = row.Q<Label>("ship-row-label")
+                        ?? throw new InvalidOperationException(
+                            "[ProgressionNewCampaignView] 'ship-row-label' is missing in ShipRowTemplate.uxml.");
 
             if (entry.PreviewSprite)
             {
-                var icon = new Image
-                {
-                    sprite = entry.PreviewSprite,
-                    scaleMode = ScaleMode.ScaleToFit
-                };
-                icon.AddToClassList("ds-nav-item__icon");
-                row.Add(icon);
+                icon.sprite = entry.PreviewSprite;
+                icon.scaleMode = ScaleMode.ScaleToFit;
+            }
+            else
+            {
+                var thumb = row.Q("ship-row-thumb");
+                if (thumb != null)
+                    thumb.style.display = DisplayStyle.None;
             }
 
-            var label = new Label(entry.DisplayName);
-            label.AddToClassList("ds-nav-item__label");
-            row.Add(label);
+            label.text = entry.DisplayName;
 
             EventCallback<ClickEvent> clickHandler = _ => SelectShip(index);
             row.RegisterCallback(clickHandler);
             _shipClickCallbacks.Add((row, clickHandler));
             _shipRows.Add(row);
-            _shipList.Add(row);
         }
 
         private void ClearShipRows()
@@ -135,7 +160,7 @@ namespace UI.Scenes.MainMenu.Views.Progression
         private void UpdateSelectionVisuals()
         {
             for (var index = 0; index < _shipRows.Count; index++)
-                _shipRows[index].EnableInClassList("is-active", index == _selectedShipIndex);
+                _shipRows[index].EnableInClassList("is-selected", index == _selectedShipIndex);
         }
 
         private void OnBackClicked()

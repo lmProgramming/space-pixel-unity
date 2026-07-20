@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Core.Services;
 using Core.Ships.Module;
 using ShipFactory.Helpers;
 using ShipFactory.Models;
@@ -15,10 +16,10 @@ namespace ShipFactory.UI.Runtime
         private const int OverlaySortingOrder = 100;
         private const int DraggedOverlaySortingOrder = OverlaySortingOrder + 1;
         private readonly Dictionary<ShipModuleSOInstanceBundle, ModuleOverlay> _bundleToOverlay = new();
-        private readonly ShipModuleCatalog _catalog;
+        private readonly IShipModuleCatalog _catalog;
         private readonly Transform _overlayRoot = new GameObject("ModuleOverlays").transform;
 
-        public OverlayManager(ShipModuleCatalog moduleCatalog)
+        public OverlayManager(IShipModuleCatalog moduleCatalog)
         {
             _catalog = moduleCatalog ?? throw new ArgumentNullException(nameof(moduleCatalog));
         }
@@ -59,7 +60,7 @@ namespace ShipFactory.UI.Runtime
 
             if (!ship) return;
 
-            if (!_catalog)
+            if (_catalog == null)
                 throw new InvalidOperationException(
                     "[ShipFactoryOverlayManager] ShipModuleCatalog is required before rebuilding overlays.");
 

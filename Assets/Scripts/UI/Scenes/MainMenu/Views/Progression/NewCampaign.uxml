@@ -1,26 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
     <Style src="project://database/Assets/DesignSystem/Resources/UI/Styles/DesignSystem/DesignSystem.uss"/>
-    <ui:VisualElement class="ds-root ds-root--transparent"
-                      style="position: absolute; left: 0; right: 0; top: 0; bottom: 0;">
-        <ui:VisualElement style="flex-direction: row; flex-grow: 1; padding: 24px; gap: 16px;">
-            <ui:VisualElement style="width: 280px; flex-shrink: 0;">
-                <ui:Label text="Select Starting Ship" class="ds-h2" style="margin-bottom: 8px;"/>
-                <ui:ScrollView mode="Vertical" style="flex-grow: 1;">
-                    <ui:VisualElement name="progression-new-campaign-ship-list" class="ds-side-nav"/>
-                </ui:ScrollView>
-            </ui:VisualElement>
-            <ui:VisualElement style="flex-grow: 1; gap: 12px;">
-                <ui:TextField name="progression-new-campaign-name-field" label="Campaign Name"
-                              class="ds-input" max-length="48"/>
-                <ui:VisualElement name="progression-new-campaign-preview-container"
-                                  style="flex-grow: 1; min-height: 280px;"/>
-                <ui:VisualElement name="progression-new-campaign-resources-container"/>
-                <ui:VisualElement class="ds-row" style="justify-content: flex-end; gap: 8px;">
-                    <ui:Button name="progression-new-campaign-back-button" text="Back"
-                               class="ds-btn ds-btn--secondary"/>
-                    <ui:Button name="progression-new-campaign-start-button" text="Start Campaign"
-                               class="ds-btn ds-btn--primary"/>
+    <Style src="project://database/Assets/Scripts/UI/Scenes/MainMenu/Views/Progression/NewCampaign.uss"/>
+    <Style src="project://database/Assets/Resources/UI/ShipPickerStyles.uss"/>
+
+    <ui:VisualElement class="ds-root ds-root--transparent new-campaign-root" style="margin: 30px">
+        <ui:VisualElement class="ds-card new-campaign-panel">
+            <ui:VisualElement class="new-campaign-layout">
+                <ui:VisualElement class="new-campaign-ships-column">
+                    <ui:Label text="Select Starting Ship" class="ds-h2 new-campaign-ships-panel__title"/>
+                    <ui:Label text="Choose a saved design to begin" class="ds-body-2 ds-text-secondary"
+                              style="margin-bottom: 12px;"/>
+                    <ui:ScrollView mode="Vertical" class="new-campaign-ships-scroll">
+                        <ui:VisualElement name="progression-new-campaign-ship-list" class="ship-picker-list"/>
+                    </ui:ScrollView>
+                </ui:VisualElement>
+
+                <ui:VisualElement class="new-campaign-stage">
+                    <ui:VisualElement class="new-campaign-name-row">
+                        <ui:Label text="Campaign Name" class="ds-body-2 ds-text-secondary new-campaign-name-label"/>
+                        <ui:TextField name="progression-new-campaign-name-field"
+                                      class="ds-input" max-length="48"/>
+                    </ui:VisualElement>
+
+                    <ui:VisualElement name="progression-new-campaign-preview-container"
+                                      class="new-campaign-preview" picking-mode="Ignore"/>
+
+                    <ui:VisualElement class="new-campaign-footer">
+                        <ui:VisualElement name="progression-new-campaign-resources-container"
+                                          class="new-campaign-resources"/>
+                        <ui:VisualElement class="ds-row new-campaign-actions">
+                            <ui:Button name="progression-new-campaign-back-button" text="Back"
+                                       class="ds-btn ds-btn--ghost"/>
+                            <ui:Button name="progression-new-campaign-start-button" text="Start Campaign"
+                                       class="ds-btn ds-btn--primary"/>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>

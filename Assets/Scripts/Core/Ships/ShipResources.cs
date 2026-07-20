@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Core.Ships
 {
     [Serializable]
-    public struct Resources
+    public struct ShipResources
     {
         public float energyCapacity;
         public float energyDraw;
@@ -15,7 +15,7 @@ namespace Core.Ships
 
         public int crewQuarters;
 
-        public Resources(float energyCapacity, float energyDraw, int crewNeeded, float energyProduction,
+        public ShipResources(float energyCapacity, float energyDraw, int crewNeeded, float energyProduction,
             int crewQuarters)
         {
             this.energyCapacity = energyCapacity;

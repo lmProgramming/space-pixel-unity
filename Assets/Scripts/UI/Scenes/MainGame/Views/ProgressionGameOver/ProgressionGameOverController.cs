@@ -38,9 +38,6 @@ namespace UI.Scenes.MainGame.Views.ProgressionGameOver
 
         public void Show(string campaignName, string credits, int enemiesKilled)
         {
-            if (!IsUiBound)
-                return;
-
             _titleLabel.text = string.IsNullOrWhiteSpace(campaignName) ? "Game Over" : $"Game Over — {campaignName}";
             _creditsLabel.text = $"Credits: {credits ?? "0"}";
             _enemiesKilledLabel.text = $"Enemies killed: {enemiesKilled}";

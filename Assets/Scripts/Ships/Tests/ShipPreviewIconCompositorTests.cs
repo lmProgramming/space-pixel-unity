@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using Core.Ships;
 using Core.Ships.Module;
 using NUnit.Framework;
 using Pixelation;
@@ -13,7 +14,6 @@ using Ships.Tests.TestHelpers.Fixtures;
 using Ships.Tests.TestHelpers.Mocks;
 using UnityEngine;
 using UnityEngine.TestTools;
-using Resources = Core.Ships.Resources;
 
 namespace Ships.Tests
 {
@@ -87,8 +87,8 @@ namespace Ships.Tests
             var ship = ShipTestBuilder.CreateShip(Container, CreatedObjects, "Ship")
                 .ParentedTo(TestRoot.transform)
                 .WithCommand("Command", Vector2.zero, 1, 1)
-                .WithBasic("Left", new Vector2(-2f, 0f), 1, 1, new Resources())
-                .WithBasic("Right", new Vector2(2f, 0f), 1, 1, new Resources())
+                .WithBasic("Left", new Vector2(-2f, 0f), 1, 1, new ShipResources())
+                .WithBasic("Right", new Vector2(2f, 0f), 1, 1, new ShipResources())
                 .Build(true);
 
             yield return null;
@@ -134,8 +134,8 @@ namespace Ships.Tests
             var ship = ShipTestBuilder.CreateShip(Container, CreatedObjects, "Ship")
                 .ParentedTo(TestRoot.transform)
                 .WithCommand("Command", new Vector2(10f, 0f), 1, 1)
-                .WithBasic("First", Vector2.zero, 1, 1, new Resources())
-                .WithBasic("Second", Vector2.zero, 1, 1, new Resources())
+                .WithBasic("First", Vector2.zero, 1, 1, new ShipResources())
+                .WithBasic("Second", Vector2.zero, 1, 1, new ShipResources())
                 .Build(true);
 
             yield return null;
@@ -172,7 +172,7 @@ namespace Ships.Tests
             var ship = ShipTestBuilder.CreateShip(Container, CreatedObjects, "Ship")
                 .ParentedTo(TestRoot.transform)
                 .WithCommandOfCustomSnapshotOrigin(Vector2.zero, 5, 5)
-                .WithCustomEngine(new Vector2(2f, 0f), 5, 5, new Resources(0, 2f, 0, 0, 0))
+                .WithCustomEngine(new Vector2(2f, 0f), 5, 5, new ShipResources(0, 2f, 0, 0, 0))
                 .Build(true);
 
             yield return null;

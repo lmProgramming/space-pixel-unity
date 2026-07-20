@@ -15,7 +15,6 @@ using Ships.Tests.TestHelpers.Mocks;
 using UnityEngine;
 using UnityEngine.TestTools;
 using ZLinq;
-using Resources = Core.Ships.Resources;
 
 namespace Ships.Tests
 {
@@ -83,7 +82,7 @@ namespace Ships.Tests
             var ship = ShipTestBuilder.CreateShip(Container, CreatedObjects, "Ship")
                 .ParentedTo(TestRoot.transform)
                 .WithCommandOfCustomSnapshotOrigin(Vector2.zero, 5, 5)
-                .WithCustomEngine(new Vector2(2f, 0f), 5, 5, new Resources(0, 2f, 0, 0, 0))
+                .WithCustomEngine(new Vector2(2f, 0f), 5, 5, new ShipResources(0, 2f, 0, 0, 0))
                 .Build(true);
 
             yield return null;
@@ -112,7 +111,7 @@ namespace Ships.Tests
             var ship = ShipTestBuilder.CreateShip(Container, CreatedObjects, "Ship")
                 .ParentedTo(TestRoot.transform)
                 .WithCommandOfCustomSnapshotOrigin(Vector2.zero, 5, 5)
-                .WithCustomEngine(new Vector2(2f, 0f), 5, 5, new Resources(0, 2f, 0, 0, 0))
+                .WithCustomEngine(new Vector2(2f, 0f), 5, 5, new ShipResources(0, 2f, 0, 0, 0))
                 .Build(true);
 
             yield return null;
@@ -139,7 +138,7 @@ namespace Ships.Tests
             var ship = ShipTestBuilder.CreateShip(Container, CreatedObjects, "Ship")
                 .ParentedTo(TestRoot.transform)
                 .WithCommandOfCustomSnapshotOrigin(Vector2.zero, 5, 5)
-                .WithCustomEngine(new Vector2(2f, 0f), 5, 5, new Resources(0, 2f, 0, 0, 0))
+                .WithCustomEngine(new Vector2(2f, 0f), 5, 5, new ShipResources(0, 2f, 0, 0, 0))
                 .Build(true);
 
             yield return null;
@@ -162,7 +161,7 @@ namespace Ships.Tests
             var ship = ShipTestBuilder.CreateShip(Container, CreatedObjects, "Ship")
                 .ParentedTo(TestRoot.transform)
                 .WithCommandOfCustomSnapshotOrigin(Vector2.zero, 5, 5)
-                .WithCustomEngine(new Vector2(2f, 0f), 5, 5, new Resources(0, 2f, 0, 0, 0))
+                .WithCustomEngine(new Vector2(2f, 0f), 5, 5, new ShipResources(0, 2f, 0, 0, 0))
                 .Build(true);
 
             yield return null;
@@ -204,10 +203,10 @@ namespace Ships.Tests
                         dampingStrength = 1234
                     }
                 })
-                .WithCustomEngine(new Vector2(5f, 0f), 5, 5, new Resources(0, 2f, 0, 0, 0))
-                .WithBasic("Power Module", new Vector2(0f, 5f), 15, 5, new Resources(100, 5, 1, 500, 0))
-                .WithBasic("Crew Module", new Vector2(0f, 10f), 5, 5, new Resources(100, 25, 1, 0, 10))
-                .WithBasic("Battery", new Vector2(-5f, 10f), 5, 5, new Resources(5000, 10, 1, 0, 0))
+                .WithCustomEngine(new Vector2(5f, 0f), 5, 5, new ShipResources(0, 2f, 0, 0, 0))
+                .WithBasic("Power Module", new Vector2(0f, 5f), 15, 5, new ShipResources(100, 5, 1, 500, 0))
+                .WithBasic("Crew Module", new Vector2(0f, 10f), 5, 5, new ShipResources(100, 25, 1, 0, 10))
+                .WithBasic("Battery", new Vector2(-5f, 10f), 5, 5, new ShipResources(5000, 10, 1, 0, 0))
                 .WithLaser("Laser", new Vector2(5f, 5f), 5, 5)
                 .WithCannon(projectilePrefab, weaponSprite, new Vector2(10f, 5f), 5, 5)
                 .Build(true);

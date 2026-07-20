@@ -12,10 +12,10 @@ using LMPro;
 using Pixelation;
 using Ships.Systems.Standalone;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Zenject;
 using ZLinq;
 using Random = UnityEngine.Random;
-using Resources = Core.Ships.Resources;
 
 [assembly: InternalsVisibleTo("Editor.InspectorExtensions")]
 [assembly: InternalsVisibleTo("Ships.Tests")]
@@ -133,7 +133,7 @@ namespace Ships.Modules
 
         public int AliveCrewCount => AliveCrew.Count;
 
-        public virtual float EnergyCapacity => Resources.energyCapacity * ModuleEfficiency;
+        public virtual float EnergyCapacity => ShipResources.energyCapacity * ModuleEfficiency;
 
         // todo: consider caching this in the future
         public float ModuleEfficiency => PixelEfficiency * GetCrewEfficiency();
@@ -141,8 +141,9 @@ namespace Ships.Modules
         public IReadOnlyList<CrewMember> AssignedCrew => assignedCrew;
         public int CrewMissingCount => Mathf.Max(0, CrewNeededCount - AliveCrewCount);
 
+        [field: FormerlySerializedAs("<Resources>k__BackingField")]
         [field: SerializeField]
-        public Resources Resources { get; private set; }
+        public ShipResources ShipResources { get; private set; }
 
         public IPixelatedRigidbody PixelatedRigidbody { get; private set; }
 
@@ -150,7 +151,7 @@ namespace Ships.Modules
 
         public virtual ModuleType Type { get; protected set; } = ModuleType.Resources;
 
-        public virtual int CrewNeededCount => Mathf.CeilToInt(Resources.crewNeeded);
+        public virtual int CrewNeededCount => Mathf.CeilToInt(ShipResources.crewNeeded);
 
         public void FillCrewBySkill(List<CrewMember> crew, out List<CrewMember> remainingCrew)
         {
@@ -201,12 +202,12 @@ namespace Ships.Modules
 
         public virtual float GetEnergyDraw()
         {
-            return Resources.energyDraw * ModuleEfficiency;
+            return ShipResources.energyDraw * ModuleEfficiency;
         }
 
         public virtual float GetEnergyProduction()
         {
-            return Resources.energyProduction * ModuleEfficiency;
+            return ShipResources.energyProduction * ModuleEfficiency;
         }
 
         public void KillAllCrew()
@@ -270,7 +271,7 @@ namespace Ships.Modules
                 archetypeId = archetypeId,
                 localPosition = Transform.localPosition,
                 localRotation = Transform.localRotation,
-                resources = Resources,
+                shipResources = ShipResources,
                 pixelatedRigidbody = PixelatedRigidbody.CaptureSnapshot(contentCatalog),
                 typePayloadJson = CaptureTypePayloadJson(contentCatalog),
                 systems = CaptureSystemSnapshots(contentCatalog)
@@ -283,7 +284,7 @@ namespace Ships.Modules
         {
             EnsurePixelatedRigidbodyCached();
 
-            SetResources(snapshot.resources);
+            SetResources(snapshot.shipResources);
 
             ApplyTypePayloadJson(snapshot.typePayloadJson, contentCatalog);
 
@@ -292,9 +293,9 @@ namespace Ships.Modules
             PixelatedRigidbody.RestoreFromSnapshot(snapshot.pixelatedRigidbody, contentCatalog);
         }
 
-        public void SetResources(Resources newResources)
+        public void SetResources(ShipResources newShipResources)
         {
-            Resources = newResources;
+            ShipResources = newShipResources;
         }
 
         /// <summary>
@@ -603,7 +604,7 @@ namespace Ships.Modules
 #if UNITY_EDITOR
         internal float InternalEfficiency => ModuleEfficiency;
 
-        internal Resources InternalResources => Resources;
+        internal ShipResources InternalShipResources => ShipResources;
 #endif
     }
 }

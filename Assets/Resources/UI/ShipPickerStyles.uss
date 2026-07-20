@@ -1,0 +1,69 @@
+/* Shared ship-picker list rows (New Campaign + Battle Ship Picker). */
+
+.ship-picker-list {
+    flex-direction: column;
+    width: 100%;
+}
+
+.ship-picker-row {
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    min-height: 72px;
+    padding: var(--space-3);
+    margin-bottom: var(--space-3);
+    border-width: var(--border-thin);
+    border-color: var(--color-border);
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface-elev);
+    transition-property: background-color, border-color;
+    transition-duration: var(--transition-fast);
+}
+
+.ship-picker-row:hover {
+    background-color: var(--color-surface-hover);
+    border-color: var(--color-border-strong);
+}
+
+.ship-picker-row.is-selected {
+    background-color: var(--color-primary-soft);
+    border-color: var(--color-primary);
+}
+
+.ship-picker-row__thumb {
+    width: 56px;
+    height: 56px;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    margin-right: var(--space-3);
+    border-radius: var(--radius-sm);
+    background-color: var(--color-bg);
+    border-width: var(--border-thin);
+    border-color: var(--color-border);
+    overflow: hidden;
+}
+
+.ship-picker-row.is-selected .ship-picker-row__thumb {
+    border-color: var(--color-primary);
+}
+
+.ship-picker-row__icon {
+    width: 48px;
+    height: 48px;
+}
+
+.ship-picker-row__label {
+    flex-grow: 1;
+    flex-shrink: 1;
+    color: var(--color-text-primary);
+    font-size: var(--font-size-body-1);
+    -unity-font-style: bold;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ship-picker-row.is-selected .ship-picker-row__label {
+    color: var(--color-primary);
+}

@@ -39,9 +39,6 @@ namespace UI.Scenes.MainGame.Views.ShipStatus
 
         private void Update()
         {
-            if (!IsUiBound)
-                return;
-
             if (!_activePlayerShipProvider.HasPlayerShip ||
                 _activePlayerShipProvider.ActiveShip == null ||
                 !_activePlayerShipProvider.ActiveShip.IsAlive())

@@ -1,9 +1,9 @@
 using System;
+using Core.ShipFactory;
+using Core.Ships;
 using Core.Ships.Module;
-using ShipFactory.Models;
 using UnityEngine;
 using UnityEngine.UIElements;
-using Resources = Core.Ships.Resources;
 
 namespace ShipFactory.UI.ToolkitComponents
 {
@@ -93,7 +93,7 @@ namespace ShipFactory.UI.ToolkitComponents
                 : moduleSO.Description;
             _moduleDescriptionScroll.scrollOffset = Vector2.zero;
 
-            ApplyResources(module.Resources);
+            ApplyResources(module.ShipResources);
             UpdateRemoveButton(isNewModuleContext, isInputLocked, isDraggingModule);
             UpdateRotationButtons(isNewModuleContext, isInputLocked, isDraggingModule);
             ApplyCollapsedVisualState();
@@ -122,13 +122,13 @@ namespace ShipFactory.UI.ToolkitComponents
             ApplyCollapsedVisualState();
         }
 
-        private void ApplyResources(Resources resources)
+        private void ApplyResources(ShipResources shipResources)
         {
-            _resourceEnergyProductionValueLabel.text = $"{resources.energyProduction:0.##}";
-            _resourceEnergyDrawValueLabel.text = $"{resources.energyDraw:0.##}";
-            _resourceEnergyCapacityValueLabel.text = $"{resources.energyCapacity:0.##}";
-            _resourceCrewNeededValueLabel.text = $"{resources.crewNeeded}";
-            _resourceCrewQuartersValueLabel.text = $"{resources.crewQuarters}";
+            _resourceEnergyProductionValueLabel.text = $"{shipResources.energyProduction:0.##}";
+            _resourceEnergyDrawValueLabel.text = $"{shipResources.energyDraw:0.##}";
+            _resourceEnergyCapacityValueLabel.text = $"{shipResources.energyCapacity:0.##}";
+            _resourceCrewNeededValueLabel.text = $"{shipResources.crewNeeded}";
+            _resourceCrewQuartersValueLabel.text = $"{shipResources.crewQuarters}";
         }
 
         private void ToggleCollapsed()

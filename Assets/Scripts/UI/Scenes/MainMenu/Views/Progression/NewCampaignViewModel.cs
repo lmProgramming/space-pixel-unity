@@ -8,11 +8,13 @@ namespace UI.Scenes.MainMenu.Views.Progression
         public NewCampaignViewModel(
             IReadOnlyList<SavedShipSnapshotDescriptor> ships,
             string campaignName,
-            bool canStart)
+            bool canStart,
+            int? selectedShipIndex)
         {
             Ships = ships;
             CampaignName = campaignName;
             CanStart = canStart;
+            SelectedShipIndex = selectedShipIndex;
         }
 
         public IReadOnlyList<SavedShipSnapshotDescriptor> Ships { get; }
@@ -20,5 +22,7 @@ namespace UI.Scenes.MainMenu.Views.Progression
         public string CampaignName { get; }
 
         public bool CanStart { get; }
+
+        public int? SelectedShipIndex { get; }
     }
 }

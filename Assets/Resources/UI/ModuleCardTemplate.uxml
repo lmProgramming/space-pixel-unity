@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="module-card" class="ds-card palette-card">
+        <ui:VisualElement name="module-card-image" class="ds-card__image">
+            <ui:Image name="module-card-sprite" class="ds-card__sprite"/>
+        </ui:VisualElement>
+        <ui:VisualElement name="module-card-labels" class="palette-card__labels">
+            <ui:VisualElement name="module-card-title-row" class="ds-card__title-row">
+                <ui:VisualElement name="module-card-title-clip" class="palette-card__title-clip">
+                    <ui:Label name="module-card-title" text="" class="ds-body-2"/>
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:Label name="module-card-dimensions" text="" class="palette-card__dimensions ds-body-2"/>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

@@ -791,6 +791,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ba93c0ac3f52e386a664db487d3e6b1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UI::UI.Common.SettingsOverlayController
+  showByDefault: 0
   isMainMenu: 0
   pointerOverUiChannel: {fileID: 11400000, guid: fe59adb565b6e2758b87bd8eda75cff1, type: 2}
 --- !u!1931382934 &1136623634

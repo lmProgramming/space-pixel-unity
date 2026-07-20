@@ -9,7 +9,6 @@ using Ships.Tests.TestHelpers.Fixtures;
 using Ships.Tests.TestHelpers.Modules;
 using UnityEngine;
 using UnityEngine.TestTools;
-using Resources = Core.Ships.Resources;
 
 namespace Ships.Tests
 {
@@ -28,7 +27,7 @@ namespace Ships.Tests
             var module = go.AddComponent<TestModule>();
             module.SetModuleType(ModuleType.Resources);
             module.SetMainSkillType(mainSkill);
-            module.SetResources(new Resources(0, 0, crewNeeded, 0, 0));
+            module.SetResources(new ShipResources(0, 0, crewNeeded, 0, 0));
 
             var ship = Substitute.For<IShip>();
             ship.CaptainMultiplier.Returns(shipCaptainMultiplier);

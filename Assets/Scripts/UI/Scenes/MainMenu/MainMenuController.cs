@@ -21,6 +21,7 @@ namespace UI.Scenes.MainMenu
         private const float DefaultAsteroidCount = 6f;
         private const float DefaultEnemyShipCount = 0f;
         private const float DefaultFriendlyShipCount = 0f;
+
         [SerializeField] private SettingsOverlayController settingsOverlay;
 
         [SerializeField]
@@ -167,12 +168,6 @@ namespace UI.Scenes.MainMenu
                 var capturedSlotIndex = slotIndex;
                 slotButton.clicked += () => OnProgressionSlotClicked(capturedSlotIndex);
                 deleteButton.clicked += () => OnProgressionSlotDeleteClicked(capturedSlotIndex);
-                row.RegisterCallback<MouseEnterEvent>(_ =>
-                {
-                    if (row.ClassListContains("has-save"))
-                        deleteButton.style.display = DisplayStyle.Flex;
-                });
-                row.RegisterCallback<MouseLeaveEvent>(_ => deleteButton.style.display = DisplayStyle.None);
 
                 _slotBindings[slotIndex] = new ProgressionSlotUiBinding(row, slotButton, deleteButton);
             }
@@ -219,7 +214,7 @@ namespace UI.Scenes.MainMenu
                     ? $"Load {descriptor.CampaignName}"
                     : "New game";
 
-                binding.DeleteButton.style.display = DisplayStyle.None;
+                binding.DeleteButton.SetEnabled(descriptor.HasSave);
                 binding.Row.EnableInClassList("has-save", descriptor.HasSave);
             }
         }
@@ -242,18 +237,9 @@ namespace UI.Scenes.MainMenu
         private void OpenNewProgressionOverlay(int slotIndex)
         {
             CloseProgressionSlotsOverlay();
+            newCampaignController.Show();
             newCampaignController.OpenForSlot(slotIndex);
             Hide();
-        }
-
-        private void Show()
-        {
-            gameObject.SetActive(true);
-        }
-
-        private void Hide()
-        {
-            gameObject.SetActive(false);
         }
 
         private void OnProgressionSlotDeleteClicked(int slotIndex)

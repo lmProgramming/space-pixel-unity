@@ -41,11 +41,6 @@ namespace ShipFactory.UI.Views.ShipLibrary
 
         public event Action<string> SnapshotDeleted;
 
-        public void Show()
-        {
-            gameObject.SetActive(true);
-        }
-
         protected override ShipSnapshotCatalogModel CreateModel()
         {
             return _snapshotRepository.Model;
@@ -53,7 +48,7 @@ namespace ShipFactory.UI.Views.ShipLibrary
 
         protected override ShipLibraryView CreateView()
         {
-            return new ShipLibraryView();
+            return gameObject.AddComponent<ShipLibraryView>();
         }
 
         protected override ShipLibraryViewModel CreateViewModel(

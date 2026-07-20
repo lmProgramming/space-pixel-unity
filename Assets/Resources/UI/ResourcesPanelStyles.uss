@@ -3,14 +3,24 @@
     font-size: var(--font-size-caption);
 }
 
+.ship-resources-panel {
+    padding: var(--space-4);
+}
+
+.ship-resources-panel__title {
+    -unity-font-style: bold;
+    margin-bottom: var(--space-1);
+}
+
 .ship-resource-bar-track {
     position: relative;
-    height: 8px;
+    height: 10px;
     overflow: hidden;
-    background-color: var(--color-surface-elev);
+    background-color: var(--color-bg);
     border-width: var(--border-thin);
     border-color: var(--color-border);
     border-radius: var(--radius-sm);
+    margin-top: var(--space-1);
 }
 
 .ship-resource-bar-fill {

@@ -10,21 +10,25 @@ namespace UI.MVCVM
         where TModel : ObservableModel
         where TView : View<TViewModel>
     {
+        [SerializeField] public bool showByDefault;
         private PanelRendererLifecycle _lifecycle;
 
         protected TModel Model { get; private set; }
 
         protected TView View { get; private set; }
 
+        protected PanelRenderer PanelRenderer { get; private set; }
+
         protected virtual void Awake()
         {
-            var panelRenderer = GetComponent<PanelRenderer>();
-            if (panelRenderer == null)
+            PanelRenderer = GetComponent<PanelRenderer>();
+            if (PanelRenderer == null)
                 throw new UnityException($"[{GetType().Name}] {nameof(PanelRenderer)} is required.");
 
             Model = CreateModel();
             View = CreateView();
-            _lifecycle = new PanelRendererLifecycle(panelRenderer, View, this);
+
+            _lifecycle = new PanelRendererLifecycle(PanelRenderer, View);
         }
 
         protected virtual void OnEnable()
@@ -42,11 +46,6 @@ namespace UI.MVCVM
             _lifecycle.OnHostDisabled();
         }
 
-        protected virtual void OnDestroy()
-        {
-            _lifecycle.Unregister();
-        }
-
         protected abstract TModel CreateModel();
 
         protected abstract TView CreateView();
@@ -58,5 +57,15 @@ namespace UI.MVCVM
 
         protected abstract TViewModel CreateViewModel(
             TModel model);
+
+        public void Show()
+        {
+            View.Show();
+        }
+
+        public void Hide()
+        {
+            View.Hide();
+        }
     }
 }

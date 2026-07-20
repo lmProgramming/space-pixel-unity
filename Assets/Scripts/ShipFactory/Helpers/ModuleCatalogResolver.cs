@@ -1,4 +1,6 @@
 using System;
+using Core.Services;
+using Core.ShipFactory;
 using Core.Ships;
 using ShipFactory.Models;
 using UnityEngine;
@@ -7,18 +9,18 @@ namespace ShipFactory.Helpers
 {
     public static class ModuleCatalogResolver
     {
-        public static ShipModuleSO ResolveModuleSO(GameObject moduleInstance, ShipModuleCatalog catalog)
+        public static ShipModuleSO ResolveModuleSO(GameObject moduleInstance, IShipModuleCatalog catalog)
         {
             if (!moduleInstance)
                 throw new ArgumentNullException(nameof(moduleInstance));
-            if (!catalog)
+            if (catalog == null)
                 throw new ArgumentNullException(nameof(catalog));
 
             var archetypeId = GetRequiredArchetypeId(moduleInstance);
 
             if (!catalog.TryGetModuleSO(archetypeId, out var moduleSO) || !moduleSO)
                 throw new InvalidOperationException(
-                    $"[ShipFactory] Module '{moduleInstance.name}' archetype '{archetypeId}' was not found in {nameof(ShipModuleCatalog)}.");
+                    $"[ShipFactory] Module '{moduleInstance.name}' archetype '{archetypeId}' was not found in {nameof(IShipModuleCatalog)}.");
 
             return moduleSO;
         }

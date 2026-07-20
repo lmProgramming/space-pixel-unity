@@ -11,7 +11,6 @@ using Ships.Tests.TestHelpers.Fixtures;
 using Ships.Tests.TestHelpers.Mocks;
 using UnityEngine;
 using UnityEngine.TestTools;
-using Resources = Core.Ships.Resources;
 
 namespace Ships.Tests
 {
@@ -42,7 +41,7 @@ namespace Ships.Tests
         {
             var ship = ShipTestBuilder.CreateShip(Container, CreatedObjects)
                 .WithCommand("Command", Vector2.zero, 10, 5)
-                .WithBasic("Generator", new Vector2(10f, 0f), 10, 5, new Resources(10f, 0f, 5, 0f, 0))
+                .WithBasic("Generator", new Vector2(10f, 0f), 10, 5, new ShipResources(10f, 0f, 5, 0f, 0))
                 .BuildDesignShip(true);
 
             yield return WaitForLifecycle();

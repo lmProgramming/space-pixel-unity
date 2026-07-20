@@ -9,12 +9,12 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6799016278290373035}
-  - component: {fileID: 6637667068672149225}
   - component: {fileID: 9005613367882335825}
   - component: {fileID: 4672096422132153420}
   - component: {fileID: 231393477886303581}
   - component: {fileID: 1194692098560824672}
   - component: {fileID: 8445236259495219692}
+  - component: {fileID: 2507691119085204829}
   m_Layer: 7
   m_Name: DesignShipShell
   m_TagString: Untagged
@@ -37,18 +37,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &6637667068672149225
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9064932019615363452}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cebb1390bd8548d4c9f27f21510f1fcb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &9005613367882335825
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -126,3 +114,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bebbde427d10492296dd83c5cc32a8a6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Ships::Ships.DesignShip
+--- !u!114 &2507691119085204829
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9064932019615363452}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8824cc46352d4ebfaf44b4d0d6e1bbad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Ships::Ships.StaticModuleConnectionFactory

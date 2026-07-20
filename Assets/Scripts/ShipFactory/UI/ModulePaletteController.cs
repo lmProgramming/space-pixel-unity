@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
 using Core.Pixelation;
+using Core.Services;
+using Core.ShipFactory;
 using Core.Ships;
-using ShipFactory.Models;
 using UI.Common;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -12,21 +13,15 @@ namespace ShipFactory.UI
 {
     public class ModulePaletteController
     {
+        private const string ModuleCardTemplatePath = "UI/ModuleCardTemplate";
         private const string ActiveTabClass = "is-active";
         private const string DraggingCardClass = "palette-card--dragging";
         private const string DisabledCardClass = "palette-card--disabled";
-        private const string CardClass = "ds-card";
-        private const string CardImageClass = "ds-card__image";
-        private const string CardTitleRowClass = "ds-card__title-row";
-        private const string CardTitleClass = "ds-body-2";
-        private const string CardDimensionsClass = "palette-card__dimensions";
-        private const string CardDimensionsTextClass = "ds-body-2";
-        private const string CardLabelsClass = "palette-card__labels";
-        private const string CardSpriteClass = "ds-card__sprite";
         private const string CommandLimitTitle = "Command module";
         private const string CommandLimitDescription = "Ship can only have 1 command module";
 
-        private readonly ShipModuleCatalog _library;
+        private readonly IShipModuleCatalog _library;
+        private readonly VisualTreeAsset _moduleCardTemplate;
         private readonly VisualElement _paletteContent;
         private readonly Dictionary<ModuleType, Button> _tabButtons = new();
 
@@ -37,18 +32,20 @@ namespace ShipFactory.UI
         private bool _shipHasCommandModule;
         private bool _shipHasModules;
 
-        public ModulePaletteController(VisualElement root, ShipModuleCatalog library)
+        public ModulePaletteController(VisualElement root, IShipModuleCatalog library)
         {
-            if (!library)
-                throw new ArgumentNullException(nameof(library),
-                    "[ModulePaletteController] ShipModuleCatalog library must be assigned!");
-
-            _library = library;
+            _library = library ?? throw new ArgumentNullException(nameof(library),
+                "[ModulePaletteController] ShipModuleCatalog library must be assigned!");
 
             _paletteContent = root.Q<VisualElement>("palette-content");
             if (_paletteContent == null)
                 throw new InvalidOperationException(
                     "[ModulePaletteController] 'palette-content' container not found in UXML!");
+
+            _moduleCardTemplate = Resources.Load<VisualTreeAsset>(ModuleCardTemplatePath);
+            if (!_moduleCardTemplate)
+                throw new InvalidOperationException(
+                    $"[ModulePaletteController] VisualTreeAsset '{ModuleCardTemplatePath}' was not found in Resources.");
 
             BindTabButtons(root);
             SelectTab(ModuleType.Command, _tabButtons[ModuleType.Command]);
@@ -120,67 +117,49 @@ namespace ShipFactory.UI
                     continue;
                 }
 
-                _paletteContent.Add(BuildModuleCard(moduleSO, blockCommandPlacement));
+                BuildModuleCard(moduleSO, blockCommandPlacement);
             }
         }
 
-        private VisualElement BuildModuleCard(ShipModuleSO moduleSO, bool isPlacementBlocked)
+        private void BuildModuleCard(ShipModuleSO moduleSO, bool isPlacementBlocked)
         {
-            var card = new VisualElement();
-            card.AddToClassList(CardClass);
-            card.style.width = 132;
-            card.style.flexShrink = 0;
-            card.style.alignSelf = Align.Stretch;
-            card.style.flexDirection = FlexDirection.Column;
+            var cardIndex = _paletteContent.childCount;
+            _moduleCardTemplate.CloneTree(_paletteContent);
+            var card = _paletteContent[cardIndex];
 
             if (isPlacementBlocked)
                 card.AddToClassList(DisabledCardClass);
 
-            var image = new VisualElement();
-            image.AddToClassList(CardImageClass);
+            var spriteImage = card.Q<Image>("module-card-sprite")
+                              ?? throw new InvalidOperationException(
+                                  "[ModulePaletteController] 'module-card-sprite' is missing in ModuleCardTemplate.uxml.");
+            var titleClip = card.Q<VisualElement>("module-card-title-clip")
+                            ?? throw new InvalidOperationException(
+                                "[ModulePaletteController] 'module-card-title-clip' is missing in ModuleCardTemplate.uxml.");
+            var title = card.Q<Label>("module-card-title")
+                        ?? throw new InvalidOperationException(
+                            "[ModulePaletteController] 'module-card-title' is missing in ModuleCardTemplate.uxml.");
+            var dimensions = card.Q<Label>("module-card-dimensions")
+                             ?? throw new InvalidOperationException(
+                                 "[ModulePaletteController] 'module-card-dimensions' is missing in ModuleCardTemplate.uxml.");
 
             var pixelatedRigidbody = moduleSO.Prefab.GetComponent<IPixelatedSprite>();
             var sprite = pixelatedRigidbody?.GetSprite();
             if (sprite)
             {
-                var spriteImage = new Image { sprite = sprite, scaleMode = ScaleMode.ScaleToFit };
-                spriteImage.AddToClassList(CardSpriteClass);
-                image.Add(spriteImage);
+                spriteImage.sprite = sprite;
+                spriteImage.scaleMode = ScaleMode.ScaleToFit;
+            }
+            else
+            {
+                spriteImage.style.display = DisplayStyle.None;
             }
 
-            var titleRow = new VisualElement();
-            titleRow.AddToClassList(CardTitleRowClass);
-            titleRow.style.width = Length.Percent(100);
+            title.text = moduleSO.Name;
+            dimensions.text = $"{moduleSO.Dimensions.x}x{moduleSO.Dimensions.y}";
 
-            var titleClip = new VisualElement
-            {
-                style =
-                {
-                    width = Length.Percent(100)
-                }
-            };
-
-            var title = new Label(moduleSO.Name);
-            title.AddToClassList(CardTitleClass);
-
-            titleClip.Add(title);
-            titleRow.Add(titleClip);
-
-            var dimensions = new Label($"{moduleSO.Dimensions.x}x{moduleSO.Dimensions.y}");
-            dimensions.AddToClassList(CardDimensionsClass);
-            dimensions.AddToClassList(CardDimensionsTextClass);
-
-            var labels = new VisualElement();
-            labels.AddToClassList(CardLabelsClass);
-            labels.Add(titleRow);
-            labels.Add(dimensions);
-
-            card.Add(image);
-            card.Add(labels);
             _ = new HoverMarqueeLabel(card, titleClip, title);
-
             RegisterCardDragEvents(card, moduleSO, isPlacementBlocked);
-            return card;
         }
 
         public void FinishModuleDrag()
