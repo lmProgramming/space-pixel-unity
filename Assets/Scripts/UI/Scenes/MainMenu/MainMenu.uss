@@ -1,0 +1,13 @@
+.progression-slot-row {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+}
+
+.progression-slot-button {
+    flex-grow: 1;
+}
+
+.progression-slot-delete-button {
+    flex-shrink: 0;
+}

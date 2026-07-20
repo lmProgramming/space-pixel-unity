@@ -14,6 +14,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/ShipFactory.unity
     guid: 63c374b93d9cc4f4daf9684e5fba1547
+  - enabled: 1
+    path: Assets/Scenes/BattleShipPicker.unity
+    guid: 9ba31a40faf30b70b9358a8bfcaeb43a
   m_configObjects:
     com.unity.adaptiveperformance.simulator.provider_settings: {fileID: 11400000, guid: 07d6e01c4f9c2b045b5f4e519b58a812, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}

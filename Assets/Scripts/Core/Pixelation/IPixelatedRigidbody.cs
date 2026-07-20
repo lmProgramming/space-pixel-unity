@@ -28,7 +28,7 @@ namespace Core.Pixelation
         Vector2 LocalToWorldPoint(Vector2Int localPosition);
         Vector2 LocalToWorldPoint(Vector2 localPosition);
         void NoPixelsLeft();
-        event Action<IPixelated> OnNoPixelsLeft;
+        event Action<IPixelatedRigidbody> Destroyed;
         event Action<List<Vector2Int>, PixelLoseReason> OnPixelsLost;
     }
 }

@@ -3,15 +3,15 @@ using System.Linq;
 using Core.Services;
 using Core.Ships;
 using Core.Ships.Module;
-using Events.Camera;
 using JetBrains.Annotations;
 using ShipFactory.Helpers;
 using ShipFactory.Helpers.LegalPositionCalculator;
 using ShipFactory.Models;
 using ShipFactory.UI.Runtime;
 using ShipFactory.UI.ToolkitComponents;
-using ShipFactory.UI.Views.Notification;
 using Ships;
+using UI.Components;
+using UI.Components.Notification;
 using UnityEngine;
 using UnityEngine.UIElements;
 using Zenject;
@@ -24,6 +24,7 @@ namespace ShipFactory.UI
     {
         private readonly DragAnimator _animator;
         private readonly CameraInfoPanel _cameraInfoPanel;
+        private readonly ShipFactoryFeedback _feedback;
         private readonly IGameInput _gameInput;
         private readonly ModuleInfoPanel _infoPanel;
 
@@ -46,20 +47,25 @@ namespace ShipFactory.UI
 
         private bool _isPointerOverCanvas;
         private ShipModuleSOInstanceBundle _selectedModuleBundle;
-        private Ship _ship;
+        private DesignShip _ship;
 
         public ShipFactoryCanvasController(
             VisualElement root,
             NotificationView notificationView,
+            ShipFactoryFeedback feedback,
             IGameInput gameInput,
             IInstantiator instantiator,
             ShipModuleCatalog moduleCatalog,
-            CameraResetRequestEventChannel cameraResetRequestEventChannel)
+            CameraInfoPanel.Factory cameraInfoPanelFactory)
         {
             _gameInput = gameInput;
             _instantiator = instantiator ?? throw new ArgumentNullException(nameof(instantiator));
             var moduleCatalog1 = moduleCatalog ?? throw new ArgumentNullException(nameof(moduleCatalog));
             _notificationView = notificationView ?? throw new ArgumentNullException(nameof(notificationView));
+            _feedback = feedback ?? throw new ArgumentNullException(nameof(feedback));
+
+            if (cameraInfoPanelFactory == null)
+                throw new ArgumentNullException(nameof(cameraInfoPanelFactory));
 
             var canvasContainer = root.Q<VisualElement>("canvas-container");
             _inputBlocker = root.Q<VisualElement>("ship-factory-input-blocker");
@@ -69,9 +75,10 @@ namespace ShipFactory.UI
                     "[ShipFactoryCanvasController] canvas-container not found in UXML!");
 
             // 1. Initialize Sub-Panels
-            _resourcesPanel = new ResourcesPanel(root);
+
+            _resourcesPanel = root.Q<ResourcesPanel>("resources-panel");
             _infoPanel = new ModuleInfoPanel(root);
-            _cameraInfoPanel = new CameraInfoPanel(root, cameraResetRequestEventChannel);
+            _cameraInfoPanel = cameraInfoPanelFactory.Create(root);
 
             _infoPanel.OnRemoveModuleClicked += RemoveSelectedModule;
             _infoPanel.OnRotateClockwiseClicked += () => RotateActiveModule(90);
@@ -91,6 +98,10 @@ namespace ShipFactory.UI
 
         public bool IsInputLocked { get; private set; }
         public bool IsDraggingModule => _draggedModuleBundle != null;
+        public bool ShipHasModules => _overlayManager.AllBundles.AsValueEnumerable().Any();
+
+        public bool ShipHasCommandModule => _overlayManager.AllBundles.AsValueEnumerable()
+            .Any(bundle => bundle.PlacedModule.Type == ModuleType.Command);
 
         public void Dispose()
         {
@@ -99,6 +110,8 @@ namespace ShipFactory.UI
         }
 
         public event Action OnModuleDragFinished;
+        public event Action OnShipCompositionChanged;
+        public event Action OnClearShipRequested;
         public event Action<bool> OnInputLockChanged;
 
         public void SetExternalInputLock(bool isLocked)
@@ -121,7 +134,7 @@ namespace ShipFactory.UI
             _notificationView.Show(message, PopupLevel.Error);
         }
 
-        public void SetShip(Ship ship)
+        public void SetShip(DesignShip ship)
         {
             _ship = ship;
             _draggedModuleBundle = null;
@@ -136,6 +149,7 @@ namespace ShipFactory.UI
             _overlayManager.RebuildFromShip(_ship);
             _resourcesPanel.Refresh(_ship);
             RefreshInfoPanelFromCurrentContext();
+            OnShipCompositionChanged?.Invoke();
         }
 
         public void ShowPaletteModuleInfo(ShipModuleSO moduleSO)
@@ -269,6 +283,19 @@ namespace ShipFactory.UI
 
             _hoveredPaletteModule = null;
 
+            if (!ShipHasModules)
+            {
+                PlaceFirstModuleAtOrigin(shipModuleSO);
+                return;
+            }
+
+            if (ShipHasCommandModule && IsCommandModulePrefab(shipModuleSO))
+            {
+                ShowWarningMessage("Ship can only have 1 command module");
+                OnModuleDragFinished?.Invoke();
+                return;
+            }
+
             var localSnapped = Snapper.SnapModuleLocalCenter(
                 _ship.transform.InverseTransformPoint(_gameInput.WorldPointerPosition),
                 shipModuleSO.Dimensions);
@@ -278,6 +305,44 @@ namespace ShipFactory.UI
 
             _overlayManager.CreateOverlay(bundle);
             BeginModuleDrag(bundle, true);
+        }
+
+        private void PlaceFirstModuleAtOrigin(ShipModuleSO shipModuleSO)
+        {
+            if (!IsCommandModulePrefab(shipModuleSO))
+            {
+                ShowWarningMessage("Place a command module first.");
+                OnModuleDragFinished?.Invoke();
+                return;
+            }
+
+            var localSnapped = Snapper.SnapModuleLocalCenter(Vector2.zero, shipModuleSO.Dimensions);
+            var worldPos = (Vector2)_ship.transform.TransformPoint(localSnapped);
+            var bundle = InstantiateModule(shipModuleSO, worldPos);
+            if (bundle == null)
+            {
+                OnModuleDragFinished?.Invoke();
+                return;
+            }
+
+            _overlayManager.CreateOverlay(bundle);
+            SelectBundle(bundle);
+            RefreshInfoPanelFromCurrentContext();
+            _resourcesPanel.Refresh(_ship);
+            _feedback.PlayPlaced(worldPos);
+            _cameraInfoPanel.RequestReset();
+            OnModuleDragFinished?.Invoke();
+            OnShipCompositionChanged?.Invoke();
+        }
+
+        private static bool IsCommandModulePrefab(ShipModuleSO shipModuleSO)
+        {
+            var prefabModule = shipModuleSO.Prefab.GetComponent<IModule>();
+            if (prefabModule == null)
+                throw new InvalidOperationException(
+                    $"[ShipFactory] Prefab '{shipModuleSO.name}' has no IModule component!");
+
+            return prefabModule.Type == ModuleType.Command;
         }
 
         private void BeginModuleDrag(ShipModuleSOInstanceBundle bundle, bool isNewBundle)
@@ -322,7 +387,15 @@ namespace ShipFactory.UI
             var legality = Calculator.CalculatePositionLegality(_draggedModuleBundle, _overlayManager.AllBundles);
             if (legality == PositionLegality.Correct)
             {
+                var wasNewModule = _draggedModuleWasNew;
+                var placedWorldPos = (Vector2)_draggedModuleBundle.Instance.transform.position;
                 FinishActiveDrag();
+                if (wasNewModule)
+                {
+                    _feedback.PlayPlaced(placedWorldPos);
+                    OnShipCompositionChanged?.Invoke();
+                }
+
                 return;
             }
 
@@ -387,7 +460,7 @@ namespace ShipFactory.UI
 
             if (_selectedModuleBundle.PlacedModule.Type == ModuleType.Command)
             {
-                ShowWarningMessage("Command module cannot be removed.");
+                OnClearShipRequested?.Invoke();
                 return;
             }
 
@@ -396,6 +469,8 @@ namespace ShipFactory.UI
                 ShowErrorMessage("Cannot remove this module: it would split the ship into islands.");
                 return;
             }
+
+            var removedWorldPos = (Vector2)_selectedModuleBundle.Instance.transform.position;
 
             _ship.ManualRemoveModule(_selectedModuleBundle.PlacedModule);
             _overlayManager.RemoveOverlay(_selectedModuleBundle);
@@ -406,6 +481,36 @@ namespace ShipFactory.UI
 
             SelectBundle(null);
             _resourcesPanel.Refresh(_ship);
+            _feedback.PlayDeleted(removedWorldPos);
+            OnShipCompositionChanged?.Invoke();
+        }
+
+        public void ClearShip()
+        {
+            if (_ship == null || IsDraggingModule || IsInputLocked) return;
+
+            var effectOrigin = Vector2.zero;
+            foreach (var bundle in _overlayManager.AllBundles)
+            {
+                if (bundle.PlacedModule.Type != ModuleType.Command) continue;
+                effectOrigin = bundle.Instance.transform.position;
+                break;
+            }
+
+            ClearEntireShip(effectOrigin);
+        }
+
+        private void ClearEntireShip(Vector2 effectOrigin)
+        {
+            _ship.DestroyAllModulesSilently();
+            _ship.InitializeModules();
+
+            _draggedModuleBundle = null;
+            _hoveredPlacedBundle = null;
+            SelectBundle(null);
+            RebuildShipModules();
+            _feedback.PlayDeleted(effectOrigin);
+            _cameraInfoPanel.RequestReset();
         }
 
         private bool WouldRemovalCreateIslands(ShipModuleSOInstanceBundle bundleToRemove)
@@ -475,11 +580,16 @@ namespace ShipFactory.UI
             if (IsDraggingModule)
             {
                 RefreshDraggedModuleLegalityOverlay();
+                _feedback.PlayRotated(bundle.Instance.transform.position);
                 return;
             }
 
             var legality = Calculator.CalculatePositionLegality(bundle, _overlayManager.AllBundles);
-            if (legality == PositionLegality.Correct) return;
+            if (legality == PositionLegality.Correct)
+            {
+                _feedback.PlayRotated(bundle.Instance.transform.position);
+                return;
+            }
 
             bundle.Instance.transform.localRotation = previousRotation;
             _overlayManager.SyncTransformFromBundle(bundle);
@@ -537,6 +647,11 @@ namespace ShipFactory.UI
         public void RefreshCameraInfoPanel(Camera camera)
         {
             _cameraInfoPanel.Update(camera);
+        }
+
+        public class Factory : PlaceholderFactory<VisualElement, NotificationView, ShipFactoryFeedback,
+            ShipFactoryCanvasController>
+        {
         }
     }
 }

@@ -9,7 +9,6 @@ using Ships.Tests.TestHelpers.Fixtures;
 using Ships.Tests.TestHelpers.Modules;
 using UnityEngine;
 using UnityEngine.TestTools;
-using Object = UnityEngine.Object;
 using Resources = Core.Ships.Resources;
 
 namespace Ships.Tests
@@ -393,6 +392,28 @@ namespace Ships.Tests
             Assert.AreEqual(1.1f, module.ModuleEfficiency, 0.0001f);
         }
 
+        [Test]
+        public void GetCrewEfficiency_WithNullShip_DoesNotThrow()
+        {
+            var module = CreateStandaloneModule(1);
+            module.AssignCrew(MakeCrew("Solo", "Pilot", 30,
+                new Dictionary<CrewSkillType, int> { { CrewSkillType.Navigation, 5 } }));
+            module.SetShip(null);
+
+            Assert.DoesNotThrow(() => module.GetCrewEfficiency());
+            Assert.AreEqual(1.1f, module.GetCrewEfficiency(), 0.0001f,
+                "Missing captain multiplier should default to 1 during junk / teardown");
+        }
+
+        [Test]
+        public void ActualEfficiency_WithNullShip_DoesNotThrow()
+        {
+            var module = CreateStandaloneModule(0);
+            module.SetShip(null);
+
+            Assert.DoesNotThrow(() => _ = module.ActualEfficiency);
+        }
+
         [UnityTest]
         public IEnumerator DestroyModule_KillsAssignedCrew()
         {
@@ -404,9 +425,9 @@ namespace Ships.Tests
 
             yield return null;
 
-            Object.DestroyImmediate(module.gameObject);
+            module.DestroyModule();
 
-            yield return null;
+            yield return WaitForLifecycle();
 
             Assert.IsFalse(crew1.IsAlive, "crew1 should be dead after module destruction");
             Assert.IsFalse(crew2.IsAlive, "crew2 should be dead after module destruction");
@@ -419,9 +440,9 @@ namespace Ships.Tests
 
             yield return null;
 
-            Assert.DoesNotThrow(() => Object.DestroyImmediate(module.gameObject));
+            Assert.DoesNotThrow(() => module.DestroyModule());
 
-            yield return null;
+            yield return WaitForLifecycle();
         }
 
         [UnityTest]
@@ -434,14 +455,14 @@ namespace Ships.Tests
             module.AssignCrew(crew2);
 
             var diedMembers = new List<CrewMember>();
-            crew1.OnDied += member => diedMembers.Add(member);
-            crew2.OnDied += member => diedMembers.Add(member);
+            crew1.OnDied += diedMembers.Add;
+            crew2.OnDied += diedMembers.Add;
 
             yield return null;
 
-            Object.DestroyImmediate(module.gameObject);
+            module.DestroyModule();
 
-            yield return null;
+            yield return WaitForLifecycle();
 
             Assert.AreEqual(2, diedMembers.Count);
             Assert.Contains(crew1, diedMembers);

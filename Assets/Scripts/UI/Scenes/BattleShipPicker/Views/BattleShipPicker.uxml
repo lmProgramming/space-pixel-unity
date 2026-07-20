@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="project://database/Assets/DesignSystem/Resources/UI/Styles/DesignSystem/DesignSystem.uss"/>
+    <ui:VisualElement class="ds-root ds-root--transparent"
+                      style="position: absolute; left: 0; right: 0; top: 0; bottom: 0;">
+        <ui:VisualElement class="ds-modal" style="width: 900px; max-width: 100%; margin: auto;">
+            <ui:Label text="Select Your Ship" class="ds-h1" style="margin-bottom: 12px;"/>
+            <ui:ScrollView mode="Vertical" style="max-height: 480px;">
+                <ui:VisualElement name="battle-ship-picker-list" class="ds-side-nav"/>
+            </ui:ScrollView>
+            <ui:Button name="battle-ship-picker-confirm-button" text="Launch Battle"
+                       class="ds-btn ds-btn--primary ds-btn--block" style="margin-top: 16px;"/>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

@@ -1,4 +1,5 @@
 using Core.MVCVM;
+using UI.Common;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -50,7 +51,7 @@ namespace UI.MVCVM
 
         protected abstract TView CreateView();
 
-        private void Refresh()
+        protected void Refresh()
         {
             View.SetData(CreateViewModel(Model));
         }

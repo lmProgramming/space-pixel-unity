@@ -5,8 +5,8 @@
     width: 100%;
     height: 100%;
 
-    --ship-factory-panel-inset: var(--space-2);
-    --ship-factory-palette-height: 220px;
+    --inset-from-edge: var(--space-2);
+    --palette-height: 220px;
 }
 
 .spacer {
@@ -32,8 +32,8 @@
 
 .camera-info {
     position: absolute;
-    top: var(--ship-factory-panel-inset);
-    right: var(--ship-factory-panel-inset);
+    top: var(--inset-from-edge);
+    right: var(--inset-from-edge);
 }
 
 .top-bar__cluster {
@@ -46,52 +46,33 @@
 }
 
 .module-info-panel .ds-info-row__label,
-.module-info-panel .ds-info-row__value,
-.ship-resources-panel .ds-info-row__label,
-.ship-resources-panel .ds-info-row__value {
+.module-info-panel .ds-info-row__value {
     font-size: var(--font-size-caption);
 }
 
 .palette-panel {
     flex-direction: row;
     flex-shrink: 0;
-    height: var(--ship-factory-palette-height);
+    height: var(--palette-height);
     background-color: var(--color-surface);
     border-top-width: 1px;
     border-top-color: var(--color-border);
 }
 
 .module-info-panel,
-.ship-resources-panel {
+#resources-panel {
     position: absolute;
     flex-direction: column;
-    bottom: 230px; /*calc(var(--ship-factory-palette-height) + var(--ship-factory-panel-inset));*/
+    bottom: 230px; /*calc(var(--palette-height) + var(--inset-from-edge));*/
     width: 300px;
 }
 
 .module-info-panel {
-    left: var(--ship-factory-panel-inset);
+    left: var(--inset-from-edge);
 }
 
-.ship-resources-panel {
-    right: var(--ship-factory-panel-inset);
-}
-
-.ship-resource-bar-track {
-    position: relative;
-    height: 8px;
-    overflow: hidden;
-    background-color: var(--color-surface-elev);
-    border-width: var(--border-thin);
-    border-color: var(--color-border);
-    border-radius: var(--radius-sm);
-}
-
-.ship-resource-bar-fill {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 0;
+#resources-panel {
+    right: var(--inset-from-edge);
 }
 
 .hidden,
@@ -154,6 +135,18 @@
 
 .palette-card--dragging {
     opacity: 0.3;
+}
+
+.palette-card--disabled {
+    opacity: 0.45;
+}
+
+.ds-nav-item:disabled {
+    opacity: 0.45;
+}
+
+.ds-nav-item:disabled .ds-nav-item__label {
+    color: var(--color-text-disabled);
 }
 
 .module-info-description-scroll {

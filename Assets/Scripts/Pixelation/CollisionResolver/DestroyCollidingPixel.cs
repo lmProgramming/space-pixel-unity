@@ -1,13 +1,16 @@
 ﻿using System.Collections.Generic;
+using Core.Constants;
 using Core.Pixelation;
 using UnityEngine;
+using Zenject;
 
 namespace Pixelation.CollisionResolver
 {
     public class DestroyCollidingPixel : CollisionResolver
     {
-        public DestroyCollidingPixel(PixelCollisionHandler collisionHandler, IPixelatedRigidbody pixelatedRigidbody) :
-            base(collisionHandler, pixelatedRigidbody)
+        public DestroyCollidingPixel(PixelCollisionHandler collisionHandler, IPixelatedRigidbody pixelatedRigidbody,
+            GameplayConstants gameplayConstants) :
+            base(collisionHandler, pixelatedRigidbody, gameplayConstants)
         {
         }
 
@@ -23,6 +26,10 @@ namespace Pixelation.CollisionResolver
             var destroyed = PixelatedRigidbody.DamagePixelAt(pos, 1f);
 
             return destroyed ? new[] { pos } : new List<Vector2Int>();
+        }
+
+        public class Factory : PlaceholderFactory<PixelCollisionHandler, IPixelatedRigidbody, DestroyCollidingPixel>
+        {
         }
     }
 }

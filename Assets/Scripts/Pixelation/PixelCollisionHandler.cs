@@ -8,6 +8,7 @@ using Grid;
 using LMPro;
 using Pixelation.CollisionResolver;
 using UnityEngine;
+using Zenject;
 using ZLinq;
 
 namespace Pixelation
@@ -28,7 +29,8 @@ namespace Pixelation
         private bool _didCollide;
 
         public PixelCollisionHandler(ITexturePixelGrid grid, PixelatedRigidbody body, PolygonCollider2D collider,
-            CollisionEventChannelSO collisionEventChannel, IDebrisSpawner debrisSpawner)
+            CollisionEventChannelSO collisionEventChannel, IDebrisSpawner debrisSpawner,
+            PhysicsCollision.Factory physicsCollisionFactory)
         {
             _grid = grid;
             _body = body;
@@ -36,7 +38,7 @@ namespace Pixelation
             _collisionEventChannel = collisionEventChannel;
             _debrisSpawner = debrisSpawner;
 
-            _collisionResolver = new PhysicsCollision(this, _body);
+            _collisionResolver = physicsCollisionFactory.Create(this, _body);
 
             body.OnPixelsLost += PixelsLost;
         }
@@ -130,7 +132,7 @@ namespace Pixelation
 
             var otherRb = collision.gameObject.GetComponent<PixelatedRigidbody>();
 
-            if (otherRb is null) return;
+            if (otherRb?.CollisionHandler is null) return;
 
             otherRb.CollisionHandler.ResolveCollision(_body, collision);
 
@@ -249,6 +251,11 @@ namespace Pixelation
             var globalPosition = _body.transform.TransformPoint(centrePoint - parentCenterPoint);
 
             _debrisSpawner.SpawnDebris(globalPosition, _body.transform.rotation, newColorsGrid, _body);
+        }
+
+        public class Factory : PlaceholderFactory<ITexturePixelGrid, PixelatedRigidbody, PolygonCollider2D,
+            PixelCollisionHandler>
+        {
         }
     }
 }

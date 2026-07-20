@@ -11,7 +11,7 @@ namespace Ships.Tests
 {
     /// <summary>
     ///     Tests that a module is destroyed outright once its remaining pixels drop below
-    ///     <see cref="GameplayConstants.ModuleDestroyedBelowPixelRatio" /> of its starting count.
+    ///     <see cref="GameplayConstants.moduleDestroyedWhenCurrentPixelRatioOfOriginalIsBelow" /> of its starting count.
     /// </summary>
     [TestFixture]
     public class ModuleDestructionThresholdTests : ShipTestBase
@@ -19,11 +19,11 @@ namespace Ships.Tests
         private const int ModuleSize = 5;
         private const int TotalPixels = ModuleSize * ModuleSize;
 
-        private static int PixelsToKeepJustBelowThreshold =>
-            Mathf.CeilToInt(TotalPixels * GameplayConstants.ModuleDestroyedBelowPixelRatio) - 1;
+        private int PixelsToKeepJustBelowThreshold =>
+            Mathf.CeilToInt(TotalPixels * GameplayConstants.moduleDestroyedWhenCurrentPixelRatioOfOriginalIsBelow) - 1;
 
-        private static int PixelsToKeepAtOrAboveThreshold =>
-            Mathf.CeilToInt(TotalPixels * GameplayConstants.ModuleDestroyedBelowPixelRatio);
+        private int PixelsToKeepAtOrAboveThreshold =>
+            Mathf.CeilToInt(TotalPixels * GameplayConstants.moduleDestroyedWhenCurrentPixelRatioOfOriginalIsBelow);
 
         /// <summary>
         ///     Removes pixels in row-major order so the kept pixels stay one contiguous region

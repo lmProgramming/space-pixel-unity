@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading;
-using Core.Constants;
 using Core.Services;
 using Core.Ships;
 using Core.Ships.Snapshots.Module.ModuleData;
@@ -34,7 +33,7 @@ namespace Ships.Modules
         private ManualTimer _reloadTimer;
         [Inject] private ShootingEventChannel _shootingEventChannel;
 
-        public override ConcreteModuleType ConcreteType => ConcreteModuleType.Cannon;
+        protected override ConcreteModuleType ConcreteType => ConcreteModuleType.Cannon;
 
         protected override void Awake()
         {
@@ -55,7 +54,7 @@ namespace Ships.Modules
                 throw new UnityException("[Cannon] Projectile spawn points must be assigned.");
         }
 
-        protected override void OnDestroy()
+        protected void OnDestroy()
         {
             _cts?.Cancel();
             _cts?.Dispose();
@@ -63,8 +62,6 @@ namespace Ships.Modules
             if (_reloadTimer == null) return;
             _reloadTimer.OnReady -= HandleReady;
             _reloadTimer.OnNotReady -= HandleNotReady;
-
-            base.OnDestroy();
         }
 
         protected override void UpdateModule()
@@ -106,7 +103,7 @@ namespace Ships.Modules
                 // bulletRigidbody.linearVelocity = PixelatedRigidbody.Rigidbody.linearVelocity;
 
                 bulletRigidbody.AddForce(
-                    direction * (projectileSpeed * GameplayConstants.CannonProjectileSpeedMultiplier),
+                    direction * (projectileSpeed * GameplayConstants.cannonProjectileSpeedMultiplier),
                     ForceMode2D.Impulse);
 
                 _shootingEventChannel?.Raise(new BulletShootingData(

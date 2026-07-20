@@ -67,7 +67,7 @@ namespace Ships
 
         [Inject] private IModuleRestoreFactory _moduleRestoreFactory;
 
-        private Action<IPixelated> _onCommandModuleNoPixelsLeft;
+        private Action<IPixelatedRigidbody> _onCommandModuleNoPixelsLeft;
 
         private SASTurnInputResolver _sasTurnInputResolver;
 
@@ -120,16 +120,14 @@ namespace Ships
                 throw new UnityException("[Ship] CommandModule is required.");
 
             InitializeModules();
+
             _sasTurnInputResolver.CaptureDesiredHeading(GetCurrentHeadingDegrees());
 
-            if (!IsDesignMode)
-                UpdateResourcesLoop().Forget();
+            UpdateResourcesLoop().Forget();
         }
 
         protected virtual void Update()
         {
-            if (IsDesignMode) return;
-
             ReadMovementInput();
             HandleWeapons();
             ResourceManager.UpdateEnergy();
@@ -137,22 +135,16 @@ namespace Ships
 
         private void FixedUpdate()
         {
-            if (IsDesignMode) return;
-
             ApplyMovementPhysics();
         }
 
         private void OnEnable()
         {
-            if (IsDesignMode) return;
-
             ShipService.RegisterShip(this);
         }
 
         private void OnDisable()
         {
-            if (IsDesignMode) return;
-
             ShipService.UnregisterShip(this);
         }
 
@@ -162,8 +154,10 @@ namespace Ships
                 _biCohesionGraph.OnNodesRemovedDueToUnreachability -= HandleUnreachableModules;
 
             if (CommandModule != null && _onCommandModuleNoPixelsLeft != null)
-                CommandModule.PixelatedRigidbody.OnNoPixelsLeft -= _onCommandModuleNoPixelsLeft;
+                CommandModule.PixelatedRigidbody.Destroyed -= _onCommandModuleNoPixelsLeft;
         }
+
+        public bool IsDesignMode => false;
 
         public IResourceManager ResourceManager { get; private set; }
 
@@ -178,7 +172,6 @@ namespace Ships
         public string Name => transform.name;
         public IReadOnlyList<IModule> AllModules => _allModulesCache;
         public virtual bool IsSASOn => false;
-        public bool IsDesignMode { get; set; }
 
         public float GeneralEfficiency => Math.Max(0.01f, ResourceManager.EnergyEfficiency);
 
@@ -247,16 +240,15 @@ namespace Ships
 
             foreach (var module in existingModules)
             {
-                module.OnShipConnectionLost();
-                module.transform.SetParent(null, true);
-                Destroy(module.gameObject);
+                if (module)
+                    module.DestroyModule();
             }
         }
 
         public void InitializeModules()
         {
             if (CommandModule != null && _onCommandModuleNoPixelsLeft != null)
-                CommandModule.PixelatedRigidbody.OnNoPixelsLeft -= _onCommandModuleNoPixelsLeft;
+                CommandModule.PixelatedRigidbody.Destroyed -= _onCommandModuleNoPixelsLeft;
 
             CommandModule = GetComponentInChildren<Command>();
             if (CommandModule == null)
@@ -269,9 +261,9 @@ namespace Ships
             _biCohesionGraph.OnNodesRemovedDueToUnreachability += HandleUnreachableModules;
 
             _onCommandModuleNoPixelsLeft = _ => DestroyShip();
-            CommandModule.PixelatedRigidbody.OnNoPixelsLeft += _onCommandModuleNoPixelsLeft;
+            CommandModule.PixelatedRigidbody.Destroyed += _onCommandModuleNoPixelsLeft;
 
-            _moduleConnectionFactory.ConnectModules(this);
+            _moduleConnectionFactory.ConnectModules(this, transform);
 
             _shipInitializeModulesEventChannel.Raise();
 
@@ -337,12 +329,16 @@ namespace Ships
             if (snapshot == null) throw new ArgumentNullException(nameof(snapshot));
             if (contentCatalog == null) throw new ArgumentNullException(nameof(contentCatalog));
 
+            var formerName = Name;
+
+            transform.name = snapshot.shipName;
+
             DestroyAllModulesSilently();
 
             CreateModulesFromSnapshot(snapshot, contentCatalog);
 
             Debug.Log(
-                $"[Ship] Applied snapshot '{snapshot.shipName}' to '{Name}' ({snapshot.modules.Count} modules)");
+                $"[Ship] Applied snapshot '{snapshot.shipName}' to '{formerName}' ({snapshot.modules.Count} modules)");
         }
 
         private void CreateModulesFromSnapshot(ShipSnapshot snapshot, IGameContentCatalog contentCatalog)
@@ -403,7 +399,7 @@ namespace Ships
             Destroy(gameObject);
         }
 
-        private void ReleaseSurvivingModulesAsJunk()
+        internal void ReleaseSurvivingModulesAsJunk()
         {
             var survivors = ModuleGraph.GetAllNodes().AsValueEnumerable()
                 .Where(module => module != CommandModule)
@@ -425,7 +421,8 @@ namespace Ships
             module.Transform.SetParent(_mapInfo.MapTransform);
             module.Transform.gameObject.layer = PhysicsLayers.Default;
 
-            if (module is Module concreteModule) concreteModule.OnShipConnectionLost();
+            if (module is Module concreteModule)
+                concreteModule.DetachAsJunkFromShip();
         }
 
         private async UniTaskVoid UpdateResourcesLoop()
@@ -468,24 +465,6 @@ namespace Ships
                 .ToArray();
 
             ResourceManager.Recalculate(_allModulesCache);
-
-            if (IsDesignMode)
-                ConfigureModulesForDesignMode();
-        }
-
-        private void ConfigureModulesForDesignMode()
-        {
-            foreach (var module in _allModulesCache)
-            {
-                var rigidbody = module.PixelatedRigidbody?.Rigidbody;
-                if (rigidbody != null)
-                    rigidbody.simulated = false;
-
-                if (module is Engine engine)
-                    engine.SuppressNozzleExhaustForDesignMode();
-            }
-
-            MarkEnginesActivity(false);
         }
 
         protected virtual void ReadMovementInput()

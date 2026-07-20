@@ -2,25 +2,26 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Core.Constants;
+using Core.Gameplay;
 using Core.Services;
-using Editor.Standalone;
-using Events.Gameplay.Collision;
+using Core.Ships;
+using Core.State;
 using Events.Gameplay.Ship;
-using Events.Gameplay.Shooting;
 using Gameplay.EasyTeam;
 using Instantiation;
+using LMPro.External.IsAlive;
 using NUnit.Framework;
-using Services;
-using ShipFactory.Models;
 using Ships;
 using Ships.ModuleConnection;
 using Ships.Modules;
 using Ships.Systems.Gimbal;
 using Ships.Systems.Sensing;
 using Ships.Tests.TestHelpers.Factories;
-using Ships.Tests.TestHelpers.Mocks;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.TestTools;
 using Zenject;
+using ZLinq;
 using Object = UnityEngine.Object;
 using Resources = Core.Ships.Resources;
 
@@ -29,103 +30,82 @@ namespace E2E
     public abstract class E2ETestBase
     {
         protected readonly List<GameObject> CreatedObjects = new();
-        private NavigationService _navigationService;
-        private ProjectilesSpawner _projectilesSpawner;
+        private IActivePlayerShipProvider _activePlayerShipProvider;
+        private INavigationService _navigationService;
 
-        private ShipService _shipService;
-        private GameObject _testRoot;
-        protected DiContainer Container;
+        private DiContainer _sceneContainer;
         protected Instantiator Instantiator;
 
-        [SetUp]
-        public virtual void SetUp()
+        [UnitySetUp]
+        public IEnumerator SetupScene()
         {
-            _testRoot = new GameObject("TestRoot");
-            CreatedObjects.Add(_testRoot);
-
-            Container = new DiContainer();
-
-            // Add camera
-            var cameraObj = new GameObject("Camera");
-            CreatedObjects.Add(cameraObj);
-            cameraObj.transform.SetParent(_testRoot.transform);
-            cameraObj.transform.position = new Vector3(0f, 0f, -10f);
-
-            var camera = cameraObj.AddComponent<Camera>();
-            camera.transform.tag = "MainCamera";
-            camera.orthographic = true;
-            camera.orthographicSize = 100f;
-
-            // Bind basic event channels
-            var collisionEventChannel = ScriptableObject.CreateInstance<CollisionEventChannelSO>();
-            Container.Bind<CollisionEventChannelSO>().FromInstance(collisionEventChannel).AsSingle();
-
-            var shootingEventChannel = ScriptableObject.CreateInstance<ShootingEventChannel>();
-            Container.Bind<ShootingEventChannel>().FromInstance(shootingEventChannel).AsSingle();
-
-            var testDebrisSpawner = new TestDebrisSpawner();
-            Container.Bind<IDebrisSpawner>().FromInstance(testDebrisSpawner).AsSingle();
-
-            var mapInfo = new TestMapInfo(_testRoot.transform);
-            Container.Bind<IMapInfo>().FromInstance(mapInfo).AsSingle();
-
-            var shipInitializeModulesEventChannel = new GameObject("Initialize Modules Event Channel")
-                .AddComponent<ShipInitializeModulesEventChannel>();
-            Container.Bind<ShipInitializeModulesEventChannel>().FromInstance(shipInitializeModulesEventChannel)
-                .AsSingle();
-            CreatedObjects.Add(shipInitializeModulesEventChannel.gameObject);
-
-            // Bind ShipService
-            var shipServiceGo = new GameObject("ShipService");
-            CreatedObjects.Add(shipServiceGo);
-            _shipService = shipServiceGo.AddComponent<ShipService>();
-            Container.Bind<IShipService>().FromInstance(_shipService).AsSingle();
-
-            // Bind NavigationService
-            var navigationServiceGo = new GameObject("NavigationService");
-            CreatedObjects.Add(navigationServiceGo);
-            _navigationService = navigationServiceGo.AddComponent<NavigationService>();
-            _navigationService.InternalSectorSize = 20f;
-            Container.Bind<INavigationService>().FromInstance(_navigationService).AsSingle();
-            var sectorVisualizer = navigationServiceGo.AddComponent<SectorVisualizer>();
-            sectorVisualizer.InternalNavigationService = _navigationService;
-
-            // Bind Instantiator & ProjectilesSpawner
-            var instantiatorGo = new GameObject("ZenjectInstantiator");
-            CreatedObjects.Add(instantiatorGo);
-            Instantiator = instantiatorGo.AddComponent<ZenjectInstantiator>();
-
-            var projectilesSpawnerGo = new GameObject("ProjectilesSpawner");
-            CreatedObjects.Add(projectilesSpawnerGo);
-            _projectilesSpawner = projectilesSpawnerGo.AddComponent<ProjectilesSpawner>();
-            _projectilesSpawner.InternalInstantiator = Instantiator;
-            _projectilesSpawner.InternalProjectilesHolder = _testRoot.transform;
-            Container.Bind<IProjectilesSpawner>().FromInstance(_projectilesSpawner).AsSingle();
-
-            // Bind EffectsSpawner
-
-            var effectsSpawnerGo = new GameObject("EffectsSpawner");
-            CreatedObjects.Add(effectsSpawnerGo);
-            effectsSpawnerGo.SetActive(false);
-            var effectsSpawner = effectsSpawnerGo.AddComponent<EffectsSpawner>();
-            effectsSpawner.SetupForTesting(GetExplosionPrefab(), _testRoot.transform, Instantiator);
-            effectsSpawnerGo.SetActive(true);
-            Container.Bind<IEffectsSpawner>().FromInstance(effectsSpawner).AsSingle();
-
-            var shipModuleCatalog = ScriptableObject.CreateInstance<ShipModuleCatalog>();
-            Container.Bind<IShipModuleCatalog>().FromInstance(shipModuleCatalog).AsSingle();
-
-            SnapshotRestoreServicesFactory.Bind(Container, CreatedObjects);
-
-            InjectAllObjectsInScene(Container);
+            yield return LoadMainGame();
         }
 
-        [TearDown]
-        public virtual void TearDown()
+        [UnityTearDown]
+        public IEnumerator TearDown()
         {
-            foreach (var obj in CreatedObjects)
+            foreach (var obj in CreatedObjects.AsValueEnumerable().Where(obj => obj != null))
                 Object.DestroyImmediate(obj);
             CreatedObjects.Clear();
+
+            DestroyEverythingExceptTestRunner();
+            ResetSaveState();
+
+            yield return null;
+        }
+
+        /// <summary>
+        ///     Loads MainGame with no auto-spawned skirmish ships (optional player already migrated).
+        ///     Tests build their own ships via ModuleFactory against the scene DiContainer.
+        /// </summary>
+        private IEnumerator LoadMainGame()
+        {
+            ConfigureEmptyFreeModeSaveState();
+            DestroyEverythingExceptTestRunner();
+
+            Assert.That(Application.CanStreamedLevelBeLoaded(SceneNames.MainGame),
+                $"Scene '{SceneNames.MainGame}' must be in Build Settings for E2E tests.");
+
+            var loadOp = SceneManager.LoadSceneAsync(SceneNames.MainGame, LoadSceneMode.Single);
+            Assert.That(loadOp, Is.Not.Null, $"Failed to start loading '{SceneNames.MainGame}'.");
+
+            while (!loadOp.isDone)
+                yield return null;
+
+            yield return null;
+
+            var sceneContext = Object.FindAnyObjectByType<SceneContext>();
+            Assert.That(sceneContext, Is.Not.Null, "MainGame scene is missing a SceneContext.");
+            Assert.That(sceneContext.Container, Is.Not.Null, "SceneContext.Container was not initialized.");
+
+            _sceneContainer = sceneContext.Container;
+            _sceneContainer.Resolve<IShipService>();
+            _activePlayerShipProvider = _sceneContainer.Resolve<IActivePlayerShipProvider>();
+            _navigationService = _sceneContainer.Resolve<INavigationService>();
+            Instantiator = Object.FindAnyObjectByType<ZenjectInstantiator>();
+            Assert.That(Instantiator, Is.Not.Null, "MainGame scene is missing an Instantiator.");
+
+            EnsureShipInitializeModulesEventChannelBound();
+        }
+
+        private int GetNavigableShipSize()
+        {
+            var sectorSize = _navigationService.SectorSize;
+            return Mathf.Max(1, Mathf.FloorToInt(sectorSize) - 1);
+        }
+
+        private void EnsureShipInitializeModulesEventChannelBound()
+        {
+            // Real ship shells bind this via GameObjectContext + ShipInstaller.
+            // ModuleFactory test ships inject from the scene container instead.
+            if (_sceneContainer.HasBinding<ShipInitializeModulesEventChannel>())
+                return;
+
+            var channelGo = new GameObject(nameof(ShipInitializeModulesEventChannel));
+            CreatedObjects.Add(channelGo);
+            var channel = channelGo.AddComponent<ShipInitializeModulesEventChannel>();
+            _sceneContainer.Bind<ShipInitializeModulesEventChannel>().FromInstance(channel).AsSingle();
         }
 
         protected static IEnumerator WaitForLifecycle()
@@ -158,91 +138,62 @@ namespace E2E
         protected AIShip CreateAIShip(string name, Team team, Vector2 position, bool withWeapons,
             bool withEngines)
         {
-            var shipGo = UnityBuilder.CreateGameObject(name, CreatedObjects, Container);
-            shipGo.layer = team.Layer;
-            shipGo.transform.position = position;
-
-            const int modulePixelSize = 5;
-            const float moduleSpacing = 5f;
-            const float engineMaxThrust = 1.6f;
-
-            // Command
-            ModuleFactory.CreateCommandModule(shipGo.transform, Vector2.zero, Container, CreatedObjects,
-                modulePixelSize, modulePixelSize);
-            // Power
-            ModuleFactory.CreateTestPowerModule(shipGo.transform, new Vector2(0f, moduleSpacing), Container,
-                CreatedObjects, modulePixelSize, modulePixelSize);
-            if (withEngines)
-            {
-                // Engines
-                ModuleFactory.CreateEngineModule(shipGo.transform, new Vector2(moduleSpacing, 0f), Container,
-                    CreatedObjects, engineMaxThrust, modulePixelSize, modulePixelSize, gimbalRange: 180f);
-                ModuleFactory.CreateEngineModule(shipGo.transform, new Vector2(-moduleSpacing, 0f), Container,
-                    CreatedObjects, engineMaxThrust, modulePixelSize, modulePixelSize, gimbalRange: 180f);
-            }
-
-            var bulletPrefab = GetBulletPrefab();
-
-            if (withWeapons)
-            {
-                // Weapon (Cannon)
-                var cannonGo = ModuleFactory.CreateModuleBase("Cannon", shipGo.transform,
-                    new Vector2(0f, -moduleSpacing), 0f, Container, CreatedObjects, 5, 5);
-                var cannon = cannonGo.AddComponent<Cannon>();
-                cannon.SetResources(new Resources(0, 1f, 0, 0, 0));
-                var weaponSprite = CreateTestSprite();
-                var projectileSpawnGo = new GameObject("ProjectileSpawn");
-                projectileSpawnGo.transform.SetParent(cannonGo.transform);
-                projectileSpawnGo.transform.position = cannonGo.transform.position;
-                cannon.SetupForTesting(bulletPrefab, 0.5f, 0.5f, weaponSprite,
-                    new List<Transform> { projectileSpawnGo.transform });
-            }
+            var shipGo = BuildShipShell(name, team, position);
+            AddStandardModules(shipGo, withWeapons, withEngines);
 
             shipGo.AddComponent<ModuleConnectionFactory>();
             shipGo.AddComponent<ShipSensing>();
 
             shipGo.SetActive(false);
             var ship = shipGo.AddComponent<AIShip>();
-            Container.InjectGameObject(shipGo);
+            _sceneContainer.InjectGameObject(shipGo);
             shipGo.SetActive(true);
 
             ship.ConfigureSASSettingsForTesting(new SASTurnInputSettings());
-
             ship.SetTeam(team);
-            ship.SetNavigationSize(15);
+            // Footprint must fit the scene NavigationService sector grid (old harness used sector 20 + size 15).
+            ship.SetNavigationSize(GetNavigableShipSize());
             ship.ConfigureAllocatorForTesting(true, 14, 1f, 0.4f, 0.02f);
             ship.InitializeModules();
-
             ship.InternalStopDistance = 4.0f;
 
             return ship;
         }
 
-        private static GameObject GetBulletPrefab()
+        protected PlayerShip CreatePlayerShip(string name, Team team, Vector2 position, bool withWeapons,
+            bool withEngines)
         {
-            var bulletPrefab = UnityEngine.Resources.Load<GameObject>("Tests/Prefabs/Bullet");
+            var shipGo = BuildShipShell(name, team, position);
+            AddStandardModules(shipGo, withWeapons, withEngines);
 
-            return bulletPrefab;
+            shipGo.AddComponent<ModuleConnectionFactory>();
+
+            shipGo.SetActive(false);
+            var ship = shipGo.AddComponent<PlayerShip>();
+            _sceneContainer.InjectGameObject(shipGo);
+            shipGo.SetActive(true);
+
+            ship.ConfigureSASSettingsForTesting(new SASTurnInputSettings());
+            ship.SetTeam(team);
+            ship.ConfigureAllocatorForTesting(true, 14, 1f, 0.4f, 0.02f);
+            ship.InitializeModules();
+            _activePlayerShipProvider.SetActiveShip(ship);
+
+            return ship;
         }
 
-        protected static GameObject GetAsteroidPrefab()
+        protected static int CountPixels(IShip ship)
         {
-            var asteroidPrefab = UnityEngine.Resources.Load<GameObject>("Tests/Prefabs/Asteroid");
+            if (ship == null || !ship.IsAlive())
+                return 0;
 
-            return asteroidPrefab;
-        }
-
-        private static GameObject GetExplosionPrefab()
-        {
-            var explosionPrefab = UnityEngine.Resources.Load<GameObject>("Tests/Prefabs/Explosion");
-
-            return explosionPrefab;
+            return ship.AllModules.AsValueEnumerable()
+                .Sum(module => module?.PixelatedRigidbody?.CurrentPixelCount ?? 0);
         }
 
         protected void CreateObstacleBox(Vector3 position, Vector2 size)
         {
             var sizeHalf = size / 2f;
-
             CreateObstacleWall("ObstacleTop", position + new Vector3(0f, sizeHalf.y, 0f), new Vector2(size.x, 5f));
             CreateObstacleWall("ObstacleBottom", position - new Vector3(0f, sizeHalf.y, 0f), new Vector2(size.x, 5f));
             CreateObstacleWall("ObstacleLeft", position - new Vector3(sizeHalf.x, 0f, 0f), new Vector2(5f, size.y));
@@ -255,15 +206,97 @@ namespace E2E
             CreatedObjects.Add(wall);
             wall.transform.position = position;
             wall.layer = PhysicsLayers.Obstacles;
+            wall.transform.localScale = size;
 
-            var col = wall.AddComponent<BoxCollider2D>();
-            col.size = size;
+            wall.AddComponent<BoxCollider2D>();
 
-            // Give it a dummy rigidbody so that collision resolver handles it as a static obstacle
             var rb = wall.AddComponent<Rigidbody2D>();
             rb.bodyType = RigidbodyType2D.Static;
 
+            var spriteRenderer = wall.AddComponent<SpriteRenderer>();
+            spriteRenderer.sprite = CreateWhiteSprite();
+
             return wall;
+        }
+
+        private static Sprite CreateWhiteSprite()
+        {
+            var texture = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+            texture.SetPixel(0, 0, Color.white);
+            texture.Apply();
+
+            texture.filterMode = FilterMode.Point;
+            texture.wrapMode = TextureWrapMode.Clamp;
+
+            var rect = new Rect(0, 0, 1, 1);
+            var pivot = new Vector2(0.5f, 0.5f);
+            var whitePixelSprite = Sprite.Create(texture, rect, pivot, 1.0f);
+
+            return whitePixelSprite;
+        }
+
+        protected static GameObject GetAsteroidPrefab()
+        {
+            var asteroidPrefab = UnityEngine.Resources.Load<GameObject>("Tests/Prefabs/Asteroid");
+            return asteroidPrefab == null
+                ? throw new UnityException("[E2E] Missing Resources/Tests/Prefabs/Asteroid.")
+                : asteroidPrefab;
+        }
+
+        private GameObject BuildShipShell(string name, Team team, Vector2 position)
+        {
+            var shipGo = UnityBuilder.CreateGameObject(name, CreatedObjects, _sceneContainer);
+            shipGo.layer = team.Layer;
+            shipGo.transform.position = position;
+            return shipGo;
+        }
+
+        private void AddStandardModules(GameObject shipGo, bool withWeapons, bool withEngines)
+        {
+            const int modulePixelSize = 5;
+            const float moduleSpacing = 5f;
+            const float engineMaxThrust = 1.6f;
+
+            ModuleFactory.CreateCommandModule(shipGo.transform, Vector2.zero, _sceneContainer, CreatedObjects,
+                modulePixelSize, modulePixelSize);
+            ModuleFactory.CreateTestPowerModule(shipGo.transform, new Vector2(0f, moduleSpacing), _sceneContainer,
+                CreatedObjects, modulePixelSize, modulePixelSize);
+
+            if (withEngines)
+            {
+                ModuleFactory.CreateEngineModule(shipGo.transform, new Vector2(moduleSpacing, 0f), _sceneContainer,
+                    CreatedObjects, engineMaxThrust, modulePixelSize, modulePixelSize, gimbalRange: 180f);
+                ModuleFactory.CreateEngineModule(shipGo.transform, new Vector2(-moduleSpacing, 0f), _sceneContainer,
+                    CreatedObjects, engineMaxThrust, modulePixelSize, modulePixelSize, gimbalRange: 180f);
+            }
+
+            if (!withWeapons)
+                return;
+
+            var bulletPrefab = GetBulletPrefab();
+
+            var cannonGo = ModuleFactory.CreateModuleBase("Cannon", shipGo.transform,
+                new Vector2(0f, -moduleSpacing), 0f, _sceneContainer, CreatedObjects, 5, 5);
+
+            var cannon = cannonGo.AddComponent<Cannon>();
+            cannon.SetResources(new Resources(0, 1f, 0, 0, 0));
+
+            var weaponSprite = CreateTestSprite();
+
+            var projectileSpawnGo = new GameObject("ProjectileSpawn");
+            projectileSpawnGo.transform.SetParent(cannonGo.transform);
+            projectileSpawnGo.transform.position = cannonGo.transform.position;
+
+            cannon.SetupForTesting(bulletPrefab, 0.5f, 0.5f, weaponSprite,
+                new List<Transform> { projectileSpawnGo.transform });
+        }
+
+        private static GameObject GetBulletPrefab()
+        {
+            var bulletPrefab = UnityEngine.Resources.Load<GameObject>("Tests/Prefabs/Bullet");
+            return bulletPrefab == null
+                ? throw new UnityException("[E2E] Missing Resources/Tests/Prefabs/Bullet.")
+                : bulletPrefab;
         }
 
         private static Sprite CreateTestSprite()
@@ -272,15 +305,46 @@ namespace E2E
             return Sprite.Create(texture, new Rect(0, 0, 2, 2), new Vector2(0.5f, 0.5f));
         }
 
-        private static void InjectAllObjectsInScene(DiContainer container)
+        private static void ConfigureEmptyFreeModeSaveState()
         {
-            var allBehaviours = Object.FindObjectsByType<MonoBehaviour>();
+            SaveState.Mode = GameSessionMode.FreeMode;
+            SaveState.PlayerShipName = null;
+            SaveState.PlayerShipSnapshotFilePath = null;
+            SaveState.EnemyShipCount = 0;
+            SaveState.FriendlyShipCount = 0;
+            SaveState.AsteroidCount = 0;
+            SaveState.ProgressionSlotIndex = 0;
+            SaveState.SelectedAllyIndex = 0;
+        }
 
-            foreach (var behaviour in allBehaviours)
-                if (behaviour != null)
-                    container.Inject(behaviour);
+        private static void ResetSaveState()
+        {
+            ConfigureEmptyFreeModeSaveState();
+        }
 
-            Debug.Log("Injected dependencies into all MonoBehaviours in the scene.");
+        private static void DestroyEverythingExceptTestRunner()
+        {
+            const string testRunnerGameObjectName = "Code-based tests runner";
+
+            var testRunner = GameObject.Find(testRunnerGameObjectName);
+            if (testRunner != null)
+                Object.DontDestroyOnLoad(testRunner);
+
+            for (var i = 0; i < SceneManager.sceneCount; i++)
+                foreach (var root in SceneManager.GetSceneAt(i).GetRootGameObjects())
+                    Object.DestroyImmediate(root);
+
+            if (!ProjectContext.HasInstance)
+            {
+                StaticContext.Clear();
+                return;
+            }
+
+            foreach (var root in ProjectContext.Instance.gameObject.scene.GetRootGameObjects())
+                if (root.name != testRunnerGameObjectName)
+                    Object.DestroyImmediate(root);
+
+            StaticContext.Clear();
         }
     }
 }

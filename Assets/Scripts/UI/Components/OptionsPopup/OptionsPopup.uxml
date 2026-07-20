@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="project://database/Assets/DesignSystem/Resources/UI/Styles/DesignSystem/DesignSystem.uss"/>
+    <ui:VisualElement name="options-popup-backdrop" class="ds-root ds-backdrop"
+                      style="position: absolute; left: 0; right: 0; top: 0; bottom: 0;">
+        <ui:VisualElement class="ds-dialog" style="min-width: 500px">
+            <ui:VisualElement style="flex-direction: row; justify-content: flex-end; width: 100%;">
+                <ui:Button name="options-popup-close-button" class="ds-modal__close">
+                    <ui:VisualElement class="ds-icon ds-icon--sm ds-icon--close"/>
+                </ui:Button>
+            </ui:VisualElement>
+            <ui:Label name="options-popup-title" text="" class="ds-dialog__title"/>
+            <ui:Label name="options-popup-description" text="" class="ds-dialog__message"/>
+            <ui:VisualElement name="options-popup-actions" class="ds-dialog__actions"/>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

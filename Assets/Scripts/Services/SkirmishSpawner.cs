@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
-using Core.Constants;
 using Core.Services;
 using Core.Ships;
-using Core.State;
 using Gameplay.EasyTeam;
 using Instantiation;
 using Services.Camera;
@@ -19,6 +17,7 @@ namespace Services
         [Header("References")]
         [SerializeField] private GameObject asteroidPrefab;
 
+        [SerializeField] private GameObject playerShipShellPrefab;
         [SerializeField] private GameObject enemyShipShellPrefab;
         [SerializeField] private GameObject friendlyShipShellPrefab;
         [SerializeField] private Team enemyTeam;
@@ -35,9 +34,10 @@ namespace Services
         [SerializeField] private LayerMask blockingMask;
 
         [SerializeField] private Instantiator instantiator;
-        [Inject(Id = Constants.PlayerShipId)] private IShip _playerShip;
+        [Inject] private IActivePlayerShipProvider _activePlayerShipProvider;
         [Inject] private ISkirmishSnapshotCatalog _snapshotCatalog;
         [Inject] private IShipSnapshotService _snapshotService;
+        [Inject] private IBattleSpawnConfigurationProvider _spawnConfigurationProvider;
 
         public void SpawnFromSaveState()
         {
@@ -47,55 +47,70 @@ namespace Services
             if (blockingMask == 0)
                 blockingMask = LayerMask.GetMask("Obstacles", "Debris", "Friendly", "Enemy");
 
-            ValidateSnapshotAvailability();
+            var configuration = _spawnConfigurationProvider.GetConfiguration();
+            ValidateSnapshotAvailability(configuration);
 
             var spawnRect = spawnArea.GetSpawnRect();
-
             var reservations = new List<SkirmishSpawnPlacement.SpawnReservation>();
 
-            SpawnAndSetupPlayer(reservations);
-            SpawnAsteroids(SaveState.AsteroidCount, spawnRect, reservations);
-            SpawnShips(
-                SaveState.EnemyShipCount,
-                enemyShipShellPrefab,
-                _snapshotCatalog.GetRandomEnemySnapshot,
-                shipSeparationRadius,
-                enemyTeam,
-                spawnRect,
-                reservations);
-            SpawnShips(
-                SaveState.FriendlyShipCount,
+            if (configuration.PlayerShipSnapshot != null)
+                SpawnPlayer(configuration, spawnRect, reservations);
+
+            SpawnAsteroids(configuration.AsteroidCount, spawnRect, reservations);
+            SpawnSnapshotShips(
+                configuration.AllySnapshots,
                 friendlyShipShellPrefab,
-                _snapshotCatalog.GetRandomFriendlySnapshot,
-                shipSeparationRadius,
                 friendlyTeam,
                 spawnRect,
                 reservations);
+            SpawnShips(
+                configuration.RandomFriendlyCount,
+                friendlyShipShellPrefab,
+                _snapshotCatalog.GetRandomFriendlySnapshot,
+                friendlyTeam,
+                spawnRect,
+                reservations);
+            SpawnShips(
+                configuration.EnemyCount,
+                enemyShipShellPrefab,
+                _snapshotCatalog.GetRandomEnemySnapshot,
+                enemyTeam,
+                spawnRect,
+                reservations);
         }
 
-        private void SpawnAndSetupPlayer(List<SkirmishSpawnPlacement.SpawnReservation> reservations)
+        private void SpawnPlayer(
+            IBattleSpawnConfiguration configuration,
+            Rect spawnRect,
+            List<SkirmishSpawnPlacement.SpawnReservation> reservations)
         {
-            var playerShipSnapshotFile = SaveState.PlayerShipSnapshotFilePath;
+            if (!playerShipShellPrefab)
+                throw new UnityException("[SkirmishSpawner] Player ship shell prefab is not assigned.");
 
-            if (!string.IsNullOrWhiteSpace(playerShipSnapshotFile))
-                _snapshotService.ApplySnapshot(_playerShip,
-                    _snapshotService.LoadSnapshotFromFile(playerShipSnapshotFile));
+            if (!TryFindSpawnPosition(spawnRect, shipSeparationRadius, reservations, out var position))
+                throw new UnityException("[SkirmishSpawner] Failed to place player ship.");
 
-            _playerShip.InitializeModules();
+            var instance = instantiator.Instantiate(playerShipShellPrefab, position, RandomRotation(), spawnParent);
+            var ship = instance.GetComponent<Ship>();
+            if (ship == null)
+                throw new UnityException("[SkirmishSpawner] Spawned player ship shell does not have a Ship component.");
 
-            cameraManager.StartFollowingObject((_playerShip.CommandModule as MonoBehaviour)?.gameObject);
+            _snapshotService.ApplySnapshot(ship, configuration.PlayerShipSnapshot);
 
-            reservations.Add(
-                new SkirmishSpawnPlacement.SpawnReservation(_playerShip.GetPosition(), shipSeparationRadius));
+            ship.SetTeam(friendlyTeam);
+            ship.InitializeModules();
+            _activePlayerShipProvider.SetActiveShip(ship);
+            cameraManager.StartFollowingObject((ship.CommandModule as MonoBehaviour)?.gameObject);
+            reservations.Add(new SkirmishSpawnPlacement.SpawnReservation(position, shipSeparationRadius));
         }
 
-        private void ValidateSnapshotAvailability()
+        private void ValidateSnapshotAvailability(IBattleSpawnConfiguration configuration)
         {
-            if (SaveState.EnemyShipCount > 0 && !_snapshotCatalog.HasEnemySnapshots())
+            if (configuration.EnemyCount > 0 && !_snapshotCatalog.HasEnemySnapshots())
                 throw new UnityException(
                     "[SkirmishSpawner] Enemy ship count is greater than zero but enemy snapshot catalog is empty.");
 
-            if (SaveState.FriendlyShipCount > 0 && !_snapshotCatalog.HasFriendlySnapshots())
+            if (configuration.RandomFriendlyCount > 0 && !_snapshotCatalog.HasFriendlySnapshots())
                 throw new UnityException(
                     "[SkirmishSpawner] Friendly ship count is greater than zero but friendly snapshot catalog is empty.");
         }
@@ -124,10 +139,43 @@ namespace Services
             }
         }
 
-        private void SpawnShips(int count,
+        private void SpawnSnapshotShips(
+            IReadOnlyList<ShipSnapshot> snapshots,
+            GameObject shipShellPrefab,
+            Team team,
+            Rect spawnRect,
+            List<SkirmishSpawnPlacement.SpawnReservation> reservations)
+        {
+            if (snapshots == null || snapshots.Count == 0)
+                return;
+
+            if (!shipShellPrefab)
+                throw new UnityException("[SkirmishSpawner] Ship shell prefab is not assigned.");
+
+            for (var i = 0; i < snapshots.Count; i++)
+            {
+                if (!TryFindSpawnPosition(spawnRect, shipSeparationRadius, reservations, out var position))
+                {
+                    Debug.LogError($"[SkirmishSpawner] Failed to place ally ship #{i + 1} without overlap.");
+                    continue;
+                }
+
+                var instance = instantiator.Instantiate(shipShellPrefab, position, RandomRotation(), spawnParent);
+                var ship = instance.GetComponent<Ship>();
+                if (ship == null)
+                    throw new UnityException("[SkirmishSpawner] Spawned ship shell does not have a Ship component.");
+
+                _snapshotService.ApplySnapshot(ship, snapshots[i]);
+                ship.SetTeam(team);
+                ship.InitializeModules();
+                reservations.Add(new SkirmishSpawnPlacement.SpawnReservation(position, shipSeparationRadius));
+            }
+        }
+
+        private void SpawnShips(
+            int count,
             GameObject shipShellPrefab,
             Func<ShipSnapshot> getSnapshot,
-            float shipRadius,
             Team team,
             Rect spawnRect,
             List<SkirmishSpawnPlacement.SpawnReservation> reservations)
@@ -140,7 +188,7 @@ namespace Services
 
             for (var i = 0; i < count; i++)
             {
-                if (!TryFindSpawnPosition(spawnRect, shipRadius, reservations, out var position))
+                if (!TryFindSpawnPosition(spawnRect, shipSeparationRadius, reservations, out var position))
                 {
                     Debug.LogError($"[SkirmishSpawner] Failed to place ship #{i + 1} without overlap.");
                     continue;
@@ -149,12 +197,12 @@ namespace Services
                 var instance = instantiator.Instantiate(shipShellPrefab, position, RandomRotation(), spawnParent);
                 var ship = instance.GetComponent<Ship>();
                 if (ship == null)
-                    throw new UnityException("[SkirmishSpawner] Spawned ship shell does not have an IShip component.");
+                    throw new UnityException("[SkirmishSpawner] Spawned ship shell does not have a Ship component.");
 
                 _snapshotService.ApplySnapshot(ship, getSnapshot());
                 ship.SetTeam(team);
                 ship.InitializeModules();
-                reservations.Add(new SkirmishSpawnPlacement.SpawnReservation(position, shipRadius));
+                reservations.Add(new SkirmishSpawnPlacement.SpawnReservation(position, shipSeparationRadius));
             }
         }
 

@@ -15,7 +15,7 @@ namespace Ships.Modules
         private ModuleType moduleType;
 
         public override ModuleType Type => moduleType;
-        public override ConcreteModuleType ConcreteType => ConcreteModuleType.Basic;
+        protected override ConcreteModuleType ConcreteType => ConcreteModuleType.Basic;
 
         protected override void Start()
         {

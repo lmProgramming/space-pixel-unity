@@ -81,5 +81,20 @@ namespace Ships.Tests.TestHelpers.Factories
                 .WithEngineModule(new Vector2(engineSpacing, 0f), engineMaxThrust, modulePixelSize, modulePixelSize)
                 .Build(true);
         }
+
+        public static DesignShip CreateDesignShipWithCommandAndEngine(DiContainer container,
+            ICollection<GameObject> createdObjects,
+            Transform parent = null, float engineMaxThrust = 100f, float engineSpacing = DefaultModuleSpacing,
+            int modulePixelSize = DefaultModulePixelSize)
+        {
+            var builder = ShipTestBuilder.CreateShip(container, createdObjects, "Ship");
+            if (parent != null)
+                builder.ParentedTo(parent);
+
+            return builder
+                .WithCommand("Command", Vector2.zero, modulePixelSize, modulePixelSize)
+                .WithEngineModule(new Vector2(engineSpacing, 0f), engineMaxThrust, modulePixelSize, modulePixelSize)
+                .BuildDesignShip(true);
+        }
     }
 }

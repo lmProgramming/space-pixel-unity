@@ -123,6 +123,51 @@ Transform:
   - {fileID: 4723389874783212023}
   m_Father: {fileID: 481154239727467556}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1531846106618602201
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 91739786414291168}
+  - component: {fileID: 42750044799143377}
+  m_Layer: 0
+  m_Name: FreeModeBattleResolutionHandler
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &91739786414291168
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1531846106618602201}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3958861665358511682}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &42750044799143377
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1531846106618602201}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a62264f0560bf8f9b4ca70c0385a6a1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UI::UI.Progression.FreeModeBattleResolutionHandler
+  missionResultUi: {fileID: 0}
 --- !u!1 &1696737034756950474
 GameObject:
   m_ObjectHideFlags: 0
@@ -288,6 +333,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 91739786414291168}
   - {fileID: 8994786268923723586}
   m_Father: {fileID: 481154239727467556}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -541,7 +587,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5494529849481706430}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 553215e9bb674350ae2cbb925cd92998, type: 3}
   m_Name: 
@@ -712,7 +758,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6910225380903978702}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 60de0711522444c8872a4b8b4425ba52, type: 3}
   m_Name: 
@@ -727,6 +773,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7617161623423185546}
   - component: {fileID: 8678225184202570128}
+  - component: {fileID: 7967597326353789627}
   m_Layer: 0
   m_Name: SkirmishSpawner
   m_TagString: Untagged
@@ -762,6 +809,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Services::Services.SkirmishSpawner
   asteroidPrefab: {fileID: 131938536724509382, guid: 30bedfd2c697a46c2b9734629bd0d881, type: 3}
+  playerShipShellPrefab: {fileID: 7092472564742756392, guid: 4604a276e7e16e094b5cdc201811de56, type: 3}
   enemyShipShellPrefab: {fileID: 7092472564742756392, guid: c57d73256ec300e6da35ccf8ed7b4775, type: 3}
   friendlyShipShellPrefab: {fileID: 7092472564742756392, guid: ea0ec5d1929f73db08c13efa187b5d57, type: 3}
   enemyTeam: {fileID: 0}
@@ -776,6 +824,19 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 0
   instantiator: {fileID: 7664176557686330551}
+--- !u!114 &7967597326353789627
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6944570369148477847}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a62264f0560bf8f9b4ca70c0385a6a1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UI::UI.Progression.FreeModeBattleResolutionHandler
+  missionResultUi: {fileID: 0}
 --- !u!1 &7875241323743208151
 GameObject:
   m_ObjectHideFlags: 0
@@ -1040,6 +1101,14 @@ PrefabInstance:
       propertyPath: projectilesSpawner
       value: 
       objectReference: {fileID: 2585479794438263957}
+    - target: {fileID: 2029778059734102207, guid: 17371dd093b1ba2c5bb0965847c3c405, type: 3}
+      propertyPath: moduleRestoreFactory
+      value: 
+      objectReference: {fileID: 962074348792692998}
+    - target: {fileID: 2029778059734102207, guid: 17371dd093b1ba2c5bb0965847c3c405, type: 3}
+      propertyPath: pixelatedRigidbodyFactory
+      value: 
+      objectReference: {fileID: 7239160791304327551}
     - target: {fileID: 5515476119549963838, guid: 17371dd093b1ba2c5bb0965847c3c405, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0

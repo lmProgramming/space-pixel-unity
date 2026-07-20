@@ -5,6 +5,9 @@ namespace Core.Gameplay.Sound
         Explosion,
         Collision,
         BulletShooting,
-        LaserShooting
+        LaserShooting,
+        ModulePlace,
+        ModuleDelete,
+        ModuleRotate
     }
 }

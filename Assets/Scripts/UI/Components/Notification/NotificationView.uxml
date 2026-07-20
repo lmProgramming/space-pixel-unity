@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML
+        xmlns:ui="UnityEngine.UIElements"
+>
+    <Style src="project://database/Assets/DesignSystem/Resources/UI/Styles/DesignSystem/DesignSystem.uss?fileID=7433441132597879392&amp;guid=2fe121bab235f2a4f8cbc07737f87fe2&amp;type=3#DesignSystem"/>
+    <ui:VisualElement class="ds-root ds-root--transparent" picking-mode="Ignore">
+        <ui:VisualElement name="notification-container" class="ds-toast-container"
+                          style="display: flex; justify-content: center; align-items: center; position: absolute; top: 80px; align-self: center;"
+        >
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

@@ -4,7 +4,6 @@ namespace Core.Constants
     {
         public static class Pause
         {
-            public const string OverlayHost = "pause-overlay-host";
             public const string Overlay = "pause-overlay";
             public const string Title = "pause-title";
             public const string ResumeButton = "pause-resume-button";
@@ -14,7 +13,6 @@ namespace Core.Constants
 
         public static class Settings
         {
-            public const string OverlayHost = "settings-overlay-host";
             public const string Overlay = "settings-overlay";
             public const string Title = "settings-title";
             public const string MasterSlider = "settings-master-slider";

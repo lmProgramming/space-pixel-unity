@@ -33,7 +33,6 @@ namespace Ships.Tests.TestHelpers.Factories
         private readonly GameObject _shipGo;
         private Module _commandModule;
         private bool _deactivateBeforeWire;
-        private bool _injectGameObject = true;
 
         private ShipTestBuilder(DiContainer container, ICollection<GameObject> createdObjects, string shipName)
         {
@@ -59,12 +58,6 @@ namespace Ships.Tests.TestHelpers.Factories
             _shipGo.transform.SetParent(parent);
             if (deactivateBeforeWire)
                 _shipGo.SetActive(false);
-            return this;
-        }
-
-        public ShipTestBuilder WithoutGameObjectInjection()
-        {
-            _injectGameObject = false;
             return this;
         }
 
@@ -266,6 +259,14 @@ namespace Ships.Tests.TestHelpers.Factories
             };
         }
 
+        public DesignShip BuildDesignShip(bool initializeModules = false)
+        {
+            var ship = WireShip<DesignShip>(initializeModules);
+            EnsureAllModulesWired(ship).Forget();
+
+            return ship;
+        }
+
         public Ship Build(bool initializeModules = false)
         {
             var ship = WireShip<Ship>(initializeModules);
@@ -294,7 +295,7 @@ namespace Ships.Tests.TestHelpers.Factories
             return new ShipWithEnginesResult<ShipTestProxy> { Ship = ship, Engines = new List<Engine>(_engines) };
         }
 
-        private static async UniTask EnsureAllModulesWired(Ship ship)
+        private static async UniTask EnsureAllModulesWired<TShip>(TShip ship) where TShip : Component, IShip
         {
             await UniTask.Yield();
 
@@ -351,13 +352,12 @@ namespace Ships.Tests.TestHelpers.Factories
             return go;
         }
 
-        private T WireShip<T>(bool initializeModules) where T : Ship
+        private T WireShip<T>(bool initializeModules) where T : Component, IShip
         {
             var ship = ModuleFactory.WireShip<T>(_shipGo, _container);
             if (initializeModules)
                 ship.InitializeModules();
-            if (_injectGameObject)
-                _container.InjectGameObject(_shipGo);
+            _container.InjectGameObject(_shipGo);
             return ship;
         }
 

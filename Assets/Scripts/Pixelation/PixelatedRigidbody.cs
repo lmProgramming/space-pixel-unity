@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using Core.Constants;
 using Core.Grid;
 using Core.Pixelation;
 using Core.Services;
@@ -51,6 +52,9 @@ namespace Pixelation
         [Inject] private IDebrisSpawner _debrisSpawner;
 
         private bool _isSetup;
+        [Inject] private PixelCollisionHandler.Factory _pixelCollisionHandlerFactory;
+
+        [Inject] protected GameplayConstants GameplayConstants;
         private HealthGrid HealthGrid { get; set; }
 
         private bool HasArmorMap => armorMap != null && armorMap.ToString() != "null";
@@ -67,6 +71,8 @@ namespace Pixelation
         {
             if (TexturePixelGrid == null || TexturePixelGrid.PixelCount == 0)
                 throw new InvalidDataException("TexturePixelGrid is null or has no pixels.");
+
+            EnsureCollisionHandler();
         }
 
         private void FixedUpdate()
@@ -231,7 +237,7 @@ namespace Pixelation
             return position;
         }
 
-        public event Action<IPixelated> OnNoPixelsLeft;
+        public event Action<IPixelatedRigidbody> Destroyed;
 
         public event Action<List<Vector2Int>, PixelLoseReason> OnPixelsLost;
 
@@ -289,7 +295,7 @@ namespace Pixelation
 
         public virtual void NoPixelsLeft()
         {
-            OnNoPixelsLeft?.Invoke(this);
+            Destroyed?.Invoke(this);
             Destroy(gameObject);
         }
 
@@ -302,6 +308,23 @@ namespace Pixelation
         {
             sprite = newSprite;
             Setup(forceSetup: true, recalculateColliders: true);
+        }
+
+        private void EnsureCollisionHandler()
+        {
+            if (CollisionHandler != null)
+                return;
+
+            if (!_collisionEventChannelSO || _debrisSpawner == null || TexturePixelGrid == null)
+                return;
+
+            if (_pixelCollisionHandlerFactory == null)
+                throw new UnityException(
+                    "[PixelatedRigidbody] PixelCollisionHandler.Factory is required.");
+
+            CollisionHandler = _pixelCollisionHandlerFactory.Create(
+                TexturePixelGrid, this, RequirePolygonCollider());
+            CollisionHandler.ForceRecalculateColliders();
         }
 
         private void ApplySpriteRenderedOptions(int sortingLayerID, int orderInLayer)
@@ -456,8 +479,14 @@ namespace Pixelation
             TexturePixelGrid = new TexturePixelGrid(SpriteRenderer);
 
             if ((_collisionEventChannelSO && _debrisSpawner != null) || recalculateColliders)
-                CollisionHandler = new PixelCollisionHandler(TexturePixelGrid, this, GetComponent<PolygonCollider2D>(),
-                    _collisionEventChannelSO, _debrisSpawner);
+            {
+                if (_pixelCollisionHandlerFactory == null)
+                    throw new UnityException(
+                        "[PixelatedRigidbody] PixelCollisionHandler.Factory is required.");
+
+                CollisionHandler = _pixelCollisionHandlerFactory.Create(
+                    TexturePixelGrid, this, RequirePolygonCollider());
+            }
 
             if (colors is not null)
             {
@@ -543,6 +572,16 @@ namespace Pixelation
             Rigidbody = GetComponent<Rigidbody2D>();
             SpriteRenderer = GetComponent<SpriteRenderer>();
             Collider2D = GetComponent<Collider2D>();
+        }
+
+        private PolygonCollider2D RequirePolygonCollider()
+        {
+            var polygonCollider = Collider2D as PolygonCollider2D ?? GetComponent<PolygonCollider2D>();
+            if (!polygonCollider)
+                throw new UnityException(
+                    $"[PixelatedRigidbody] PolygonCollider2D is required on '{name}'.");
+
+            return polygonCollider;
         }
 
         public void CopyVelocity(IPixelatedRigidbody parentBody)

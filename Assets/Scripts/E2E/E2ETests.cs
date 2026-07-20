@@ -3,7 +3,6 @@ using Core.Constants;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
-using ZLinq;
 
 namespace E2E
 {
@@ -14,25 +13,19 @@ namespace E2E
         [Retry(3)]
         public IEnumerator Test1_OpposingTeamShipsGoAroundWallAndComeCloseToEachOther()
         {
-            // arrange
-
             var team1 = CreateTeam("Team1", PhysicsLayers.Friendly);
             var team2 = CreateTeam("Team2", PhysicsLayers.Enemy);
 
-            var ship1 = CreateAIShip("Ship1", team1, new Vector2(-70f, 0f), false, true);
-            var ship2 = CreateAIShip("Ship2", team2, new Vector2(70f, 0f), false, true);
+            var ship1 = CreateAIShip("Ship1", team1, new Vector2(-100f, 0f), false, true);
+            var ship2 = CreateAIShip("Ship2", team2, new Vector2(100f, 0f), false, true);
 
-            CreateObstacleBox(Vector2.zero,
-                new Vector2(300f, 300f));
-
-            CreateObstacleWall("MazeWall", new Vector2(0f, -50f), new Vector2(30f, 300f));
-
-            // act
+            CreateObstacleBox(Vector2.zero, new Vector2(300f, 300f));
+            CreateObstacleWall("MazeWall", new Vector2(-50f, -50f), new Vector2(50f, 300f));
+            CreateObstacleWall("MazeWall", new Vector2(50f, 50f), new Vector2(50f, 300f));
 
             yield return WaitForLifecycle();
 
             const float expectedDistance = 30f;
-
             var initialDistance = Vector2.Distance(ship1.GetPosition(), ship2.GetPosition());
             Assert.That(initialDistance, Is.GreaterThan(expectedDistance));
 
@@ -46,14 +39,12 @@ namespace E2E
                 yield return SimulateForSeconds(step);
 
                 finalDistance = Vector2.Distance(ship1.GetPosition(), ship2.GetPosition());
-
                 Debug.Log(
                     $"[E2E Maze Test] Initial Distance: {initialDistance:F2}, Final Distance: {finalDistance:F2}");
 
-                if (finalDistance < expectedDistance) break;
+                if (finalDistance < expectedDistance)
+                    break;
             }
-
-            // assert
 
             Assert.That(finalDistance, Is.LessThan(expectedDistance),
                 $"Expected ships to navigate around the wall and close the distance, but got {finalDistance:F2}");
@@ -63,35 +54,21 @@ namespace E2E
         [Retry(3)]
         public IEnumerator Test2_OpposingTeamShipsShootAndDestroyPixels()
         {
-            // act 
-
             var team1 = CreateTeam("Team1", PhysicsLayers.Friendly);
             var team2 = CreateTeam("Team2", PhysicsLayers.Enemy);
 
             var ship1 = CreateAIShip("Ship1", team1, Vector2.zero, true, false);
-            var ship2 = CreateAIShip("Ship2", team2, new Vector2(25f, -25f), true, false);
+            var ship2 = CreateAIShip("Ship2", team2, new Vector2(0f, 5f), true, false);
 
             yield return WaitForLifecycle();
 
-            var ship1StartPixels =
-                ship1.AllModules.AsValueEnumerable().Sum(m => m.PixelatedRigidbody.CurrentPixelCount);
-            var ship2StartPixels =
-                ship2.AllModules.AsValueEnumerable().Sum(m => m.PixelatedRigidbody.CurrentPixelCount);
-
-            // act
+            var ship1StartPixels = CountPixels(ship1);
+            var ship2StartPixels = CountPixels(ship2);
 
             yield return SimulateForSeconds(10f);
 
-            // assert
-
-            var ship1FinalPixels =
-                ship1 != null
-                    ? ship1.AllModules.AsValueEnumerable().Sum(m => m.PixelatedRigidbody.CurrentPixelCount)
-                    : 0;
-            var ship2FinalPixels =
-                ship2 != null
-                    ? ship2.AllModules.AsValueEnumerable().Sum(m => m.PixelatedRigidbody.CurrentPixelCount)
-                    : 0;
+            var ship1FinalPixels = CountPixels(ship1);
+            var ship2FinalPixels = CountPixels(ship2);
 
             Debug.Log(
                 $"[E2E Shootout] Ship 1 pixels: {ship1StartPixels} -> {ship1FinalPixels}, Ship 2 pixels: {ship2StartPixels} -> {ship2FinalPixels}");
@@ -104,46 +81,23 @@ namespace E2E
         [Retry(3)]
         public IEnumerator Test3_ThreeVsOneShootout()
         {
-            // arrange
-
             var teamA = CreateTeam("TeamA", PhysicsLayers.Friendly);
             var teamB = CreateTeam("TeamB", PhysicsLayers.Enemy);
 
             var shipB = CreateAIShip("ShipB", teamB, Vector2.zero, true, false);
-
             var shipA1 = CreateAIShip("ShipA1", teamA, new Vector2(25f, 30f), true, false);
             var shipA2 = CreateAIShip("ShipA2", teamA, new Vector2(25f, -40f), true, false);
             var shipA3 = CreateAIShip("ShipA3", teamA, new Vector2(30f, 0f), true, false);
 
             yield return WaitForLifecycle();
 
-            var shipBModules = shipB.AllModules;
-
-            var shipA1Modules = shipA1.AllModules;
-            var shipA2Modules = shipA2.AllModules;
-            var shipA3Modules = shipA3.AllModules;
-
-            var startPixelsB = shipBModules.AsValueEnumerable().Sum(m => m.PixelatedRigidbody.CurrentPixelCount);
-            var startPixelsA1 = shipA1Modules.AsValueEnumerable().Sum(m => m.PixelatedRigidbody.CurrentPixelCount);
-            var startPixelsA2 = shipA2Modules.AsValueEnumerable().Sum(m => m.PixelatedRigidbody.CurrentPixelCount);
-            var startPixelsA3 = shipA3Modules.AsValueEnumerable().Sum(m => m.PixelatedRigidbody.CurrentPixelCount);
-            var startPixelsACombined = startPixelsA1 + startPixelsA2 + startPixelsA3;
-
-            // act
+            var startPixelsB = CountPixels(shipB);
+            var startPixelsACombined = CountPixels(shipA1) + CountPixels(shipA2) + CountPixels(shipA3);
 
             yield return SimulateForSeconds(10f);
 
-            // assert
-
-            var finalPixelsB =
-                shipBModules.AsValueEnumerable().Sum(m => m != null ? m.PixelatedRigidbody.CurrentPixelCount : 0);
-            var finalPixelsA1 = shipA1Modules.AsValueEnumerable()
-                .Sum(m => m != null ? m.PixelatedRigidbody.CurrentPixelCount : 0);
-            var finalPixelsA2 = shipA2Modules.AsValueEnumerable()
-                .Sum(m => m != null ? m.PixelatedRigidbody.CurrentPixelCount : 0);
-            var finalPixelsA3 = shipA3Modules.AsValueEnumerable()
-                .Sum(m => m != null ? m.PixelatedRigidbody.CurrentPixelCount : 0);
-            var finalPixelsACombined = finalPixelsA1 + finalPixelsA2 + finalPixelsA3;
+            var finalPixelsB = CountPixels(shipB);
+            var finalPixelsACombined = CountPixels(shipA1) + CountPixels(shipA2) + CountPixels(shipA3);
 
             var damageB = startPixelsB - finalPixelsB;
             var damageACombined = startPixelsACombined - finalPixelsACombined;
@@ -158,10 +112,7 @@ namespace E2E
         [Retry(3)]
         public IEnumerator Test4_FastMovingShipLosesPixelsOnCollisionWithAnotherPixelatedRigidbody()
         {
-            // arrange
-
             var team1 = CreateTeam("Team1", PhysicsLayers.Friendly);
-
             var ship = CreateAIShip("CrashingShip", team1, Vector2.zero, false, false);
 
             var asteroid = Instantiator.Instantiate(GetAsteroidPrefab(), new Vector2(80f, 0f), Quaternion.identity);
@@ -169,21 +120,14 @@ namespace E2E
 
             yield return WaitForLifecycle();
 
-            // Set the ship flying straight at the asteroid at high speed
             var rb = ship.CommandModule.PixelatedRigidbody.Rigidbody;
-            rb.linearVelocity = new Vector2(400f, 0f);
+            rb.linearVelocity = new Vector2(1000f, 0f);
 
-            var startPixels = ship.AllModules.AsValueEnumerable().Sum(m => m.PixelatedRigidbody.CurrentPixelCount);
-
-            // act
+            var startPixels = CountPixels(ship);
 
             yield return SimulateForSeconds(1f);
 
-            // assert
-
-            var finalPixels = ship != null
-                ? ship.AllModules.AsValueEnumerable().Sum(m => m.PixelatedRigidbody.CurrentPixelCount)
-                : 0;
+            var finalPixels = CountPixels(ship);
 
             Debug.Log($"[E2E Impact] Starting pixels: {startPixels}, Final pixels: {finalPixels}");
 
@@ -195,29 +139,21 @@ namespace E2E
         [Retry(3)]
         public IEnumerator Test5_TargetPractice_ShipDestroysStationaryEnemyShip()
         {
-            // arrange
-
             var team1 = CreateTeam("Team1", PhysicsLayers.Friendly);
             var team2 = CreateTeam("Team2", PhysicsLayers.Enemy);
 
             CreateAIShip("ShooterShip", team1, Vector2.zero, true, false);
-            var targetShip = CreateAIShip("TargetShip", team2, new Vector2(20f, 0f), false, false);
+            var targetShip = CreateAIShip("TargetShip", team2, new Vector2(40f, 0f), false, false);
             var targetGo = targetShip.gameObject;
 
-            CreateObstacleBox(Vector2.zero,
-                new Vector2(60f, 40f));
+            CreateObstacleBox(Vector2.zero, new Vector2(100f, 80f));
 
             yield return WaitForLifecycle();
 
             Assert.IsNotNull(targetShip);
 
-            // act
-
             const float testTime = 5f;
-
             yield return SimulateForSeconds(testTime);
-
-            // assert
 
             var targetIsDestroyed = targetShip == null || targetGo == null;
 
@@ -225,6 +161,35 @@ namespace E2E
 
             Assert.That(targetIsDestroyed, Is.True,
                 $"Expected the stationary target ship to be completely destroyed after {testTime} seconds of targeted gunfire.");
+        }
+
+        [UnityTest]
+        [Retry(3)]
+        public IEnumerator Test6_AiShipDealsSignificantDamageToPlayerShip()
+        {
+            var friendlyTeam = CreateTeam("Friendly", PhysicsLayers.Friendly);
+            var enemyTeam = CreateTeam("Enemy", PhysicsLayers.Enemy);
+
+            var player = CreatePlayerShip("Player", friendlyTeam, Vector2.zero, false, false);
+            CreateAIShip("Attacker", enemyTeam, new Vector2(0f, 50f), true, false);
+
+            yield return WaitForLifecycle();
+
+            var startPixels = CountPixels(player);
+            Assert.That(startPixels, Is.GreaterThan(0));
+
+            yield return SimulateForSeconds(10f);
+
+            var finalPixels = CountPixels(player);
+            var damage = startPixels - finalPixels;
+            const float minDamageRatio = 0.25f;
+            var minDamage = Mathf.CeilToInt(startPixels * minDamageRatio);
+
+            Debug.Log(
+                $"[E2E Player Damage] Player pixels: {startPixels} -> {finalPixels} (damage {damage}, min {minDamage})");
+
+            Assert.That(damage, Is.GreaterThanOrEqualTo(minDamage),
+                $"Expected AI ship to deal significant damage to PlayerShip (>= {minDamageRatio:P0} of pixels).");
         }
     }
 }

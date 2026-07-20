@@ -1,0 +1,21 @@
+.ds-info-row__label,
+.ds-info-row__value {
+    font-size: var(--font-size-caption);
+}
+
+.ship-resource-bar-track {
+    position: relative;
+    height: 8px;
+    overflow: hidden;
+    background-color: var(--color-surface-elev);
+    border-width: var(--border-thin);
+    border-color: var(--color-border);
+    border-radius: var(--radius-sm);
+}
+
+.ship-resource-bar-fill {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 0;
+}

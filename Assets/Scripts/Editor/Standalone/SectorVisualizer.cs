@@ -15,8 +15,6 @@ namespace Editor.Standalone
         [SerializeField] private bool showGrid = true;
         [SerializeField] private float gizmoZ;
 
-        [HideInInspector] public bool showSectorOverlay;
-
         [SerializeField]
         private NavigationService navigationService;
 
@@ -103,14 +101,12 @@ namespace Editor.Standalone
 
             foreach (var key in keys)
                 navigationService.GetSectorResult(new Vector3(key.x + sectorSize * 0.5f, key.y + sectorSize * 0.5f));
-
-            showSectorOverlay = true;
         }
 
-        internal NavigationService InternalNavigationService
+        internal INavigationService InternalNavigationService
         {
             get => navigationService;
-            set => navigationService = value;
+            set => navigationService = value as NavigationService;
         }
 #endif
     }

@@ -17,28 +17,28 @@
     -unity-font-style: bold;
     color: var(--color-text-primary);
     -unity-text-align: middle-left;
-    white-space: wrap;
+    white-space: normal;
 }
 
 .ds-h2 {
     font-size: var(--font-size-h2);
     -unity-font-style: bold;
     color: var(--color-text-primary);
-    white-space: wrap;
+    white-space: normal;
 }
 
 .ds-h3 {
     font-size: var(--font-size-h3);
     -unity-font-style: bold; /* Semibold — UI Toolkit uses normal/bold; pair with a Semibold font asset for accuracy */
     color: var(--color-text-primary);
-    white-space: wrap;
+    white-space: normal;
 }
 
 .ds-body-1 {
     font-size: var(--font-size-body-1);
     -unity-font-style: normal;
     color: var(--color-text-primary);
-    white-space: wrap;
+    white-space: normal;
 }
 
 .ds-body-2 {

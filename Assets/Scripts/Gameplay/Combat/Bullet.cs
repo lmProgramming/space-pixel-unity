@@ -1,8 +1,11 @@
 using System;
+using System.Collections.Generic;
 using Core.Constants;
+using Core.Pixelation;
 using Cysharp.Threading.Tasks;
 using Pixelation;
 using UnityEngine;
+using Zenject;
 
 namespace Gameplay.Combat
 {
@@ -14,19 +17,36 @@ namespace Gameplay.Combat
         private const float FadeOutTime = 2f;
         private const float LifeTime = 2f;
 
+        [Inject] private GameplayConstants _gameplayConstants;
+
         protected override void Awake()
         {
             base.Awake();
 
             DelayedFadeOutAsync().Forget();
-
-            OnPixelsLost += (_, _) => SetLayer(PhysicsLayers.Default);
         }
 
-        protected override void OnDestroy()
+        private void OnEnable()
         {
-            base.OnDestroy();
+            OnPixelsLost += OnOnPixelsLost;
 
+            Destroyed += HandleDestroy;
+        }
+
+        private void OnDisable()
+        {
+            OnPixelsLost -= OnOnPixelsLost;
+
+            Destroyed -= HandleDestroy;
+        }
+
+        private void OnOnPixelsLost(List<Vector2Int> vector2Ints, PixelLoseReason pixelLoseReason)
+        {
+            SetLayer(PhysicsLayers.Default);
+        }
+
+        private void HandleDestroy(IPixelated obj)
+        {
             var results = new Collider2D[5];
             Physics2D.OverlapCircle(transform.position, PushAwayRadius, ContactFilter2D.noFilter, results);
 
@@ -47,9 +67,9 @@ namespace Gameplay.Combat
                 var token = this.GetCancellationTokenOnDestroy();
 
                 await UniTask.Delay(
-                    TimeSpan.FromSeconds(LifeTime * GameplayConstants.CannonProjectileLifetimeMultiplier),
+                    TimeSpan.FromSeconds(LifeTime * _gameplayConstants.cannonProjectileLifetimeMultiplier),
                     cancellationToken: token);
-                await FadeOutAndDestroy(FadeOutTime * GameplayConstants.CannonProjectileLifetimeMultiplier);
+                await FadeOutAndDestroy(FadeOutTime * _gameplayConstants.cannonProjectileLifetimeMultiplier);
             }
             catch (OperationCanceledException)
             {

@@ -5,7 +5,6 @@ using Ships.Tests.TestHelpers.Factories;
 using Ships.Tests.TestHelpers.Fixtures;
 using UnityEngine;
 using UnityEngine.TestTools;
-using Object = UnityEngine.Object;
 
 namespace Ships.Tests
 {
@@ -45,7 +44,7 @@ namespace Ships.Tests
                 ShipTestFactory.CreateTwoModuleShip(Container, CreatedObjects);
             yield return WaitForLifecycle();
 
-            Object.Destroy(other.gameObject);
+            other.DestroyModule();
             yield return WaitForLifecycle();
 
             Assert.That(command.GetComponents<FixedJoint2D>(), Is.Empty,
