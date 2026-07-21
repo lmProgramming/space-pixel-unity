@@ -55,6 +55,7 @@ namespace UI.Scenes.MainMenu.Views.Progression
             _selectedShipIndex = null;
             _campaignName = string.Empty;
             Refresh();
+            View.Show();
         }
 
         protected override ShipSnapshotCatalogModel CreateModel()

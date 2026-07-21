@@ -51,15 +51,13 @@ namespace UI.Common
             _masterSlider.RegisterValueChangedCallback(OnMasterVolumeChanged);
             _musicSlider.RegisterValueChangedCallback(OnMusicVolumeChanged);
             _effectsSlider.RegisterValueChangedCallback(OnEffectsVolumeChanged);
-            WireThemeToggle();
+            _themeToggle?.RegisterValueChangedCallback(OnThemeToggleChanged);
+
             WireThemeProvider();
             LoadFromPlayerPrefs();
 
-            if (_pointerOverUiChannel)
-            {
-                _uiPointerTracker = new UiPointerTracker(_pointerOverUiChannel);
-                _uiPointerTracker.Track(_backdrop);
-            }
+            _uiPointerTracker = new UiPointerTracker(_pointerOverUiChannel);
+            _uiPointerTracker.Track(_backdrop);
         }
 
         protected override void UnbindUiCore()
@@ -94,11 +92,6 @@ namespace UI.Common
 
             _themeToggle.SetValueWithoutNotify(DesignSystemThemeService.EffectiveIsLightTheme);
             _themeToggle.SetEnabled(!DesignSystemThemeService.IsCodigrateActive);
-        }
-
-        private void WireThemeToggle()
-        {
-            _themeToggle?.RegisterValueChangedCallback(OnThemeToggleChanged);
         }
 
         private void WireThemeProvider()

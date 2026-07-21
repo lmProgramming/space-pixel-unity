@@ -59,7 +59,6 @@ namespace UI.Common
                 throw new InvalidOperationException("[PauseOverlayController] Pause elements missing in UXML.");
 
             title.text = pauseTitle;
-            _pauseOverlay.style.display = DisplayStyle.None;
 
             _resumeButton.clicked += OnResumeClicked;
             _settingsButton.clicked += OnSettingsClicked;
@@ -100,8 +99,8 @@ namespace UI.Common
             if (pauseStateChannel)
                 pauseStateChannel.Raise(paused);
 
-            if (_pauseOverlay != null)
-                _pauseOverlay.style.display = paused ? DisplayStyle.Flex : DisplayStyle.None;
+            if (paused) Show();
+            else Hide();
 
             if (!paused)
             {

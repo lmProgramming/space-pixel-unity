@@ -225,7 +225,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.Ships::Ships.Modules.Command
   mainSkillType: 0
   assignedCrew: []
-  <Resources>k__BackingField:
+  <ShipResources>k__BackingField:
     energyCapacity: 480
     energyDraw: 120
     energyProduction: 0

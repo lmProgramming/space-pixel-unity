@@ -77,7 +77,7 @@ namespace UI.Common
             if (Root == null)
                 return;
 
-            Root.style.display = IsOpen ? DisplayStyle.Flex : DisplayStyle.None;
+            Root.visible = IsOpen;
         }
 
         protected virtual void BeforeBindUi(

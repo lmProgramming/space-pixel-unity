@@ -40,9 +40,10 @@ namespace Context
         {
             if (validateAll)
             {
-                if (!debrisSpawner) throw new UnityException($"Missing {nameof(debrisSpawner)}");
+                if (!debrisSpawner && !dummyDebrisSpawner) throw new UnityException($"Missing {nameof(debrisSpawner)}");
+                if (!projectilesSpawner && !dummyProjectileSpawner)
+                    throw new UnityException($"Missing {nameof(projectilesSpawner)}");
                 if (!mapInfo) throw new UnityException($"Missing {nameof(mapInfo)}");
-                if (!projectilesSpawner) throw new UnityException($"Missing {nameof(projectilesSpawner)}");
                 if (!shipService) throw new UnityException($"Missing {nameof(shipService)}");
                 if (!soundManager) throw new UnityException($"Missing {nameof(soundManager)}");
                 if (!effectSpawner) throw new UnityException($"Missing {nameof(effectSpawner)}");

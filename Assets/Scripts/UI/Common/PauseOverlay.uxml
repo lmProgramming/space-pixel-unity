@@ -3,7 +3,7 @@
     <Style src="project://database/Assets/DesignSystem/Resources/UI/Styles/DesignSystem/DesignSystem.uss"/>
     <ui:VisualElement class="ds-root ds-root--transparent" picking-mode="Ignore"
                       style="position: absolute; left: 0; right: 0; top: 0; bottom: 0;">
-        <ui:VisualElement name="pause-overlay" class="ds-backdrop" style="display: none;">
+        <ui:VisualElement name="pause-overlay" class="ds-backdrop">
             <ui:VisualElement name="pause-dialog" class="ds-dialog" style="width: 420px; max-width: 90%;">
                 <ui:Label name="pause-title" text="Paused" class="ds-dialog__title" style="margin-bottom: 16px;"/>
                 <ui:Button name="pause-resume-button" text="Resume" class="ds-btn ds-btn--primary ds-btn--block"

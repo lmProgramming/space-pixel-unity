@@ -10,7 +10,7 @@ namespace UI.MVCVM
         where TModel : ObservableModel
         where TView : View<TViewModel>
     {
-        [SerializeField] public bool showByDefault;
+        [SerializeField] private bool showByDefault;
         private PanelRendererLifecycle _lifecycle;
 
         protected TModel Model { get; private set; }
@@ -29,6 +29,14 @@ namespace UI.MVCVM
             View = CreateView();
 
             _lifecycle = new PanelRendererLifecycle(PanelRenderer, View);
+        }
+
+        private void Start()
+        {
+            if (showByDefault)
+                View.Show();
+            else
+                View.Hide();
         }
 
         protected virtual void OnEnable()

@@ -196,6 +196,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a1cbadfdbf7cc80c9893b39052d9273, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UI::UI.Progression.BattleShipPicker
+  showByDefault: 1
 --- !u!1931382934 &1018897900
 PanelRenderer:
   m_ObjectHideFlags: 0

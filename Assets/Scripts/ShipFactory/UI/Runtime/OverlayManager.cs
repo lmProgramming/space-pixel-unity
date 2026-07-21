@@ -60,10 +60,6 @@ namespace ShipFactory.UI.Runtime
 
             if (!ship) return;
 
-            if (_catalog == null)
-                throw new InvalidOperationException(
-                    "[ShipFactoryOverlayManager] ShipModuleCatalog is required before rebuilding overlays.");
-
             foreach (Transform child in ship.gameObject.transform)
             {
                 var module = child.GetComponent<IModule>();
