@@ -28,6 +28,7 @@ namespace UI.Tests
             _gameUi = _host.AddComponent<GameUi>();
             container.Bind<IGameUi>().FromInstance(_gameUi);
             container.Inject(_gameUi);
+            _gameUi.SetRootParentsForTesting(_gameUi.transform);
             _host.SetActive(true);
         }
 

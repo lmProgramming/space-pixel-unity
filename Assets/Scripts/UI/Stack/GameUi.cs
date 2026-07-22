@@ -16,8 +16,8 @@ namespace UI.Stack
         private const int DefaultBaseSortingOrder = 100;
         private const int DefaultToastSortingOrder = 1000;
 
-        [SerializeField] private Transform stackRoot;
-        [SerializeField] private Transform toastRoot;
+        [SerializeField] private Transform stackParent;
+        [SerializeField] private Transform toastParent;
         [SerializeField] private int baseSortingOrder = DefaultBaseSortingOrder;
         [SerializeField] private int toastSortingOrder = DefaultToastSortingOrder;
 
@@ -31,10 +31,10 @@ namespace UI.Stack
 
         private void Awake()
         {
-            if (!stackRoot)
+            if (!stackParent)
                 throw new InvalidOperationException("[GameUi] Stack root is required.");
 
-            if (!toastRoot)
+            if (!toastParent)
                 throw new InvalidOperationException("[GameUi] Toast root is required.");
 
             if (_container == null)
@@ -92,7 +92,7 @@ namespace UI.Stack
             if (_stack.Count == 0)
                 throw new InvalidOperationException("[GameUi] SetRoot must be called before Push.");
 
-            var instance = _container.InstantiatePrefab(prefab, stackRoot);
+            var instance = _container.InstantiatePrefab(prefab, stackParent);
             var controller = instance.GetComponent<T>();
             if (controller is not Component component)
                 throw new InvalidOperationException("[GameUi] Prefab for id '" + prefab.name + "' is not a component.");
@@ -229,7 +229,7 @@ namespace UI.Stack
             if (!prefab)
                 throw new InvalidOperationException("[GameUi] NotificationHost prefab is missing.");
 
-            var instance = _container.InstantiatePrefab(prefab, toastRoot);
+            var instance = _container.InstantiatePrefab(prefab, toastParent);
             ApplySortingOrder(instance, toastSortingOrder);
 
             _notificationHost = instance.GetComponent<NotificationView>();
@@ -305,6 +305,12 @@ namespace UI.Stack
         internal void HandleEscapeForTesting()
         {
             HandleEscape();
+        }
+
+        internal void SetRootParentsForTesting(Transform root)
+        {
+            stackParent = root;
+            toastParent = root;
         }
 #endif
     }
