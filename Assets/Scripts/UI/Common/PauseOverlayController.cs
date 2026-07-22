@@ -2,21 +2,23 @@ using System;
 using Core.Constants;
 using Events.Game;
 using Events.UI;
+using UI.Stack;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
+using Zenject;
 
 namespace UI.Common
 {
     public class PauseOverlayController : PanelRendererBase
     {
         [SerializeField] private string pauseTitle = "Paused";
-        [SerializeField] private SettingsOverlayController settingsOverlay;
-        [SerializeField] private PointerOverUiEventChannel pointerOverUiChannel;
-        [SerializeField] private PauseStateEventChannel pauseStateChannel;
-        [SerializeField] private bool handleEscapeInput = true;
+
+        [Inject] private IGameUi _gameUi;
 
         private VisualElement _pauseOverlay;
+        [Inject] private PauseStateEventChannel _pauseStateChannel;
+        [Inject] private PointerOverUiEventChannel _pointerOverUiChannel;
         private Button _quitButton;
         private Button _resumeButton;
         private Button _settingsButton;
@@ -24,24 +26,16 @@ namespace UI.Common
 
         public bool IsPaused { get; private set; }
 
-        private void LateUpdate()
+        protected override void OnEnable()
         {
-            if (!handleEscapeInput || !Input.GetKeyDown(KeyCode.Escape))
-                return;
-
-            if (settingsOverlay && settingsOverlay.IsOpen)
-            {
-                settingsOverlay.Hide();
-                return;
-            }
-
-            SetPaused(!IsPaused);
+            base.OnEnable();
+            EnterPausedState();
         }
 
         protected override void OnDisable()
         {
+            ExitPausedState();
             base.OnDisable();
-            SetPaused(false);
         }
 
         public event Action<bool> PauseChanged;
@@ -58,59 +52,69 @@ namespace UI.Common
                 _pauseOverlay == null)
                 throw new InvalidOperationException("[PauseOverlayController] Pause elements missing in UXML.");
 
+            if (_gameUi == null)
+                throw new InvalidOperationException("[PauseOverlayController] IGameUi is not injected.");
+
+            if (_pauseStateChannel == null)
+                throw new InvalidOperationException(
+                    "[PauseOverlayController] PauseStateEventChannel is not injected.");
+
+            if (_pointerOverUiChannel == null)
+                throw new InvalidOperationException(
+                    "[PauseOverlayController] PointerOverUiEventChannel is not injected.");
+
             title.text = pauseTitle;
 
             _resumeButton.clicked += OnResumeClicked;
             _settingsButton.clicked += OnSettingsClicked;
             _quitButton.clicked += QuitToMainMenu;
 
-            if (pointerOverUiChannel)
-            {
-                _uiPointerTracker = new UiPointerTracker(pointerOverUiChannel);
-                _uiPointerTracker.Track(_pauseOverlay);
-            }
+            _uiPointerTracker = new UiPointerTracker(_pointerOverUiChannel);
+            _uiPointerTracker.Track(_pauseOverlay);
         }
 
         protected override void UnbindUiCore()
         {
-            _resumeButton.clicked -= OnResumeClicked;
-            _settingsButton.clicked -= OnSettingsClicked;
-            _quitButton.clicked -= QuitToMainMenu;
+            if (_resumeButton != null)
+                _resumeButton.clicked -= OnResumeClicked;
+            if (_settingsButton != null)
+                _settingsButton.clicked -= OnSettingsClicked;
+            if (_quitButton != null)
+                _quitButton.clicked -= QuitToMainMenu;
+
+            _uiPointerTracker?.Release(_pauseOverlay);
         }
 
         private void OnResumeClicked()
         {
-            SetPaused(false);
+            _gameUi.Pop();
         }
 
         private void OnSettingsClicked()
         {
-            settingsOverlay?.Toggle();
+            _gameUi.PushById<SettingsOverlayController>(UIPanelPrefabConstants.Settings);
         }
 
-        private void SetPaused(bool paused)
+        private void EnterPausedState()
         {
-            if (IsPaused == paused)
+            if (IsPaused)
                 return;
 
-            IsPaused = paused;
-            Time.timeScale = paused ? 0f : 1f;
+            IsPaused = true;
+            Time.timeScale = 0f;
+            _pauseStateChannel?.Raise(true);
+            PauseChanged?.Invoke(true);
+        }
 
-            if (pauseStateChannel)
-                pauseStateChannel.Raise(paused);
+        private void ExitPausedState()
+        {
+            if (!IsPaused)
+                return;
 
-            if (paused) Show();
-            else Hide();
-
-            if (!paused)
-            {
-                if (settingsOverlay && settingsOverlay.IsOpen)
-                    settingsOverlay.Hide();
-
-                _uiPointerTracker?.Release(_pauseOverlay);
-            }
-
-            PauseChanged?.Invoke(paused);
+            IsPaused = false;
+            Time.timeScale = 1f;
+            _pauseStateChannel?.Raise(false);
+            PauseChanged?.Invoke(false);
         }
 
         private static void QuitToMainMenu()

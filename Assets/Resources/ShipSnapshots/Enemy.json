@@ -20,7 +20,7 @@
         "z": 0.0,
         "w": 1.0
       },
-      "resources": {
+      "shipResources": {
         "energyCapacity": 140.0,
         "energyDraw": 70.0,
         "energyProduction": 0.0,
@@ -54,7 +54,7 @@
         "z": 0.0,
         "w": 1.0
       },
-      "resources": {
+      "shipResources": {
         "energyCapacity": 0.0,
         "energyDraw": 1000.0,
         "energyProduction": 0.0,
@@ -84,7 +84,7 @@
         "z": 0.0,
         "w": 1.0
       },
-      "resources": {
+      "shipResources": {
         "energyCapacity": 0.0,
         "energyDraw": 1000.0,
         "energyProduction": 0.0,
@@ -114,7 +114,7 @@
         "z": 0.0,
         "w": 1.0
       },
-      "resources": {
+      "shipResources": {
         "energyCapacity": 0.0,
         "energyDraw": 50.0,
         "energyProduction": 0.0,
@@ -144,7 +144,7 @@
         "z": 0.0,
         "w": 1.0
       },
-      "resources": {
+      "shipResources": {
         "energyCapacity": 0.0,
         "energyDraw": 50.0,
         "energyProduction": 0.0,
@@ -174,7 +174,7 @@
         "z": 0.0,
         "w": 1.0
       },
-      "resources": {
+      "shipResources": {
         "energyCapacity": 1000.0,
         "energyDraw": 25.0,
         "energyProduction": 500.0,
@@ -204,7 +204,7 @@
         "z": 0.0,
         "w": 1.0
       },
-      "resources": {
+      "shipResources": {
         "energyCapacity": 1000.0,
         "energyDraw": 25.0,
         "energyProduction": 500.0,

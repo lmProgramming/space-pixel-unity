@@ -7,11 +7,13 @@ namespace UI.Common
     [RequireComponent(typeof(PanelRenderer))]
     public abstract class PanelRendererBase : MonoBehaviour, IPanelRenderable
     {
-        [SerializeField] private bool showByDefault;
+        [SerializeField] private ActionOnEscape actionOnEscape = ActionOnEscape.Pop;
 
         private PanelRendererLifecycle _lifecycle;
         private VisualElement Root => _lifecycle.Root;
         public bool IsOpen { get; private set; }
+
+        public ActionOnEscape ActionOnEscape => actionOnEscape;
 
         protected PanelRenderer PanelRenderer { get; private set; }
 
@@ -22,7 +24,7 @@ namespace UI.Common
                 throw new UnityException($"[{GetType().Name}] {nameof(PanelRenderer)} is required.");
 
             _lifecycle = new PanelRendererLifecycle(PanelRenderer, this);
-            IsOpen = showByDefault;
+            IsOpen = false;
         }
 
         protected virtual void OnEnable()
@@ -91,6 +93,7 @@ namespace UI.Common
         protected virtual void AfterBindUi(
             VisualElement root)
         {
+            ApplyVisibility();
         }
 
         protected virtual void BeforeUnbindUi()
