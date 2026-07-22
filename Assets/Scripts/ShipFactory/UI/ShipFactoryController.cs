@@ -1,15 +1,17 @@
 using System;
 using System.IO;
+using Core.Constants;
 using Core.Gameplay.Sound;
 using Core.Services;
 using Core.ShipFactory;
+using Events.Game;
 using Events.UI;
 using ShipFactory.UI.Runtime;
 using ShipFactory.UI.Views.ShipLibrary;
 using Ships;
 using UI.Common;
-using UI.Components.Notification;
 using UI.Components.OptionsPopup;
+using UI.Stack;
 using UnityEngine;
 using UnityEngine.UIElements;
 using Zenject;
@@ -26,16 +28,6 @@ namespace ShipFactory.UI
         private static readonly object ModuleDragPointerBlocker = new();
         private static readonly object UiHoverBlocker = new();
         private static readonly object UiPointerDownBlocker = new();
-
-        [Header("Controllers")]
-        [SerializeField] private ShipLibraryController libraryController;
-
-        [SerializeField] private OptionsPopupController optionsPopup;
-
-        [SerializeField]
-        private NotificationView notificationView;
-
-        [SerializeField] private PauseOverlayController pauseOverlay;
 
         [SerializeField] private DesignShip initialShip;
         [SerializeField] private ShipFactoryFeedback feedback;
@@ -54,6 +46,9 @@ namespace ShipFactory.UI
 
         private GameObject _gameObjectUnderPointer;
 
+        [Inject]
+        private IGameUi _gameUi;
+
         private bool _isModuleDragBlockingCamera;
         private bool _isUiHoverBlockingCamera;
         private bool _isUiPointerDownBlockingCamera;
@@ -64,7 +59,8 @@ namespace ShipFactory.UI
         [Inject]
         private ModulePaletteController.Factory _paletteControllerFactory;
 
-        private Action<string> _pendingPopupOptionHandler;
+        [Inject]
+        private PauseStateEventChannel _pauseStateChannel;
 
         [Inject]
         private PointerOverUiEventChannel _pointerOverUiChannel;
@@ -92,12 +88,6 @@ namespace ShipFactory.UI
             base.Awake();
             _camera = Camera.main;
 
-            if (libraryController == null)
-                throw new UnityException("[ShipFactoryController] ShipLibraryController is required.");
-
-            if (optionsPopup == null)
-                throw new UnityException("[ShipFactoryController] OptionsPopupController is required.");
-
             if (_canvasControllerFactory == null)
                 throw new UnityException(
                     "[ShipFactoryController] ShipFactoryCanvasController.Factory is required.");
@@ -106,8 +96,16 @@ namespace ShipFactory.UI
                 throw new UnityException(
                     "[ShipFactoryController] ModulePaletteController.Factory is required.");
 
-            if (pauseOverlay == null)
-                throw new UnityException("[ShipFactoryController] PauseOverlayController is required.");
+            if (_gameUi == null)
+                throw new UnityException("[ShipFactoryController] IGameUi is required.");
+
+            if (_pauseStateChannel == null)
+                throw new UnityException("[ShipFactoryController] PauseStateEventChannel is required.");
+        }
+
+        private void Start()
+        {
+            _gameUi.SetRoot(this);
         }
 
         private void Update()
@@ -121,13 +119,13 @@ namespace ShipFactory.UI
         protected override void OnEnable()
         {
             base.OnEnable();
-            pauseOverlay.PauseChanged += OnPauseChanged;
+            _pauseStateChannel.Register(OnPauseChanged);
         }
 
         protected override void OnDisable()
         {
             OnPauseChanged(false);
-            pauseOverlay.PauseChanged -= OnPauseChanged;
+            _pauseStateChannel.Unregister(OnPauseChanged);
             base.OnDisable();
         }
 
@@ -136,7 +134,7 @@ namespace ShipFactory.UI
         {
             _root = root;
 
-            _canvasController = _canvasControllerFactory.Create(root, notificationView, feedback);
+            _canvasController = _canvasControllerFactory.Create(root, feedback);
             _paletteController = _paletteControllerFactory.Create(root);
 
             _shipNameField = root.Q<TextField>("ship-name-field");
@@ -180,24 +178,9 @@ namespace ShipFactory.UI
 
         private void ShowSnapshotLibrary()
         {
-            UnBindSnapshotLibrary();
-            libraryController.CloseClicked += HideSnapshotLibrary;
-            libraryController.SnapshotSelected += LoadSnapshotFromLibrary;
-            libraryController.SnapshotDeleted += OnSnapshotDeleted;
-            libraryController.Show();
-        }
-
-        private void HideSnapshotLibrary()
-        {
-            libraryController.gameObject.SetActive(false);
-            UnBindSnapshotLibrary();
-        }
-
-        private void UnBindSnapshotLibrary()
-        {
-            libraryController.CloseClicked -= HideSnapshotLibrary;
-            libraryController.SnapshotSelected -= LoadSnapshotFromLibrary;
-            libraryController.SnapshotDeleted -= OnSnapshotDeleted;
+            var library = _gameUi.PushById<ShipLibraryController>(UIPanelPrefabConstants.ShipLibrary);
+            library.SnapshotSelected += LoadSnapshotFromLibrary;
+            library.SnapshotDeleted += OnSnapshotDeleted;
         }
 
         private void LoadSnapshotFromLibrary(string snapshotPath)
@@ -219,7 +202,6 @@ namespace ShipFactory.UI
                     ? DefaultShipName
                     : snapshot.shipName);
                 _canvasController.RebuildShipModules();
-                HideSnapshotLibrary();
 
                 _duplicateShipNameWarning = (false, snapshot.shipName);
             }
@@ -268,8 +250,6 @@ namespace ShipFactory.UI
                 _canvasController.OnClearShipRequested -= OnClearShipRequested;
                 _canvasController.Dispose();
             }
-
-            ClearPendingPopupHandler();
 
             _shipNameField.UnregisterValueChangedCallback(OnShipNameChanged);
 
@@ -357,7 +337,7 @@ namespace ShipFactory.UI
 
         private void OnClearShipRequested()
         {
-            ShowOptionsPopup(
+            _gameUi.ShowOptions(
                 "Clear ship?",
                 "Deleting the command module removes the entire ship. This cannot be undone.",
                 OnClearShipPopupOptionSelected,
@@ -367,49 +347,11 @@ namespace ShipFactory.UI
 
         private void OnBlockedPlacementClicked(string title, string description)
         {
-            ShowOptionsPopup(
+            _gameUi.ShowOptions(
                 title,
                 description,
                 null,
                 new OptionsPopupOption(InfoAcknowledgeOptionId, "OK", OptionsPopupOptionStyle.Primary));
-        }
-
-        private void ShowOptionsPopup(
-            string title,
-            string description,
-            Action<string> optionHandler,
-            params OptionsPopupOption[] options)
-        {
-            ClearPendingPopupHandler();
-            _pendingPopupOptionHandler = optionHandler;
-
-            optionsPopup.gameObject.SetActive(true);
-            optionsPopup.OptionSelected += OnOptionsPopupOptionSelected;
-            optionsPopup.Closed += OnOptionsPopupClosed;
-            optionsPopup.Show(title, description, options);
-        }
-
-        private void OnOptionsPopupOptionSelected(string optionId)
-        {
-            var handler = _pendingPopupOptionHandler;
-            ClearPendingPopupHandler();
-            handler?.Invoke(optionId);
-        }
-
-        private void OnOptionsPopupClosed()
-        {
-            ClearPendingPopupHandler();
-        }
-
-        private void ClearPendingPopupHandler()
-        {
-            if (optionsPopup != null)
-            {
-                optionsPopup.OptionSelected -= OnOptionsPopupOptionSelected;
-                optionsPopup.Closed -= OnOptionsPopupClosed;
-            }
-
-            _pendingPopupOptionHandler = null;
         }
 
         private void OnClearShipPopupOptionSelected(string optionId)
@@ -428,7 +370,7 @@ namespace ShipFactory.UI
 
         private void HandleRotationInput()
         {
-            if (pauseOverlay.IsPaused || _canvasController == null) return;
+            if (_gameInput.IsPaused || _canvasController == null) return;
             if (_gameInput.IsTextInputFocused) return;
             if (!Input.GetKeyDown(KeyCode.R)) return;
 

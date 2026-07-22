@@ -9,20 +9,25 @@ using Core.ShipSnapshots;
 using Core.State;
 using Ships;
 using UI.MVCVM;
+using UI.Stack;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Zenject;
 
 namespace UI.Scenes.MainMenu.Views.Progression
 {
+    [RequireComponent(typeof(NewCampaignView))]
     public class NewCampaignController
         : Controller<ShipSnapshotCatalogModel, NewCampaignView, NewCampaignViewModel>
     {
-        [SerializeField]
-        private DesignShip previewShip;
-
         private string _campaignName = string.Empty;
+
+        [Inject] private IGameUi _gameUi;
         private int? _pendingSlotIndex;
+
+        [Inject(Id = UIPanelPrefabConstants.NewCampaignPreviewShip)]
+        private DesignShip _previewShip;
+
         [Inject] private IProgressionRepository _progressionRepository;
         private int? _selectedShipIndex;
 
@@ -63,11 +68,6 @@ namespace UI.Scenes.MainMenu.Views.Progression
             return _snapshotRepository.Model;
         }
 
-        protected override NewCampaignView CreateView()
-        {
-            return gameObject.AddComponent<NewCampaignView>();
-        }
-
         protected override NewCampaignViewModel CreateViewModel(ShipSnapshotCatalogModel model)
         {
             return new NewCampaignViewModel(
@@ -97,7 +97,7 @@ namespace UI.Scenes.MainMenu.Views.Progression
         private void OnBackClicked()
         {
             CloseSelected?.Invoke();
-            Hide();
+            _gameUi.Pop();
         }
 
         private void OnStartClicked()
@@ -128,14 +128,14 @@ namespace UI.Scenes.MainMenu.Views.Progression
         {
             _selectedShipIndex = shipIndex;
 
-            if (!previewShip)
+            if (!_previewShip)
                 throw new InvalidOperationException(
-                    "[ProgressionNewCampaignController] Preview ship is not assigned.");
+                    "[NewCampaignController] Preview DesignShip is not injected.");
 
             var snapshotPath = Model.Snapshots[shipIndex].FilePath;
-            _snapshotService.ApplySnapshot(previewShip, _snapshotService.LoadSnapshotFromFile(snapshotPath));
-            previewShip.InitializeModules();
-            View.ResourcesPanel.Refresh(previewShip);
+            _snapshotService.ApplySnapshot(_previewShip, _snapshotService.LoadSnapshotFromFile(snapshotPath));
+            _previewShip.InitializeModules();
+            View.ResourcesPanel.Refresh(_previewShip);
             Refresh();
         }
 

@@ -4,16 +4,21 @@ using Core.Services;
 using Core.Ships;
 using Core.ShipSnapshots;
 using UI.MVCVM;
+using UI.Stack;
+using UnityEngine;
 using Zenject;
 
 namespace ShipFactory.UI.Views.ShipLibrary
 {
+    [RequireComponent(typeof(ShipLibraryView))]
     public class ShipLibraryController
         : Controller<
             ShipSnapshotCatalogModel,
             ShipLibraryView,
             ShipLibraryViewModel>
     {
+        [Inject] private IGameUi _gameUi;
+
         [Inject]
         private IShipSnapshotRepository _snapshotRepository;
 
@@ -46,11 +51,6 @@ namespace ShipFactory.UI.Views.ShipLibrary
             return _snapshotRepository.Model;
         }
 
-        protected override ShipLibraryView CreateView()
-        {
-            return gameObject.AddComponent<ShipLibraryView>();
-        }
-
         protected override ShipLibraryViewModel CreateViewModel(
             ShipSnapshotCatalogModel model)
         {
@@ -77,11 +77,13 @@ namespace ShipFactory.UI.Views.ShipLibrary
         private void OnViewCloseClicked()
         {
             CloseClicked?.Invoke();
+            _gameUi.Pop();
         }
 
         private void OnViewLoadClicked(string snapshotPath)
         {
             SnapshotSelected?.Invoke(snapshotPath);
+            _gameUi.Pop();
         }
 
         private void OnViewDeleteClicked(string snapshotPath)

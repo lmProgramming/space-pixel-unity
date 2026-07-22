@@ -160,9 +160,11 @@ namespace {_namespaceName}
                 folder,
                 $"{_screenName}Controller.cs",
                 $@"using UI.MVCVM;
+using UnityEngine;
 
 namespace {_namespaceName} 
 {{
+    [RequireComponent(typeof({_screenName}View))]
     public class {_screenName}Controller 
         : Controller<
             {_screenName}Model,
@@ -172,11 +174,6 @@ namespace {_namespaceName}
         protected override {_screenName}Model CreateModel()
         {{
             return new {_screenName}Model();
-        }}
-
-        protected override {_screenName}View CreateView()
-        {{
-            return new {_screenName}View();
         }}
 
         protected override {_screenName}ViewModel
