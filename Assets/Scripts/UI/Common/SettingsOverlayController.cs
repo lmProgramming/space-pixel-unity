@@ -4,7 +4,6 @@ using Core.Constants;
 using DesignSystem.Runtime;
 using DesignSystem.Showcase.Runtime;
 using Events.UI;
-using UI.Stack;
 using UI.Tools;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -19,7 +18,6 @@ namespace UI.Common
         private int _codigrateFetchGeneration;
         private Slider _effectsSlider;
 
-        [Inject] private IGameUi _gameUi;
         private Slider _masterSlider;
         private Slider _musicSlider;
         [Inject] private PointerOverUiEventChannel _pointerOverUiChannel;
@@ -44,7 +42,7 @@ namespace UI.Common
                 throw new InvalidOperationException(
                     "[SettingsOverlayController] Required settings elements are missing in UXML.");
 
-            if (_gameUi == null)
+            if (GameUi == null)
                 throw new InvalidOperationException("[SettingsOverlayController] IGameUi is not injected.");
 
             titleLabel.text = "Settings";
@@ -85,7 +83,7 @@ namespace UI.Common
 
         private void OnCloseClicked()
         {
-            _gameUi.Pop();
+            GameUi.Pop();
         }
 
         private void SyncThemeToggleState()

@@ -1,6 +1,8 @@
+using Core.UI;
 using DesignSystem.Runtime;
 using UnityEngine;
 using UnityEngine.UIElements;
+using Zenject;
 
 namespace UI.Common
 {
@@ -8,6 +10,8 @@ namespace UI.Common
     public abstract class PanelRendererBase : MonoBehaviour, IPanelRenderable
     {
         [SerializeField] private ActionOnEscape actionOnEscape = ActionOnEscape.Pop;
+
+        [Inject] protected IGameUi GameUi;
 
         private PanelRendererLifecycle _lifecycle;
         private VisualElement Root => _lifecycle.Root;

@@ -35,11 +35,11 @@ namespace UI.Components
         {
             if (!ship.IsAlive() || !ship.ResourceManager.IsAlive())
             {
-                _shipResourcesPanel.style.display = DisplayStyle.None;
+                _shipResourcesPanel.visible = false;
                 return;
             }
 
-            _shipResourcesPanel.style.display = DisplayStyle.Flex;
+            _shipResourcesPanel.visible = true;
 
             var rm = ship.ResourceManager;
 

@@ -4,6 +4,7 @@ using Core.Services;
 using Core.ShipFactory;
 using Core.Ships;
 using Core.Ships.Module;
+using Core.UI;
 using JetBrains.Annotations;
 using ShipFactory.Helpers;
 using ShipFactory.Helpers.LegalPositionCalculator;
@@ -12,8 +13,6 @@ using ShipFactory.UI.Runtime;
 using ShipFactory.UI.ToolkitComponents;
 using Ships;
 using UI.Components;
-using UI.Components.Notification;
-using UI.Stack;
 using UnityEngine;
 using UnityEngine.UIElements;
 using Zenject;
@@ -36,13 +35,13 @@ namespace ShipFactory.UI
 
         private readonly OverlayManager _overlayManager;
         private readonly ResourcesPanel _resourcesPanel;
-
-        private ShipModuleSOInstanceBundle _draggedModuleBundle;
-        private bool _draggedModuleWasNew;
         private Quaternion _dragStartLocalRotation;
         private float _dragStartLocalZ;
         private Vector2 _dragStartWorldPos;
         private Vector2 _dragWorldOffset;
+
+        private ShipModuleSOInstanceBundle _draggedModuleBundle;
+        private bool _draggedModuleWasNew;
 
         private ShipModuleSO _hoveredPaletteModule;
         private ShipModuleSOInstanceBundle _hoveredPlacedBundle;
@@ -553,7 +552,7 @@ namespace ShipFactory.UI
         private void SetInputLocked(bool isLocked)
         {
             IsInputLocked = isLocked;
-            _inputBlocker.style.display = isLocked ? DisplayStyle.Flex : DisplayStyle.None;
+            _inputBlocker.visible = isLocked;
             RefreshInfoPanelFromCurrentContext();
             OnInputLockChanged?.Invoke(isLocked);
         }

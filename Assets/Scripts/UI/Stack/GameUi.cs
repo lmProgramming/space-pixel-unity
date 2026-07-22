@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Core.Constants;
+using Core.UI;
 using UI.Common;
 using UI.Components.Notification;
 using UI.Components.OptionsPopup;
@@ -71,7 +72,7 @@ namespace UI.Stack
             DepthChanged?.Invoke();
         }
 
-        public T PushById<T>(string panelId) where T : Component
+        public T PushById<T>(string panelId)
         {
             if (string.IsNullOrWhiteSpace(panelId))
                 throw new ArgumentException("Panel id is required.", nameof(panelId));
@@ -83,7 +84,7 @@ namespace UI.Stack
             return Push<T>(prefab);
         }
 
-        public T Push<T>(GameObject prefab) where T : Component
+        public T Push<T>(GameObject prefab)
         {
             if (!prefab)
                 throw new ArgumentNullException(nameof(prefab));
@@ -92,7 +93,9 @@ namespace UI.Stack
                 throw new InvalidOperationException("[GameUi] SetRoot must be called before Push.");
 
             var instance = _container.InstantiatePrefab(prefab, stackRoot);
-            var component = instance.GetComponent<T>();
+            var controller = instance.GetComponent<T>();
+            if (controller is not Component component)
+                throw new InvalidOperationException("[GameUi] Prefab for id '" + prefab.name + "' is not a component.");
             if (!component)
             {
                 Destroy(instance);
@@ -105,7 +108,7 @@ namespace UI.Stack
 
             _stack.Add(component);
             DepthChanged?.Invoke();
-            return component;
+            return controller;
         }
 
         public void Pop()
@@ -125,6 +128,9 @@ namespace UI.Stack
             Destroy(top.gameObject);
 
             DepthChanged?.Invoke();
+
+            ShowComponent(_stack[^1]);
+
             return true;
         }
 

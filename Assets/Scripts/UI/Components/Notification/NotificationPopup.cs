@@ -1,17 +1,11 @@
 using System;
+using Core.UI;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 // Define the custom control type.
 namespace UI.Components.Notification
 {
-    public enum PopupLevel
-    {
-        Info,
-        Warning,
-        Error
-    }
-
     [UxmlElement]
     public partial class NotificationPopup : VisualElement
     {

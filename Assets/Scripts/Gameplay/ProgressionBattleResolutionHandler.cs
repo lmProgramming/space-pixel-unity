@@ -5,21 +5,21 @@ using Core.Gameplay.EasyTeam;
 using Core.Services;
 using Core.Ships;
 using Core.State;
+using Core.UI;
 using Events.Game.BattleOver;
 using LMPro.External.IsAlive;
-using UI.Scenes.MainGame.Views.ProgressionGameOver;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Zenject;
 using ZLinq;
 
-namespace UI.Scenes.MainGame.Views
+namespace Gameplay
 {
     public class ProgressionBattleResolutionHandler : MonoBehaviour, IBattleResolutionHandler
     {
-        [SerializeField] private ProgressionGameOverController progressionGameOverController;
         [Inject] private IActivePlayerShipProvider _activePlayerShipProvider;
         [Inject] private BattleOverEventChannel _battleOverEventChannel;
+        [Inject] private IGameUi _gameUi;
 
         [Inject] private IProgressionRepository _progressionRepository;
         [Inject] private IShipService _shipService;
@@ -52,8 +52,14 @@ namespace UI.Scenes.MainGame.Views
 
         public void OnBattleDefeat()
         {
+            if (_gameUi == null)
+                throw new InvalidOperationException(
+                    "[ProgressionBattleResolutionHandler] IGameUi is not injected.");
+
             var save = _progressionRepository.Load(SaveState.ProgressionSlotIndex);
-            progressionGameOverController.Show(save.campaignName, save.credits, save.enemiesKilled);
+            var gameOver =
+                _gameUi.PushById<IProgressionGameOverController>(UIPanelPrefabConstants.ProgressionGameOver);
+            gameOver.Render(save.campaignName, save.credits, save.enemiesKilled);
             _progressionRepository.Delete(SaveState.ProgressionSlotIndex);
         }
 

@@ -152,7 +152,7 @@ namespace ShipFactory.UI
             }
             else
             {
-                spriteImage.style.display = DisplayStyle.None;
+                spriteImage.visible = false;
             }
 
             title.text = moduleSO.Name;

@@ -2,7 +2,6 @@ using System;
 using Core.Constants;
 using Events.Game;
 using Events.UI;
-using UI.Stack;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
@@ -13,8 +12,6 @@ namespace UI.Common
     public class PauseOverlayController : PanelRendererBase
     {
         [SerializeField] private string pauseTitle = "Paused";
-
-        [Inject] private IGameUi _gameUi;
 
         private VisualElement _pauseOverlay;
         [Inject] private PauseStateEventChannel _pauseStateChannel;
@@ -52,7 +49,7 @@ namespace UI.Common
                 _pauseOverlay == null)
                 throw new InvalidOperationException("[PauseOverlayController] Pause elements missing in UXML.");
 
-            if (_gameUi == null)
+            if (GameUi == null)
                 throw new InvalidOperationException("[PauseOverlayController] IGameUi is not injected.");
 
             if (_pauseStateChannel == null)
@@ -87,12 +84,12 @@ namespace UI.Common
 
         private void OnResumeClicked()
         {
-            _gameUi.Pop();
+            GameUi.Pop();
         }
 
         private void OnSettingsClicked()
         {
-            _gameUi.PushById<SettingsOverlayController>(UIPanelPrefabConstants.Settings);
+            GameUi.PushById<SettingsOverlayController>(UIPanelPrefabConstants.Settings);
         }
 
         private void EnterPausedState()

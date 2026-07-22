@@ -37,6 +37,15 @@ namespace UI.Scenes.MainGame.Views.ShipStatus
         private float _targetEnergyBarHeight;
         private UiPointerTracker _uiPointerTracker;
 
+        private void Start()
+        {
+            if (GameUi == null)
+                throw new InvalidOperationException(
+                    "[ShipStatusPanelController] IGameUi is not injected.");
+
+            GameUi.SetRoot(this);
+        }
+
         private void Update()
         {
             if (!_activePlayerShipProvider.HasPlayerShip ||
@@ -116,10 +125,7 @@ namespace UI.Scenes.MainGame.Views.ShipStatus
 
         private void RegisterSASToggle()
         {
-            if (_sasToggle == null)
-                return;
-
-            _sasToggle.RegisterValueChangedCallback(OnSASToggleChanged);
+            _sasToggle?.RegisterValueChangedCallback(OnSASToggleChanged);
         }
 
         private void UnregisterSASToggle()
@@ -139,13 +145,13 @@ namespace UI.Scenes.MainGame.Views.ShipStatus
         private void SetMainHudVisible(bool visible)
         {
             if (_mainHudRoot != null)
-                _mainHudRoot.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
+                _mainHudRoot.visible = visible;
         }
 
         private void SetShipStatusBlockVisible(bool visible)
         {
             if (_shipStatusPanel != null)
-                _shipStatusPanel.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
+                _shipStatusPanel.visible = visible;
         }
 
         private void UpdateSpeedDisplay()
@@ -163,12 +169,12 @@ namespace UI.Scenes.MainGame.Views.ShipStatus
             if (_activePlayerShipProvider.ActiveShip is not ISAS playerShipTyped)
             {
                 if (_sasCluster != null)
-                    _sasCluster.style.display = DisplayStyle.None;
+                    _sasCluster.visible = false;
                 return;
             }
 
             if (_sasCluster != null)
-                _sasCluster.style.display = DisplayStyle.Flex;
+                _sasCluster.visible = true;
 
             if (_sasToggle == null)
                 return;

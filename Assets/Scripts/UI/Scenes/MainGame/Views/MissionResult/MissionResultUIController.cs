@@ -1,13 +1,25 @@
 using System;
+using Core.UI;
 using UI.Common;
 using UnityEngine.UIElements;
 
 namespace UI.Scenes.MainGame.Views.MissionResult
 {
-    public class MissionResultUIController : PanelRendererBase
+    public class MissionResultUIController : PanelRendererBase, IMissionResultUIController
     {
         private VisualElement _overlay;
+        private PendingMissionResult _pendingResult = PendingMissionResult.None;
         private Label _resultLabel;
+
+        public void ShowVictory()
+        {
+            _pendingResult = PendingMissionResult.Victory;
+        }
+
+        public void ShowDefeat()
+        {
+            _pendingResult = PendingMissionResult.Defeat;
+        }
 
         protected override void BindUiCore(VisualElement root)
         {
@@ -17,22 +29,35 @@ namespace UI.Scenes.MainGame.Views.MissionResult
             if (_overlay == null || _resultLabel == null)
                 throw new InvalidOperationException(
                     "[MissionResultUIController] Mission result elements missing in UXML.");
+
+            ApplyPendingRender();
         }
 
-        public void ShowVictory()
+        private void ApplyPendingRender()
         {
-            _resultLabel.text = "VICTORY";
-            _resultLabel.RemoveFromClassList("defeat");
-            _resultLabel.AddToClassList("victory");
-            _overlay.RemoveFromClassList("hidden");
+            switch (_pendingResult)
+            {
+                case PendingMissionResult.Victory:
+                    _resultLabel.text = "VICTORY";
+                    _resultLabel.RemoveFromClassList("defeat");
+                    _resultLabel.AddToClassList("victory");
+                    break;
+                case PendingMissionResult.Defeat:
+                    _resultLabel.text = "DEFEAT";
+                    _resultLabel.RemoveFromClassList("victory");
+                    _resultLabel.AddToClassList("defeat");
+                    break;
+                case PendingMissionResult.None:
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
-        public void ShowDefeat()
+        private enum PendingMissionResult
         {
-            _resultLabel.text = "DEFEAT";
-            _resultLabel.RemoveFromClassList("victory");
-            _resultLabel.AddToClassList("defeat");
-            _overlay.RemoveFromClassList("hidden");
+            None = 0,
+            Victory = 1,
+            Defeat = 2
         }
     }
 }

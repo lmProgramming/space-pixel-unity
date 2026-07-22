@@ -1,4 +1,4 @@
-namespace UI.Common
+namespace Core.UI
 {
     public enum ActionOnEscape
     {

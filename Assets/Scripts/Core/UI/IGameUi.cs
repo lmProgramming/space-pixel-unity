@@ -1,9 +1,7 @@
 using System;
-using UI.Components.Notification;
-using UI.Components.OptionsPopup;
 using UnityEngine;
 
-namespace UI.Stack
+namespace Core.UI
 {
     public interface IGameUi
     {
@@ -13,9 +11,9 @@ namespace UI.Stack
 
         void SetRoot(Component root);
 
-        T PushById<T>(string panelId) where T : Component;
+        T PushById<T>(string panelId);
 
-        T Push<T>(GameObject prefab) where T : Component;
+        T Push<T>(GameObject prefab);
 
         void Pop();
 

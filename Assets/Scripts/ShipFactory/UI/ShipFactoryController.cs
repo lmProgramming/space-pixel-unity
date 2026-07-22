@@ -4,14 +4,13 @@ using Core.Constants;
 using Core.Gameplay.Sound;
 using Core.Services;
 using Core.ShipFactory;
+using Core.UI;
 using Events.Game;
 using Events.UI;
 using ShipFactory.UI.Runtime;
 using ShipFactory.UI.Views.ShipLibrary;
 using Ships;
 using UI.Common;
-using UI.Components.OptionsPopup;
-using UI.Stack;
 using UnityEngine;
 using UnityEngine.UIElements;
 using Zenject;
@@ -41,13 +40,9 @@ namespace ShipFactory.UI
 
         private (bool needToShow, string shipName) _duplicateShipNameWarning;
 
-        [Inject]
-        private IGameInput _gameInput;
+        [Inject] private IGameInput _gameInput;
 
         private GameObject _gameObjectUnderPointer;
-
-        [Inject]
-        private IGameUi _gameUi;
 
         private bool _isModuleDragBlockingCamera;
         private bool _isUiHoverBlockingCamera;
@@ -56,14 +51,11 @@ namespace ShipFactory.UI
         private Button _loadShipButton;
         private ModulePaletteController _paletteController;
 
-        [Inject]
-        private ModulePaletteController.Factory _paletteControllerFactory;
+        [Inject] private ModulePaletteController.Factory _paletteControllerFactory;
 
-        [Inject]
-        private PauseStateEventChannel _pauseStateChannel;
+        [Inject] private PauseStateEventChannel _pauseStateChannel;
 
-        [Inject]
-        private PointerOverUiEventChannel _pointerOverUiChannel;
+        [Inject] private PointerOverUiEventChannel _pointerOverUiChannel;
 
         private VisualElement _root;
         private Button _saveShipButton;
@@ -72,14 +64,11 @@ namespace ShipFactory.UI
 
         [Inject] private IShipSnapshotRepository _shipSnapshotRepository;
 
-        [Inject]
-        private IShipSnapshotService _snapshotService;
+        [Inject] private IShipSnapshotService _snapshotService;
 
-        [Inject(Optional = true)]
-        private ISoundManager _soundManager;
+        [Inject] private ISoundManager _soundManager;
 
-        [Inject]
-        private TextInputFocusEventChannel _textInputFocusChannel;
+        [Inject] private TextInputFocusEventChannel _textInputFocusChannel;
 
         private TextInputFocusTracker _textInputFocusTracker;
 
@@ -96,7 +85,7 @@ namespace ShipFactory.UI
                 throw new UnityException(
                     "[ShipFactoryController] ModulePaletteController.Factory is required.");
 
-            if (_gameUi == null)
+            if (GameUi == null)
                 throw new UnityException("[ShipFactoryController] IGameUi is required.");
 
             if (_pauseStateChannel == null)
@@ -105,7 +94,7 @@ namespace ShipFactory.UI
 
         private void Start()
         {
-            _gameUi.SetRoot(this);
+            GameUi.SetRoot(this);
         }
 
         private void Update()
@@ -178,7 +167,7 @@ namespace ShipFactory.UI
 
         private void ShowSnapshotLibrary()
         {
-            var library = _gameUi.PushById<ShipLibraryController>(UIPanelPrefabConstants.ShipLibrary);
+            var library = GameUi.PushById<ShipLibraryController>(UIPanelPrefabConstants.ShipLibrary);
             library.SnapshotSelected += LoadSnapshotFromLibrary;
             library.SnapshotDeleted += OnSnapshotDeleted;
         }
@@ -337,7 +326,7 @@ namespace ShipFactory.UI
 
         private void OnClearShipRequested()
         {
-            _gameUi.ShowOptions(
+            GameUi.ShowOptions(
                 "Clear ship?",
                 "Deleting the command module removes the entire ship. This cannot be undone.",
                 OnClearShipPopupOptionSelected,
@@ -347,7 +336,7 @@ namespace ShipFactory.UI
 
         private void OnBlockedPlacementClicked(string title, string description)
         {
-            _gameUi.ShowOptions(
+            GameUi.ShowOptions(
                 title,
                 description,
                 null,
