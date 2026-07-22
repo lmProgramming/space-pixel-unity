@@ -8,11 +8,16 @@ namespace Services
     public class SkirmishSetup : MonoBehaviour
     {
         [Inject]
+        private IMissionService _missionService;
+
+        [Inject]
         private ISkirmishSpawner _skirmishSpawner;
 
         private void Awake()
         {
             _skirmishSpawner.SpawnFromSaveState();
+
+            _missionService.Setup();
         }
     }
 }

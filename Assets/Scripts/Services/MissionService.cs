@@ -16,7 +16,7 @@ namespace Services
         [Inject] private IActivePlayerShipProvider _activePlayerShipProvider;
 
         [Inject] private BattleOverEventChannel _battleOverEventChannel;
-        private bool _hadEnemies;
+
         private bool _missionOver;
 
         private ITeam _missionTeam;
@@ -24,7 +24,7 @@ namespace Services
 
         private void Start()
         {
-            TryBindMissionTeam();
+            Setup();
         }
 
         private void Update()
@@ -32,15 +32,23 @@ namespace Services
             if (_missionOver)
                 return;
 
-            if (_hadEnemies && !AllEnemiesDestroyed())
+            var allAlliesDestroyed = AllAlliesDestroyed();
+            var allEnemiesDestroyed = AllEnemiesDestroyed();
+
+            if (allEnemiesDestroyed && !allAlliesDestroyed)
                 TriggerVictory();
 
-            if (AllAlliesDestroyed())
+            if (allAlliesDestroyed && !allEnemiesDestroyed)
                 TriggerDefeat();
         }
 
         public event Action OnVictory;
         public event Action OnDefeat;
+
+        public void Setup()
+        {
+            TryBindMissionTeam();
+        }
 
         private void TryBindMissionTeam()
         {
