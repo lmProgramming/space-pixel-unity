@@ -1,0 +1,44 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/DesignSystem/Resources/UI/Styles/DesignSystem/DesignSystem.uss"/>
+    <Style src="project://database/Assets/Scripts/UI/Scenes/MainMenu/MainMenu.uss"/>
+
+    <ui:VisualElement name="progression-slots-root" class="ds-root ds-root--transparent"
+                      style="position: absolute; left: 0; right: 0; top: 0; bottom: 0;">
+        <ui:VisualElement name="progression-slots-overlay" class="ds-backdrop" style="display: flex;">
+            <ui:VisualElement class="ds-dialog" style="width: 520px; max-width: 520px;">
+                <ui:Label text="Progression" class="ds-dialog__title"/>
+                <ui:Label text="Choose a save slot" class="ds-body-2 ds-text-secondary"
+                          style="margin-bottom: 16px; -unity-text-align: middle-center;"/>
+                <ui:VisualElement class="progression-slots-list">
+                    <ui:VisualElement name="progression-slot-0-row" class="progression-slot-row">
+                        <ui:Button name="progression-slot-0-button" text="New game"
+                                   class="ds-btn ds-btn--secondary progression-slot-button"/>
+                        <ui:Button name="progression-slot-0-delete-button"
+                                   class="ds-btn ds-btn--icon ds-btn--icon-danger progression-slot-delete-button">
+                            <ui:VisualElement class="ds-icon ds-icon--trash"/>
+                        </ui:Button>
+                    </ui:VisualElement>
+                    <ui:VisualElement name="progression-slot-1-row" class="progression-slot-row">
+                        <ui:Button name="progression-slot-1-button" text="New game"
+                                   class="ds-btn ds-btn--secondary progression-slot-button"/>
+                        <ui:Button name="progression-slot-1-delete-button"
+                                   class="ds-btn ds-btn--icon ds-btn--icon-danger progression-slot-delete-button">
+                            <ui:VisualElement class="ds-icon ds-icon--trash"/>
+                        </ui:Button>
+                    </ui:VisualElement>
+                    <ui:VisualElement name="progression-slot-2-row" class="progression-slot-row">
+                        <ui:Button name="progression-slot-2-button" text="New game"
+                                   class="ds-btn ds-btn--secondary progression-slot-button"/>
+                        <ui:Button name="progression-slot-2-delete-button"
+                                   class="ds-btn ds-btn--icon ds-btn--icon-danger progression-slot-delete-button">
+                            <ui:VisualElement class="ds-icon ds-icon--trash"/>
+                        </ui:Button>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement class="ds-dialog__actions">
+                    <ui:Button name="progression-slots-cancel-button" text="Back" class="ds-btn ds-btn--secondary"/>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

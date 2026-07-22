@@ -9,7 +9,6 @@ using Core.ShipSnapshots;
 using Core.State;
 using Ships;
 using UI.MVCVM;
-using UI.Stack;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Zenject;
@@ -22,7 +21,6 @@ namespace UI.Scenes.MainMenu.Views.Progression
     {
         private string _campaignName = string.Empty;
 
-        [Inject] private IGameUi _gameUi;
         private int? _pendingSlotIndex;
 
         [Inject(Id = UIPanelPrefabConstants.NewCampaignPreviewShip)]
@@ -97,7 +95,7 @@ namespace UI.Scenes.MainMenu.Views.Progression
         private void OnBackClicked()
         {
             CloseSelected?.Invoke();
-            _gameUi.Pop();
+            GameUi.Pop();
         }
 
         private void OnStartClicked()

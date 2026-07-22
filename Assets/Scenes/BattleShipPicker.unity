@@ -162,6 +162,7 @@ GameObject:
   - component: {fileID: 1018897898}
   - component: {fileID: 1018897900}
   - component: {fileID: 1018897899}
+  - component: {fileID: 1018897901}
   m_Layer: 0
   m_Name: BattleShipPicker
   m_TagString: Untagged
@@ -196,7 +197,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a1cbadfdbf7cc80c9893b39052d9273, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UI::UI.Progression.BattleShipPicker
-  showByDefault: 1
 --- !u!1931382934 &1018897900
 PanelRenderer:
   m_ObjectHideFlags: 0
@@ -255,6 +255,19 @@ PanelRenderer:
   m_PivotReferenceSize: 0
   m_Pivot: 0
   m_Position: 0
+--- !u!114 &1018897901
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1018897897}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e004e2956b895fe5f951c9241102c4c8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UI::UI.Scenes.BattleShipPicker.Views.BattleShipPickerView
+  actionOnEscape: 2
 --- !u!1001 &1134624176
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -263,14 +276,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 3935436465786090567, guid: 17371dd093b1ba2c5bb0965847c3c405, type: 3}
+      propertyPath: gameUi
+      value: 
+      objectReference: {fileID: 1134624179}
     - target: {fileID: 4677564092631612332, guid: 17371dd093b1ba2c5bb0965847c3c405, type: 3}
       propertyPath: _monoInstallers.Array.size
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4677564092631612332, guid: 17371dd093b1ba2c5bb0965847c3c405, type: 3}
       propertyPath: '_monoInstallers.Array.data[0]'
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1134624178}
     - target: {fileID: 5515476119549963838, guid: 17371dd093b1ba2c5bb0965847c3c405, type: 3}
       propertyPath: m_LocalPosition.x
       value: 4.64053
@@ -319,8 +336,43 @@ PrefabInstance:
     - {fileID: 2029778059734102207, guid: 17371dd093b1ba2c5bb0965847c3c405, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 8276008820147856545, guid: 17371dd093b1ba2c5bb0965847c3c405, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1134624179}
   m_SourcePrefab: {fileID: 100100000, guid: 17371dd093b1ba2c5bb0965847c3c405, type: 3}
+--- !u!1 &1134624177 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8276008820147856545, guid: 17371dd093b1ba2c5bb0965847c3c405, type: 3}
+  m_PrefabInstance: {fileID: 1134624176}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1134624178 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3935436465786090567, guid: 17371dd093b1ba2c5bb0965847c3c405, type: 3}
+  m_PrefabInstance: {fileID: 1134624176}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1134624177}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a2932ca8a019fb27959f14e4ab61114, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UI::UI.Stack.GameUiInstaller
+--- !u!114 &1134624179
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1134624177}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 23905d5b04acf09f9a1e028c93182a1b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UI::UI.Stack.GameUi
+  stackRoot: {fileID: 918121610}
+  toastRoot: {fileID: 918121610}
+  baseSortingOrder: 100
+  toastSortingOrder: 1000
 --- !u!1 &2106773580
 GameObject:
   m_ObjectHideFlags: 0
@@ -332,6 +384,7 @@ GameObject:
   - component: {fileID: 2106773583}
   - component: {fileID: 2106773582}
   - component: {fileID: 2106773581}
+  - component: {fileID: 2106773584}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -413,6 +466,50 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2106773584
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2106773580}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a79441f348de89743a2939f4d699eac1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalCameraData
+  m_RenderShadows: 1
+  m_RequiresDepthTextureOption: 2
+  m_RequiresOpaqueTextureOption: 2
+  m_CameraType: 0
+  m_Cameras: []
+  m_RendererIndex: -1
+  m_VolumeLayerMask:
+    serializedVersion: 2
+    m_Bits: 1
+  m_VolumeTrigger: {fileID: 0}
+  m_VolumeFrameworkUpdateModeOption: 2
+  m_RenderPostProcessing: 0
+  m_Antialiasing: 0
+  m_AntialiasingQuality: 2
+  m_StopNaN: 0
+  m_Dithering: 0
+  m_ClearDepth: 1
+  m_AllowXRRendering: 1
+  m_AllowHDROutput: 1
+  m_UseScreenCoordOverride: 0
+  m_ScreenSizeOverride: {x: 0, y: 0, z: 0, w: 0}
+  m_ScreenCoordScaleBias: {x: 0, y: 0, z: 0, w: 0}
+  m_RequiresDepthTexture: 0
+  m_RequiresColorTexture: 0
+  m_TaaSettings:
+    m_Quality: 3
+    m_FrameInfluence: 0.1
+    m_JitterScale: 1
+    m_MipBias: 0
+    m_VarianceClampScale: 0.9
+    m_ContrastAdaptiveSharpening: 0
+  m_Version: 2
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
