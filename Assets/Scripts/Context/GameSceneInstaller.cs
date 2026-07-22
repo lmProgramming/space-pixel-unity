@@ -10,7 +10,6 @@ using Services.Sound;
 using ShipFactory.UI;
 using ShipFactory.UI.Runtime;
 using ShipFactory.UI.ToolkitComponents;
-using UI.Components.Notification;
 using UnityEngine;
 using UnityEngine.UIElements;
 using Zenject;
@@ -130,7 +129,7 @@ namespace Context
 
             Container.BindFactory<VisualElement, CameraInfoPanel, CameraInfoPanel.Factory>();
 
-            Container.BindFactory<VisualElement, NotificationView, ShipFactoryFeedback, ShipFactoryCanvasController,
+            Container.BindFactory<VisualElement, ShipFactoryFeedback, ShipFactoryCanvasController,
                 ShipFactoryCanvasController.Factory>();
         }
     }

@@ -35,6 +35,19 @@ namespace Context
         [SerializeField]
         private BattleOverEventChannel battleOverEventChannel;
 
+        [Header("UI Panels")]
+        [SerializeField] private GameObject settingsPanelPrefab;
+
+        [SerializeField] private GameObject pausePanelPrefab;
+        [SerializeField] private GameObject optionsPopupPanelPrefab;
+        [SerializeField] private GameObject newCampaignPanelPrefab;
+        [SerializeField] private GameObject progressionSlotsPanelPrefab;
+        [SerializeField] private GameObject freeModeSetupPanelPrefab;
+        [SerializeField] private GameObject shipLibraryPanelPrefab;
+        [SerializeField] private GameObject notificationHostPanelPrefab;
+        [SerializeField] private GameObject missionResolutionPanelPrefab;
+        [SerializeField] private GameObject progressionGameOverPanelPrefab;
+
         public override void InstallBindings()
         {
             if (pointerOverUiChannel == null)
@@ -95,6 +108,24 @@ namespace Context
                 .To<ProgressionRepository>()
                 .AsSingle();
 
+            Container.Bind<IGameInput>()
+                .To<GameInput>()
+                .FromNewComponentOnNewGameObject()
+                .WithGameObjectName("GameInput")
+                .AsSingle()
+                .NonLazy();
+
+            Container.Bind<GameplayConstants>()
+                .FromInstance(gameplayConstants)
+                .AsSingle();
+
+            BindChannels();
+
+            BindUiPanelPrefabs();
+        }
+
+        private void BindChannels()
+        {
             Container.Bind<PointerOverUiEventChannel>()
                 .FromInstance(pointerOverUiChannel)
                 .AsSingle();
@@ -115,23 +146,39 @@ namespace Context
                 .FromInstance(battleOverEventChannel)
                 .AsSingle();
 
-            Container.Bind<IGameInput>()
-                .To<GameInput>()
-                .FromNewComponentOnNewGameObject()
-                .WithGameObjectName("GameInput")
-                .AsSingle()
-                .NonLazy();
-
-            Container.Bind<GameplayConstants>()
-                .FromInstance(gameplayConstants)
-                .AsSingle();
-
             Container.Bind<CameraResetRequestEventChannel>()
                 .FromInstance(cameraResetRequestEventChannel)
                 .AsSingle();
 
-            if (physicsCollisionChannel)
-                Container.Bind<CollisionEventChannelSO>().FromInstance(physicsCollisionChannel).AsSingle();
+            Container.Bind<CollisionEventChannelSO>()
+                .FromInstance(physicsCollisionChannel)
+                .AsSingle();
+        }
+
+        private void BindUiPanelPrefabs()
+        {
+            BindUiPanel(UIPanelPrefabConstants.Settings, settingsPanelPrefab);
+            BindUiPanel(UIPanelPrefabConstants.Pause, pausePanelPrefab);
+            BindUiPanel(UIPanelPrefabConstants.OptionsPopup, optionsPopupPanelPrefab);
+            BindUiPanel(UIPanelPrefabConstants.NewCampaign, newCampaignPanelPrefab);
+            BindUiPanel(UIPanelPrefabConstants.ProgressionSlots, progressionSlotsPanelPrefab);
+            BindUiPanel(UIPanelPrefabConstants.FreeModeSetup, freeModeSetupPanelPrefab);
+            BindUiPanel(UIPanelPrefabConstants.ShipLibrary, shipLibraryPanelPrefab);
+            BindUiPanel(UIPanelPrefabConstants.NotificationHost, notificationHostPanelPrefab);
+            BindUiPanel(UIPanelPrefabConstants.MissionResolution, missionResolutionPanelPrefab);
+            BindUiPanel(UIPanelPrefabConstants.ProgressionGameOver, progressionGameOverPanelPrefab);
+        }
+
+        private void BindUiPanel(string panelId, GameObject prefab)
+        {
+            if (!prefab)
+                throw new UnityException(
+                    $"[GameProjectInstaller] UI panel prefab for '{panelId}' must be assigned.");
+
+            Container.Bind<GameObject>()
+                .WithId(panelId)
+                .FromInstance(prefab)
+                .AsCached();
         }
     }
 }

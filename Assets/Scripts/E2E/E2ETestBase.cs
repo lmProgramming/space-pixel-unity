@@ -34,6 +34,7 @@ namespace E2E
 
         private DiContainer _sceneContainer;
         protected Instantiator Instantiator;
+        protected IMissionService MissionService;
 
         [UnitySetUp]
         public IEnumerator SetupScene()
@@ -82,6 +83,7 @@ namespace E2E
             _sceneContainer.Resolve<IShipService>();
             _activePlayerShipProvider = _sceneContainer.Resolve<IActivePlayerShipProvider>();
             _navigationService = _sceneContainer.Resolve<INavigationService>();
+            MissionService = _sceneContainer.Resolve<IMissionService>();
             Instantiator = Object.FindAnyObjectByType<ZenjectInstantiator>();
             Assert.That(Instantiator, Is.Not.Null, "MainGame scene is missing an Instantiator.");
 
