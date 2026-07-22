@@ -4,7 +4,6 @@ using Core.Services;
 using Core.Ships;
 using Core.ShipSnapshots;
 using UI.MVCVM;
-using UI.Stack;
 using UnityEngine;
 using Zenject;
 
@@ -17,8 +16,6 @@ namespace ShipFactory.UI.Views.ShipLibrary
             ShipLibraryView,
             ShipLibraryViewModel>
     {
-        [Inject] private IGameUi _gameUi;
-
         [Inject]
         private IShipSnapshotRepository _snapshotRepository;
 
@@ -77,13 +74,13 @@ namespace ShipFactory.UI.Views.ShipLibrary
         private void OnViewCloseClicked()
         {
             CloseClicked?.Invoke();
-            _gameUi.Pop();
+            GameUi.Pop();
         }
 
         private void OnViewLoadClicked(string snapshotPath)
         {
             SnapshotSelected?.Invoke(snapshotPath);
-            _gameUi.Pop();
+            GameUi.Pop();
         }
 
         private void OnViewDeleteClicked(string snapshotPath)

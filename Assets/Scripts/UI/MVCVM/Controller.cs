@@ -1,6 +1,8 @@
 using Core.MVCVM;
+using UI.Stack;
 using UnityEngine;
 using UnityEngine.UIElements;
+using Zenject;
 
 namespace UI.MVCVM
 {
@@ -9,6 +11,7 @@ namespace UI.MVCVM
         where TModel : ObservableModel
         where TView : View<TViewModel>
     {
+        [Inject] protected IGameUi GameUi;
         protected TModel Model { get; private set; }
 
         protected TView View { get; private set; }
