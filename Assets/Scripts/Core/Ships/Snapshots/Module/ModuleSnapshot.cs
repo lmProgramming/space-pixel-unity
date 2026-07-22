@@ -1,6 +1,7 @@
 using System;
 using Core.Ships.Snapshots.PixelatedRigidbody;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Core.Ships.Snapshots.Module
 {
@@ -14,7 +15,7 @@ namespace Core.Ships.Snapshots.Module
         public string archetypeId;
         public Vector3 localPosition;
         public Quaternion localRotation;
-        public Resources resources;
+        [FormerlySerializedAs("resources")] public ShipResources shipResources;
 
         public string typePayloadJson;
 

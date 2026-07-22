@@ -97,7 +97,7 @@ namespace UI.Scenes.MainGame.Views.Reload
 
         private void HandleWeaponStateChange(IWeapon weapon, bool becameReady)
         {
-            if (!IsUiBound || _weaponSlotDictionary == null ||
+            if (_weaponSlotDictionary == null ||
                 !_weaponSlotDictionary.TryGetValue(weapon, out var slot) || slot == null)
             {
                 Debug.LogWarning($"Weapon slot not found for {weapon} during state change.", this);

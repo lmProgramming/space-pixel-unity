@@ -7,13 +7,13 @@ using Events.UI;
 using UI.Tools;
 using UnityEngine;
 using UnityEngine.UIElements;
+using Zenject;
 
 namespace UI.Common
 {
     public class SettingsOverlayController : PanelRendererBase
     {
         [SerializeField] private bool isMainMenu;
-        [SerializeField] private PointerOverUiEventChannel pointerOverUiChannel;
 
         private VisualElement _backdrop;
         private Button _closeButton;
@@ -21,12 +21,11 @@ namespace UI.Common
         private Slider _effectsSlider;
         private Slider _masterSlider;
         private Slider _musicSlider;
+        [Inject] private PointerOverUiEventChannel _pointerOverUiChannel;
         private bool _suppressPersist;
         private DropdownField _themeProviderDropdown;
         private Toggle _themeToggle;
         private UiPointerTracker _uiPointerTracker;
-
-        public bool IsOpen => _backdrop != null && _backdrop.style.display == DisplayStyle.Flex;
 
         protected override void BindUiCore(VisualElement root)
         {
@@ -47,21 +46,18 @@ namespace UI.Common
             titleLabel.text = isMainMenu ? "Settings (Main Menu)" : "Settings";
             DesignSystemThemeService.RegisterVisualTree(root);
             DesignSystemRuntime.EnsureToggleKnobs(root);
-            _backdrop.style.display = DisplayStyle.None;
 
             _closeButton.clicked += Hide;
             _masterSlider.RegisterValueChangedCallback(OnMasterVolumeChanged);
             _musicSlider.RegisterValueChangedCallback(OnMusicVolumeChanged);
             _effectsSlider.RegisterValueChangedCallback(OnEffectsVolumeChanged);
-            WireThemeToggle();
+            _themeToggle?.RegisterValueChangedCallback(OnThemeToggleChanged);
+
             WireThemeProvider();
             LoadFromPlayerPrefs();
 
-            if (pointerOverUiChannel != null)
-            {
-                _uiPointerTracker = new UiPointerTracker(pointerOverUiChannel);
-                _uiPointerTracker.Track(_backdrop);
-            }
+            _uiPointerTracker = new UiPointerTracker(_pointerOverUiChannel);
+            _uiPointerTracker.Track(_backdrop);
         }
 
         protected override void UnbindUiCore()
@@ -77,28 +73,16 @@ namespace UI.Common
             Hide();
         }
 
-        public void Hide()
+        public override void Hide()
         {
-            if (_backdrop == null)
-                return;
-
-            _backdrop.style.display = DisplayStyle.None;
+            base.Hide();
             _uiPointerTracker?.Release(_backdrop);
         }
 
-        public void Toggle()
+        public override void Show()
         {
-            if (IsOpen)
-                Hide();
-            else
-                Show();
-        }
-
-        private void Show()
-        {
+            base.Show();
             LoadFromPlayerPrefs();
-            DesignSystemRuntime.EnsureToggleKnobs(_backdrop);
-            _backdrop.style.display = DisplayStyle.Flex;
         }
 
         private void SyncThemeToggleState()
@@ -108,11 +92,6 @@ namespace UI.Common
 
             _themeToggle.SetValueWithoutNotify(DesignSystemThemeService.EffectiveIsLightTheme);
             _themeToggle.SetEnabled(!DesignSystemThemeService.IsCodigrateActive);
-        }
-
-        private void WireThemeToggle()
-        {
-            _themeToggle?.RegisterValueChangedCallback(OnThemeToggleChanged);
         }
 
         private void WireThemeProvider()

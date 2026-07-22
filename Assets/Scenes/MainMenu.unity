@@ -524,8 +524,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1456832617}
-  - component: {fileID: 1456832619}
   - component: {fileID: 1456832618}
+  - component: {fileID: 1456832619}
   m_Layer: 0
   m_Name: SettingsOverlay
   m_TagString: Untagged
@@ -542,8 +542,8 @@ Transform:
   m_GameObject: {fileID: 1456832616}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -6.76953, y: 0.44887, z: 0}
-  m_LocalScale: {x: 15, y: 15, z: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1699419270}
@@ -560,8 +560,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ba93c0ac3f52e386a664db487d3e6b1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UI::UI.Common.SettingsOverlayController
+  showByDefault: 0
   isMainMenu: 1
-  pointerOverUiChannel: {fileID: 11400000, guid: fe59adb565b6e2758b87bd8eda75cff1, type: 2}
 --- !u!1931382934 &1456832619
 PanelRenderer:
   m_ObjectHideFlags: 0
@@ -650,6 +650,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bdc7950fc88242add8894a91e5b444fd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Game.UI::UI.Main.MainMenuController
+  showByDefault: 1
   settingsOverlay: {fileID: 1456832618}
   newCampaignController: {fileID: 2095039585}
 --- !u!4 &1622572001
@@ -661,7 +662,7 @@ Transform:
   m_GameObject: {fileID: 1622571998}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -114.140564, y: 20.60696, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -750,9 +751,9 @@ Transform:
   m_GameObject: {fileID: 1699419269}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 6.76953, y: -0.44887, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: -1}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 1622572001}
   - {fileID: 1456832617}
@@ -768,15 +769,15 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2095039584}
-  - component: {fileID: 2095039586}
   - component: {fileID: 2095039585}
+  - component: {fileID: 2095039586}
   m_Layer: 0
   m_Name: ProgressionNewCampaign
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &2095039584
 Transform:
   m_ObjectHideFlags: 0
@@ -788,7 +789,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 1699419270}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -804,6 +805,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fce4e1e5b1fa07a1ab697d46aa9dee97, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UI::UI.Progression.ProgressionNewCampaignController
+  showByDefault: 0
   previewShip: {fileID: 8956799424639359191}
 --- !u!1931382934 &2095039586
 PanelRenderer:
@@ -854,7 +856,7 @@ PanelRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   serializedVersion: 1
-  m_PanelSettings: {fileID: 11400000, guid: bdbe1f2b7f606d8bca72704a6c95444a, type: 2}
+  m_PanelSettings: {fileID: 11400000, guid: 1d7a31aea686ba3c3baccf17c6690272, type: 2}
   sourceAsset: {fileID: 9197481963319205126, guid: e07f66ca7d87ce72c8381c27def0b55c, type: 3}
   m_ParentUI: {fileID: 0}
   m_WorldSpaceSizeMode: 1
@@ -863,6 +865,60 @@ PanelRenderer:
   m_PivotReferenceSize: 0
   m_Pivot: 0
   m_Position: 0
+--- !u!1 &2139413471
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2139413473}
+  - component: {fileID: 2139413472}
+  m_Layer: 0
+  m_Name: PanelInputConfiguration
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2139413472
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2139413471}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 19106, guid: 0000000000000000e000000000000000, type: 0}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.dll::UnityEngine.UIElements.PanelInputConfiguration
+  m_Settings:
+    m_ProcessWorldSpaceInput: 1
+    m_InteractionLayers:
+      serializedVersion: 2
+      m_Bits: 2043
+    m_MaxInteractionDistance: Infinity
+    m_DefaultEventCameraIsMainCamera: 1
+    m_EventCameras: []
+    m_PanelInputRedirection: 0
+    m_AutoCreatePanelComponents: 1
+--- !u!4 &2139413473
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2139413471}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &7038610650188309146
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -885,15 +941,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6799016278290373035, guid: 1de7a1823d84d0b02a0b3dc3a726b2aa, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 800
+      value: 500
       objectReference: {fileID: 0}
     - target: {fileID: 6799016278290373035, guid: 1de7a1823d84d0b02a0b3dc3a726b2aa, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 450
+      value: 475
       objectReference: {fileID: 0}
     - target: {fileID: 6799016278290373035, guid: 1de7a1823d84d0b02a0b3dc3a726b2aa, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: -8
       objectReference: {fileID: 0}
     - target: {fileID: 6799016278290373035, guid: 1de7a1823d84d0b02a0b3dc3a726b2aa, type: 3}
       propertyPath: m_LocalRotation.w
@@ -955,3 +1011,4 @@ SceneRoots:
   - {fileID: 979709535}
   - {fileID: 1699419270}
   - {fileID: 7038610650188309146}
+  - {fileID: 2139413473}

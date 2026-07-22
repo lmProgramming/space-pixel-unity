@@ -12,7 +12,6 @@ using UnityEngine;
 using Zenject;
 using ZLinq;
 using Object = UnityEngine.Object;
-using Resources = Core.Ships.Resources;
 
 namespace Ships.Tests.TestHelpers.Factories
 {
@@ -72,12 +71,13 @@ namespace Ships.Tests.TestHelpers.Factories
             return this;
         }
 
-        public ShipTestBuilder WithBasic(string name, Vector2 localPosition, int width, int height, Resources resources)
+        public ShipTestBuilder WithBasic(string name, Vector2 localPosition, int width, int height,
+            ShipResources shipResources)
         {
             var moduleGo = CreateModuleBase(name, localPosition, width, height);
 
             var basic = ModuleFactory.AddBasicComponent(moduleGo);
-            basic.SetResources(resources);
+            basic.SetResources(shipResources);
 
             RegisterOtherModule(basic);
 
@@ -115,7 +115,7 @@ namespace Ships.Tests.TestHelpers.Factories
 
             var testModule = ModuleFactory.AddTestModuleComponent(moduleGo);
             testModule.SetMainSkillType(mainSkill);
-            testModule.SetResources(new Resources(0, 0, crewNeeded, 0, 0));
+            testModule.SetResources(new ShipResources(0, 0, crewNeeded, 0, 0));
 
             RegisterOtherModule(testModule);
 
@@ -145,7 +145,7 @@ namespace Ships.Tests.TestHelpers.Factories
                 _createdObjects, width, height);
 
             var command = ModuleFactory.AddCommandModuleComponent(commandGo);
-            command.SetResources(new Resources(0, 0, 0, 0, 0));
+            command.SetResources(new ShipResources(0, 0, 0, 0, 0));
 
             var identity = commandGo.AddComponent<GameObjectInstanceIdentity>();
             identity.EnsureAssigned(InstanceOrigin.Custom);
@@ -176,7 +176,7 @@ namespace Ships.Tests.TestHelpers.Factories
                 commandGo.GetComponent<PixelatedRigidbody>().SetTextureFromColors(colors);
 
             var command = ModuleFactory.AddCommandModuleComponent(commandGo);
-            command.SetResources(new Resources(0, 0, 0, 0, 0));
+            command.SetResources(new ShipResources(0, 0, 0, 0, 0));
 
             var identity = commandGo.AddComponent<GameObjectInstanceIdentity>();
             identity.EnsureAssigned(InstanceOrigin.Custom);
@@ -186,7 +186,8 @@ namespace Ships.Tests.TestHelpers.Factories
             return this;
         }
 
-        public ShipTestBuilder WithCustomEngine(Vector2 localPosition, int width, int height, Resources resources)
+        public ShipTestBuilder WithCustomEngine(Vector2 localPosition, int width, int height,
+            ShipResources shipResources)
         {
             var engineGo = ModuleFactory.CreateModuleBase("Engine", _shipGo.transform, localPosition, 0f, _container,
                 _createdObjects, width, height);
@@ -194,7 +195,7 @@ namespace Ships.Tests.TestHelpers.Factories
             ModuleFactory.AddNozzle(engineGo, _container, _createdObjects);
 
             var engine = engineGo.AddComponent<Engine>();
-            engine.SetResources(resources);
+            engine.SetResources(shipResources);
 
             var identity = engineGo.AddComponent<GameObjectInstanceIdentity>();
             identity.EnsureAssigned(InstanceOrigin.Custom);
@@ -340,7 +341,7 @@ namespace Ships.Tests.TestHelpers.Factories
                 container, createdObjects, width, height);
             go.SetActive(false);
             var cannon = go.AddComponent<Cannon>();
-            cannon.SetResources(new Resources(0, 1, 0, 0, 0));
+            cannon.SetResources(new ShipResources(0, 1, 0, 0, 0));
 
             var projectileSpawnGo = new GameObject("ProjectileSpawn");
             projectileSpawnGo.transform.SetParent(go.transform);

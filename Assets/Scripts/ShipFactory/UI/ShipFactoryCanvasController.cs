@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Core.Services;
+using Core.ShipFactory;
 using Core.Ships;
 using Core.Ships.Module;
 using JetBrains.Annotations;
@@ -55,12 +56,12 @@ namespace ShipFactory.UI
             ShipFactoryFeedback feedback,
             IGameInput gameInput,
             IInstantiator instantiator,
-            ShipModuleCatalog moduleCatalog,
+            IShipModuleCatalog moduleCatalog,
             CameraInfoPanel.Factory cameraInfoPanelFactory)
         {
             _gameInput = gameInput;
             _instantiator = instantiator ?? throw new ArgumentNullException(nameof(instantiator));
-            var moduleCatalog1 = moduleCatalog ?? throw new ArgumentNullException(nameof(moduleCatalog));
+            if (moduleCatalog == null) throw new ArgumentNullException(nameof(moduleCatalog));
             _notificationView = notificationView ?? throw new ArgumentNullException(nameof(notificationView));
             _feedback = feedback ?? throw new ArgumentNullException(nameof(feedback));
 
@@ -85,7 +86,7 @@ namespace ShipFactory.UI
             _infoPanel.OnRotateCounterClockwiseClicked += () => RotateActiveModule(-90);
 
             // 2. Initialize Managers
-            _overlayManager = new OverlayManager(moduleCatalog1);
+            _overlayManager = new OverlayManager(moduleCatalog);
             _animator = new DragAnimator(_overlayManager);
 
             // 3. Register Inputs

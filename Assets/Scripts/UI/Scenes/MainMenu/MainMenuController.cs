@@ -246,16 +246,6 @@ namespace UI.Scenes.MainMenu
             Hide();
         }
 
-        private void Show()
-        {
-            gameObject.SetActive(true);
-        }
-
-        private void Hide()
-        {
-            gameObject.SetActive(false);
-        }
-
         private void OnProgressionSlotDeleteClicked(int slotIndex)
         {
             _slotPendingDelete = slotIndex;

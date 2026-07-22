@@ -52,7 +52,7 @@ namespace UI.Components.OptionsPopup
 
         protected override OptionsPopupView CreateView()
         {
-            return new OptionsPopupView();
+            return gameObject.AddComponent<OptionsPopupView>();
         }
 
         protected override OptionsPopupViewModel CreateViewModel(OptionsPopupModel model)

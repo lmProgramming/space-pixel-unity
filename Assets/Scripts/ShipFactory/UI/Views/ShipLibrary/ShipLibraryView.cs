@@ -7,8 +7,7 @@ using UnityEngine.UIElements;
 
 namespace ShipFactory.UI.Views.ShipLibrary
 {
-    public class ShipLibraryView
-        : View<ShipLibraryViewModel>
+    public class ShipLibraryView : View<ShipLibraryViewModel>
     {
         private readonly List<VisualElement> _entryCards = new();
         private readonly List<(VisualElement element, EventCallback<ClickEvent> callback)> _entryClickCallbacks = new();
@@ -34,8 +33,7 @@ namespace ShipFactory.UI.Views.ShipLibrary
 
         public event Action<string> DeleteClicked;
 
-        public override void BindUI(
-            VisualElement root)
+        protected override void BindUiCore(VisualElement root)
         {
             _closeButton = root.Q<Button>("ship-library-close-button");
             _loadButton = root.Q<Button>("ship-library-load-button");
@@ -53,7 +51,7 @@ namespace ShipFactory.UI.Views.ShipLibrary
             Render();
         }
 
-        public override void UnbindUI()
+        protected override void UnbindUiCore()
         {
             if (_closeButton != null)
                 _closeButton.clicked -= OnCloseClicked;

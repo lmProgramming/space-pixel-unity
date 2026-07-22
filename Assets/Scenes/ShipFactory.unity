@@ -223,6 +223,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c1a79923e8f49fb8fb32853329765b1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ShipFactory::ShipFactory.ShipFactoryController
+  showByDefault: 1
   libraryController: {fileID: 1154439628}
   optionsPopup: {fileID: 1947081261}
   notificationView: {fileID: 1889098462}
@@ -366,8 +367,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ba93c0ac3f52e386a664db487d3e6b1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UI::UI.Common.SettingsOverlayController
+  showByDefault: 0
   isMainMenu: 0
-  pointerOverUiChannel: {fileID: 11400000, guid: fe59adb565b6e2758b87bd8eda75cff1, type: 2}
 --- !u!1931382934 &660530472
 PanelRenderer:
   m_ObjectHideFlags: 0
@@ -709,7 +710,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1154439626
 Transform:
   m_ObjectHideFlags: 0
@@ -795,6 +796,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cbfec8939112b49cbaedc3d65352b06c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ShipFactory::ShipFactory.UI.Views.ShipLibrary.ShipLibraryController
+  showByDefault: 0
 --- !u!1 &1569039270
 GameObject:
   m_ObjectHideFlags: 0
@@ -840,6 +842,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0698006a74be854e1bf5702fc185a220, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UI::UI.Common.PauseOverlayController
+  showByDefault: 0
   pauseTitle: Paused
   settingsOverlay: {fileID: 660530471}
   pointerOverUiChannel: {fileID: 11400000, guid: fe59adb565b6e2758b87bd8eda75cff1, type: 2}
@@ -1214,6 +1217,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efbb0c339d636e94e8fc024e80ae13fc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ShipFactory::ShipFactory.UI.ToolkitComponents.NotificationPopup
+  showByDefault: 0
 --- !u!1931382934 &1889098463
 PanelRenderer:
   m_ObjectHideFlags: 0
@@ -1289,7 +1293,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1947081260
 Transform:
   m_ObjectHideFlags: 0
@@ -1317,6 +1321,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f3118a0bf348df1c99a171089b095d40, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UI::UI.Components.OptionsPopup.OptionsPopupController
+  showByDefault: 0
 --- !u!1931382934 &1947081262
 PanelRenderer:
   m_ObjectHideFlags: 0

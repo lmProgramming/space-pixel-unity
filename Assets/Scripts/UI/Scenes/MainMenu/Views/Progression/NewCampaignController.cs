@@ -40,11 +40,11 @@ namespace UI.Scenes.MainMenu.Views.Progression
 
         protected override void OnDisable()
         {
+            base.OnDisable();
             View.BackClicked -= OnBackClicked;
             View.StartClicked -= OnStartClicked;
             View.ShipSelected -= OnShipSelected;
             View.CampaignNameChanged -= OnCampaignNameChanged;
-            base.OnDisable();
         }
 
         public event Action CloseSelected;
@@ -54,13 +54,8 @@ namespace UI.Scenes.MainMenu.Views.Progression
             _pendingSlotIndex = slotIndex;
             _selectedShipIndex = null;
             _campaignName = string.Empty;
-            gameObject.SetActive(true);
             Refresh();
-        }
-
-        public void Close()
-        {
-            gameObject.SetActive(false);
+            View.Show();
         }
 
         protected override ShipSnapshotCatalogModel CreateModel()
@@ -70,7 +65,7 @@ namespace UI.Scenes.MainMenu.Views.Progression
 
         protected override NewCampaignView CreateView()
         {
-            return new NewCampaignView();
+            return gameObject.AddComponent<NewCampaignView>();
         }
 
         protected override NewCampaignViewModel CreateViewModel(ShipSnapshotCatalogModel model)
@@ -78,7 +73,8 @@ namespace UI.Scenes.MainMenu.Views.Progression
             return new NewCampaignViewModel(
                 CreateShipEntries(model.Snapshots),
                 _campaignName,
-                CanStartCampaign());
+                CanStartCampaign(),
+                _selectedShipIndex);
         }
 
         private static IReadOnlyList<SavedShipSnapshotDescriptor> CreateShipEntries(
@@ -100,8 +96,8 @@ namespace UI.Scenes.MainMenu.Views.Progression
 
         private void OnBackClicked()
         {
-            Close();
             CloseSelected?.Invoke();
+            Hide();
         }
 
         private void OnStartClicked()

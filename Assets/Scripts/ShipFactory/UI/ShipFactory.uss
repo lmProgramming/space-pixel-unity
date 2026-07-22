@@ -133,6 +133,21 @@
     align-self: center;
 }
 
+.palette-card {
+    width: 132px;
+    flex-shrink: 0;
+    align-self: stretch;
+    flex-direction: column;
+}
+
+.palette-card__title-clip {
+    width: 100%;
+}
+
+.palette-card .ds-card__title-row {
+    width: 100%;
+}
+
 .palette-card--dragging {
     opacity: 0.3;
 }

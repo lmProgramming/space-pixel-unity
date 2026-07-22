@@ -34,7 +34,7 @@ namespace UI.Scenes.BattleShipPicker.Views
 
         protected override BattleShipPickerView CreateView()
         {
-            return new BattleShipPickerView();
+            return gameObject.AddComponent<BattleShipPickerView>();
         }
 
         protected override BattleShipPickerViewModel CreateViewModel(BattleShipPickerModel model)

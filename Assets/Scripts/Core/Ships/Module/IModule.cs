@@ -15,7 +15,7 @@ namespace Core.Ships.Module
         [CanBeNull]
         public Transform Transform { get; }
 
-        public Resources Resources { get; }
+        public ShipResources ShipResources { get; }
         public float ModuleEfficiency { get; }
         public int CrewNeededCount { get; }
         public float EnergyCapacity { get; }
@@ -33,7 +33,7 @@ namespace Core.Ships.Module
         public float GetEnergyProduction();
         public void KillAllCrew();
         public void KillRandomCrew(int count);
-        public void SetResources(Resources newResources);
+        public void SetResources(ShipResources newShipResources);
         public void SetLocalPosition(Vector2 localPosition);
         public void SetShip(IShip ship);
     }

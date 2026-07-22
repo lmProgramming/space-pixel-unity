@@ -1,3 +1,4 @@
+using Core.ShipFactory;
 using Core.Ships.Module;
 using UnityEngine;
 

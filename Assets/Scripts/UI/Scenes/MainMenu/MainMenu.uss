@@ -1,13 +1,29 @@
+.progression-slots-list {
+    width: 75%;
+    flex-direction: column;
+    margin-bottom: var(--space-4);
+}
+
 .progression-slot-row {
     flex-direction: row;
     align-items: center;
-    gap: 8px;
+    width: 100%;
+    margin-bottom: var(--space-3);
 }
 
 .progression-slot-button {
     flex-grow: 1;
+    flex-shrink: 1;
+    width: 0;
+    margin: 0;
 }
 
 .progression-slot-delete-button {
+    flex-grow: 0;
     flex-shrink: 0;
+    margin-left: var(--space-2);
+}
+
+.progression-slot-delete-button:disabled {
+    opacity: 0.35;
 }

@@ -35,10 +35,8 @@ namespace Services
             var json = File.ReadAllText(filePath);
             var save = JsonUtility.FromJson<ProgressionSave>(json);
 
-            if (save == null)
-                throw new InvalidOperationException($"Failed to deserialize progression save for slot {slotIndex}.");
-
-            return save;
+            return save ??
+                   throw new InvalidOperationException($"Failed to deserialize progression save for slot {slotIndex}.");
         }
 
         public void Save(int slotIndex, ProgressionSave save)
@@ -94,7 +92,7 @@ namespace Services
 
         private static void ValidateSlotIndex(int slotIndex)
         {
-            if (slotIndex < 0 || slotIndex >= Constants.ProgressionSlotCount)
+            if (slotIndex is < 0 or >= Constants.ProgressionSlotCount)
                 throw new ArgumentOutOfRangeException(nameof(slotIndex));
         }
     }

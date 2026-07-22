@@ -23,7 +23,6 @@ using UnityEngine.TestTools;
 using Zenject;
 using ZLinq;
 using Object = UnityEngine.Object;
-using Resources = Core.Ships.Resources;
 
 namespace E2E
 {
@@ -237,7 +236,7 @@ namespace E2E
 
         protected static GameObject GetAsteroidPrefab()
         {
-            var asteroidPrefab = UnityEngine.Resources.Load<GameObject>("Tests/Prefabs/Asteroid");
+            var asteroidPrefab = Resources.Load<GameObject>("Tests/Prefabs/Asteroid");
             return asteroidPrefab == null
                 ? throw new UnityException("[E2E] Missing Resources/Tests/Prefabs/Asteroid.")
                 : asteroidPrefab;
@@ -279,7 +278,7 @@ namespace E2E
                 new Vector2(0f, -moduleSpacing), 0f, _sceneContainer, CreatedObjects, 5, 5);
 
             var cannon = cannonGo.AddComponent<Cannon>();
-            cannon.SetResources(new Resources(0, 1f, 0, 0, 0));
+            cannon.SetResources(new ShipResources(0, 1f, 0, 0, 0));
 
             var weaponSprite = CreateTestSprite();
 
@@ -293,7 +292,7 @@ namespace E2E
 
         private static GameObject GetBulletPrefab()
         {
-            var bulletPrefab = UnityEngine.Resources.Load<GameObject>("Tests/Prefabs/Bullet");
+            var bulletPrefab = Resources.Load<GameObject>("Tests/Prefabs/Bullet");
             return bulletPrefab == null
                 ? throw new UnityException("[E2E] Missing Resources/Tests/Prefabs/Bullet.")
                 : bulletPrefab;
