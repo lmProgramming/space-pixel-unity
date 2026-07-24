@@ -26,7 +26,7 @@ Prefer these over their standard-library equivalents:
 
 - **ZLinq** (`using ZLinq;`): use `.AsValueEnumerable()` instead of `System.Linq` for collection queries. It does not allocate memory
 - **UniTask** (`using Cysharp.Threading.Tasks;`): use `async UniTask` / `async UniTaskVoid` instead of `async Task` / `async void`
-- **Zenject** (`using Zenject;`): dependency injection — use `[Inject]` on private fields, register new services in `GameSceneInstaller`
+- **Zenject** (`using Zenject;`): dependency injection — use `[Inject]` on private/protected fields, register new services in `GameSceneInstaller`
 
 ## Architecture
 

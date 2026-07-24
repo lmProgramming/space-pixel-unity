@@ -11,6 +11,7 @@ using Gameplay.EasyTeam;
 using Instantiation;
 using LMPro.External.IsAlive;
 using NUnit.Framework;
+using Services;
 using Ships;
 using Ships.ModuleConnection;
 using Ships.Modules;
@@ -55,10 +56,6 @@ namespace E2E
             yield return null;
         }
 
-        /// <summary>
-        ///     Loads MainGame with no auto-spawned skirmish ships (optional player already migrated).
-        ///     Tests build their own ships via ModuleFactory against the scene DiContainer.
-        /// </summary>
         private IEnumerator LoadMainGame()
         {
             ConfigureEmptyFreeModeSaveState();
@@ -69,6 +66,8 @@ namespace E2E
 
             var loadOp = SceneManager.LoadSceneAsync(SceneNames.MainGame, LoadSceneMode.Single);
             Assert.That(loadOp, Is.Not.Null, $"Failed to start loading '{SceneNames.MainGame}'.");
+
+            loadOp.completed += _ => { Object.FindAnyObjectByType<SkirmishSetup>().SetupMissionService = false; };
 
             while (!loadOp.isDone)
                 yield return null;

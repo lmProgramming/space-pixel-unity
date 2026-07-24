@@ -39,12 +39,12 @@ namespace UI.Components.OptionsPopup
 
         public void Close()
         {
-            Closed?.Invoke();
-
             if (GameUi == null)
                 throw new InvalidOperationException("[OptionsPopupController] IGameUi is not injected.");
 
             GameUi.Pop();
+
+            Closed?.Invoke();
         }
 
         protected override OptionsPopupModel CreateModel()

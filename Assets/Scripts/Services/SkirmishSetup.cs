@@ -7,17 +7,21 @@ namespace Services
     [DefaultExecutionOrder(-100)]
     public class SkirmishSetup : MonoBehaviour
     {
+        [field: SerializeField]
+        public bool SetupMissionService { get; set; } = true;
+
         [Inject]
         private IMissionService _missionService;
 
         [Inject]
         private ISkirmishSpawner _skirmishSpawner;
 
-        private void Awake()
+        private void Start()
         {
             _skirmishSpawner.SpawnFromSaveState();
 
-            _missionService.Setup();
+            if (SetupMissionService)
+                _missionService.Setup();
         }
     }
 }

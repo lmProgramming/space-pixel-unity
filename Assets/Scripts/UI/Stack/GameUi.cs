@@ -95,12 +95,10 @@ namespace UI.Stack
             var instance = _container.InstantiatePrefab(prefab, stackParent);
             var controller = instance.GetComponent<T>();
             if (controller is not Component component)
-                throw new InvalidOperationException("[GameUi] Prefab for id '" + prefab.name + "' is not a component.");
-            if (!component)
             {
                 Destroy(instance);
-                throw new InvalidOperationException(
-                    $"[GameUi] Prefab '{prefab.name}' is missing component {typeof(T).Name}.");
+                throw new InvalidOperationException("[GameUi] Prefab for id '" + prefab.name +
+                                                    "' is not a component or is null.");
             }
 
             ApplySortingOrder(instance, baseSortingOrder + _stack.Count);
@@ -191,8 +189,8 @@ namespace UI.Stack
             }
 
             var panel = component.GetComponent<PanelRendererBase>();
-            if (panel)
-                panel.Show();
+            if (!panel) throw new InvalidOperationException("[GameUI] component can't be shown");
+            panel.Show();
         }
 
         private void OnOptionsPopupOptionSelected(string optionId)

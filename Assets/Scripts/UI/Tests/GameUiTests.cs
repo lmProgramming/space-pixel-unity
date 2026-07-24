@@ -94,11 +94,11 @@ namespace UI.Tests
         }
 
         [Test]
-        public void Notify_DoesNotChangeDepth()
+        public void Notify_DoesNotChangeDepthOnThrow()
         {
             _gameUi.SetRoot(CreateMarker("Root"));
             var depth = _gameUi.Depth;
-            // Notify requires DiContainer + prefab; depth must stay unchanged when host missing throws
+            // This will fail as Notify requires stuff
             Assert.Throws<ZenjectException>(() => _gameUi.Notify("hello"));
             Assert.AreEqual(depth, _gameUi.Depth);
         }

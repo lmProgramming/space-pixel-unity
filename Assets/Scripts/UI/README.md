@@ -13,7 +13,7 @@ Two layers:
 
 Scene “roots” (MainMenu, ShipFactory, ShipStatus) stay in the scene and register with `SetRoot`. Overlays are **prefabs** pushed onto the stack.
 
-```
+```text
 [toast host — always on top]
 [OptionsPopup]     ← Depth 3
 [ProgressionSlots] ← Depth 2

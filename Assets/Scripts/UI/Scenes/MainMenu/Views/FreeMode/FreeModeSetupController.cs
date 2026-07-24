@@ -5,6 +5,7 @@ using Core.Gameplay;
 using Core.Services;
 using Core.Ships;
 using Core.State;
+using Core.UI;
 using UI.Common;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -116,11 +117,7 @@ namespace UI.Scenes.MainMenu.Views.FreeMode
                 _snapshotFilePaths.Add(snapshot.FilePath);
             }
 
-            if (_snapshotDisplayNames.Count == 0)
-            {
-                _snapshotDisplayNames.Add("Default Ship");
-                _snapshotFilePaths.Add(string.Empty);
-            }
+            if (_snapshotDisplayNames.Count == 0) GameUi.Notify("No ships exist!", PopupLevel.Warning);
 
             _shipDropdown.choices = _snapshotDisplayNames;
             _shipDropdown.index = 0;
