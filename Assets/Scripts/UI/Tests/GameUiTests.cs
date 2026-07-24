@@ -106,6 +106,7 @@ namespace UI.Tests
         private StackMarker CreateMarker(string name)
         {
             var go = new GameObject(name);
+            go.AddComponent<MockRenderable>();
             _created.Add(go);
             return go.AddComponent<StackMarker>();
         }

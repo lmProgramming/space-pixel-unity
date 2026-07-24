@@ -188,8 +188,10 @@ namespace UI.Stack
                 return;
             }
 
-            var panel = component.GetComponent<PanelRendererBase>();
-            if (!panel) throw new InvalidOperationException("[GameUI] component can't be shown");
+            var panel = component.GetComponent<IPanelRenderable>();
+
+            if (panel == null) throw new InvalidOperationException("[GameUI] component can't be shown");
+
             panel.Show();
         }
 

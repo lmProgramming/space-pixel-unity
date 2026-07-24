@@ -369,8 +369,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 23905d5b04acf09f9a1e028c93182a1b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UI::UI.Stack.GameUi
-  stackRoot: {fileID: 918121610}
-  toastRoot: {fileID: 918121610}
+  stackParent: {fileID: 918121610}
+  toastParent: {fileID: 918121610}
   baseSortingOrder: 100
   toastSortingOrder: 1000
 --- !u!1 &2106773580
