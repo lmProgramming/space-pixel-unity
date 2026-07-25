@@ -24,6 +24,7 @@ namespace Context
         [SerializeField] private TextInputFocusEventChannel textInputFocusChannel;
         [SerializeField] private PauseStateEventChannel pauseStateChannel;
         [SerializeField] private ShootingEventChannel shootingEventChannel;
+        [SerializeField] private CameraModeEventChannel cameraModeEventChannel;
 
         [Header("SOs")]
         [SerializeField] private ShipModuleCatalog shipModuleCatalog;
@@ -152,6 +153,10 @@ namespace Context
 
             Container.Bind<CollisionEventChannelSO>()
                 .FromInstance(physicsCollisionChannel)
+                .AsSingle();
+
+            Container.Bind<CameraModeEventChannel>()
+                .FromInstance(cameraModeEventChannel)
                 .AsSingle();
         }
 

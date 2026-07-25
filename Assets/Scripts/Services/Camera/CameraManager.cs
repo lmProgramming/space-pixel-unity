@@ -1,3 +1,4 @@
+using System;
 using Core.Services;
 using Events.Camera;
 using PrimeTween;
@@ -9,7 +10,6 @@ namespace Services.Camera
     public class CameraManager : MonoBehaviour
     {
         [SerializeField] private GameObject objectToFollow;
-        [SerializeField] private bool forcedToFollowCurrentObject;
         [SerializeField] private bool followRotation;
 
         [SerializeField] private float dragSpeed = 1f;
@@ -24,6 +24,8 @@ namespace Services.Camera
         [SerializeField] private bool canZoomOnUI;
 
         public bool updateCamera = true;
+        private CameraMode _cameraMode = CameraMode.FreeMode;
+        [Inject] private CameraModeEventChannel _cameraModeEventChannel;
 
         [Inject] private CameraResetRequestEventChannel _cameraResetRequestEventChannel;
         [Inject] private IGameInput _gameInput;
@@ -52,10 +54,17 @@ namespace Services.Camera
             if (!_gameInput.CanControlCamera)
                 return;
 
-            if (objectToFollow)
-                FollowObject();
-            else
-                ProcessDrag();
+            switch (_cameraMode)
+            {
+                case CameraMode.FollowingObject:
+                    FollowObject();
+                    break;
+                case CameraMode.FreeMode:
+                    ProcessDrag();
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
 
             ProcessZoom();
 
@@ -65,15 +74,18 @@ namespace Services.Camera
         private void OnEnable()
         {
             _cameraResetRequestEventChannel.Register(ResetCamera);
+            _cameraModeEventChannel.Register(SetMode);
         }
 
         private void OnDisable()
         {
             _cameraResetRequestEventChannel.Unregister(ResetCamera);
+            _cameraModeEventChannel.Unregister(SetMode);
         }
 
         private void FollowObject()
         {
+            if (!objectToFollow) return;
             var targetPosition = objectToFollow.transform.position;
             transform.position = new Vector3(targetPosition.x, targetPosition.y, transform.position.z);
 
@@ -82,29 +94,19 @@ namespace Services.Camera
             transform.rotation = Quaternion.Euler(0, 0, targetRotationZ);
         }
 
+        public void SetMode(CameraMode mode)
+        {
+            _cameraMode = mode;
+        }
+
         public void StartFollowingObject(GameObject newObjectToFollow)
         {
             objectToFollow = newObjectToFollow;
         }
 
-        public void ForceStartFollowingObject(GameObject newObjectToFollow)
-        {
-            objectToFollow = newObjectToFollow;
-            forcedToFollowCurrentObject = true;
-        }
-
         public void StopFollowingObject()
         {
-            if (forcedToFollowCurrentObject)
-                return;
-
             objectToFollow = null;
-        }
-
-        public void ForceStopFollowingObject()
-        {
-            objectToFollow = null;
-            forcedToFollowCurrentObject = false;
         }
 
         private void ProcessDrag()
