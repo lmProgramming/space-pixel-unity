@@ -743,6 +743,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: MainCamera
       objectReference: {fileID: 0}
+    - target: {fileID: 6096164580743536988, guid: c9fdcbb0df9d8753088130f6567e0059, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 20
+      objectReference: {fileID: 0}
     - target: {fileID: 7722343981703651362, guid: c9fdcbb0df9d8753088130f6567e0059, type: 3}
       propertyPath: m_LocalPosition.x
       value: -1.5
@@ -1752,6 +1756,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d4282e20c6d341309875e6d4c48a0749, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Services::Services.SkirmishSetup
+  <SetupMissionService>k__BackingField: 1
 --- !u!4 &6408919835749880663
 Transform:
   m_ObjectHideFlags: 0

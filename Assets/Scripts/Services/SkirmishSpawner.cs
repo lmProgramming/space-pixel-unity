@@ -100,7 +100,9 @@ namespace Services
             ship.SetTeam(friendlyTeam);
             ship.InitializeModules();
             _activePlayerShipProvider.SetActiveShip(ship);
-            cameraManager.StartFollowingObject((ship.CommandModule as MonoBehaviour)?.gameObject);
+            var commandModuleGo = ship.CommandModule.Transform!.gameObject;
+            cameraManager.StartFollowingObject(commandModuleGo);
+            cameraManager.SetMode(CameraMode.FollowingObject);
             reservations.Add(new SkirmishSpawnPlacement.SpawnReservation(position, shipSeparationRadius));
         }
 

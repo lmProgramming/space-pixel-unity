@@ -24,6 +24,7 @@ namespace Context
         [SerializeField] private TextInputFocusEventChannel textInputFocusChannel;
         [SerializeField] private PauseStateEventChannel pauseStateChannel;
         [SerializeField] private ShootingEventChannel shootingEventChannel;
+        [SerializeField] private CameraModeEventChannel cameraModeEventChannel;
 
         [Header("SOs")]
         [SerializeField] private ShipModuleCatalog shipModuleCatalog;
@@ -79,10 +80,13 @@ namespace Context
 
             if (!cameraResetRequestEventChannel)
                 throw new UnityException(
-                    $"[ShipFactoryInstaller] {nameof(cameraResetRequestEventChannel)} must be assigned.");
+                    $"[GameProjectInstaller] {nameof(cameraResetRequestEventChannel)} must be assigned.");
 
             if (!physicsCollisionChannel)
-                throw new UnityException($"Missing {nameof(physicsCollisionChannel)}");
+                throw new UnityException($"[GameProjectInstaller] Missing {nameof(physicsCollisionChannel)}");
+
+            if (!cameraModeEventChannel)
+                throw new UnityException($"[GameProjectInstaller] Missing {nameof(cameraModeEventChannel)}");
 
             Container.Bind<IShipModuleCatalog>()
                 .FromInstance(typedShipModuleCatalog)
@@ -152,6 +156,10 @@ namespace Context
 
             Container.Bind<CollisionEventChannelSO>()
                 .FromInstance(physicsCollisionChannel)
+                .AsSingle();
+
+            Container.Bind<CameraModeEventChannel>()
+                .FromInstance(cameraModeEventChannel)
                 .AsSingle();
         }
 

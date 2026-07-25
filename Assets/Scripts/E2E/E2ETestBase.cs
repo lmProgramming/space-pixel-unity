@@ -37,6 +37,14 @@ namespace E2E
         protected Instantiator Instantiator;
         protected IMissionService MissionService;
 
+        [TearDown]
+        public void TearDownOnRetry()
+        {
+            foreach (var obj in CreatedObjects.AsValueEnumerable().Where(obj => obj != null))
+                Object.DestroyImmediate(obj);
+            CreatedObjects.Clear();
+        }
+
         [UnitySetUp]
         public IEnumerator SetupScene()
         {

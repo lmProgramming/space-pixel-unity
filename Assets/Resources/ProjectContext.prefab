@@ -80,6 +80,7 @@ MonoBehaviour:
   textInputFocusChannel: {fileID: 11400000, guid: 7d7c50038550a47ada15334cf9960875, type: 2}
   pauseStateChannel: {fileID: 11400000, guid: 74f53e084322486ddb6ba9576741f3e3, type: 2}
   shootingEventChannel: {fileID: 11400000, guid: 17adcbea821a7aa3bb4aafc76131348b, type: 2}
+  cameraModeEventChannel: {fileID: 11400000, guid: 4e8110eaa14eca147ad9b5655ee36b34, type: 2}
   shipModuleCatalog: {fileID: 11400000, guid: c7f8c73c057efe68c87d7df2ac599fd9, type: 2}
   gameContentCatalog: {fileID: 11400000, guid: 219f1022e4678b052824091903047da7, type: 2}
   skirmishSnapshotCatalog: {fileID: 11400000, guid: 40f1c37d4651cf7898dcc2b40a007491, type: 2}

@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 2567555534539309744}
   - component: {fileID: 2056938013039895359}
   - component: {fileID: 2729375908060184227}
+  - component: {fileID: 7236519099801833247}
   m_Layer: 0
   m_Name: NewCampaign
   m_TagString: Untagged
@@ -117,3 +118,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UI::UI.Scenes.MainMenu.Views.Progression.NewCampaignView
   actionOnEscape: 0
+--- !u!210 &7236519099801833247
+SortingGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2843218011054322329}
+  m_Enabled: 1
+  m_SortingLayerID: -1637327103
+  m_SortingLayer: -2
+  m_SortingOrder: 0
+  m_SortAtRoot: 0
+  m_Sort3DAs2D: 0

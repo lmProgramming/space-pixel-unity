@@ -67,7 +67,7 @@ namespace Ships
         public string Name => transform.name;
         public IReadOnlyList<IModule> AllModules => _allModulesCache;
         public bool IsSASOn => false;
-        public bool IsDesignMode { get; set; }
+        public bool IsDesignMode => true;
 
         public Graph<IModule> ModuleGraph => _biCohesionGraph;
         public Vector2 AttackTargetPosition => throw new NotSupportedException();
@@ -119,10 +119,8 @@ namespace Ships
             var existingModules = GetComponentsInChildren<Module>();
 
             foreach (var module in existingModules)
-            {
                 if (module)
                     module.DestroyModule();
-            }
         }
 
         public void InitializeModules()
@@ -268,7 +266,7 @@ namespace Ships
             MarkEnginesActivity(false);
         }
 
-        protected void MarkEnginesActivity(bool active)
+        private void MarkEnginesActivity(bool active)
         {
             foreach (var engine in Engines)
                 engine.SetActive(active);

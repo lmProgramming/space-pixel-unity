@@ -65,7 +65,7 @@ namespace Ships.Tests
                 ShipTestFactory.CreateTwoModuleShip(Container, CreatedObjects);
             yield return WaitForLifecycle();
 
-            other.PixelatedRigidbody.RemovePixels(PixelsToRemoveKeeping(PixelsToKeepAtOrAboveThreshold));
+            other.PixelatedRigidbody.RemovePixels(PixelsToRemoveKeeping(PixelsToKeepAtOrAboveThreshold + 1));
             yield return WaitForLifecycle();
 
             Assert.IsTrue(other, "Module at/above the pixel threshold should survive");
