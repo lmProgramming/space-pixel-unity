@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
+using Core.UI;
 using UI.MVCVM;
+using UnityEngine;
 
 namespace UI.Components.OptionsPopup
 {
+    [RequireComponent(typeof(OptionsPopupView))]
     public class OptionsPopupController : Controller<OptionsPopupModel, OptionsPopupView, OptionsPopupViewModel>
     {
         protected override void OnEnable()
@@ -30,29 +33,23 @@ namespace UI.Components.OptionsPopup
 
         public void Show(string title, string description, IReadOnlyList<OptionsPopupOption> options)
         {
-            if (!gameObject.activeSelf)
-                gameObject.SetActive(true);
-
             Model.Configure(title, description, options);
+            View.Show();
         }
 
         public void Close()
         {
-            if (!gameObject.activeSelf)
-                return;
+            if (GameUi == null)
+                throw new InvalidOperationException("[OptionsPopupController] IGameUi is not injected.");
 
-            gameObject.SetActive(false);
+            GameUi.Pop();
+
             Closed?.Invoke();
         }
 
         protected override OptionsPopupModel CreateModel()
         {
             return new OptionsPopupModel();
-        }
-
-        protected override OptionsPopupView CreateView()
-        {
-            return gameObject.AddComponent<OptionsPopupView>();
         }
 
         protected override OptionsPopupViewModel CreateViewModel(OptionsPopupModel model)

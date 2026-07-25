@@ -1,7 +1,8 @@
 using Core.MVCVM;
-using UI.Common;
+using Core.UI;
 using UnityEngine;
 using UnityEngine.UIElements;
+using Zenject;
 
 namespace UI.MVCVM
 {
@@ -10,9 +11,7 @@ namespace UI.MVCVM
         where TModel : ObservableModel
         where TView : View<TViewModel>
     {
-        [SerializeField] private bool showByDefault;
-        private PanelRendererLifecycle _lifecycle;
-
+        [Inject] protected IGameUi GameUi;
         protected TModel Model { get; private set; }
 
         protected TView View { get; private set; }
@@ -25,24 +24,17 @@ namespace UI.MVCVM
             if (PanelRenderer == null)
                 throw new UnityException($"[{GetType().Name}] {nameof(PanelRenderer)} is required.");
 
+            View = GetComponent<TView>();
+            if (View == null)
+                throw new UnityException(
+                    $"[{GetType().Name}] {typeof(TView).Name} is required on the same GameObject.");
+
             Model = CreateModel();
-            View = CreateView();
-
-            _lifecycle = new PanelRendererLifecycle(PanelRenderer, View);
-        }
-
-        private void Start()
-        {
-            if (showByDefault)
-                View.Show();
-            else
-                View.Hide();
         }
 
         protected virtual void OnEnable()
         {
             Model.Changed += Refresh;
-            _lifecycle.OnHostEnabled();
             Refresh();
             Debug.Log($"[MVCVM] Opened {GetType().Name}", this);
         }
@@ -51,12 +43,9 @@ namespace UI.MVCVM
         {
             Debug.Log($"[MVCVM] Closed {GetType().Name}", this);
             Model.Changed -= Refresh;
-            _lifecycle.OnHostDisabled();
         }
 
         protected abstract TModel CreateModel();
-
-        protected abstract TView CreateView();
 
         protected void Refresh()
         {

@@ -16,31 +16,42 @@ namespace Services
         [Inject] private IActivePlayerShipProvider _activePlayerShipProvider;
 
         [Inject] private BattleOverEventChannel _battleOverEventChannel;
-        private bool _hadEnemies;
         private bool _missionOver;
+
+        private bool _missionStarted;
 
         private ITeam _missionTeam;
         [Inject] private IShipService _shipService;
 
-        private void Start()
-        {
-            TryBindMissionTeam();
-        }
-
         private void Update()
         {
-            if (_missionOver)
+            if (_missionOver || !_missionStarted)
                 return;
 
-            if (_hadEnemies && !AllEnemiesDestroyed())
+            var allAlliesDestroyed = AllAlliesDestroyed();
+            var allEnemiesDestroyed = AllEnemiesDestroyed();
+
+            if (allEnemiesDestroyed && !allAlliesDestroyed)
                 TriggerVictory();
 
-            if (AllAlliesDestroyed())
+            if (allAlliesDestroyed && !allEnemiesDestroyed)
                 TriggerDefeat();
         }
 
         public event Action OnVictory;
         public event Action OnDefeat;
+
+        public void Setup()
+        {
+            TryBindMissionTeam();
+
+            _missionStarted = true;
+        }
+
+        public void SetMissionStarted(bool started)
+        {
+            _missionStarted = started;
+        }
 
         private void TryBindMissionTeam()
         {

@@ -99,6 +99,7 @@ GameObject:
   - component: {fileID: 5515476119549963838}
   - component: {fileID: 2029778059734102207}
   - component: {fileID: 4677564092631612332}
+  - component: {fileID: 3935436465786090567}
   m_Layer: 0
   m_Name: Context
   m_TagString: Untagged
@@ -135,17 +136,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 491bcd1756fb9f5489b9601cec144ec0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  physicsCollisionChannelAsset: {fileID: 11400000, guid: 407789f55f1a01548b246d2e77cf6183, type: 2}
   debrisSpawner: {fileID: 0}
+  dummyDebrisSpawner: 0
   mapInfo: {fileID: 0}
   projectilesSpawner: {fileID: 0}
+  dummyProjectileSpawner: 0
   shipService: {fileID: 0}
   soundManager: {fileID: 0}
   effectSpawner: {fileID: 0}
   navigationService: {fileID: 0}
   missionService: {fileID: 0}
   skirmishSpawner: {fileID: 0}
-  playerShip: {fileID: 0}
+  pixelatedRigidbodyFactory: {fileID: 0}
+  moduleRestoreFactory: {fileID: 0}
+  validateAll: 0
 --- !u!114 &4677564092631612332
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -178,3 +182,16 @@ MonoBehaviour:
   _parentNewObjectsUnderSceneContext: 0
   _contractNames: []
   _parentContractNames: []
+--- !u!114 &3935436465786090567
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8276008820147856545}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a2932ca8a019fb27959f14e4ab61114, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UI::UI.Stack.GameUiInstaller
+  gameUi: {fileID: 0}

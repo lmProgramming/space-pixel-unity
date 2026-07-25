@@ -1,6 +1,6 @@
 using System;
 
-namespace UI.Components.OptionsPopup
+namespace Core.UI
 {
     public readonly struct OptionsPopupOption
     {

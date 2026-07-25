@@ -4,6 +4,7 @@ using Core.Services;
 using Core.ShipFactory;
 using Core.Ships;
 using Core.Ships.Module;
+using Core.UI;
 using JetBrains.Annotations;
 using ShipFactory.Helpers;
 using ShipFactory.Helpers.LegalPositionCalculator;
@@ -12,7 +13,6 @@ using ShipFactory.UI.Runtime;
 using ShipFactory.UI.ToolkitComponents;
 using Ships;
 using UI.Components;
-using UI.Components.Notification;
 using UnityEngine;
 using UnityEngine.UIElements;
 using Zenject;
@@ -27,21 +27,21 @@ namespace ShipFactory.UI
         private readonly CameraInfoPanel _cameraInfoPanel;
         private readonly ShipFactoryFeedback _feedback;
         private readonly IGameInput _gameInput;
+        private readonly IGameUi _gameUi;
         private readonly ModuleInfoPanel _infoPanel;
 
         private readonly VisualElement _inputBlocker;
         private readonly IInstantiator _instantiator;
-        private readonly NotificationView _notificationView;
 
         private readonly OverlayManager _overlayManager;
         private readonly ResourcesPanel _resourcesPanel;
-
-        private ShipModuleSOInstanceBundle _draggedModuleBundle;
-        private bool _draggedModuleWasNew;
         private Quaternion _dragStartLocalRotation;
         private float _dragStartLocalZ;
         private Vector2 _dragStartWorldPos;
         private Vector2 _dragWorldOffset;
+
+        private ShipModuleSOInstanceBundle _draggedModuleBundle;
+        private bool _draggedModuleWasNew;
 
         private ShipModuleSO _hoveredPaletteModule;
         private ShipModuleSOInstanceBundle _hoveredPlacedBundle;
@@ -52,17 +52,17 @@ namespace ShipFactory.UI
 
         public ShipFactoryCanvasController(
             VisualElement root,
-            NotificationView notificationView,
             ShipFactoryFeedback feedback,
+            IGameUi gameUi,
             IGameInput gameInput,
             IInstantiator instantiator,
             IShipModuleCatalog moduleCatalog,
             CameraInfoPanel.Factory cameraInfoPanelFactory)
         {
             _gameInput = gameInput;
+            _gameUi = gameUi ?? throw new ArgumentNullException(nameof(gameUi));
             _instantiator = instantiator ?? throw new ArgumentNullException(nameof(instantiator));
             if (moduleCatalog == null) throw new ArgumentNullException(nameof(moduleCatalog));
-            _notificationView = notificationView ?? throw new ArgumentNullException(nameof(notificationView));
             _feedback = feedback ?? throw new ArgumentNullException(nameof(feedback));
 
             if (cameraInfoPanelFactory == null)
@@ -122,17 +122,17 @@ namespace ShipFactory.UI
 
         public void ShowInfoMessage(string message)
         {
-            _notificationView.Show(message);
+            _gameUi.Notify(message);
         }
 
         public void ShowWarningMessage(string message)
         {
-            _notificationView.Show(message, PopupLevel.Warning);
+            _gameUi.Notify(message, PopupLevel.Warning);
         }
 
         public void ShowErrorMessage(string message)
         {
-            _notificationView.Show(message, PopupLevel.Error);
+            _gameUi.Notify(message, PopupLevel.Error);
         }
 
         public void SetShip(DesignShip ship)
@@ -552,7 +552,7 @@ namespace ShipFactory.UI
         private void SetInputLocked(bool isLocked)
         {
             IsInputLocked = isLocked;
-            _inputBlocker.style.display = isLocked ? DisplayStyle.Flex : DisplayStyle.None;
+            _inputBlocker.visible = isLocked;
             RefreshInfoPanelFromCurrentContext();
             OnInputLockChanged?.Invoke(isLocked);
         }
@@ -650,8 +650,7 @@ namespace ShipFactory.UI
             _cameraInfoPanel.Update(camera);
         }
 
-        public class Factory : PlaceholderFactory<VisualElement, NotificationView, ShipFactoryFeedback,
-            ShipFactoryCanvasController>
+        public class Factory : PlaceholderFactory<VisualElement, ShipFactoryFeedback, ShipFactoryCanvasController>
         {
         }
     }

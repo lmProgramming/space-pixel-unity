@@ -227,7 +227,7 @@ namespace Ships.Modules
             if (Mathf.Abs(clampedTarget) > Mathf.Epsilon || Mathf.Abs(CurrentThrusterAngle) <= Mathf.Epsilon)
                 return maxStep;
 
-            return maxStep * GameplayConstants.nozzleGoingBackToRestRotationMultiplierSpeed;
+            return maxStep * GameplayConstants.nozzleGoingBackToRestRotationMultiplierSpeed * ActualEfficiency;
         }
 
         protected override string CaptureTypePayloadJson(IGameContentCatalog contentCatalog)

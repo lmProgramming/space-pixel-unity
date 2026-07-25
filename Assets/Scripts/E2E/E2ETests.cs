@@ -23,9 +23,11 @@ namespace E2E
             CreateObstacleWall("MazeWall", new Vector2(-50f, -50f), new Vector2(50f, 300f));
             CreateObstacleWall("MazeWall", new Vector2(50f, 50f), new Vector2(50f, 300f));
 
+            MissionService.Setup();
+
             yield return WaitForLifecycle();
 
-            const float expectedDistance = 30f;
+            const float expectedDistance = 60f;
             var initialDistance = Vector2.Distance(ship1.GetPosition(), ship2.GetPosition());
             Assert.That(initialDistance, Is.GreaterThan(expectedDistance));
 
@@ -58,7 +60,9 @@ namespace E2E
             var team2 = CreateTeam("Team2", PhysicsLayers.Enemy);
 
             var ship1 = CreateAIShip("Ship1", team1, Vector2.zero, true, false);
-            var ship2 = CreateAIShip("Ship2", team2, new Vector2(0f, 5f), true, false);
+            var ship2 = CreateAIShip("Ship2", team2, new Vector2(0f, 50f), true, false);
+
+            MissionService.Setup();
 
             yield return WaitForLifecycle();
 
@@ -89,6 +93,8 @@ namespace E2E
             var shipA2 = CreateAIShip("ShipA2", teamA, new Vector2(25f, -40f), true, false);
             var shipA3 = CreateAIShip("ShipA3", teamA, new Vector2(30f, 0f), true, false);
 
+            MissionService.Setup();
+
             yield return WaitForLifecycle();
 
             var startPixelsB = CountPixels(shipB);
@@ -117,6 +123,8 @@ namespace E2E
 
             var asteroid = Instantiator.Instantiate(GetAsteroidPrefab(), new Vector2(80f, 0f), Quaternion.identity);
             CreatedObjects.Add(asteroid);
+
+            MissionService.Setup();
 
             yield return WaitForLifecycle();
 
@@ -148,6 +156,8 @@ namespace E2E
 
             CreateObstacleBox(Vector2.zero, new Vector2(100f, 80f));
 
+            MissionService.Setup();
+
             yield return WaitForLifecycle();
 
             Assert.IsNotNull(targetShip);
@@ -172,6 +182,8 @@ namespace E2E
 
             var player = CreatePlayerShip("Player", friendlyTeam, Vector2.zero, false, false);
             CreateAIShip("Attacker", enemyTeam, new Vector2(0f, 50f), true, false);
+
+            MissionService.Setup();
 
             yield return WaitForLifecycle();
 

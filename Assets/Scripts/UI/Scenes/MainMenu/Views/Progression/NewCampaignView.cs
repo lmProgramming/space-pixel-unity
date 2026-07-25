@@ -129,7 +129,7 @@ namespace UI.Scenes.MainMenu.Views.Progression
             {
                 var thumb = row.Q("ship-row-thumb");
                 if (thumb != null)
-                    thumb.style.display = DisplayStyle.None;
+                    thumb.visible = false;
             }
 
             label.text = entry.DisplayName;

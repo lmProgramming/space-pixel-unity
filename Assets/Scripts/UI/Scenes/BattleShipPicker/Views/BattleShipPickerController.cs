@@ -6,14 +6,22 @@ using Core.Services;
 using Core.State;
 using Services;
 using UI.MVCVM;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 using Zenject;
 
 namespace UI.Scenes.BattleShipPicker.Views
 {
-    public class BattleShipPicker : Controller<BattleShipPickerModel, BattleShipPickerView, BattleShipPickerViewModel>
+    [RequireComponent(typeof(BattleShipPickerView))]
+    public class
+        BattleShipPickerController : Controller<BattleShipPickerModel, BattleShipPickerView, BattleShipPickerViewModel>
     {
         [Inject] private IProgressionRepository _progressionRepository;
+
+        private void Start()
+        {
+            GameUi.SetRoot(this);
+        }
 
         protected override void OnEnable()
         {
@@ -30,11 +38,6 @@ namespace UI.Scenes.BattleShipPicker.Views
         protected override BattleShipPickerModel CreateModel()
         {
             return new BattleShipPickerModel();
-        }
-
-        protected override BattleShipPickerView CreateView()
-        {
-            return gameObject.AddComponent<BattleShipPickerView>();
         }
 
         protected override BattleShipPickerViewModel CreateViewModel(BattleShipPickerModel model)

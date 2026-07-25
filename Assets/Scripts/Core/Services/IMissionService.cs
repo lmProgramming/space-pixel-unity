@@ -6,5 +6,7 @@ namespace Core.Services
     {
         event Action OnVictory;
         event Action OnDefeat;
+        void Setup();
+        void SetMissionStarted(bool started);
     }
 }

@@ -1,4 +1,4 @@
-namespace UI.Components.OptionsPopup
+namespace Core.UI
 {
     public enum OptionsPopupOptionStyle
     {

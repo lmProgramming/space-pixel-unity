@@ -239,10 +239,8 @@ namespace Ships
             var existingModules = GetComponentsInChildren<Module>();
 
             foreach (var module in existingModules)
-            {
                 if (module)
                     module.DestroyModule();
-            }
         }
 
         public void InitializeModules()
@@ -523,9 +521,9 @@ namespace Ships
             turnInput = Mathf.Clamp(turnInput, -1f, 1f);
 
             var selfRigidbody = CommandModule.PixelatedRigidbody?.Rigidbody;
-            if (selfRigidbody == null)
+            if (!selfRigidbody)
                 throw new InvalidOperationException("[Ship] CommandModule.PixelatedRigidbody.Rigidbody is required.");
-            if (CommandModule.Transform == null)
+            if (!CommandModule.Transform)
                 throw new InvalidOperationException("[Ship] CommandModule.Transform is required.");
 
             var engines = Engines;

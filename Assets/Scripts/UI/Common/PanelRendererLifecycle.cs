@@ -28,6 +28,13 @@ namespace UI.Common
         public void OnHostDisabled()
         {
             _panelRenderer.UnregisterUIReloadCallback(OnUIReload);
+
+            if (Root == null)
+                return;
+
+            _renderable.UnbindUI();
+            Root = null;
+            _uiVersion = -1;
         }
 
         private void OnUIReload(

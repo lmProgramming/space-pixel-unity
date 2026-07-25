@@ -13,12 +13,11 @@ namespace UI.Common
 {
     public class SettingsOverlayController : PanelRendererBase
     {
-        [SerializeField] private bool isMainMenu;
-
         private VisualElement _backdrop;
         private Button _closeButton;
         private int _codigrateFetchGeneration;
         private Slider _effectsSlider;
+
         private Slider _masterSlider;
         private Slider _musicSlider;
         [Inject] private PointerOverUiEventChannel _pointerOverUiChannel;
@@ -43,11 +42,14 @@ namespace UI.Common
                 throw new InvalidOperationException(
                     "[SettingsOverlayController] Required settings elements are missing in UXML.");
 
-            titleLabel.text = isMainMenu ? "Settings (Main Menu)" : "Settings";
+            if (GameUi == null)
+                throw new InvalidOperationException("[SettingsOverlayController] IGameUi is not injected.");
+
+            titleLabel.text = "Settings";
             DesignSystemThemeService.RegisterVisualTree(root);
             DesignSystemRuntime.EnsureToggleKnobs(root);
 
-            _closeButton.clicked += Hide;
+            _closeButton.clicked += OnCloseClicked;
             _masterSlider.RegisterValueChangedCallback(OnMasterVolumeChanged);
             _musicSlider.RegisterValueChangedCallback(OnMusicVolumeChanged);
             _effectsSlider.RegisterValueChangedCallback(OnEffectsVolumeChanged);
@@ -64,18 +66,12 @@ namespace UI.Common
         {
             _codigrateFetchGeneration++;
             if (_closeButton != null)
-                _closeButton.clicked -= Hide;
+                _closeButton.clicked -= OnCloseClicked;
             _masterSlider?.UnregisterValueChangedCallback(OnMasterVolumeChanged);
             _musicSlider?.UnregisterValueChangedCallback(OnMusicVolumeChanged);
             _effectsSlider?.UnregisterValueChangedCallback(OnEffectsVolumeChanged);
             _themeToggle?.UnregisterValueChangedCallback(OnThemeToggleChanged);
             _themeProviderDropdown?.UnregisterValueChangedCallback(OnThemeProviderChanged);
-            Hide();
-        }
-
-        public override void Hide()
-        {
-            base.Hide();
             _uiPointerTracker?.Release(_backdrop);
         }
 
@@ -83,6 +79,11 @@ namespace UI.Common
         {
             base.Show();
             LoadFromPlayerPrefs();
+        }
+
+        private void OnCloseClicked()
+        {
+            GameUi.Pop();
         }
 
         private void SyncThemeToggleState()
@@ -137,6 +138,9 @@ namespace UI.Common
 
         private void LoadFromPlayerPrefs()
         {
+            if (_masterSlider == null)
+                return;
+
             _suppressPersist = true;
             _masterSlider.SetValueWithoutNotify(PlayerPrefs.GetFloat(PlayerPrefsKeys.MasterVolume, 1f));
             _musicSlider.SetValueWithoutNotify(PlayerPrefs.GetFloat(PlayerPrefsKeys.MusicVolume, 1f));

@@ -1,18 +1,19 @@
 using System;
+using Core.Constants;
 using Core.Gameplay;
 using Core.Services;
 using Core.State;
+using Core.UI;
 using Events.Game.BattleOver;
-using UI.Scenes.MainGame.Views.MissionResult;
 using UnityEngine;
 using Zenject;
 
-namespace UI.Scenes.MainGame.Views
+namespace Gameplay
 {
     public class FreeModeBattleResolutionHandler : MonoBehaviour, IBattleResolutionHandler
     {
-        [SerializeField] private MissionResultUIController missionResultUi;
         [Inject] private BattleOverEventChannel _battleOverEventChannel;
+        [Inject] private IGameUi _gameUi;
 
         private void Start()
         {
@@ -31,11 +32,23 @@ namespace UI.Scenes.MainGame.Views
 
         public void OnBattleVictory()
         {
+            if (_gameUi == null)
+                throw new InvalidOperationException(
+                    "[FreeModeBattleResolutionHandler] IGameUi is not injected.");
+
+            var missionResultUi =
+                _gameUi.PushById<IMissionResultUIController>(UIPanelPrefabConstants.MissionResolution);
             missionResultUi.ShowVictory();
         }
 
         public void OnBattleDefeat()
         {
+            if (_gameUi == null)
+                throw new InvalidOperationException(
+                    "[FreeModeBattleResolutionHandler] IGameUi is not injected.");
+
+            var missionResultUi =
+                _gameUi.PushById<IMissionResultUIController>(UIPanelPrefabConstants.MissionResolution);
             missionResultUi.ShowDefeat();
         }
 
