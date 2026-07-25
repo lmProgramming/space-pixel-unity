@@ -10,7 +10,6 @@ namespace E2E
     public class E2ETests : E2ETestBase
     {
         [UnityTest]
-        [Retry(3)]
         public IEnumerator Test1_OpposingTeamShipsGoAroundWallAndComeCloseToEachOther()
         {
             var team1 = CreateTeam("Team1", PhysicsLayers.Friendly);
@@ -27,13 +26,13 @@ namespace E2E
 
             yield return WaitForLifecycle();
 
-            const float expectedDistance = 60f;
+            const float expectedDistance = 80f;
             var initialDistance = Vector2.Distance(ship1.GetPosition(), ship2.GetPosition());
             Assert.That(initialDistance, Is.GreaterThan(expectedDistance));
 
             var finalDistance = float.MaxValue;
             const float totalTime = 25f;
-            const int maxIterations = 100;
+            const int maxIterations = 200;
             const float step = totalTime / maxIterations;
 
             for (var i = 0; i < maxIterations; i++)
@@ -53,14 +52,15 @@ namespace E2E
         }
 
         [UnityTest]
-        [Retry(3)]
         public IEnumerator Test2_OpposingTeamShipsShootAndDestroyPixels()
         {
             var team1 = CreateTeam("Team1", PhysicsLayers.Friendly);
             var team2 = CreateTeam("Team2", PhysicsLayers.Enemy);
 
             var ship1 = CreateAIShip("Ship1", team1, Vector2.zero, true, false);
-            var ship2 = CreateAIShip("Ship2", team2, new Vector2(0f, 50f), true, false);
+            var ship2 = CreateAIShip("Ship2", team2, new Vector2(50f, 50f), true, false);
+
+            ship1.CommandModule.PixelatedRigidbody.Rigidbody.AddForce(new Vector2(100f, 0f), ForceMode2D.Impulse);
 
             MissionService.Setup();
 
@@ -82,7 +82,6 @@ namespace E2E
         }
 
         [UnityTest]
-        [Retry(3)]
         public IEnumerator Test3_ThreeVsOneShootout()
         {
             var teamA = CreateTeam("TeamA", PhysicsLayers.Friendly);
@@ -92,6 +91,8 @@ namespace E2E
             var shipA1 = CreateAIShip("ShipA1", teamA, new Vector2(25f, 30f), true, false);
             var shipA2 = CreateAIShip("ShipA2", teamA, new Vector2(25f, -40f), true, false);
             var shipA3 = CreateAIShip("ShipA3", teamA, new Vector2(30f, 0f), true, false);
+
+            CreateObstacleBox(Vector2.zero, new Vector2(100f, 100f));
 
             MissionService.Setup();
 
@@ -115,7 +116,6 @@ namespace E2E
         }
 
         [UnityTest]
-        [Retry(3)]
         public IEnumerator Test4_FastMovingShipLosesPixelsOnCollisionWithAnotherPixelatedRigidbody()
         {
             var team1 = CreateTeam("Team1", PhysicsLayers.Friendly);
@@ -144,7 +144,6 @@ namespace E2E
         }
 
         [UnityTest]
-        [Retry(3)]
         public IEnumerator Test5_TargetPractice_ShipDestroysStationaryEnemyShip()
         {
             var team1 = CreateTeam("Team1", PhysicsLayers.Friendly);
@@ -174,7 +173,6 @@ namespace E2E
         }
 
         [UnityTest]
-        [Retry(3)]
         public IEnumerator Test6_AiShipDealsSignificantDamageToPlayerShip()
         {
             var friendlyTeam = CreateTeam("Friendly", PhysicsLayers.Friendly);

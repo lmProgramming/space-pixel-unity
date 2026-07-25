@@ -80,10 +80,13 @@ namespace Context
 
             if (!cameraResetRequestEventChannel)
                 throw new UnityException(
-                    $"[ShipFactoryInstaller] {nameof(cameraResetRequestEventChannel)} must be assigned.");
+                    $"[GameProjectInstaller] {nameof(cameraResetRequestEventChannel)} must be assigned.");
 
             if (!physicsCollisionChannel)
-                throw new UnityException($"Missing {nameof(physicsCollisionChannel)}");
+                throw new UnityException($"[GameProjectInstaller] Missing {nameof(physicsCollisionChannel)}");
+
+            if (!cameraModeEventChannel)
+                throw new UnityException($"[GameProjectInstaller] Missing {nameof(cameraModeEventChannel)}");
 
             Container.Bind<IShipModuleCatalog>()
                 .FromInstance(typedShipModuleCatalog)
