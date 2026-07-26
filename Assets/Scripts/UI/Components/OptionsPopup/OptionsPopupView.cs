@@ -2,22 +2,18 @@ using System;
 using System.Collections.Generic;
 using Core.UI;
 using UI.MVCVM;
-using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace UI.Components.OptionsPopup
 {
     public class OptionsPopupView : View<OptionsPopupViewModel>
     {
-        private const string OptionButtonTemplatePath = "UI/OptionsPopupButton";
-
-        private readonly List<(Button button, EventCallback<ClickEvent> callback)> _optionCallbacks = new();
+        private readonly List<OptionsPopupOptionButton> _optionButtons = new();
 
         private VisualElement _actions;
         private VisualElement _backdrop;
         private Button _closeButton;
         private Label _descriptionLabel;
-        private VisualTreeAsset _optionButtonTemplate;
         private Label _titleLabel;
         private OptionsPopupViewModel _viewModel;
 
@@ -35,11 +31,6 @@ namespace UI.Components.OptionsPopup
             if (_backdrop == null || _titleLabel == null || _descriptionLabel == null || _actions == null ||
                 _closeButton == null)
                 throw new InvalidOperationException("[OptionsPopupView] Required controls are missing in UXML.");
-
-            _optionButtonTemplate = Resources.Load<VisualTreeAsset>(OptionButtonTemplatePath);
-            if (!_optionButtonTemplate)
-                throw new InvalidOperationException(
-                    $"[OptionsPopupView] VisualTreeAsset '{OptionButtonTemplatePath}' was not found in Resources.");
 
             _closeButton.clicked += OnCloseClicked;
             _backdrop.RegisterCallback<ClickEvent>(OnBackdropClicked);
@@ -76,28 +67,22 @@ namespace UI.Components.OptionsPopup
 
             foreach (var option in options)
             {
-                var buttonIndex = _actions.childCount;
-                _optionButtonTemplate.CloneTree(_actions);
-                var button = _actions[buttonIndex] as Button
-                             ?? throw new InvalidOperationException(
-                                 "[OptionsPopupView] OptionsPopupButton.uxml root must be a Button.");
-
-                button.text = option.Label;
-                button.AddToClassList(GetStyleClass(option.Style));
-
                 var optionId = option.Id;
-                EventCallback<ClickEvent> callback = _ => OptionClicked?.Invoke(optionId);
-                button.RegisterCallback(callback);
-                _optionCallbacks.Add((button, callback));
+                var button = OptionsPopupOptionButton.Create(
+                    option.Label,
+                    GetStyleClass(option.Style),
+                    () => OptionClicked?.Invoke(optionId));
+                _actions.Add(button);
+                _optionButtons.Add(button);
             }
         }
 
         private void ClearOptionButtons()
         {
-            foreach (var (button, callback) in _optionCallbacks)
-                button.UnregisterCallback(callback);
+            foreach (var button in _optionButtons)
+                button.Unbind();
 
-            _optionCallbacks.Clear();
+            _optionButtons.Clear();
             _actions?.Clear();
         }
 

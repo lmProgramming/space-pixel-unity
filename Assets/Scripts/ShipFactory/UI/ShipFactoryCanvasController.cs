@@ -77,7 +77,11 @@ namespace ShipFactory.UI
 
             // 1. Initialize Sub-Panels
 
-            _resourcesPanel = root.Q<ResourcesPanel>("resources-panel");
+            _resourcesPanel = root.Q("resources-panel")?.Q<ResourcesPanel>();
+            if (_resourcesPanel == null)
+                throw new InvalidOperationException(
+                    "[ShipFactoryCanvasController] ResourcesPanel 'resources-panel' not found in UXML!");
+
             _infoPanel = new ModuleInfoPanel(root);
             _cameraInfoPanel = cameraInfoPanelFactory.Create(root);
 

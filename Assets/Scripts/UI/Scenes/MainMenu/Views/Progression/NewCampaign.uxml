@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:Template name="ResourcesPanel"
+                 src="project://database/Assets/Scripts/UI/Components/ResourcesPanel.uxml"/>
     <Style src="project://database/Assets/DesignSystem/Resources/UI/Styles/DesignSystem/DesignSystem.uss"/>
     <Style src="project://database/Assets/Scripts/UI/Scenes/MainMenu/Views/Progression/NewCampaign.uss"/>
     <Style src="project://database/Assets/Resources/UI/ShipPickerStyles.uss"/>
@@ -28,7 +30,9 @@
 
                     <ui:VisualElement class="new-campaign-footer">
                         <ui:VisualElement name="progression-new-campaign-resources-container"
-                                          class="new-campaign-resources"/>
+                                          class="new-campaign-resources">
+                            <ui:Instance template="ResourcesPanel"/>
+                        </ui:VisualElement>
                         <ui:VisualElement class="ds-row new-campaign-actions">
                             <ui:Button name="progression-new-campaign-back-button" text="Back"
                                        class="ds-btn ds-btn--ghost"/>

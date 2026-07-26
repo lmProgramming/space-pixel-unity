@@ -41,7 +41,7 @@ namespace UI.Components.Notification
 
         private void AddNotification(string message, PopupLevel level)
         {
-            var popup = new NotificationPopup(message, level);
+            var popup = NotificationPopup.Create(message, level);
             _notificationContainer.Add(popup);
         }
     }

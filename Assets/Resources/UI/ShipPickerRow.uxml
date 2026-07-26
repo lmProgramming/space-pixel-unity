@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
-    <ui:VisualElement name="ship-row" class="ship-picker-row">
+    <UI.Components.ShipPickerRow name="ship-row" class="ship-picker-row">
         <ui:VisualElement name="ship-row-thumb" class="ship-picker-row__thumb">
             <ui:Image name="ship-row-icon" class="ship-picker-row__icon"/>
         </ui:VisualElement>
         <ui:Label name="ship-row-label" text="" class="ship-picker-row__label"/>
-    </ui:VisualElement>
+    </UI.Components.ShipPickerRow>
 </ui:UXML>

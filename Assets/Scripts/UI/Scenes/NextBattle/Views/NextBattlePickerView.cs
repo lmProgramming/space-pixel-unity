@@ -1,23 +1,19 @@
 using System;
 using System.Collections.Generic;
 using Core.Progression;
+using UI.Components;
 using UI.MVCVM;
-using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace UI.Scenes.NextBattle.Views
 {
     public class NextBattlePickerView : View<NextBattlePickerViewModel>
     {
-        private const string ShipRowTemplatePath = "UI/ShipRowTemplate";
-
-        private readonly List<(VisualElement element, EventCallback<ClickEvent> callback)> _entryClickCallbacks = new();
-        private readonly List<VisualElement> _entryElements = new();
+        private readonly List<ShipPickerRow> _entryElements = new();
 
         private Button _confirmButton;
         private VisualElement _list;
         private Guid? _selectedAllyIndex;
-        private VisualTreeAsset _shipRowTemplate;
         private NextBattlePickerViewModel _viewModel;
 
         public event Action<Guid> ConfirmClicked;
@@ -28,12 +24,7 @@ namespace UI.Scenes.NextBattle.Views
             _confirmButton = root.Q<Button>("next-battle-picker-confirm-button");
 
             if (_list == null || _confirmButton == null)
-                throw new InvalidOperationException("[BattleShipPickerView] Required controls are missing in UXML.");
-
-            _shipRowTemplate = Resources.Load<VisualTreeAsset>(ShipRowTemplatePath);
-            if (!_shipRowTemplate)
-                throw new InvalidOperationException(
-                    $"[BattleShipPickerView] VisualTreeAsset '{ShipRowTemplatePath}' was not found in Resources.");
+                throw new InvalidOperationException("[NextBattlePickerView] Required controls are missing in UXML.");
 
             _confirmButton.clicked += OnConfirmClicked;
             Render();
@@ -71,45 +62,17 @@ namespace UI.Scenes.NextBattle.Views
 
         private void AddEntry(NextBattlePickerEntry entry)
         {
-            var rowIndex = _list.childCount;
-            _shipRowTemplate.CloneTree(_list);
-            var row = _list[rowIndex].Q<VisualElement>("ship-row")
-                      ?? throw new InvalidOperationException(
-                          "[BattleShipPickerView] 'ship-row' is missing in ShipRowTemplate.uxml.");
-
-            var icon = row.Q<Image>("ship-row-icon")
-                       ?? throw new InvalidOperationException(
-                           "[BattleShipPickerView] 'ship-row-icon' is missing in ShipRowTemplate.uxml.");
-            var label = row.Q<Label>("ship-row-label")
-                        ?? throw new InvalidOperationException(
-                            "[BattleShipPickerView] 'ship-row-label' is missing in ShipRowTemplate.uxml.");
-
-            if (entry.PreviewSprite)
-            {
-                icon.sprite = entry.PreviewSprite;
-                icon.scaleMode = ScaleMode.ScaleToFit;
-            }
-            else
-            {
-                var thumb = row.Q("ship-row-thumb");
-                if (thumb != null)
-                    thumb.visible = false;
-            }
-
-            label.text = entry.DisplayName;
-
-            EventCallback<ClickEvent> clickHandler = _ => SelectEntry(entry.Id);
-            row.RegisterCallback(clickHandler);
-            _entryClickCallbacks.Add((row, clickHandler));
+            var row = ShipPickerRow.Create();
+            row.Bind(entry.PreviewSprite, entry.DisplayName, () => SelectEntry(entry.Id));
+            _list.Add(row);
             _entryElements.Add(row);
         }
 
         private void ClearEntries()
         {
-            foreach (var (element, callback) in _entryClickCallbacks)
-                element.UnregisterCallback(callback);
+            foreach (var row in _entryElements)
+                row.Unbind();
 
-            _entryClickCallbacks.Clear();
             _entryElements.Clear();
             _list?.Clear();
         }
@@ -125,7 +88,7 @@ namespace UI.Scenes.NextBattle.Views
             for (var index = 0; index < _entryElements.Count; index++)
             {
                 var allyIndex = _viewModel.Entries[index].Id;
-                _entryElements[index].EnableInClassList("is-selected", allyIndex == _selectedAllyIndex);
+                _entryElements[index].SetSelected(allyIndex == _selectedAllyIndex);
             }
 
             _confirmButton.SetEnabled(_selectedAllyIndex.HasValue);

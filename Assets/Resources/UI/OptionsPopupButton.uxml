@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<ui:UXML xmlns:ui="UnityEngine.UIElements">
-    <ui:Button name="options-popup-option-button" text="" class="ds-btn"/>
-</ui:UXML>

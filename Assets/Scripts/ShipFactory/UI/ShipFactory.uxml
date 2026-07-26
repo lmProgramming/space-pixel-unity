@@ -2,6 +2,8 @@
 <ui:UXML
         xmlns:ui="UnityEngine.UIElements"
 >
+    <ui:Template name="ResourcesPanel"
+                 src="project://database/Assets/Scripts/UI/Components/ResourcesPanel.uxml"/>
     <Style src="ShipFactory.uss"/>
     <Style src="project://database/Assets/DesignSystem/Resources/UI/Styles/DesignSystem/DesignSystem.uss"/>
 
@@ -110,7 +112,7 @@
             </ui:VisualElement>
         </ui:VisualElement>
 
-        <UI.Components.ResourcesPanel name="resources-panel"/>
+        <ui:Instance template="ResourcesPanel" name="resources-panel"/>
 
         <!-- Bottom palette panel -->
         <ui:VisualElement name="palette-panel" class="palette-panel">
