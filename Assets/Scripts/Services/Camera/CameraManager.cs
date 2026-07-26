@@ -1,5 +1,6 @@
 using System;
 using Core.Services;
+using Core.Services.Enums;
 using Events.Camera;
 using PrimeTween;
 using UnityEngine;

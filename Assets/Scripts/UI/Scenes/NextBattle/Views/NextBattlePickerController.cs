@@ -1,12 +1,8 @@
 using System;
-using System.Collections.Generic;
 using Core.Constants;
-using Core.Gameplay.Progression;
 using Core.Services;
 using Core.State;
-using Services;
 using UI.MVCVM;
-using UI.Scenes.BattleShipPicker.Views;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Zenject;
@@ -17,6 +13,7 @@ namespace UI.Scenes.NextBattle.Views
     public class
         NextBattlePickerController : Controller<NextBattlePickerModel, NextBattlePickerView, NextBattlePickerViewModel>
     {
+        [Inject] private INextBattleService _nextBattleService;
         [Inject] private IProgressionRepository _progressionRepository;
 
         private void Start()
@@ -43,32 +40,13 @@ namespace UI.Scenes.NextBattle.Views
 
         protected override NextBattlePickerViewModel CreateViewModel(NextBattlePickerModel model)
         {
-            var save = _progressionRepository.Load(SaveState.ProgressionSlotIndex);
-            return new NextBattlePickerViewModel(CreateEntries(save));
+            var entries = _nextBattleService.GetNextBattlePickerEntries();
+            return new NextBattlePickerViewModel(entries);
         }
 
-        private static IReadOnlyList<BattleShipPickerEntry> CreateEntries(ProgressionSave save)
+        private static void OnConfirmClicked(Guid allyIndex)
         {
-            if (save.allies == null || save.allies.Length == 0)
-                throw new InvalidOperationException("[BattleShipPicker] Progression save has no allies.");
-
-            var entries = new BattleShipPickerEntry[save.allies.Length];
-
-            for (var index = 0; index < save.allies.Length; index++)
-            {
-                var snapshot = save.allies[index];
-                entries[index] = new BattleShipPickerEntry(
-                    index,
-                    string.IsNullOrWhiteSpace(snapshot.shipName) ? $"Ship {index + 1}" : snapshot.shipName,
-                    ShipPreviewIconCompositor.ComposeFromSnapshot(snapshot));
-            }
-
-            return entries;
-        }
-
-        private static void OnConfirmClicked(int allyIndex)
-        {
-            SaveState.SelectedAllyIndex = allyIndex;
+            SaveState.SelectedBattleId = allyIndex;
             SceneManager.LoadScene(SceneNames.MainGame);
         }
     }

@@ -1,15 +1,15 @@
 using System.Collections.Generic;
-using UI.Scenes.BattleShipPicker.Views;
+using Core.Progression;
 
 namespace UI.Scenes.NextBattle.Views
 {
     public class NextBattlePickerViewModel
     {
-        public NextBattlePickerViewModel(IReadOnlyList<BattleShipPickerEntry> entries)
+        public NextBattlePickerViewModel(IReadOnlyList<NextBattlePickerEntry> entries)
         {
             Entries = entries;
         }
 
-        public IReadOnlyList<BattleShipPickerEntry> Entries { get; }
+        public IReadOnlyList<NextBattlePickerEntry> Entries { get; }
     }
 }

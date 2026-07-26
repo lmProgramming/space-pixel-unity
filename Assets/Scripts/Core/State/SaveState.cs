@@ -1,3 +1,4 @@
+using System;
 using Core.Gameplay;
 
 namespace Core.State
@@ -12,5 +13,6 @@ namespace Core.State
         public static int AsteroidCount { get; set; }
         public static int EnemyShipCount { get; set; }
         public static int FriendlyShipCount { get; set; }
+        public static Guid SelectedBattleId { get; set; }
     }
 }

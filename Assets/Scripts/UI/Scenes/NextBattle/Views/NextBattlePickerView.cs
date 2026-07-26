@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
+using Core.Progression;
 using UI.MVCVM;
-using UI.Scenes.BattleShipPicker.Views;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -16,16 +16,16 @@ namespace UI.Scenes.NextBattle.Views
 
         private Button _confirmButton;
         private VisualElement _list;
-        private int? _selectedAllyIndex;
+        private Guid? _selectedAllyIndex;
         private VisualTreeAsset _shipRowTemplate;
         private NextBattlePickerViewModel _viewModel;
 
-        public event Action<int> ConfirmClicked;
+        public event Action<Guid> ConfirmClicked;
 
         protected override void BindUiCore(VisualElement root)
         {
-            _list = root.Q<VisualElement>("battle-ship-picker-list");
-            _confirmButton = root.Q<Button>("battle-ship-picker-confirm-button");
+            _list = root.Q<VisualElement>("next-battle-picker-list");
+            _confirmButton = root.Q<Button>("next-battle-picker-confirm-button");
 
             if (_list == null || _confirmButton == null)
                 throw new InvalidOperationException("[BattleShipPickerView] Required controls are missing in UXML.");
@@ -63,13 +63,13 @@ namespace UI.Scenes.NextBattle.Views
 
             ClearEntries();
 
-            foreach (var battleShipPickerEntry in _viewModel.Entries)
-                AddEntry(battleShipPickerEntry);
+            foreach (var nextBattlePickerEntry in _viewModel.Entries)
+                AddEntry(nextBattlePickerEntry);
 
             UpdateSelectionVisuals();
         }
 
-        private void AddEntry(BattleShipPickerEntry entry)
+        private void AddEntry(NextBattlePickerEntry entry)
         {
             var rowIndex = _list.childCount;
             _shipRowTemplate.CloneTree(_list);
@@ -98,7 +98,7 @@ namespace UI.Scenes.NextBattle.Views
 
             label.text = entry.DisplayName;
 
-            EventCallback<ClickEvent> clickHandler = _ => SelectEntry(entry.AllyIndex);
+            EventCallback<ClickEvent> clickHandler = _ => SelectEntry(entry.Id);
             row.RegisterCallback(clickHandler);
             _entryClickCallbacks.Add((row, clickHandler));
             _entryElements.Add(row);
@@ -114,7 +114,7 @@ namespace UI.Scenes.NextBattle.Views
             _list?.Clear();
         }
 
-        private void SelectEntry(int allyIndex)
+        private void SelectEntry(Guid allyIndex)
         {
             _selectedAllyIndex = allyIndex;
             UpdateSelectionVisuals();
@@ -124,7 +124,7 @@ namespace UI.Scenes.NextBattle.Views
         {
             for (var index = 0; index < _entryElements.Count; index++)
             {
-                var allyIndex = _viewModel.Entries[index].AllyIndex;
+                var allyIndex = _viewModel.Entries[index].Id;
                 _entryElements[index].EnableInClassList("is-selected", allyIndex == _selectedAllyIndex);
             }
 

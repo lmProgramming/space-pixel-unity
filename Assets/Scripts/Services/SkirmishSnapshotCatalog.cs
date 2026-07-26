@@ -3,6 +3,7 @@ using Core.Services;
 using Core.Ships;
 using UnityEngine;
 using ZLinq;
+using Random = UnityEngine.Random;
 
 namespace Services
 {
@@ -11,6 +12,13 @@ namespace Services
     {
         [SerializeField] private List<TextAsset> enemySnapshots = new();
         [SerializeField] private List<TextAsset> friendlySnapshots = new();
+
+        public ShipSnapshot[] GetRandomFriendlySnapshots(int count)
+        {
+            var snapshots = new List<ShipSnapshot>();
+            for (var i = 0; i < count; i++) snapshots.Add(GetRandomFriendlySnapshot());
+            return snapshots.ToArray();
+        }
 
         public bool HasEnemySnapshots()
         {
@@ -30,6 +38,13 @@ namespace Services
         public ShipSnapshot GetRandomFriendlySnapshot()
         {
             return GetRandomSnapshot(friendlySnapshots, "friendly");
+        }
+
+        public ShipSnapshot[] GetRandomEnemySnapshots(int count)
+        {
+            var snapshots = new List<ShipSnapshot>();
+            for (var i = 0; i < count; i++) snapshots.Add(GetRandomEnemySnapshot());
+            return snapshots.ToArray();
         }
 
         private static bool HasSnapshots(List<TextAsset> snapshots)
