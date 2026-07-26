@@ -30,12 +30,12 @@ namespace E2E
     public abstract class E2ETestBase
     {
         protected readonly List<GameObject> CreatedObjects = new();
+        protected Instantiator Instantiator;
+        protected IMissionService MissionService;
         private IActivePlayerShipProvider _activePlayerShipProvider;
         private INavigationService _navigationService;
 
         private DiContainer _sceneContainer;
-        protected Instantiator Instantiator;
-        protected IMissionService MissionService;
 
         [TearDown]
         public void TearDownOnRetry()
@@ -318,8 +318,8 @@ namespace E2E
             SaveState.Mode = GameSessionMode.FreeMode;
             SaveState.PlayerShipName = null;
             SaveState.PlayerShipSnapshotFilePath = null;
-            SaveState.EnemyShipCount = 0;
-            SaveState.FriendlyShipCount = 0;
+            SaveState.EnemySnapshots = null;
+            SaveState.AllySnapshots = null;
             SaveState.AsteroidCount = 0;
             SaveState.ProgressionSlotIndex = 0;
             SaveState.SelectedAllyIndex = 0;

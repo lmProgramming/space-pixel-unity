@@ -12,7 +12,7 @@
             <ui:ScrollView mode="Vertical" style="max-height: 420px; flex-grow: 1;">
                 <ui:VisualElement name="next-battle-picker-list" class="battle-picker-list"/>
             </ui:ScrollView>
-            <ui:Button name="next=battle-picker-confirm-button" text="Select"
+            <ui:Button name="next-battle-picker-confirm-button" text="Select"
                        class="ds-btn ds-btn--primary ds-btn--block" style="margin-top: 16px;"/>
         </ui:VisualElement>
     </ui:VisualElement>

@@ -112,6 +112,10 @@ namespace Context
                 .To<ProgressionRepository>()
                 .AsSingle();
 
+            Container.Bind<INextBattleService>()
+                .To<NextBattleService>()
+                .AsSingle();
+
             Container.Bind<IGameInput>()
                 .To<GameInput>()
                 .FromNewComponentOnNewGameObject()

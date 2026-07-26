@@ -28,6 +28,8 @@ namespace Services.Tests
             SaveState.Mode = GameSessionMode.Progression;
             SaveState.ProgressionSlotIndex = 0;
             SaveState.SelectedAllyIndex = 1;
+            SaveState.EnemySnapshots = new[] { new ShipSnapshot("Enemy") };
+            SaveState.AsteroidCount = 3;
 
             var provider = new ProgressionBattleSpawnConfigurationProvider(repository);
             var configuration = provider.GetConfiguration();
@@ -36,9 +38,9 @@ namespace Services.Tests
             Assert.That(configuration.AllySnapshots, Has.Count.EqualTo(2));
             Assert.That(configuration.AllySnapshots[0].shipName, Is.EqualTo("Alpha"));
             Assert.That(configuration.AllySnapshots[1].shipName, Is.EqualTo("Charlie"));
-            Assert.That(configuration.EnemyCount, Is.EqualTo(1));
-            Assert.That(configuration.AsteroidCount, Is.EqualTo(0));
-            Assert.That(configuration.RandomFriendlyCount, Is.EqualTo(0));
+            Assert.That(configuration.EnemySnapshots, Has.Count.EqualTo(1));
+            Assert.That(configuration.EnemySnapshots[0].shipName, Is.EqualTo("Enemy"));
+            Assert.That(configuration.AsteroidCount, Is.EqualTo(3));
         }
     }
 }

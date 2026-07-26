@@ -10,25 +10,21 @@ namespace Services
         public BattleSpawnConfiguration(
             ShipSnapshot playerShipSnapshot,
             IReadOnlyList<ShipSnapshot> allySnapshots,
-            int enemyCount,
-            int asteroidCount,
-            int randomFriendlyCount)
+            IReadOnlyList<ShipSnapshot> enemySnapshots,
+            int asteroidCount)
         {
             PlayerShipSnapshot = playerShipSnapshot;
             AllySnapshots = allySnapshots ?? Array.Empty<ShipSnapshot>();
-            EnemyCount = enemyCount;
+            EnemySnapshots = enemySnapshots ?? Array.Empty<ShipSnapshot>();
             AsteroidCount = asteroidCount;
-            RandomFriendlyCount = randomFriendlyCount;
         }
 
         public ShipSnapshot PlayerShipSnapshot { get; }
 
         public IReadOnlyList<ShipSnapshot> AllySnapshots { get; }
 
-        public int EnemyCount { get; }
+        public IReadOnlyList<ShipSnapshot> EnemySnapshots { get; }
 
         public int AsteroidCount { get; }
-
-        public int RandomFriendlyCount { get; }
     }
 }

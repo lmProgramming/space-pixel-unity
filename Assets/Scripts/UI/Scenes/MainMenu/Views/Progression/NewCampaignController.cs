@@ -119,7 +119,7 @@ namespace UI.Scenes.MainMenu.Views.Progression
             SaveState.Mode = GameSessionMode.Progression;
             SaveState.ProgressionSlotIndex = _pendingSlotIndex.Value;
 
-            SceneManager.LoadScene(SceneNames.BattleShipPicker);
+            SceneManager.LoadScene(SceneNames.NextBattle);
         }
 
         private void OnShipSelected(int shipIndex)

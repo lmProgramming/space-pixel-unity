@@ -47,7 +47,7 @@ namespace Gameplay
             save.enemiesKilled++;
             _progressionRepository.Save(SaveState.ProgressionSlotIndex, save);
 
-            SceneManager.LoadScene(SceneNames.BattleShipPicker);
+            SceneManager.LoadScene(SceneNames.NextBattle);
         }
 
         public void OnBattleDefeat()

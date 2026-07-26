@@ -13,7 +13,7 @@ namespace UI.Scenes.NextBattle.Views
 
         private Button _confirmButton;
         private VisualElement _list;
-        private Guid? _selectedAllyIndex;
+        private Guid? _selectedBattleId;
         private NextBattlePickerViewModel _viewModel;
 
         public event Action<Guid> ConfirmClicked;
@@ -43,7 +43,7 @@ namespace UI.Scenes.NextBattle.Views
         public override void SetData(NextBattlePickerViewModel viewModel)
         {
             _viewModel = viewModel ?? throw new ArgumentNullException(nameof(viewModel));
-            _selectedAllyIndex = null;
+            _selectedBattleId = null;
             Render();
         }
 
@@ -77,9 +77,9 @@ namespace UI.Scenes.NextBattle.Views
             _list?.Clear();
         }
 
-        private void SelectEntry(Guid allyIndex)
+        private void SelectEntry(Guid battleId)
         {
-            _selectedAllyIndex = allyIndex;
+            _selectedBattleId = battleId;
             UpdateSelectionVisuals();
         }
 
@@ -87,19 +87,19 @@ namespace UI.Scenes.NextBattle.Views
         {
             for (var index = 0; index < _entryElements.Count; index++)
             {
-                var allyIndex = _viewModel.Entries[index].Id;
-                _entryElements[index].SetSelected(allyIndex == _selectedAllyIndex);
+                var battleId = _viewModel.Entries[index].Id;
+                _entryElements[index].SetSelected(battleId == _selectedBattleId);
             }
 
-            _confirmButton.SetEnabled(_selectedAllyIndex.HasValue);
+            _confirmButton.SetEnabled(_selectedBattleId.HasValue);
         }
 
         private void OnConfirmClicked()
         {
-            if (!_selectedAllyIndex.HasValue)
+            if (!_selectedBattleId.HasValue)
                 return;
 
-            ConfirmClicked?.Invoke(_selectedAllyIndex.Value);
+            ConfirmClicked?.Invoke(_selectedBattleId.Value);
         }
     }
 }

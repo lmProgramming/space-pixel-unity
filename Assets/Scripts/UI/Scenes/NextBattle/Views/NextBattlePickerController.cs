@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using Core.Constants;
+using Core.Progression;
 using Core.Services;
 using Core.State;
 using UI.MVCVM;
@@ -13,8 +15,8 @@ namespace UI.Scenes.NextBattle.Views
     public class
         NextBattlePickerController : Controller<NextBattlePickerModel, NextBattlePickerView, NextBattlePickerViewModel>
     {
+        private IReadOnlyList<NextBattlePickerEntry> _entries;
         [Inject] private INextBattleService _nextBattleService;
-        [Inject] private IProgressionRepository _progressionRepository;
 
         private void Start()
         {
@@ -40,14 +42,25 @@ namespace UI.Scenes.NextBattle.Views
 
         protected override NextBattlePickerViewModel CreateViewModel(NextBattlePickerModel model)
         {
-            var entries = _nextBattleService.GetNextBattlePickerEntries();
-            return new NextBattlePickerViewModel(entries);
+            _entries = _nextBattleService.GetNextBattlePickerEntries();
+            return new NextBattlePickerViewModel(_entries);
         }
 
-        private static void OnConfirmClicked(Guid allyIndex)
+        private void OnConfirmClicked(Guid battleId)
         {
-            SaveState.SelectedBattleId = allyIndex;
-            SceneManager.LoadScene(SceneNames.MainGame);
+            for (var index = 0; index < _entries.Count; index++)
+            {
+                if (_entries[index].Id != battleId)
+                    continue;
+
+                SaveState.EnemySnapshots = _entries[index].EnemySnapshots;
+                SaveState.AsteroidCount = _entries[index].AsteroidsCount;
+                SceneManager.LoadScene(SceneNames.BattleShipPicker);
+                return;
+            }
+
+            throw new InvalidOperationException(
+                $"[NextBattlePickerController] No battle entry found for id '{battleId}'.");
         }
     }
 }

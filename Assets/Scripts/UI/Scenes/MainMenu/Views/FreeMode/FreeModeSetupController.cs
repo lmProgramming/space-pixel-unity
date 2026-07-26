@@ -29,6 +29,7 @@ namespace UI.Scenes.MainMenu.Views.FreeMode
         private Slider _friendlyCountSlider;
         private Button _launchButton;
         private DropdownField _shipDropdown;
+        [Inject] private ISkirmishSnapshotCatalog _skirmishSnapshotCatalog;
 
         [Inject] private IShipSnapshotRepository _snapshotRepository;
 
@@ -86,12 +87,19 @@ namespace UI.Scenes.MainMenu.Views.FreeMode
             var selectedName = _snapshotDisplayNames[selectedIndex];
             var selectedFile = _snapshotFilePaths[selectedIndex];
 
+            var enemyCount = Mathf.RoundToInt(_enemyCountSlider.value);
+            var friendlyCount = Mathf.RoundToInt(_friendlyCountSlider.value);
+
             SaveState.Mode = GameSessionMode.FreeMode;
             SaveState.PlayerShipName = selectedName;
             SaveState.PlayerShipSnapshotFilePath = selectedFile;
             SaveState.AsteroidCount = Mathf.RoundToInt(_asteroidCountSlider.value);
-            SaveState.EnemyShipCount = Mathf.RoundToInt(_enemyCountSlider.value);
-            SaveState.FriendlyShipCount = Mathf.RoundToInt(_friendlyCountSlider.value);
+            SaveState.EnemySnapshots = enemyCount > 0
+                ? _skirmishSnapshotCatalog.GetRandomEnemySnapshots(enemyCount)
+                : Array.Empty<ShipSnapshot>();
+            SaveState.AllySnapshots = friendlyCount > 0
+                ? _skirmishSnapshotCatalog.GetRandomFriendlySnapshots(friendlyCount)
+                : Array.Empty<ShipSnapshot>();
 
             SceneManager.LoadScene(SceneNames.MainGame);
         }

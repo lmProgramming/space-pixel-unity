@@ -7,7 +7,6 @@ namespace Services
 {
     public class NextBattleService : INextBattleService
     {
-        [Inject] private IProgressionRepository _progressionRepository;
         [Inject] private ISkirmishSnapshotCatalog _skirmishSnapshotCatalog;
 
         public NextBattlePickerEntry[] GetNextBattlePickerEntries()
