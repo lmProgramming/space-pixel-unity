@@ -11,10 +11,8 @@ namespace Core.Services
 
         IReadOnlyList<ShipSnapshot> AllySnapshots { get; }
 
-        int EnemyCount { get; }
+        IReadOnlyList<ShipSnapshot> EnemySnapshots { get; }
 
         int AsteroidCount { get; }
-
-        int RandomFriendlyCount { get; }
     }
 }

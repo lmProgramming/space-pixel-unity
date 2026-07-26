@@ -1,4 +1,4 @@
-using Core.Services;
+using Core.Services.Enums;
 using UnityEngine;
 
 namespace Events.Camera

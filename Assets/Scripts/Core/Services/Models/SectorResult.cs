@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Core.Ships;
 
-namespace Core.Services
+namespace Core.Services.Models
 {
     public class SectorResult
     {

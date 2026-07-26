@@ -29,10 +29,9 @@ namespace Services
 
             return new BattleSpawnConfiguration(
                 playerSnapshot,
-                Array.Empty<ShipSnapshot>(),
-                SaveState.EnemyShipCount,
-                SaveState.AsteroidCount,
-                SaveState.FriendlyShipCount);
+                SaveState.AllySnapshots ?? Array.Empty<ShipSnapshot>(),
+                SaveState.EnemySnapshots ?? Array.Empty<ShipSnapshot>(),
+                SaveState.AsteroidCount);
         }
     }
 }

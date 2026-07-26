@@ -1,22 +1,18 @@
 using System;
 using System.Collections.Generic;
+using UI.Components;
 using UI.MVCVM;
-using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace UI.Scenes.BattleShipPicker.Views
 {
     public class BattleShipPickerView : View<BattleShipPickerViewModel>
     {
-        private const string ShipRowTemplatePath = "UI/ShipRowTemplate";
-
-        private readonly List<(VisualElement element, EventCallback<ClickEvent> callback)> _entryClickCallbacks = new();
-        private readonly List<VisualElement> _entryElements = new();
+        private readonly List<ShipPickerRow> _entryElements = new();
 
         private Button _confirmButton;
         private VisualElement _list;
         private int? _selectedAllyIndex;
-        private VisualTreeAsset _shipRowTemplate;
         private BattleShipPickerViewModel _viewModel;
 
         public event Action<int> ConfirmClicked;
@@ -28,11 +24,6 @@ namespace UI.Scenes.BattleShipPicker.Views
 
             if (_list == null || _confirmButton == null)
                 throw new InvalidOperationException("[BattleShipPickerView] Required controls are missing in UXML.");
-
-            _shipRowTemplate = Resources.Load<VisualTreeAsset>(ShipRowTemplatePath);
-            if (!_shipRowTemplate)
-                throw new InvalidOperationException(
-                    $"[BattleShipPickerView] VisualTreeAsset '{ShipRowTemplatePath}' was not found in Resources.");
 
             _confirmButton.clicked += OnConfirmClicked;
             Render();
@@ -70,45 +61,17 @@ namespace UI.Scenes.BattleShipPicker.Views
 
         private void AddEntry(BattleShipPickerEntry entry)
         {
-            var rowIndex = _list.childCount;
-            _shipRowTemplate.CloneTree(_list);
-            var row = _list[rowIndex].Q<VisualElement>("ship-row")
-                      ?? throw new InvalidOperationException(
-                          "[BattleShipPickerView] 'ship-row' is missing in ShipRowTemplate.uxml.");
-
-            var icon = row.Q<Image>("ship-row-icon")
-                       ?? throw new InvalidOperationException(
-                           "[BattleShipPickerView] 'ship-row-icon' is missing in ShipRowTemplate.uxml.");
-            var label = row.Q<Label>("ship-row-label")
-                        ?? throw new InvalidOperationException(
-                            "[BattleShipPickerView] 'ship-row-label' is missing in ShipRowTemplate.uxml.");
-
-            if (entry.PreviewSprite)
-            {
-                icon.sprite = entry.PreviewSprite;
-                icon.scaleMode = ScaleMode.ScaleToFit;
-            }
-            else
-            {
-                var thumb = row.Q("ship-row-thumb");
-                if (thumb != null)
-                    thumb.visible = false;
-            }
-
-            label.text = entry.DisplayName;
-
-            EventCallback<ClickEvent> clickHandler = _ => SelectEntry(entry.AllyIndex);
-            row.RegisterCallback(clickHandler);
-            _entryClickCallbacks.Add((row, clickHandler));
+            var row = ShipPickerRow.Create();
+            row.Bind(entry.PreviewSprite, entry.DisplayName, () => SelectEntry(entry.AllyIndex));
+            _list.Add(row);
             _entryElements.Add(row);
         }
 
         private void ClearEntries()
         {
-            foreach (var (element, callback) in _entryClickCallbacks)
-                element.UnregisterCallback(callback);
+            foreach (var row in _entryElements)
+                row.Unbind();
 
-            _entryClickCallbacks.Clear();
             _entryElements.Clear();
             _list?.Clear();
         }
@@ -124,7 +87,7 @@ namespace UI.Scenes.BattleShipPicker.Views
             for (var index = 0; index < _entryElements.Count; index++)
             {
                 var allyIndex = _viewModel.Entries[index].AllyIndex;
-                _entryElements[index].EnableInClassList("is-selected", allyIndex == _selectedAllyIndex);
+                _entryElements[index].SetSelected(allyIndex == _selectedAllyIndex);
             }
 
             _confirmButton.SetEnabled(_selectedAllyIndex.HasValue);

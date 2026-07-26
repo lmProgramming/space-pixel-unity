@@ -3,13 +3,13 @@ using Core.Ships;
 using LMPro.External.IsAlive;
 using UnityEngine;
 using UnityEngine.UIElements;
-using Resources = UnityEngine.Resources;
 
 namespace UI.Components
 {
     [UxmlElement]
     public partial class ResourcesPanel : VisualElement
     {
+        private bool _elementsCached;
         private VisualElement _shipResourceCrewBufferFill;
         private VisualElement _shipResourceCrewFill;
         private Label _shipResourceCrewValueLabel;
@@ -21,18 +21,13 @@ namespace UI.Components
 
         public ResourcesPanel()
         {
-            var asset = Resources.Load<VisualTreeAsset>("UI/ResourcesPanel");
-            if (!asset)
-                throw new InvalidOperationException(
-                    "[ResourcesPanel] VisualTreeAsset 'UI/ResourcesPanel' was not found in Resources.");
-
-            asset.CloneTree(this);
-
-            CacheElements();
+            RegisterCallback<AttachToPanelEvent>(OnAttachToPanel);
         }
 
         public void Refresh(IShip ship)
         {
+            EnsureElementsCached();
+
             if (!ship.IsAlive() || !ship.ResourceManager.IsAlive())
             {
                 _shipResourcesPanel.visible = false;
@@ -63,6 +58,21 @@ namespace UI.Components
                 rm.Crew,
                 rm.CrewCapacity,
                 new Color(80f / 255f, 172f / 255f, 250f / 255f));
+        }
+
+        private void OnAttachToPanel(AttachToPanelEvent evt)
+        {
+            UnregisterCallback<AttachToPanelEvent>(OnAttachToPanel);
+            EnsureElementsCached();
+        }
+
+        private void EnsureElementsCached()
+        {
+            if (_elementsCached)
+                return;
+
+            CacheElements();
+            _elementsCached = true;
         }
 
         private void CacheElements()

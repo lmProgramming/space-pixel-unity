@@ -71,8 +71,12 @@
     left: var(--inset-from-edge);
 }
 
+/* TemplateContainer host for ResourcesPanel — size to content like module-info-panel */
 #resources-panel {
     right: var(--inset-from-edge);
+    align-items: stretch;
+    flex-grow: 0;
+    flex-shrink: 0;
 }
 
 .hidden,

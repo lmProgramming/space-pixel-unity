@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ui:UXML
-        xmlns:ui="UnityEngine.UIElements"
->
-    <ui:VisualElement name="action-popup" class="ds-toast"
-                      style="display: flex; align-self: center;"
-    >
-        <ui:VisualElement name="action-popup-icon" class="ds-icon ds-icon--sm ds-toast__icon"/>
-        <ui:Label text="" name="action-popup-label" class="ds-toast__message"/>
-    </ui:VisualElement>
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <UI.Components.Notification.NotificationPopup>
+        <ui:VisualElement name="action-popup" class="ds-toast"
+                          style="display: flex; align-self: center;">
+            <ui:VisualElement name="action-popup-icon" class="ds-icon ds-icon--sm ds-toast__icon"/>
+            <ui:Label text="" name="action-popup-label" class="ds-toast__message"/>
+        </ui:VisualElement>
+    </UI.Components.Notification.NotificationPopup>
 </ui:UXML>

@@ -99,7 +99,7 @@ namespace UI.Scenes.MainMenu
         {
             SaveState.Mode = GameSessionMode.Progression;
             SaveState.ProgressionSlotIndex = slotIndex;
-            SceneManager.LoadScene(SceneNames.BattleShipPicker);
+            SceneManager.LoadScene(SceneNames.NextBattle);
         }
 
         private void OpenFreeModeSetup()

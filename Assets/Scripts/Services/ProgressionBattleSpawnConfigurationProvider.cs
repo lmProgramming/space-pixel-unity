@@ -32,6 +32,10 @@ namespace Services
             if (selectedIndex < 0 || selectedIndex >= save.allies.Length)
                 throw new ArgumentOutOfRangeException(nameof(SaveState.SelectedAllyIndex));
 
+            if (SaveState.EnemySnapshots == null || SaveState.EnemySnapshots.Length == 0)
+                throw new UnityException(
+                    "[ProgressionBattleSpawnConfigurationProvider] EnemySnapshots must be set before spawning.");
+
             var allies = new List<ShipSnapshot>(save.allies.Length - 1);
             for (var index = 0; index < save.allies.Length; index++)
             {
@@ -44,9 +48,8 @@ namespace Services
             return new BattleSpawnConfiguration(
                 save.allies[selectedIndex],
                 allies,
-                1,
-                0,
-                0);
+                SaveState.EnemySnapshots,
+                SaveState.AsteroidCount);
         }
     }
 }

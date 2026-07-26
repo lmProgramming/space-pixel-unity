@@ -6,6 +6,8 @@ namespace Core.Services
     {
         ShipSnapshot GetRandomEnemySnapshot();
         ShipSnapshot GetRandomFriendlySnapshot();
+        ShipSnapshot[] GetRandomEnemySnapshots(int count);
+        ShipSnapshot[] GetRandomFriendlySnapshots(int count);
         bool HasEnemySnapshots();
         bool HasFriendlySnapshots();
     }

@@ -1,4 +1,5 @@
 using Core.Gameplay;
+using Core.Ships;
 
 namespace Core.State
 {
@@ -10,7 +11,7 @@ namespace Core.State
         public static string PlayerShipName { get; set; }
         public static string PlayerShipSnapshotFilePath { get; set; }
         public static int AsteroidCount { get; set; }
-        public static int EnemyShipCount { get; set; }
-        public static int FriendlyShipCount { get; set; }
+        public static ShipSnapshot[] EnemySnapshots { get; set; }
+        public static ShipSnapshot[] AllySnapshots { get; set; }
     }
 }

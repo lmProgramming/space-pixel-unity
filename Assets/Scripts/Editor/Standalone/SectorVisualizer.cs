@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Core.Services;
+using Core.Services.Models;
 using Services;
 using UnityEngine;
 

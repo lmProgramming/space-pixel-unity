@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Core.Services;
+using Core.Services.Models;
 using Core.Ships;
 using Gameplay.Navigation;
 using NSubstitute;

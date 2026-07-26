@@ -3,12 +3,12 @@ using Core.UI;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-// Define the custom control type.
 namespace UI.Components.Notification
 {
     [UxmlElement]
     public partial class NotificationPopup : VisualElement
     {
+        private const string TemplateResourcePath = "UI/NotificationPopup";
         private const string ToastInfoClassName = "ds-toast--info";
         private const string ToastWarningClassName = "ds-toast--warning";
         private const string ToastDangerClassName = "ds-toast--danger";
@@ -16,22 +16,27 @@ namespace UI.Components.Notification
         private const int CharacterTimeMs = 1;
         private const int DefaultTimeMs = 3000;
 
-        // Custom controls need a default constructor. This default constructor 
-        // calls the other constructor in this class.
-        // ReSharper disable once MemberCanBePrivate.Global
-        public NotificationPopup()
+        private VisualElement PopupIcon => this.Q("action-popup-icon");
+        private Label ActionPopupLabel => this.Q<Label>("action-popup-label");
+        private VisualElement ActionPopup => this.Q<VisualElement>("action-popup");
+
+        public static NotificationPopup Create(string message, PopupLevel level = PopupLevel.Info)
         {
+            var asset = Resources.Load<VisualTreeAsset>(TemplateResourcePath);
+            if (!asset)
+                throw new InvalidOperationException(
+                    $"[NotificationPopup] VisualTreeAsset '{TemplateResourcePath}' was not found in Resources.");
+
+            var popup = asset.Instantiate().Q<NotificationPopup>()
+                        ?? throw new InvalidOperationException(
+                            "[NotificationPopup] NotificationPopup root is missing in NotificationPopup.uxml.");
+
+            popup.Configure(message, level);
+            return popup;
         }
 
-        // Define a constructor that loads the UXML document that defines 
-        // the hierarchy of CardElement and assigns an image and badge values.
-        public NotificationPopup(string message, PopupLevel level = PopupLevel.Info)
+        private void Configure(string message, PopupLevel level = PopupLevel.Info)
         {
-            // It assumes the UXML file is called "CardElement.uxml" and 
-            // is placed at the "Resources" folder.
-            var asset = Resources.Load<VisualTreeAsset>("UI/NotificationPopup");
-            asset.CloneTree(this);
-
             switch (level)
             {
                 case PopupLevel.Warning:
@@ -55,9 +60,5 @@ namespace UI.Components.Notification
             ActionPopup.schedule.Execute(() => { ActionPopup.RemoveFromHierarchy(); })
                 .StartingIn(DefaultTimeMs + CharacterTimeMs * message.Length);
         }
-
-        private VisualElement PopupIcon => this.Q("action-popup-icon");
-        private Label ActionPopupLabel => this.Q<Label>("action-popup-label");
-        private VisualElement ActionPopup => this.Q<VisualElement>("action-popup");
     }
 }
