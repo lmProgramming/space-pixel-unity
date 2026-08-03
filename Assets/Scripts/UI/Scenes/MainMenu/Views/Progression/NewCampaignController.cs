@@ -26,6 +26,8 @@ namespace UI.Scenes.MainMenu.Views.Progression
         [Inject(Id = UIPanelPrefabConstants.NewCampaignPreviewShip)]
         private DesignShip _previewShip;
 
+        [Inject] private ProgressionConstants _progressionConstants;
+
         [Inject] private IProgressionRepository _progressionRepository;
         private int? _selectedShipIndex;
 
@@ -110,7 +112,7 @@ namespace UI.Scenes.MainMenu.Views.Progression
             {
                 campaignName = _campaignName.Trim(),
                 allies = new[] { snapshot },
-                credits = "0",
+                credits = _progressionConstants.initialCredits,
                 enemiesKilled = 0
             };
 

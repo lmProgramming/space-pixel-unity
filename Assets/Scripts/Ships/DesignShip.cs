@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Core.Gameplay.EasyTeam;
 using Core.Services;
 using Core.Ships;
+using Core.Ships.Blueprints;
 using Core.Ships.Module;
 using LMPro.DataStructures;
 using LMPro.DataStructures.Graph;
@@ -68,6 +69,7 @@ namespace Ships
         public IReadOnlyList<IModule> AllModules => _allModulesCache;
         public bool IsSASOn => false;
         public bool IsDesignMode => true;
+        public ShipBlueprint Blueprint { get; private set; } = new();
 
         public Graph<IModule> ModuleGraph => _biCohesionGraph;
         public Vector2 AttackTargetPosition => throw new NotSupportedException();
@@ -160,6 +162,16 @@ namespace Ships
             }
         }
 
+        public void SetBlueprint(ShipBlueprint blueprint)
+        {
+            Blueprint = blueprint ?? throw new ArgumentNullException(nameof(blueprint));
+        }
+
+        public void SyncBlueprintFromLiveModules()
+        {
+            Blueprint = MergeBlueprintFromLiveModules();
+        }
+
         public ShipSnapshot CaptureSnapshot(IGameContentCatalog contentCatalog)
         {
             if (!this.IsAlive())
@@ -186,6 +198,8 @@ namespace Ships
                 snapshot.commandModuleInstanceId = moduleSnapshot.instanceId;
             }
 
+            snapshot.blueprint = MergeBlueprintFromLiveModules();
+
             Debug.Log($"[Ship] Captured snapshot of '{Name}' with {snapshot.modules.Count} modules");
             return snapshot;
         }
@@ -194,6 +208,8 @@ namespace Ships
         {
             if (snapshot == null) throw new ArgumentNullException(nameof(snapshot));
             if (contentCatalog == null) throw new ArgumentNullException(nameof(contentCatalog));
+
+            SetBlueprint(ResolveBlueprintFromSnapshot(snapshot));
 
             DestroyAllModulesSilently();
 
@@ -207,31 +223,80 @@ namespace Ships
                 $"[Ship] Applied snapshot '{snapshot.shipName}' to '{Name}' ({snapshot.modules.Count} modules)");
         }
 
+        private ShipBlueprint MergeBlueprintFromLiveModules()
+        {
+            var result = Blueprint ?? new ShipBlueprint();
+            if (result.modules == null)
+                result.modules = new List<ModuleBlueprint>();
+
+            foreach (var entry in result.modules)
+            {
+                if (entry != null && string.IsNullOrWhiteSpace(entry.blueprintId))
+                    entry.blueprintId = Guid.NewGuid().ToString("N");
+            }
+
+            if (result.modules.Count == 0)
+            {
+                foreach (var module in AllModules)
+                {
+                    if (module.Blueprint == null)
+                        throw new UnityException(
+                            $"[Ship] Module '{module.Transform?.name}' has no blueprint during capture.");
+                    result.modules.Add(module.Blueprint);
+                }
+
+                return result;
+            }
+
+            var byId = result.modules.AsValueEnumerable()
+                .Where(entry => entry != null && !string.IsNullOrWhiteSpace(entry.blueprintId))
+                .ToDictionary(entry => entry.blueprintId);
+
+            foreach (var module in AllModules)
+            {
+                if (module.Blueprint == null)
+                    throw new UnityException(
+                        $"[Ship] Module '{module.Transform?.name}' has no blueprint during capture.");
+
+                if (string.IsNullOrWhiteSpace(module.Blueprint.blueprintId))
+                    throw new UnityException(
+                        $"[Ship] Module '{module.Transform?.name}' has empty blueprint id during capture.");
+
+                byId[module.Blueprint.blueprintId] = module.Blueprint;
+            }
+
+            result.modules = byId.Values.AsValueEnumerable().ToList();
+            return result;
+        }
+
+        private static ShipBlueprint ResolveBlueprintFromSnapshot(ShipSnapshot snapshot)
+        {
+            if (snapshot.blueprint?.modules != null && snapshot.blueprint.modules.Count > 0)
+                return snapshot.blueprint;
+
+            var synthesized = new ShipBlueprint();
+            foreach (var moduleSnapshot in snapshot.modules)
+            {
+                if (moduleSnapshot.blueprint != null)
+                {
+                    synthesized.modules.Add(moduleSnapshot.blueprint);
+                    continue;
+                }
+
+                synthesized.modules.Add(new ModuleBlueprint(
+                    moduleSnapshot.instanceId,
+                    moduleSnapshot.archetypeId ?? string.Empty,
+                    moduleSnapshot.localPosition,
+                    moduleSnapshot.localRotation));
+            }
+
+            return synthesized;
+        }
+
         private void CreateModulesFromSnapshot(ShipSnapshot snapshot, IGameContentCatalog contentCatalog)
         {
-            foreach (var ms in snapshot.modules)
-            {
-                var moduleGo = _moduleRestoreFactory.CreateModuleShell(ms, transform);
-                moduleGo.SetActive(false);
-                moduleGo.transform.localPosition = ms.localPosition;
-                moduleGo.transform.localRotation = ms.localRotation;
-
-                var identity = moduleGo.GetComponent<GameObjectInstanceIdentity>();
-                if (!identity)
-                    identity = moduleGo.AddComponent<GameObjectInstanceIdentity>();
-                identity.RestoreFromSnapshot(ms.instanceId, ms.origin, ms.archetypeId);
-
-                var module = moduleGo.GetComponent<IModule>();
-                if (module == null)
-                    throw new UnityException(
-                        $"[Ship] Failed to add a Module component for '{ms.moduleName}' (moduleType: {ms.concreteModuleType}).");
-
-                module.SetShip(this);
-                module.RestoreFromSnapshot(ms, contentCatalog);
-
-                moduleGo.SetActive(true);
-                moduleGo.gameObject.layer = gameObject.layer;
-            }
+            ShipSnapshotModulePlacer.CreateModulesFromSnapshot(this, transform, snapshot, contentCatalog,
+                _moduleRestoreFactory);
         }
 
         private void HandleModuleChange()

@@ -174,5 +174,42 @@ namespace Grid
             ApplyPixels();
             PixelCount -= pointsList.Count;
         }
+
+        public void AddPixelAt(Vector2Int point, Color32 color)
+        {
+            if (!InBounds(point))
+                throw new ArgumentOutOfRangeException(nameof(point),
+                    $"[TexturePixelGrid] Point {point} is out of bounds ({Width}x{Height}).");
+            if (color.a == 0)
+                throw new ArgumentException("[TexturePixelGrid] Cannot add a transparent pixel.", nameof(color));
+            if (IsPixelAssumeInBounds(point))
+                throw new InvalidOperationException(
+                    $"[TexturePixelGrid] Cannot add pixel at {point}: cell is already filled.");
+
+            SetPixel(point, color);
+            PixelCount++;
+        }
+
+        public void AddPixels(IEnumerable<(Vector2Int point, Color32 color)> pixels)
+        {
+            var list = pixels.AsValueEnumerable().ToList();
+            foreach (var (point, color) in list)
+            {
+                if (!InBounds(point))
+                    throw new ArgumentOutOfRangeException(nameof(pixels),
+                        $"[TexturePixelGrid] Point {point} is out of bounds ({Width}x{Height}).");
+                if (color.a == 0)
+                    throw new ArgumentException("[TexturePixelGrid] Cannot add a transparent pixel.", nameof(pixels));
+                if (IsPixelAssumeInBounds(point))
+                    throw new InvalidOperationException(
+                        $"[TexturePixelGrid] Cannot add pixel at {point}: cell is already filled.");
+            }
+
+            foreach (var (point, color) in list)
+                SetPixelNoApply(point, color);
+
+            ApplyPixels();
+            PixelCount += list.Count;
+        }
     }
 }

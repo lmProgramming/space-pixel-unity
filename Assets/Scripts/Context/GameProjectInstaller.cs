@@ -32,6 +32,7 @@ namespace Context
         [SerializeField] private GameContentCatalog gameContentCatalog;
         [SerializeField] private SkirmishSnapshotCatalog skirmishSnapshotCatalog;
         [SerializeField] private GameplayConstants gameplayConstants;
+        [SerializeField] private ProgressionConstants progressionConstants;
 
         [SerializeField]
         private BattleOverEventChannel battleOverEventChannel;
@@ -88,6 +89,12 @@ namespace Context
             if (!cameraModeEventChannel)
                 throw new UnityException($"[GameProjectInstaller] Missing {nameof(cameraModeEventChannel)}");
 
+            if (!gameplayConstants)
+                throw new UnityException($"[GameProjectInstaller] Missing {nameof(gameplayConstants)}");
+
+            if (!progressionConstants)
+                throw new UnityException($"[GameProjectInstaller] Missing {nameof(progressionConstants)}");
+
             Container.Bind<IShipModuleCatalog>()
                 .FromInstance(typedShipModuleCatalog)
                 .AsSingle();
@@ -125,6 +132,10 @@ namespace Context
 
             Container.Bind<GameplayConstants>()
                 .FromInstance(gameplayConstants)
+                .AsSingle();
+
+            Container.Bind<ProgressionConstants>()
+                .FromInstance(progressionConstants)
                 .AsSingle();
 
             BindChannels();

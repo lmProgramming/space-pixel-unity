@@ -45,6 +45,8 @@ namespace Gameplay
             var save = _progressionRepository.Load(SaveState.ProgressionSlotIndex);
             save.allies = CaptureSurvivingAllySnapshots(_activePlayerShipProvider.ActiveShip.Team);
             save.enemiesKilled++;
+            save.credits += SaveState.PendingBattleCreditsReward;
+            SaveState.PendingBattleCreditsReward = 0;
             _progressionRepository.Save(SaveState.ProgressionSlotIndex, save);
 
             SceneManager.LoadScene(SceneNames.NextBattle);

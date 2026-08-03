@@ -85,6 +85,7 @@ MonoBehaviour:
   gameContentCatalog: {fileID: 11400000, guid: 219f1022e4678b052824091903047da7, type: 2}
   skirmishSnapshotCatalog: {fileID: 11400000, guid: 40f1c37d4651cf7898dcc2b40a007491, type: 2}
   gameplayConstants: {fileID: 11400000, guid: 37f0afba1a50bc7e894e6ab17aa4512b, type: 2}
+  progressionConstants: {fileID: 11400000, guid: a7480d81e7286c947bbd41c4b8bfd703, type: 2}
   battleOverEventChannel: {fileID: 11400000, guid: e33af3711594ca794bf281365938411d, type: 2}
   settingsPanelPrefab: {fileID: 7250222067925199393, guid: 911fc516ba15f6b26a44f930f7b7c6e2, type: 3}
   pausePanelPrefab: {fileID: 47914524217903831, guid: b5452539250c145a285e976e93dc5938, type: 3}

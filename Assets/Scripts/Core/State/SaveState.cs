@@ -11,6 +11,7 @@ namespace Core.State
         public static string PlayerShipName { get; set; }
         public static string PlayerShipSnapshotFilePath { get; set; }
         public static int AsteroidCount { get; set; }
+        public static int PendingBattleCreditsReward { get; set; }
         public static ShipSnapshot[] EnemySnapshots { get; set; }
         public static ShipSnapshot[] AllySnapshots { get; set; }
     }

@@ -14,9 +14,11 @@ namespace ShipFactory.UI.Runtime
     public class OverlayManager : IDisposable
     {
         private const int OverlaySortingOrder = 100;
+        private const int GhostSortingOrder = OverlaySortingOrder - 1;
         private const int DraggedOverlaySortingOrder = OverlaySortingOrder + 1;
         private readonly Dictionary<ShipModuleSOInstanceBundle, ModuleOverlay> _bundleToOverlay = new();
         private readonly IShipModuleCatalog _catalog;
+        private readonly List<ModuleGhost> _ghosts = new();
         private readonly Transform _overlayRoot = new GameObject("ModuleOverlays").transform;
 
         public OverlayManager(IShipModuleCatalog moduleCatalog)
@@ -25,9 +27,11 @@ namespace ShipFactory.UI.Runtime
         }
 
         public IEnumerable<ShipModuleSOInstanceBundle> AllBundles => _bundleToOverlay.Keys;
+        public IReadOnlyList<ModuleGhost> Ghosts => _ghosts;
 
         public void Dispose()
         {
+            DestroyAllGhosts();
             if (_overlayRoot)
                 Object.Destroy(_overlayRoot.gameObject);
         }
@@ -57,6 +61,7 @@ namespace ShipFactory.UI.Runtime
         public void RebuildFromShip(DesignShip ship)
         {
             DestroyAllOverlays();
+            DestroyAllGhosts();
 
             if (!ship) return;
 
@@ -68,6 +73,38 @@ namespace ShipFactory.UI.Runtime
                 var moduleSO = ModuleCatalogResolver.ResolveModuleSO(child.gameObject, _catalog);
                 CreateOverlay(new ShipModuleSOInstanceBundle(child.gameObject, moduleSO, module));
             }
+
+            RebuildGhosts(ship);
+        }
+
+        public void RebuildGhosts(DesignShip ship)
+        {
+            DestroyAllGhosts();
+            if (!ship || ship.Blueprint?.modules == null) return;
+
+            var liveIds = ship.AllModules.AsValueEnumerable()
+                .Where(m => m.Blueprint != null)
+                .Select(m => m.Blueprint.blueprintId)
+                .ToHashSet();
+
+            var layoutParent = ship.CommandModule?.Transform ?? ship.transform;
+
+            foreach (var blueprint in ship.Blueprint.modules.AsValueEnumerable()
+                         .Where(b => b != null && !b.removedByPlayer && !liveIds.Contains(b.blueprintId)))
+            {
+                if (!_catalog.TryGetModuleSO(blueprint.archetypeId, out var moduleSO) || !moduleSO)
+                    throw new InvalidOperationException(
+                        $"[OverlayManager] Ghost archetype '{blueprint.archetypeId}' was not found in catalog.");
+
+                _ghosts.Add(ModuleGhost.Create(blueprint, moduleSO, layoutParent, GhostSortingOrder));
+            }
+        }
+
+        public void RemoveGhost(ModuleGhost ghost)
+        {
+            if (ghost == null) return;
+            _ghosts.Remove(ghost);
+            if (ghost) Object.Destroy(ghost.gameObject);
         }
 
         public void SetPosition(ShipModuleSOInstanceBundle bundle, Vector2 worldPos)
@@ -114,6 +151,27 @@ namespace ShipFactory.UI.Runtime
                     return bundle;
 
             return null;
+        }
+
+        public ModuleGhost FindGhostAtWorldPosition(Vector2 worldPos)
+        {
+            foreach (var ghost in _ghosts.AsValueEnumerable().Where(g => g))
+                if (ghost.ContainsWorldPoint(worldPos))
+                    return ghost;
+
+            return null;
+        }
+
+        public IEnumerable<(Vector2 min, Vector2 max)> GetGhostBounds()
+        {
+            return _ghosts.AsValueEnumerable().Where(g => g).Select(g => g.GetAxisAlignedBounds()).ToList();
+        }
+
+        private void DestroyAllGhosts()
+        {
+            foreach (var ghost in _ghosts.AsValueEnumerable().Where(g => g != null))
+                Object.Destroy(ghost.gameObject);
+            _ghosts.Clear();
         }
     }
 }

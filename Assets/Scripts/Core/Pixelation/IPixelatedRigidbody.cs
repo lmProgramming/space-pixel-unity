@@ -30,5 +30,8 @@ namespace Core.Pixelation
         void NoPixelsLeft();
         event Action<IPixelatedRigidbody> Destroyed;
         event Action<List<Vector2Int>, PixelLoseReason> OnPixelsLost;
+        event Action<List<Vector2Int>> OnPixelsRestored;
+        Color32[,] BuildPristineColors();
+        float[,] BuildPristineHealth(Color32[,] pristineColors);
     }
 }

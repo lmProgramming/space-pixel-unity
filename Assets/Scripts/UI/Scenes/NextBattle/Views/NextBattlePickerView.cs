@@ -12,21 +12,25 @@ namespace UI.Scenes.NextBattle.Views
         private readonly List<ShipPickerRow> _entryElements = new();
 
         private Button _confirmButton;
+        private Button _hangarButton;
         private VisualElement _list;
         private Guid? _selectedBattleId;
         private NextBattlePickerViewModel _viewModel;
 
         public event Action<Guid> ConfirmClicked;
+        public event Action HangarClicked;
 
         protected override void BindUiCore(VisualElement root)
         {
             _list = root.Q<VisualElement>("next-battle-picker-list");
             _confirmButton = root.Q<Button>("next-battle-picker-confirm-button");
+            _hangarButton = root.Q<Button>("next-battle-picker-hangar-button");
 
-            if (_list == null || _confirmButton == null)
+            if (_list == null || _confirmButton == null || _hangarButton == null)
                 throw new InvalidOperationException("[NextBattlePickerView] Required controls are missing in UXML.");
 
             _confirmButton.clicked += OnConfirmClicked;
+            _hangarButton.clicked += OnHangarClicked;
             Render();
         }
 
@@ -35,9 +39,13 @@ namespace UI.Scenes.NextBattle.Views
             if (_confirmButton != null)
                 _confirmButton.clicked -= OnConfirmClicked;
 
+            if (_hangarButton != null)
+                _hangarButton.clicked -= OnHangarClicked;
+
             ClearEntries();
             _list = null;
             _confirmButton = null;
+            _hangarButton = null;
         }
 
         public override void SetData(NextBattlePickerViewModel viewModel)
@@ -63,7 +71,8 @@ namespace UI.Scenes.NextBattle.Views
         private void AddEntry(NextBattlePickerEntry entry)
         {
             var row = ShipPickerRow.Create();
-            row.Bind(entry.PreviewSprite, entry.DisplayName, () => SelectEntry(entry.Id));
+            row.Bind(entry.PreviewSprite, $"{entry.DisplayName}  (+{entry.CreditsReward} cr)",
+                () => SelectEntry(entry.Id));
             _list.Add(row);
             _entryElements.Add(row);
         }
@@ -100,6 +109,11 @@ namespace UI.Scenes.NextBattle.Views
                 return;
 
             ConfirmClicked?.Invoke(_selectedBattleId.Value);
+        }
+
+        private void OnHangarClicked()
+        {
+            HangarClicked?.Invoke();
         }
     }
 }

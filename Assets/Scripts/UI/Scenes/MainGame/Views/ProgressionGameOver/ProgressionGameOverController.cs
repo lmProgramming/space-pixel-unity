@@ -13,11 +13,11 @@ namespace UI.Scenes.MainGame.Views.ProgressionGameOver
         private Label _enemiesKilledLabel;
         private Button _mainMenuButton;
         private string _pendingCampaignName;
-        private string _pendingCredits;
+        private int _pendingCredits;
         private int _pendingEnemiesKilled;
         private Label _titleLabel;
 
-        public void Render(string campaignName, string credits, int enemiesKilled)
+        public void Render(string campaignName, int credits, int enemiesKilled)
         {
             _pendingCampaignName = campaignName;
             _pendingCredits = credits;
@@ -52,7 +52,7 @@ namespace UI.Scenes.MainGame.Views.ProgressionGameOver
             _titleLabel.text = string.IsNullOrWhiteSpace(_pendingCampaignName)
                 ? "Game Over"
                 : $"Game Over — {_pendingCampaignName}";
-            _creditsLabel.text = $"Credits: {_pendingCredits ?? "0"}";
+            _creditsLabel.text = $"Credits: {_pendingCredits}";
             _enemiesKilledLabel.text = $"Enemies killed: {_pendingEnemiesKilled}";
         }
 

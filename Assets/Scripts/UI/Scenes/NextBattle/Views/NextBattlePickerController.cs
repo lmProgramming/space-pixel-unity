@@ -27,11 +27,13 @@ namespace UI.Scenes.NextBattle.Views
         {
             base.OnEnable();
             View.ConfirmClicked += OnConfirmClicked;
+            View.HangarClicked += OnHangarClicked;
         }
 
         protected override void OnDisable()
         {
             View.ConfirmClicked -= OnConfirmClicked;
+            View.HangarClicked -= OnHangarClicked;
             base.OnDisable();
         }
 
@@ -55,12 +57,18 @@ namespace UI.Scenes.NextBattle.Views
 
                 SaveState.EnemySnapshots = _entries[index].EnemySnapshots;
                 SaveState.AsteroidCount = _entries[index].AsteroidsCount;
+                SaveState.PendingBattleCreditsReward = _entries[index].CreditsReward;
                 SceneManager.LoadScene(SceneNames.BattleShipPicker);
                 return;
             }
 
             throw new InvalidOperationException(
                 $"[NextBattlePickerController] No battle entry found for id '{battleId}'.");
+        }
+
+        private void OnHangarClicked()
+        {
+            SceneManager.LoadScene(SceneNames.ShipFactory);
         }
     }
 }

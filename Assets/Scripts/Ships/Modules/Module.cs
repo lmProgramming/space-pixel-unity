@@ -5,6 +5,7 @@ using Core.Constants;
 using Core.Pixelation;
 using Core.Services;
 using Core.Ships;
+using Core.Ships.Blueprints;
 using Core.Ships.Module;
 using Core.Ships.Snapshots.Module;
 using Core.Ships.Snapshots.Module.StandaloneModuleSystemData;
@@ -40,14 +41,14 @@ namespace Ships.Modules
 
         private readonly List<IStandaloneModuleSystem> _standaloneSystems = new();
 
+        [Inject] protected GameplayConstants GameplayConstants;
+
         private float _crewAppropriateSkillSum;
 
         [Inject]
         private IEffectsSpawner _effectsSpawner;
 
         private bool _hasTornDownConnectionsAndCrew;
-
-        [Inject] protected GameplayConstants GameplayConstants;
 
         protected List<CrewMember> AliveCrew { get; private set; }
 
@@ -151,6 +152,8 @@ namespace Ships.Modules
 
         public virtual ModuleType Type { get; protected set; } = ModuleType.Resources;
 
+        public ModuleBlueprint Blueprint { get; private set; }
+
         public virtual int CrewNeededCount => Mathf.CeilToInt(ShipResources.crewNeeded);
 
         public void FillCrewBySkill(List<CrewMember> crew, out List<CrewMember> remainingCrew)
@@ -232,12 +235,50 @@ namespace Ships.Modules
 
         public void SetLocalPosition(Vector2 localPosition)
         {
-            transform.localPosition = localPosition;
+            ApplyLayoutTransform(new Vector3(localPosition.x, localPosition.y, transform.localPosition.z),
+                Ship != null
+                    ? ShipLayoutSpace.WorldToLocalRotation(Ship, transform.rotation)
+                    : transform.localRotation);
+        }
+
+        public void SyncBlueprintLayoutFromTransform()
+        {
+            if (Blueprint == null || Ship == null) return;
+
+            Blueprint.localPosition = ShipLayoutSpace.WorldToLocal(Ship, transform.position);
+            Blueprint.localRotation = ShipLayoutSpace.WorldToLocalRotation(Ship, transform.rotation);
         }
 
         public void SetShip(IShip ship)
         {
             Ship = ship;
+        }
+
+        public void SetBlueprint(ModuleBlueprint blueprint)
+        {
+            Blueprint = blueprint ?? throw new ArgumentNullException(nameof(blueprint));
+        }
+
+        public void EnsureBlueprintIdentity()
+        {
+            if (!Transform) throw new NullReferenceException("[Module] Transform was null!");
+
+            var identity = Transform.GetComponent<GameObjectInstanceIdentity>();
+            if (!identity)
+            {
+                identity = Transform.gameObject.AddComponent<GameObjectInstanceIdentity>();
+                identity.EnsureAssigned(InstanceOrigin.Custom);
+            }
+            else if (string.IsNullOrWhiteSpace(identity.InstanceId))
+            {
+                identity.EnsureAssigned(identity.Origin, identity.ArchetypeId);
+            }
+
+            var archetypeId = !string.IsNullOrWhiteSpace(identity.ArchetypeId)
+                ? identity.ArchetypeId
+                : ResolveArchetypeIdForSnapshot(identity);
+
+            EnsureBlueprintForCapture(identity.InstanceId, archetypeId);
         }
 
         public ModuleSnapshot CaptureSnapshot(IGameContentCatalog contentCatalog)
@@ -262,6 +303,15 @@ namespace Ships.Modules
             if (!string.IsNullOrWhiteSpace(archetypeId) && string.IsNullOrWhiteSpace(identity.ArchetypeId))
                 identity.EnsureAssigned(InstanceOrigin.CatalogPrefab, archetypeId);
 
+            EnsureBlueprintForCapture(identity.InstanceId, archetypeId);
+
+            var layoutPosition = Ship != null
+                ? ShipLayoutSpace.WorldToLocal(Ship, Transform.position)
+                : Transform.localPosition;
+            var layoutRotation = Ship != null
+                ? ShipLayoutSpace.WorldToLocalRotation(Ship, Transform.rotation)
+                : Transform.localRotation;
+
             var moduleSnapshot = new ModuleSnapshot
             {
                 instanceId = identity.InstanceId,
@@ -269,12 +319,13 @@ namespace Ships.Modules
                 concreteModuleType = ConcreteType,
                 origin = identity.Origin,
                 archetypeId = archetypeId,
-                localPosition = Transform.localPosition,
-                localRotation = Transform.localRotation,
+                localPosition = layoutPosition,
+                localRotation = layoutRotation,
                 shipResources = ShipResources,
                 pixelatedRigidbody = PixelatedRigidbody.CaptureSnapshot(contentCatalog),
                 typePayloadJson = CaptureTypePayloadJson(contentCatalog),
-                systems = CaptureSystemSnapshots(contentCatalog)
+                systems = CaptureSystemSnapshots(contentCatalog),
+                blueprint = Blueprint
             };
 
             return moduleSnapshot;
@@ -291,11 +342,81 @@ namespace Ships.Modules
             RestoreSystems(snapshot.systems, contentCatalog);
 
             PixelatedRigidbody.RestoreFromSnapshot(snapshot.pixelatedRigidbody, contentCatalog);
+
+            if (snapshot.blueprint != null)
+                SetBlueprint(snapshot.blueprint);
+
+            EnsureBlueprintIdentity();
         }
 
         public void SetResources(ShipResources newShipResources)
         {
             ShipResources = newShipResources;
+        }
+
+        private void EnsureBlueprintForCapture(string instanceId, string archetypeId)
+        {
+            if (!Transform) throw new NullReferenceException("[Module] Transform was null!");
+
+            instanceId = ResolveBlueprintInstanceId(instanceId);
+
+            var layoutPosition = Ship != null
+                ? ShipLayoutSpace.WorldToLocal(Ship, Transform.position)
+                : Transform.localPosition;
+            var layoutRotation = Ship != null
+                ? ShipLayoutSpace.WorldToLocalRotation(Ship, Transform.rotation)
+                : Transform.localRotation;
+
+            if (Blueprint != null)
+            {
+                Blueprint.blueprintId = instanceId;
+                if (!string.IsNullOrWhiteSpace(archetypeId))
+                    Blueprint.archetypeId = archetypeId;
+
+                Blueprint.localPosition = layoutPosition;
+                Blueprint.localRotation = layoutRotation;
+                return;
+            }
+
+            SetBlueprint(new ModuleBlueprint(
+                instanceId,
+                archetypeId ?? string.Empty,
+                layoutPosition,
+                layoutRotation));
+        }
+
+        private string ResolveBlueprintInstanceId(string instanceId)
+        {
+            if (!string.IsNullOrWhiteSpace(instanceId))
+                return instanceId;
+
+            if (!Transform)
+                throw new InvalidOperationException("[Module] Transform was null!");
+
+            var identity = Transform.GetComponent<GameObjectInstanceIdentity>();
+            if (!identity)
+            {
+                identity = Transform.gameObject.AddComponent<GameObjectInstanceIdentity>();
+                identity.EnsureAssigned(InstanceOrigin.Custom);
+            }
+            else if (string.IsNullOrWhiteSpace(identity.InstanceId))
+            {
+                identity.EnsureAssigned(identity.Origin, identity.ArchetypeId);
+            }
+
+            return identity.InstanceId;
+        }
+
+        private void ApplyLayoutTransform(Vector3 layoutPosition, Quaternion layoutRotation)
+        {
+            if (Ship == null)
+            {
+                transform.localPosition = layoutPosition;
+                transform.localRotation = layoutRotation;
+                return;
+            }
+
+            ShipLayoutSpace.ApplyLayoutTransform(Ship, transform, layoutPosition, layoutRotation);
         }
 
         /// <summary>

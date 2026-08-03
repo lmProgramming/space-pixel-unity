@@ -9,6 +9,6 @@ namespace Core.Gameplay.Progression
         public string campaignName;
         public ShipSnapshot[] allies;
         public int enemiesKilled;
-        public string credits;
+        public int credits;
     }
 }

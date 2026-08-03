@@ -17,3 +17,4 @@ MonoBehaviour:
   dimensions: {x: 24, y: 16}
   partName: Command Module mk2
   description: Sturdy stud
+  cost: 9000

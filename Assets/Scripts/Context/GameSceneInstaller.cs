@@ -7,11 +7,7 @@ using Pixelation;
 using Pixelation.CollisionResolver;
 using Services;
 using Services.Sound;
-using ShipFactory.UI;
-using ShipFactory.UI.Runtime;
-using ShipFactory.UI.ToolkitComponents;
 using UnityEngine;
-using UnityEngine.UIElements;
 using Zenject;
 
 namespace Context
@@ -124,13 +120,6 @@ namespace Context
 
             Container.BindFactory<PixelCollisionHandler, IPixelatedRigidbody, DestroyCollidingPixel,
                 DestroyCollidingPixel.Factory>();
-
-            Container.BindFactory<VisualElement, ModulePaletteController, ModulePaletteController.Factory>();
-
-            Container.BindFactory<VisualElement, CameraInfoPanel, CameraInfoPanel.Factory>();
-
-            Container.BindFactory<VisualElement, ShipFactoryFeedback, ShipFactoryCanvasController,
-                ShipFactoryCanvasController.Factory>();
         }
     }
 }

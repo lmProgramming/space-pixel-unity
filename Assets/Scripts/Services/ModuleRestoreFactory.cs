@@ -1,6 +1,7 @@
 using System;
 using Core.Services;
 using Core.Ships;
+using Core.Ships.Blueprints;
 using Core.Ships.Snapshots.Module;
 using Pixelation;
 using UnityEngine;
@@ -19,12 +20,23 @@ namespace Services
         {
             var moduleGo = snapshot.origin switch
             {
-                InstanceOrigin.CatalogPrefab => CreateFromCatalog(snapshot, parent),
+                InstanceOrigin.CatalogPrefab => CreateFromCatalog(snapshot.archetypeId, snapshot.moduleName, parent),
                 InstanceOrigin.Custom => CreateCustom(snapshot, parent),
                 _ => throw new ArgumentOutOfRangeException(nameof(snapshot.origin), snapshot.origin,
                     "Unknown module origin.")
             };
 
+            _container.InjectGameObject(moduleGo);
+            return moduleGo;
+        }
+
+        public GameObject CreateModuleShellFromBlueprint(ModuleBlueprint blueprint, Transform parent)
+        {
+            if (blueprint == null) throw new ArgumentNullException(nameof(blueprint));
+            if (string.IsNullOrWhiteSpace(blueprint.archetypeId))
+                throw new UnityException("[ModuleRestoreFactory] Blueprint archetypeId is required.");
+
+            var moduleGo = CreateFromCatalog(blueprint.archetypeId, blueprint.archetypeId, parent);
             _container.InjectGameObject(moduleGo);
             return moduleGo;
         }
@@ -42,14 +54,14 @@ namespace Services
             _pixelatedRigidbodyFactory = pixelatedRigidbodyFactory;
         }
 
-        private GameObject CreateFromCatalog(ModuleSnapshot snapshot, Transform parent)
+        private GameObject CreateFromCatalog(string archetypeId, string moduleName, Transform parent)
         {
-            if (!_shipModuleCatalog.TryGetModulePrefab(snapshot.archetypeId, out var prefab) || !prefab)
+            if (!_shipModuleCatalog.TryGetModulePrefab(archetypeId, out var prefab) || !prefab)
                 throw new UnityException(
-                    $"[ModuleRestoreFactory] Missing module prefab for archetype '{snapshot.archetypeId}'.");
+                    $"[ModuleRestoreFactory] Missing module prefab for archetype '{archetypeId}'.");
 
             var instance = _instantiator.InstantiatePrefab(prefab, parent);
-            instance.name = snapshot.moduleName;
+            instance.name = moduleName;
             return instance;
         }
 

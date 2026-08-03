@@ -33,7 +33,6 @@ namespace ShipFactory.UI
         private readonly VisualElement _inputBlocker;
         private readonly IInstantiator _instantiator;
 
-        private readonly OverlayManager _overlayManager;
         private readonly ResourcesPanel _resourcesPanel;
         private Quaternion _dragStartLocalRotation;
         private float _dragStartLocalZ;
@@ -42,13 +41,12 @@ namespace ShipFactory.UI
 
         private ShipModuleSOInstanceBundle _draggedModuleBundle;
         private bool _draggedModuleWasNew;
+        private bool _ghostSelectionEnabled;
 
         private ShipModuleSO _hoveredPaletteModule;
         private ShipModuleSOInstanceBundle _hoveredPlacedBundle;
 
         private bool _isPointerOverCanvas;
-        private ShipModuleSOInstanceBundle _selectedModuleBundle;
-        private DesignShip _ship;
 
         public ShipFactoryCanvasController(
             VisualElement root,
@@ -90,34 +88,55 @@ namespace ShipFactory.UI
             _infoPanel.OnRotateCounterClockwiseClicked += () => RotateActiveModule(-90);
 
             // 2. Initialize Managers
-            _overlayManager = new OverlayManager(moduleCatalog);
-            _animator = new DragAnimator(_overlayManager);
+            OverlayManager = new OverlayManager(moduleCatalog);
+            _animator = new DragAnimator(OverlayManager);
 
             // 3. Register Inputs
             RegisterInputEvents(root, canvasContainer);
 
             SetInputLocked(false);
             RefreshInfoPanelFromCurrentContext();
-            _resourcesPanel.Refresh(_ship);
+            _resourcesPanel.Refresh(Ship);
         }
 
         public bool IsInputLocked { get; private set; }
         public bool IsDraggingModule => _draggedModuleBundle != null;
-        public bool ShipHasModules => _overlayManager.AllBundles.AsValueEnumerable().Any();
+        public bool ShipHasModules => OverlayManager.AllBundles.AsValueEnumerable().Any();
 
-        public bool ShipHasCommandModule => _overlayManager.AllBundles.AsValueEnumerable()
+        public bool ShipHasCommandModule => OverlayManager.AllBundles.AsValueEnumerable()
             .Any(bundle => bundle.PlacedModule.Type == ModuleType.Command);
+
+        public Func<ShipModuleSO, bool> CanAffordModulePlacement { get; set; }
+        public Action<ShipModuleSO> OnModulePurchased { get; set; }
+
+        public ShipModuleSOInstanceBundle SelectedModuleBundle { get; private set; }
+
+        public ModuleGhost SelectedGhost { get; private set; }
+
+        public DesignShip Ship { get; private set; }
+
+        public OverlayManager OverlayManager { get; }
 
         public void Dispose()
         {
             _animator.Dispose();
-            _overlayManager.Dispose();
+            OverlayManager.Dispose();
         }
 
         public event Action OnModuleDragFinished;
         public event Action OnShipCompositionChanged;
         public event Action OnClearShipRequested;
         public event Action<bool> OnInputLockChanged;
+        public event Action<ShipModuleSOInstanceBundle> ModuleSelected;
+        public event Action<ModuleGhost> GhostSelected;
+        public event Action SelectionCleared;
+
+        public void SetGhostSelectionEnabled(bool enabled)
+        {
+            _ghostSelectionEnabled = enabled;
+            if (!enabled)
+                ClearGhostSelection();
+        }
 
         public void SetExternalInputLock(bool isLocked)
         {
@@ -141,9 +160,9 @@ namespace ShipFactory.UI
 
         public void SetShip(DesignShip ship)
         {
-            _ship = ship;
+            Ship = ship;
             _draggedModuleBundle = null;
-            _selectedModuleBundle = null;
+            SelectedModuleBundle = null;
             _hoveredPlacedBundle = null;
 
             RebuildShipModules();
@@ -151,8 +170,8 @@ namespace ShipFactory.UI
 
         public void RebuildShipModules()
         {
-            _overlayManager.RebuildFromShip(_ship);
-            _resourcesPanel.Refresh(_ship);
+            OverlayManager.RebuildFromShip(Ship);
+            _resourcesPanel.Refresh(Ship);
             RefreshInfoPanelFromCurrentContext();
             OnShipCompositionChanged?.Invoke();
         }
@@ -177,25 +196,62 @@ namespace ShipFactory.UI
 
         private void SelectBundle(ShipModuleSOInstanceBundle bundle)
         {
-            var oldSelected = _selectedModuleBundle;
-            _selectedModuleBundle = bundle;
+            ClearGhostSelection();
+
+            var oldSelected = SelectedModuleBundle;
+            SelectedModuleBundle = bundle;
 
             if (oldSelected != null) RefreshOverlayColor(oldSelected);
-            if (_selectedModuleBundle != null) RefreshOverlayColor(_selectedModuleBundle);
+            if (SelectedModuleBundle != null) RefreshOverlayColor(SelectedModuleBundle);
 
             RefreshInfoPanelFromCurrentContext();
+            ModuleSelected?.Invoke(SelectedModuleBundle);
+        }
+
+        private void SelectGhost(ModuleGhost ghost)
+        {
+            if (SelectedModuleBundle != null)
+            {
+                var old = SelectedModuleBundle;
+                SelectedModuleBundle = null;
+                RefreshOverlayColor(old);
+            }
+
+            if (SelectedGhost != null && SelectedGhost != ghost)
+                SelectedGhost.SetSelected(false);
+
+            SelectedGhost = ghost;
+            SelectedGhost?.SetSelected(true);
+
+            if (ghost != null)
+            {
+                _infoPanel.ApplyPaletteInfo(ghost.ModuleSO, false, IsInputLocked, false);
+                GhostSelected?.Invoke(ghost);
+            }
+            else
+            {
+                RefreshInfoPanelFromCurrentContext();
+                SelectionCleared?.Invoke();
+            }
+        }
+
+        private void ClearGhostSelection()
+        {
+            if (SelectedGhost == null) return;
+            SelectedGhost.SetSelected(false);
+            SelectedGhost = null;
         }
 
         private void RefreshOverlayColor(ShipModuleSOInstanceBundle bundle)
         {
             if (bundle == null || bundle == _draggedModuleBundle) return;
 
-            if (bundle == _selectedModuleBundle)
-                _overlayManager.SetColor(bundle, ModuleOverlay.SelectedColor);
+            if (bundle == SelectedModuleBundle)
+                OverlayManager.SetColor(bundle, ModuleOverlay.SelectedColor);
             else if (bundle == _hoveredPlacedBundle)
-                _overlayManager.SetColor(bundle, ModuleOverlay.HoverColor);
+                OverlayManager.SetColor(bundle, ModuleOverlay.HoverColor);
             else
-                _overlayManager.SetColor(bundle, ModuleOverlay.NormalColor);
+                OverlayManager.SetColor(bundle, ModuleOverlay.NormalColor);
         }
 
         private void RefreshInfoPanelFromCurrentContext()
@@ -206,8 +262,8 @@ namespace ShipFactory.UI
                 _infoPanel.ApplyPaletteInfo(_hoveredPlacedBundle.ModuleSO, false, IsInputLocked, false);
             else if (_hoveredPaletteModule)
                 _infoPanel.ApplyPaletteInfo(_hoveredPaletteModule, true, IsInputLocked, false);
-            else if (_selectedModuleBundle != null)
-                _infoPanel.ApplyPaletteInfo(_selectedModuleBundle.ModuleSO, false, IsInputLocked, false);
+            else if (SelectedModuleBundle != null)
+                _infoPanel.ApplyPaletteInfo(SelectedModuleBundle.ModuleSO, false, IsInputLocked, false);
             else
                 _infoPanel.ApplyEmptyInfo();
         }
@@ -238,11 +294,36 @@ namespace ShipFactory.UI
         {
             if (evt.button != 0 || IsInputLocked || IsDraggingModule) return;
 
-            var bundle = _overlayManager.FindBundleAtWorldPosition(_gameInput.WorldPointerPosition);
-            if (bundle == null) return;
+            var worldPos = _gameInput.WorldPointerPosition;
+            var bundle = OverlayManager.FindBundleAtWorldPosition(worldPos);
+            if (bundle != null)
+            {
+                SelectBundle(bundle);
+                BeginModuleDrag(bundle, false);
+                evt.StopPropagation();
+                return;
+            }
 
-            BeginModuleDrag(bundle, false);
-            evt.StopPropagation();
+            if (_ghostSelectionEnabled)
+            {
+                var ghost = OverlayManager.FindGhostAtWorldPosition(worldPos);
+                if (ghost != null)
+                {
+                    SelectGhost(ghost);
+                    evt.StopPropagation();
+                    return;
+                }
+            }
+
+            SelectGhost(null);
+            if (SelectedModuleBundle != null)
+            {
+                var old = SelectedModuleBundle;
+                SelectedModuleBundle = null;
+                RefreshOverlayColor(old);
+                RefreshInfoPanelFromCurrentContext();
+                SelectionCleared?.Invoke();
+            }
         }
 
         private void OnPointerMove(PointerMoveEvent evt)
@@ -257,7 +338,7 @@ namespace ShipFactory.UI
 
             if (!_isPointerOverCanvas) return;
 
-            var bundle = _overlayManager.FindBundleAtWorldPosition(_gameInput.WorldPointerPosition);
+            var bundle = OverlayManager.FindBundleAtWorldPosition(_gameInput.WorldPointerPosition);
             if (bundle == _hoveredPlacedBundle) return;
 
             var oldHovered = _hoveredPlacedBundle;
@@ -280,9 +361,16 @@ namespace ShipFactory.UI
         {
             if (IsInputLocked) return;
 
-            if (_ship == null)
+            if (Ship == null)
             {
                 Debug.LogWarning("[ShipFactory] No ship assigned — cannot place module.");
+                return;
+            }
+
+            if (CanAffordModulePlacement != null && !CanAffordModulePlacement(shipModuleSO))
+            {
+                ShowWarningMessage("Not enough credits");
+                OnModuleDragFinished?.Invoke();
                 return;
             }
 
@@ -302,13 +390,13 @@ namespace ShipFactory.UI
             }
 
             var localSnapped = Snapper.SnapModuleLocalCenter(
-                _ship.transform.InverseTransformPoint(_gameInput.WorldPointerPosition),
+                WorldToLayoutLocal(_gameInput.WorldPointerPosition),
                 shipModuleSO.Dimensions);
-            var worldPos = (Vector2)_ship.transform.TransformPoint(localSnapped);
+            var worldPos = LayoutLocalToWorld(localSnapped);
             var bundle = InstantiateModule(shipModuleSO, worldPos);
             if (bundle == null) return;
 
-            _overlayManager.CreateOverlay(bundle);
+            OverlayManager.CreateOverlay(bundle);
             BeginModuleDrag(bundle, true);
         }
 
@@ -322,7 +410,7 @@ namespace ShipFactory.UI
             }
 
             var localSnapped = Snapper.SnapModuleLocalCenter(Vector2.zero, shipModuleSO.Dimensions);
-            var worldPos = (Vector2)_ship.transform.TransformPoint(localSnapped);
+            var worldPos = LayoutLocalToWorld(localSnapped);
             var bundle = InstantiateModule(shipModuleSO, worldPos);
             if (bundle == null)
             {
@@ -330,10 +418,11 @@ namespace ShipFactory.UI
                 return;
             }
 
-            _overlayManager.CreateOverlay(bundle);
+            OverlayManager.CreateOverlay(bundle);
             SelectBundle(bundle);
             RefreshInfoPanelFromCurrentContext();
-            _resourcesPanel.Refresh(_ship);
+            _resourcesPanel.Refresh(Ship);
+            OnModulePurchased?.Invoke(shipModuleSO);
             _feedback.PlayPlaced(worldPos);
             _cameraInfoPanel.RequestReset();
             OnModuleDragFinished?.Invoke();
@@ -367,8 +456,8 @@ namespace ShipFactory.UI
             localPosition.z = GetMaxModuleLocalZ(bundle) - 1f;
             bundle.Instance.transform.localPosition = localPosition;
 
-            _overlayManager.BringOverlayToFront(bundle);
-            _overlayManager.SyncTransformFromBundle(bundle);
+            OverlayManager.BringOverlayToFront(bundle);
+            OverlayManager.SyncTransformFromBundle(bundle);
 
             SelectBundle(bundle);
             RefreshInfoPanelFromCurrentContext();
@@ -379,24 +468,27 @@ namespace ShipFactory.UI
         {
             var draggedTransform = _draggedModuleBundle.Instance.transform;
             var localSnapped = Snapper.SnapModuleLocalCenter(
-                _ship.transform.InverseTransformPoint(_gameInput.WorldPointerPosition + _dragWorldOffset),
+                WorldToLayoutLocal(_gameInput.WorldPointerPosition + _dragWorldOffset),
                 _draggedModuleBundle.ModuleSO.Dimensions,
                 draggedTransform.localRotation);
-            var worldPos = (Vector2)_ship.transform.TransformPoint(localSnapped);
-            _overlayManager.SetPosition(_draggedModuleBundle, worldPos);
+            var worldPos = LayoutLocalToWorld(localSnapped);
+            OverlayManager.SetPosition(_draggedModuleBundle, worldPos);
             RefreshDraggedModuleLegalityOverlay();
         }
 
         private void HandleDragRelease()
         {
-            var legality = Calculator.CalculatePositionLegality(_draggedModuleBundle, _overlayManager.AllBundles);
+            var legality = Calculator.CalculatePositionLegality(_draggedModuleBundle, OverlayManager.AllBundles,
+                OverlayManager.GetGhostBounds());
             if (legality == PositionLegality.Correct)
             {
                 var wasNewModule = _draggedModuleWasNew;
+                var placedModuleSo = _draggedModuleBundle.ModuleSO;
                 var placedWorldPos = (Vector2)_draggedModuleBundle.Instance.transform.position;
                 FinishActiveDrag();
                 if (wasNewModule)
                 {
+                    OnModulePurchased?.Invoke(placedModuleSo);
                     _feedback.PlayPlaced(placedWorldPos);
                     OnShipCompositionChanged?.Invoke();
                 }
@@ -415,10 +507,10 @@ namespace ShipFactory.UI
 
                 _animator.AnimateBundleMovement(activeBundle, currentWorldPos, bottomWorldTarget, () =>
                 {
-                    if (_ship != null)
-                        _ship.ManualRemoveModule(activeBundle.PlacedModule);
+                    if (Ship != null)
+                        Ship.ManualRemoveModule(activeBundle.PlacedModule);
 
-                    _overlayManager.RemoveOverlay(activeBundle);
+                    OverlayManager.RemoveOverlay(activeBundle);
                     Object.Destroy(activeBundle.Instance);
 
                     SelectBundle(null);
@@ -449,53 +541,58 @@ namespace ShipFactory.UI
                 var localPosition = finishedBundle.Instance.transform.localPosition;
                 localPosition.z = _dragStartLocalZ;
                 finishedBundle.Instance.transform.localPosition = localPosition;
-                _overlayManager.ResetOverlaySortingOrder(finishedBundle);
-                _overlayManager.SyncTransformFromBundle(finishedBundle);
+                OverlayManager.ResetOverlaySortingOrder(finishedBundle);
+                OverlayManager.SyncTransformFromBundle(finishedBundle);
                 RefreshOverlayColor(finishedBundle);
+
+                if (finishedBundle.PlacedModule.Type == ModuleType.Command)
+                    ReapplyNonCommandModulesFromLayout();
+
+                finishedBundle.PlacedModule.SyncBlueprintLayoutFromTransform();
             }
 
             RefreshInfoPanelFromCurrentContext();
-            _resourcesPanel.Refresh(_ship);
+            _resourcesPanel.Refresh(Ship);
             OnModuleDragFinished?.Invoke();
         }
 
         private void RemoveSelectedModule()
         {
-            if (_selectedModuleBundle == null || _ship == null || IsDraggingModule || IsInputLocked) return;
+            if (SelectedModuleBundle == null || Ship == null || IsDraggingModule || IsInputLocked) return;
 
-            if (_selectedModuleBundle.PlacedModule.Type == ModuleType.Command)
+            if (SelectedModuleBundle.PlacedModule.Type == ModuleType.Command)
             {
                 OnClearShipRequested?.Invoke();
                 return;
             }
 
-            if (WouldRemovalCreateIslands(_selectedModuleBundle))
+            if (WouldRemovalCreateIslands(SelectedModuleBundle))
             {
                 ShowErrorMessage("Cannot remove this module: it would split the ship into islands.");
                 return;
             }
 
-            var removedWorldPos = (Vector2)_selectedModuleBundle.Instance.transform.position;
+            var removedWorldPos = (Vector2)SelectedModuleBundle.Instance.transform.position;
 
-            _ship.ManualRemoveModule(_selectedModuleBundle.PlacedModule);
-            _overlayManager.RemoveOverlay(_selectedModuleBundle);
-            Object.Destroy(_selectedModuleBundle.Instance);
+            Ship.ManualRemoveModule(SelectedModuleBundle.PlacedModule);
+            OverlayManager.RemoveOverlay(SelectedModuleBundle);
+            Object.Destroy(SelectedModuleBundle.Instance);
 
-            if (_hoveredPlacedBundle == _selectedModuleBundle)
+            if (_hoveredPlacedBundle == SelectedModuleBundle)
                 _hoveredPlacedBundle = null;
 
             SelectBundle(null);
-            _resourcesPanel.Refresh(_ship);
+            _resourcesPanel.Refresh(Ship);
             _feedback.PlayDeleted(removedWorldPos);
             OnShipCompositionChanged?.Invoke();
         }
 
         public void ClearShip()
         {
-            if (_ship == null || IsDraggingModule || IsInputLocked) return;
+            if (Ship == null || IsDraggingModule || IsInputLocked) return;
 
             var effectOrigin = Vector2.zero;
-            foreach (var bundle in _overlayManager.AllBundles)
+            foreach (var bundle in OverlayManager.AllBundles)
             {
                 if (bundle.PlacedModule.Type != ModuleType.Command) continue;
                 effectOrigin = bundle.Instance.transform.position;
@@ -507,8 +604,8 @@ namespace ShipFactory.UI
 
         private void ClearEntireShip(Vector2 effectOrigin)
         {
-            _ship.DestroyAllModulesSilently();
-            _ship.InitializeModules();
+            Ship.DestroyAllModulesSilently();
+            Ship.InitializeModules();
 
             _draggedModuleBundle = null;
             _hoveredPlacedBundle = null;
@@ -520,7 +617,7 @@ namespace ShipFactory.UI
 
         private bool WouldRemovalCreateIslands(ShipModuleSOInstanceBundle bundleToRemove)
         {
-            var remainingBundles = _overlayManager.AllBundles.AsValueEnumerable()
+            var remainingBundles = OverlayManager.AllBundles.AsValueEnumerable()
                 .Where(bundle => bundle != bundleToRemove).ToList();
 
             return remainingBundles.Count > 1 && remainingBundles.AsValueEnumerable()
@@ -531,7 +628,7 @@ namespace ShipFactory.UI
         [CanBeNull]
         private ShipModuleSOInstanceBundle InstantiateModule(ShipModuleSO shipModuleSO, Vector2 worldPosition)
         {
-            var instance = _instantiator.InstantiatePrefab(shipModuleSO.Prefab, _ship.transform);
+            var instance = _instantiator.InstantiatePrefab(shipModuleSO.Prefab, Ship.transform);
             var module = instance.GetComponent<IModule>();
 
             if (module == null)
@@ -541,14 +638,15 @@ namespace ShipFactory.UI
                 return null;
             }
 
-            var localPosition = (Vector2)_ship.transform.InverseTransformPoint(worldPosition);
-            _ship.ManualAddModule(module);
-            module.SetLocalPosition(localPosition);
+            var layoutPosition = WorldToLayoutLocal(worldPosition);
+            Ship.ManualAddModule(module);
+            module.SetLocalPosition(layoutPosition);
 
             var identity = instance.GetComponent<GameObjectInstanceIdentity>();
             if (identity == null)
                 identity = instance.AddComponent<GameObjectInstanceIdentity>();
             identity.EnsureAssigned(InstanceOrigin.CatalogPrefab, shipModuleSO.ArchetypeId);
+            module.EnsureBlueprintIdentity();
 
             return new ShipModuleSOInstanceBundle(instance, shipModuleSO, module);
         }
@@ -563,14 +661,14 @@ namespace ShipFactory.UI
 
         public void RefreshShipResourcesPanel()
         {
-            _resourcesPanel.Refresh(_ship);
+            _resourcesPanel.Refresh(Ship);
         }
 
         public void RotateActiveModule(int degrees)
         {
             if (degrees is not (90 or -90) || IsInputLocked) return;
 
-            var bundle = _draggedModuleBundle ?? _selectedModuleBundle;
+            var bundle = _draggedModuleBundle ?? SelectedModuleBundle;
             if (bundle == null) return;
 
             var previousRotation = bundle.Instance.transform.localRotation;
@@ -580,7 +678,7 @@ namespace ShipFactory.UI
             if (IsDraggingModule)
                 ResnapDraggedModuleToGrid();
 
-            _overlayManager.SyncTransformFromBundle(bundle);
+            OverlayManager.SyncTransformFromBundle(bundle);
 
             if (IsDraggingModule)
             {
@@ -589,7 +687,8 @@ namespace ShipFactory.UI
                 return;
             }
 
-            var legality = Calculator.CalculatePositionLegality(bundle, _overlayManager.AllBundles);
+            var legality = Calculator.CalculatePositionLegality(bundle, OverlayManager.AllBundles,
+                OverlayManager.GetGhostBounds());
             if (legality == PositionLegality.Correct)
             {
                 _feedback.PlayRotated(bundle.Instance.transform.position);
@@ -597,7 +696,7 @@ namespace ShipFactory.UI
             }
 
             bundle.Instance.transform.localRotation = previousRotation;
-            _overlayManager.SyncTransformFromBundle(bundle);
+            OverlayManager.SyncTransformFromBundle(bundle);
 
             var message = legality switch
             {
@@ -616,29 +715,32 @@ namespace ShipFactory.UI
         private void ResnapDraggedModuleToGrid()
         {
             var transform = _draggedModuleBundle.Instance.transform;
+            var layoutPosition = WorldToLayoutLocal(transform.position);
             var localSnapped = Snapper.SnapModuleLocalCenter(
-                transform.localPosition,
+                layoutPosition,
                 _draggedModuleBundle.ModuleSO.Dimensions,
                 transform.localRotation);
-            transform.localPosition = new Vector3(localSnapped.x, localSnapped.y, transform.localPosition.z);
+            var worldPos = LayoutLocalToWorld(localSnapped);
+            transform.position = new Vector3(worldPos.x, worldPos.y, transform.position.z);
         }
 
         private void RestoreDragStartRotation(ShipModuleSOInstanceBundle bundle)
         {
             bundle.Instance.transform.localRotation = _dragStartLocalRotation;
-            _overlayManager.SyncTransformFromBundle(bundle);
+            OverlayManager.SyncTransformFromBundle(bundle);
         }
 
         private float GetMaxModuleLocalZ(ShipModuleSOInstanceBundle exclude = null)
         {
-            return _ship.transform.Cast<Transform>().AsValueEnumerable()
+            return Ship.transform.Cast<Transform>().AsValueEnumerable()
                 .Where(child => exclude == null || child.gameObject != exclude.Instance).Aggregate(0f,
                     (current, child) => Mathf.Max(current, child.localPosition.z));
         }
 
         private void RefreshDraggedModuleLegalityOverlay()
         {
-            var legality = Calculator.CalculatePositionLegality(_draggedModuleBundle, _overlayManager.AllBundles);
+            var legality = Calculator.CalculatePositionLegality(_draggedModuleBundle, OverlayManager.AllBundles,
+                OverlayManager.GetGhostBounds());
             var color = legality switch
             {
                 PositionLegality.InsideOther => ModuleOverlay.InsideOtherColor,
@@ -646,12 +748,41 @@ namespace ShipFactory.UI
                 _ => ModuleOverlay.SelectedColor
             };
 
-            _overlayManager.SetColor(_draggedModuleBundle, color);
+            OverlayManager.SetColor(_draggedModuleBundle, color);
         }
 
         public void RefreshCameraInfoPanel(Camera camera)
         {
             _cameraInfoPanel.Update(camera);
+        }
+
+        private Vector2 WorldToLayoutLocal(Vector2 world)
+        {
+            return ShipLayoutSpace.WorldToLocal(Ship, world);
+        }
+
+        private Vector2 LayoutLocalToWorld(Vector2 layoutLocal)
+        {
+            return ShipLayoutSpace.LocalToWorld(Ship, layoutLocal);
+        }
+
+        private void ReapplyNonCommandModulesFromLayout()
+        {
+            if (Ship?.CommandModule?.Transform == null) return;
+
+            var origin = Ship.CommandModule.Transform;
+            foreach (var bundle in OverlayManager.AllBundles)
+            {
+                if (bundle.PlacedModule.Type == ModuleType.Command) continue;
+
+                var blueprint = bundle.PlacedModule.Blueprint;
+                if (blueprint == null) continue;
+
+                var moduleTransform = bundle.Instance.transform;
+                moduleTransform.SetPositionAndRotation(
+                    origin.TransformPoint(blueprint.localPosition),
+                    origin.rotation * blueprint.localRotation);
+            }
         }
 
         public class Factory : PlaceholderFactory<VisualElement, ShipFactoryFeedback, ShipFactoryCanvasController>

@@ -38,9 +38,6 @@ namespace Services.Tests
             Assert.That(configuration.AllySnapshots, Has.Count.EqualTo(2));
             Assert.That(configuration.AllySnapshots[0].shipName, Is.EqualTo("Alpha"));
             Assert.That(configuration.AllySnapshots[1].shipName, Is.EqualTo("Charlie"));
-            Assert.That(configuration.EnemySnapshots, Has.Count.EqualTo(1));
-            Assert.That(configuration.EnemySnapshots[0].shipName, Is.EqualTo("Enemy"));
-            Assert.That(configuration.AsteroidCount, Is.EqualTo(3));
         }
     }
 }

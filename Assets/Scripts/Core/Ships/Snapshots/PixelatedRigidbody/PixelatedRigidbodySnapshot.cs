@@ -13,6 +13,7 @@ namespace Core.Ships.Snapshots.PixelatedRigidbody
         public Quaternion localRotation;
         public float defaultPixelHealth = 1f;
         public float maxArmorHealth = 10f;
+        public int startPixelCount;
 
         public int spriteRenderedOrderInLayer;
         public int spriteRenderedSortingLayerID;
