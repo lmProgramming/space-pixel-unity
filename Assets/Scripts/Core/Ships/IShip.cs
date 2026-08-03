@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Core.Gameplay.EasyTeam;
+using Core.Ships.Blueprints;
 using Core.Ships.Module;
 using Core.Snapshot;
 using LMPro.DataStructures.Graph;
@@ -21,6 +22,7 @@ namespace Core.Ships
         IReadOnlyList<IModule> AllModules { get; }
         public bool IsSASOn { get; }
         bool IsDesignMode { get; }
+        ShipBlueprint Blueprint { get; }
         List<IWeapon> Weapons { get; }
         List<IEngine> Engines { get; }
         IResourceManager ResourceManager { get; }
@@ -32,5 +34,7 @@ namespace Core.Ships
         void InitializeModules();
         void SetTeam(ITeam newTeam);
         void DestroyAllModulesSilently();
+        void SetBlueprint(ShipBlueprint blueprint);
+        void SyncBlueprintFromLiveModules();
     }
 }

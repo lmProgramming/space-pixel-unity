@@ -19,7 +19,7 @@ namespace Services
             var pixelMap = new Dictionary<Vector2Int, Color32>();
 
             foreach (var module in ship.AllModules)
-                CollectModulePixelsFromLiveModule(module, pixelMap);
+                CollectModulePixelsFromLiveModule(ship, module, pixelMap);
 
             return CreateSpriteFromPixelMap(pixelMap);
         }
@@ -92,6 +92,7 @@ namespace Services
         }
 
         private static void CollectModulePixelsFromLiveModule(
+            IShip ship,
             IModule module,
             Dictionary<Vector2Int, Color32> pixelMap)
         {
@@ -109,8 +110,8 @@ namespace Services
 
             var dimensions = texturePixelGrid.Dimensions();
             CollectModulePixels(
-                module.Transform.localPosition,
-                module.Transform.localRotation,
+                ShipLayoutSpace.WorldToLocal(ship, module.Transform.position),
+                ShipLayoutSpace.WorldToLocalRotation(ship, module.Transform.rotation),
                 dimensions.x,
                 dimensions.y,
                 texturePixelGrid.IsPixel,

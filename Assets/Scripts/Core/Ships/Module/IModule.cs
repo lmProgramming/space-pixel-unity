@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Core.Pixelation;
+using Core.Ships.Blueprints;
 using Core.Ships.Snapshots.Module;
 using Core.Snapshot;
 using JetBrains.Annotations;
@@ -25,6 +26,7 @@ namespace Core.Ships.Module
         public int AliveCrewCount { get; }
         public IShip Ship { get; }
         public Collider2D Collider2D { get; }
+        public ModuleBlueprint Blueprint { get; }
         public void FillCrewBySkill(List<CrewMember> crew, out List<CrewMember> remainingCrew);
         public bool AssignCrew(CrewMember member);
         public bool RemoveCrew(CrewMember member);
@@ -36,5 +38,8 @@ namespace Core.Ships.Module
         public void SetResources(ShipResources newShipResources);
         public void SetLocalPosition(Vector2 localPosition);
         public void SetShip(IShip ship);
+        public void SetBlueprint(ModuleBlueprint blueprint);
+        public void EnsureBlueprintIdentity();
+        public void SyncBlueprintLayoutFromTransform();
     }
 }

@@ -1,3 +1,4 @@
+using Core.Constants;
 using Core.Progression;
 using Core.Services;
 using UnityEngine;
@@ -7,15 +8,19 @@ namespace Services
 {
     public class NextBattleService : INextBattleService
     {
+        [Inject] private ProgressionConstants _progressionConstants;
         [Inject] private ISkirmishSnapshotCatalog _skirmishSnapshotCatalog;
 
         public NextBattlePickerEntry[] GetNextBattlePickerEntries()
         {
             return new NextBattlePickerEntry[]
             {
-                new("easy", null, _skirmishSnapshotCatalog.GetRandomEnemySnapshots(1), Random.Range(0, 15)),
-                new("medium", null, _skirmishSnapshotCatalog.GetRandomEnemySnapshots(2), Random.Range(0, 15)),
-                new("boss", null, _skirmishSnapshotCatalog.GetRandomEnemySnapshots(3), Random.Range(0, 15))
+                new("easy", null, _skirmishSnapshotCatalog.GetRandomEnemySnapshots(1), Random.Range(0, 15),
+                    _progressionConstants.easyBattleCreditsReward),
+                new("medium", null, _skirmishSnapshotCatalog.GetRandomEnemySnapshots(2), Random.Range(0, 15),
+                    _progressionConstants.mediumBattleCreditsReward),
+                new("boss", null, _skirmishSnapshotCatalog.GetRandomEnemySnapshots(3), Random.Range(0, 15),
+                    _progressionConstants.bossBattleCreditsReward)
             };
         }
     }

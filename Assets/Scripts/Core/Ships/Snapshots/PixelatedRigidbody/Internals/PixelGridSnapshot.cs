@@ -134,6 +134,16 @@ namespace Core.Ships.Snapshots.PixelatedRigidbody.Internals
                 RemovePixelAt(point);
         }
 
+        public void AddPixelAt(Vector2Int point, Color32 color)
+        {
+            throw new NotSupportedException();
+        }
+
+        public void AddPixels(IEnumerable<(Vector2Int point, Color32 color)> newPixels)
+        {
+            throw new NotSupportedException();
+        }
+
         public Vector2Int? GetFirstPixelAlongPath(Vector2Int startPosition, Vector2 direction, bool getLast)
         {
             throw new NotSupportedException(

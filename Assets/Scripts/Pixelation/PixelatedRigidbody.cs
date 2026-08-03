@@ -48,13 +48,13 @@ namespace Pixelation
         [Tooltip("Health value that a fully white (255) pixel in the armor map represents.")] [SerializeField]
         private float maxArmorHealth = 10f;
 
+        [Inject] protected GameplayConstants GameplayConstants;
+
         [Inject] private CollisionEventChannelSO _collisionEventChannelSO;
         [Inject] private IDebrisSpawner _debrisSpawner;
 
         private bool _isSetup;
         [Inject] private PixelCollisionHandler.Factory _pixelCollisionHandlerFactory;
-
-        [Inject] protected GameplayConstants GameplayConstants;
         private HealthGrid HealthGrid { get; set; }
 
         private bool HasArmorMap => armorMap != null && armorMap.ToString() != "null";
@@ -241,6 +241,8 @@ namespace Pixelation
 
         public event Action<List<Vector2Int>, PixelLoseReason> OnPixelsLost;
 
+        public event Action<List<Vector2Int>> OnPixelsRestored;
+
         public float DefaultPixelHealthForSnapshot => defaultPixelHealth;
         public float MaxArmorHealthForSnapshot => maxArmorHealth;
 
@@ -256,6 +258,7 @@ namespace Pixelation
                 spriteRenderedSortingLayerID = SpriteRenderer.sortingLayerID,
                 defaultPixelHealth = defaultPixelHealth,
                 maxArmorHealth = maxArmorHealth,
+                startPixelCount = StartPixelCount,
                 armorGrid = CaptureArmorGridSnapshot(),
                 healthGrid = CaptureHealthGridSnapshot()
             };
@@ -291,12 +294,172 @@ namespace Pixelation
             ApplyArmorGridSnapshot(snapshot.armorGrid);
             ApplyHealthGridSnapshot(snapshot.healthGrid);
             ApplySpriteRenderedOptions(snapshot.spriteRenderedSortingLayerID, snapshot.spriteRenderedOrderInLayer);
+
+            if (snapshot.startPixelCount > 0)
+                SetStartPixelCount(snapshot.startPixelCount);
+        }
+
+        public void SetStartPixelCount(int startPixelCount)
+        {
+            if (startPixelCount <= 0)
+                throw new ArgumentOutOfRangeException(nameof(startPixelCount),
+                    "[PixelatedRigidbody] StartPixelCount must be positive.");
+            StartPixelCount = startPixelCount;
+        }
+
+        public void RestorePixels(IReadOnlyList<Pixel> pixels)
+        {
+            if (pixels == null) throw new ArgumentNullException(nameof(pixels));
+            if (pixels.Count == 0) return;
+            if (TexturePixelGrid == null)
+                throw new InvalidOperationException(
+                    $"[PixelatedRigidbody] '{name}' has no TexturePixelGrid; cannot restore pixels.");
+            if (HealthGrid == null)
+                throw new InvalidOperationException(
+                    $"[PixelatedRigidbody] '{name}' has no HealthGrid; cannot restore pixels.");
+
+            var countBefore = TexturePixelGrid.PixelCount;
+            var points = new List<Vector2Int>(pixels.Count);
+            var addPayload = new List<(Vector2Int point, Color32 color)>(pixels.Count);
+
+            foreach (var pixel in pixels)
+            {
+                if (pixel.Color.a == 0)
+                    throw new UnityException(
+                        $"[PixelatedRigidbody] '{name}' cannot restore transparent pixel at {pixel.Point}.");
+                if (pixel.Health <= 0f)
+                    throw new UnityException(
+                        $"[PixelatedRigidbody] '{name}' cannot restore pixel at {pixel.Point} with non-positive health.");
+
+                points.Add(pixel.Point);
+                addPayload.Add((pixel.Point, pixel.Color));
+            }
+
+            TexturePixelGrid.AddPixels(addPayload);
+
+            foreach (var pixel in pixels)
+                HealthGrid.SetHealth(pixel.Point, pixel.Health);
+
+            NudgeWeightedCenterForAdded(points, countBefore);
+            OnPixelsRestored?.Invoke(points);
+        }
+
+        public void KeepOnlyPixels(IEnumerable<Vector2Int> pointsToKeep)
+        {
+            if (pointsToKeep == null) throw new ArgumentNullException(nameof(pointsToKeep));
+            if (TexturePixelGrid == null)
+                throw new InvalidOperationException(
+                    $"[PixelatedRigidbody] '{name}' has no TexturePixelGrid; cannot keep pixels.");
+
+            var keepSet = pointsToKeep.AsValueEnumerable().ToHashSet();
+            if (keepSet.Count == 0)
+                throw new UnityException(
+                    $"[PixelatedRigidbody] '{name}' KeepOnlyPixels requires at least one pixel.");
+
+            var dims = TexturePixelGrid.Dimensions();
+            var removed = new List<Vector2Int>();
+
+            for (var y = 0; y < dims.y; y++)
+            for (var x = 0; x < dims.x; x++)
+            {
+                var point = new Vector2Int(x, y);
+                if (!TexturePixelGrid.IsPixelAssumeInBounds(point) || keepSet.Contains(point))
+                    continue;
+                removed.Add(point);
+            }
+
+            if (removed.Count == 0)
+            {
+                WeightedCenter = CalculateWeightedCenter();
+                CollisionHandler?.ForceRecalculateColliders();
+                return;
+            }
+
+            var countBefore = TexturePixelGrid.PixelCount;
+            HealthGrid?.RemovePixels(removed);
+            TexturePixelGrid.RemovePixels(removed);
+            NudgeWeightedCenter(removed, countBefore);
+            CollisionHandler?.ForceRecalculateColliders();
+        }
+
+        public Color32[,] BuildPristineColors()
+        {
+            if (!HasSprite)
+                throw new InvalidOperationException(
+                    $"[PixelatedRigidbody] '{name}' has no sprite; cannot build pristine colors.");
+
+            var (colorsArray, width, height) =
+                (sprite.texture.GetPixels32(), sprite.texture.width, sprite.texture.height);
+            colorsArray = EasyImage.ReorientTexture(colorsArray, width, height, flipX, flipY);
+            (colorsArray, width, height) = EasyImage.RotateTexture(colorsArray, width, height, rotation);
+
+            var colors = new Color32[width, height];
+            for (var y = 0; y < height; y++)
+            for (var x = 0; x < width; x++)
+                colors[x, y] = colorsArray[y * width + x];
+
+            return colors;
+        }
+
+        public float[,] BuildPristineHealth(Color32[,] pristineColors)
+        {
+            if (pristineColors == null) throw new ArgumentNullException(nameof(pristineColors));
+
+            var width = pristineColors.GetLength(0);
+            var height = pristineColors.GetLength(1);
+            var health = new float[width, height];
+
+            byte[] armorBytes = null;
+            var armorWidth = 0;
+
+            if (HasArmorMap)
+            {
+                var armorPixels = armorMap.texture.GetPixels32();
+                armorWidth = armorMap.texture.width;
+                var armorHeight = armorMap.texture.height;
+                armorPixels = EasyImage.ReorientTexture(armorPixels, armorWidth, armorHeight, flipX, flipY);
+                (armorPixels, armorWidth, armorHeight) =
+                    EasyImage.RotateTexture(armorPixels, armorWidth, armorHeight, rotation);
+
+                if (armorWidth != width || armorHeight != height)
+                    throw new UnityException(
+                        $"[PixelatedRigidbody] Armor map size ({armorWidth}x{armorHeight}) doesn't match " +
+                        $"sprite size ({width}x{height}) on '{name}'.");
+
+                armorBytes = armorPixels.AsValueEnumerable().Select(c => c.r).ToArray();
+            }
+
+            for (var y = 0; y < height; y++)
+            for (var x = 0; x < width; x++)
+            {
+                if (pristineColors[x, y].a == 0)
+                {
+                    health[x, y] = 0f;
+                    continue;
+                }
+
+                if (armorBytes == null)
+                {
+                    health[x, y] = defaultPixelHealth;
+                    continue;
+                }
+
+                var brightness = armorBytes[y * armorWidth + x] / 255f;
+                health[x, y] = Mathf.Lerp(defaultPixelHealth, maxArmorHealth, brightness);
+            }
+
+            return health;
         }
 
         public virtual void NoPixelsLeft()
         {
             Destroyed?.Invoke(this);
             Destroy(gameObject);
+        }
+
+        public Color32 GetColor(Vector2Int point)
+        {
+            return TexturePixelGrid.GetValue(point);
         }
 
         public Sprite GetSprite()
@@ -308,6 +471,26 @@ namespace Pixelation
         {
             sprite = newSprite;
             Setup(forceSetup: true, recalculateColliders: true);
+        }
+
+        private void NudgeWeightedCenterForAdded(IEnumerable<Vector2Int> addedPixels, int countBefore)
+        {
+            if (TexturePixelGrid.PixelCount <= 0)
+            {
+                WeightedCenter = TexturePixelGrid.Center;
+                return;
+            }
+
+            if (countBefore <= 0)
+            {
+                WeightedCenter = CalculateWeightedCenter();
+                return;
+            }
+
+            var addedSum = addedPixels.AsValueEnumerable()
+                .Aggregate(Vector2.zero, (current, p) => current + new Vector2(p.x, p.y));
+
+            WeightedCenter = (WeightedCenter * countBefore + addedSum) / TexturePixelGrid.PixelCount;
         }
 
         private void EnsureCollisionHandler()
@@ -437,11 +620,6 @@ namespace Pixelation
                 colors[x, y] = colorGrid.GetValue(new Vector2Int(x, y));
 
             SetTextureFromColors(colors);
-        }
-
-        public Color32 GetColor(Vector2Int point)
-        {
-            return TexturePixelGrid.GetValue(point);
         }
 
 #if UNITY_INCLUDE_TESTS

@@ -30,7 +30,7 @@ namespace Services.Tests
             {
                 campaignName = "Test Campaign",
                 allies = new[] { new ShipSnapshot("Frigate") },
-                credits = "0",
+                credits = 0,
                 enemiesKilled = 2
             };
 

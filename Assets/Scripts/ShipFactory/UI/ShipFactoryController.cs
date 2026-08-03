@@ -1,13 +1,16 @@
 using System;
 using System.IO;
 using Core.Constants;
+using Core.Gameplay;
 using Core.Gameplay.Sound;
 using Core.Services;
 using Core.ShipFactory;
+using Core.State;
 using Core.UI;
 using Events.Game;
 using Events.UI;
 using ShipFactory.UI.Runtime;
+using ShipFactory.UI.Views.Repair;
 using ShipFactory.UI.Views.ShipLibrary;
 using Ships;
 using UI.Common;
@@ -38,6 +41,8 @@ namespace ShipFactory.UI
         [Inject]
         private ShipFactoryCanvasController.Factory _canvasControllerFactory;
 
+        private VisualElement _designTopBar;
+
         private (bool needToShow, string shipName) _duplicateShipNameWarning;
 
         [Inject] private IGameInput _gameInput;
@@ -45,6 +50,7 @@ namespace ShipFactory.UI
         private GameObject _gameObjectUnderPointer;
 
         private bool _isModuleDragBlockingCamera;
+        private bool _isProgressionMode;
         private bool _isUiHoverBlockingCamera;
         private bool _isUiPointerDownBlockingCamera;
 
@@ -56,6 +62,10 @@ namespace ShipFactory.UI
         [Inject] private PauseStateEventChannel _pauseStateChannel;
 
         [Inject] private PointerOverUiEventChannel _pointerOverUiChannel;
+
+        private RepairPanelController _repairPanelController;
+
+        [Inject] private RepairPanelController.Factory _repairPanelControllerFactory;
 
         private VisualElement _root;
         private Button _saveShipButton;
@@ -76,6 +86,7 @@ namespace ShipFactory.UI
         {
             base.Awake();
             _camera = Camera.main;
+            _isProgressionMode = SaveState.Mode == GameSessionMode.Progression;
 
             if (_canvasControllerFactory == null)
                 throw new UnityException(
@@ -84,6 +95,10 @@ namespace ShipFactory.UI
             if (_paletteControllerFactory == null)
                 throw new UnityException(
                     "[ShipFactoryController] ModulePaletteController.Factory is required.");
+
+            if (_isProgressionMode && _repairPanelControllerFactory == null)
+                throw new UnityException(
+                    "[ShipFactoryController] RepairPanelController.Factory is required in progression mode.");
 
             if (GameUi == null)
                 throw new UnityException("[ShipFactoryController] IGameUi is required.");
@@ -118,14 +133,14 @@ namespace ShipFactory.UI
             base.OnDisable();
         }
 
-        protected override void BindUiCore(
-            VisualElement root)
+        protected override void BindUiCore(VisualElement root)
         {
             _root = root;
 
             _canvasController = _canvasControllerFactory.Create(root, feedback);
             _paletteController = _paletteControllerFactory.Create(root);
 
+            _designTopBar = root.Q<VisualElement>("design-top-bar");
             _shipNameField = root.Q<TextField>("ship-name-field");
             _saveShipButton = root.Q<Button>("save-ship-button");
             _loadShipButton = root.Q<Button>("load-ship-button");
@@ -158,6 +173,24 @@ namespace ShipFactory.UI
             RegisterCameraDragPointerBlockers(root);
             _textInputFocusTracker = new TextInputFocusTracker(_textInputFocusChannel);
             _textInputFocusTracker.Track(_shipNameField);
+
+            if (_isProgressionMode)
+                EnterProgressionMode(root);
+            else
+            {
+                var repairPanel = root.Q("repair-panel");
+                if (repairPanel != null)
+                    repairPanel.style.display = DisplayStyle.None;
+            }
+        }
+
+        private void EnterProgressionMode(VisualElement root)
+        {
+            if (_designTopBar != null)
+                _designTopBar.style.display = DisplayStyle.None;
+
+            _repairPanelController = _repairPanelControllerFactory.Create(root);
+            _repairPanelController.Show(_canvasController);
         }
 
         private void OnShipNameChanged(ChangeEvent<string> evt)
@@ -239,6 +272,9 @@ namespace ShipFactory.UI
                 _canvasController.OnClearShipRequested -= OnClearShipRequested;
                 _canvasController.Dispose();
             }
+
+            _repairPanelController?.Dispose();
+            _repairPanelController = null;
 
             _shipNameField.UnregisterValueChangedCallback(OnShipNameChanged);
 
@@ -326,6 +362,12 @@ namespace ShipFactory.UI
 
         private void OnClearShipRequested()
         {
+            if (_isProgressionMode)
+            {
+                _canvasController.ShowWarningMessage("Clear ship is disabled in progression hangar.");
+                return;
+            }
+
             GameUi.ShowOptions(
                 "Clear ship?",
                 "Deleting the command module removes the entire ship. This cannot be undone.",

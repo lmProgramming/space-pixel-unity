@@ -14,6 +14,8 @@ namespace Core.Grid
         bool IsPixelAssumeInBounds(Vector2Int point);
         void RemovePixelAt(Vector2Int point);
         void RemovePixels(IEnumerable<Vector2Int> points);
+        void AddPixelAt(Vector2Int point, Color32 color);
+        void AddPixels(IEnumerable<(Vector2Int point, Color32 color)> pixels);
         Vector2Int? GetFirstPixelAlongPath(Vector2Int startPosition, Vector2 direction, bool getLast);
     }
 }

@@ -318,6 +318,11 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &544678720 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8276008820147856545, guid: 17371dd093b1ba2c5bb0965847c3c405, type: 3}
+  m_PrefabInstance: {fileID: 3122171792374019293}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &779531616
 GameObject:
   m_ObjectHideFlags: 0
@@ -562,7 +567,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3935436465786090567, guid: 17371dd093b1ba2c5bb0965847c3c405, type: 3}
   m_PrefabInstance: {fileID: 3122171792374019293}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 544678720}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6a2932ca8a019fb27959f14e4ab61114, type: 3}
@@ -854,12 +859,16 @@ PrefabInstance:
       objectReference: {fileID: 233530847229394504}
     - target: {fileID: 4677564092631612332, guid: 17371dd093b1ba2c5bb0965847c3c405, type: 3}
       propertyPath: _monoInstallers.Array.size
-      value: 2
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 4677564092631612332, guid: 17371dd093b1ba2c5bb0965847c3c405, type: 3}
       propertyPath: '_monoInstallers.Array.data[1]'
       value: 
       objectReference: {fileID: 1629573553}
+    - target: {fileID: 4677564092631612332, guid: 17371dd093b1ba2c5bb0965847c3c405, type: 3}
+      propertyPath: '_monoInstallers.Array.data[2]'
+      value: 
+      objectReference: {fileID: 3122171792374019301}
     - target: {fileID: 5515476119549963838, guid: 17371dd093b1ba2c5bb0965847c3c405, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -907,7 +916,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 8276008820147856545, guid: 17371dd093b1ba2c5bb0965847c3c405, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3122171792374019301}
   m_SourcePrefab: {fileID: 100100000, guid: 17371dd093b1ba2c5bb0965847c3c405, type: 3}
 --- !u!4 &3122171792374019294 stripped
 Transform:
@@ -936,6 +948,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d7beaaabf3f4ed0a9868210f53d5689, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &3122171792374019301
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 544678720}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f35b95c4e19a86f7a09187e7a6a6c6e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ShipFactory::ShipFactory.ShipFactoryInstaller
 --- !u!1 &3174967458054390413
 GameObject:
   m_ObjectHideFlags: 0

@@ -236,6 +236,71 @@ namespace Ships.Tests
             Assert.IsTrue(allModulesEnumerable.Where(m => m.Type == ModuleType.Weapon).Count() == 2);
         }
 
+        [UnityTest]
+        public IEnumerator CaptureSnapshot_IncludesBlueprintAndStartPixelCount()
+        {
+            var ship = ShipTestBuilder.CreateShip(Container, CreatedObjects, "Ship")
+                .ParentedTo(TestRoot.transform)
+                .WithCommandOfCustomSnapshotOrigin(Vector2.zero, 5, 5)
+                .WithCustomEngine(new Vector2(2f, 0f), 5, 5, new ShipResources(0, 2f, 0, 0, 0))
+                .Build(true);
+
+            yield return null;
+
+            var engine = (Engine)ship.AllModules[1];
+            var startCount = engine.PixelatedRigidbody.StartPixelCount;
+            engine.PixelatedRigidbody.RemovePixelAt(new Vector2Int(2, 2));
+
+            var snapshot = _service.CaptureSnapshot(ship);
+            Assert.That(snapshot.blueprint, Is.Not.Null);
+            Assert.That(snapshot.blueprint.modules.Count, Is.EqualTo(2));
+            Assert.That(snapshot.modules[1].pixelatedRigidbody.startPixelCount, Is.EqualTo(startCount));
+
+            var json = JsonUtility.ToJson(snapshot, true);
+            var fromJson = JsonUtility.FromJson<ShipSnapshot>(json);
+            fromJson.blueprint.modules[1].removedByPlayer = true;
+
+            _service.ApplySnapshot(ship, fromJson);
+            ship.InitializeModules();
+
+            yield return null;
+
+            Assert.That(ship.Blueprint.modules.Count, Is.EqualTo(2));
+            Assert.That(ship.Blueprint.modules[1].removedByPlayer, Is.True);
+            Assert.That(ship.AllModules[1].PixelatedRigidbody.StartPixelCount, Is.EqualTo(startCount));
+        }
+
+        [UnityTest]
+        public IEnumerator CaptureSnapshot_AfterWorldMovement_PreservesCommandRelativeLayout()
+        {
+            var engineLayout = new Vector2(5f, 0f);
+            var ship = ShipTestBuilder.CreateShip(Container, CreatedObjects, "LayoutShip")
+                .WithCommand("Command", Vector2.zero, 5, 5)
+                .WithCustomEngine(engineLayout, 5, 5, new ShipResources(0, 2f, 0, 0, 0))
+                .Build(true);
+
+            yield return null;
+
+            var engine = (Engine)ship.AllModules.AsValueEnumerable().First(m => m.Type == ModuleType.Engine);
+            var expectedLayout = ShipLayoutSpace.WorldToLocal(ship, engine.Transform!.position);
+
+            var worldDelta = new Vector3(37f, -12f, 0f);
+            foreach (var module in ship.AllModules)
+                module.Transform!.position += worldDelta;
+
+            yield return null;
+
+            var snapshot = _service.CaptureSnapshot(ship);
+            var commandSnapshot = snapshot.modules.AsValueEnumerable()
+                .First(m => m.concreteModuleType == ConcreteModuleType.Command);
+            var engineSnapshot = snapshot.modules.AsValueEnumerable()
+                .First(m => m.concreteModuleType == ConcreteModuleType.Engine);
+
+            Assert.That(commandSnapshot.localPosition, Is.EqualTo(Vector3.zero));
+            Assert.That(engineSnapshot.localPosition.x, Is.EqualTo(expectedLayout.x).Within(0.01f));
+            Assert.That(engineSnapshot.localPosition.y, Is.EqualTo(expectedLayout.y).Within(0.01f));
+        }
+
         private (GameObject projectilePrefab, Sprite weaponSprite) CreateSimpleCannonDependencies()
         {
             var projectilePrefab = new GameObject("ProjectilePrefab");

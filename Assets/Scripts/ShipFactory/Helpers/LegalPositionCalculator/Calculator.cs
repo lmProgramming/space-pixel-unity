@@ -19,10 +19,16 @@ namespace ShipFactory.Helpers.LegalPositionCalculator
         private const float EdgeEpsilon = 0.001f;
 
         public static PositionLegality CalculatePositionLegality(ShipModuleSOInstanceBundle bundleToCheck,
-            IEnumerable<ShipModuleSOInstanceBundle> placedElements)
+            IEnumerable<ShipModuleSOInstanceBundle> placedElements,
+            IEnumerable<(Vector2 min, Vector2 max)> additionalOccupiedBounds = null)
         {
             var allBundles = new List<ShipModuleSOInstanceBundle>(placedElements);
             var (leftBottomPos, rightTop) = GetBottomLeftAndTopRightPositions(bundleToCheck);
+
+            if (additionalOccupiedBounds != null)
+                foreach (var (ghostMin, ghostMax) in additionalOccupiedBounds)
+                    if (Overlap(leftBottomPos, rightTop, ghostMin, ghostMax))
+                        return PositionLegality.InsideOther;
 
             var hasAnyTouch = false;
 

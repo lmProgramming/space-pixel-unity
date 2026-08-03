@@ -41,11 +41,13 @@ namespace Pixelation
             _collisionResolver = physicsCollisionFactory.Create(this, _body);
 
             body.OnPixelsLost += PixelsLost;
+            body.OnPixelsRestored += PixelsRestored;
         }
 
         public void Unsubscribe()
         {
             _body.OnPixelsLost -= PixelsLost;
+            _body.OnPixelsRestored -= PixelsRestored;
         }
 
         public void ForceRecalculateColliders()
@@ -191,6 +193,12 @@ namespace Pixelation
 
             RecalculateMass();
 
+            RecalculateColliders();
+        }
+
+        private void PixelsRestored(List<Vector2Int> pixels)
+        {
+            RecalculateMass();
             RecalculateColliders();
         }
 

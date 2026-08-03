@@ -19,7 +19,7 @@
 
         <!-- Top bar -->
         <ui:VisualElement name="top-bar" class="top-bar">
-            <ui:VisualElement class="ds-card ds-row ds-row__gap top-bar__cluster"
+            <ui:VisualElement name="design-top-bar" class="ds-card ds-row ds-row__gap top-bar__cluster"
                               style="border-top-left-radius: 0; border-top-right-radius: 0;">
                 <ui:TextField name="ship-name-field" label="Name" value="Ship" class="ds-input top-bar__name-field"
                               max-length="32"/>
@@ -30,6 +30,26 @@
                     <ui:VisualElement class="ds-icon ds-icon--save"/>
                 </ui:Button>
             </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:VisualElement name="repair-panel" class="ds-card"
+                          style="position: absolute; right: 12px; top: 72px; width: 280px; padding: 12px; display: none;">
+            <ui:Label text="Ship Hangar" class="ds-body-1" style="margin-bottom: 8px;"/>
+            <ui:Label name="repair-credits-label" text="Credits: 0" class="ds-caption" style="margin-bottom: 8px;"/>
+            <ui:Label text="Fleet" class="ds-caption" style="margin-bottom: 4px;"/>
+            <ui:ScrollView name="repair-fleet-list" style="max-height: 120px; margin-bottom: 8px;"/>
+            <ui:Label name="repair-selection-label" text="No module selected" class="ds-caption"
+                      style="margin-bottom: 4px; white-space: normal;"/>
+            <ui:Label name="repair-cost-label" text="Repair cost: 0" class="ds-caption" style="margin-bottom: 8px;"/>
+            <ui:Button name="repair-module-button" text="Repair Module" class="ds-btn ds-btn--primary ds-btn--block"
+                       style="margin-bottom: 6px;"/>
+            <ui:Button name="repair-all-button" text="Repair All" class="ds-btn ds-btn--secondary ds-btn--block"
+                       style="margin-bottom: 6px;"/>
+            <ui:Button name="remove-ghost-button" text="Remove Ghost Permanently"
+                       class="ds-btn ds-btn--danger ds-btn--block" style="margin-bottom: 6px; display: none;"/>
+            <ui:Button name="finish-button" text="Finish" class="ds-btn ds-btn--tertiary ds-btn--block"/>
+            <ui:Label name="repair-status-label" text="" class="ds-caption"
+                      style="margin-top: 8px; white-space: normal;"/>
         </ui:VisualElement>
 
         <!-- Top right camera info -->

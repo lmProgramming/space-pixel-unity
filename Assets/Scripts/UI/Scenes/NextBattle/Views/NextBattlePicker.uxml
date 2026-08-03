@@ -7,13 +7,15 @@
                       style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; align-items: center; justify-content: center;">
         <ui:VisualElement class="ds-modal" style="width: 520px; max-width: 100%;">
             <ui:Label text="Battle aftermath" class="ds-h1" style="margin-bottom: 4px;"/>
-            <ui:Label text="Pick which enemies to slain next" class="ds-body-2 ds-text-secondary"
+            <ui:Label text="Choose your next battle" class="ds-body-2 ds-text-secondary"
                       style="margin-bottom: 16px;"/>
             <ui:ScrollView mode="Vertical" style="max-height: 420px; flex-grow: 1;">
                 <ui:VisualElement name="next-battle-picker-list" class="battle-picker-list"/>
             </ui:ScrollView>
             <ui:Button name="next-battle-picker-confirm-button" text="Select"
                        class="ds-btn ds-btn--primary ds-btn--block" style="margin-top: 16px;"/>
+            <ui:Button name="next-battle-picker-hangar-button" text="Hangar"
+                       class="ds-btn ds-btn--secondary ds-btn--block" style="margin-top: 8px;"/>
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>
