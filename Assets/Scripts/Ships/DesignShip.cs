@@ -160,6 +160,11 @@ namespace Ships
                 module.transform.SetParent(null, true);
                 Destroy(module.gameObject);
             }
+
+            _biCohesionGraph = null;
+            CommandModule = null;
+            _allModulesCache.Clear();
+            _modulesDictionary.Clear();
         }
 
         public void SetBlueprint(ShipBlueprint blueprint)

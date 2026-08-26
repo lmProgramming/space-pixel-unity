@@ -19,7 +19,7 @@ namespace Services
             var pixelMap = new Dictionary<Vector2Int, Color32>();
 
             foreach (var module in ship.AllModules)
-                CollectModulePixelsFromLiveModule(ship, module, pixelMap);
+                CollectModulePixelsFromLiveModule(module, pixelMap);
 
             return CreateSpriteFromPixelMap(pixelMap);
         }
@@ -92,7 +92,6 @@ namespace Services
         }
 
         private static void CollectModulePixelsFromLiveModule(
-            IShip ship,
             IModule module,
             Dictionary<Vector2Int, Color32> pixelMap)
         {
@@ -108,10 +107,14 @@ namespace Services
                 return;
             }
 
+            // The command module sits at the layout origin with identity rotation, so raw module
+            // locals equal the layout-space coordinates snapshots store. Reading them directly
+            // keeps rotated modules rotated instead of normalizing them against themselves.
+            var moduleTransform = module.Transform;
             var dimensions = texturePixelGrid.Dimensions();
             CollectModulePixels(
-                ShipLayoutSpace.WorldToLocal(ship, module.Transform.position),
-                ShipLayoutSpace.WorldToLocalRotation(ship, module.Transform.rotation),
+                moduleTransform.localPosition,
+                moduleTransform.localRotation,
                 dimensions.x,
                 dimensions.y,
                 texturePixelGrid.IsPixel,

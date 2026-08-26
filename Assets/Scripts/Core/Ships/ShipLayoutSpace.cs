@@ -1,6 +1,7 @@
 using System;
 using Core.Ships.Module;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Core.Ships
 {
@@ -14,8 +15,9 @@ namespace Core.Ships
         {
             if (ship == null) throw new ArgumentNullException(nameof(ship));
 
-            if (ship.CommandModule?.Transform != null)
-                return ship.CommandModule.Transform;
+            var commandModule = ship.CommandModule;
+            if (HasAliveTransform(commandModule))
+                return commandModule.Transform;
 
             if (ship is Component shipComponent)
                 return shipComponent.transform;
@@ -45,7 +47,7 @@ namespace Core.Ships
 
         public static bool IsCommandModule(IShip ship, IModule module)
         {
-            return module != null && ship.CommandModule == module;
+            return HasAliveTransform(module) && ship.CommandModule == module;
         }
 
         public static void ApplyLayoutTransform(IShip ship, Transform moduleTransform, Vector3 layoutPosition,
@@ -54,7 +56,8 @@ namespace Core.Ships
             if (!moduleTransform)
                 throw new ArgumentNullException(nameof(moduleTransform));
 
-            if (ship.CommandModule?.Transform == moduleTransform)
+            var commandModule = ship.CommandModule;
+            if (HasAliveTransform(commandModule) && commandModule.Transform == moduleTransform)
             {
                 moduleTransform.localPosition = Vector3.zero;
                 moduleTransform.localRotation = Quaternion.identity;
@@ -65,6 +68,15 @@ namespace Core.Ships
             moduleTransform.SetPositionAndRotation(
                 origin.TransformPoint(layoutPosition),
                 origin.rotation * layoutRotation);
+        }
+
+        private static bool HasAliveTransform(IModule module)
+        {
+            // Plain null-coalescing cannot detect destroyed Unity objects, and even a destroyed
+            // module passes an interface-typed null check, so cast to Object first.
+            return module is Object unityObject &&
+                   unityObject != null &&
+                   unityObject.transform != null;
         }
     }
 }

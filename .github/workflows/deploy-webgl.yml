@@ -1,0 +1,81 @@
+name: Deploy WebGL to GitHub Pages
+
+# Requires repository Settings -> Pages -> Source set to "GitHub Actions".
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: deploy-webgl-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build WebGL
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Read Unity version
+        id: unity
+        run: |
+          version=$(grep 'm_EditorVersion:' ProjectSettings/ProjectVersion.txt | awk '{print $2}')
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "image=unityci/editor:ubuntu-${version}-base-3" >> "$GITHUB_OUTPUT"
+
+      - name: Pull Unity editor image
+        run: docker pull ${{ steps.unity.outputs.image }}
+
+      - name: Cache Library
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-WebGL-${{ steps.unity.outputs.version }}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: |
+            Library-WebGL-${{ steps.unity.outputs.version }}-
+            Library-
+
+      - name: Increase file descriptor limit
+        run: |
+          ulimit -n 4096
+          ulimit -a
+
+      - name: Build WebGL
+        id: build
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          targetPlatform: WebGL
+          customImage: ${{ steps.unity.outputs.image }}
+          buildsPath: build
+          buildMethod: Editor.Standalone.WebGLCliBuilder.Build
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/WebGL
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
