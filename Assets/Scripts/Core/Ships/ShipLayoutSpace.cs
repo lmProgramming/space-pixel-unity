@@ -1,7 +1,7 @@
 using System;
 using Core.Ships.Module;
+using LMPro.External.IsAlive;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace Core.Ships
 {
@@ -74,9 +74,7 @@ namespace Core.Ships
         {
             // Plain null-coalescing cannot detect destroyed Unity objects, and even a destroyed
             // module passes an interface-typed null check, so cast to Object first.
-            return module is Object unityObject &&
-                   unityObject != null &&
-                   unityObject.transform != null;
+            return module.IsAliveEnabled();
         }
     }
 }
