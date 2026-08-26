@@ -7,7 +7,6 @@ using UI.Common;
 using UI.Scenes.MainMenu.Views.FreeMode;
 using UI.Scenes.MainMenu.Views.Progression;
 using UI.Tools;
-using UnityEditor;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 using Zenject;
