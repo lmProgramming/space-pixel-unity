@@ -10,6 +10,9 @@ using UI.Tools;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 using Zenject;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace UI.Scenes.MainMenu
 {
