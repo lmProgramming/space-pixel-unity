@@ -39,9 +39,21 @@ namespace Editor.Standalone
                 target = BuildTarget.WebGL
             });
 
+            foreach (var step in report.steps)
+                if (!string.IsNullOrEmpty(step.name) && step.messages.AsValueEnumerable().Any())
+                    Debug.Log($"[WebGLCliBuilder] Step '{step.name}': {string.Join(Environment.NewLine, step.messages.AsValueEnumerable())}");
+
             if (report.summary.result != BuildResult.Succeeded)
+            {
+                var errors = report.steps.AsValueEnumerable()
+                    .SelectMany(step => step.messages.AsValueEnumerable())
+                    .Where(message => message.type == LogType.Error || message.type == LogType.Exception)
+                    .Select(message => message.content)
+                    .ToList();
+
                 throw new Exception(
-                    $"[WebGLCliBuilder] WebGL build failed: {report.summary.result} ({report.summary.totalErrors} errors)");
+                    $"[WebGLCliBuilder] WebGL build failed: {report.summary.result} ({report.summary.totalErrors} errors).{Environment.NewLine}{string.Join(Environment.NewLine, errors)}");
+            }
         }
     }
 }

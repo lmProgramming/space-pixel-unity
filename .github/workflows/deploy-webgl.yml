@@ -31,10 +31,6 @@ jobs:
         run: |
           version=$(grep 'm_EditorVersion:' ProjectSettings/ProjectVersion.txt | awk '{print $2}')
           echo "version=$version" >> "$GITHUB_OUTPUT"
-          echo "image=unityci/editor:ubuntu-${version}-base-3" >> "$GITHUB_OUTPUT"
-
-      - name: Pull Unity editor image
-        run: docker pull ${{ steps.unity.outputs.image }}
 
       - name: Cache Library
         uses: actions/cache@v4
@@ -59,7 +55,7 @@ jobs:
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
           targetPlatform: WebGL
-          customImage: ${{ steps.unity.outputs.image }}
+          allowDirtyBuild: true
           buildsPath: build
           buildMethod: Editor.Standalone.WebGLCliBuilder.Build
 
