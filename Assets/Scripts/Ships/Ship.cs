@@ -154,8 +154,15 @@ namespace Ships
             if (_biCohesionGraph != null)
                 _biCohesionGraph.OnNodesRemovedDueToUnreachability -= HandleUnreachableModules;
 
-            if (CommandModule != null && _onCommandModuleNoPixelsLeft != null)
-                CommandModule.PixelatedRigidbody.Destroyed -= _onCommandModuleNoPixelsLeft;
+            UnsubscribeFromCommandModulePixelDestroyed();
+        }
+
+        private void UnsubscribeFromCommandModulePixelDestroyed()
+        {
+            if (CommandModule == null || _onCommandModuleNoPixelsLeft == null)
+                return;
+
+            CommandModule.PixelatedRigidbody.Destroyed -= _onCommandModuleNoPixelsLeft;
         }
 
         public bool IsDesignMode => false;
@@ -248,8 +255,7 @@ namespace Ships
 
         public void InitializeModules()
         {
-            if (CommandModule != null && _onCommandModuleNoPixelsLeft != null)
-                CommandModule.PixelatedRigidbody.Destroyed -= _onCommandModuleNoPixelsLeft;
+            UnsubscribeFromCommandModulePixelDestroyed();
 
             CommandModule = GetComponentInChildren<Command>();
             if (CommandModule == null)
@@ -285,6 +291,8 @@ namespace Ships
 
         public void DestroyAllModulesSilently()
         {
+            UnsubscribeFromCommandModulePixelDestroyed();
+
             var existingModules = GetComponentsInChildren<Module>();
 
             foreach (var module in existingModules)
@@ -293,6 +301,19 @@ namespace Ships
                 module.transform.SetParent(null, true);
                 Destroy(module.gameObject);
             }
+
+            ClearReferencesToDestroyedModules();
+        }
+
+        private void ClearReferencesToDestroyedModules()
+        {
+            if (_biCohesionGraph != null)
+                _biCohesionGraph.OnNodesRemovedDueToUnreachability -= HandleUnreachableModules;
+
+            _biCohesionGraph = null;
+            CommandModule = null;
+            _allModulesCache.Clear();
+            _modulesDictionary.Clear();
         }
 
         public void SetBlueprint(ShipBlueprint blueprint)
