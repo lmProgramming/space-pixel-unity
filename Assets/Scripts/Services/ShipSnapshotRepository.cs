@@ -14,10 +14,14 @@ namespace Services
     {
         private readonly List<Sprite> _loadedIcons = new();
 
+        // The skirmish "Friend" asset is the built-in starter ship ("Ally") shipped with the game.
+        private const string StarterShipResourcePath = "ShipSnapshots/Friend";
+
         public ShipSnapshotRepository()
         {
             Model = new ShipSnapshotCatalogModel();
 
+            EnsureStarterShipSeeded();
             Refresh();
         }
 
@@ -87,6 +91,30 @@ namespace Services
         private static string GetShipSnapshotIconPath(string shipName)
         {
             return Path.Combine(Constants.ShipSnapshotsFolder, $"{shipName}{Constants.ShipSnapshotIconExtension}");
+        }
+
+        private static void EnsureStarterShipSeeded()
+        {
+            if (Directory.Exists(Constants.ShipSnapshotsFolder))
+                return;
+
+            var starterShipJson = Resources.Load<TextAsset>(StarterShipResourcePath);
+            if (starterShipJson == null)
+                throw new UnityException(
+                    $"[ShipSnapshotRepository] Starter ship resource '{StarterShipResourcePath}' is missing.");
+
+            var starterSnapshot = JsonUtility.FromJson<ShipSnapshot>(starterShipJson.text);
+            if (starterSnapshot == null || string.IsNullOrWhiteSpace(starterSnapshot.shipName))
+                throw new UnityException(
+                    "[ShipSnapshotRepository] Starter ship resource does not contain a valid ship snapshot.");
+
+            var filePath = FilePathForShipName(starterSnapshot.shipName);
+            var directoryPath = Path.GetDirectoryName(filePath);
+
+            if (!string.IsNullOrWhiteSpace(directoryPath))
+                Directory.CreateDirectory(directoryPath);
+
+            File.WriteAllText(filePath, starterShipJson.text);
         }
 
         private void Refresh()
